@@ -1,0 +1,15 @@
+name: 'Unity - Builder'
+author: Webber Takken <webber@takken.io>
+description: 'Build Unity projects for different platforms.'
+inputs: {}
+outputs:
+  buildPath:
+    description: "Path where the current platform has been built to."
+  allBuildsPath:
+    description: "Path where the build folders are stored. Each platform creates a folder within it."
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'box'
+  color: 'gray-dark'
