@@ -13,8 +13,14 @@ static class Builder
     providedArguments = new Dictionary<string, string>();
     string[] args = Environment.GetCommandLineArgs();
 
+    // Output args in console
+    Debug.Log("Arguments given: ");
+    foreach (string arg in args) {
+      Debug.Log(arg);  
+    }
+
     // Extract flags with optional values
-    for (int current = 0, next = 1; current <= args.Length; current++, next++) {
+    for (int current = 0, next = 1; current < args.Length; current++, next++) {
       // Parse flag
       bool isFlag = args[current].StartsWith("-");
       if (!isFlag) continue;
