@@ -1,0 +1,30 @@
+name: Actions 😎
+on: [push]
+
+jobs:
+  buildForWebGL:
+    name: Build for WebGL 🕸
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository (required to test local actions)
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Configure builder
+      - name: Build project
+        id: buildStep
+        uses: ./
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_PROJECT_PATH: test-project
+          BUILD_NAME: TestBuild
+          BUILD_TARGET: WebGL
+          BUILDS_PATH: builds
+          BUILD_COMMAND: ""
+
+      # Upload distributables
+      - name: Upload Build
+        uses: actions/upload-artifact@v1
+        with:
+          name: Build
+          path: ${{ steps.buildStep.outputs.allBuildsPath }}
