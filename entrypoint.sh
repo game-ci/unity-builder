@@ -64,7 +64,8 @@ CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_TARGET
 #
 
 if [ -z "$BUILD_COMMAND" ]; then
-  EXECUTE_CUSTOM_METHOD=""
+  # TODO - copy Builder class from root
+  EXECUTE_CUSTOM_METHOD="-executeMethod Builder.BuildProject"
 else
   EXECUTE_CUSTOM_METHOD="-executeMethod $BUILD_COMMAND"
 fi
