@@ -8,16 +8,20 @@ using UnityEngine;
 
 static class Builder
 {
+  private static string EOL = Environment.NewLine;
+  
   private static void ParseCommandLineArguments(out Dictionary<string, string> providedArguments)
   {
     providedArguments = new Dictionary<string, string>();
     string[] args = Environment.GetCommandLineArgs();
 
-    // Output args in console
-    Debug.Log("Arguments given: ");
-    foreach (string arg in args) {
-      Debug.Log(arg);  
-    }
+    Console.WriteLine(
+      $"{EOL}" +
+      $"###########################{EOL}" +
+      $"#    Parsing settings     #{EOL}" +
+      $"###########################{EOL}" +
+      $"{EOL}"
+    );
 
     // Extract flags with optional values
     for (int current = 0, next = 1; current < args.Length; current++, next++) {
@@ -27,10 +31,11 @@ static class Builder
       string flag = args[current].TrimStart('-');
 
       // Parse optional value
-      bool flagHasValue = next >= args.Length || !args[next].StartsWith("-");
+      bool flagHasValue = next < args.Length && !args[next].StartsWith("-");
       string value = flagHasValue ? args[next].TrimStart('-') : "";
 
       // Assign
+      Console.WriteLine($"Found flag \"{flag}\" with value \"{value}\".");
       providedArguments.Add(flag, value);
     }
   }
@@ -40,12 +45,12 @@ static class Builder
     ParseCommandLineArguments(out var validatedOptions);
 
     if (!validatedOptions.TryGetValue("projectPath", out var projectPath)) {
-      Debug.Log("Missing argument -projectPath");
+      Console.WriteLine("Missing argument -projectPath");
       EditorApplication.Exit(110);
     }
 
     if (!validatedOptions.TryGetValue("buildTarget", out var buildTarget)) {
-      Debug.Log("Missing argument -buildTarget");
+      Console.WriteLine("Missing argument -buildTarget");
       EditorApplication.Exit(120);
     }
 
@@ -54,17 +59,17 @@ static class Builder
     }
 
     if (!validatedOptions.TryGetValue("customBuildPath", out var customBuildPath)) {
-      Debug.Log("Missing argument -customBuildPath");
+      Console.WriteLine("Missing argument -customBuildPath");
       EditorApplication.Exit(130);
     }
 
     string defaultCustomBuildName = "TestBuild";
     if (!validatedOptions.TryGetValue("customBuildName", out var customBuildName)) {
-      Debug.Log($"Missing argument -customBuildName, defaulting to {defaultCustomBuildName}.");
+      Console.WriteLine($"Missing argument -customBuildName, defaulting to {defaultCustomBuildName}.");
       validatedOptions.Add("customBuildName", defaultCustomBuildName);
     }
     else if (customBuildName == "") {
-      Debug.Log($"Invalid argument -customBuildName, defaulting to {defaultCustomBuildName}.");
+      Console.WriteLine($"Invalid argument -customBuildName, defaulting to {defaultCustomBuildName}.");
       validatedOptions.Add("customBuildName", defaultCustomBuildName);
     }
 
@@ -100,8 +105,7 @@ static class Builder
 
   private static void ReportSummary(BuildSummary summary)
   {
-    var EOL = Environment.NewLine;
-    Debug.Log(
+    Console.WriteLine(
       $"{EOL}" +
       $"###########################{EOL}" +
       $"#      Build results      #{EOL}" +
@@ -118,22 +122,22 @@ static class Builder
   private static void ExitWithResult(BuildResult result)
   {
     if (result == BuildResult.Succeeded) {
-      Debug.Log("Build succeeded!");
+      Console.WriteLine("Build succeeded!");
       EditorApplication.Exit(0);
     }
 
     if (result == BuildResult.Failed) {
-      Debug.Log("Build failed!");
+      Console.WriteLine("Build failed!");
       EditorApplication.Exit(101);
     }
 
     if (result == BuildResult.Cancelled) {
-      Debug.Log("Build cancelled!");
+      Console.WriteLine("Build cancelled!");
       EditorApplication.Exit(102);
     }
 
     if (result == BuildResult.Unknown) {
-      Debug.Log("Build result is unknown!");
+      Console.WriteLine("Build result is unknown!");
       EditorApplication.Exit(103);
     }
   }
