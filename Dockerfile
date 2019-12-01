@@ -1,4 +1,4 @@
-FROM gableroux/unity3d:2019.2.11f1
+FROM gableroux/unity3d:2019.2.11f1-webgl
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."
