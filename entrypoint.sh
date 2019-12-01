@@ -29,6 +29,14 @@ fi
 # Linux64, iOS, Android, WebGL, XboxOne,
 # PS4, WindowsStoreApps, Switch, tvOS
 #
+# New options array:
+#
+# Web:     WebGL
+# Desktop: StandaloneOSX, StandaloneWindows, StandaloneWindows64, StandaloneLinux64
+# Console: PS4, XboxOne, Switch
+# Mobile:  Android, iOS
+# Other:   tvOS, Lumin, BJM, WSAPlayer
+#
 # Default to WebGL (no particular reason)
 #
 
