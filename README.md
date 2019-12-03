@@ -1,6 +1,18 @@
 # Unity - Builder
 [![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+workflow%3A%22Actions+%F0%9F%98%8E%22)
 
+---
+
+GitHub Action to 
+[build Unity projects](https://github.com/marketplace/actions/unity-builder) 
+for different platforms.
+
+Part of the 
+[Unity Actions](https://github.com/webbertakken/unity-actions) 
+collection.
+
+---
+
 [Github Action](https://github.com/features/actions)
 to build Unity projects for different platforms.
 
