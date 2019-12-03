@@ -86,3 +86,9 @@ Commit and push your workflow definition.
 Visit 
 [Unity Actions](https://github.com/webbertakken/unity-actions) 
 to find related actions for Unity.
+
+Feel free to contribute.
+
+## Licence 
+
+[MIT](./LICENSE)
