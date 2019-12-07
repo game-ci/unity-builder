@@ -1,5 +1,7 @@
 name: Actions 😎
-on: [push]
+on:
+  pull_request: {}
+  push: { branches: [master] }
 
 jobs:
   buildForWebGL:
@@ -10,12 +12,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v1
 
+      # Activate license
+      - name: Activate license
+        uses: webbertakken/unity-activate@v1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
       # Configure builder
       - name: Build project
         id: buildStep
         uses: ./
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
           BUILD_TARGET: WebGL
@@ -28,3 +35,8 @@ jobs:
         with:
           name: Build
           path: ${{ steps.buildStep.outputs.allBuildsPath }}
+
+      # Return license
+      - name: Return License
+        uses: webbertakken/unity-return-license@v0.1
+        if: always()
