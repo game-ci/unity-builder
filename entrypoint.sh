@@ -57,24 +57,31 @@ CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_TARGET
 # The method must be declared static and placed in project/Assets/Editor
 #
 
-if [ -n "$BUILD_METHOD" ]; then
-  # User has provided their own build method.
-  #
-  # Assume they also bring their own script; simply reference it.
-  #
-  EXECUTE_BUILD_METHOD="-executeMethod $BUILD_METHOD"
-  #
-else
+if [ -z "$BUILD_METHOD" ]; then
   # User has not provided their own build command.
   #
   # Use the script from this action which builds the scenes that are enabled in
   # the project.
   #
-  cp -r /UnityBuilderAction $CURRENT_BUILD_PATH/Assets/Editor/
-  EXECUTE_BUILD_METHOD="-executeMethod UnityBuilderAction.Builder.BuildProject"
-  ls -Ralph $CURRENT_BUILD_PATH/Assets/Editor/
+  # Create Editor directory if it does not exist
+  mkdir -p $UNITY_PROJECT_PATH/Assets/Editor/
+  # Copy the build script of Unity Builder action
+  cp -r /UnityBuilderAction $UNITY_PROJECT_PATH/Assets/Editor/
+  # Set the Build method to that of UnityBuilder Action
+  BUILD_METHOD="UnityBuilderAction.Builder.BuildProject"
+  # Verify recursive paths
+  ls -Ralph $UNITY_PROJECT_PATH/Assets/Editor/
+  #
+else
+  # User has provided their own build method.
+  # Assume they also bring their own script.
+  #
+  echo "User set build method to $BUILD_METHOD."
   #
 fi
+
+# Set build method to execute as flag + argument
+EXECUTE_BUILD_METHOD="-executeMethod $BUILD_METHOD"
 
 
 # The build specification below may require Unity 2019.2.11f1 or later (not tested below).
