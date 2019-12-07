@@ -42,16 +42,18 @@ jobs:
     steps:
 ```
 
+Activate Unity in a step using the 
+[Unity Activate](https://github.com/marketplace/actions/unity-activate)
+action. 
+
 Configure the builder as follows:
 
 ```yaml
       # Configure builder
       - name: Build project
         id: buildStep
-        uses: webbertakken/unity-builder@v0.1 # WIP (only webgl for now)
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  
+        uses: webbertakken/unity-builder@v0.2 # WIP (only webgl for now)
+        env:  
           # Optional: Path to your project, leave blank for "./"
           UNITY_PROJECT_PATH: path/to/your/project
 
@@ -64,9 +66,12 @@ Configure the builder as follows:
           # Target platform for your build
           BUILD_TARGET: WebGL
 
-          # Optional: <StaticBuildClass.StaticMethod>, defaults to Builder.BuildProject
+          # Optional: <StaticBuildClass.StaticMethod> 
           BUILD_COMMAND: ""
 ```
+
+> _**Note:** By default the enabled scenes from the 
+project's settings will be built._
 
 You use the id to **upload your built files** like so:
 
@@ -78,6 +83,10 @@ You use the id to **upload your built files** like so:
           name: Build
           path: ${{ steps.buildStep.outputs.allBuildsPath }}
 ```
+
+Return the Unity license in a final step using the 
+[Unity Return License](https://github.com/marketplace/actions/unity-return-license)
+action. 
 
 Commit and push your workflow definition.
 
