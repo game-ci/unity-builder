@@ -47,21 +47,32 @@ CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_TARGET
 CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_TARGET
 
 #
-# Set the build command, must reference one of:
+# Set the build method, must reference one of:
 #
 #   - <NamespaceName.ClassName.MethodName>
 #   - <ClassName.MethodName>
 #
 # For example: `BuildCommand.PerformBuild`
 #
-# The method must be defined static
+# The method must be declared static and placed in project/Assets/Editor
 #
 
-if [ -z "$BUILD_COMMAND" ]; then
-  # TODO - copy Builder class from root
-  EXECUTE_METHOD="-executeMethod Builder.BuildProject"
+if [ -n "$BUILD_METHOD" ]; then
+  # User has provided their own build method.
+  #
+  # Assume they also bring their own script; simply reference it.
+  #
+  EXECUTE_BUILD_METHOD="-executeMethod $BUILD_METHOD"
+  #
 else
-  EXECUTE_METHOD="-executeMethod $BUILD_COMMAND"
+  # User has not provided their own build command.
+  #
+  # Use the script from this action which builds the scenes that are enabled in
+  # the project.
+  #
+  cp -r /UnityBuilderAction $CURRENT_BUILD_PATH/Assets/Editor/
+  EXECUTE_BUILD_METHOD="-executeMethod UnityBuilderAction.Builder.BuildProject"
+  #
 fi
 
 
@@ -116,7 +127,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -buildTarget "$BUILD_TARGET" \
     -customBuildTarget "$BUILD_TARGET" \
     -customBuildPath "$CURRENT_BUILD_FULL_PATH" \
-    $EXECUTE_METHOD
+    $EXECUTE_BUILD_METHOD
 
 # Catch exit code
 BUILD_EXIT_CODE=$?

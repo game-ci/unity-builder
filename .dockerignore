@@ -4,3 +4,4 @@
 # Files required for the action
 !entrypoint.sh
 !action.yml
+!default-build-script
