@@ -72,6 +72,7 @@ else
   #
   cp -r /UnityBuilderAction $CURRENT_BUILD_PATH/Assets/Editor/
   EXECUTE_BUILD_METHOD="-executeMethod UnityBuilderAction.Builder.BuildProject"
+  ls -Ralph $CURRENT_BUILD_PATH/Assets/Editor/
   #
 fi
 
