@@ -9,6 +9,7 @@ LABEL "repository"="http://github.com/webbertakken/unity-actions"
 LABEL "homepage"="http://github.com/webbertakken/unity-actions"
 LABEL "maintainer"="Webber Takken <webber@takken.io>"
 
+ADD default-build-script /UnityBuilderAction
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
