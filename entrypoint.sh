@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
 #
-# Set license file path
-#
-
-LICENSE_FILE_PATH=UnityLicenseFile.ulf
-
-#
 # Set project path
 #
 
@@ -22,14 +16,6 @@ fi
 
 #
 # Set the builds target platform;
-#
-# possible options are:
-#
-# Standalone, Win, Win64, OSXUniversal,
-# Linux64, iOS, Android, WebGL, XboxOne,
-# PS4, WindowsStoreApps, Switch, tvOS
-#
-# New options array:
 #
 # Web:     WebGL
 # Desktop: StandaloneOSX, StandaloneWindows, StandaloneWindows64, StandaloneLinux64
@@ -73,36 +59,11 @@ CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_TARGET
 
 if [ -z "$BUILD_COMMAND" ]; then
   # TODO - copy Builder class from root
-  EXECUTE_CUSTOM_METHOD="-executeMethod Builder.BuildProject"
+  EXECUTE_METHOD="-executeMethod Builder.BuildProject"
 else
-  EXECUTE_CUSTOM_METHOD="-executeMethod $BUILD_COMMAND"
+  EXECUTE_METHOD="-executeMethod $BUILD_COMMAND"
 fi
 
-#
-# Copy license file from Github variables
-#
-
-echo "$UNITY_LICENSE" | tr -d '\r' > $LICENSE_FILE_PATH
-echo "$UNITY_LICENSE" | tr -d '\r' > /root/.local/share/unity3d/Unity/Unity_lic.ulf
-# TODO - test if this line has any effect
-echo "$UNITY_LICENSE" | tr -d '\r' > /root/.local/share/unity3d/Unity/Unity_v2019.x.ulf
-
-#
-# Activate license
-#
-
-echo "Requesting activation"
-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
-  /opt/Unity/Editor/Unity \
-    -batchmode \
-    -nographics \
-    -logFile /dev/stdout \
-    -quit \
-    -manualLicenseFile $LICENSE_FILE_PATH
-# This is expected to always exit with code 1 (both success and failure).
-# Convert to exit code 0 by echoing the current exit code.
-echo $?
-# Exit code is now 0
 
 # The build specification below may require Unity 2019.2.11f1 or later (not tested below).
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
@@ -155,7 +116,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -buildTarget "$BUILD_TARGET" \
     -customBuildTarget "$BUILD_TARGET" \
     -customBuildPath "$CURRENT_BUILD_FULL_PATH" \
-    $EXECUTE_CUSTOM_METHOD
+    $EXECUTE_METHOD
 
 # Catch exit code
 BUILD_EXIT_CODE=$?
