@@ -67,7 +67,7 @@ Configure the builder as follows:
           BUILD_TARGET: WebGL
 
           # Optional: <StaticBuildClass.StaticMethod> 
-          BUILD_COMMAND: ""
+          BUILD_METHOD: ""
 ```
 
 > _**Note:** By default the enabled scenes from the 

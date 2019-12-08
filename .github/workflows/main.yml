@@ -27,7 +27,7 @@ jobs:
           BUILD_NAME: TestBuild
           BUILD_TARGET: WebGL
           BUILDS_PATH: builds
-          BUILD_COMMAND: ""
+          BUILD_METHOD: ""
 
       # Upload distributables
       - name: Upload Build
