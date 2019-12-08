@@ -38,5 +38,5 @@ jobs:
 
       # Return license
       - name: Return License
-        uses: webbertakken/unity-return-license@v0.1
+        uses: webbertakken/unity-return-license@v1
         if: always()
