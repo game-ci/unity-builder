@@ -1,4 +1,7 @@
-FROM gableroux/unity3d:2019.2.11f1-webgl
+ARG IMAGE_VERSION=2019.2.11f1
+ARG IMAGE_TARGET=webgl
+
+FROM gableroux/unity3d:${IMAGE_VERSION}-${IMAGE_TARGET}
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."
