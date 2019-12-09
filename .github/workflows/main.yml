@@ -8,6 +8,7 @@ jobs:
     name: Build for WebGL 🕸
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         version: [2019.2.11f1, 2018.4.13f1]
         target: [webgl, android]
@@ -26,9 +27,13 @@ jobs:
       - name: Build project
         id: buildStep
         uses: ./
+        container:
+          options:
+            - --env IMAGE_VERSION=${{ matrix.version }}
+            - --env IMAGE_TARGET=${{ matrix.target }}
+            - --build-arg IMAGE_VERSION=${{ matrix.version }}
+            - --build-arg IMAGE_TARGET=${{ matrix.target }}
         env:
-          IMAGE_VERSION: ${{ matrix.version }}
-          IMAGE_TARGET: ${{ matrix.target }}
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
           BUILD_TARGET: WebGL
