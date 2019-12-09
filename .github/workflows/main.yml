@@ -34,7 +34,8 @@ jobs:
           BUILDS_PATH: builds
           BUILD_METHOD: ""
         with:
-          args: IMAGE_VERSION=${{ matrix.version }} IMAGE_TARGET=${{ matrix.target }}
+          image_version: ${{ matrix.version }}
+          image_target: ${{ matrix.target }}
 
 
       # Upload distributables

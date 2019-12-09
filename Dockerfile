@@ -1,7 +1,7 @@
 ARG IMAGE_VERSION=2019.0.00f0
 ARG IMAGE_TARGET=webgl
 
-FROM gableroux/unity3d:${IMAGE_VERSION}-${IMAGE_TARGET}
+FROM gableroux/unity3d:${INPUT_IMAGE_VERSION}-${INPUT_IMAGE_TARGET}
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."
