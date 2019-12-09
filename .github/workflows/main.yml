@@ -12,6 +12,10 @@ jobs:
       matrix:
         version: [2019.2.11f1, 2018.4.13f1]
         target: [webgl, android]
+    container:
+      options:
+        - --build-arg IMAGE_VERSION=${{ matrix.version }}
+        - --build-arg IMAGE_TARGET=${{ matrix.target }}
     steps:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
@@ -27,12 +31,6 @@ jobs:
       - name: Build project
         id: buildStep
         uses: ./
-        container:
-          options:
-            - --env IMAGE_VERSION=${{ matrix.version }}
-            - --env IMAGE_TARGET=${{ matrix.target }}
-            - --build-arg IMAGE_VERSION=${{ matrix.version }}
-            - --build-arg IMAGE_TARGET=${{ matrix.target }}
         env:
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
