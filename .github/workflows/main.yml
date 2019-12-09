@@ -12,8 +12,6 @@ jobs:
       matrix:
         version: [2019.2.11f1, 2018.4.13f1]
         target: [webgl, android]
-    container:
-      options: --build-arg IMAGE_VERSION=${{ matrix.version }} --build-arg IMAGE_TARGET=${{ matrix.target }}
     steps:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
@@ -35,6 +33,9 @@ jobs:
           BUILD_TARGET: WebGL
           BUILDS_PATH: builds
           BUILD_METHOD: ""
+        with:
+          args: IMAGE_VERSION=${{ matrix.version }} IMAGE_TARGET=${{ matrix.target }}
+
 
       # Upload distributables
       - name: Upload Build
