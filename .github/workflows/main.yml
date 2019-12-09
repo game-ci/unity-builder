@@ -7,6 +7,10 @@ jobs:
   buildForWebGL:
     name: Build for WebGL 🕸
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [2019.2.11f1, 2018.4.13f1]
+        target: [webgl, android]
     steps:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
@@ -23,6 +27,8 @@ jobs:
         id: buildStep
         uses: ./
         env:
+          IMAGE_VERSION: ${{ matrix.version }}
+          IMAGE_TARGET: ${{ matrix.target }}
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
           BUILD_TARGET: WebGL
