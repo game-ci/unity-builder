@@ -14,7 +14,7 @@ jobs:
         target: [webgl, android]
     container:
       image: node:10.16-jessie
-      options: --build-arg IMAGE_TARGET_ARG=a_value
+      options: IMAGE_TARGET_ARG=a_value
     steps:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
