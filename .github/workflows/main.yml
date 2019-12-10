@@ -35,6 +35,8 @@ jobs:
           BUILD_TARGET: WebGL
           BUILDS_PATH: builds
           BUILD_METHOD: ""
+        with:
+          args: IMAGE_TARGET_ARG=a_value
 
       # Upload distributables
       - name: Upload Build
