@@ -28,15 +28,13 @@ jobs:
         id: buildStep
         uses: ./
         env:
+          IMAGE_VERSION: ${{ matrix.version }}
+          IMAGE_TARGET: ${{ matrix.target }}
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
           BUILD_TARGET: WebGL
           BUILDS_PATH: builds
           BUILD_METHOD: ""
-        with:
-          image_version: ${{ matrix.version }}
-          image_target: ${{ matrix.target }}
-
 
       # Upload distributables
       - name: Upload Build
