@@ -1,6 +1,6 @@
-ENV INPUT_IMAGE_VERSION=2019.0.00f0
-ENV INPUT_IMAGE_TARGET=nothing
-FROM gableroux/unity3d:${INPUT_IMAGE_VERSION}-${INPUT_IMAGE_TARGET}
+ENV IMAGE_VERSION=2019.0.00f0
+ENV IMAGE_TARGET=nothing
+FROM gableroux/unity3d:${IMAGE_VERSION}-${IMAGE_TARGET}
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."
