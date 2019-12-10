@@ -1,5 +1,5 @@
-ENV IMAGE_VERSION=2019.0.00f0
-ENV IMAGE_TARGET=nothing
+ENV IMAGE_VERSION "2019.0.00f0"
+ENV IMAGE_TARGET "nothing"
 FROM gableroux/unity3d:${IMAGE_VERSION}-${IMAGE_TARGET}
 
 LABEL "com.github.actions.name"="Unity - Builder"
