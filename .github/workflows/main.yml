@@ -13,6 +13,7 @@ jobs:
         version: [2019.2.11f1, 2018.4.13f1]
         target: [webgl, android]
     container:
+      image: node:10.16-jessie
       options: --build-arg IMAGE_TARGET_ARG=a_value
     steps:
       # Checkout repository (required to test local actions)
