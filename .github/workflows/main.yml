@@ -9,15 +9,8 @@ env:
   PROJECT_PATH: test-project
 
 jobs:
-  activate:
-    name: Activate Unity
-    runs-on: ubuntu-latest
-    steps:
-      - uses: webbertakken/unity-activate@v1
-
   test:
     name: Test the project
-    needs: [activate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
