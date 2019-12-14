@@ -7,6 +7,7 @@ on:
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   PROJECT_PATH: test-project
+  UNITY_PROJECT_PATH: test-project
 
 jobs:
   checkout:
@@ -26,7 +27,9 @@ jobs:
     needs: [checkout, activate]
     runs-on: ubuntu-latest
     steps:
-      - uses: webbertakken/unity-test-runner@v1
+      - uses: webbertakken/unity-test-runner@master
+        env:
+          TEST_MODE: all
 
   buildForWebGL:
     name: Build for WebGL
@@ -34,7 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     steps: # webbertakken/unity-builder@v0.3-webgl
       - uses: ./
-
 
   buildForAndroid:
     name: Build for Android
