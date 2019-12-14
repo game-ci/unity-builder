@@ -10,12 +10,6 @@ env:
   UNITY_PROJECT_PATH: test-project
 
 jobs:
-  checkout:
-    name: Checkout
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-
   activate:
     name: Activate Unity
     runs-on: ubuntu-latest
@@ -27,6 +21,7 @@ jobs:
     needs: [checkout, activate]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
       - uses: webbertakken/unity-test-runner@master
         env:
           TEST_MODE: all
@@ -36,6 +31,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps: # webbertakken/unity-builder@v0.3-webgl
+      - uses: actions/checkout@v1
       - uses: ./
 
   buildForAndroid:
@@ -43,6 +39,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps: # webbertakken/unity-builder@v0.3-android
+      - uses: actions/checkout@v1
       - uses: ./
 
   uploadBuildArtifacts:
