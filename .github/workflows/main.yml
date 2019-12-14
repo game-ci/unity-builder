@@ -7,7 +7,6 @@ on:
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   PROJECT_PATH: test-project
-  UNITY_PROJECT_PATH: test-project
 
 jobs:
   activate:
@@ -22,9 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - uses: webbertakken/unity-activate@v1
       - uses: webbertakken/unity-test-runner@master
-        env:
-          TEST_MODE: all
+      - uses: webbertakken/unity-return-license@v1
+        if: always()
 
   buildForWebGL:
     name: Build for WebGL
@@ -32,7 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     steps: # webbertakken/unity-builder@v0.3-webgl
       - uses: actions/checkout@v1
+      - uses: webbertakken/unity-activate@v1
       - uses: ./
+      - uses: webbertakken/unity-return-license@v1
+        if: always()
 
   buildForAndroid:
     name: Build for Android
@@ -40,7 +43,10 @@ jobs:
     runs-on: ubuntu-latest
     steps: # webbertakken/unity-builder@v0.3-android
       - uses: actions/checkout@v1
+      - uses: webbertakken/unity-activate@v1
       - uses: ./
+      - uses: webbertakken/unity-return-license@v1
+        if: always()
 
   uploadBuildArtifacts:
     name: Upload Build Artifacts
@@ -54,11 +60,3 @@ jobs:
         with:
           name: Builds
           path: builds
-
-  returnTheLicense:
-    name: Return the license
-    needs: [uploadBuildArtifacts]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: webbertakken/unity-return-license@v1
