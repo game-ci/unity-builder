@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: webbertakken/unity-activate@v1
-      - uses: webbertakken/unity-test-runner@master
+      - uses: webbertakken/unity-test-runner@v1.1
       - uses: webbertakken/unity-return-license@v1
         if: always()
       - uses: actions/upload-artifact@v1
@@ -35,8 +35,8 @@ jobs:
         if: always()
       - uses: actions/upload-artifact@v1
         with:
-          name: Builds
-          path: builds
+          name: Build
+          path: build
 
   buildForAndroid:
     name: Build for Android
@@ -50,5 +50,5 @@ jobs:
         if: always()
       - uses: actions/upload-artifact@v1
         with:
-          name: Builds
-          path: builds
+          name: Build
+          path: build
