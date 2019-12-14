@@ -1,46 +1,65 @@
 name: Actions 😎
+
 on:
   pull_request: {}
   push: { branches: [master] }
 
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: test-project
+
 jobs:
-  buildForWebGL:
-    name: Build for WebGL 🕸
+  checkout:
+    name: Checkout
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [v0.1, v0.2]
-
     steps:
-      # Checkout repository (required to test local actions)
-      - name: Checkout repository
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-      # Activate license
-      - name: Activate license
-        uses: webbertakken/unity-activate@v1
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  activate:
+    name: Activate Unity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webbertakken/unity-activate@v1
 
-      # Configure builder
-      - name: Build project
-        id: buildStep
-        uses: webbertakken/unity-builder@${{ matrix.version }}
-        env:
-          UNITY_PROJECT_PATH: test-project
-          BUILD_NAME: TestBuild
-          BUILD_TARGET: WebGL
-          BUILDS_PATH: builds
-          BUILD_METHOD: ""
+  test:
+    name: Test the project
+    needs: [checkout, activate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webbertakken/unity-test-runner@v1
 
-      # Upload distributables
-      - name: Upload Build
-        uses: actions/upload-artifact@v1
+  buildForWebGL:
+    name: Build for WebGL
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps: # webbertakken/unity-builder@v0.3-webgl
+      - uses: ./
+
+
+  buildForAndroid:
+    name: Build for Android
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps: # webbertakken/unity-builder@v0.3-android
+      - uses: ./
+
+  uploadBuildArtifacts:
+    name: Upload Build Artifacts
+    needs:
+      - buildForWebGL
+      - buildForAndroid
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/upload-artifact@v1
         with:
-          name: Build
-          path: ${{ steps.buildStep.outputs.allBuildsPath }}
+          name: Builds
+          path: builds
 
-      # Return license
-      - name: Return License
-        uses: webbertakken/unity-return-license@v1
-        if: always()
+  returnTheLicense:
+    name: Return the license
+    needs: [uploadBuildArtifacts]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webbertakken/unity-return-license@v1

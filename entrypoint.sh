@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 
 #
-# Set project path
+# Set project path (configured with "with: { project: somepath }"
 #
-
-UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$UNITY_PROJECT_PATH
+UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
 
 #
 # Set the name for the build
 #
 
 if [ -z "$BUILD_NAME" ]; then
-  BUILD_NAME=buildName
+  BUILD_NAME="build-$(date '+%F-%H%M')"
 fi
 
 #
