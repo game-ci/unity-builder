@@ -18,7 +18,7 @@ jobs:
 
   test:
     name: Test the project
-    needs: [checkout, activate]
+    needs: [activate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
