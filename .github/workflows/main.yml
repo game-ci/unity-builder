@@ -18,6 +18,10 @@ jobs:
       - uses: webbertakken/unity-test-runner@master
       - uses: webbertakken/unity-return-license@v1
         if: always()
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Test results
+          path: artifacts/
 
   buildForWebGL:
     name: Build for WebGL
@@ -29,6 +33,10 @@ jobs:
       - uses: ./
       - uses: webbertakken/unity-return-license@v1
         if: always()
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Builds
+          path: builds
 
   buildForAndroid:
     name: Build for Android
@@ -40,15 +48,6 @@ jobs:
       - uses: ./
       - uses: webbertakken/unity-return-license@v1
         if: always()
-
-  uploadBuildArtifacts:
-    name: Upload Build Artifacts
-    needs:
-      - buildForWebGL
-      - buildForAndroid
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/upload-artifact@v1
         with:
           name: Builds
