@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Set project path (configured with "with: { project: somepath }"
+# Set project path
 #
 UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
 
