@@ -7,6 +7,10 @@ jobs:
   buildForWebGL:
     name: Build for WebGL 🕸
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [v0.1, v0.2]
+
     steps:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
@@ -21,7 +25,7 @@ jobs:
       # Configure builder
       - name: Build project
         id: buildStep
-        uses: ./
+        uses: webbertakken/unity-builder@${{ matrix.version }}
         env:
           UNITY_PROJECT_PATH: test-project
           BUILD_NAME: TestBuild
