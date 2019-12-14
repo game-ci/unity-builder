@@ -5,8 +5,6 @@ inputs: {}
 outputs:
   buildPath:
     description: "Path where the current platform has been built to."
-  allBuildsPath:
-    description: "Path where the build folders are stored. Each platform creates a folder within it."
 runs:
   using: 'docker'
   image: 'Dockerfile'
