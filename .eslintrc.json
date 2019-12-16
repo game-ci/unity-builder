@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "ecmaFeatures": {
+      "impliedStrict": true
+    }
+  },
+  "extends": ["airbnb", "plugin:unicorn/recommended", "prettier"],
+  "plugins": ["react", "jsx-a11y", "import", "prettier", "flowtype", "unicorn"],
+  "settings": { "react": { "version": "latest" } },
+  "rules": {
+    "prettier/prettier": "error"
+  }
+}
