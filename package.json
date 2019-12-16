@@ -1,0 +1,51 @@
+{
+  "name": "unity-builder",
+  "version": "0.2.0",
+  "description": "Build Unity projects for different platforms.",
+  "main": "src/index.js",
+  "repository": "git@github.com:webbertakken/unity-builder.git",
+  "author": "Webber <webber@takken.io>",
+  "license": "MIT",
+  "scripts": {
+    "build": "babel src -d dist",
+    "lint": "prettier --check \"src/**/*.js\" && eslint src"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "1.0.2",
+    "@actions/github": "^2.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.7.5",
+    "@babel/core": "7.7.5",
+    "babel-eslint": "10.0.3",
+    "eslint": "6.7.2",
+    "eslint-config-airbnb": "18.0.1",
+    "eslint-config-prettier": "6.7.0",
+    "eslint-plugin-flowtype": "4.5.2",
+    "eslint-plugin-import": "2.19.1",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-prettier": "3.1.2",
+    "eslint-plugin-react": "7.17.0",
+    "eslint-plugin-unicorn": "14.0.1",
+    "husky": "3.1.0",
+    "lint-staged": "9.5.0",
+    "prettier": "1.19.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ],
+    "json,sh,md,yaml,yml}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}

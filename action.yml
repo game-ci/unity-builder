@@ -4,10 +4,10 @@ description: 'Build Unity projects for different platforms.'
 inputs: {}
 outputs:
   buildPath:
-    description: "Path where the current platform has been built to."
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
+    description: 'Path where the current platform has been built to.'
 branding:
   icon: 'box'
   color: 'gray-dark'
+runs:
+  using: 'node12'
+  main: 'src/index.js'
