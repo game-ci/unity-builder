@@ -7,7 +7,8 @@
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
-    "build": "babel src -d dist",
+    "build": "ncc build src/index.js -o dist -m",
+    "watch": "yarn build -w",
     "lint": "prettier --check \"src/**/*.js\" && eslint src",
     "test": "jest --passWithNoTests"
   },
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@babel/cli": "7.7.5",
     "@babel/core": "7.7.5",
+    "@zeit/ncc": "0.20.5",
     "babel-eslint": "10.0.3",
     "eslint": "6.7.2",
     "eslint-config-airbnb": "18.0.1",
@@ -29,14 +31,14 @@
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-react": "7.17.0",
     "eslint-plugin-unicorn": "14.0.1",
-    "husky": "3.1.0",
+    "husky": "4.0.0-beta.5",
     "jest": "24.9.0",
     "lint-staged": "9.5.0",
     "prettier": "1.19.1"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && yarn build && git add dist"
     }
   },
   "lint-staged": {
