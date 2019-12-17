@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "babel src -d dist",
-    "lint": "prettier --check \"src/**/*.js\" && eslint src"
+    "lint": "prettier --check \"src/**/*.js\" && eslint src",
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
@@ -29,6 +30,7 @@
     "eslint-plugin-react": "7.17.0",
     "eslint-plugin-unicorn": "14.0.1",
     "husky": "3.1.0",
+    "jest": "24.9.0",
     "lint-staged": "9.5.0",
     "prettier": "1.19.1"
   },
@@ -41,9 +43,10 @@
     "*.{js,jsx}": [
       "prettier --write",
       "eslint",
-      "git add"
+      "git add",
+      "jest --findRelatedTests"
     ],
-    "json,sh,md,yaml,yml}": [
+    "*.{json,sh,md,yaml,yml}": [
       "prettier --write",
       "git add"
     ]
