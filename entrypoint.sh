@@ -3,7 +3,9 @@
 #
 # Set project path
 #
+
 UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
+echo "Using project path \"$UNITY_PROJECT_PATH\"."
 
 #
 # Set the name for the build
@@ -12,6 +14,7 @@ UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
 if [ -z "$BUILD_NAME" ]; then
   BUILD_NAME="build-$(date '+%F-%H%M')"
 fi
+echo "Using build name \"$BUILD_NAME\"."
 
 #
 # Set the builds target platform;
@@ -28,6 +31,7 @@ fi
 if [ -z "$BUILD_TARGET" ]; then
   BUILD_TARGET=WebGL
 fi
+echo "Using build target \"$BUILD_TARGET\"."
 
 #
 # Set builds path
@@ -37,13 +41,9 @@ if [ -z "$BUILDS_PATH" ]; then
   BUILDS_PATH=build
 fi
 BUILDS_FULL_PATH=$GITHUB_WORKSPACE/$BUILDS_PATH
-
-#
-# Set path for current build (relative and full)
-#
-
 CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_TARGET
 CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_TARGET
+echo "Using build path \"$CURRENT_BUILD_PATH\"."
 
 #
 # Set the build method, must reference one of:
@@ -62,6 +62,7 @@ if [ -z "$BUILD_METHOD" ]; then
   # Use the script from this action which builds the scenes that are enabled in
   # the project.
   #
+  echo "Using built-in build method."
   # Create Editor directory if it does not exist
   mkdir -p $UNITY_PROJECT_PATH/Assets/Editor/
   # Copy the build script of Unity Builder action
