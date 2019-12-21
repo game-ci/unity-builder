@@ -4,12 +4,13 @@
 # Input variables
 #
 
-PROJECT_PATH=$1
-UNITY_VERSION="2019.2.11f1"
-BUILD_TARGET=$2
-BUILD_NAME=$3
-BUILDS_PATH=$4
-BUILD_METHOD=$5
+IMAGE_UNITY_VERSION=$1
+IMAGE_TARGET_PLATFORM=$2
+PROJECT_PATH=$3
+TARGET_PLATFORM=$4
+BUILD_NAME=$5
+BUILDS_PATH=$6
+BUILD_METHOD=$7
 
 #
 # Default variables
@@ -42,9 +43,9 @@ BUILD_METHOD=$5
 #
 
 ACTION_ROOT=$(dirname $(dirname $(readlink -fm "$0")))
-DOCKER_IMAGE_TAG=webber-unity:$UNITY_VERSION-$BUILD_TARGET
+DOCKER_IMAGE_TAG=unity-builder:$UNITY_VERSION-$TARGET_PLATFORM
 
-# TODO - Remove debug statements below
+# TODO - Remove debug statements (after it is proven to work)
 
 echo "Listing ACTION_ROOT"
 ls $ACTION_ROOT
@@ -60,9 +61,12 @@ echo ""
 # Build image
 #
 
-echo "Building docker images for $BUILD_TARGET"
+echo "Building docker image for $UNITY_VERSION-$TARGET_PLATFORM"
 docker build $GITHUB_WORKSPACE \
   --file $ACTION_ROOT/Dockerfile \
+  --build-arg IMAGE_REPOSITORY=gableroux \
+  --build-arg IMAGE_NAME=unity3d \
+  --build-arg IMAGE_VERSION=$IMAGE_UNITY_VERSION-$IMAGE_TARGET_PLATFORM \
   --tag $DOCKER_IMAGE_TAG
 
 #
@@ -73,7 +77,7 @@ docker run \
   --workdir /github/workspace \
   --rm \
   --env PROJECT_PATH \
-  --env BUILD_TARGET \
+  --env BUILD_TARGET=$TARGET_PLATFORM \
   --env BUILD_NAME \
   --env BUILDS_PATH \
   --env BUILD_METHOD \
