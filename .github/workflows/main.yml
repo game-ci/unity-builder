@@ -33,6 +33,8 @@ jobs:
       - uses: ./
         with:
           projectPath: test-project
+          targetPlatform: WebGL
+          unityVersion: 2019.2.11f1
       - uses: webbertakken/unity-return-license@v1
         if: always()
       - uses: actions/upload-artifact@v1
