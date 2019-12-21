@@ -43,7 +43,7 @@ BUILD_METHOD=$7
 #
 
 ACTION_ROOT=$(dirname $(dirname $(readlink -fm "$0")))
-DOCKER_IMAGE_TAG=unity-builder:$UNITY_VERSION-$TARGET_PLATFORM
+DOCKER_IMAGE_TAG=unity-builder:$IMAGE_UNITY_VERSION-$IMAGE_TARGET_PLATFORM
 
 # TODO - Remove debug statements (after it is proven to work)
 
@@ -61,7 +61,7 @@ echo ""
 # Build image
 #
 
-echo "Building docker image for $UNITY_VERSION-$TARGET_PLATFORM"
+echo "Building docker image for $IMAGE_UNITY_VERSION-$IMAGE_TARGET_PLATFORM"
 docker build $GITHUB_WORKSPACE \
   --file $ACTION_ROOT/Dockerfile \
   --build-arg IMAGE_REPOSITORY=gableroux \
