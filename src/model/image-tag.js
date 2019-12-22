@@ -1,33 +1,33 @@
-import { has, get, trimEnd } from 'lodash-es';
+import { has, get, trimEnd, trimStart } from 'lodash-es';
 
-export default class Image {
+export default class ImageTag {
   constructor(imageProperties) {
     const {
       repository = 'gableroux',
       name = 'unity3d',
       version = '2019.2.11f1',
-      targetPlatform,
+      platform,
     } = imageProperties;
 
-    if (!Image.versionPattern.test(version)) {
+    if (!ImageTag.versionPattern.test(version)) {
       throw new Error(`Invalid version "${version}".`);
     }
 
-    if (!has(Image.targetPlatformToBuilderPlatformMap, targetPlatform)) {
-      throw new Error(`Platform "${targetPlatform}" is currently not supported.`);
+    if (!has(ImageTag.targetPlatformToBuilderPlatformMap, platform)) {
+      throw new Error(`Platform "${platform}" is currently not supported.`);
     }
 
     const builderPlatform = get(
-      Image.targetPlatformToBuilderPlatformMap,
-      targetPlatform,
-      Image.builderPlatforms.generic,
+      ImageTag.targetPlatformToBuilderPlatformMap,
+      platform,
+      ImageTag.builderPlatforms.generic,
     );
 
-    Object.assign(this, { repository, name, version, targetPlatform, builderPlatform });
+    Object.assign(this, { repository, name, version, platform, builderPlatform });
   }
 
   static get versionPattern() {
-    return /^20\d{2}\.\d\.\w{4}$/;
+    return /^20\d{2}\.\d\.\w{4}|3$/;
   }
 
   static get builderPlatforms() {
@@ -42,9 +42,11 @@ export default class Image {
   }
 
   static get targetPlatformToBuilderPlatformMap() {
-    const { generic, webgl, mac, windows, android, ios } = Image.builderPlatforms;
+    const { generic, webgl, mac, windows, android, ios } = ImageTag.builderPlatforms;
 
+    // @see: https://github.com/Unity-Technologies/UnityCsReference/blob/9034442437e6b5efe28c51d02e978a96a3ce5439/Editor/Mono/BuildTarget.cs
     return {
+      Test: generic,
       WebGL: webgl,
       StandaloneOSX: mac,
       StandaloneWindows: windows,
@@ -61,6 +63,8 @@ export default class Image {
       Stadia: generic,
       WSAPlayer: generic,
       Facebook: generic,
+      // *undocumented*
+      NoTarget: generic,
     };
   }
 
@@ -68,9 +72,13 @@ export default class Image {
     return trimEnd(`${this.version}-${this.builderPlatform}`, '-');
   }
 
-  toString() {
-    const { repository, name, tag } = this;
+  get image() {
+    return trimStart(`${this.repository}/${this.name}`, '/');
+  }
 
-    return `${repository}/${name}:${tag}`;
+  toString() {
+    const { image, tag } = this;
+
+    return `${image}:${tag}`;
   }
 }

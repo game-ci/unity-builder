@@ -1,6 +1,6 @@
 import Action from './model/action';
 import Docker from './model/docker';
-import ImageTag from './model/image';
+import ImageTag from './model/image-tag';
 import Input from './model/input';
 
 const core = require('@actions/core');
@@ -8,19 +8,15 @@ const core = require('@actions/core');
 async function action() {
   Action.checkCompatibility();
 
-  const {
-    unityVersion,
-    targetPlatform,
-    projectPath,
-    buildName,
-    buildsPath,
-    buildMethod,
-  } = Input.getFromUser();
-
   const { dockerfile, workspace } = Action;
-  const baseImage = new ImageTag({ unityVersion, targetPlatform });
-  const builtImage = await Docker.build({ path: workspace, dockerfile, image: baseImage });
-  await Docker.run(builtImage, { projectPath, buildName, buildsPath, buildMethod });
+  const { version, platform, projectPath, buildName, buildsPath, method } = Input.getFromUser();
+
+  console.log({ version, platform, projectPath, buildName, buildsPath, method });
+
+  const baseImage = new ImageTag({ version, platform });
+  const builtImage = await Docker.build({ path: workspace, dockerfile, baseImage });
+
+  await Docker.run(builtImage, { workspace, platform, projectPath, buildName, buildsPath, method });
 }
 
 action().catch(error => {

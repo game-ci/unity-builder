@@ -9,29 +9,33 @@ env:
   PROJECT_PATH: test-project
 
 jobs:
-  strategy:
-    matrix:
-      unityVersion:
-        - 2019.2.11f1
-      targetPlatform:
-        - WebGL
-        #        - StandaloneOSX
-        #        - StandaloneWindows
-        #        - StandaloneWindows64
-        #        - StandaloneLinux64
-        #        - PS4
-        #        - XboxOne
-        #        - Switch
-        - Android
-        - iOS
-  #        - tvOS
-  #        - Lumin
-  #        - BJM
-  #        - WSAPlayer
-
   buildForAllPlatforms:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - 2019.2.11f1
+        targetPlatform:
+          - WebGL
+          - StandaloneOSX
+          - StandaloneWindows
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - PS4
+          - XboxOne
+          - Switch
+          - Android
+          - iOS
+          - tvOS
+          - Lumin
+          - BJM
+          - Stadia
+          - WSAPlayer
+          - Facebook
+          - NoTarget
+
     steps:
       - uses: actions/checkout@v1
       - uses: webbertakken/unity-activate@v1
@@ -40,8 +44,8 @@ jobs:
           projectPath: test-project
           targetPlatform: ${{ matrix.targetPlatform }}
           unityVersion: ${{ matrix.unityVersion }}
-      - uses: webbertakken/unity-return-license@v1
-        if: always()
+      #      - uses: webbertakken/unity-return-license@v1
+      #        if: always()
       - uses: actions/upload-artifact@v1
         with:
           name: Build

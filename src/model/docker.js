@@ -1,36 +1,44 @@
 import { exec } from '@actions/exec';
+import ImageTag from './image-tag';
 
 export default class Docker {
-  static async build(buildParameters) {
-    const { path = './', dockerfile, image } = buildParameters;
-    const tag = `unity-builder:${image.tag}`;
+  static async build(buildParameters, silent = false) {
+    const { path, dockerfile, baseImage } = buildParameters;
+    const { version, platform } = baseImage;
 
-    await exec('pwd');
-    await exec('ls -alh');
-    await exec(`ls -alh ${path}`);
-    await exec(`
-      docker build ${path}
-        --file ${dockerfile}
-        --build-arg IMAGE=${image}
-        --tag ${tag}
-    `);
+    const tag = new ImageTag({ repository: '', name: 'unity-builder', version, platform });
+    const command = `docker build ${path} \
+      --file ${dockerfile} \
+      --build-arg IMAGE=${baseImage} \
+      --tag ${tag}`;
+
+    await exec(command, null, { silent });
 
     return tag;
   }
 
   static async run(image, parameters) {
-    const { GITHUB_WORKSPACE } = process.env;
-    const { projectPath, buildName, buildsPath, buildMethod } = parameters;
+    const { workspace, platform, projectPath, buildName, buildsPath, method } = parameters;
 
-    await exec(`
+    console.log('running with parameters: ');
+    console.log({
+      workspace,
+      platform,
+      projectPath,
+      buildName,
+      buildsPath,
+      method,
+    });
+
+    await exec(`\
       docker run \
         --workdir /github/workspace \
         --rm \
         --env PROJECT_PATH=${projectPath} \
-        --env BUILD_TARGET=${image.targetPlatform} \
+        --env BUILD_TARGET=${platform} \
         --env BUILD_NAME=${buildName} \
         --env BUILDS_PATH=${buildsPath} \
-        --env BUILD_METHOD=${buildMethod} \
+        --env BUILD_METHOD=${method} \
         --env HOME=/github/home \
         --env GITHUB_REF \
         --env GITHUB_SHA \
@@ -50,8 +58,8 @@ export default class Docker {
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
         --volume "/home/runner/work/_temp/_github_home":"/github/home" \
         --volume "/home/runner/work/_temp/_github_workflow":"/github/workflow" \
-        --volume "${GITHUB_WORKSPACE}":"/github/workspace" \
-        ${image}
+        --volume "${workspace}":"/github/workspace" \
+        ${image} \
       `);
   }
 }
