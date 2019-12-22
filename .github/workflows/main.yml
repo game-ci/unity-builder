@@ -6,7 +6,6 @@ on:
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  PROJECT_PATH: test-project
 
 jobs:
   buildForAllPlatforms:
@@ -15,20 +14,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        projectPath:
+          - test-project
         unityVersion:
           - 2019.2.11f1
-          - 2019.3.0f1
+        #          - 2019.3.0f1 # requires unity-activate to upgrade
         targetPlatform:
           - WebGL
-          #          - StandaloneOSX
-          #          - StandaloneWindows
-          #          - StandaloneWindows64
-          #          - StandaloneLinux64
-          #          - PS4
-          #          - XboxOne
-          #          - Switch
-          #          - Android
           - iOS
+    #          - StandaloneOSX
+    #          - StandaloneWindows
+    #          - StandaloneWindows64
+    #          - StandaloneLinux64
+    #          - PS4
+    #          - XboxOne
+    #          - Switch
+    #          - Android
     #          - tvOS
     #          - Lumin
     #          - BJM
@@ -40,11 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: webbertakken/unity-activate@v1
-      - uses: ./ # webbertakken/unity-builder@v0.3-webgl
+      - uses: ./
         with:
-          projectPath: test-project
-          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
       - uses: webbertakken/unity-return-license@v1
         if: always()
       - uses: actions/upload-artifact@v1

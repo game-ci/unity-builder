@@ -1,14 +1,15 @@
 # Unity - Builder
+
 [![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+workflow%3A%22Actions+%F0%9F%98%8E%22)
 
 ---
 
-GitHub Action to 
-[build Unity projects](https://github.com/marketplace/actions/unity-builder) 
+GitHub Action to
+[build Unity projects](https://github.com/marketplace/actions/unity-builder)
 for different platforms.
 
-Part of the 
-[Unity Actions](https://github.com/webbertakken/unity-actions) 
+Part of the
+[Unity Actions](https://github.com/webbertakken/unity-actions)
 collection.
 
 ---
@@ -18,13 +19,13 @@ to build Unity projects for different platforms.
 
 It is recommended to run the
 [Test](https://github.com/webbertakken/unity-actions#test)
-action from the 
-[Unity Actions](https://github.com/webbertakken/unity-actions) 
+action from the
+[Unity Actions](https://github.com/webbertakken/unity-actions)
 collection before running this action. This action also requires the [Activation](https://github.com/marketplace/actions/unity-activate) step.
 
 ## Documentation
 
-See the 
+See the
 [Unity Actions](https://github.com/webbertakken/unity-actions)
 collection repository for workflow documentation and reference implementation.
 
@@ -36,68 +37,109 @@ Create or edit the file called `.github/workflows/main.yml` and add a job to it.
 name: Build project
 on: [push]
 jobs:
-  buildForWebGL:
-    name: Build for WebGL 🕸
+  buildForSomePlatforms:
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - path/to/your/project
+        unityVersion:
+          - 2019.2.11f1
+        targetPlatform:
+          - WebGL
+          - iOS
     steps:
-```
-
-Activate Unity in a step using the 
-[Unity Activate](https://github.com/marketplace/actions/unity-activate)
-action. 
-
-Configure the builder as follows:
-
-```yaml
-      # Configure builder
-      - name: Build project
-        id: buildStep
-        uses: webbertakken/unity-builder@v0.2 # WIP (only webgl for now)
-        env:  
-          # Optional: Path to your project, leave blank for "./"
-          UNITY_PROJECT_PATH: path/to/your/project
-
-          # Name for your build
-          BUILD_NAME: TestBuild
-
-          # Optional: Builds path, leave blank for "build"
-          BUILDS_PATH: build
-
-          # Target platform for your build
-          BUILD_TARGET: WebGL
-
-          # Optional: <StaticBuildClass.StaticMethod> 
-          BUILD_METHOD: ""
-```
-
-> _**Note:** By default the enabled scenes from the 
-project's settings will be built._
-
-You use the id to **upload your built files** like so:
-
-```yaml
-      # Upload distributables
-      - name: Upload Build
-        uses: actions/upload-artifact@v1
+      - uses: actions/checkout@v1
+      - uses: webbertakken/unity-activate@v1
+      - uses: webbertakken/unity-builder@v0.3
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - uses: webbertakken/unity-return-license@v1
+        if: always()
+      - uses: actions/upload-artifact@v1
         with:
           name: Build
-          path: ${{ steps.buildStep.outputs.allBuildsPath }}
+          path: build
 ```
 
-Return the Unity license in a final step using the 
-[Unity Return License](https://github.com/marketplace/actions/unity-return-license)
-action. 
+> **Notes:**
+>
+> - Don't forget to replace _&lt;test-project&gt;_ with your project name.
+> - By default the enabled scenes from the project's settings will be built.
 
-Commit and push your workflow definition.
+## Configuration options
+
+Below options can be specified under `with:` for the `unity-builder` action.
+
+#### projectPath
+
+Specify the path to your Unity project to be built.
+The path should be relative to the root of your project.
+
+_**required:** `false`_
+_**default:** `<your project root>`_
+
+#### unityVersion
+
+Version of Unity to use for building the project.
+
+_**required:** `false`_
+_**default:** `2019.2.1f11`_
+
+#### targetPlatform
+
+Platform that the build should target.
+
+_**required:** `true`_
+
+#### buildName
+
+Name of the build.
+
+_**required:** `false`_
+_**default:** `testBuild`_
+
+#### buildsPath
+
+Path where the builds should be stored.
+
+In this folder a folder will be created for every targetPlatform.
+
+_**required:** `false`_
+_**default:** `build`_
+
+#### buildCommand
+
+Custom command to run your build.
+
+There are two conditions for a custom buildCommand:
+
+- Must reference a valid path to a `static` method.
+- The class must reside in the `Assets/Editor` directory.
+
+_**example:**_
+
+```yaml
+- uses: webbertakken/unity-builder@master
+  with:
+    buildCommand: EditorNamespace.BuilderClassName.StaticBulidMethod
+```
+
+_**required:** `false`_
+_**default:** Built-in script that will run a build out of the box._
 
 ## More actions
 
-Visit 
-[Unity Actions](https://github.com/webbertakken/unity-actions) 
+Visit
+[Unity Actions](https://github.com/webbertakken/unity-actions)
 to find related actions for Unity.
 
 Feel free to contribute.
 
-## Licence 
+## Licence
 
 [MIT](./LICENSE)
