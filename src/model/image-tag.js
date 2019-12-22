@@ -63,7 +63,6 @@ export default class ImageTag {
       Stadia: generic,
       WSAPlayer: generic,
       Facebook: generic,
-      // *undocumented*
       NoTarget: generic,
     };
   }
