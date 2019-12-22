@@ -5,12 +5,29 @@ export default class Action {
     return ['linux'];
   }
 
+  static get isRunningLocally() {
+    return process.env.RUNNER_WORKSPACE === undefined;
+  }
+
+  static get isRunningFromSource() {
+    return __dirname !== 'dist';
+  }
+
   static get name() {
     return 'unity-builder';
   }
 
   static get rootFolder() {
-    return path.dirname(path.dirname(__dirname));
+    if (!Action.isRunningLocally) {
+      const workspace = process.env.RUNNER_WORKSPACE;
+      return `${workspace}/${path.basename(workspace)}`;
+    }
+
+    if (Action.isRunningFromSource) {
+      return path.dirname(path.dirname(path.dirname(__filename)));
+    }
+
+    return path.dirname(path.dirname(__filename));
   }
 
   static get dockerfile() {
