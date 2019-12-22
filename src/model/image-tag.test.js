@@ -31,17 +31,17 @@ describe('UnityImageVersion', () => {
       expect(image.builderPlatform).toStrictEqual(some.builderPlatform);
     });
 
-    it('throws for incorrect versions', () => {
-      const { platform } = some;
-      expect(() => new ImageTag({ version: 'some version', platform })).toThrow();
-      expect(() => new ImageTag({ version: '', platform })).toThrow();
-      expect(() => new ImageTag({ version: 1, platform })).toThrow();
-      expect(() => new ImageTag({ version: null, platform })).toThrow();
+    test.each(['2000.0.0f0', '2011.1.11f1'])('accepts %p version format', version => {
+      expect(() => new ImageTag({ version, platform: some.platform })).not.toThrow();
     });
 
-    it('throws for incorrect or unsupported targets', () => {
-      expect(() => new ImageTag({ platform: undefined })).toThrow();
-      expect(() => new ImageTag({ platform: 'nonExisting' })).toThrow();
+    test.each(['some version', '', 1, null])('throws for incorrect versions %p', version => {
+      const { platform } = some;
+      expect(() => new ImageTag({ version, platform })).toThrow();
+    });
+
+    test.each([undefined, 'nonExisting'])('throws for unsupported target %p', platform => {
+      expect(() => new ImageTag({ platform })).toThrow();
     });
   });
 
