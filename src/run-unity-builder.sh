@@ -60,6 +60,7 @@ echo ""
 #
 # Build image
 #
+echo "some test"
 
 echo "Building docker image for $IMAGE_UNITY_VERSION-$IMAGE_TARGET_PLATFORM"
 docker build $GITHUB_WORKSPACE \
