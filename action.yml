@@ -1,7 +1,31 @@
 name: 'Unity - Builder'
 author: Webber Takken <webber@takken.io>
 description: 'Build Unity projects for different platforms.'
-inputs: {}
+inputs:
+  unityVersion:
+    required: false
+    default: ''
+    description: 'Version of unity to use for building the project.'
+  targetPlatform:
+    required: false
+    default: ''
+    description: 'Platform that the build should target.'
+  projectPath:
+    required: false
+    default: ''
+    description: 'Relative path to the project to be built.'
+  buildName:
+    required: false
+    default: ''
+    description: 'Name of the build.'
+  buildsPath:
+    required: false
+    default: ''
+    description: 'Path where the builds should be stored.'
+  buildMethod:
+    required: false
+    default: ''
+    description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
 outputs:
   buildPath:
     description: 'Path where the current platform has been built to.'
