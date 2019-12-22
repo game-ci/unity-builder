@@ -12,7 +12,5 @@ LABEL "maintainer"="Webber Takken <webber@takken.io>"
 
 ADD default-build-script /UnityBuilderAction
 ADD entrypoint.sh /entrypoint.sh
-
 RUN chmod +x /entrypoint.sh
-
 ENTRYPOINT ["/entrypoint.sh"]
