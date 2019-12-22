@@ -15,6 +15,7 @@
   "plugins": ["react", "jsx-a11y", "import", "prettier", "flowtype", "unicorn"],
   "settings": { "react": { "version": "latest" } },
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "import/no-extraneous-dependencies": 0
   }
 }

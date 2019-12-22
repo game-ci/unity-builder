@@ -7,11 +7,9 @@
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
-    "build": "ncc build src/index.js -o dist -m",
-    "watch": "yarn build -w",
-    "start": "node dist/index.js",
+    "build": "ncc build --out dist --minify",
     "lint": "prettier --check \"src/**/*.js\" && eslint src",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
@@ -21,6 +19,7 @@
   "devDependencies": {
     "@babel/cli": "7.7.5",
     "@babel/core": "7.7.5",
+    "@babel/preset-env": "7.7.7",
     "@zeit/ncc": "0.20.5",
     "babel-eslint": "10.0.3",
     "eslint": "6.7.2",
@@ -35,6 +34,7 @@
     "husky": "4.0.0-beta.5",
     "jest": "24.9.0",
     "lint-staged": "9.5.0",
+    "lodash-es": "4.17.15",
     "prettier": "1.19.1"
   },
   "husky": {

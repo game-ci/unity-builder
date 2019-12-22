@@ -1,8 +1,5 @@
-ARG IMAGE_REPOSITORY
-ARG IMAGE_NAME
-ARG IMAGE_VERSION
-
-FROM $IMAGE_REPOSITORY/$IMAGE_NAME:$IMAGE_VERSION
+ARG IMAGE
+FROM $IMAGE
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."

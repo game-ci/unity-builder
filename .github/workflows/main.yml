@@ -9,49 +9,40 @@ env:
   PROJECT_PATH: test-project
 
 jobs:
-  #  test:
-  #    name: Test the project
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v1
-  #      - uses: webbertakken/unity-activate@v1
-  #      - uses: webbertakken/unity-test-runner@v1.1
-  #      - uses: webbertakken/unity-return-license@v1
-  #        if: always()
-  #      - uses: actions/upload-artifact@v1
-  #        with:
-  #          name: Test results
-  #          path: artifacts/
+  strategy:
+    matrix:
+      unityVersion:
+        - 2019.2.11f1
+      targetPlatform:
+        - WebGL
+        #        - StandaloneOSX
+        #        - StandaloneWindows
+        #        - StandaloneWindows64
+        #        - StandaloneLinux64
+        #        - PS4
+        #        - XboxOne
+        #        - Switch
+        - Android
+        - iOS
+  #        - tvOS
+  #        - Lumin
+  #        - BJM
+  #        - WSAPlayer
 
-  buildForWebGL:
-    name: Build for WebGL
-    #    needs: [test]
+  buildForAllPlatforms:
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
-    steps: # webbertakken/unity-builder@v0.3-webgl
+    steps:
       - uses: actions/checkout@v1
       - uses: webbertakken/unity-activate@v1
-      - uses: ./
+      - uses: ./ # webbertakken/unity-builder@v0.3-webgl
         with:
           projectPath: test-project
-          targetPlatform: WebGL
-          unityVersion: 2019.2.11f1
+          targetPlatform: ${{ matrix.targetPlatform }}
+          unityVersion: ${{ matrix.unityVersion }}
       - uses: webbertakken/unity-return-license@v1
         if: always()
       - uses: actions/upload-artifact@v1
         with:
           name: Build
           path: build
-#  buildForAndroid:
-#    name: Build for Android
-#    #    needs: [test]
-#    runs-on: ubuntu-latest
-#    steps: # webbertakken/unity-builder@v0.3-android
-#      - uses: actions/checkout@v1
-#      - uses: webbertakken/unity-activate@v1
-#      - uses: ./
-#      - uses: webbertakken/unity-return-license@v1
-#        if: always()
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: Build
-#          path: build
