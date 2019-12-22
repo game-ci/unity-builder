@@ -11,8 +11,6 @@ async function action() {
   const { dockerfile, workspace } = Action;
   const { version, platform, projectPath, buildName, buildsPath, method } = Input.getFromUser();
 
-  console.log({ version, platform, projectPath, buildName, buildsPath, method });
-
   const baseImage = new ImageTag({ version, platform });
   const builtImage = await Docker.build({ path: workspace, dockerfile, baseImage });
 

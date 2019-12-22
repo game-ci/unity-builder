@@ -17,21 +17,10 @@ export default class Docker {
     return tag;
   }
 
-  static async run(image, parameters) {
+  static async run(image, parameters, silent = false) {
     const { workspace, platform, projectPath, buildName, buildsPath, method } = parameters;
 
-    console.log('running with parameters: ');
-    console.log({
-      workspace,
-      platform,
-      projectPath,
-      buildName,
-      buildsPath,
-      method,
-    });
-
-    await exec(`\
-      docker run \
+    const command = `docker run \
         --workdir /github/workspace \
         --rm \
         --env PROJECT_PATH=${projectPath} \
@@ -59,7 +48,8 @@ export default class Docker {
         --volume "/home/runner/work/_temp/_github_home":"/github/home" \
         --volume "/home/runner/work/_temp/_github_workflow":"/github/workflow" \
         --volume "${workspace}":"/github/workspace" \
-        ${image} \
-      `);
+        ${image}`;
+
+    await exec(command, null, { silent });
   }
 }
