@@ -10,7 +10,7 @@ export default class Action {
   }
 
   static get isRunningFromSource() {
-    return __dirname !== 'dist';
+    return path.basename(__dirname) === 'model';
   }
 
   static get name() {
