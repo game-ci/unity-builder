@@ -18,11 +18,6 @@ export default class Action {
   }
 
   static get rootFolder() {
-    if (!Action.isRunningLocally) {
-      const workspace = process.env.RUNNER_WORKSPACE;
-      return `${workspace}/${path.basename(workspace)}`;
-    }
-
     if (Action.isRunningFromSource) {
       return path.dirname(path.dirname(path.dirname(__filename)));
     }
