@@ -4,7 +4,7 @@ import ImageTag from './image-tag';
 
 describe('Docker', () => {
   it('builds', async () => {
-    const path = Action.rootFolder;
+    const path = Action.builderFolder;
     const dockerfile = `${path}/Dockerfile`;
     const baseImage = new ImageTag({
       repository: '',

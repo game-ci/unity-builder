@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import Action from './action';
 
 describe('Action', () => {
@@ -16,5 +17,20 @@ describe('Action', () => {
     const { rootFolder, name } = Action;
 
     expect(path.basename(rootFolder)).toStrictEqual(name);
+    expect(fs.existsSync(rootFolder)).toStrictEqual(true);
+  });
+
+  it('returns the builder folder', () => {
+    const { builderFolder } = Action;
+
+    expect(path.basename(builderFolder)).toStrictEqual('builder');
+    expect(fs.existsSync(builderFolder)).toStrictEqual(true);
+  });
+
+  it('returns the docker file', () => {
+    const { dockerfile } = Action;
+
+    expect(path.basename(dockerfile)).toStrictEqual('Dockerfile');
+    expect(fs.existsSync(dockerfile)).toStrictEqual(true);
   });
 });
