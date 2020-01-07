@@ -23,6 +23,7 @@ export default class Docker {
     const command = `docker run \
         --workdir /github/workspace \
         --rm \
+        --env UNITY_LICENSE \
         --env PROJECT_PATH=${projectPath} \
         --env BUILD_TARGET=${platform} \
         --env BUILD_NAME=${buildName} \

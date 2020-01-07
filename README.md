@@ -34,8 +34,27 @@ collection repository for workflow documentation and reference implementation.
 Create or edit the file called `.github/workflows/main.yml` and add a job to it.
 
 ```yaml
+- uses: webbertakken/unity-builder@v0.5
+  env:
+    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  with:
+    projectPath: path/to/your/project
+    unityVersion: 2020.X.XXXX
+    targetPlatform: WebGL
+```
+
+A complete workflow that builds every available platform could look like this:
+
+```yaml
 name: Build project
-on: [push]
+
+on:
+  pull_request: {}
+  push: { branches: [master] }
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
 jobs:
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
@@ -47,19 +66,27 @@ jobs:
           - path/to/your/project
         unityVersion:
           - 2019.2.11f1
+          - 2019.3.0f1
         targetPlatform:
-          - WebGL
-          - iOS
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows # Build a Windows standalone.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk standalone app.
+          - WebGL # WebGL.
+          - WSAPlayer # Build an Windows Store Apps player.
+          - PS4 # Build a PS4 Standalone.
+          - XboxOne # Build a Xbox One Standalone.
+          - tvOS # Build to Apple's tvOS platform.
+          - Switch # Build a Nintendo Switch player.
     steps:
       - uses: actions/checkout@v1
-      - uses: webbertakken/unity-activate@v1
-      - uses: webbertakken/unity-builder@v0.3
+      - uses: webbertakken/unity-builder@v0.5
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-      - uses: webbertakken/unity-return-license@v1
-        if: always()
       - uses: actions/upload-artifact@v1
         with:
           name: Build
