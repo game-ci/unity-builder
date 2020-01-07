@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 #
-#
+# Activate Unity
 #
 
-/steps/activate.sh
+source /steps/activate.sh
 
 #
 # Set project path
