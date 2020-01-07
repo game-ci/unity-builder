@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 #
+#
+#
+
+/steps/activate.sh
+
+#
 # Set project path
 #
 
