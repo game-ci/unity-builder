@@ -8,11 +8,11 @@ const core = require('@actions/core');
 async function action() {
   Action.checkCompatibility();
 
-  const { dockerfile, workspace, rootFolder } = Action;
+  const { dockerfile, workspace, builderFolder } = Action;
   const { version, platform, projectPath, buildName, buildsPath, method } = Input.getFromUser();
 
   const baseImage = new ImageTag({ version, platform });
-  const builtImage = await Docker.build({ path: rootFolder, dockerfile, baseImage });
+  const builtImage = await Docker.build({ path: builderFolder, dockerfile, baseImage });
 
   await Docker.run(builtImage, { workspace, platform, projectPath, buildName, buildsPath, method });
 }

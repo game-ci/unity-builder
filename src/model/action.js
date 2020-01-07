@@ -25,8 +25,12 @@ export default class Action {
     return path.dirname(path.dirname(__filename));
   }
 
+  static get builderFolder() {
+    return `${Action.rootFolder}/builder`;
+  }
+
   static get dockerfile() {
-    return `${Action.rootFolder}/Dockerfile`;
+    return `${Action.builderFolder}/Dockerfile`;
   }
 
   static get workspace() {
