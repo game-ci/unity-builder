@@ -17,24 +17,30 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   # Copy license file from Github variables
   echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
 
-  ##
-  ## Activate license
-  ##
+  #
+  # Activate license
+  #
+  # This is expected to always exit with code 1 (both success and failure).
+  #
   echo "Requesting activation"
-  xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
+  ACTIVATION_OUTPUT=$(xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
       -batchmode \
       -nographics \
       -logFile /dev/stdout \
       -quit \
-      -manualLicenseFile $FILE_PATH
-  # This is expected to always exit with code 1 (both success and failure).
+      -manualLicenseFile $FILE_PATH)
   # Convert to exit code 0 by echoing the current exit code.
   echo $?
   # Exit code is now 0
 
+  # TODO - remove debugging
+  echo $ACTIVATION_OUTPUT
+  echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default'
+  echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default' | wc -l
+
   # TODO - Derive exit code by grepping success statement
-  UNITY_EXIT_CODE=0
+  UNITY_EXIT_CODE=$(echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default' | wc -l)
 
   # Display information about the result
   if [ $UNITY_EXIT_CODE -eq 0 ]; then
@@ -48,7 +54,9 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   rm -f $FILE_PATH
 
   # Exit with the code from the license verification step
-  exit $UNITY_EXIT_CODE
+  if [ $UNITY_EXIT_CODE -ne 0 ]; then
+    exit $UNITY_EXIT_CODE
+  fi
 
 else
   #

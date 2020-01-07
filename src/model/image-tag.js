@@ -38,32 +38,35 @@ export default class ImageTag {
       windows: 'windows',
       android: 'android',
       ios: 'ios',
+      facebook: 'facebook',
     };
   }
 
   static get targetPlatformToBuilderPlatformMap() {
-    const { generic, webgl, mac, windows, android, ios } = ImageTag.builderPlatforms;
+    const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.builderPlatforms;
 
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     return {
-      Test: generic,
-      WebGL: webgl,
       StandaloneOSX: mac,
       StandaloneWindows: windows,
       StandaloneWindows64: windows,
-      StandaloneLinux64: generic,
-      PS4: generic,
-      XboxOne: generic,
-      Switch: generic,
-      Android: android,
+      StandaloneLinux64: windows,
       iOS: ios,
-      tvOS: generic,
-      Lumin: generic,
-      BJM: generic,
-      Stadia: generic,
-      WSAPlayer: generic,
-      Facebook: generic,
+      Android: android,
+      WebGL: webgl,
+      WSAPlayer: windows,
+      PS4: windows,
+      XboxOne: windows,
+      tvOS: windows,
+      Switch: windows,
+      // Unsupported
+      Lumin: windows,
+      BJM: windows,
+      Stadia: windows,
+      Facebook: facebook,
       NoTarget: generic,
+      // Test specific
+      Test: generic,
     };
   }
 

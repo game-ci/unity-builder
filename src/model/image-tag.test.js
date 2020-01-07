@@ -5,7 +5,7 @@ describe('UnityImageVersion', () => {
     repository: 'test1',
     name: 'test2',
     version: '2099.9.f9f9',
-    platform: 'Stadia',
+    platform: 'Test',
     builderPlatform: '',
   };
 
@@ -59,7 +59,7 @@ describe('UnityImageVersion', () => {
     });
 
     it('returns no specific build platform for generic targetPlatforms', () => {
-      const image = new ImageTag({ platform: 'Stadia' });
+      const image = new ImageTag({ platform: 'NoTarget' });
 
       expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1`);
     });
