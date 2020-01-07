@@ -94,6 +94,8 @@ _**default:** `2019.2.1f11`_
 
 Platform that the build should target.
 
+Must be one of the [allowed values](https://docs.unity3d.com/ScriptReference/BuildTarget.html) listed in the Unity scripting manual.
+
 _**required:** `true`_
 
 #### buildName

@@ -44,7 +44,7 @@ export default class ImageTag {
   static get targetPlatformToBuilderPlatformMap() {
     const { generic, webgl, mac, windows, android, ios } = ImageTag.builderPlatforms;
 
-    // @see: https://github.com/Unity-Technologies/UnityCsReference/blob/9034442437e6b5efe28c51d02e978a96a3ce5439/Editor/Mono/BuildTarget.cs
+    // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     return {
       Test: generic,
       WebGL: webgl,
