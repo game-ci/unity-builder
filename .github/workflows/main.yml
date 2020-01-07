@@ -18,7 +18,7 @@ jobs:
           - test-project
         unityVersion:
           - 2019.2.11f1
-        #          - 2019.3.0f1 # requires unity-activate to upgrade
+          - 2019.3.0f1
         targetPlatform:
           - WebGL
           - iOS
@@ -40,14 +40,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: webbertakken/unity-activate@v1
       - uses: ./
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-      - uses: webbertakken/unity-return-license@v1
-        if: always()
       - uses: actions/upload-artifact@v1
         with:
           name: Build
