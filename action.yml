@@ -26,9 +26,7 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-outputs:
-  buildPath:
-    description: 'Path where the current platform has been built to.'
+outputs: {}
 branding:
   icon: 'box'
   color: 'gray-dark'
