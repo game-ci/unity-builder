@@ -114,7 +114,7 @@ In this folder a folder will be created for every targetPlatform.
 _**required:** `false`_
 _**default:** `build`_
 
-#### buildCommand
+#### buildMethod
 
 Custom command to run your build.
 
@@ -128,7 +128,7 @@ _**example:**_
 ```yaml
 - uses: webbertakken/unity-builder@master
   with:
-    buildCommand: EditorNamespace.BuilderClassName.StaticBulidMethod
+    buildMethod: EditorNamespace.BuilderClassName.StaticBulidMethod
 ```
 
 _**required:** `false`_
