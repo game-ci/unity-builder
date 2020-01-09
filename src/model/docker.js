@@ -19,11 +19,13 @@ export default class Docker {
 
   static async run(image, parameters, silent = false) {
     const { workspace, platform, projectPath, buildName, buildsPath, method } = parameters;
+    const { version } = image;
 
     const command = `docker run \
         --workdir /github/workspace \
         --rm \
         --env UNITY_LICENSE \
+        --env UNITY_VERSION=${version} \
         --env PROJECT_PATH=${projectPath} \
         --env BUILD_TARGET=${platform} \
         --env BUILD_NAME=${buildName} \
