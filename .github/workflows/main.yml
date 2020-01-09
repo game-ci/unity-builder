@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - test-project
+          - simple-test-project
         unityVersion:
           - 2019.2.11f1
           - 2019.3.0f1
