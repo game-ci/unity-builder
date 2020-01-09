@@ -108,9 +108,9 @@ echo "#    Current build dir    #"
 echo "###########################"
 echo ""
 
-echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."
-mkdir -p $CURRENT_BUILD_FULL_PATH
-ls -alh $CURRENT_BUILD_FULL_PATH
+#echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."
+#mkdir -p $CURRENT_BUILD_FULL_PATH
+#ls -alh $CURRENT_BUILD_FULL_PATH
 
 echo ""
 echo "###########################"
