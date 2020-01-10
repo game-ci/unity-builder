@@ -18,7 +18,7 @@ jobs:
           - simple-test-project
         unityVersion:
           - 2019.2.11f1
-          - 2019.3.0f1
+        #          - 2019.3.0f1 # requires different license file/method
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows # Build a Windows standalone.
