@@ -42,8 +42,8 @@ if [ -z "$BUILDS_PATH" ]; then
 fi
 BUILDS_FULL_PATH=$GITHUB_WORKSPACE/$BUILDS_PATH
 BUILD_FOLDER=$BUILD_TARGET-$UNITY_VERSION
-CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_FOLDER
-CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER
+CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_FOLDER/
+CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER/
 echo "Using build path \"$CURRENT_BUILD_PATH\"."
 
 #
@@ -108,9 +108,9 @@ echo "#    Current build dir    #"
 echo "###########################"
 echo ""
 
-#echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."
-#mkdir -p $CURRENT_BUILD_FULL_PATH
-#ls -alh $CURRENT_BUILD_FULL_PATH
+echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."
+mkdir -p $CURRENT_BUILD_FULL_PATH
+ls -alh $CURRENT_BUILD_FULL_PATH
 
 echo ""
 echo "###########################"
