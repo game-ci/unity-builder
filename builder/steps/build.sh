@@ -41,9 +41,15 @@ if [ -z "$BUILDS_PATH" ]; then
   BUILDS_PATH=build
 fi
 BUILDS_FULL_PATH=$GITHUB_WORKSPACE/$BUILDS_PATH
+
+# TODO - Cleanup
 BUILD_FOLDER=$BUILD_TARGET-$UNITY_VERSION
-CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_FOLDER/$BUILD_FOLDER
-CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER/$BUILD_FOLDER
+CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_FOLDER
+CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER
+
+# TODO - Determine the file or folder based on BUILD_TARGET
+CUSTOM_BUILD_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER/$BUILD_TARGET
+
 echo "Using build path \"$CURRENT_BUILD_PATH\"."
 
 #
@@ -108,12 +114,9 @@ echo "#    Current build dir    #"
 echo "###########################"
 echo ""
 
-#echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."
-echo "Creating \"$BUILDS_FULL_PATH/$BUILD_FOLDER\" if it does not exist."
-#mkdir -p $CURRENT_BUILD_FULL_PATH
-mkdir -p $BUILDS_FULL_PATH/$BUILD_FOLDER
-#ls -alh $CURRENT_BUILD_FULL_PATH
-ls -alh $BUILDS_FULL_PATH/$BUILD_FOLDER
+echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."exist."
+mkdir -p $CURRENT_BUILD_FULL_PATH
+ls -alh $CURRENT_BUILD_FULL_PATH
 
 echo ""
 echo "###########################"
@@ -138,7 +141,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -projectPath "$UNITY_PROJECT_PATH" \
     -buildTarget "$BUILD_TARGET" \
     -customBuildTarget "$BUILD_TARGET" \
-    -customBuildPath "$CURRENT_BUILD_FULL_PATH" \
+    -customBuildPath "$CUSTOM_BUILD_PATH" \
     $EXECUTE_BUILD_METHOD
 
 # Catch exit code
