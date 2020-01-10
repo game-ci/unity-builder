@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - simple-test-project
+          - test-project
         unityVersion:
           - 2019.2.11f1
         #          - 2019.3.0f1 # requires different license file/method
@@ -27,11 +27,11 @@ jobs:
           - iOS # Build an iOS player.
           #          - Android # Build an Android .apk standalone app.
           - WebGL # WebGL.
-    #          - WSAPlayer # Build an Windows Store Apps player.
-    #          - PS4 # Build a PS4 Standalone.
-    #          - XboxOne # Build a Xbox One Standalone.
-    #          - tvOS # Build to Apple's tvOS platform.
-    #          - Switch # Build a Nintendo Switch player.
+          #          - WSAPlayer # Build an Windows Store Apps player.
+          #          - PS4 # Build a PS4 Standalone.
+          #          - XboxOne # Build a Xbox One Standalone.
+          #          - tvOS # Build to Apple's tvOS platform.
+          #          - Switch # Build a Nintendo Switch player.
 
     steps:
       - uses: actions/checkout@v1
