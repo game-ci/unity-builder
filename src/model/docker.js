@@ -25,6 +25,9 @@ export default class Docker {
         --workdir /github/workspace \
         --rm \
         --env UNITY_LICENSE \
+        --env UNITY_EMAIL \
+        --env UNITY_PASSWORD \
+        --env UNITY_SERIAL \
         --env UNITY_VERSION=${version} \
         --env PROJECT_PATH=${projectPath} \
         --env BUILD_TARGET=${platform} \
