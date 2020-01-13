@@ -4,6 +4,9 @@
 # Run steps
 #
 
+echo "Stuff is working??"
+exit 0
+
 source /steps/activate.sh
 source /steps/build.sh
 source /steps/return_license.sh

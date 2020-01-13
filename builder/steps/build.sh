@@ -4,8 +4,6 @@
 # Set project path
 #
 
-echo "Stuff is working??"
-
 UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
 echo "Using project path \"$UNITY_PROJECT_PATH\"."
 
