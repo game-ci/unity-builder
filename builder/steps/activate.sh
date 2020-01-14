@@ -67,9 +67,7 @@ else
   # Note: This is the preferred way for PROFESSIONAL LICENSES.
   #
 
-  echo "UNITY_SERIAL: ${UNITY_SERIAL:0:10}"
-  echo "UNITY_EMAIL: ${UNITY_EMAIL:-4}"
-  echo "UNITY_PASSWORD: ${UNITY_PASSWORD:0:4}"
+  echo "UNITY_EMAIL: ${UNITY_EMAIL}"
 
   xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
