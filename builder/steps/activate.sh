@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "In activate.sh"
+
 if [[ -n "$UNITY_LICENSE" ]]; then
   #
   # PERSONAL LICENSE MODE
