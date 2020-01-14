@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo "In return_license.sh"
-
 if [[ -n "$UNITY_SERIAL" ]]; then
   #
   # PROFESSIONAL (SERIAL) LICENSE MODE
