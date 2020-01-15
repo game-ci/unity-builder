@@ -58,7 +58,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
     exit $UNITY_EXIT_CODE
   fi
 
-else
+elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # PROFESSIONAL (SERIAL) LICENSE MODE
   #
@@ -89,5 +89,12 @@ else
 
   # Exit with the code from the license verification step
   exit $UNITY_EXIT_CODE
-
+else
+  # Exit since no license and no serial number provided!
+  echo "No personal or professional licenses provided!"
+  echo "Please ensure you have setup one of these licensing methods:"
+  echo "  - Personal: Set the UNITY_LICENSE environment variable."
+  echo "  - Professional: Set the UNITY_EMAIL, UNITY_PASSWORD and UNITY_SERIAL environment variables."
+  echo "See https://github.com/webbertakken/unity-builder#usage for details."
+  exit 1;
 fi
