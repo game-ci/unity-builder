@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+# Try personal activation
 if [[ -n "$UNITY_LICENSE" ]]; then
+  LICENSE_MODE="personal"
   #
   # PERSONAL LICENSE MODE
   #
@@ -42,23 +44,12 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   # TODO - Derive exit code by grepping success statement
   UNITY_EXIT_CODE=$(echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default' | wc -l)
 
-  # Display information about the result
-  if [ $UNITY_EXIT_CODE -eq 0 ]; then
-    echo "Activation (personal) complete."
-  else
-    echo "Unclassified error occured while trying to activate (personal) license."
-    echo "Exit code was: $UNITY_EXIT_CODE"
-  fi
-
   # Remove license file
   rm -f $FILE_PATH
 
-  # Exit with the code from the license verification step
-  if [ $UNITY_EXIT_CODE -ne 0 ]; then
-    exit $UNITY_EXIT_CODE
-  fi
-
+# Try professional activation
 elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
+  LICENSE_MODE="professional"
   #
   # PROFESSIONAL (SERIAL) LICENSE MODE
   #
@@ -66,6 +57,7 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # Note: This is the preferred way for PROFESSIONAL LICENSES.
   #
+
   xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
       -batchmode \
@@ -79,22 +71,22 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
 
-  # Display information about the result
-  if [ $UNITY_EXIT_CODE -eq 0 ]; then
-    echo "Activation (professional) complete."
-  else
-    echo "Unclassified error occured while trying to activate (professional) license."
-    echo "Exit code was: $UNITY_EXIT_CODE"
-  fi
-
-  # Exit with the code from the license verification step
-  exit $UNITY_EXIT_CODE
+# Exit since personal and professional modes failed
 else
-  # Exit since no license and no serial number provided!
   echo "No personal or professional licenses provided!"
   echo "Please ensure you have setup one of these licensing methods:"
   echo "  - Personal: Set the UNITY_LICENSE environment variable."
   echo "  - Professional: Set the UNITY_EMAIL, UNITY_PASSWORD and UNITY_SERIAL environment variables."
   echo "See https://github.com/webbertakken/unity-builder#usage for details."
   exit 1;
+fi
+
+# Display information about the result
+if [ $UNITY_EXIT_CODE -eq 0 ]; then
+  echo "Activation ($LICENSE_MODE) complete."
+else
+  # Exit with the code from the license verification step
+  echo "Unclassified error occured while trying to activate ($LICENSE_MODE) license."
+  echo "Exit code was: $UNITY_EXIT_CODE"
+  exit $UNITY_EXIT_CODE
 fi
