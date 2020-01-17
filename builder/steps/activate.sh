@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Try personal activation
 if [[ -n "$UNITY_LICENSE" ]]; then
-  LICENSE_MODE="personal"
   #
   # PERSONAL LICENSE MODE
   #
@@ -12,6 +10,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   #   * See for more details: https://gitlab.com/gableroux/unity3d-gitlab-ci-example/issues/5#note_72815478
   #
   # The license file can be acquired using `webbertakken/request-manual-activation-file` action.
+  LICENSE_MODE="personal"
 
   # Set the license file path
   FILE_PATH=UnityLicenseFile.ulf
@@ -47,9 +46,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   # Remove license file
   rm -f $FILE_PATH
 
-# Try professional activation
 elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
-  LICENSE_MODE="professional"
   #
   # PROFESSIONAL (SERIAL) LICENSE MODE
   #
@@ -57,6 +54,7 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # Note: This is the preferred way for PROFESSIONAL LICENSES.
   #
+  LICENSE_MODE="professional"
 
   xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
@@ -71,8 +69,12 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
 
-# Exit since personal and professional modes failed
 else
+  #
+  # LICENSE ACTIVATION FAILED
+  #
+  # This will exit since both personal and professional activation modes failed
+  #
   echo "No personal or professional licenses provided!"
   echo "Please ensure you have setup one of these licensing methods:"
   echo "  - Personal: Set the UNITY_LICENSE environment variable."
@@ -81,11 +83,14 @@ else
   exit 1;
 fi
 
+#
 # Display information about the result
+#
 if [ $UNITY_EXIT_CODE -eq 0 ]; then
+  # Activation was a success
   echo "Activation ($LICENSE_MODE) complete."
 else
-  # Exit with the code from the license verification step
+  # Activation failed so exit with the code from the license verification step
   echo "Unclassified error occured while trying to activate ($LICENSE_MODE) license."
   echo "Exit code was: $UNITY_EXIT_CODE"
   exit $UNITY_EXIT_CODE
