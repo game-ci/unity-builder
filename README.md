@@ -1,6 +1,6 @@
 # Unity - Builder
 
-[![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+workflow%3A%22Actions+%F0%9F%98%8E%22)
+[![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg?event=push&branch=master)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+event%3Apush+workflow%3A%22Actions+%F0%9F%98%8E%22)
 
 ---
 
