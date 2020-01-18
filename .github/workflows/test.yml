@@ -13,3 +13,5 @@ jobs:
       - run: yarn
       - run: yarn lint
       - run: yarn test
+      - run: yarn build || { echo "build command should always succeed" ; exit 61; }
+      - run: yarn build --quiet && git diff --quiet builder || { echo "builder should be auto generated" ; exit 62; }
