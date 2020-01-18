@@ -2,8 +2,8 @@ import path from 'path';
 
 export default class Action {
   static get supportedPlatforms() {
-    const platform = 'linux';
-    return [platform];
+    const platform2 = 'linux';
+    return [platform2];
   }
 
   static get isRunningLocally() {
