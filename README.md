@@ -127,10 +127,10 @@ _**required:** `true`_
 
 #### buildName
 
-Name of the build.
+Name of the build. Also the folder in which the build will be stored within `buildsPath`.
 
 _**required:** `false`_
-_**default:** `testBuild`_
+_**default:** `<build_target>`_
 
 #### buildsPath
 

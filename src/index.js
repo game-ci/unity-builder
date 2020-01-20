@@ -2,6 +2,7 @@ import Action from './model/action';
 import Docker from './model/docker';
 import ImageTag from './model/image-tag';
 import Input from './model/input';
+import BuildParameters from './model/build-parameters';
 
 const core = require('@actions/core');
 
@@ -9,12 +10,14 @@ async function action() {
   Action.checkCompatibility();
 
   const { dockerfile, workspace, builderFolder } = Action;
-  const { version, platform, projectPath, buildName, buildsPath, method } = Input.getFromUser();
+  const buildParameters = BuildParameters.create(Input.getFromUser());
+  const baseImage = new ImageTag(buildParameters);
 
-  const baseImage = new ImageTag({ version, platform });
+  // Build docker image
   const builtImage = await Docker.build({ path: builderFolder, dockerfile, baseImage });
 
-  await Docker.run(builtImage, { workspace, platform, projectPath, buildName, buildsPath, method });
+  // Run docker image
+  await Docker.run(builtImage, { workspace, ...buildParameters });
 }
 
 action().catch(error => {

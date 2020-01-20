@@ -1,7 +1,7 @@
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
 
-export default class Docker {
+class Docker {
   static async build(buildParameters, silent = false) {
     const { path, dockerfile, baseImage } = buildParameters;
     const { version, platform } = baseImage;
@@ -18,8 +18,16 @@ export default class Docker {
   }
 
   static async run(image, parameters, silent = false) {
-    const { workspace, platform, projectPath, buildName, buildsPath, method } = parameters;
-    const { version } = image;
+    const {
+      version,
+      workspace,
+      platform,
+      projectPath,
+      buildName,
+      buildPath,
+      buildFile,
+      buildMethod,
+    } = parameters;
 
     const command = `docker run \
         --workdir /github/workspace \
@@ -32,8 +40,9 @@ export default class Docker {
         --env PROJECT_PATH=${projectPath} \
         --env BUILD_TARGET=${platform} \
         --env BUILD_NAME=${buildName} \
-        --env BUILDS_PATH=${buildsPath} \
-        --env BUILD_METHOD=${method} \
+        --env BUILD_PATH=${buildPath} \
+        --env BUILD_FILE=${buildFile} \
+        --env BUILD_METHOD=${buildMethod} \
         --env HOME=/github/home \
         --env GITHUB_REF \
         --env GITHUB_SHA \
@@ -59,3 +68,5 @@ export default class Docker {
     await exec(command, null, { silent });
   }
 }
+
+export default Docker;

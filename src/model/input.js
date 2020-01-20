@@ -1,22 +1,26 @@
+import Platform from './platform';
+
 const core = require('@actions/core');
 
-export default class Input {
+class Input {
   static getFromUser() {
     // Input variables specified in workflows using "with" prop.
-    const version = core.getInput('unityVersion');
-    const platform = core.getInput('targetPlatform');
+    const unityVersion = core.getInput('unityVersion');
+    const targetPlatform = core.getInput('targetPlatform') || Platform.default;
     const projectPath = core.getInput('projectPath');
-    const buildName = core.getInput('buildName');
-    const buildsPath = core.getInput('buildsPath');
-    const buildMethod = core.getInput('buildMethod');
+    const buildName = core.getInput('buildName') || targetPlatform;
+    const buildsPath = core.getInput('buildsPath') || 'build';
+    const buildMethod = core.getInput('buildMethod'); // processed in docker file
 
     return {
-      version,
-      platform,
+      unityVersion,
+      targetPlatform,
       projectPath,
       buildName,
       buildsPath,
-      method: buildMethod,
+      buildMethod,
     };
   }
 }
+
+export default Input;
