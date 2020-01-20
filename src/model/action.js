@@ -1,6 +1,6 @@
 import path from 'path';
 
-export default class Action {
+class Action {
   static get supportedPlatforms() {
     return ['linux'];
   }
@@ -44,3 +44,5 @@ export default class Action {
     }
   }
 }
+
+export default Action;

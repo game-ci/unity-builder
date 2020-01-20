@@ -1,6 +1,7 @@
 import { has, get, trimEnd, trimStart } from 'lodash-es';
+import Platform from './platform';
 
-export default class ImageTag {
+class ImageTag {
   constructor(imageProperties) {
     const {
       repository = 'gableroux',
@@ -13,14 +14,14 @@ export default class ImageTag {
       throw new Error(`Invalid version "${version}".`);
     }
 
-    if (!has(ImageTag.targetPlatformToBuilderPlatformMap, platform)) {
+    if (!has(ImageTag.targetPlatformToImageSuffixMap, platform)) {
       throw new Error(`Platform "${platform}" is currently not supported.`);
     }
 
     const builderPlatform = get(
-      ImageTag.targetPlatformToBuilderPlatformMap,
+      ImageTag.targetPlatformToImageSuffixMap,
       platform,
-      ImageTag.builderPlatforms.generic,
+      ImageTag.imageSuffixes.generic,
     );
 
     Object.assign(this, { repository, name, version, platform, builderPlatform });
@@ -30,7 +31,7 @@ export default class ImageTag {
     return /^20\d{2}\.\d\.\w{3,4}|3$/;
   }
 
-  static get builderPlatforms() {
+  static get imageSuffixes() {
     return {
       generic: '',
       webgl: 'webgl',
@@ -42,31 +43,31 @@ export default class ImageTag {
     };
   }
 
-  static get targetPlatformToBuilderPlatformMap() {
-    const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.builderPlatforms;
+  static get targetPlatformToImageSuffixMap() {
+    const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.imageSuffixes;
 
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     return {
-      StandaloneOSX: mac,
-      StandaloneWindows: windows,
-      StandaloneWindows64: windows,
-      StandaloneLinux64: windows,
-      iOS: ios,
-      Android: android,
-      WebGL: webgl,
-      WSAPlayer: windows,
-      PS4: windows,
-      XboxOne: windows,
-      tvOS: windows,
-      Switch: windows,
+      [Platform.types.StandaloneOSX]: mac,
+      [Platform.types.StandaloneWindows]: windows,
+      [Platform.types.StandaloneWindows64]: windows,
+      [Platform.types.StandaloneLinux64]: windows,
+      [Platform.types.iOS]: ios,
+      [Platform.types.Android]: android,
+      [Platform.types.WebGL]: webgl,
+      [Platform.types.WSAPlayer]: windows,
+      [Platform.types.PS4]: windows,
+      [Platform.types.XboxOne]: windows,
+      [Platform.types.tvOS]: windows,
+      [Platform.types.Switch]: windows,
       // Unsupported
-      Lumin: windows,
-      BJM: windows,
-      Stadia: windows,
-      Facebook: facebook,
-      NoTarget: generic,
+      [Platform.types.Lumin]: windows,
+      [Platform.types.BJM]: windows,
+      [Platform.types.Stadia]: windows,
+      [Platform.types.Facebook]: facebook,
+      [Platform.types.NoTarget]: generic,
       // Test specific
-      Test: generic,
+      [Platform.types.Test]: generic,
     };
   }
 
@@ -84,3 +85,5 @@ export default class ImageTag {
     return `${image}:${tag}`;
   }
 }
+
+export default ImageTag;

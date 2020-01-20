@@ -4,53 +4,28 @@
 # Set project path
 #
 
-UNITY_PROJECT_PATH=$GITHUB_WORKSPACE/$PROJECT_PATH
+UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
 echo "Using project path \"$UNITY_PROJECT_PATH\"."
 
 #
-# Set the name for the build
+# Display the name for the build, doubles as the output name
 #
 
-if [ -z "$BUILD_NAME" ]; then
-  BUILD_NAME="build-$(date '+%F-%H%M')"
-fi
 echo "Using build name \"$BUILD_NAME\"."
 
 #
-# Set the builds target platform;
-#
-# Web:     WebGL
-# Desktop: StandaloneOSX, StandaloneWindows, StandaloneWindows64, StandaloneLinux64
-# Console: PS4, XboxOne, Switch
-# Mobile:  Android, iOS
-# Other:   tvOS, Lumin, BJM, WSAPlayer
-#
-# Default to WebGL (no particular reason)
+# Display the build's target platform;
 #
 
-if [ -z "$BUILD_TARGET" ]; then
-  BUILD_TARGET=WebGL
-fi
 echo "Using build target \"$BUILD_TARGET\"."
 
 #
-# Set builds path
+# Display build path and file
 #
 
-if [ -z "$BUILDS_PATH" ]; then
-  BUILDS_PATH=build
-fi
-BUILDS_FULL_PATH=$GITHUB_WORKSPACE/$BUILDS_PATH
-
-# TODO - Cleanup
-BUILD_FOLDER=$BUILD_TARGET-$UNITY_VERSION
-CURRENT_BUILD_PATH=$BUILDS_PATH/$BUILD_FOLDER
-CURRENT_BUILD_FULL_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER
-
-# TODO - Determine the file or folder based on BUILD_TARGET
-CUSTOM_BUILD_PATH=$BUILDS_FULL_PATH/$BUILD_FOLDER/$BUILD_TARGET
-
-echo "Using build path \"$CURRENT_BUILD_PATH\"."
+echo "Using build path \"$BUILD_PATH\" to save file \"$BUILD_FILE\"."
+BUILD_PATH_FULL="$GITHUB_WORKSPACE/$BUILD_PATH"
+CUSTOM_BUILD_PATH="$BUILD_PATH_FULL/$BUILD_FILE"
 
 #
 # Set the build method, must reference one of:
@@ -71,13 +46,13 @@ if [ -z "$BUILD_METHOD" ]; then
   #
   echo "Using built-in build method."
   # Create Editor directory if it does not exist
-  mkdir -p $UNITY_PROJECT_PATH/Assets/Editor/
+  mkdir -p "$UNITY_PROJECT_PATH/Assets/Editor/"
   # Copy the build script of Unity Builder action
-  cp -r /UnityBuilderAction/Assets/Editor $UNITY_PROJECT_PATH/Assets/Editor/
+  cp -r "/UnityBuilderAction/Assets/Editor" "$UNITY_PROJECT_PATH/Assets/Editor/"
   # Set the Build method to that of UnityBuilder Action
   BUILD_METHOD="UnityBuilderAction.Builder.BuildProject"
   # Verify recursive paths
-  ls -Ralph $UNITY_PROJECT_PATH/Assets/Editor/
+  ls -Ralph "$UNITY_PROJECT_PATH/Assets/Editor/"
   #
 else
   # User has provided their own build method.
@@ -100,23 +75,13 @@ EXECUTE_BUILD_METHOD="-executeMethod $BUILD_METHOD"
 
 echo ""
 echo "###########################"
-echo "#      All builds dir     #"
-echo "###########################"
-echo ""
-
-echo "Creating \"$BUILDS_FULL_PATH\" if it does not exist."
-mkdir -p $BUILDS_FULL_PATH
-ls -alh $BUILDS_FULL_PATH
-
-echo ""
-echo "###########################"
 echo "#    Current build dir    #"
 echo "###########################"
 echo ""
 
-echo "Creating \"$CURRENT_BUILD_FULL_PATH\" if it does not exist."exist."
-mkdir -p $CURRENT_BUILD_FULL_PATH
-ls -alh $CURRENT_BUILD_FULL_PATH
+echo "Creating \"$BUILD_PATH_FULL\" if it does not exist."
+mkdir -p "$BUILD_PATH_FULL"
+ls -alh "$BUILD_PATH_FULL"
 
 echo ""
 echo "###########################"
@@ -164,4 +129,4 @@ echo "#     Build directory     #"
 echo "###########################"
 echo ""
 
-ls -alh $CURRENT_BUILD_FULL_PATH
+ls -alh "$BUILD_PATH_FULL"
