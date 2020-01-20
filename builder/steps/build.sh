@@ -62,10 +62,6 @@ else
   #
 fi
 
-# Set build method to execute as flag + argument
-EXECUTE_BUILD_METHOD="-executeMethod $BUILD_METHOD"
-
-
 # The build specification below may require Unity 2019.2.11f1 or later (not tested below).
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
@@ -107,7 +103,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -buildTarget "$BUILD_TARGET" \
     -customBuildTarget "$BUILD_TARGET" \
     -customBuildPath "$CUSTOM_BUILD_PATH" \
-    $EXECUTE_BUILD_METHOD
+    -executeMethod "$BUILD_METHOD"
 
 # Catch exit code
 BUILD_EXIT_CODE=$?
