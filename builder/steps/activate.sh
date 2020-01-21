@@ -10,7 +10,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   #   * See for more details: https://gitlab.com/gableroux/unity3d-gitlab-ci-example/issues/5#note_72815478
   #
   # The license file can be acquired using `webbertakken/request-manual-activation-file` action.
-  LICENSE_MODE="personal"
+  echo "Requesting activation (personal license)"
 
   # Set the license file path
   FILE_PATH=UnityLicenseFile.ulf
@@ -19,7 +19,6 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
 
   # Activate license
-  echo "Requesting activation"
   ACTIVATION_OUTPUT=$(xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
       -batchmode \
@@ -56,8 +55,9 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # Note: This is the preferred way for PROFESSIONAL LICENSES.
   #
-  LICENSE_MODE="professional"
+  echo "Requesting activation (professional license)"
 
+  # Activate license
   xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
       -batchmode \
@@ -92,10 +92,10 @@ fi
 #
 if [ $UNITY_EXIT_CODE -eq 0 ]; then
   # Activation was a success
-  echo "Activation ($LICENSE_MODE) complete."
+  echo "Activation complete."
 else
   # Activation failed so exit with the code from the license verification step
-  echo "Unclassified error occured while trying to activate ($LICENSE_MODE) license."
+  echo "Unclassified error occured while trying to activate license."
   echo "Exit code was: $UNITY_EXIT_CODE"
   exit $UNITY_EXIT_CODE
 fi
