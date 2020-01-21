@@ -41,18 +41,12 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   ACTIVATION_SUCCESSFUL=$(echo $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l)
 
   # Set exit code to 0 if activation was successful
-  if [[ $ACTIVATION_SUCCESSFUL -ne 1 ]]; then
+  if [[ $ACTIVATION_SUCCESSFUL -eq 1 ]]; then
     UNITY_EXIT_CODE=0
   fi;
 
   # Remove license file
   rm -f $FILE_PATH
-
-  # TODO - remove debugging
-  echo "activation successful value: $ACTIVATION_SUCCESSFUL"
-  echo $ACTIVATION_OUTPUT
-  echo $ACTIVATION_OUTPUT | grep 'Next license update check is after'
-  echo $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l
 
 elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
