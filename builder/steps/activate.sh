@@ -6,7 +6,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   #
   # This will activate Unity, using a license file
   #
-  # Note that this is the ONLY WAY for PERSONAL LICENSES in 2019.
+  # Note that this is the ONLY WAY for PERSONAL LICENSES in 2020.
   #   * See for more details: https://gitlab.com/gableroux/unity3d-gitlab-ci-example/issues/5#note_72815478
   #
   # The license file can be acquired using `webbertakken/request-manual-activation-file` action.
@@ -18,11 +18,7 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   # Copy license file from Github variables
   echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
 
-  #
   # Activate license
-  #
-  # This is expected to always exit with code 1 (both success and failure).
-  #
   echo "Requesting activation"
   ACTIVATION_OUTPUT=$(xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     /opt/Unity/Editor/Unity \
@@ -31,20 +27,32 @@ if [[ -n "$UNITY_LICENSE" ]]; then
       -logFile /dev/stdout \
       -quit \
       -manualLicenseFile $FILE_PATH)
-  # Convert to exit code 0 by echoing the current exit code.
-  echo $?
-  # Exit code is now 0
 
-  # TODO - remove debugging
-  echo $ACTIVATION_OUTPUT
-  echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default'
-  echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default' | wc -l
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
 
-  # TODO - Derive exit code by grepping success statement
-  UNITY_EXIT_CODE=$(echo $ACTIVATION_OUTPUT | grep 'config is NOT valid, switching to default' | wc -l)
+  # The exit code for personal activation is always 1;
+  # Determine whether activation was successful.
+  #
+  # Successful output should include the following:
+  #
+  #   "LICENSE SYSTEM [2020120 18:51:20] Next license update check is after 2019-11-25T18:23:38"
+  #
+  ACTIVATION_SUCCESSFUL=$(echo $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l)
+
+  # Set exit code to 0 if activation was successful
+  if [[ $ACTIVATION_SUCCESSFUL -ne 1 ]]; then
+    UNITY_EXIT_CODE=0
+  fi;
 
   # Remove license file
   rm -f $FILE_PATH
+
+  # TODO - remove debugging
+  echo "activation successful value: $ACTIVATION_SUCCESSFUL"
+  echo $ACTIVATION_OUTPUT
+  echo $ACTIVATION_OUTPUT | grep 'Next license update check is after'
+  echo $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l
 
 elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
@@ -71,16 +79,18 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
 
 else
   #
-  # LICENSE ACTIVATION FAILED
+  # NO LICENSE ACTIVATION STRATEGY MATCHED
   #
-  # This will exit since both personal and professional activation modes failed
+  # This will exit since no activation strategies could be matched.
   #
-  echo "No personal or professional licenses provided!"
-  echo "Please ensure you have setup one of these licensing methods:"
-  echo "  - Personal: Set the UNITY_LICENSE environment variable."
-  echo "  - Professional: Set the UNITY_EMAIL, UNITY_PASSWORD and UNITY_SERIAL environment variables."
-  echo "See https://github.com/webbertakken/unity-builder#usage for details."
+  echo "License activation strategy could not be determined."
+  echo ""
+  echo "Visit https://github.com/webbertakken/unity-builder#usage for more"
+  echo "details on how to set up one of the possible activation strategies."
+
+  # Immediately exit as no UNITY_EXIT_CODE can be derrived.
   exit 1;
+
 fi
 
 #
