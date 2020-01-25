@@ -25,7 +25,6 @@ class Cache {
   }
 
   static async save() {
-    console.log(`saving to ${Unity.libraryFolder}`);
     await tc.cacheDir(Unity.libraryFolder, 'library', this.libraryKey);
   }
 }
