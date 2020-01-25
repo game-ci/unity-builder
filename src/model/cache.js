@@ -12,8 +12,15 @@ class Cache {
   }
 
   static async load() {
+    // Look for cache
     const libraryFolder = await tc.find('library', this.libraryKey);
 
+    // Cache miss
+    if (!libraryFolder) {
+      return;
+    }
+
+    // Restore
     await core.addPath(libraryFolder);
   }
 
