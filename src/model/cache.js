@@ -8,7 +8,7 @@ class Cache {
   static get libraryKey() {
     const { projectPath } = Input.getFromUser();
 
-    return `${projectPath}`;
+    return `alwaysthesame`;
   }
 
   static async load() {
