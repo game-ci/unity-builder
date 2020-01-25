@@ -1,6 +1,9 @@
+import Input from './input';
+
 class Unity {
   static get libraryFolder() {
-    return 'Library';
+    const { projectPath } = Input.getFromUser();
+    return `${projectPath}/'Library'`;
   }
 }
 
