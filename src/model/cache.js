@@ -13,6 +13,9 @@ class Cache {
   }
 
   static async load() {
+    const allLibraryVersions = tc.findAllVersions('library');
+    console.log(`Versions available for library: ${allLibraryVersions}`);
+
     // Look for cache
     const libraryFolder = await tc.find('library', this.libraryKey);
 
