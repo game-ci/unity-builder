@@ -7,7 +7,7 @@ class Input {
     // Input variables specified in workflows using "with" prop.
     const unityVersion = core.getInput('unityVersion');
     const targetPlatform = core.getInput('targetPlatform') || Platform.default;
-    const projectPath = core.getInput('projectPath');
+    const projectPath = core.getInput('projectPath') || './';
     const buildName = core.getInput('buildName') || targetPlatform;
     const buildsPath = core.getInput('buildsPath') || 'build';
     const buildMethod = core.getInput('buildMethod'); // processed in docker file

@@ -1,13 +1,12 @@
-import Action from './model/action';
-import Docker from './model/docker';
-import ImageTag from './model/image-tag';
-import Input from './model/input';
-import BuildParameters from './model/build-parameters';
+import { Action, Docker, Input, ImageTag, BuildParameters, Cache } from './model';
 
 const core = require('@actions/core');
 
 async function action() {
   Action.checkCompatibility();
+
+  // Load cache
+  await Cache.load();
 
   const { dockerfile, workspace, builderFolder } = Action;
   const buildParameters = BuildParameters.create(Input.getFromUser());
@@ -18,6 +17,9 @@ async function action() {
 
   // Run docker image
   await Docker.run(builtImage, { workspace, ...buildParameters });
+
+  // Save cache
+  await Cache.save();
 }
 
 action().catch(error => {
