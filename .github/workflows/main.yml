@@ -49,6 +49,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/cache@v1.1.0
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+            Library-${{ matrix.projectPath }}-
+            Library-
       - uses: ./
         with:
           projectPath: ${{ matrix.projectPath }}
