@@ -1,8 +1,4 @@
-import Action from './model/action';
-import Docker from './model/docker';
-import ImageTag from './model/image-tag';
-import Input from './model/input';
-import BuildParameters from './model/build-parameters';
+import { Action, Docker, Input, ImageTag, BuildParameters } from './model';
 
 const core = require('@actions/core');
 
