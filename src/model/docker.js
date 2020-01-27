@@ -27,6 +27,7 @@ class Docker {
       buildPath,
       buildFile,
       buildMethod,
+      customParameters,
     } = parameters;
 
     const command = `docker run \
@@ -43,6 +44,7 @@ class Docker {
         --env BUILD_PATH=${buildPath} \
         --env BUILD_FILE=${buildFile} \
         --env BUILD_METHOD=${buildMethod} \
+        --env CUSTOM_PARAMETERS=${customParameters} \
         --env HOME=/github/home \
         --env GITHUB_REF \
         --env GITHUB_SHA \
