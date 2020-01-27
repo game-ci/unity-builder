@@ -14,9 +14,11 @@ class Cache {
       return;
     }
 
-    console.log('Library folder does not exist.');
-    console.log('Consider setting up caching to speed up your workflow.');
-    console.log('If this is not your first build.');
+    // eslint-disable-next-line no-console
+    console.log(`
+      Library folder does not exist.
+      Consider setting up caching to speed up your workflow
+      If this is not your first build.`);
   }
 }
 
