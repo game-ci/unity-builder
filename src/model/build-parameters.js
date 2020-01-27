@@ -9,6 +9,7 @@ class BuildParameters {
       buildName,
       buildsPath,
       buildMethod,
+      customParameters,
     } = parameters;
 
     return {
@@ -19,6 +20,7 @@ class BuildParameters {
       buildPath: `${buildsPath}/${targetPlatform}`,
       buildFile: this.parseBuildFile(buildName, targetPlatform),
       buildMethod,
+      customParameters,
     };
   }
 

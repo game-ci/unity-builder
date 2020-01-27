@@ -11,6 +11,7 @@ class Input {
     const buildName = core.getInput('buildName') || targetPlatform;
     const buildsPath = core.getInput('buildsPath') || 'build';
     const buildMethod = core.getInput('buildMethod'); // processed in docker file
+    const customParameters = core.getInput('customParameters') || '';
 
     return {
       unityVersion,
@@ -19,6 +20,7 @@ class Input {
       buildName,
       buildsPath,
       buildMethod,
+      customParameters,
     };
   }
 }

@@ -58,9 +58,14 @@ else
   # User has provided their own build method.
   # Assume they also bring their own script.
   #
-  echo "User set build method to $BUILD_METHOD."
+  echo "Using build method \"$BUILD_METHOD\"."
   #
 fi
+
+#
+# Display custom parameters
+#
+echo "Using custom parameters \"$CUSTOM_PARAMETERS\"."
 
 # The build specification below may require Unity 2019.2.11f1 or later (not tested below).
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
@@ -103,7 +108,8 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -buildTarget "$BUILD_TARGET" \
     -customBuildTarget "$BUILD_TARGET" \
     -customBuildPath "$CUSTOM_BUILD_PATH" \
-    -executeMethod "$BUILD_METHOD"
+    -executeMethod "$BUILD_METHOD" \
+    "$CUSTOM_PARAMETERS"
 
 # Catch exit code
 BUILD_EXIT_CODE=$?
