@@ -34,7 +34,7 @@ collection repository for workflow documentation and reference implementation.
 Create or edit the file called `.github/workflows/main.yml` and add a job to it.
 
 ```yaml
-- uses: webbertakken/unity-builder@v0.5
+- uses: webbertakken/unity-builder@v0.9
   env:
     UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   with:
@@ -82,7 +82,7 @@ jobs:
           - Switch # Build a Nintendo Switch player.
     steps:
       - uses: actions/checkout@v1
-      - uses: webbertakken/unity-builder@v0.5
+      - uses: webbertakken/unity-builder@v0.9
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
@@ -160,6 +160,25 @@ _**example:**_
 
 _**required:** `false`_
 _**default:** Built-in script that will run a build out of the box._
+
+#### customParameters
+
+Custom parameters to configure the build.
+
+Parameters must start with a hyphen (`-`) and may be followed by a value (without hyphen).
+
+Parameters without a value will be considered booleans (with a value of true).
+
+_**example:**_
+
+```yaml
+- uses: webbertakken/unity-builder@master
+  with:
+    customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+```
+
+_**required:** `false`_
+_**default:** ""_
 
 ## More actions
 
