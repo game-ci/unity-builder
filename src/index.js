@@ -1,9 +1,10 @@
-import { Action, Docker, Input, ImageTag, BuildParameters } from './model';
+import { Action, BuildParameters, Cache, Docker, Input, ImageTag } from './model';
 
 const core = require('@actions/core');
 
 async function action() {
   Action.checkCompatibility();
+  Cache.verify();
 
   const { dockerfile, workspace, builderFolder } = Action;
   const buildParameters = BuildParameters.create(Input.getFromUser());
