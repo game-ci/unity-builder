@@ -31,7 +31,21 @@ collection repository for workflow documentation and reference implementation.
 
 ## Usage
 
+#### Setup builder
+
+By default the enabled scenes from the project's settings will be built.
+
 Create or edit the file called `.github/workflows/main.yml` and add a job to it.
+
+##### Personal License
+
+Personal licenses require a one-time manual activation step (per unity version).
+
+Make sure you
+[acquire and activate](https://github.com/marketplace/actions/unity-request-activation-file)
+your license file and add it as a secret.
+
+Then, define the build step as follows:
 
 ```yaml
 - uses: webbertakken/unity-builder@v0.9
@@ -42,6 +56,75 @@ Create or edit the file called `.github/workflows/main.yml` and add a job to it.
     unityVersion: 2020.X.XXXX
     targetPlatform: WebGL
 ```
+
+##### Professional license
+
+Professional licenses do not need any manual steps.
+
+Instead, three variables will need to be set.
+
+- `UNITY_EMAIL` (should contain the email address for your Unity account)
+- `UNITY_PASSWORD` (the password that you use to login to Unity)
+- `UNITY_SERIAL` (the serial provided by Unity)
+
+Define the build step as follows:
+
+```yaml
+- uses: webbertakken/unity-builder@v0.9
+  env:
+    UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+    UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+  with:
+    projectPath: path/to/your/project
+    unityVersion: 2020.X.XXXX
+    targetPlatform: WebGL
+```
+
+That is all you need to build your project.
+
+#### Storing the build
+
+To be able to access your built files,
+they need to be uploaded as artifacts.
+To do this it is recommended to use Github Actions official
+[upload artifact action](https://github.com/marketplace/actions/upload-artifact)
+after any build action.
+
+By default, Builder outputs it's builds to a folder named `build`.
+
+Example:
+
+```yaml
+- uses: actions/upload-artifact@v1
+  with:
+    name: Build
+    path: build
+```
+
+Builds can now be downloaded as Artifacts in the Actions tab.
+
+#### Caching
+
+In order to make builds run faster, you can cache Library files from previous
+builds. To do so simply add Github Actions official
+[cache action](https://github.com/marketplace/actions/cache) before any unity steps.
+
+Example:
+
+```yaml
+- uses: actions/cache@v1.1.0
+  with:
+    path: path/to/your/project/Library
+    key: Library-MyProjectName-TargetPlatform
+    restore-keys: |
+      Library-MyProjectName-
+      Library-
+```
+
+This simple could speed up your build by more than 50%.
+
+## Complete example
 
 A complete workflow that builds every available platform could look like this:
 
@@ -82,6 +165,13 @@ jobs:
           - Switch # Build a Nintendo Switch player.
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/cache@v1.1.0
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-
+            Library-
       - uses: webbertakken/unity-builder@v0.9
         with:
           projectPath: ${{ matrix.projectPath }}
@@ -93,10 +183,7 @@ jobs:
           path: build
 ```
 
-> **Notes:**
->
-> - Don't forget to replace _&lt;test-project&gt;_ with your project name.
-> - By default the enabled scenes from the project's settings will be built.
+> **Note:** _Environment variables are set for all jobs in the workflow like this._
 
 ## Configuration options
 
