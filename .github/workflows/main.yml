@@ -20,7 +20,7 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
-      - run: yarn build --quiet && git diff --quiet action || { echo "action should be auto generated" ; exit 62; }
+      - run: yarn build --quiet && git diff --quiet action || { echo "action should be auto generated" ; git diff action ; exit 62; }
 
   buildForAllPlatforms:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
