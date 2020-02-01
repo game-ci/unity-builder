@@ -122,7 +122,7 @@ Example:
       Library-
 ```
 
-This simple could speed up your build by more than 50%.
+This simple addition could speed up your build by more than 50%.
 
 ## Complete example
 
@@ -164,7 +164,9 @@ jobs:
           - tvOS # Build to Apple's tvOS platform.
           - Switch # Build a Nintendo Switch player.
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
       - uses: actions/cache@v1.1.0
         with:
           path: ${{ matrix.projectPath }}/Library

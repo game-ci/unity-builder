@@ -20,11 +20,11 @@ describe('Action', () => {
     expect(fs.existsSync(rootFolder)).toStrictEqual(true);
   });
 
-  it('returns the builder folder', () => {
-    const { builderFolder } = Action;
+  it('returns the action folder', () => {
+    const { actionFolder } = Action;
 
-    expect(path.basename(builderFolder)).toStrictEqual('builder');
-    expect(fs.existsSync(builderFolder)).toStrictEqual(true);
+    expect(path.basename(actionFolder)).toStrictEqual('action');
+    expect(fs.existsSync(actionFolder)).toStrictEqual(true);
   });
 
   it('returns the docker file', () => {

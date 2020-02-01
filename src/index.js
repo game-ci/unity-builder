@@ -6,12 +6,12 @@ async function action() {
   Action.checkCompatibility();
   Cache.verify();
 
-  const { dockerfile, workspace, builderFolder } = Action;
+  const { dockerfile, workspace, actionFolder } = Action;
   const buildParameters = BuildParameters.create(Input.getFromUser());
   const baseImage = new ImageTag(buildParameters);
 
   // Build docker image
-  const builtImage = await Docker.build({ path: builderFolder, dockerfile, baseImage });
+  const builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
 
   // Run docker image
   await Docker.run(builtImage, { workspace, ...buildParameters });
