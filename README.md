@@ -48,7 +48,7 @@ your license file and add it as a secret.
 Then, define the build step as follows:
 
 ```yaml
-- uses: webbertakken/unity-builder@v0.9
+- uses: webbertakken/unity-builder@v0.10
   env:
     UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   with:
@@ -70,7 +70,7 @@ Instead, three variables will need to be set.
 Define the build step as follows:
 
 ```yaml
-- uses: webbertakken/unity-builder@v0.9
+- uses: webbertakken/unity-builder@v0.10
   env:
     UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
     UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -174,7 +174,7 @@ jobs:
           restore-keys: |
             Library-${{ matrix.projectPath }}-
             Library-
-      - uses: webbertakken/unity-builder@v0.9
+      - uses: webbertakken/unity-builder@v0.10
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
