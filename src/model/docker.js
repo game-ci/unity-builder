@@ -37,14 +37,14 @@ class Docker {
         --env UNITY_EMAIL \
         --env UNITY_PASSWORD \
         --env UNITY_SERIAL \
-        --env UNITY_VERSION=${version} \
-        --env PROJECT_PATH=${projectPath} \
-        --env BUILD_TARGET=${platform} \
-        --env BUILD_NAME=${buildName} \
-        --env BUILD_PATH=${buildPath} \
-        --env BUILD_FILE=${buildFile} \
-        --env BUILD_METHOD=${buildMethod} \
-        --env CUSTOM_PARAMETERS=${customParameters} \
+        --env UNITY_VERSION="${version}" \
+        --env PROJECT_PATH="${projectPath}" \
+        --env BUILD_TARGET="${platform}" \
+        --env BUILD_NAME="${buildName}" \
+        --env BUILD_PATH="${buildPath}" \
+        --env BUILD_FILE="${buildFile}" \
+        --env BUILD_METHOD="${buildMethod}" \
+        --env CUSTOM_PARAMETERS="${customParameters}" \
         --env HOME=/github/home \
         --env GITHUB_REF \
         --env GITHUB_SHA \
