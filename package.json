@@ -2,12 +2,12 @@
   "name": "unity-builder",
   "version": "0.5.0",
   "description": "Build Unity projects for different platforms.",
-  "main": "builder/index.js",
+  "main": "action/index.js",
   "repository": "git@github.com:webbertakken/unity-builder.git",
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
-    "build": "ncc build src --out builder --minify",
+    "build": "ncc build src --out action --minify",
     "lint": "prettier --check \"src/**/*.js\" && eslint src",
     "test": "jest"
   },
@@ -39,7 +39,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn build && git add builder/index.js"
+      "pre-commit": "lint-staged && yarn build && git add action/index.js"
     }
   },
   "lint-staged": {
