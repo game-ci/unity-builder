@@ -14,13 +14,21 @@
   dependencies:
     "@actions/io" "^1.0.1"
 
-"@actions/github@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@actions/github/-/github-2.0.0.tgz#5b066b1a8747bbf48d47a058d9c241a2e37d5ee7"
-  integrity sha512-sNpZ5dJyJyfJIO5lNYx8r/Gha4Tlm8R0MLO2cBkGdOnAAEn3t1M/MHVcoBhY/VPfjGVe5RNAUPz+6INrViiUPA==
+"@actions/github@^2.0.1":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@actions/github/-/github-2.1.0.tgz#ca36cfb146b4c8955f3d5f88d8dde5f89194de21"
+  integrity sha512-G4ncMlh4pLLAvNgHUYUtpWQ1zPf/VYqmRH9oshxLabdaOOnp7i1hgSgzr2xne2YUaSND3uqemd3YYTIsm2f/KQ==
   dependencies:
+    "@actions/http-client" "^1.0.3"
     "@octokit/graphql" "^4.3.1"
     "@octokit/rest" "^16.15.0"
+
+"@actions/http-client@^1.0.3":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@actions/http-client/-/http-client-1.0.6.tgz#6f9267ca50e1d74d8581f4a894a943cd4c97b49a"
+  integrity sha512-LGmio4w98UyGX33b/W6V6Nx/sQHRXZ859YlMkn36wPsXPB82u8xTVlA/Dq2DXrm6lEq9RVmisRJa1c+HETAIJA==
+  dependencies:
+    tunnel "0.0.6"
 
 "@actions/io@^1.0.1":
   version "1.0.1"
@@ -5821,6 +5829,11 @@ tunnel-agent@^0.6.0:
   integrity sha1-J6XeoGs2sEoKmWZ3SykIaPD8QP0=
   dependencies:
     safe-buffer "^5.0.1"
+
+tunnel@0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/tunnel/-/tunnel-0.0.6.tgz#72f1314b34a5b192db012324df2cc587ca47f92c"
+  integrity sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==
 
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
