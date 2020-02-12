@@ -31,7 +31,7 @@
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-react": "7.18.3",
     "eslint-plugin-unicorn": "16.0.0",
-    "husky": "4.2.1",
+    "husky": "4.2.2",
     "jest": "25.1.0",
     "lint-staged": "10.0.7",
     "lodash-es": "4.17.15",
