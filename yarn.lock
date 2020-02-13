@@ -1143,10 +1143,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@zeit/ncc@0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@zeit/ncc/-/ncc-0.21.0.tgz#9516fc44ca81614c5b582d6e88542fdf37c401b6"
-  integrity sha512-RUMdvVK/w78oo+yBjruZltt0kJXYar2un/1bYQ2LuHG7GmFVm+QjxzEmySwREctaJdEnBvlMdUNWd9hXHxEI3g==
+"@zeit/ncc@0.21.1":
+  version "0.21.1"
+  resolved "https://registry.yarnpkg.com/@zeit/ncc/-/ncc-0.21.1.tgz#44fd4359c54ba34a018a5ccf7a315489db20a733"
+  integrity sha512-M9WzgquSOt2nsjRkYM9LRylBLmmlwNCwYbm3Up3PDEshfvdmIfqpFNSK8EJvR18NwZjGHE5z2avlDtYQx2JQnw==
 
 abab@^2.0.0:
   version "2.0.3"
