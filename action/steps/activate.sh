@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -n "$UNITY_LICENSE" ]]; then
+if [[ -n "$UNITY_LICENSE" || -n "$UNITY_LICENSE_PATH" ]]; then
   #
   # PERSONAL LICENSE MODE
   #
@@ -15,8 +15,14 @@ if [[ -n "$UNITY_LICENSE" ]]; then
   # Set the license file path
   FILE_PATH=UnityLicenseFile.ulf
 
-  # Copy license file from Github variables
-  echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
+  if [[ -n "$UNITY_LICENSE" ]]; then
+    # Copy license file from Github variables
+    echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
+  else
+    # Copy license file from file system
+    cat "$UNITY_LICENSE_PATH" | tr -d '\r' > $FILE_PATH
+    cat "$FILE_PATH"
+  fi
 
   # Activate license
   ACTIVATION_OUTPUT=$(xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
