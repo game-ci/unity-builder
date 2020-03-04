@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -n "$UNITY_LICENSE" || -n "$UNITY_LICENSE_PATH" ]]; then
+if [[ -n "$UNITY_LICENSE" || -n "$UNITY_LICENSE_FILE" ]]; then
   #
   # PERSONAL LICENSE MODE
   #
@@ -20,8 +20,7 @@ if [[ -n "$UNITY_LICENSE" || -n "$UNITY_LICENSE_PATH" ]]; then
     echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
   else
     # Copy license file from file system
-    cat "$UNITY_LICENSE_PATH" | tr -d '\r' > $FILE_PATH
-    cat "$FILE_PATH"
+    cat "$UNITY_LICENSE_FILE" | tr -d '\r' > $FILE_PATH
   fi
 
   # Activate license
