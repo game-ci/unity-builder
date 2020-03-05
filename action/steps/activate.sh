@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -n "$UNITY_LICENSE" || -n "$UNITY_LICENSE_FILE" ]]; then
+if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   #
   # PERSONAL LICENSE MODE
   #
