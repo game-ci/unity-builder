@@ -18,7 +18,7 @@ if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   if [[ -n "$UNITY_LICENSE" ]]; then
     # Copy license file from Github variables
     echo "$UNITY_LICENSE" | tr -d '\r' > $FILE_PATH
-  else
+  elif [[ -n "$UNITY_LICENSE_FILE" ]]; then
     # Copy license file from file system
     cat "$UNITY_LICENSE_FILE" | tr -d '\r' > $FILE_PATH
   fi
