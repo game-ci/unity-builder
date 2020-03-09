@@ -7,6 +7,7 @@
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
+    "prebuild": "yarn",
     "build": "ncc build src --out action --minify",
     "lint": "prettier --check \"src/**/*.js\" && eslint src",
     "test": "jest"
