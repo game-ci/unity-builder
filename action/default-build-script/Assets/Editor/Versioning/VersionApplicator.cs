@@ -14,7 +14,7 @@ namespace UnityBuilderAction.Versioning
       SemanticClassic,
     }
 
-    public static void SetVersionForBuild(string strategy, [CanBeNull] string version)
+    public static void SetVersion(string strategy, [CanBeNull] string version)
     {
       if (!Enum.TryParse<Strategy>(strategy, out Strategy validatedStrategy)) {
         throw new Exception($"Invalid versioning argument provided. {strategy} is not a valid strategy.");

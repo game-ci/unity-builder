@@ -57,7 +57,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Editor\Builder.cs" />
+     <Compile Include="Assets\Editor\Input\ArgumentsParser.cs" />
+     <Compile Include="Assets\Editor\Reporting\StdOutReporter.cs" />
      <Compile Include="Assets\Editor\System\ProcessExtensions.cs" />
+     <Compile Include="Assets\Editor\Versioning\VersionApplicator.cs" />
      <Compile Include="Assets\Editor\Versioning\Git.cs" />
      <Compile Include="Assets\Editor\Versioning\VersionGenerator.cs" />
      <Compile Include="Assets\Editor\Versioning\GitException.cs" />
