@@ -31,6 +31,22 @@ namespace UnityBuilderAction.Versioning
     }
 
     /// <summary>
+    /// Get the version of the current tag.
+    ///
+    /// Output Format:
+    /// #.* (where # is the major version and * can be any number of any type of character)
+    /// </summary>
+    /// <returns></returns>
+    public static string GenerateSemanticClassicVersion()
+    {
+      string version = Run(@"tag --points-at HEAD | grep v[0-9]*");
+
+      version = version.Substring(1);
+
+      return version;
+    }
+
+    /// <summary>
     /// Get the total number of commits.
     /// </summary>
     static int GetTotalNumberOfCommits()
