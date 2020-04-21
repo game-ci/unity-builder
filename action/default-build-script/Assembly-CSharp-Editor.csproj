@@ -57,6 +57,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Editor\Builder.cs" />
+     <Compile Include="Assets\Editor\System\ProcessExtensions.cs" />
+     <Compile Include="Assets\Editor\Versioning\Git.cs" />
+     <Compile Include="Assets\Editor\Versioning\VersionGenerator.cs" />
+     <Compile Include="Assets\Editor\Versioning\GitException.cs" />
  <Reference Include="UnityEditor.TestRunner">
  <HintPath>C:/Repositories/unity-builder/builder/default-build-script/Library/ScriptAssemblies/UnityEditor.TestRunner.dll</HintPath>
  </Reference>
@@ -687,6 +691,9 @@
  <Reference Include="Boo.Lang">
  <HintPath>C:/Program Files/Unity/2019.2.11f1/Editor/Data/MonoBleedingEdge/lib/mono/unityscript/Boo.Lang.dll</HintPath>
  </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".editorconfig" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
