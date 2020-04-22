@@ -10,8 +10,8 @@ namespace UnityBuilderAction.Versioning
     {
       None,
       Custom,
-      SemanticCommit,
-      SemanticClassic,
+      Semantic,
+      Tag,
     }
 
     public static void SetVersion(string strategy, [CanBeNull] string version)
@@ -26,11 +26,11 @@ namespace UnityBuilderAction.Versioning
         case Strategy.Custom:
           ApplyCustomVersion(version);
           return;
-        case Strategy.SemanticCommit:
+        case Strategy.Semantic:
           ApplySemanticCommitVersion();
           return;
-        case Strategy.SemanticClassic:
-          ApplySemanticClassicVersion();
+        case Strategy.Tag:
+          ApplyVersionFromCurrentTag();
           return;
         default:
           throw new NotImplementedException("Version strategy has not been implemented.");
@@ -49,9 +49,9 @@ namespace UnityBuilderAction.Versioning
       Apply(version);
     }
 
-    static void ApplySemanticClassicVersion()
+    static void ApplyVersionFromCurrentTag()
     {
-      string version = Git.GenerateSemanticClassicVersion();
+      string version = Git.GetTagVersion();
 
       Apply(version);
     }

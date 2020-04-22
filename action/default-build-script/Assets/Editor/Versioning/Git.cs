@@ -32,12 +32,13 @@ namespace UnityBuilderAction.Versioning
 
     /// <summary>
     /// Get the version of the current tag.
+    /// 
+    /// The tag must point at HEAD for this method to work.
     ///
     /// Output Format:
     /// #.* (where # is the major version and * can be any number of any type of character)
     /// </summary>
-    /// <returns></returns>
-    public static string GenerateSemanticClassicVersion()
+    public static string GetTagVersion()
     {
       string version = Run(@"tag --points-at HEAD | grep v[0-9]*");
 
@@ -72,7 +73,7 @@ namespace UnityBuilderAction.Versioning
     /// </summary>
     static string GetSemanticCommitVersion()
     {
-      // v0.1-2-g12345678
+      // v0.1-2-g12345678 (where 2 is the amount of commits, g stands for git)
       string version = GetVersionString();
       // 0.1-2
       version = version.Substring(1, version.LastIndexOf('-') - 1);
@@ -86,10 +87,15 @@ namespace UnityBuilderAction.Versioning
     /// Get version string.
     /// 
     /// Format: `v0.1-2-g12345678` (where 2 is the amount of commits since the last tag)
+    ///
+    /// See: https://softwareengineering.stackexchange.com/questions/141973/how-do-you-achieve-a-numeric-versioning-scheme-with-git
     /// </summary>
     static string GetVersionString()
     {
       return Run(@"describe --tags --long --match ""v[0-9]*""");
+
+      // Todo - implement split function based on this more complete query
+      return Run(@"git describe --long --tags --dirty --always");
     }
 
     /// <summary>
