@@ -19,7 +19,7 @@ class Docker {
 
   static async run(image, parameters, silent = false) {
     const {
-      version,
+      unityVersion,
       workspace,
       platform,
       projectPath,
@@ -27,6 +27,8 @@ class Docker {
       buildPath,
       buildFile,
       buildMethod,
+      versioning,
+      version,
       customParameters,
     } = parameters;
 
@@ -38,13 +40,15 @@ class Docker {
         --env UNITY_EMAIL \
         --env UNITY_PASSWORD \
         --env UNITY_SERIAL \
-        --env UNITY_VERSION="${version}" \
+        --env UNITY_VERSION="${unityVersion}" \
         --env PROJECT_PATH="${projectPath}" \
         --env BUILD_TARGET="${platform}" \
         --env BUILD_NAME="${buildName}" \
         --env BUILD_PATH="${buildPath}" \
         --env BUILD_FILE="${buildFile}" \
         --env BUILD_METHOD="${buildMethod}" \
+        --env VERSIONING="${versioning}" \
+        --env VERSION="${version}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
         --env HOME=/github/home \
         --env GITHUB_REF \
