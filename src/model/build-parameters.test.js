@@ -18,7 +18,7 @@ describe('BuildParameters', () => {
     });
 
     it('returns the version', () => {
-      expect(BuildParameters.create(someParameters).version).toStrictEqual(
+      expect(BuildParameters.create(someParameters).unityVersion).toStrictEqual(
         someParameters.unityVersion,
       );
     });

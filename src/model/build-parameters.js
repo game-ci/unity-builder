@@ -9,17 +9,21 @@ class BuildParameters {
       buildName,
       buildsPath,
       buildMethod,
+      versioning,
+      version,
       customParameters,
     } = parameters;
 
     return {
-      version: unityVersion,
+      unityVersion,
       platform: targetPlatform,
       projectPath,
       buildName,
       buildPath: `${buildsPath}/${targetPlatform}`,
       buildFile: this.parseBuildFile(buildName, targetPlatform),
       buildMethod,
+      versioning,
+      version,
       customParameters,
     };
   }
