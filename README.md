@@ -245,13 +245,76 @@ There are two conditions for a custom buildCommand:
 _**example:**_
 
 ```yaml
-- uses: webbertakken/unity-builder@master
+- uses: webbertakken/unity-builder@<version>
   with:
     buildMethod: EditorNamespace.BuilderClassName.StaticBulidMethod
 ```
 
 _**required:** `false`_
 _**default:** Built-in script that will run a build out of the box._
+
+#### versioning
+
+The versioning strategy to use.
+
+Strategies only work when no custom buildMethod is specified.
+
+_**required:** `false`_
+_**default:** `Auto`_
+
+#### _These are the available strategies:_
+
+##### None
+
+No version will be set by Builder.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    versioning: None
+```
+
+##### Semantic (default)
+
+Builder automatically generates a version based on [semantic versioning](https://semver.org/) out of the box.
+
+The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.  
+The latest tag dictates `<major>.<minor>` and the number of commits since that tag is used in `<patch>`.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    versioning: Semantic
+```
+
+This strategy works well for the following reasons:
+
+- All builds have their unique version
+- No version related commits are created
+- No knowledge of git or versioning is required
+- Developer keeps control over `major` and `minor` versions using tags.
+- Zero configuration; It works out of the box
+
+##### Custom
+
+Allows specifying a custom version in the `version` field.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    versioning: Custom
+    version: <some_version>
+```
+
+##### Custom
+
+Uses the tag that points at `HEAD` as the version.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    versioning: Tag
+```
 
 #### customParameters
 
@@ -264,7 +327,7 @@ Parameters without a value will be considered booleans (with a value of true).
 _**example:**_
 
 ```yaml
-- uses: webbertakken/unity-builder@master
+- uses: webbertakken/unity-builder@<version>
   with:
     customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
 ```
