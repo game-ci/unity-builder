@@ -4,7 +4,7 @@ import Platform from './platform';
 describe('BuildParameters', () => {
   describe('create', () => {
     const someParameters = {
-      unityVersion: 'someVersion',
+      version: 'someVersion',
       targetPlatform: 'somePlatform',
       projectPath: 'path/to/project',
       buildName: 'someBuildName',
@@ -18,9 +18,7 @@ describe('BuildParameters', () => {
     });
 
     it('returns the version', () => {
-      expect(BuildParameters.create(someParameters).unityVersion).toStrictEqual(
-        someParameters.unityVersion,
-      );
+      expect(BuildParameters.create(someParameters).version).toStrictEqual(someParameters.version);
     });
 
     it('returns the platform', () => {

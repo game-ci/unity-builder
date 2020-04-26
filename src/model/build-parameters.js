@@ -3,27 +3,25 @@ import Platform from './platform';
 class BuildParameters {
   static create(parameters) {
     const {
-      unityVersion,
+      version,
       targetPlatform,
       projectPath,
       buildName,
       buildsPath,
       buildMethod,
-      versioning,
-      version,
+      buildVersion,
       customParameters,
     } = parameters;
 
     return {
-      unityVersion,
+      version,
       platform: targetPlatform,
       projectPath,
       buildName,
       buildPath: `${buildsPath}/${targetPlatform}`,
       buildFile: this.parseBuildFile(buildName, targetPlatform),
       buildMethod,
-      versioning,
-      version,
+      buildVersion,
       customParameters,
     };
   }

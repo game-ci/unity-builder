@@ -7,8 +7,8 @@ async function action() {
   Cache.verify();
 
   const { dockerfile, workspace, actionFolder } = Action;
-  const buildParameters = BuildParameters.create(Input.getFromUser());
-  const baseImage = new ImageTag({ ...buildParameters, version: buildParameters.unityVersion });
+  const buildParameters = BuildParameters.create(await Input.getFromUser());
+  const baseImage = new ImageTag(buildParameters);
 
   // Build docker image
   const builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });

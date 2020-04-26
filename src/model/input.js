@@ -1,43 +1,36 @@
 import Platform from './platform';
-import ValidationError from './error/validation-error';
+import Versioning from './versioning';
 
 const core = require('@actions/core');
 
-const versioningStrategies = ['None', 'Semantic', 'Tag', 'Custom'];
-
 class Input {
-  static getFromUser() {
+  static async getFromUser() {
     // Input variables specified in workflows using "with" prop.
-    const unityVersion = core.getInput('unityVersion');
+    const version = core.getInput('unityVersion');
     const targetPlatform = core.getInput('targetPlatform') || Platform.default;
     const rawProjectPath = core.getInput('projectPath') || '.';
     const buildName = core.getInput('buildName') || targetPlatform;
     const buildsPath = core.getInput('buildsPath') || 'build';
     const buildMethod = core.getInput('buildMethod'); // processed in docker file
-    const versioning = core.getInput('versioning') || 'Semantic';
-    const version = core.getInput('version') || '';
+    const versioningStrategy = core.getInput('versioning') || 'Semantic';
+    const specifiedVersion = core.getInput('version') || '';
     const customParameters = core.getInput('customParameters') || '';
 
     // Sanitise input
     const projectPath = rawProjectPath.replace(/\/$/, '');
 
-    // Validate input
-    if (!versioningStrategies.includes(versioning)) {
-      throw new ValidationError(
-        `Versioning strategy should be one of ${versioningStrategies.join(', ')}.`,
-      );
-    }
+    // Parse input
+    const buildVersion = await Versioning.determineVersion(versioningStrategy, specifiedVersion);
 
-    // Return sanitised input
+    // Return validated input
     return {
-      unityVersion,
+      version,
       targetPlatform,
       projectPath,
       buildName,
       buildsPath,
       buildMethod,
-      versioning,
-      version,
+      buildVersion,
       customParameters,
     };
   }

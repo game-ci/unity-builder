@@ -27,7 +27,7 @@ namespace UnityBuilderAction
       };
 
       // Set version for this build
-      VersionApplicator.SetVersion(options["versioning"], options["version"]);
+      VersionApplicator.SetVersion(options["version"]);
 
       // Perform build
       BuildReport buildReport = BuildPipeline.BuildPlayer(buildOptions);
