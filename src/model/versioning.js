@@ -164,6 +164,7 @@ export default class Versioning {
    */
   static async hasAnyVersionTags() {
     const numberOfVersionCommits = await System.run('git', [
+      'tag',
       '--list',
       '--merged',
       'HEAD',
