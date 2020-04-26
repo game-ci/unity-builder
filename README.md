@@ -274,6 +274,8 @@ No version will be set by Builder.
     versioning: None
 ```
 
+Note that the version set in the project will be used instead.
+
 ##### Semantic (default)
 
 Builder automatically generates a version based on [semantic versioning](https://semver.org/) out of the box.
@@ -295,6 +297,20 @@ This strategy works well for the following reasons:
 - Developer keeps control over `major` and `minor` versions using tags.
 - Zero configuration; It works out of the box
 
+##### Tag
+
+Uses the tag that points at `HEAD` as the version.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    versioning: Tag
+```
+
+This strategy works well when using a pipeline that specifically runs for tags.
+
+The tag must be a version tag.
+
 ##### Custom
 
 Allows specifying a custom version in the `version` field.
@@ -306,15 +322,7 @@ Allows specifying a custom version in the `version` field.
     version: <some_version>
 ```
 
-##### Custom
-
-Uses the tag that points at `HEAD` as the version.
-
-```yaml
-- uses: webbertakken/unity-builder@<version>
-  with:
-    versioning: Tag
-```
+If there is a use case missing from Builder, feel free to create a feature request.
 
 #### customParameters
 
