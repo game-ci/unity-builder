@@ -10,7 +10,7 @@ namespace UnityBuilderAction.Versioning
     /// <summary>
     /// Generate a version based on the latest tag and the amount of commits.
     /// Format: 0.1.2 (where 2 is the amount of commits).
-    /// 
+    ///
     /// If no tag is present in the repository then v0.0 is assumed.
     /// This would result in 0.0.# where # is the amount of commits.
     /// </summary>
@@ -32,7 +32,7 @@ namespace UnityBuilderAction.Versioning
 
     /// <summary>
     /// Get the version of the current tag.
-    /// 
+    ///
     /// The tag must point at HEAD for this method to work.
     ///
     /// Output Format:
@@ -85,7 +85,7 @@ namespace UnityBuilderAction.Versioning
 
     /// <summary>
     /// Get version string.
-    /// 
+    ///
     /// Format: `v0.1-2-g12345678` (where 2 is the amount of commits since the last tag)
     ///
     /// See: https://softwareengineering.stackexchange.com/questions/141973/how-do-you-achieve-a-numeric-versioning-scheme-with-git
@@ -95,7 +95,7 @@ namespace UnityBuilderAction.Versioning
       return Run(@"describe --tags --long --match ""v[0-9]*""");
 
       // Todo - implement split function based on this more complete query
-      return Run(@"git describe --long --tags --dirty --always");
+      // return Run(@"describe --long --tags --dirty --always");
     }
 
     /// <summary>

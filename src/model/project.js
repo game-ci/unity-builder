@@ -4,7 +4,7 @@ import Action from './action';
 
 class Project {
   static get relativePath() {
-    const { projectPath } = Input.getFromUser();
+    const projectPath = Input.getFromUser().then(result => result.projectPath);
 
     return `${projectPath}`;
   }

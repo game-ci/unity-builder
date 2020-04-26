@@ -12,6 +12,6 @@ describe('Index', () => {
     'Project',
     'Unity',
   ])('exports %s', exportedModule => {
-    expect(typeof Index[exportedModule]).toStrictEqual('function');
+    expect(Index[exportedModule]).toBeEitherAFunctionOrAnObject();
   });
 });
