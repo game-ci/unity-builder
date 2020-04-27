@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import { exec } from '@actions/exec';
 import NotImplementedException from './error/not-implemented-exception';
 import ValidationError from './error/validation-error';
 import System from './system';
@@ -13,7 +12,8 @@ export default class Versioning {
    * Get the branch name of the (related) branch
    */
   static get branch() {
-    return this.headRef || this.ref.slice(11);
+    // Todo - use optional chaining (https://github.com/zeit/ncc/issues/534)
+    return this.headRef || (this.ref && this.ref.slice(11));
   }
 
   /**
@@ -113,22 +113,23 @@ export default class Versioning {
    */
   static async parseSemanticVersion() {
     const description = await this.getVersionDescription();
-    const [match, tag, commits, hash] = this.descriptionRegex.exec(description);
 
-    if (!match) {
-      throw new Error(`Failed to parse git describe output: "${description}"`);
+    try {
+      const [match, tag, commits, hash] = this.descriptionRegex.exec(description);
+
+      return {
+        match,
+        tag,
+        commits,
+        hash,
+      };
+    } catch (error) {
+      throw new Error(`Failed to parse git describe output: "${description}".`);
     }
-
-    return {
-      match,
-      tag,
-      commits,
-      hash,
-    };
   }
 
   static async fetchAll() {
-    await exec('git', ['fetch', '--all']);
+    await System.run('git', ['fetch', '--all']);
   }
 
   /**
