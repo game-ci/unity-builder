@@ -1,11 +1,12 @@
-import { mockDetermineVersion } from './__mocks__/versioning';
 import Input from './input';
+import Versioning from './versioning';
 
-jest.restoreAllMocks();
-jest.mock('./versioning');
+const determineVersion = jest
+  .spyOn(Versioning, 'determineVersion')
+  .mockImplementation(() => '1.3.37');
 
-beforeEach(() => {
-  mockDetermineVersion.mockClear();
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
 describe('Input', () => {
@@ -18,11 +19,9 @@ describe('Input', () => {
       await expect(typeof (await Input.getFromUser())).toStrictEqual('object');
     });
 
-    it.skip('calls version generator once', async () => {
+    it('calls version generator once', async () => {
       await Input.getFromUser();
-
-      // Todo - make sure the versioning mock is actually hit after restoreAllMocks is used.
-      expect(mockDetermineVersion).toHaveBeenCalledTimes(1);
+      expect(determineVersion).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -1,5 +1,7 @@
 import Project from './project';
 
+jest.mock('./input');
+
 describe('Platform', () => {
   describe('relativePath', () => {
     it('does not throw', () => {
