@@ -44,6 +44,7 @@ describe('Versioning', () => {
     });
 
     it('returns part of Ref when set', () => {
+      jest.spyOn(Versioning, 'headRef', 'get').mockReturnValue(undefined);
       const reference = jest
         .spyOn(Versioning, 'ref', 'get')
         .mockReturnValue('refs/heads/feature-branch-2');
