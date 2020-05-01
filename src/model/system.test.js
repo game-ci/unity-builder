@@ -1,7 +1,10 @@
 import * as core from '@actions/core';
 import System from './system';
 
+jest.spyOn(core, 'debug').mockImplementation(() => {});
 const info = jest.spyOn(core, 'info').mockImplementation(() => {});
+jest.spyOn(core, 'warning').mockImplementation(() => {});
+jest.spyOn(core, 'error').mockImplementation(() => {});
 
 afterEach(() => {
   jest.clearAllMocks();
