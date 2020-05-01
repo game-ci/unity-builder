@@ -129,10 +129,12 @@ export default class Versioning {
   }
 
   /**
-   * Retrieves refs from the configured remote, unshallow (based on actions/checkout@v2+)
+   * Retrieves refs from the configured remote.
+   *
+   * Note: `--all` should not be used, and would break fetching for push event.
    */
   static async fetch() {
-    await System.run('git', ['fetch', '--unshallow']);
+    await System.run('git', ['fetch']);
   }
 
   /**
