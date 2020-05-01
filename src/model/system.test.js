@@ -44,5 +44,13 @@ describe('System', () => {
       expect(info).toHaveBeenCalledTimes(2);
       expect(info).toHaveBeenLastCalledWith('3\n');
     });
+
+    it('allows pipes using buffer', async () => {
+      await expect(
+        System.run('sh', undefined, {
+          input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
+        }),
+      ).resolves.toBeParsableToANumber();
+    });
   });
 });

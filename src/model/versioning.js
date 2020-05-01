@@ -183,18 +183,14 @@ export default class Versioning {
    * Whether or not the repository has any version tags yet.
    */
   static async hasAnyVersionTags() {
-    const numberOfVersionCommits = await System.run('git', [
-      'tag',
-      '--list',
-      '--merged',
-      'HEAD',
-      '|',
-      'grep v[0-9]*',
-      '|',
-      'wc -l',
-    ]);
+    const numberOfCommitsAsString = await System.run('sh', undefined, {
+      input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
+      silent: false,
+    });
 
-    return numberOfVersionCommits !== '0';
+    const numberOfCommits = Number.parseInt(numberOfCommitsAsString, 10);
+
+    return numberOfCommits !== 0;
   }
 
   /**
