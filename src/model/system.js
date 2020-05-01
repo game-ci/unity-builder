@@ -19,7 +19,7 @@ class System {
       },
     };
 
-    const exitCode = await exec(command, arguments_, { ...options, listeners });
+    const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
 
     if (debug !== '') {
       core.debug(debug);
