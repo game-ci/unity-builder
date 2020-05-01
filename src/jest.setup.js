@@ -26,4 +26,24 @@ expect.extend({
       pass,
     };
   },
+
+  toBeParsableToANumber(received) {
+    let pass = false;
+    let errorMessage = '';
+
+    try {
+      Number.parseInt(received, 10);
+      pass = true;
+    } catch (error) {
+      errorMessage = error;
+    }
+
+    const message = () => `Expected ${this.utils.printExpected(received)} to be parsable as a number
+      , but received error: ${this.utils.printReceived(errorMessage)}.`;
+
+    return {
+      message,
+      pass,
+    };
+  },
 });
