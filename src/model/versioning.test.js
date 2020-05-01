@@ -201,6 +201,17 @@ describe('Versioning', () => {
       jest.spyOn(System, 'run').mockResolvedValue(null);
       await expect(Versioning.fetch()).resolves.not.toThrow();
     });
+
+    it('falls back to the second strategy when the first fails', async () => {
+      jest.spyOn(core, 'warning').mockImplementation(() => {});
+      const gitFetch = jest
+        .spyOn(System, 'run')
+        .mockResolvedValue(null)
+        .mockRejectedValueOnce(null);
+
+      await expect(Versioning.fetch()).resolves.not.toThrow();
+      expect(gitFetch).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('generateSemanticVersion', () => {
