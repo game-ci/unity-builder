@@ -77,7 +77,7 @@ export default class Versioning {
    * @See: https://semver.org/
    */
   static async generateSemanticVersion() {
-    await this.fetchAll();
+    await this.fetch();
 
     if (await this.isDirty()) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
@@ -128,8 +128,11 @@ export default class Versioning {
     }
   }
 
-  static async fetchAll() {
-    await System.run('git', ['fetch', '--all']);
+  /**
+   * Retrieves refs from the configured remote, unshallow (based on actions/checkout@v2+)
+   */
+  static async fetch() {
+    await System.run('git', ['fetch', '--unshallow']);
   }
 
   /**
@@ -141,7 +144,14 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return System.run('git', ['describe', '--long', '--tags', '--always', `origin/${this.branch}`]);
+    return System.run('git', [
+      'describe',
+      '--long',
+      '--tags',
+      '--always',
+      '--debug',
+      `origin/${this.branch}`,
+    ]);
   }
 
   /**

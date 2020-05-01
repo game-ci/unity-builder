@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import NotImplementedException from './error/not-implemented-exception';
 import System from './system';
 import Versioning from './versioning';
@@ -194,10 +195,46 @@ describe('Versioning', () => {
     });
   });
 
-  describe('fetchAll', () => {
+  describe('fetch', () => {
     it('awaits the command', async () => {
       jest.spyOn(System, 'run').mockResolvedValue(null);
-      await expect(Versioning.fetchAll()).resolves.not.toThrow();
+      await expect(Versioning.fetch()).resolves.not.toThrow();
+    });
+  });
+
+  describe('generateSemanticVersion', () => {
+    it('returns a proper version from description', async () => {
+      jest.spyOn(System, 'run').mockResolvedValue(null);
+      jest.spyOn(core, 'info').mockImplementation(() => {});
+      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
+      jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
+      jest.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(2);
+      jest.spyOn(Versioning, 'parseSemanticVersion').mockResolvedValue({
+        match: '0.1-2-g1b345678',
+        tag: '0.1',
+        commits: '2',
+        hash: '1b345678',
+      });
+
+      await expect(Versioning.generateSemanticVersion()).resolves.toStrictEqual('0.1.2');
+    });
+
+    it('throws when dirty', async () => {
+      jest.spyOn(System, 'run').mockResolvedValue(null);
+      jest.spyOn(core, 'info').mockImplementation(() => {});
+      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(true);
+      await expect(Versioning.generateSemanticVersion()).rejects.toThrowError();
+    });
+
+    it('falls back to commits only, when no tags are present', async () => {
+      const commits = Math.round(Math.random() * 10);
+      jest.spyOn(System, 'run').mockResolvedValue(null);
+      jest.spyOn(core, 'info').mockImplementation(() => {});
+      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
+      jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(false);
+      jest.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(commits);
+
+      await expect(Versioning.generateSemanticVersion()).resolves.toStrictEqual(`0.0.${commits}`);
     });
   });
 
