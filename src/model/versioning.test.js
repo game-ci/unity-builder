@@ -197,6 +197,7 @@ describe('Versioning', () => {
 
   describe('fetch', () => {
     it('awaits the command', async () => {
+      jest.spyOn(core, 'warning').mockImplementation(() => {});
       jest.spyOn(System, 'run').mockResolvedValue(null);
       await expect(Versioning.fetch()).resolves.not.toThrow();
     });
