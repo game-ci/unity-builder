@@ -78,6 +78,18 @@ describe('Versioning', () => {
     });
   });
 
+  describe('headRef', () => {
+    it('does not throw', () => {
+      expect(() => Versioning.headRef).not.toThrow();
+    });
+  });
+
+  describe('ref', () => {
+    it('does not throw', () => {
+      expect(() => Versioning.ref).not.toThrow();
+    });
+  });
+
   describe('descriptionRegex', () => {
     it('is a valid regex', () => {
       expect(Versioning.descriptionRegex).toBeInstanceOf(RegExp);
