@@ -8,13 +8,13 @@ class System {
     let debug = '';
 
     const listeners = {
-      stdout: dataBuffer => {
+      stdout: (dataBuffer) => {
         result += dataBuffer.toString();
       },
-      stderr: dataBuffer => {
+      stderr: (dataBuffer) => {
         error += dataBuffer.toString();
       },
-      debug: dataString => {
+      debug: (dataString) => {
         debug += dataString.toString();
       },
     };
