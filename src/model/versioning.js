@@ -131,10 +131,17 @@ export default class Versioning {
   /**
    * Retrieves refs from the configured remote.
    *
+   * Fetch unshallow for incomplete repository, but fall back to normal fetch.
+   *
    * Note: `--all` should not be used, and would break fetching for push event.
    */
   static async fetch() {
-    await System.run('git', ['fetch']);
+    try {
+      await System.run('git', ['fetch', '--unshallow']);
+    } catch (error) {
+      core.warning(error);
+      await System.run('git', ['fetch']);
+    }
   }
 
   /**
