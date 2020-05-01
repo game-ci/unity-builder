@@ -1,10 +1,11 @@
+import * as core from '@actions/core';
 import Unity from './unity';
-import Input from './input';
 import Action from './action';
 
 class Project {
   static get relativePath() {
-    const projectPath = Input.getFromUser().then(result => result.projectPath);
+    // Todo - properly use Input for this.
+    const projectPath = core.getInput('projectPath') || '.';
 
     return `${projectPath}`;
   }
