@@ -11,7 +11,7 @@ describe('Index', () => {
     'Platform',
     'Project',
     'Unity',
-  ])('exports %s', exportedModule => {
+  ])('exports %s', (exportedModule) => {
     expect(Index[exportedModule]).toBeEitherAFunctionOrAnObject();
   });
 });

@@ -5,7 +5,7 @@ describe('CommandExecutionError', () => {
     expect(() => new CommandExecutionError()).not.toThrow();
   });
 
-  test.each([1, 'one', { name: '!' }])('Displays title %s', message => {
+  test.each([1, 'one', { name: '!' }])('Displays title %s', (message) => {
     const error = new CommandExecutionError(message);
 
     expect(error.name).toStrictEqual('CommandExecutionError');

@@ -17,6 +17,6 @@ async function action() {
   await Docker.run(builtImage, { workspace, ...buildParameters });
 }
 
-action().catch(error => {
+action().catch((error) => {
   core.setFailed(error.message);
 });

@@ -203,6 +203,6 @@ export default class Versioning {
   static async getTotalNumberOfCommits() {
     const numberOfCommitsAsString = await System.run('git', ['rev-list', '--count', 'HEAD']);
 
-    return parseInt(numberOfCommitsAsString, 10);
+    return Number.parseInt(numberOfCommitsAsString, 10);
   }
 }

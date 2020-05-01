@@ -54,14 +54,14 @@ describe('BuildParameters', () => {
 
       test.each([Platform.types.StandaloneWindows, Platform.types.StandaloneWindows64])(
         'appends exe for %s',
-        targetPlatform => {
+        (targetPlatform) => {
           expect(
             BuildParameters.create({ ...someParameters, targetPlatform }).buildFile,
           ).toStrictEqual(`${someParameters.buildName}.exe`);
         },
       );
 
-      test.each([Platform.types.Android])('appends apk for %s', targetPlatform => {
+      test.each([Platform.types.Android])('appends apk for %s', (targetPlatform) => {
         expect(
           BuildParameters.create({ ...someParameters, targetPlatform }).buildFile,
         ).toStrictEqual(`${someParameters.buildName}.apk`);

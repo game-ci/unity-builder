@@ -12,7 +12,7 @@ class Docker {
       --build-arg IMAGE=${baseImage} \
       --tag ${tag}`;
 
-    await exec(command, null, { silent });
+    await exec(command, undefined, { silent });
 
     return tag;
   }
@@ -70,7 +70,7 @@ class Docker {
         --volume "${workspace}":"/github/workspace" \
         ${image}`;
 
-    await exec(command, null, { silent });
+    await exec(command, undefined, { silent });
   }
 }
 
