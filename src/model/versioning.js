@@ -199,7 +199,11 @@ export default class Versioning {
    * Note: HEAD should not be used, as it may be detached, resulting in an additional count.
    */
   static async getTotalNumberOfCommits() {
-    const numberOfCommitsAsString = await System.run('git', ['rev-list', '--count', this.branch]);
+    const numberOfCommitsAsString = await System.run('git', [
+      'rev-list',
+      '--count',
+      `origin/${this.branch}`,
+    ]);
 
     return Number.parseInt(numberOfCommitsAsString, 10);
   }
