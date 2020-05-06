@@ -40,7 +40,9 @@ class Action {
   static checkCompatibility() {
     const currentPlatform = process.platform;
     if (!Action.supportedPlatforms.includes(currentPlatform)) {
-      throw new Error(`Currently ${currentPlatform}-platform is not supported`);
+      throw new Error(
+        `Selected target build platform: {platform} is incorrect/not supported. Please refer to Unity BuildTarget for a list of available platforms`,
+      );
     }
   }
 }
