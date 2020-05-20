@@ -4,6 +4,11 @@ import ValidationError from './error/validation-error';
 import System from './system';
 
 export default class Versioning {
+  static get projectPath() {
+    // Todo - Unify duplication with Input.js, without async accessor
+    return core.getInput('projectPath') || '.';
+  }
+
   static get strategies() {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
@@ -137,10 +142,10 @@ export default class Versioning {
    */
   static async fetch() {
     try {
-      await System.run('git', ['fetch', '--unshallow']);
+      await this.git(['fetch', '--unshallow']);
     } catch (error) {
       core.warning(error);
-      await System.run('git', ['fetch']);
+      await this.git(['fetch']);
     }
   }
 
@@ -153,7 +158,7 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return System.run('git', [
+    return this.git([
       'describe',
       '--long',
       '--tags',
@@ -167,7 +172,7 @@ export default class Versioning {
    * Returns whether there are uncommitted changes that are not ignored.
    */
   static async isDirty() {
-    const output = await System.run('git', ['status', '--porcelain']);
+    const output = await this.git(['status', '--porcelain']);
 
     return output !== '';
   }
@@ -176,7 +181,7 @@ export default class Versioning {
    * Get the tag if there is one pointing at HEAD
    */
   static async getTag() {
-    return System.run('git', ['tag', '--points-at', 'HEAD']);
+    return this.git(['tag', '--points-at', 'HEAD']);
   }
 
   /**
@@ -199,12 +204,19 @@ export default class Versioning {
    * Note: HEAD should not be used, as it may be detached, resulting in an additional count.
    */
   static async getTotalNumberOfCommits() {
-    const numberOfCommitsAsString = await System.run('git', [
+    const numberOfCommitsAsString = await this.git([
       'rev-list',
       '--count',
       `origin/${this.branch}`,
     ]);
 
     return Number.parseInt(numberOfCommitsAsString, 10);
+  }
+
+  /**
+   * Run git in the specified project path
+   */
+  static async git(arguments_, options = {}) {
+    return System.run('git', arguments_, { cwd: this.projectPath, ...options });
   }
 }
