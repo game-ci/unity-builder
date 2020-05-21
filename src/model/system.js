@@ -19,27 +19,40 @@ class System {
       },
     };
 
-    const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
-
-    if (debug !== '') {
-      core.debug(debug);
-    }
-
-    if (result !== '') {
-      core.info(result);
-    }
-
-    if (error !== '') {
-      core.warning(error);
-    }
-
-    if (exitCode !== 0) {
-      let argumentsString = '';
-      if (Array.isArray(arguments_)) {
-        argumentsString += ` ${arguments_.join(' ')}`;
+    const showOutput = () => {
+      if (debug !== '') {
+        core.debug(debug);
       }
 
-      throw new Error(`Failed to run "${command}${argumentsString}".\n ${error}`);
+      if (result !== '') {
+        core.info(result);
+      }
+
+      if (error !== '') {
+        core.warning(error);
+      }
+    };
+
+    const throwErrorShowing = (message) => {
+      let commandAsString = command;
+      if (Array.isArray(arguments_)) {
+        commandAsString += ` ${arguments_.join(' ')}`;
+      } else if (typeof arguments_ === 'string') {
+        commandAsString += ` ${arguments_}`;
+      }
+
+      throw new Error(`Failed to run "${commandAsString}".\n ${message}`);
+    };
+
+    try {
+      const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
+      showOutput();
+      if (exitCode !== 0) {
+        throwErrorShowing(error);
+      }
+    } catch (inCommandError) {
+      showOutput();
+      throwErrorShowing(inCommandError);
     }
 
     return result;
