@@ -34,7 +34,12 @@ class System {
     }
 
     if (exitCode !== 0) {
-      throw new Error(error);
+      let argumentsString = '';
+      if (Array.isArray(arguments_)) {
+        argumentsString += ` ${arguments_.join(' ')}`;
+      }
+
+      throw new Error(`Failed to run "${command}${argumentsString}".\n ${error}`);
     }
 
     return result;
