@@ -14,10 +14,12 @@ class Input {
     const buildMethod = core.getInput('buildMethod'); // processed in docker file
     const versioningStrategy = core.getInput('versioning') || 'Semantic';
     const specifiedVersion = core.getInput('version') || '';
+    const rawAllowDirtyBuild = core.getInput('allowDirtyBuild') || 'false';
     const customParameters = core.getInput('customParameters') || '';
 
     // Sanitise input
     const projectPath = rawProjectPath.replace(/\/$/, '');
+    const allowDirtyBuild = rawAllowDirtyBuild === 'true' ? 'true' : 'false';
 
     // Parse input
     const buildVersion = await Versioning.determineVersion(versioningStrategy, specifiedVersion);
@@ -31,6 +33,7 @@ class Input {
       buildsPath,
       buildMethod,
       buildVersion,
+      allowDirtyBuild,
       customParameters,
     };
   }
