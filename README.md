@@ -324,6 +324,20 @@ Allows specifying a custom version in the `version` field.
 
 If there is a use case missing from Builder, feel free to create a feature request.
 
+#### allowDirtyBuild
+
+Allows the branch of the build to be dirty, and still generate the build.
+
+```yaml
+- uses: webbertakken/unity-builder@<version>
+  with:
+    allowDirtyBuild: true
+```
+
+Note that it is generally bad practice to modify your branch
+in a CI Pipeline. However there are exceptions where this might
+be needed. (use with care).
+
 #### customParameters
 
 Custom parameters to configure the build.
