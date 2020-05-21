@@ -162,14 +162,8 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return this.git([
-      'describe',
-      '--long',
-      '--tags',
-      '--always',
-      '--debug',
-      `origin/${this.branch}`,
-    ]);
+    const commitIsh = this.getTag() || `origin/${this.branch}`;
+    return this.git(['describe', '--long', '--tags', '--always', '--debug', commitIsh]);
   }
 
   /**
