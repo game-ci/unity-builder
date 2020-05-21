@@ -9,6 +9,13 @@ export default class Versioning {
     return core.getInput('projectPath') || '.';
   }
 
+  static get isDirtyAllowed() {
+    // Todo - Unify duplication with Input.js, without async accessor
+    const allowDirtyBuild = core.getInput('allowDirtyBuild') || 'false';
+
+    return allowDirtyBuild === 'true';
+  }
+
   static get strategies() {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
@@ -84,7 +91,7 @@ export default class Versioning {
   static async generateSemanticVersion() {
     await this.fetch();
 
-    if (await this.isDirty()) {
+    if ((await this.isDirty()) && !this.isDirtyAllowed) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
     }
 
