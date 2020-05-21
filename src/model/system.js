@@ -29,12 +29,12 @@ class System {
       core.info(result);
     }
 
-    if (exitCode !== 0) {
-      throw new Error(error);
-    }
-
     if (error !== '') {
       core.warning(error);
+    }
+
+    if (exitCode !== 0) {
+      throw new Error(error);
     }
 
     return result;
