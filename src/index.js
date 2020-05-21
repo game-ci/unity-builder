@@ -1,4 +1,4 @@
-import { Action, BuildParameters, Cache, Docker, Input, ImageTag } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag } from './model';
 
 const core = require('@actions/core');
 
@@ -7,7 +7,8 @@ async function action() {
   Cache.verify();
 
   const { dockerfile, workspace, actionFolder } = Action;
-  const buildParameters = BuildParameters.create(await Input.getFromUser());
+
+  const buildParameters = await BuildParameters.create();
   const baseImage = new ImageTag(buildParameters);
 
   // Build docker image
