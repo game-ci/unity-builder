@@ -48,11 +48,11 @@ class System {
       const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
       showOutput();
       if (exitCode !== 0) {
-        throwErrorShowing(error);
+        throwErrorShowing(`Command returned non-zero exit code.\nError: ${error}`);
       }
     } catch (inCommandError) {
       showOutput();
-      throwErrorShowing(inCommandError);
+      throwErrorShowing(`In-command error caught: ${inCommandError}`);
     }
 
     return result;

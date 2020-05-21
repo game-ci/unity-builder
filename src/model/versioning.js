@@ -148,7 +148,7 @@ export default class Versioning {
     try {
       await this.git(['fetch', '--unshallow']);
     } catch (error) {
-      core.warning(error);
+      core.warning(`Fetch --unshallow caught: ${error}`);
       await this.git(['fetch']);
     }
   }
