@@ -1,19 +1,16 @@
 import * as core from '@actions/core';
 import NotImplementedException from './error/not-implemented-exception';
 import ValidationError from './error/validation-error';
+import Input from './input';
 import System from './system';
 
 export default class Versioning {
   static get projectPath() {
-    // Todo - Unify duplication with Input.js, without async accessor
-    return core.getInput('projectPath') || '.';
+    return Input.projectPath;
   }
 
   static get isDirtyAllowed() {
-    // Todo - Unify duplication with Input.js, without async accessor
-    const allowDirtyBuild = core.getInput('allowDirtyBuild') || 'false';
-
-    return allowDirtyBuild === 'true';
+    return Input.allowDirtyBuild === 'true';
   }
 
   static get strategies() {
