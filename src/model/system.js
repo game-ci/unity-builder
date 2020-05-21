@@ -33,7 +33,7 @@ class System {
       }
     };
 
-    const throwErrorShowing = (message) => {
+    const throwContextualError = (message) => {
       let commandAsString = command;
       if (Array.isArray(arguments_)) {
         commandAsString += ` ${arguments_.join(' ')}`;
@@ -48,11 +48,11 @@ class System {
       const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
       showOutput();
       if (exitCode !== 0) {
-        throwErrorShowing(`Command returned non-zero exit code.\nError: ${error}`);
+        throwContextualError(`Command returned non-zero exit code.\nError: ${error}`);
       }
     } catch (inCommandError) {
       showOutput();
-      throwErrorShowing(`In-command error caught: ${inCommandError}`);
+      throwContextualError(`In-command error caught: ${inCommandError}`);
     }
 
     return result;
