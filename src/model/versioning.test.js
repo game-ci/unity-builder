@@ -90,6 +90,16 @@ describe('Versioning', () => {
     });
   });
 
+  describe('isDirtyAllowed', () => {
+    it('does not throw', () => {
+      expect(() => Versioning.isDirtyAllowed).not.toThrow();
+    });
+
+    it('returns false by default', () => {
+      expect(Versioning.isDirtyAllowed).toStrictEqual(false);
+    });
+  });
+
   describe('descriptionRegex', () => {
     it('is a valid regex', () => {
       expect(Versioning.descriptionRegex).toBeInstanceOf(RegExp);
