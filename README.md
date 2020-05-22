@@ -51,7 +51,7 @@ your license file and add it as a secret.
 Then, define the build step as follows:
 
 ```yaml
-- uses: webbertakken/unity-builder@v0.11
+- uses: webbertakken/unity-builder@<version>
   env:
     UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   with:
@@ -73,7 +73,7 @@ Instead, three variables will need to be set.
 Define the build step as follows:
 
 ```yaml
-- uses: webbertakken/unity-builder@v0.11
+- uses: webbertakken/unity-builder@<version>
   env:
     UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
     UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -177,7 +177,7 @@ jobs:
           restore-keys: |
             Library-${{ matrix.projectPath }}-
             Library-
-      - uses: webbertakken/unity-builder@v0.11
+      - uses: webbertakken/unity-builder@<version>
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
@@ -255,33 +255,7 @@ _**default:** Built-in script that will run a build out of the box._
 
 #### versioning
 
-The versioning strategy to use.
-
-Strategies only work when no custom buildMethod is specified.
-
-_**required:** `false`_
-_**default:** `Auto`_
-
-#### _These are the available strategies:_
-
-##### None
-
-No version will be set by Builder.
-
-```yaml
-- uses: webbertakken/unity-builder@<version>
-  with:
-    versioning: None
-```
-
-Note that the version set in the project will be used instead.
-
-##### Semantic (default)
-
-Builder automatically generates a version based on [semantic versioning](https://semver.org/) out of the box.
-
-The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.  
-The latest tag dictates `<major>.<minor>` and the number of commits since that tag is used in `<patch>`.
+Configure a specific versioning strategy
 
 ```yaml
 - uses: webbertakken/unity-builder@<version>
@@ -289,40 +263,38 @@ The latest tag dictates `<major>.<minor>` and the number of commits since that t
     versioning: Semantic
 ```
 
-This strategy works well for the following reasons:
+Find the available strategies below:
 
-- All builds have their unique version
-- No version related commits are created
-- No knowledge of git or versioning is required
-- Developer keeps control over `major` and `minor` versions using tags.
-- Zero configuration; It works out of the box
+##### Semantic
 
-##### Tag
+Versioning out of the box! **(recommended)**
 
-Uses the tag that points at `HEAD` as the version.
+> Compatible with **all platforms**.  
+> Does **not** modify your repository.  
+> Requires **zero configuration**.
 
-```yaml
-- uses: webbertakken/unity-builder@<version>
-  with:
-    versioning: Tag
-```
+How it works:
 
-This strategy works well when using a pipeline that specifically runs for tags.
+> Generates a version based on [semantic versioning](https://semver.org/).  
+> Follows `<major>.<minor>.<patch>` for example `0.17.2`.  
+> The latest tag dictates `<major>.<minor>` (defaults to 0.0 for no tag).  
+> The number of commits (since the last tag, if any) is used for `<patch>`.
 
-The tag must be a version tag.
+No configuration required.
 
 ##### Custom
 
-Allows specifying a custom version in the `version` field.
+Allows specifying a custom version in the `version` field. **(advanced users)**
 
-```yaml
-- uses: webbertakken/unity-builder@<version>
-  with:
-    versioning: Custom
-    version: <some_version>
-```
+> This strategy is useful when your project or pipeline has some kind of orchestration
+> that determines the versions.
 
-If there is a use case missing from Builder, feel free to create a feature request.
+##### None
+
+No version will be set by Builder. **(not recommended)**
+
+> Not recommended unless you generate a new version in a pre-commit hook. Manually
+> setting versions is error-prone.
 
 #### allowDirtyBuild
 
