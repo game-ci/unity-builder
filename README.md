@@ -1,7 +1,6 @@
 # Unity - Builder
 
 [![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg?event=push&branch=master)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+event%3Apush+workflow%3A%22Actions+%F0%9F%98%8E%22)
-[![snyk - known vulnerabilities](https://snyk.io/test/github/webbertakken/unity-builder/badge.svg)](https://snyk.io/test/github/webbertakken/unity-builder)
 [![lgtm - code quality](https://img.shields.io/lgtm/grade/javascript/g/webbertakken/unity-builder.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/webbertakken/unity-builder/context:javascript)
 [![codecov - test coverage](https://codecov.io/gh/webbertakken/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/webbertakken/unity-builder)
 
