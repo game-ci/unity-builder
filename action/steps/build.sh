@@ -123,6 +123,11 @@ else
   echo "Build failed, with exit code $BUILD_EXIT_CODE";
 fi
 
+# Add permissions to make app runnable
+if [[ "$BUILD_TARGET" == "StandaloneOSX" ]]; then
+  chmod +x $BUILD_PATH_FULL/StandaloneOSX.app/Contents/MacOS/*
+fi
+
 #
 # Results
 #
