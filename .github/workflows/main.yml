@@ -49,7 +49,7 @@ jobs:
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - iOS # Build an iOS player.
           #          - Android # Build an Android .apk standalone app.
-          - WebGL # WebGL.
+          #          - WebGL # WebGL.
           #          - WSAPlayer # Build an Windows Store Apps player.
           #          - PS4 # Build a PS4 Standalone.
           #          - XboxOne # Build a Xbox One Standalone.
