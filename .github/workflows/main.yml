@@ -67,7 +67,7 @@ jobs:
           restore-keys: |
             Library-${{ matrix.projectPath }}-
             Library-
-      - uses: ./
+      - uses: webbertakken/unity-builder@8ae8dbb
         env:
           UNITY_LICENSE: ${{ matrix.license }}
         with:
