@@ -1,6 +1,6 @@
 # Unity - Builder
 
-[![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions%20%F0%9F%98%8E/badge.svg?event=push&branch=master)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+event%3Apush+workflow%3A%22Actions+%F0%9F%98%8E%22)
+[![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions/badge.svg?event=push&branch=master)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+event%3Apush+workflow%3A%22Actions)
 [![lgtm - code quality](https://img.shields.io/lgtm/grade/javascript/g/webbertakken/unity-builder.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/webbertakken/unity-builder/context:javascript)
 [![codecov - test coverage](https://codecov.io/gh/webbertakken/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/webbertakken/unity-builder)
 
@@ -268,15 +268,15 @@ Find the available strategies below:
 
 Versioning out of the box! **(recommended)**
 
-> Compatible with **all platforms**.  
-> Does **not** modify your repository.  
+> Compatible with **all platforms**.
+> Does **not** modify your repository.
 > Requires **zero configuration**.
 
 How it works:
 
-> Generates a version based on [semantic versioning](https://semver.org/).  
-> Follows `<major>.<minor>.<patch>` for example `0.17.2`.  
-> The latest tag dictates `<major>.<minor>` (defaults to 0.0 for no tag).  
+> Generates a version based on [semantic versioning](https://semver.org/).
+> Follows `<major>.<minor>.<patch>` for example `0.17.2`.
+> The latest tag dictates `<major>.<minor>` (defaults to 0.0 for no tag).
 > The number of commits (since the last tag, if any) is used for `<patch>`.
 
 No configuration required.

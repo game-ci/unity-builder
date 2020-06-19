@@ -1,4 +1,4 @@
-name: Actions 😎
+name: Actions
 
 on:
   pull_request: {}
@@ -48,7 +48,7 @@ jobs:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - iOS # Build an iOS player.
-          #          - Android # Build an Android .apk standalone app.
+          - Android # Build an Android .apk.
           #          - WebGL # WebGL.
           #          - WSAPlayer # Build an Windows Store Apps player.
           #          - PS4 # Build a PS4 Standalone.
