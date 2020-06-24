@@ -25,7 +25,7 @@ describe('Docker', () => {
     const parameters = {
       workspace: Action.rootFolder,
       projectPath: `${Action.rootFolder}/test-project`,
-      buildName: 'someBulidName',
+      buildName: 'someBuildName',
       buildsPath: 'build',
       method: '',
     };

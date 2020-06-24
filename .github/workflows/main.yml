@@ -74,6 +74,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          androidVersionCode: ${{ github.run_number }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
       - uses: actions/upload-artifact@v1
         with:

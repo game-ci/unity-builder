@@ -295,6 +295,12 @@ No version will be set by Builder. **(not recommended)**
 > Not recommended unless you generate a new version in a pre-commit hook. Manually
 > setting versions is error-prone.
 
+#### androidVersionCode
+
+Configure the android `versionCode`.
+
+When not specified, the version code is generated from the version using the `major * 1000000 + minor * 1000 + patch` scheme;
+
 #### allowDirtyBuild
 
 Allows the branch of the build to be dirty, and still generate the build.

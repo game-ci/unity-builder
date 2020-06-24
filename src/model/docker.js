@@ -29,6 +29,7 @@ class Docker {
       buildMethod,
       buildVersion,
       customParameters,
+      androidVersionCode,
     } = parameters;
 
     const command = `docker run \
@@ -47,6 +48,7 @@ class Docker {
         --env BUILD_FILE="${buildFile}" \
         --env BUILD_METHOD="${buildMethod}" \
         --env VERSION="${buildVersion}" \
+        --env ANDROID_VERSION_CODE="${androidVersionCode}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
         --env HOME=/github/home \
         --env GITHUB_REF \

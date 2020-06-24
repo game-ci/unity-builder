@@ -30,6 +30,22 @@ describe('BuildParameters', () => {
       );
     });
 
+    it('returns the android version code with provided input', async () => {
+      const mockValue = '42';
+      jest.spyOn(Input, 'androidVersionCode', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidVersionCode: mockValue }),
+      );
+    });
+
+    it('returns the android version code from version by default', async () => {
+      const mockValue = '';
+      jest.spyOn(Input, 'androidVersionCode', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidVersionCode: 1003037 }),
+      );
+    });
+
     it('returns the platform', async () => {
       const mockValue = 'somePlatform';
       jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(mockValue);

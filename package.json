@@ -10,12 +10,14 @@
     "prebuild": "yarn",
     "build": "ncc build src --out action --minify",
     "lint": "prettier --check \"src/**/*.js\" && eslint src",
+    "format": "prettier --write \"src/**/*.js\"",
     "test": "jest"
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/exec": "1.0.4",
-    "@actions/github": "^2.1.1"
+    "@actions/github": "^2.1.1",
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",

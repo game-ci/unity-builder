@@ -118,6 +118,19 @@ describe('Input', () => {
     });
   });
 
+  describe('androidVersionCode', () => {
+    it('defaults to null', () => {
+      expect(Input.androidVersionCode).toBeFalsy();
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = '42';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidVersionCode).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('allowDirtyBuild', () => {
     it('returns the default value', () => {
       expect(Input.allowDirtyBuild).toStrictEqual('false');

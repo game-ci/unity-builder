@@ -1,3 +1,4 @@
+import AndroidVersioning from './android-versioning';
 import Input from './input';
 import Platform from './platform';
 import Versioning from './versioning';
@@ -10,6 +11,11 @@ class BuildParameters {
       Input.specifiedVersion,
     );
 
+    const androidVersionCode = AndroidVersioning.determineVersionCode(
+      buildVersion,
+      Input.androidVersionCode,
+    );
+
     return {
       version: Input.unityVersion,
       platform: Input.targetPlatform,
@@ -19,6 +25,7 @@ class BuildParameters {
       buildFile,
       buildMethod: Input.buildMethod,
       buildVersion,
+      androidVersionCode,
       customParameters: Input.customParameters,
     };
   }
