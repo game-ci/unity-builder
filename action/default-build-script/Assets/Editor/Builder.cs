@@ -28,6 +28,7 @@ namespace UnityBuilderAction
 
       // Set version for this build
       VersionApplicator.SetVersion(options["version"]);
+      VersionApplicator.SetAndroidVersionCode(options["androidVersionCode"]);
 
       // Perform build
       BuildReport buildReport = BuildPipeline.BuildPlayer(buildOptions);

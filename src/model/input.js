@@ -41,6 +41,10 @@ class Input {
     return core.getInput('version') || '';
   }
 
+  static get androidVersionCode() {
+    return core.getInput('androidVersionCode');
+  }
+
   static get allowDirtyBuild() {
     const input = core.getInput('allowDirtyBuild') || 'false';
 

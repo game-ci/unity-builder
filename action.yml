@@ -26,6 +26,14 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
+  versioning:
+    required: false
+    default: 'Semantic'
+    description: 'The versioning scheme to use when building the project'
+  androidVersionCode:
+    required: false
+    default: ''
+    description: 'The android versionCode'
 outputs: {}
 branding:
   icon: 'box'

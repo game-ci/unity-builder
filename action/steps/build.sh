@@ -109,8 +109,8 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -customBuildTarget "$BUILD_TARGET" \
     -customBuildPath "$CUSTOM_BUILD_PATH" \
     -executeMethod "$BUILD_METHOD" \
-    -versioning "$VERSIONING" \
     -version "$VERSION" \
+    -androidVersionCode "$ANDROID_VERSION_CODE" \
     $CUSTOM_PARAMETERS
 
 # Catch exit code
