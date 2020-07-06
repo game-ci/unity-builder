@@ -38,6 +38,30 @@ inputs:
     required: false
     default: ''
     description: 'The android versionCode'
+  androidAppBundle:
+    required: false
+    default: false
+    description: 'Whether to build .aab instead of .apk'
+  androidKeystoreName:
+    required: false
+    default: ''
+    description: 'The android keystoreName'
+  androidKeystoreBase64:
+    required: false
+    default: ''
+    description: 'The base64 contents of the android keystore file'
+  androidKeystorePass:
+    required: false
+    default: ''
+    description: 'The android keystorePass'
+  androidKeyaliasName:
+    required: false
+    default: ''
+    description: 'The android keyaliasName'
+  androidKeyaliasPass:
+    required: false
+    default: ''
+    description: 'The android keyaliasPass'
   customParameters:
     required: false
     default: ''

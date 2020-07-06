@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 
 namespace UnityBuilderAction.Input
@@ -7,6 +8,7 @@ namespace UnityBuilderAction.Input
   public class ArgumentsParser
   {
     static string EOL = Environment.NewLine;
+    static readonly string[] Secrets = { "androidKeystorePass", "androidKeyaliasName", "androidKeyaliasPass" };
 
     public static Dictionary<string, string> GetValidatedOptions()
     {
@@ -66,9 +68,11 @@ namespace UnityBuilderAction.Input
         // Parse optional value
         bool flagHasValue = next < args.Length && !args[next].StartsWith("-");
         string value = flagHasValue ? args[next].TrimStart('-') : "";
+        bool secret = Secrets.Contains(flag);
+        string displayValue = secret ? "*HIDDEN*" : "\"" + value + "\"";
 
         // Assign
-        Console.WriteLine($"Found flag \"{flag}\" with value \"{value}\".");
+        Console.WriteLine($"Found flag \"{flag}\" with value {displayValue}.");
         providedArguments.Add(flag, value);
       }
     }

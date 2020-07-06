@@ -131,6 +131,89 @@ describe('Input', () => {
     });
   });
 
+  describe('androidAppBundle', () => {
+    it('returns the default value', () => {
+      expect(Input.androidAppBundle).toStrictEqual('false');
+    });
+
+    it('returns true when string true is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.androidAppBundle).toStrictEqual('true');
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.androidAppBundle).toStrictEqual('false');
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('androidKeystoreName', () => {
+    it('returns the default value', () => {
+      expect(Input.androidKeystoreName).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'keystore.keystore';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidKeystoreName).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('androidKeystoreBase64', () => {
+    it('returns the default value', () => {
+      expect(Input.androidKeystoreBase64).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'secret';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidKeystoreBase64).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('androidKeystorePass', () => {
+    it('returns the default value', () => {
+      expect(Input.androidKeystorePass).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'secret';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidKeystorePass).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('androidKeyaliasName', () => {
+    it('returns the default value', () => {
+      expect(Input.androidKeyaliasName).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'secret';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidKeyaliasName).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('androidKeyaliasPass', () => {
+    it('returns the default value', () => {
+      expect(Input.androidKeyaliasPass).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'secret';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidKeyaliasPass).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('allowDirtyBuild', () => {
     it('returns the default value', () => {
       expect(Input.allowDirtyBuild).toStrictEqual('false');

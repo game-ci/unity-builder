@@ -63,6 +63,16 @@ else
 fi
 
 #
+# Create Android keystore, if needed
+#
+if [[ -z $ANDROID_KEYSTORE_NAME || -z $ANDROID_KEYSTORE_BASE64 ]]; then
+  echo "Not creating Android keystore."
+else
+  echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_NAME"
+  echo "Created Android keystore."
+fi
+
+#
 # Display custom parameters
 #
 echo "Using custom parameters $CUSTOM_PARAMETERS."
@@ -111,6 +121,10 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
     -executeMethod "$BUILD_METHOD" \
     -version "$VERSION" \
     -androidVersionCode "$ANDROID_VERSION_CODE" \
+    -androidKeystoreName "$ANDROID_KEYSTORE_NAME" \
+    -androidKeystorePass "$ANDROID_KEYSTORE_PASS" \
+    -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
+    -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
     $CUSTOM_PARAMETERS
 
 # Catch exit code
