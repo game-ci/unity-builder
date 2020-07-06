@@ -103,8 +103,18 @@ describe('BuildParameters', () => {
     test.each([Platform.types.Android])('appends apk for %s', async (targetPlatform) => {
       jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
+      jest.spyOn(Input, 'androidAppBundle', 'get').mockReturnValue(false);
       await expect(BuildParameters.create()).resolves.toEqual(
         expect.objectContaining({ buildFile: `${targetPlatform}.apk` }),
+      );
+    });
+
+    test.each([Platform.types.Android])('appends aab for %s', async (targetPlatform) => {
+      jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
+      jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
+      jest.spyOn(Input, 'androidAppBundle', 'get').mockReturnValue(true);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ buildFile: `${targetPlatform}.aab` }),
       );
     });
 
@@ -113,6 +123,46 @@ describe('BuildParameters', () => {
       jest.spyOn(Input, 'buildMethod', 'get').mockReturnValue(mockValue);
       await expect(BuildParameters.create()).resolves.toEqual(
         expect.objectContaining({ buildMethod: mockValue }),
+      );
+    });
+
+    it('returns the android keystore name', async () => {
+      const mockValue = 'keystore.keystore';
+      jest.spyOn(Input, 'androidKeystoreName', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidKeystoreName: mockValue }),
+      );
+    });
+
+    it('returns the android keystore base64-encoded content', async () => {
+      const mockValue = 'secret';
+      jest.spyOn(Input, 'androidKeystoreBase64', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidKeystoreBase64: mockValue }),
+      );
+    });
+
+    it('returns the android keystore pass', async () => {
+      const mockValue = 'secret';
+      jest.spyOn(Input, 'androidKeystorePass', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidKeystorePass: mockValue }),
+      );
+    });
+
+    it('returns the android keyalias name', async () => {
+      const mockValue = 'secret';
+      jest.spyOn(Input, 'androidKeyaliasName', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidKeyaliasName: mockValue }),
+      );
+    });
+
+    it('returns the android keyalias pass', async () => {
+      const mockValue = 'secret';
+      jest.spyOn(Input, 'androidKeyaliasPass', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidKeyaliasPass: mockValue }),
       );
     });
 

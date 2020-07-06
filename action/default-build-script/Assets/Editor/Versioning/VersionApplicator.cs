@@ -21,6 +21,7 @@ namespace UnityBuilderAction.Versioning
     static void Apply(string version)
     {
       PlayerSettings.bundleVersion = version;
+      PlayerSettings.macOS.buildNumber = version;
     }
   }
 }
