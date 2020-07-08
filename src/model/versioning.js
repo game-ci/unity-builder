@@ -13,10 +13,6 @@ export default class Versioning {
     return Input.allowDirtyBuild === 'true';
   }
 
-  static get logDiffIfDirty() {
-    return Input.logDiffIfDirty === 'true';
-  }
-
   static get strategies() {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
@@ -48,6 +44,20 @@ export default class Versioning {
    */
   static get sha() {
     return process.env.GITHUB_SHA;
+  }
+
+  /**
+   * Maximum number of lines to print when logging the git diff
+   */
+  static get maxDiffLines() {
+    return 60;
+  }
+
+  /**
+   * Log up to maxDiffLines of the git diff.
+   */
+  static async logDiff() {
+    this.git(['--no-pager', 'diff', '|', 'head', '-n', this.maxDiffLines.toString()]);
   }
 
   /**
@@ -98,6 +108,8 @@ export default class Versioning {
    */
   static async generateSemanticVersion() {
     await this.fetch();
+
+    await this.logDiff();
 
     if ((await this.isDirty()) && !this.isDirtyAllowed) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
@@ -182,12 +194,7 @@ export default class Versioning {
   static async isDirty() {
     const output = await this.git(['status', '--porcelain']);
 
-    const dirty = output !== '';
-    if (dirty && this.logDiffIfDirty) {
-      await this.git(['--no-pager', 'diff']);
-    }
-
-    return dirty;
+    return output !== '';
   }
 
   /**
