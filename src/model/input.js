@@ -77,6 +77,12 @@ class Input {
     return input === 'true' ? 'true' : 'false';
   }
 
+  static get logDiffIfDirty() {
+    const input = core.getInput('logDiffIfDirty') || 'false';
+
+    return input === 'true' ? 'true' : 'false';
+  }
+
   static get customParameters() {
     return core.getInput('customParameters') || '';
   }
