@@ -100,6 +100,35 @@ describe('Versioning', () => {
     });
   });
 
+  describe('logDiffIfDirty', () => {
+    it('does not throw', () => {
+      expect(() => Versioning.logDiffIfDirty).not.toThrow();
+    });
+
+    it('returns false by default', () => {
+      expect(Versioning.logDiffIfDirty).toStrictEqual(false);
+    });
+
+    it('does not call git diff if logDiffIfDirty is false', async () => {
+      jest.spyOn(core, 'getInput').mockReturnValue('false');
+      const gitSpy = jest.spyOn(Versioning, 'git').mockReturnValue('');
+      await Versioning.isDirty();
+      expect(gitSpy).toHaveBeenCalledTimes(1);
+      expect(gitSpy).toBeCalledWith(['status', '--porcelain']);
+    });
+
+    it('calls git diff if logDiffIfDirty is true', async () => {
+      jest.spyOn(core, 'getInput').mockReturnValue('true');
+      const gitSpy = jest
+        .spyOn(Versioning, 'git')
+        .mockReturnValue('There is a diff actually! \n M My_Dirty_File.txt');
+      await Versioning.isDirty();
+      expect(gitSpy).toHaveBeenCalledTimes(2);
+      expect(Versioning.git.mock.calls[0][0].indexOf('status')).toBeGreaterThan(-1);
+      expect(Versioning.git.mock.calls[1][0].indexOf('diff')).toBeGreaterThan(-1);
+    });
+  });
+
   describe('descriptionRegex', () => {
     it('is a valid regex', () => {
       expect(Versioning.descriptionRegex).toBeInstanceOf(RegExp);
