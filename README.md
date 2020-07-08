@@ -362,21 +362,6 @@ be needed. (use with care).
 _**required:** `false`_
 _**default:** false_
 
-#### logDiffIfDirty
-
-Print a summary of changed files if the branch is determined to be dirty.
-This can be useful in debugging the reason your project files changed unexpectedly.
-This option works independently of `allowDirtyBuild`.
-
-```yaml
-- uses: webbertakken/unity-builder@<version>
-  with:
-    logDiffIfDirty: true
-```
-
-_**required:** `false`_
-_**default:** false_
-
 #### customParameters
 
 Custom parameters to configure the build.
