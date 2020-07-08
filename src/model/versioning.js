@@ -13,6 +13,10 @@ export default class Versioning {
     return Input.allowDirtyBuild === 'true';
   }
 
+  static get logDiffIfDirty() {
+    return Input.logDiffIfDirty === 'true';
+  }
+
   static get strategies() {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
@@ -178,7 +182,12 @@ export default class Versioning {
   static async isDirty() {
     const output = await this.git(['status', '--porcelain']);
 
-    return output !== '';
+    const dirty = output !== '';
+    if (dirty && this.logDiffIfDirty) {
+      await this.git(['--no-pager', 'diff']);
+    }
+
+    return dirty;
   }
 
   /**
