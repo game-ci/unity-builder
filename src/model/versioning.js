@@ -50,7 +50,7 @@ export default class Versioning {
    * Maximum number of lines to print when logging the git diff
    */
   static get maxDiffLines() {
-    return 5; // TODO: testing only, revert
+    return 60;
   }
 
   /**
@@ -60,7 +60,7 @@ export default class Versioning {
     const diffCommand = `git --no-pager diff | head -n ${this.maxDiffLines.toString()}`;
     await System.run('sh', undefined, {
       input: Buffer.from(diffCommand),
-      silent: false,
+      silent: true,
     });
   }
 
