@@ -111,15 +111,14 @@ describe('Versioning', () => {
         .spyOn(Versioning, 'parseSemanticVersion')
         .mockResolvedValue({ tag: 'mocktag', commits: 'abcdef', hash: '75822BCAF' });
       const logDiffSpy = jest.spyOn(Versioning, 'logDiff');
-      const gitSpy = jest
-        .spyOn(Versioning, 'git')
-        .mockReturnValue('There is a diff actually! \n M My_Dirty_File.txt');
+      const gitSpy = jest.spyOn(System, 'run').mockResolvedValue({});
 
       await Versioning.generateSemanticVersion();
 
       expect(logDiffSpy).toHaveBeenCalledTimes(1);
       expect(gitSpy).toHaveBeenCalledTimes(1);
-      expect(Versioning.git.mock.calls[0][0].indexOf('diff')).toBeGreaterThan(-1);
+      const issuedCommand = System.run.mock.calls[0][2].input.toString();
+      expect(issuedCommand.indexOf('diff')).toBeGreaterThan(-1);
     });
   });
 
