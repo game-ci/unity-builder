@@ -57,7 +57,10 @@ export default class Versioning {
    * Log up to maxDiffLines of the git diff.
    */
   static async logDiff() {
-    this.git(['--no-pager', 'diff', '|', 'head', '-n', this.maxDiffLines.toString()]);
+    await System.run('sh', undefined, {
+      input: Buffer.from(`git --no-pager diff | head -n ${this.maxDiffLines.toString()}`),
+      silent: false,
+    });
   }
 
   /**
