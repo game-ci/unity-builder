@@ -107,7 +107,7 @@ jobs:
       - uses: frostebite/File-To-Base64@master
         id: read-k8s-config
         with:
-          filePath: ~/.kube/config
+          filePath: ${{ github.workspace }}/.kube/config
       - uses: ./
         id: k8s-unity-build
         env:
