@@ -119,7 +119,7 @@ jobs:
           cp $HOME/.kube/config ./kubeconfig
       - uses: frostebite/kubernetes-download-pv@master
         with:
-          pv: ${{ steps.k8-unity-build.outputs.kubernetesPVC }}
+          pv: ${{ steps.k8-unity-build.outputs.volume }}
           sourcePath: repo/build/
         env:
           KUBECONFIG: ${{ github.workspace }}/kubeconfig
