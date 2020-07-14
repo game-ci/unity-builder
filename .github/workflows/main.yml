@@ -81,8 +81,8 @@ jobs:
         with:
           name: Build (${{ matrix.unityVersion }})
           path: build
-  kubernetesBuilds:
-    name: K8 build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+  k8sBuilds:
+    name: K8s build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
