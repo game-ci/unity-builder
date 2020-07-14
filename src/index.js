@@ -10,7 +10,7 @@ async function action() {
 
   const buildParameters = await BuildParameters.create();
   const baseImage = new ImageTag(buildParameters);
-  if (buildParameters.kubernetes) {
+  if (buildParameters.kubernetesBase64Config) {
     core.info('Building with Kubernetes');
     await Kubernetes.runBuildJob(buildParameters, baseImage);
   } else {

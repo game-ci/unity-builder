@@ -1,11 +1,16 @@
 const KubeClient = require('kubernetes-client').Client;
 const core = require('@actions/core');
 const base64 = require('base-64');
+const { KubeConfig } = require('kubernetes-client');
+const Request = require('kubernetes-client/backends/request');
 
 class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
     // uses default kubeconfig location/env variable
-    const kubeClient = new KubeClient();
+    const kubeconfig = new KubeConfig();
+    kubeconfig.loadFromString(base64.decode(buildParameters.kubernetesBase64Config));
+    const backend = new Request({ kubeconfig });
+    const kubeClient = new KubeClient(backend);
     await kubeClient.loadSpec();
 
     const buildId = Kubernetes.uuidv4();

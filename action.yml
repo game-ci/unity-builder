@@ -26,10 +26,10 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  kubernetes:
+  kubernetesBase64Config:
     default: ''
     required: false
-    description: 'Use kubernetes to clone the repo and run the build this will use kubernetes APPLICATION DEFAULT CREDENTIALS to access the current cluster context'
+    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
   githubToken:
     default: ''
     required: false
