@@ -118,15 +118,11 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: 2019.3.15f1
-      - run: |
-          cp $HOME/.kube/config ./kubeconfig
       - uses: frostebite/kubernetes-download-pv@master
         with:
           kubernetesBase64Config: ${{ steps.read-k8-config.outputs.base64 }}
-          pv: ${{ steps.k8-unity-build.outputs.volume }}
+          volume: ${{ steps.k8-unity-build.outputs.volume }}
           sourcePath: repo/build/
-        env:
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
       - uses: actions/upload-artifact@v1
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
