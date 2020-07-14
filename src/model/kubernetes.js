@@ -25,9 +25,9 @@ class Kubernetes {
 
     await Kubernetes.createSecret();
     await Kubernetes.createPersistentVolumeClaim();
-    await Kubernetes.createBuildJob();
+    await Kubernetes.scheduleBuildJob();
     await Kubernetes.watchBuildJobUntilFinished();
-    await Kubernetes.cleanupJob();
+    await Kubernetes.cleanup();
 
     core.setOutput('kubernetesPVC', pvcName);
   }
@@ -71,19 +71,21 @@ class Kubernetes {
     await this.kubeClient.api.v1
       .namespaces('default')
       .persistentvolumeclaims.post({ body: pvcManifest });
-    let ready = false;
-    while (!ready) {
-      // eslint-disable-next-line no-await-in-loop
-      const queryResult = await this.kubeClient.api.v1
-        .namespaces('default')
-        .persistentvolumeclaims(this.pvcName)
-        .get();
-      ready = queryResult.body.status.phase !== 'Pending';
-    }
-    core.info('PVC created');
+    await Kubernetes.watchBuildJobUntilFinished();
+    core.info('Persistent Volume ready for claims');
   }
 
-  static async createBuildJob() {
+  static async watchPersistentVolumeClaimUntilReady() {
+    const queryResult = await this.kubeClient.api.v1
+      .namespaces('default')
+      .persistentvolumeclaims(this.pvcName)
+      .get();
+    if (queryResult.body.status.phase === 'Pending') {
+      await Kubernetes.watchPersistentVolumeClaimUntilReady();
+    }
+  }
+
+  static async scheduleBuildJob() {
     core.info('Creating build job');
     const jobManifest = {
       apiVersion: 'batch/v1',
@@ -265,10 +267,6 @@ class Kubernetes {
       }
     }
 
-    if (!podname) {
-      core.error('no pods to stream logs from found');
-    }
-
     core.info(`Watching build job ${podname}`);
     let logQueryTime;
     let complete = false;
@@ -311,7 +309,7 @@ class Kubernetes {
     }
   }
 
-  static async cleanupJob() {
+  static async cleanup() {
     await this.kubeClient.apis.batch.v1.namespaces('default').jobs(this.jobName).delete();
     await this.kubeClient.api.v1.namespaces('default').secrets(this.secretName).delete();
   }
