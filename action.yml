@@ -31,6 +31,7 @@ inputs:
     required: false
     description: 'Use kubernetes to clone the repo and run the build this will use kubernetes APPLICATION DEFAULT CREDENTIALS to access the current cluster context'
   githubToken:
+    default: ''
     required: false
     description: 'GitHub token for cloning, only needed when kubeconfig is used.'
   versioning:
