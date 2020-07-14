@@ -1,5 +1,5 @@
-import {core} from '@actions/core'
-import {base64} from 'base-64'
+import { core } from '@actions/core'
+import { base64 } from 'base-64'
 import KubeConfig from 'kubernetes-client'
 import Client from 'kubernetes-client';
 import Request from 'kubernetes-client/backends/request'
