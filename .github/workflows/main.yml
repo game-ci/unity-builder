@@ -105,7 +105,7 @@ jobs:
             --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
-          kubeConfig=$(cat $KUBECONFIG | base64 -w0)
+          kubeConfig=$(cat ~/.kube/config | base64 -w0)
           echo "::set-output name=kubeConfig::$kubeConfig"
       - uses: ./
         id: k8s-unity-build
