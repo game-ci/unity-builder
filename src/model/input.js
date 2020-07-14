@@ -80,6 +80,14 @@ class Input {
   static get customParameters() {
     return core.getInput('customParameters') || '';
   }
+
+  static get kubeConfig() {
+    return core.getInput('kubeConfig') || '';
+  }
+
+  static get githubToken() {
+    return core.getInput('githubToken') || false;
+  }
 }
 
 export default Input;
