@@ -26,7 +26,7 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  kubernetesBase64Config:
+  kubeConfig:
     default: ''
     required: false
     description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'

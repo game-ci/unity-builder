@@ -81,8 +81,8 @@ class Input {
     return core.getInput('customParameters') || '';
   }
 
-  static get kubernetesBase64Config() {
-    return core.getInput('kubernetesBase64Config') || false;
+  static get kubeConfig() {
+    return core.getInput('kubeConfig') || '';
   }
 
   static get githubToken() {

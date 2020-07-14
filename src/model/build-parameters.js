@@ -36,7 +36,7 @@ class BuildParameters {
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
       customParameters: Input.customParameters,
-      kubernetesBase64Config: Input.kubernetesBase64Config,
+      kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
     };
   }

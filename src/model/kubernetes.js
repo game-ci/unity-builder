@@ -8,7 +8,7 @@ class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
     // uses default kubeconfig location/env variable
     const kubeconfig = new KubeConfig();
-    kubeconfig.loadFromString(base64.decode(buildParameters.kubernetesBase64Config));
+    kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
     const backend = new Request({ kubeconfig });
     const kubeClient = new KubeClient(backend);
     await kubeClient.loadSpec();
