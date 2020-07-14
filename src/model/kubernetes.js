@@ -1,8 +1,8 @@
-const KubeClient = require('kubernetes-client').Client;
-const core = require('@actions/core');
-const base64 = require('base-64');
-const { KubeConfig } = require('kubernetes-client');
-const Request = require('kubernetes-client/backends/request');
+import {core} from '@actions/core'
+import {base64} from 'base-64'
+import KubeConfig from 'kubernetes-client'
+import Client from 'kubernetes-client';
+import Request from 'kubernetes-client/backends/request'
 
 class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
@@ -10,7 +10,7 @@ class Kubernetes {
     const kubeconfig = new KubeConfig();
     kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
     const backend = new Request({ kubeconfig });
-    const kubeClient = new KubeClient(backend);
+    const kubeClient = new Client(backend);
     await kubeClient.loadSpec();
 
     const buildId = Kubernetes.uuidv4();
