@@ -97,8 +97,8 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '288.0.0'
-          service_account_email: ${{ secrets.SA_EMAIL }}
-          service_account_key: ${{ secrets.GCLOUD_AUTH }}
+          service_account_email: ${{ secrets.SERVICE_ACCOUNT }}
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
       - run: |
           gcloud container clusters get-credentials $GKE_CLUSTER \
             --zone $GKE_ZONE --project $GKE_PROJECT
