@@ -99,15 +99,14 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: |
+      - id: read-k8s-config
+        run: |
           gcloud container clusters get-credentials $GKE_CLUSTER \
             --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
-      - uses: frostebite/File-To-Base64@master
-        id: read-k8s-config
-        with:
-          filePath: ${{ env.KUBECONFIG }}/.kube/config
+          kubeConfig=$(cat $KUBECONFIG | base64 -w0)
+          echo "::set-output name=kubeConfig::$kubeConfig"
       - uses: ./
         id: k8s-unity-build
         env:
