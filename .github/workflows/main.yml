@@ -107,6 +107,7 @@ jobs:
           kubectl version
           kubeConfig=$(cat ~/.kube/config | base64 -w0)
           echo "::set-output name=kubeConfig::$kubeConfig"
+          echo "::add-mask::$kubeConfig"
       - uses: ./
         id: k8s-unity-build
         env:
