@@ -1,11 +1,11 @@
-import core from '@actions/core';
-import base64 from 'base-64';
 import { Client, KubeConfig } from 'kubernetes-client';
 import Request from 'kubernetes-client/backends/request';
 
+const core = require('@actions/core');
+const base64 = require('base-64');
+
 class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
-    // uses default kubeconfig location/env variable
     const kubeconfig = new KubeConfig();
     kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
     const backend = new Request({ kubeconfig });
@@ -16,6 +16,7 @@ class Kubernetes {
     const pvcName = `unity-builder-pvc-${buildId}`;
     const secretName = `build-credentials-${buildId}`;
     const jobName = `unity-builder-job-${buildId}`;
+    const namespace = 'default';
 
     Object.assign(this, {
       kubeClient,
@@ -25,6 +26,7 @@ class Kubernetes {
       pvcName,
       secretName,
       jobName,
+      namespace,
     });
 
     await Kubernetes.createSecret();
@@ -52,7 +54,7 @@ class Kubernetes {
         ANDROID_KEYALIAS_PASS: base64.encode(this.buildParameters.androidKeyaliasPass),
       },
     };
-    await this.kubeClient.api.v1.namespaces('default').secrets.post({ body: secretManifest });
+    await this.kubeClient.api.v1.namespaces(this.namespace).secrets.post({ body: secretManifest });
   }
 
   static async createPersistentVolumeClaim() {
@@ -73,15 +75,17 @@ class Kubernetes {
       },
     };
     await this.kubeClient.api.v1
-      .namespaces('default')
+      .namespaces(this.namespace)
       .persistentvolumeclaims.post({ body: pvcManifest });
-    await Kubernetes.watchBuildJobUntilFinished();
+    core.info('Persistent Volume created, waiting for ready state...');
+    await Kubernetes.watchPersistentVolumeClaimUntilReady();
     core.info('Persistent Volume ready for claims');
   }
 
   static async watchPersistentVolumeClaimUntilReady() {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     const queryResult = await this.kubeClient.api.v1
-      .namespaces('default')
+      .namespaces(this.namespace)
       .persistentvolumeclaims(this.pvcName)
       .get();
     if (queryResult.body.status.phase === 'Pending') {
@@ -242,7 +246,7 @@ class Kubernetes {
         backoffLimit: 1,
       },
     };
-    await this.kubeClient.apis.batch.v1.namespaces('default').jobs.post({ body: jobManifest });
+    await this.kubeClient.apis.batch.v1.namespaces(this.namespace).jobs.post({ body: jobManifest });
     core.info('Job created');
   }
 
@@ -253,7 +257,7 @@ class Kubernetes {
     let ready = false;
     while (!ready) {
       // eslint-disable-next-line no-await-in-loop
-      const pods = await this.kubeClient.api.v1.namespaces('default').pods.get();
+      const pods = await this.kubeClient.api.v1.namespaces(this.namespace).pods.get();
       // eslint-disable-next-line no-plusplus
       for (let index = 0; index < pods.body.items.length; index++) {
         const element = pods.body.items[index];
@@ -276,13 +280,13 @@ class Kubernetes {
     let complete = false;
     while (!complete) {
       // eslint-disable-next-line no-await-in-loop
-      const podStatus = await this.kubeClient.api.v1.namespaces('default').pod(podname).get();
+      const podStatus = await this.kubeClient.api.v1.namespaces(this.namespace).pod(podname).get();
       if (podStatus.body.status.phase !== 'Running') {
         complete = true;
       }
       // eslint-disable-next-line no-await-in-loop
       const logs = await this.kubeClient.api.v1
-        .namespaces('default')
+        .namespaces(this.namespace)
         .pod(podname)
         .log.get({
           qs: {
@@ -314,8 +318,8 @@ class Kubernetes {
   }
 
   static async cleanup() {
-    await this.kubeClient.apis.batch.v1.namespaces('default').jobs(this.jobName).delete();
-    await this.kubeClient.api.v1.namespaces('default').secrets(this.secretName).delete();
+    await this.kubeClient.apis.batch.v1.namespaces(this.namespace).jobs(this.jobName).delete();
+    await this.kubeClient.api.v1.namespaces(this.namespace).secrets(this.secretName).delete();
   }
 
   static uuidv4() {
