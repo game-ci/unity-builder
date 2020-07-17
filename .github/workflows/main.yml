@@ -118,7 +118,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: 2019.3.15f1
-      - uses: frostebite/kubernetes-download-pv@master
+      - uses: frostebite/K8s-Download-PVC@master
         with:
           kubeConfig: ${{ steps.read-k8s-config.outputs.kubeConfig }}
           volume: ${{ steps.k8s-unity-build.outputs.volume }}
