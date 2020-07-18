@@ -35,7 +35,7 @@ class Kubernetes {
     await Kubernetes.watchBuildJobUntilFinished();
     await Kubernetes.cleanup();
 
-    core.setOutput('kubernetesPVC', pvcName);
+    core.setOutput('volume', pvcName);
   }
 
   static async createSecret() {
