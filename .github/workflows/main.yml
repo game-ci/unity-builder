@@ -126,4 +126,4 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
-          path: data/repo/build/
+          path: k8s-volume-download
