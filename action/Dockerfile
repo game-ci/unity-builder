@@ -1,5 +1,5 @@
 ARG IMAGE
-FROM $IMAGE
+FROM $IMAGE@sha256:264c17ca3563d08574f436b12aa39c63a3c72c813d16428234c36a085e75bb06
 
 LABEL "com.github.actions.name"="Unity - Builder"
 LABEL "com.github.actions.description"="Build Unity projects for different platforms."
