@@ -46,9 +46,9 @@ class Input {
   }
 
   static get androidAppBundle() {
-    const input = core.getInput('androidAppBundle') || 'false';
+    const input = core.getInput('androidAppBundle') || false;
 
-    return input === 'true' ? 'true' : 'false';
+    return input === 'true';
   }
 
   static get androidKeystoreName() {
@@ -72,9 +72,9 @@ class Input {
   }
 
   static get allowDirtyBuild() {
-    const input = core.getInput('allowDirtyBuild') || 'false';
+    const input = core.getInput('allowDirtyBuild') || false;
 
-    return input === 'true' ? 'true' : 'false';
+    return input === 'true';
   }
 
   static get customParameters() {

@@ -40,7 +40,7 @@ inputs:
     description: 'The android versionCode'
   androidAppBundle:
     required: false
-    default: false
+    default: 'false'
     description: 'Whether to build .aab instead of .apk'
   androidKeystoreName:
     required: false
