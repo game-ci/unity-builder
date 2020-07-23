@@ -100,6 +100,9 @@ class Kubernetes {
       kind: 'Job',
       metadata: {
         name: this.jobName,
+        labels: {
+          app: 'unity-builder',
+        },
       },
       spec: {
         template: {
