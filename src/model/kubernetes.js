@@ -168,7 +168,7 @@ class Kubernetes {
                   cp -r /data/builder/action/steps /steps
                   chmod -R +x /entrypoint.sh;
                   chmod -R +x /steps;
-                  ./entrypoint.sh;
+                  /entrypoint.sh;
                   `,
                 ],
                 env: [
