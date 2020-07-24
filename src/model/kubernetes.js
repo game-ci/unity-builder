@@ -130,7 +130,7 @@ class Kubernetes {
                   '-c',
                   `export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
                   cd /data;
-                  git clone https://github.com/${process.env.GITHUB_REPOSITORY} repo;
+                  git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
                   git clone https://github.com/webbertakken/unity-builder.git builder;
                   cd repo;
                   git checkout $GITHUB_SHA;
