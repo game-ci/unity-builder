@@ -124,11 +124,13 @@ class Kubernetes {
             initContainers: [
               {
                 name: 'clone',
-                image: 'valian/git-lfs',
+                image: 'alpine/git',
                 command: [
                   '/bin/sh',
                   '-c',
-                  `export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
+                  `apk update;
+                  apk add git-lfs;
+                  export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
                   cd /data;
                   git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
                   git clone https://github.com/webbertakken/unity-builder.git builder;
