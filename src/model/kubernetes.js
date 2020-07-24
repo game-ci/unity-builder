@@ -4,6 +4,8 @@ import Request from 'kubernetes-client/backends/request';
 const core = require('@actions/core');
 const base64 = require('base-64');
 
+const pollInterval = 5000;
+
 class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
     const kubeconfig = new KubeConfig();
@@ -83,7 +85,7 @@ class Kubernetes {
   }
 
   static async watchPersistentVolumeClaimUntilReady() {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
     const queryResult = await this.kubeClient.api.v1
       .namespaces(this.namespace)
       .persistentvolumeclaims(this.pvcName)
@@ -256,11 +258,11 @@ class Kubernetes {
   }
 
   static async watchBuildJobUntilFinished() {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-
     let podname;
     let ready = false;
     while (!ready) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
       // eslint-disable-next-line no-await-in-loop
       const pods = await this.kubeClient.api.v1.namespaces(this.namespace).pods.get();
       // eslint-disable-next-line no-plusplus
@@ -284,6 +286,8 @@ class Kubernetes {
     let logQueryTime;
     let complete = false;
     while (!complete) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
       // eslint-disable-next-line no-await-in-loop
       const podStatus = await this.kubeClient.api.v1.namespaces(this.namespace).pod(podname).get();
       if (podStatus.body.status.phase !== 'Running') {
