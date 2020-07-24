@@ -124,7 +124,7 @@ class Kubernetes {
             initContainers: [
               {
                 name: 'clone',
-                image: 'openanalytics/alpine-git-lfs-client',
+                image: 'valian/git-lfs',
                 command: [
                   '/bin/sh',
                   '-c',
