@@ -71,7 +71,7 @@ class Kubernetes {
         volumeMode: 'Filesystem',
         resources: {
           requests: {
-            storage: '5Gi',
+            storage: this.buildParameters.kubeVolumeDiscSize,
           },
         },
       },
@@ -176,6 +176,12 @@ class Kubernetes {
                   /entrypoint.sh;
                   `,
                 ],
+                resources: {
+                  requests: {
+                    memory: this.buildParameters.kubeContainerMemory,
+                    cpu: this.buildParameters.kubeContainerCPU,
+                  },
+                },
                 env: [
                   {
                     name: 'GITHUB_WORKSPACE',

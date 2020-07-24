@@ -86,7 +86,19 @@ class Input {
   }
 
   static get githubToken() {
-    return core.getInput('githubToken') || false;
+    return core.getInput('githubToken') || '';
+  }
+
+  static get kubeContainerMemory() {
+    return core.getInput('kubeContainerMemory') || '';
+  }
+
+  static get kubeContainerCPU() {
+    return core.getInput('kubeContainerCPU') || '';
+  }
+
+  static get kubeVolumeDiscSize() {
+    return core.getInput('kubeVolumeDiscSize') || '';
   }
 }
 

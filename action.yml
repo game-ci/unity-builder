@@ -30,6 +30,18 @@ inputs:
     default: ''
     required: false
     description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+  kubeContainerMemory:
+    default: '800M'
+    required: false
+    description: 'Amount of memory to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+  kubeContainerCPU:
+    default: '0.25'
+    required: false
+    description: 'Amount of CPU time to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+  kubeVolumeDiscSize:
+    default: '5Gi'
+    required: false
+    description: 'Amount of disc space to assign the Kubernetes Persistent Volume (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
   githubToken:
     default: ''
     required: false

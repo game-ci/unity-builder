@@ -38,6 +38,9 @@ class BuildParameters {
       customParameters: Input.customParameters,
       kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
+      kubeContainerMemory: Input.kubeContainerMemory,
+      kubeContainerCPU: Input.kubeContainerCPU,
+      kubeVolumeDiscSize: Input.kubeVolumeDiscSize,
     };
   }
 
