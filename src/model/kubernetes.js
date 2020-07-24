@@ -108,6 +108,7 @@ class Kubernetes {
       },
       spec: {
         template: {
+          backoffLimit: 1,
           spec: {
             volumes: [
               {
@@ -250,7 +251,6 @@ class Kubernetes {
             restartPolicy: 'Never',
           },
         },
-        backoffLimit: 1,
       },
     };
     await this.kubeClient.apis.batch.v1.namespaces(this.namespace).jobs.post({ body: jobManifest });
