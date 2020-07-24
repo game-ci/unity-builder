@@ -137,5 +137,5 @@ jobs:
           path: k8s-volume-download
       - run: |
           pods=$(kubectl get pods -o json | jq '.items | .[].metadata.labels' | jq 'select("app", "unity-builder")')
-          [ -z pods ] || gcloud container clusters delete ${{env.GKE_CLUSTER}} --zone $GKE_ZONE --project $GKE_PROJECT --quiet
+          if [ -z pods ]; then gcloud container clusters delete ${{env.GKE_CLUSTER}} --zone $GKE_ZONE --project $GKE_PROJECT --quiet; fi
         if: ${{ always() }}
