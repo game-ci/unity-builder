@@ -4,7 +4,7 @@ import Request from 'kubernetes-client/backends/request';
 const core = require('@actions/core');
 const base64 = require('base-64');
 
-const pollInterval = 5000;
+const pollInterval = 10000;
 
 class Kubernetes {
   static async runBuildJob(buildParameters, baseImage) {
