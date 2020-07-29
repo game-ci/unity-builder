@@ -99,11 +99,7 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-
-      - uses: opsgang/ga-setup-minikube@v0.1.1
-        with:
-          minikube-version: 1.4.0
-          k8s-version: 1.15.1
+      - uses: engineerd/setup-kind@v0.4.0
       - name: Testing
         run: |
           minikube config set vm-driver kvm2
