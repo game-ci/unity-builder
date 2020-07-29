@@ -104,8 +104,6 @@ jobs:
         uses: medyagh/setup-minikube@master
       - name: Testing
         run: |
-          minikube start
-          minikube update-context
           kubectl cluster-info
           kubectl get pods -n kube-system
           apiVersion: v1
