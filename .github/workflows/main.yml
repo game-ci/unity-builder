@@ -117,7 +117,7 @@ jobs:
           spec:
             storageClassName: manual
             capacity:
-              storage: 10Gi
+              storage: 2Gi
             accessModes:
               - ReadWriteOnce
             hostPath:
