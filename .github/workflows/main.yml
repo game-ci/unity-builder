@@ -106,7 +106,6 @@ jobs:
         run: |
           kubectl cluster-info
           kubectl get pods -n kube-system
-          apiVersion: v1
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
           kind: PersistentVolume
