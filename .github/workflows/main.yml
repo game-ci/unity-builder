@@ -99,13 +99,11 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - uses: engineerd/setup-kind@v0.4.0
       - name: Testing
         run: |
-          minikube config set vm-driver kvm2
-          minikube config set kubernetes-version=v1.15.1
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
           minikube start
-          minikube update-context
           kubectl cluster-info
           kubectl get pods -n kube-system
           cat <<EOF | kubectl apply -f -
