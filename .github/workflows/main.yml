@@ -99,11 +99,17 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: start minikube
-        id: minikube
-        uses: medyagh/setup-minikube@master
+
+      - uses: opsgang/ga-setup-minikube@v0.1.1
+        with:
+          minikube-version: 1.4.0
+          k8s-version: 1.15.1
       - name: Testing
         run: |
+          minikube config set vm-driver kvm2
+          minikube config set kubernetes-version=v1.15.1
+          minikube start
+          minikube update-context
           kubectl cluster-info
           kubectl get pods -n kube-system
           cat <<EOF | kubectl apply -f -
