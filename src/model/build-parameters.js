@@ -40,7 +40,8 @@ class BuildParameters {
       githubToken: Input.githubToken,
       kubeContainerMemory: Input.kubeContainerMemory,
       kubeContainerCPU: Input.kubeContainerCPU,
-      kubeVolumeDiscSize: Input.kubeVolumeDiscSize,
+      kubeVolumeSize: Input.kubeVolumeSize,
+      kubeVolume: Input.kubeVolume,
     };
   }
 

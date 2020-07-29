@@ -30,6 +30,10 @@ inputs:
     default: ''
     required: false
     description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+  kubeVolume:
+    default: ''
+    required: false
+    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
   kubeContainerMemory:
     default: '800M'
     required: false
@@ -38,7 +42,7 @@ inputs:
     default: '0.25'
     required: false
     description: 'Amount of CPU time to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
-  kubeVolumeDiscSize:
+  kubeVolumeSize:
     default: '5Gi'
     required: false
     description: 'Amount of disc space to assign the Kubernetes Persistent Volume (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'

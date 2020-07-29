@@ -97,8 +97,12 @@ class Input {
     return core.getInput('kubeContainerCPU') || '';
   }
 
-  static get kubeVolumeDiscSize() {
-    return core.getInput('kubeVolumeDiscSize') || '';
+  static get kubeVolumeSize() {
+    return core.getInput('kubeVolumeSize') || '';
+  }
+
+  static get kubeVolume() {
+    return core.getInput('kubeVolume') || '';
   }
 }
 

@@ -99,19 +99,45 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: Get Gist
-        id: get
-        uses: andymckay/get-gist-action@master
+      - uses: opsgang/ga-setup-minikube@v0.1.1
         with:
-          gistURL: 'https://gist.github.com/frostebite/58fdeb02d45f6e7a24bcbe36f6bdc051'
-      - id: read-k8s-config
+          minikube-version: 1.4.0
+          k8s-version: 1.15.1
+      - name: Testing
         run: |
-          chmod +x ${{ steps.get.outputs.file }}
-          ${{ steps.get.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
-          gcloud container clusters get-credentials $GKE_CLUSTER \
-            --zone $GKE_ZONE --project $GKE_PROJECT
-          # run a command to get access-token
-          kubectl version
+          minikube start
+          minikube update-context
+          kubectl cluster-info
+          kubectl get pods -n kube-system
+          apiVersion: v1
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: PersistentVolume
+          metadata:
+            name: task-pv-volume
+            labels:
+              type: local
+          spec:
+            storageClassName: manual
+            capacity:
+              storage: 10Gi
+            accessModes:
+              - ReadWriteOnce
+            hostPath:
+              path: "/data/task-pv-volume"
+          ---
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: task-pv-claim
+          spec:
+            storageClassName: manual
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+          EOF
       - uses: frostebite/File-To-Base64@master
         id: read-base64
         with:
@@ -126,16 +152,11 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: 2019.3.15f1
-      - uses: frostebite/K8s-Download-Volume@master
-        with:
-          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
-          volume: ${{ steps.k8s-unity-build.outputs.volume }}
-          sourcePath: repo/build/
+          kubeVolume: task-pv-claim
+      - run: |
+          ls /data/task-pv-volume
       - uses: actions/upload-artifact@v1
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
-      - run: |
-          pods=$(kubectl get pods -o json | jq '.items | .[].metadata.labels' | jq 'select("app", "unity-builder")')
-          if [ -z pods ]; then gcloud container clusters delete ${{env.GKE_CLUSTER}} --zone $GKE_ZONE --project $GKE_PROJECT --quiet; fi
         if: ${{ always() }}
