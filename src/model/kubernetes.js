@@ -61,6 +61,7 @@ class Kubernetes {
 
   static async createPersistentVolumeClaim() {
     if (this.buildParameters.kubeVolume !== '') {
+      core.info(this.buildParameters.kubeVolume);
       this.pvcName = this.buildParameters.kubeVolume;
       return;
     }
