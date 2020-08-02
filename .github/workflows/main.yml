@@ -100,14 +100,20 @@ jobs:
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - name: Get Gist
-        id: get
+        id: get-apply
         uses: andymckay/get-gist-action@master
         with:
           gistURL: 'https://gist.github.com/frostebite/58fdeb02d45f6e7a24bcbe36f6bdc051'
+      - name: Get Gist
+        id: get-apply-lock
+        uses: andymckay/get-gist-action@master
+        with:
+          gistURL: 'https://gist.github.com/frostebite/810dcf9b726d841796c1b19917a75a32'
       - id: read-k8s-config
         run: |
-          chmod +x ${{ steps.get.outputs.file }}
-          ${{ steps.get.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+          chmod +x ${{ steps.get-apply-lock.outputs.file }}
+          chmod +x ${{ steps.get-apply.outputs.file }}
+          ${{ steps.get-apply-lock.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }} ${{ steps.get-apply.outputs.file }}
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
@@ -134,7 +140,12 @@ jobs:
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
+      - name: Get Gist
+        id: get-shutdown
+        uses: andymckay/get-gist-action@master
+        with:
+          gistURL: 'https://gist.github.com/frostebite/5964fdd4d1c84507673ddef035d344ca'
       - run: |
-          pods=$(kubectl get pods -o json | jq '.items | .[].metadata.labels' | jq 'select("app", "unity-builder")')
-          if [ -z pods ]; then gcloud container clusters delete ${{env.GKE_CLUSTER}} --zone $GKE_ZONE --project $GKE_PROJECT --quiet; fi
+          chmod +x ${{ steps.get-shutdown.outputs.file }}
+          ${{ steps.get-shutdown.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
