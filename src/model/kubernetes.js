@@ -76,7 +76,7 @@ class Kubernetes {
         volumeMode: 'Filesystem',
         resources: {
           requests: {
-            storage: this.buildParameters.kubeVolumeDiscSize,
+            storage: this.buildParameters.kubeVolumeSize,
           },
         },
       },
