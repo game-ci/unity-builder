@@ -25,7 +25,7 @@ jobs:
       - run: yarn test --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
-      - run: yarn build --quiet && git diff --quiet action || { echo "action should be auto generated" ; git diff action ; exit 62; }
+      # - run: yarn build --quiet && git diff --quiet action || { echo "action should be auto generated" ; git diff action ; exit 62; }
   buildForAllPlatforms:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
@@ -108,8 +108,7 @@ jobs:
         run: |
           chmod +x ${{ steps.get.outputs.file }}
           ${{ steps.get.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
-          gcloud container clusters get-credentials $GKE_CLUSTER \
-            --zone $GKE_ZONE --project $GKE_PROJECT
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
       - uses: frostebite/File-To-Base64@master
