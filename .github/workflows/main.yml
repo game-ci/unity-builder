@@ -107,7 +107,7 @@ jobs:
       - id: read-k8s-config
         run: |
           chmod +x ${{ steps.get-apply.outputs.file }}
-          ${{ steps.get-apply-lock.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }} ${{ steps.get-apply.outputs.file }}
+          ${{ steps.get-apply.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
