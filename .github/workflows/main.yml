@@ -99,20 +99,18 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: Get Gist
+        id: get-apply
+        uses: andymckay/get-gist-action@master
+        with:
+          gistURL: 'https://gist.github.com/frostebite/58fdeb02d45f6e7a24bcbe36f6bdc051'
       - id: read-k8s-config
         run: |
-          sudo sh -c "curl https://raw.githubusercontent.com/kadwanev/retry/master/retry -o /usr/local/bin/retry && chmod +x /usr/local/bin/retry"
-          # gcloud container node-pools create unity-builder-pool --cluster $GKE_CLUSTER
+          chmod +x ${{ steps.get-apply.outputs.file }}
+          ${{ steps.get-apply.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           # run a command to get access-token
           kubectl version
-          export NSID=$(cat /proc/sys/kernel/random/uuid)
-          cat <<EOF | kubectl apply -f -
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-              name: ns-unity-builder-$NSID
-          EOF
       - uses: frostebite/File-To-Base64@master
         id: read-base64
         with:
@@ -142,6 +140,6 @@ jobs:
         with:
           gistURL: 'https://gist.github.com/frostebite/5964fdd4d1c84507673ddef035d344ca'
       - run: |
-          kubectl delete ns-unity-builder-$NSID
-
+          chmod +x ${{ steps.get-shutdown.outputs.file }}
+          ${{ steps.get-shutdown.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
