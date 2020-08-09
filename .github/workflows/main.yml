@@ -99,7 +99,7 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: ./ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: action/bootstrapper/ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
       - uses: frostebite/File-To-Base64@master
         id: read-base64
         with:
@@ -123,5 +123,5 @@ jobs:
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
-      - run: ./ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: action/bootstrapper/ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
