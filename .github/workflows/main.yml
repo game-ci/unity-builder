@@ -134,6 +134,7 @@ jobs:
         uses: andymckay/get-gist-action@master
         with:
           gistURL: 'https://gist.github.com/frostebite/5964fdd4d1c84507673ddef035d344ca'
+        if: ${{ always() }}
       - run: |
           chmod +x ${{ steps.get-shutdown.outputs.file }}
           ${{ steps.get-shutdown.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
