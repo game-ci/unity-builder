@@ -7,9 +7,9 @@
 # Requires GCP Cloud SDK
 # Installs retry https://github.com/kadwanev/retry
 
-export GKE_PROJECT=$1
-export GKE_CLUSTER=$2
-export GKE_ZONE=$3
+GKE_PROJECT=$1
+GKE_CLUSTER=$2
+GKE_ZONE=$3
 
 # may update this to avoid repeated install, drop me a comment if needed
 sudo sh -c "curl https://raw.githubusercontent.com/kadwanev/retry/master/retry -o /usr/local/bin/retry && chmod +x /usr/local/bin/retry"
