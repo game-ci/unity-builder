@@ -50,7 +50,7 @@ jobs:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - iOS # Build an iOS player.
-          - Android # Build an Android .apk.
+          # - Android # Build an Android .apk.
           #          - StandaloneWindows # Build a Windows standalone.
           #          - WebGL # WebGL.
           #          - WSAPlayer # Build an Windows Store Apps player.
@@ -104,10 +104,8 @@ jobs:
         uses: andymckay/get-gist-action@master
         with:
           gistURL: 'https://gist.github.com/frostebite/58fdeb02d45f6e7a24bcbe36f6bdc051'
-      - id: read-k8s-config
-        run: |
-          chmod +x ${{ steps.get-apply.outputs.file }}
-          ${{ steps.get-apply.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: chmod +x ${{ steps.get-apply.outputs.file }}
+      - run: ${{ steps.get-apply.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
       - uses: frostebite/File-To-Base64@master
         id: read-base64
         with:
