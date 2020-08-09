@@ -15,7 +15,7 @@ GKE_ZONE=$3
 sudo sh -c "curl https://raw.githubusercontent.com/kadwanev/retry/master/retry -o /usr/local/bin/retry && chmod +x /usr/local/bin/retry"
 
 attempts=0
-while [ attempts == 0 ]
+while [ "$attempts" == "0" ]
 do
 retry -s 15 -t 20 -v '
     STATUS=$(gcloud container clusters list --format="json" --project $GKE_PROJECT |
