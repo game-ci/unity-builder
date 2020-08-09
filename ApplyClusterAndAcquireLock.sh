@@ -54,6 +54,7 @@ gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --projec
 kubectl version
 NSID=$(cat /proc/sys/kernel/random/uuid)
 echo "::set-env name=NSID::"$NSID
+{
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Namespace
@@ -61,7 +62,8 @@ metadata:
   name: ns-unity-builder-$NSID
   labels:
     app: unity-builder
-EOF && exit 0
+EOF
+} && exit 0
 
 attempts=$(($attempts+1))
 done
