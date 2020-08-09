@@ -61,7 +61,7 @@ metadata:
   name: ns-unity-builder-$NSID
   labels:
     app: unity-builder
-EOF
+EOF && exit 0
 
 attempts=attempts+1
 done
