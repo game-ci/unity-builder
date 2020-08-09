@@ -80,6 +80,30 @@ class Input {
   static get customParameters() {
     return core.getInput('customParameters') || '';
   }
+
+  static get kubeConfig() {
+    return core.getInput('kubeConfig') || '';
+  }
+
+  static get githubToken() {
+    return core.getInput('githubToken') || '';
+  }
+
+  static get kubeContainerMemory() {
+    return core.getInput('kubeContainerMemory') || '800M';
+  }
+
+  static get kubeContainerCPU() {
+    return core.getInput('kubeContainerCPU') || '0.25';
+  }
+
+  static get kubeVolumeSize() {
+    return core.getInput('kubeVolumeSize') || '5Gi';
+  }
+
+  static get kubeVolume() {
+    return core.getInput('kubeVolume') || '';
+  }
 }
 
 export default Input;

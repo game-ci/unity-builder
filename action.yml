@@ -26,6 +26,30 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
+  kubeConfig:
+    default: ''
+    required: false
+    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+  kubeVolume:
+    default: ''
+    required: false
+    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
+  kubeContainerMemory:
+    default: '800M'
+    required: false
+    description: 'Amount of memory to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+  kubeContainerCPU:
+    default: '0.25'
+    required: false
+    description: 'Amount of CPU time to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+  kubeVolumeSize:
+    default: '5Gi'
+    required: false
+    description: 'Amount of disc space to assign the Kubernetes Persistent Volume (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+  githubToken:
+    default: ''
+    required: false
+    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
   versioning:
     required: false
     default: 'Semantic'
@@ -79,8 +103,9 @@ inputs:
       Note that it is generally bad practice to modify your branch
       in a CI Pipeline. However there are exceptions where this might
       be needed. (use with care).
-
-outputs: {}
+outputs:
+  volume:
+    description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'
 branding:
   icon: 'box'
   color: 'gray-dark'
