@@ -99,13 +99,7 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: Get Gist
-        id: get-apply
-        uses: andymckay/get-gist-action@master
-        with:
-          gistURL: 'https://gist.github.com/frostebite/58fdeb02d45f6e7a24bcbe36f6bdc051'
-      - run: chmod +x ${{ steps.get-apply.outputs.file }}
-      - run: ${{ steps.get-apply.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: ./ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
       - uses: frostebite/File-To-Base64@master
         id: read-base64
         with:
@@ -129,13 +123,5 @@ jobs:
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
-      - name: Get Gist
-        id: get-shutdown
-        uses: andymckay/get-gist-action@master
-        with:
-          gistURL: 'https://gist.github.com/frostebite/5964fdd4d1c84507673ddef035d344ca'
-        if: ${{ always() }}
-      - run: |
-          chmod +x ${{ steps.get-shutdown.outputs.file }}
-          ${{ steps.get-shutdown.outputs.file }} ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: ./ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
