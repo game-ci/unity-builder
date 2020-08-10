@@ -10,7 +10,7 @@ export default class Versioning {
   }
 
   static get isDirtyAllowed() {
-    return Input.allowDirtyBuild === 'true';
+    return Input.allowDirtyBuild;
   }
 
   static get strategies() {

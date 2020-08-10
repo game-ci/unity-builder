@@ -133,18 +133,18 @@ describe('Input', () => {
 
   describe('androidAppBundle', () => {
     it('returns the default value', () => {
-      expect(Input.androidAppBundle).toStrictEqual('false');
+      expect(Input.androidAppBundle).toStrictEqual(false);
     });
 
     it('returns true when string true is passed', () => {
       const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
-      expect(Input.androidAppBundle).toStrictEqual('true');
+      expect(Input.androidAppBundle).toStrictEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('returns false when string false is passed', () => {
       const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
-      expect(Input.androidAppBundle).toStrictEqual('false');
+      expect(Input.androidAppBundle).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
@@ -216,18 +216,18 @@ describe('Input', () => {
 
   describe('allowDirtyBuild', () => {
     it('returns the default value', () => {
-      expect(Input.allowDirtyBuild).toStrictEqual('false');
+      expect(Input.allowDirtyBuild).toStrictEqual(false);
     });
 
     it('returns true when string true is passed', () => {
       const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
-      expect(Input.allowDirtyBuild).toStrictEqual('true');
+      expect(Input.allowDirtyBuild).toStrictEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('returns false when string false is passed', () => {
       const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
-      expect(Input.allowDirtyBuild).toStrictEqual('false');
+      expect(Input.allowDirtyBuild).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
