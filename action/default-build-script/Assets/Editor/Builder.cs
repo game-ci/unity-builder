@@ -27,7 +27,7 @@ namespace UnityBuilderAction
       };
 
       // Set version for this build
-      VersionApplicator.SetVersion(options["customProjectVersion"]);
+      VersionApplicator.SetVersion(options["buildVersion"]);
       VersionApplicator.SetAndroidVersionCode(options["androidVersionCode"]);
       
       // Apply Android settings
