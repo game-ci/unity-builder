@@ -21,6 +21,7 @@ class Docker {
     const {
       version,
       workspace,
+      runnerTempPath,
       platform,
       projectPath,
       buildName,
@@ -77,8 +78,8 @@ class Docker {
         --env RUNNER_TEMP \
         --env RUNNER_WORKSPACE \
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
-        --volume "/home/runner/work/_temp/_github_home":"/github/home" \
-        --volume "/home/runner/work/_temp/_github_workflow":"/github/workflow" \
+        --volume "${runnerTempPath}/_github_home":"/github/home" \
+        --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
         --volume "${workspace}":"/github/workspace" \
         ${image}`;
 
