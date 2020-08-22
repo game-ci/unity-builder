@@ -57,6 +57,9 @@
     "*.{json,md,yaml,yml}": [
       "prettier --write",
       "git add"
+    ],
+    "*.sh": [
+      "git update-index --chmod=+x"
     ]
   }
 }
