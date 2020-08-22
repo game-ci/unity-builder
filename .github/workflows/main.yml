@@ -94,34 +94,43 @@ jobs:
       - uses: actions/checkout@v2
         with:
           lfs: true
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - name: Provision K8s Cluster
+        id: provision
+        uses: frostebite/Provision-GKE-Cluster@1.0
         with:
-          version: '288.0.0'
-          service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
-          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: ./ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
-      - uses: frostebite/File-To-Base64@master
-        id: read-base64
-        with:
-          filePath: ~/.kube/config
+          GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          project: ${{ env.GKE_PROJECT }}
+          cluster: ${{ env.GKE_CLUSTER }}
+          zone: ${{ env.GKE_ZONE }}
       - uses: ./
         id: k8s-unity-build
         env:
           UNITY_LICENSE: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>\n    <License id=\"Terms\">\n        <MachineBindings>\n            <Binding Key=\"1\" Value=\"33bf639e81e54693a8f9bf57c8900e5a\"/>\n            <Binding Key=\"2\" Value=\"33bf639e81e54693a8f9bf57c8900e5a\"/>\n        </MachineBindings>\n        <MachineID Value=\"xWka2iXdDJejhZdi/zU2RUeXUi4=\"/>\n        <SerialHash Value=\"1efd68fa935192b6090ac03c77d289a9f588c55a\"/>\n        <Features>\n            <Feature Value=\"33\"/>\n            <Feature Value=\"1\"/>\n            <Feature Value=\"12\"/>\n            <Feature Value=\"2\"/>\n            <Feature Value=\"24\"/>\n            <Feature Value=\"3\"/>\n            <Feature Value=\"36\"/>\n            <Feature Value=\"17\"/>\n            <Feature Value=\"19\"/>\n            <Feature Value=\"62\"/>\n        </Features>\n        <DeveloperData Value=\"AQAAAEY0LUg2WFMtUE00NS1SM0M4LUUyWlotWkdWOA==\"/>\n        <SerialMasked Value=\"F4-H6XS-PM45-R3C8-E2ZZ-XXXX\"/>\n        <StartDate Value=\"2018-05-02T00:00:00\"/>\n        <UpdateDate Value=\"2020-06-14T13:49:47\"/>\n        <InitialActivationDate Value=\"2018-05-02T14:21:28\"/>\n        <LicenseVersion Value=\"6.x\"/>\n        <ClientProvidedVersion Value=\"2019.3.15f1\"/>\n        <AlwaysOnline Value=\"false\"/>\n        <Entitlements>\n            <Entitlement Ns=\"unity_editor\" Tag=\"UnityPersonal\" Type=\"EDITOR\" ValidTo=\"9999-12-31T00:00:00\"/>\n        </Entitlements>\n    </License>\n<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"#Terms\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>bpzWx3PZ0lqWDo1m9aLQuZ4cweo=</DigestValue></Reference></SignedInfo><SignatureValue>QcDm4/qAXZuUMQbUVk63vO6u66Bp8PnqqWQcZZOcym/rGUZLj1sr66EquF3X3w1L7aqiwMGtbY2b\nkPttcalFeaBkc5NsJMrexWjuBCxQvhbmVFQnTjvC6vNS+k1wrkz7If1oPkz/XaDtCfUs8oxc9iPe\nPzzUJIVYLZoDtpPq2XbgVn9/TiVb3Zu6ldKgvtNRYUjrB3KywtvL9OcIFll3htRcBZPG43kxryJc\nDD2TL5Nw1JuX6MejBBuYTZsZNpGX9Pjop9+uFUZ4GI9h8a5g6wJUfXzsGw7j4gkvDkC9MvyWiksi\n2hNXw1QNeB6JfQsd4sAuhYh/CqTm2gCz9i9ZpA==</SignatureValue></Signature></root>"
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+          kubeConfig: ${{ steps.provision.outputs.kubeConfig }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: 2019.3.15f1
       - uses: frostebite/K8s-Download-Volume@master
         with:
-          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+          kubeConfig: ${{ steps.provision.outputs.kubeConfig }}
           volume: ${{ steps.k8s-unity-build.outputs.volume }}
           sourcePath: repo/build/
       - uses: actions/upload-artifact@v1
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
-      - run: ./ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - name: Dispose K8s Cluster
         if: ${{ always() }}
+        id: dispose
+        uses: frostebite/Provision-GKE-Cluster@1.0
+        with:
+          GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          project: ${{ env.GKE_PROJECT }}
+          cluster: ${{ env.GKE_CLUSTER }}
+          zone: ${{ env.GKE_ZONE }}
+          lock: ${{ steps.provision.outputs.lock }}
+          dispose: true
