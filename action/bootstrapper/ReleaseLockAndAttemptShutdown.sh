@@ -9,5 +9,5 @@ then
    exit 0
 else
    echo "delete cluster"
-   gcloud container clusters delete $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT --quiet
+   retry -s 15 -t 5 -v 'gcloud container clusters delete $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT --quiet'
 fi
