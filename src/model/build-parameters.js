@@ -22,6 +22,7 @@ class BuildParameters {
 
     return {
       version: Input.unityVersion,
+      runnerTempPath: process.env.RUNNER_TEMP,
       platform: Input.targetPlatform,
       projectPath: Input.projectPath,
       buildName: Input.buildName,
