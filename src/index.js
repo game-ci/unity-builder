@@ -16,7 +16,13 @@ async function action() {
   } else {
     // Build docker image
     // TODO: No image required (instead use a version published to dockerhub for the action, supply credentials for github cloning)
-    const builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+    const builtImage = await Docker.build({
+      path: actionFolder,
+      dockerfile,
+      baseImage,
+      uid: buildParameters.uid,
+      gid: buildParameters.gid,
+    });
     await Docker.run(builtImage, { workspace, ...buildParameters });
   }
 }
