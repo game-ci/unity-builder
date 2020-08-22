@@ -91,9 +91,6 @@ jobs:
           - StandaloneLinux64
           - StandaloneWindows64
     steps:
-      - uses: actions/checkout@v2
-        with:
-          lfs: true
       - name: Provision K8s Cluster
         id: provision
         uses: frostebite/Provision-GKE-Cluster@1.0
@@ -103,6 +100,9 @@ jobs:
           project: ${{ env.GKE_PROJECT }}
           cluster: ${{ env.GKE_CLUSTER }}
           zone: ${{ env.GKE_ZONE }}
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
       - uses: ./
         id: k8s-unity-build
         env:
