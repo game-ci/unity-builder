@@ -1,4 +1,4 @@
-import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output } from './model';
 
 const core = require('@actions/core');
 
@@ -25,6 +25,9 @@ async function action() {
     });
     await Docker.run(builtImage, { workspace, ...buildParameters });
   }
+
+  // Set output
+  await Output.setBuildVersion(buildParameters.buildVersion);
 }
 
 action().catch((error) => {

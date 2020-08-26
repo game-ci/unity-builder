@@ -106,6 +106,8 @@ inputs:
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'
+  buildVersion:
+    description: 'The generated version used for the Unity build'
 branding:
   icon: 'box'
   color: 'gray-dark'
