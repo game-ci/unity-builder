@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Provision K8s Cluster
         id: provision
-        uses: frostebite/Provision-GKE-Cluster@1.0
+        uses: frostebite/Provision-GKE-Cluster@1.1
         with:
           GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
@@ -125,7 +125,7 @@ jobs:
       - name: Dispose K8s Cluster
         if: ${{ always() }}
         id: dispose
-        uses: frostebite/Provision-GKE-Cluster@1.0
+        uses: frostebite/Provision-GKE-Cluster@1.1
         with:
           GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
