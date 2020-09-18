@@ -6,6 +6,10 @@ inputs:
     required: false
     default: ''
     description: 'Version of unity to use for building the project.'
+  customImage:
+    required: false
+    default: ''
+    description: 'Specific docker image that should be used for building the project'
   targetPlatform:
     required: false
     default: ''

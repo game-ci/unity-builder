@@ -12,6 +12,10 @@ class Input {
     return core.getInput('unityVersion');
   }
 
+  static get customImage() {
+    return core.getInput('customImage');
+  }
+
   static get targetPlatform() {
     return core.getInput('targetPlatform') || Platform.default;
   }
