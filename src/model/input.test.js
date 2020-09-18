@@ -20,6 +20,18 @@ describe('Input', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
+  describe('customImage', () => {
+    it('returns the default value', () => {
+      expect(Input.customImage).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = '2020.4.99f9';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.customImage).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('targetPlatform', () => {
     it('returns the default value', () => {

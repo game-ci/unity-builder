@@ -83,7 +83,7 @@ class ImageTag {
   toString() {
     const { image, tag } = this;
 
-    if (this.customImage) {
+    if (this.customImage && this.customImage !== '') {
       return this.customImage;
     }
 
