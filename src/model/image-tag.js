@@ -8,6 +8,7 @@ class ImageTag {
       name = 'unity3d',
       version = '2019.2.11f1',
       platform,
+      customImage,
     } = imageProperties;
 
     if (!ImageTag.versionPattern.test(version)) {
@@ -24,7 +25,7 @@ class ImageTag {
       ImageTag.imageSuffixes.generic,
     );
 
-    Object.assign(this, { repository, name, version, platform, builderPlatform });
+    Object.assign(this, { repository, name, version, platform, builderPlatform, customImage });
   }
 
   static get versionPattern() {
@@ -81,6 +82,10 @@ class ImageTag {
 
   toString() {
     const { image, tag } = this;
+
+    if (this.customImage) {
+      return this.customImage;
+    }
 
     return `${image}:${tag}`;
   }

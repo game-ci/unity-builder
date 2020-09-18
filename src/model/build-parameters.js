@@ -25,6 +25,7 @@ class BuildParameters {
 
     return {
       version: Input.unityVersion,
+      customImage: Input.customImage,
       uid,
       gid,
       runnerTempPath: process.env.RUNNER_TEMP,
