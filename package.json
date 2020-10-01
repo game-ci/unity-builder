@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@actions/core": "^1.2.4",
+    "@actions/core": "^1.2.6",
     "@actions/exec": "1.0.4",
     "@actions/github": "^2.1.1",
     "base-64": "^0.1.0",
