@@ -1,18 +1,15 @@
-import fs from 'fs';
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
 
 class Docker {
   static async build(buildParameters, silent = false) {
-    const { path, dockerfile, baseImage, uid, gid } = buildParameters;
+    const { path, dockerfile, baseImage } = buildParameters;
     const { version, platform } = baseImage;
 
     const tag = new ImageTag({ repository: '', name: 'unity-builder', version, platform });
     const command = `docker build ${path} \
       --file ${dockerfile} \
       --build-arg IMAGE=${baseImage} \
-      --build-arg UID=${uid} \
-      --build-arg GID=${gid} \
       --tag ${tag}`;
 
     await exec(command, undefined, { silent });
@@ -85,9 +82,6 @@ class Docker {
         --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
         --volume "${workspace}":"/github/workspace" \
         ${image}`;
-
-    fs.mkdirSync(`${runnerTempPath}/_github_home`, { recursive: true });
-    fs.mkdirSync(`${runnerTempPath}/_github_workflow`, { recursive: true });
 
     await exec(command, undefined, { silent });
   }
