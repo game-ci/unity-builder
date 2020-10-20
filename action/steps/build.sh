@@ -108,24 +108,24 @@ echo "#    Building platform    #"
 echo "###########################"
 echo ""
 
-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' \
-  unity-editor \
-    -batchmode \
-    -logfile /dev/stdout \
-    -quit \
-    -customBuildName "$BUILD_NAME" \
-    -projectPath "$UNITY_PROJECT_PATH" \
-    -buildTarget "$BUILD_TARGET" \
-    -customBuildTarget "$BUILD_TARGET" \
-    -customBuildPath "$CUSTOM_BUILD_PATH" \
-    -executeMethod "$BUILD_METHOD" \
-    -buildVersion "$VERSION" \
-    -androidVersionCode "$ANDROID_VERSION_CODE" \
-    -androidKeystoreName "$ANDROID_KEYSTORE_NAME" \
-    -androidKeystorePass "$ANDROID_KEYSTORE_PASS" \
-    -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
-    -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
-    $CUSTOM_PARAMETERS
+unity-editor \
+  -batchmode \
+  -nographics \
+  -logfile /dev/stdout \
+  -quit \
+  -customBuildName "$BUILD_NAME" \
+  -projectPath "$UNITY_PROJECT_PATH" \
+  -buildTarget "$BUILD_TARGET" \
+  -customBuildTarget "$BUILD_TARGET" \
+  -customBuildPath "$CUSTOM_BUILD_PATH" \
+  -executeMethod "$BUILD_METHOD" \
+  -buildVersion "$VERSION" \
+  -androidVersionCode "$ANDROID_VERSION_CODE" \
+  -androidKeystoreName "$ANDROID_KEYSTORE_NAME" \
+  -androidKeystorePass "$ANDROID_KEYSTORE_PASS" \
+  -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
+  -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
+  $CUSTOM_PARAMETERS
 
 # Catch exit code
 BUILD_EXIT_CODE=$?
