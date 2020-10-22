@@ -110,6 +110,7 @@ echo ""
 
 unity-editor \
   -batchmode \
+  -nographics \
   -logfile /dev/stdout \
   -quit \
   -customBuildName "$BUILD_NAME" \
