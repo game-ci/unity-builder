@@ -4,8 +4,8 @@ import Platform from './platform';
 class ImageTag {
   constructor(imageProperties) {
     const {
-      repository = 'gableroux',
-      name = 'unity3d',
+      repository = 'unityci',
+      name = 'editor',
       version = '2019.2.11f1',
       platform,
       customImage,
@@ -47,7 +47,7 @@ class ImageTag {
   static get targetPlatformToImageSuffixMap() {
     const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.imageSuffixes;
 
-    // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
+    // @see: https://docs.editor.com/ScriptReference/BuildTarget.html
     return {
       [Platform.types.StandaloneOSX]: mac,
       [Platform.types.StandaloneWindows]: windows,

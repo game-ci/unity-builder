@@ -10,9 +10,9 @@ describe('UnityImageVersion', () => {
   };
 
   const defaults = {
-    repository: 'gableroux',
-    name: 'unity3d',
-    image: 'gableroux/unity3d',
+    repository: 'unityci',
+    name: 'editor',
+    image: 'unityci/editor',
   };
 
   describe('constructor', () => {
