@@ -36,8 +36,8 @@ class ImageTag {
     return {
       generic: '',
       webgl: 'webgl',
-      mac: 'mac',
-      windows: 'windows',
+      mac: 'mac-mono',
+      windows: 'windows-mono',
       android: 'android',
       ios: 'ios',
       facebook: 'facebook',
@@ -47,7 +47,7 @@ class ImageTag {
   static get targetPlatformToImageSuffixMap() {
     const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.imageSuffixes;
 
-    // @see: https://docs.editor.com/ScriptReference/BuildTarget.html
+    // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     return {
       [Platform.types.StandaloneOSX]: mac,
       [Platform.types.StandaloneWindows]: windows,
@@ -87,7 +87,7 @@ class ImageTag {
       return this.customImage;
     }
 
-    return `${image}:${tag}`;
+    return `${image}:${tag}-0`; // '0' here represents the docker repo version
   }
 }
 

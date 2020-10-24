@@ -49,7 +49,7 @@ describe('UnityImageVersion', () => {
     it('returns the correct version', () => {
       const image = new ImageTag({ version: '2099.1.1111', platform: some.platform });
 
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2099.1.1111`);
+      expect(image.toString()).toStrictEqual(`${defaults.image}:2099.1.1111-0`);
     });
     it('returns customImage if given', () => {
       const image = new ImageTag({
@@ -64,13 +64,13 @@ describe('UnityImageVersion', () => {
     it('returns the specific build platform', () => {
       const image = new ImageTag({ version: '2019.2.11f1', platform: 'WebGL' });
 
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-webgl`);
+      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-webgl-0`);
     });
 
     it('returns no specific build platform for generic targetPlatforms', () => {
       const image = new ImageTag({ platform: 'NoTarget' });
 
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1`);
+      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-0`);
     });
   });
 });
