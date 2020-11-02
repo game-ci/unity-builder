@@ -4,8 +4,8 @@ import Platform from './platform';
 class ImageTag {
   constructor(imageProperties) {
     const {
-      repository = 'gableroux',
-      name = 'unity3d',
+      repository = 'unityci',
+      name = 'editor',
       version = '2019.2.11f1',
       platform,
       customImage,
@@ -36,8 +36,9 @@ class ImageTag {
     return {
       generic: '',
       webgl: 'webgl',
-      mac: 'mac',
-      windows: 'windows',
+      mac: 'mac-mono',
+      windows: 'windows-mono',
+      linux: 'base',
       android: 'android',
       ios: 'ios',
       facebook: 'facebook',
@@ -45,14 +46,14 @@ class ImageTag {
   }
 
   static get targetPlatformToImageSuffixMap() {
-    const { generic, webgl, mac, windows, android, ios, facebook } = ImageTag.imageSuffixes;
+    const { generic, webgl, mac, windows, linux, android, ios, facebook } = ImageTag.imageSuffixes;
 
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     return {
       [Platform.types.StandaloneOSX]: mac,
       [Platform.types.StandaloneWindows]: windows,
       [Platform.types.StandaloneWindows64]: windows,
-      [Platform.types.StandaloneLinux64]: windows,
+      [Platform.types.StandaloneLinux64]: linux,
       [Platform.types.iOS]: ios,
       [Platform.types.Android]: android,
       [Platform.types.WebGL]: webgl,
@@ -87,7 +88,7 @@ class ImageTag {
       return this.customImage;
     }
 
-    return `${image}:${tag}`;
+    return `${image}:${tag}-0`; // '0' here represents the docker repo version
   }
 }
 
