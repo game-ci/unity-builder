@@ -68,7 +68,7 @@ export default class Versioning {
    * Regex to parse version description into separate fields
    */
   static get descriptionRegex() {
-    return /^v([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
+    return /^v(\d[\w.]*)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   static async determineVersion(strategy, inputVersion) {

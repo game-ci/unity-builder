@@ -127,8 +127,15 @@ describe('Versioning', () => {
       expect(Versioning.descriptionRegex).toBeInstanceOf(RegExp);
     });
 
-    test.each(['v1.1-1-g12345678', 'v0.1-2-g12345678', 'v0.0-500-gA9B6C3D0-dirty'])(
-      'is happy with valid %s',
+    test.each(
+      [
+        'v1.1-1-g12345678',
+        'v0.1-2-g12345678',
+        'v0.0-500-gA9B6C3D0-dirty',
+        'v0.0-500a-gA9B6C3D0-dirty',
+        'v0.1.0a-26-g6817b33',
+        'is happy with valid %s',
+      ],
       (description) => {
         expect(Versioning.descriptionRegex.test(description)).toBeTruthy();
       },
