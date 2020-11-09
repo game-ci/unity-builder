@@ -109,7 +109,6 @@ echo "###########################"
 echo ""
 
 unity-editor \
-  -batchmode \
   -nographics \
   -logfile /dev/stdout \
   -quit \
