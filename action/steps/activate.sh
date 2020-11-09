@@ -25,7 +25,6 @@ if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
 
   # Activate license
   ACTIVATION_OUTPUT=$(unity-editor \
-      -batchmode \
       -nographics \
       -logFile /dev/stdout \
       -quit \
