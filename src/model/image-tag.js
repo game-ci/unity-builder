@@ -51,7 +51,7 @@ class ImageTag {
       facebook,
     } = ImageTag.imageSuffixes;
 
-    const [major, minor] = version.split('.').map(Number);
+    const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     switch (platform) {
       case Platform.types.StandaloneOSX:
