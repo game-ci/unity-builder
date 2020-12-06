@@ -19,9 +19,9 @@ Part of the <a href="https://game.ci">GameCI</a> open source project.
 ## How to use
 
 Find the
-[docs](https://game-ci.com/docs)
-on the Unity CI
-[website](https://game-ci.com/).
+[docs](https://game.ci/docs)
+on the GameCI
+[website](https://game.ci/).
 
 ## Related actions
 
@@ -32,7 +32,7 @@ status repository for related Actions.
 ## Community
 
 Feel free to join us on
-<a href="http://game-ci.com/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
+<a href="http://game.ci/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
 and engage with the community.
 
 ## Contributing
