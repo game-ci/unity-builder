@@ -1,15 +1,12 @@
-<div align="center">
-<a href="https://github.com/marketplace/actions/unity-builder">
-<img width="800" src="media/UnityBuilder-Logo.png" alt="Unity Builder">
-</a>
-<br />
-<br />
+# Unity - Builder
+
+(Not affiliated with Unity Technologies)
 
 GitHub Action to
 [build Unity projects](https://github.com/marketplace/actions/unity-builder)
 for different platforms.
 
-Part of the <a href="https://unity-ci.com"><img height="30" src="media/UnityCI-ReferenceLogo.png" alt="Unity CI"></a> open source project.
+Part of the <a href="https://game.ci">GameCI</a> open source project.
 <br />
 <br />
 
@@ -19,30 +16,28 @@ Part of the <a href="https://unity-ci.com"><img height="30" src="media/UnityCI-R
 <br />
 <br />
 
-</div>
-
 ## How to use
 
 Find the
-[docs](https://unity-ci.com/docs/github)
+[docs](https://game-ci.com/docs)
 on the Unity CI
-[website](https://unity-ci.com/).
+[website](https://game-ci.com/).
 
 ## Related actions
 
 Visit the
-<a href="https://github.com/webbertakken/unity-actions"><img height="30" src="media/UnityActions-ReferenceLogo.png" alt="Unity Actions"></a>
+GameCI <a href="https://github.com/game-ci/unity-actions">Unity Actions</a>
 status repository for related Actions.
 
 ## Community
 
 Feel free to join us on
-<a href="http://unity-ci.com/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
+<a href="http://game-ci.com/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
 and engage with the community.
 
 ## Contributing
 
-To help out sharpen the documentation, please find the docs [repository](https://github.com/Unity-CI/Website).
+To help improve the documentation, please find the docs [repository](https://github.com/game-ci/documentation).
 
 To contribute to Unity Builder, kindly read the [contribution guide](./CONTRIBUTING.md).
 
