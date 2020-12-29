@@ -1,4 +1,5 @@
 import Versioning from './versioning';
+import UnityVersioning from './unity-versioning';
 import BuildParameters from './build-parameters';
 import Input from './input';
 import Platform from './platform';
@@ -6,6 +7,10 @@ import Platform from './platform';
 const determineVersion = jest
   .spyOn(Versioning, 'determineVersion')
   .mockImplementation(() => '1.3.37');
+
+const determineUnityVersion = jest
+  .spyOn(UnityVersioning, 'determineUnityVersion')
+  .mockImplementation(() => '2019.2.11f1');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -22,12 +27,9 @@ describe('BuildParameters', () => {
       expect(determineVersion).toHaveBeenCalledTimes(1);
     });
 
-    it('returns the version', async () => {
-      const mockValue = 'someVersion';
-      jest.spyOn(Input, 'unityVersion', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ version: mockValue }),
-      );
+    it('determines the unity version only once', async () => {
+      await BuildParameters.create();
+      expect(determineUnityVersion).toHaveBeenCalledTimes(1);
     });
 
     it('returns the android version code with provided input', async () => {

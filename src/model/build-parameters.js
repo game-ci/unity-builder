@@ -1,6 +1,7 @@
 import AndroidVersioning from './android-versioning';
 import Input from './input';
 import Platform from './platform';
+import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 
 class BuildParameters {
@@ -10,6 +11,12 @@ class BuildParameters {
       Input.targetPlatform,
       Input.androidAppBundle,
     );
+
+    const unityVersion = UnityVersioning.determineUnityVersion(
+      Input.projectPath,
+      Input.unityVersion,
+    );
+
     const buildVersion = await Versioning.determineVersion(
       Input.versioningStrategy,
       Input.specifiedVersion,
@@ -21,7 +28,7 @@ class BuildParameters {
     );
 
     return {
-      version: Input.unityVersion,
+      version: unityVersion,
       customImage: Input.customImage,
 
       runnerTempPath: process.env.RUNNER_TEMP,

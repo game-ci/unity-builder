@@ -9,7 +9,7 @@ const core = require('@actions/core');
  */
 class Input {
   static get unityVersion() {
-    return core.getInput('unityVersion');
+    return core.getInput('unityVersion') || 'auto';
   }
 
   static get customImage() {

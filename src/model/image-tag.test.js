@@ -1,6 +1,6 @@
 import ImageTag from './image-tag';
 
-describe('UnityImageVersion', () => {
+describe('ImageTag', () => {
   const some = {
     repository: 'test1',
     name: 'test2',
