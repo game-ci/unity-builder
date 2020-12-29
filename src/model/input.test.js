@@ -10,7 +10,7 @@ afterEach(() => {
 describe('Input', () => {
   describe('unityVersion', () => {
     it('returns the default value', () => {
-      expect(Input.unityVersion).toStrictEqual('');
+      expect(Input.unityVersion).toStrictEqual('auto');
     });
 
     it('takes input from the users workflow', () => {

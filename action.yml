@@ -4,8 +4,8 @@ description: 'Build Unity projects for different platforms.'
 inputs:
   unityVersion:
     required: false
-    default: ''
-    description: 'Version of unity to use for building the project.'
+    default: 'auto'
+    description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
   customImage:
     required: false
     default: ''
