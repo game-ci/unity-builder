@@ -24,6 +24,7 @@ namespace UnityBuilderAction
         scenes = scenes,
         locationPathName = options["customBuildPath"],
         target = (BuildTarget) Enum.Parse(typeof(BuildTarget), options["buildTarget"]),
+        options = BuildOptions.EnableHeadlessMode
       };
 
       // Set version for this build
