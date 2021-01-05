@@ -22,7 +22,7 @@ namespace UnityBuilderAction
       // Get all buildOptions from options
       BuildOptions buildOptions = BuildOptions.None;
       foreach (string buildOptionString in Enum.GetNames(typeof(BuildOptions))) {
-        if (providedArguments.ContainsKey(buildOptionString)) {
+        if (options.ContainsKey(buildOptionString)) {
           BuildOptions buildOptionEnum = (BuildOptions) Enum.Parse(typeof(BuildOptions), buildOptionString);
           buildOptions |= buildOptionEnum;
         }
