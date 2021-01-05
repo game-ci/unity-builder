@@ -18,12 +18,22 @@ namespace UnityBuilderAction
 
       // Gather values from project
       var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(s => s.path).ToArray();
+      
+      // Get all buildOptions from options
+      BuildOptions buildOptions = BuildOptions.None;
+      foreach (string buildOptionString in Enum.GetNames(typeof(BuildOptions))) {
+        if (options.ContainsKey(buildOptionString)) {
+          BuildOptions buildOptionEnum = (BuildOptions) Enum.Parse(typeof(BuildOptions), buildOptionString);
+          buildOptions |= buildOptionEnum;
+        }
+      }
 
       // Define BuildPlayer Options
-      var buildOptions = new BuildPlayerOptions {
+      var buildPlayerOptions = new BuildPlayerOptions {
         scenes = scenes,
         locationPathName = options["customBuildPath"],
         target = (BuildTarget) Enum.Parse(typeof(BuildTarget), options["buildTarget"]),
+        options = buildOptions
       };
 
       // Set version for this build
@@ -31,11 +41,11 @@ namespace UnityBuilderAction
       VersionApplicator.SetAndroidVersionCode(options["androidVersionCode"]);
       
       // Apply Android settings
-      if (buildOptions.target == BuildTarget.Android)
+      if (buildPlayerOptions.target == BuildTarget.Android)
         AndroidSettings.Apply(options);
 
       // Perform build
-      BuildReport buildReport = BuildPipeline.BuildPlayer(buildOptions);
+      BuildReport buildReport = BuildPipeline.BuildPlayer(buildPlayerOptions);
 
       // Summary
       BuildSummary summary = buildReport.summary;
