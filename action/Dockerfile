@@ -10,7 +10,7 @@ LABEL "repository"="http://github.com/webbertakken/unity-actions"
 LABEL "homepage"="http://github.com/webbertakken/unity-actions"
 LABEL "maintainer"="Webber Takken <webber@takken.io>"
 
-RUN apt-get -y install locales
+RUN apt-get -q install -y --no-install-recommends --allow-downgrades && apt-get clean
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
