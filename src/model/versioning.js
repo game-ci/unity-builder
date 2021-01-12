@@ -67,8 +67,16 @@ export default class Versioning {
   /**
    * Regex to parse version description into separate fields
    */
-  static get descriptionRegex() {
+  static get descriptionRegex1() {
     return /^v([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
+  }
+
+  static get descriptionRegex2() {
+    return /^v([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
+  }
+
+  static get descriptionRegex3() {
+    return /^v([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   static async determineVersion(strategy, inputVersion) {
@@ -125,10 +133,16 @@ export default class Versioning {
       return version;
     }
 
-    const { tag, commits, hash } = await this.parseSemanticVersion();
-    core.info(`Found semantic version ${tag}.${commits} for ${this.branch}@${hash}`);
+    const versionDescriptor = await this.parseSemanticVersion();
 
-    return `${tag}.${commits}`;
+    if (versionDescriptor) {
+      const { tag, commits, hash } = versionDescriptor;
+      core.info(`Found semantic version ${tag}.${commits} for ${this.branch}@${hash}`);
+      return `${tag}.${commits}`;
+    }
+    const version = `0.0.${await this.getTotalNumberOfCommits()}`;
+    core.info(`Generated version ${version} (semantic version couldn't be determined).`);
+    return version;
   }
 
   /**
@@ -151,7 +165,7 @@ export default class Versioning {
     const description = await this.getVersionDescription();
 
     try {
-      const [match, tag, commits, hash] = this.descriptionRegex.exec(description);
+      const [match, tag, commits, hash] = this.descriptionRegex1.exec(description);
 
       return {
         match,
@@ -160,7 +174,32 @@ export default class Versioning {
         hash,
       };
     } catch (error) {
-      throw new Error(`Failed to parse git describe output: "${description}".`);
+      try {
+        const [match, tag, commits, hash] = this.descriptionRegex2.exec(description);
+
+        return {
+          match,
+          tag,
+          commits,
+          hash,
+        };
+      } catch (error_) {
+        try {
+          const [match, tag, commits, hash] = this.descriptionRegex3.exec(description);
+
+          return {
+            match,
+            tag,
+            commits,
+            hash,
+          };
+        } catch (error__) {
+          core.warning(
+            `Failed to parse git describe output or version can not be determined through: "${description}".`,
+          );
+          return false;
+        }
+      }
     }
   }
 
