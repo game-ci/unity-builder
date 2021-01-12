@@ -62,6 +62,8 @@ class Docker {
         --env ANDROID_KEYALIAS_PASS="${androidKeyaliasPass}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
         --env HOME=/github/home \
+        --env LANG="C.UTF-8"
+        --env LC_ALL="C.UTF-8"
         --env GITHUB_REF \
         --env GITHUB_SHA \
         --env GITHUB_REPOSITORY \
