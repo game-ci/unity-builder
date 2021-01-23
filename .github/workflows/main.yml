@@ -77,10 +77,11 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: Build (${{ matrix.unityVersion }})
           path: build
+          retention-days: 14
   k8sBuilds:
     name: K8s build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
@@ -120,9 +121,10 @@ jobs:
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           volume: ${{ steps.k8s-unity-build.outputs.volume }}
           sourcePath: repo/build/
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: Kubernetes Build (${{ matrix.targetPlatform }})
           path: k8s-volume-download
+          retention-days: 14
       - run: ./action/bootstrapper/ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
