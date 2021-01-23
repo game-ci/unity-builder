@@ -1,0 +1,83 @@
+name: Builds
+
+on:
+  push: { branches: [main] }
+  pull_request_target:
+    paths-ignore:
+      - '.github/**'
+
+jobs:
+  buildForAllPlatforms:
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - test-project
+        unityVersion:
+          - 2019.2.11f1
+          - 2019.3.15f1
+        unityLicense:
+          - ${{ secrets.UNITY_LICENSE }}
+        targetPlatform:
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk.
+          - WebGL # WebGL.
+          #          - StandaloneWindows # Build a Windows standalone.
+          #          - WSAPlayer # Build an Windows Store Apps player.
+          #          - PS4 # Build a PS4 Standalone.
+          #          - XboxOne # Build a Xbox One Standalone.
+          #          - tvOS # Build to Apple's tvOS platform.
+          #          - Switch # Build a Nintendo Switch player
+    steps:
+      ###########################
+      #         Checkout        #
+      ###########################
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
+        with:
+          lfs: true
+      - name: Checkout (pull_request_target)
+        uses: actions/checkout@v2
+        if: github.event.event_type == 'pull_request_target'
+        with:
+          lfs: true
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      ###########################
+      #          Cache          #
+      ###########################
+      - uses: actions/cache@v2
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-
+            Library-
+
+      ###########################
+      #          Build          #
+      ###########################
+      - uses: ./
+        env:
+          UNITY_LICENSE: ${{ matrix.unityLicense }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+
+      ###########################
+      #          Upload         #
+      ###########################
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Build (${{ matrix.unityVersion }})
+          path: build
+          retention-days: 14
