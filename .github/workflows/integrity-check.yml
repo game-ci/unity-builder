@@ -1,0 +1,24 @@
+name: Integrity
+
+on:
+  push: { branches: [main] }
+  pull_request: {}
+
+env:
+  CODECOV_TOKEN: '2f2eb890-30e2-4724-83eb-7633832cf0de'
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - run: yarn
+      - run: yarn lint
+      - run: yarn test --coverage
+      - run: bash <(curl -s https://codecov.io/bash)
+      - run: yarn build || { echo "build command should always succeed" ; exit 61; }
+      # - run: yarn build --quiet && git diff --quiet action || { echo "action should be auto generated" ; git diff action ; exit 62; }

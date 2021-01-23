@@ -1,13 +1,14 @@
-name: Delete old artifacts
+name: Cleanup (cron)
 on:
   schedule:
     - cron: '30 10 * * SUN' # every sunday at 10:30
 
 jobs:
-  delete-artifacts:
+  deleteArtifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: kolpav/purge-artifacts-action@v1
+      - name: Delete old artifacts
+        uses: kolpav/purge-artifacts-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           expire-in: 21 days
