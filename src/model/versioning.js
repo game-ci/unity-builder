@@ -228,7 +228,7 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return this.git(['describe', '--long', '--tags', '--always', '--debug', this.sha]);
+    return this.git(['describe', '--long', '--tags', '--always', this.sha]);
   }
 
   /**
