@@ -19,7 +19,8 @@
     "@actions/github": "^2.1.1",
     "base-64": "^0.1.0",
     "kubernetes-client": "^9.0.0",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "aws-sdk": "^2.812.0"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",

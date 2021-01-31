@@ -85,6 +85,18 @@ class Input {
     return core.getInput('customParameters') || '';
   }
 
+  static get remote() {
+    return core.getInput('awsRegion') || '';
+  }
+
+  static get awsStackName() {
+    return core.getInput('awsStackName') || '';
+  }
+
+  static get awsRegion() {
+    return core.getInput('awsRegion') || '';
+  }
+
   static get kubeConfig() {
     return core.getInput('kubeConfig') || '';
   }

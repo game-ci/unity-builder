@@ -1,0 +1,52 @@
+name: AWS
+
+on:
+  push: { branches: [aws] }
+
+env:
+  AWS_REGION: "eu-west-1"
+
+jobs:
+  buildForAllPlatforms:
+    name: AWS Fargate Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - test-project
+        unityVersion:
+          - 2019.2.11f1
+          - 2019.3.15f1
+        unityLicense:
+          - ${{ secrets.UNITY_LICENSE }}
+        targetPlatform:
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk.
+          - WebGL # WebGL.
+          #          - StandaloneWindows # Build a Windows standalone.
+          #          - WSAPlayer # Build an Windows Store Apps player.
+          #          - PS4 # Build a PS4 Standalone.
+          #          - XboxOne # Build a Xbox One Standalone.
+          #          - tvOS # Build to Apple's tvOS platform.
+          #          - Switch # Build a Nintendo Switch player
+    # steps
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
+        with:
+          lfs: true
+      - uses: ./
+        id: aws-fargate-unity-build
+        env:
+          UNITY_LICENSE: ${{ matrix.unityLicense }}
+        with:
+          remote: aws
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+
