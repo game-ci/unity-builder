@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
+
 const fs = require('fs');
 const core = require('@actions/core');
 
