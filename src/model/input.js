@@ -86,7 +86,7 @@ class Input {
   }
 
   static get remote() {
-    return core.getInput('awsRegion') || '';
+    return core.getInput('remote') || '';
   }
 
   static get awsStackName() {
