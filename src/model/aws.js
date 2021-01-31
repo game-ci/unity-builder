@@ -8,15 +8,49 @@ const core = require('@actions/core');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
-    await this.run(buildParameters.awsStackName, baseImage.toString());
+    await this.run(
+      buildParameters.awsStackName,
+      'alpine/git',
+      [
+        '/bin/sh',
+        '-c',
+        `apk update;
+        apk add git-lfs;
+        ls ./;
+        export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
+        cd /data;
+        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
+        git clone https://github.com/webbertakken/unity-builder.git builder;
+        cd repo;
+        git checkout $GITHUB_SHA;
+        ls`,
+      ],
+      [
+        {
+          name: 'GITHUB_SHA',
+          value: process.env.GITHUB_SHA,
+        },
+      ],
+    );
+    await this.run(
+      buildParameters.awsStackName,
+      baseImage.toString(),
+      ['bin/bash', '-c', 'echo "test"'],
+      [
+        {
+          name: '',
+          value: '',
+        },
+      ],
+    );
   }
 
-  static async run(stackName, image) {
+  static async run(stackName, image, commands, environment) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
     const EC2 = new SDK.EC2();
 
-    const alphanumericImageName = image.toString().replace(/[^0-9a-z]/gi, '');
+    const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
     const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}`;
     const stackExists =
       (await CF.listStacks().promise()).StackSummaries.find(
@@ -61,8 +95,8 @@ class AWS {
         containerOverrides: [
           {
             name: 'example',
-            command: ['bin/bash', '-c', 'echo "test"'],
-            // environment: []
+            command: commands,
+            environment,
           },
         ],
       },
@@ -104,12 +138,14 @@ class AWS {
       ],
     }).promise();
     core.info(JSON.stringify(networkInterfaces.NetworkInterfaces[0].Association.PublicIp));
-    // const client = new WebSocketClient('ws://');
-    // client.on('connect', (con) => {
-    //   con.on('message', (message) => {
-    //     core.info(message);
-    //   });
-    // });
+    const client = new WebSocketClient(
+      `ws://${networkInterfaces.NetworkInterfaces[0].Association.PublicIp}:80`,
+    );
+    client.on('connect', (con) => {
+      con.on('message', (message) => {
+        core.info(message);
+      });
+    });
 
     // await this.watch(async () => {
     //   return (
