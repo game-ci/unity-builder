@@ -103,7 +103,7 @@ class AWS {
           .details.find((x) => x.name === 'networkInterfaceId').value,
       ],
     }).promise();
-    core.info(JSON.stringify(networkInterfaces.NetworkInterfaces[0].Association[0].Ipv6Address));
+    core.info(JSON.stringify(networkInterfaces.NetworkInterfaces[0].Association.PublicIp));
     // const client = new WebSocketClient('ws://');
     // client.on('connect', (con) => {
     //   con.on('message', (message) => {
