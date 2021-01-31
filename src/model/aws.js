@@ -7,7 +7,11 @@ const core = require('@actions/core');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
-    SDK.config.update({ region: buildParameters.awsRegion });
+    SDK.config.update({
+      region: buildParameters.awsRegion,
+      secretAccessKey: buildParameters.awsSecretAccessKey,
+      accessKeyId: buildParameters.awsAccessKeyId,
+    });
     await this.run(buildParameters.awsStackName, baseImage.toString());
   }
 

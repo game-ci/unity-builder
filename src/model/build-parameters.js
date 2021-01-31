@@ -51,6 +51,8 @@ class BuildParameters {
       remote: Input.remote,
       awsStackName: Input.awsStackName,
       awsRegion: Input.awsRegion,
+      awsAccessKeyId: Input.awsAccessKeyId,
+      awsSecretAccessKey: Input.awsSecretAccessKey,
       kubeContainerMemory: Input.kubeContainerMemory,
       kubeContainerCPU: Input.kubeContainerCPU,
       kubeVolumeSize: Input.kubeVolumeSize,

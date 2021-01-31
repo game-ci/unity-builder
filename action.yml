@@ -42,6 +42,14 @@ inputs:
     default: 'eu-west-1'
     required: false
     description: ''
+  awsAccessKeyId:
+    default: ''
+    required: false
+    description: 'AWS Access Key Id'
+  awsAccessKey:
+    default: ''
+    required: false
+    description: 'AWS Access Key Secret'
   kubeConfig:
     default: ''
     required: false
