@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Fargate cluster that can span public and private subnets. Supports
+             public facing load balancers, private internal load balancers, and
+             both internal and external service discovery namespaces.
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: development
+    Description: "Your deployment environment: DEV, QA , PROD"
+
+  ServiceName:
+    Type: String
+    Default: example
+    Description: A name for the service
+  ImageUrl:
+    Type: String
+    Default: nginx
+    Description: The url of a docker image that contains the application process that
+                 will handle the traffic for this service
+  ContainerPort:
+    Type: Number
+    Default: 80
+    Description: What port number the application inside the docker container is binding to
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: How much memory in megabytes to give the container
+  Prefix:
+    Type: String
+    Default: "test"
+
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+  Role:
+    Type: String
+    Default: ""
+    Description: (Optional) An IAM role to give the service's containers if the code within needs to
+                 access other AWS resources like S3 buckets, DynamoDB tables, etc
+  EFSMountPath:
+    Type: String
+    Default: "/usr/share/nginx/html"
+
+
+
+
+Mappings:
+  # Hard values for the subnet masks. These masks define
+  # the range of internal IP addresses that can be assigned.
+  # The VPC can have all IP's from 10.0.0.0 to 10.0.255.255
+  # There are four subnets which cover the ranges:
+  #
+  # 10.0.0.0 - 10.0.0.255
+  # 10.0.1.0 - 10.0.1.255
+  # 10.0.2.0 - 10.0.2.255
+  # 10.0.3.0 - 10.0.3.255
+
+  SubnetConfig:
+    VPC:
+      CIDR: '10.0.0.0/16'
+    PublicOne:
+      CIDR: '10.0.0.0/24'
+    PublicTwo:
+      CIDR: '10.0.1.0/24'
+  # A log group for storing the stdout logs from this service's containers
+Conditions:
+  HasCustomRole: !Not [ !Equals [!Ref 'Role', ''] ]
+  
+Resources:
+
+  # The task definition. This is a simple metadata description of what
+  # container to run, and what resource requirements it has.
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref 'ServiceName'
+      Cpu: !Ref 'ContainerCpu'
+      Memory: !Ref 'ContainerMemory'
+      NetworkMode: awsvpc
+      Volumes:
+        - Name: efs-data
+          EFSVolumeConfiguration:
+            FilesystemId: 
+              Fn::ImportValue: !Sub ${EnvironmentName}:EfsFileStorageId
+            TransitEncryption: ENABLED
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: 
+        Fn::ImportValue: !Sub ${EnvironmentName}:ECSTaskExecutionRole
+      TaskRoleArn:
+        Fn::If:
+          - 'HasCustomRole'
+          - !Ref 'Role'
+          - !Ref "AWS::NoValue"
+      ContainerDefinitions:
+        - Name: !Ref 'ServiceName'
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          Image: !Ref 'ImageUrl'
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              HostPort: !Ref ContainerPort
+          Environment: 
+            - Name: ALLOW_EMPTY_PASSWORD
+              Value: 'yes'
+          MountPoints:
+            - SourceVolume: efs-data
+              ContainerPath: !Ref EFSMountPath
+              ReadOnly: false
+          
+         
+          LogConfiguration:
+            LogDriver: 'awslogs'
+            Options:
+              awslogs-group: !Ref 'ServiceName'
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: !Ref 'ServiceName'
