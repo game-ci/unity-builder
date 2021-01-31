@@ -16,15 +16,15 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2019.2.11f1
+        #  - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
-          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          #- StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
-          - iOS # Build an iOS player.
-          - Android # Build an Android .apk.
-          - WebGL # WebGL.
+          #- iOS # Build an iOS player.
+          #- Android # Build an Android .apk.
+          #- WebGL # WebGL.
           #          - StandaloneWindows # Build a Windows standalone.
           #          - WSAPlayer # Build an Windows Store Apps player.
           #          - PS4 # Build a PS4 Standalone.
