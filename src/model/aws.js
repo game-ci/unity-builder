@@ -91,7 +91,10 @@ class AWS {
     core.info(`Build job is running, `);
 
     // watching logs
-    const taskDescriptions = await ECS.describeTasks({ tasks: [task.tasks[0].taskArn] }).promise();
+    const taskDescriptions = await ECS.describeTasks({
+      tasks: [task.tasks[0].taskArn],
+      cluster: clusterName,
+    }).promise();
     core.info(taskDescriptions.tasks[0]);
     // const client = new WebSocketClient('ws://');
     // client.on('connect', (con) => {
