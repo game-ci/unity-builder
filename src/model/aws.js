@@ -95,7 +95,7 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
       cluster: clusterName,
     }).promise();
-    core.info(taskDescriptions.tasks[0]);
+    core.info(taskDescriptions.tasks[0].toString());
     // const client = new WebSocketClient('ws://');
     // client.on('connect', (con) => {
     //   con.on('message', (message) => {
