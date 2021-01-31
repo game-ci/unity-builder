@@ -18,8 +18,6 @@ jobs:
         unityVersion:
           - 2019.2.11f1
           - 2019.3.15f1
-        unityLicense:
-          - ${{ secrets.UNITY_LICENSE }}
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -43,7 +41,7 @@ jobs:
       - uses: ./
         id: aws-fargate-unity-build
         env:
-          UNITY_LICENSE: ${{ matrix.unityLicense }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           remote: aws
           projectPath: ${{ matrix.projectPath }}
