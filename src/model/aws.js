@@ -14,7 +14,8 @@ class AWS {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
-    const taskDefStackName = `${stackName}-taskDef-${image}`;
+    const alphanumericImageName = image.toString().replace(/[^0-9a-z]/gi, '');
+    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}`;
     const stackExists =
       (await CF.listStacks().promise()).StackSummaries.find(
         (x) => x.StackName === taskDefStackName,
