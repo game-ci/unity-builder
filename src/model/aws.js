@@ -22,7 +22,7 @@ class AWS {
 
     if (!stackExists) {
       core.info("Task Definition doesn't exist, creating a task definition stack");
-      const taskDefCloudFormation = fs.readFileSync(`${__dirname}\\task-def-formation.yml`, 'utf8');
+      const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
       await CF.createStack({
         StackName: taskDefStackName,
         TemplateBody: taskDefCloudFormation,
