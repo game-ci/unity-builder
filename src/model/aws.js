@@ -111,7 +111,7 @@ class AWS {
     let latestLogTimestamp = new Date().getUTCSeconds();
     let complete = false;
     while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 30000));
       if ((await statusFunc()) === 'Stopped') {
         complete = true;
       }
