@@ -2,6 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
 
+const WebSocketClient = require('websocket').client;
 const fs = require('fs');
 const core = require('@actions/core');
 
@@ -87,9 +88,18 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
     }).promise();
 
-    core.info('Build job is running, watching logs');
+    core.info(`Build job is running, `);
 
     // watching logs
+    const taskDescriptions = await ECS.describeTasks({ tasks: [task.tasks[0].taskArn] }).promise();
+    core.info(taskDescriptions.tasks[0]);
+    // const client = new WebSocketClient('ws://');
+    // client.on('connect', (con) => {
+    //   con.on('message', (message) => {
+    //     core.info(message);
+    //   });
+    // });
+
     await this.watch(async () => {
       return (
         await ECS.describeTasks({ tasks: [task.tasks[0].taskArn], cluster: clusterName }).promise()
@@ -102,36 +112,6 @@ class AWS {
     }).promise();
 
     core.info('Build job has ended');
-
-    return task;
-  }
-
-  static async watch(statusFunc, logGroupName) {
-    const CloudWatchLogs = new SDK.CloudWatchLogs();
-    let latestLogTimestamp = new Date().getUTCSeconds();
-    let complete = false;
-    while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, 30000));
-      if ((await statusFunc()) === 'Stopped') {
-        complete = true;
-      }
-
-      const log = await CloudWatchLogs.getLogEvents({
-        startTime: latestLogTimestamp,
-        logGroupName,
-        logStreamName: (
-          await CloudWatchLogs.describeLogStreams({
-            logGroupName,
-          }).promise()
-        ).logStreams[0].logStreamName,
-      }).promise();
-      if (log.events.length > 0) {
-        for (let index = 0; index < log.events.length; index++) {
-          core.info(log.events[index].message);
-        }
-        latestLogTimestamp = log.events[log.events.length - 1].timestamp;
-      }
-    }
   }
 }
 export default AWS;

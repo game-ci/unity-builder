@@ -20,7 +20,8 @@
     "base-64": "^0.1.0",
     "kubernetes-client": "^9.0.0",
     "semver": "^7.3.2",
-    "aws-sdk": "^2.812.0"
+    "aws-sdk": "^2.812.0",
+    "websocket": "^1.0.33"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
