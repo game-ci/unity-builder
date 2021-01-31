@@ -84,20 +84,21 @@ class AWS {
 
     await ECS.waitFor('tasksRunning', {
       cluster: clusterName,
-      tasks: [task],
+      tasks: [task.tasks[0].taskArn],
     }).promise();
 
     core.info('Build job is running, watching logs');
 
     // watching logs
     await this.watch(async () => {
-      return (await ECS.describeTasks({ tasks: [task], cluster: clusterName }).promise()).tasks[0]
-        .lastStatus;
+      return (
+        await ECS.describeTasks({ tasks: [task.tasks[0].taskArn], cluster: clusterName }).promise()
+      ).tasks[0].lastStatus;
     }, 'example');
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
-      tasks: [task],
+      tasks: [task.tasks[0].taskArn],
     }).promise();
 
     core.info('Build job has ended');
