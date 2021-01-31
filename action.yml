@@ -35,7 +35,7 @@ inputs:
     required: false
     description: 'Either local, k8s or aws can be used to run builds, additional configuration parameters are required for options other than local.'
   awsStackName:
-    default: 'game-ci-stack'
+    default: 'game-ci'
     required: false
     description: 'The Cloud Formation stack name that must be setup before using this option.'
   awsRegion:
