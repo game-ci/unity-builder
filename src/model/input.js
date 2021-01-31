@@ -93,18 +93,6 @@ class Input {
     return core.getInput('awsStackName') || '';
   }
 
-  static get awsRegion() {
-    return core.getInput('awsRegion') || '';
-  }
-
-  static get awsAccessKeyId() {
-    return core.getInput('awsAccessKeyId') || '';
-  }
-
-  static get awsSecretAccessKey() {
-    return core.getInput('awsSecretAccessKey') || '';
-  }
-
   static get kubeConfig() {
     return core.getInput('kubeConfig') || '';
   }
