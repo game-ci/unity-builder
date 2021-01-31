@@ -1,4 +1,4 @@
-import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, AWS } from './model';
 
 const core = require('@actions/core');
 
@@ -19,6 +19,8 @@ async function action() {
       break;
 
     case 'aws':
+      core.info('Building with AWS');
+      await AWS.runBuildJob(buildParameters, baseImage);
       break;
 
     // default and local case
