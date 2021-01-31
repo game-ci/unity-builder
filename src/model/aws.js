@@ -14,6 +14,7 @@ class AWS {
   static async run(stackName, image) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
+    const EC2 = new SDK.EC2();
 
     const alphanumericImageName = image.toString().replace(/[^0-9a-z]/gi, '');
     const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}`;
@@ -95,7 +96,14 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
       cluster: clusterName,
     }).promise();
-    core.info(JSON.stringify(taskDescriptions.tasks[0]));
+    const networkInterfaces = await EC2.describeNetworkInterfaces({
+      NetworkInterfaceIds: [
+        taskDescriptions.tasks[0].attachments
+          .find((x) => x.type === 'ElasticNetworkInterface')
+          .details.find((x) => x.name === 'networkInterfaceId').value,
+      ],
+    }).promise();
+    core.info(JSON.stringify(networkInterfaces.NetworkInterfaces[0].Association[0].Ipv6Address));
     // const client = new WebSocketClient('ws://');
     // client.on('connect', (con) => {
     //   con.on('message', (message) => {
