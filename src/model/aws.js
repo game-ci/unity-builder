@@ -100,11 +100,11 @@ class AWS {
     //   });
     // });
 
-    await this.watch(async () => {
-      return (
-        await ECS.describeTasks({ tasks: [task.tasks[0].taskArn], cluster: clusterName }).promise()
-      ).tasks[0].lastStatus;
-    }, 'example');
+    // await this.watch(async () => {
+    //   return (
+    //     await ECS.describeTasks({ tasks: [task.tasks[0].taskArn], cluster: clusterName }).promise()
+    //   ).tasks[0].lastStatus;
+    // }, 'example');
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
