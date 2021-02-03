@@ -61,7 +61,6 @@ class Docker {
         --env ANDROID_KEYALIAS_NAME="${androidKeyaliasName}" \
         --env ANDROID_KEYALIAS_PASS="${androidKeyaliasPass}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
-        --env HOME=/github/home \
         --env GITHUB_REF \
         --env GITHUB_SHA \
         --env GITHUB_REPOSITORY \
@@ -78,7 +77,7 @@ class Docker {
         --env RUNNER_TEMP \
         --env RUNNER_WORKSPACE \
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
-        --volume "${runnerTempPath}/_github_home":"/github/home" \
+        --volume "${runnerTempPath}/_github_home":"/root" \
         --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
         --volume "${workspace}":"/github/workspace" \
         ${image}`;
