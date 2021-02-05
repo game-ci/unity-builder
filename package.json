@@ -21,8 +21,7 @@
     "base-64": "^0.1.0",
     "cloudwatch-logs-hose": "0.0.2",
     "kubernetes-client": "^9.0.0",
-    "semver": "^7.3.2",
-    "websocket": "^1.0.33"
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",

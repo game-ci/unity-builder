@@ -2,7 +2,6 @@
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
 
-const WebSocketClient = require('websocket').client;
 const fs = require('fs');
 const core = require('@actions/core');
 const hose = require('cloudwatch-logs-hose');
@@ -49,7 +48,6 @@ class AWS {
   static async run(stackName, image, commands, environment) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
-    const EC2 = new SDK.EC2();
 
     const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
     const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}`;
@@ -128,8 +126,7 @@ class AWS {
 
     // watching logs
     const source = new hose.Source({
-      LogGroup: '/aws/lambda/MINUS-49dda359e9abcd4e180f73bd8ba7e2f9',
-      aws: { region: 'us-west-2' },
+      LogGroup: baseResources.StackResources.find((x) => x.LogicalResourceId === 'LogGroup'),
     });
 
     source.on('logs', AWS.onlog);
@@ -148,8 +145,10 @@ class AWS {
     core.info('Build job has ended');
   }
 
-  static onlog(batch){
-
+  static onlog(batch) {
+    batch.forEach((log) => {
+      core.info(`log: ${log}`);
+    });
   }
 }
 export default AWS;
