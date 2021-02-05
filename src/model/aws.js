@@ -11,20 +11,7 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       'alpine/git',
-      [
-        '/bin/sh',
-        '-c',
-        `apk update;
-        apk add git-lfs;
-        ls ./;
-        export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
-        cd /data;
-        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
-        git clone https://github.com/webbertakken/unity-builder.git builder;
-        cd repo;
-        git checkout $GITHUB_SHA;
-        ls`,
-      ],
+      ['clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
       [
         {
           name: 'GITHUB_SHA',
