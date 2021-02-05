@@ -5,6 +5,7 @@ import * as SDK from 'aws-sdk';
 const WebSocketClient = require('websocket').client;
 const fs = require('fs');
 const core = require('@actions/core');
+const hose = require('cloudwatch-logs-hose');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -126,32 +127,18 @@ class AWS {
     core.info(`Build job is running, `);
 
     // watching logs
-    const taskDescriptions = await ECS.describeTasks({
-      tasks: [task.tasks[0].taskArn],
-      cluster: clusterName,
-    }).promise();
-    const networkInterfaces = await EC2.describeNetworkInterfaces({
-      NetworkInterfaceIds: [
-        taskDescriptions.tasks[0].attachments
-          .find((x) => x.type === 'ElasticNetworkInterface')
-          .details.find((x) => x.name === 'networkInterfaceId').value,
-      ],
-    }).promise();
-    core.info(JSON.stringify(networkInterfaces.NetworkInterfaces[0].Association.PublicIp));
-    const client = new WebSocketClient(
-      `ws://${networkInterfaces.NetworkInterfaces[0].Association.PublicIp}:80`,
-    );
-    client.on('connect', (con) => {
-      con.on('message', (message) => {
-        core.info(message);
-      });
+    const source = new hose.Source({
+      LogGroup: '/aws/lambda/MINUS-49dda359e9abcd4e180f73bd8ba7e2f9',
+      aws: { region: 'us-west-2' },
     });
 
-    // await this.watch(async () => {
-    //   return (
-    //     await ECS.describeTasks({ tasks: [task.tasks[0].taskArn], cluster: clusterName }).promise()
-    //   ).tasks[0].lastStatus;
-    // }, 'example');
+    source.on('logs', AWS.onlog);
+
+    source.on('error', (error) => {
+      core.info('Error: ', error);
+    });
+
+    source.open();
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
@@ -159,6 +146,10 @@ class AWS {
     }).promise();
 
     core.info('Build job has ended');
+  }
+
+  static onlog(batch){
+
   }
 }
 export default AWS;
