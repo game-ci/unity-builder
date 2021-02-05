@@ -117,13 +117,17 @@ class AWS {
       aws: { region: SDK.config.region },
     });
 
-    source.on('logs', AWS.onlog);
+    try {
+      source.on('logs', AWS.onlog);
 
-    source.on('error', (error) => {
-      core.info('Error: ', error);
-    });
+      source.on('error', (error) => {
+        core.info('Error: ', error);
+      });
 
-    source.open();
+      source.open();
+    } catch (error) {
+      core.error(error);
+    }
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
