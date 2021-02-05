@@ -112,12 +112,13 @@ class AWS {
     core.info(`Build job is running, `);
 
     // watching logs
-    const source = new hose.Source({
-      LogGroup: baseResources.StackResources.find((x) => x.LogicalResourceId === 'LogGroup'),
-      aws: { region: SDK.config.region },
-    });
 
     try {
+      const source = new hose.Source({
+        LogGroup: baseResources.StackResources.find((x) => x.LogicalResourceId === 'LogGroup'),
+        aws: SDK.config,
+      });
+
       source.on('logs', AWS.onlog);
 
       source.on('error', (error) => {
@@ -126,7 +127,7 @@ class AWS {
 
       source.open();
     } catch (error) {
-      core.error(error);
+      core.info(error);
     }
 
     await ECS.waitFor('tasksStopped', {
