@@ -111,12 +111,10 @@ class AWS {
 
     core.info(`Build job is running, `);
 
-    const stackInstance = await CF.describeStackInstance({ StackSetName: stackName }).promise();
-
     // watching logs
     const source = new hose.Source({
       LogGroup: baseResources.StackResources.find((x) => x.LogicalResourceId === 'LogGroup'),
-      aws: { region: stackInstance.StackInstance.Region },
+      aws: { region: SDK.config.region },
     });
 
     source.on('logs', AWS.onlog);
