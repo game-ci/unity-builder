@@ -10,7 +10,7 @@ Part of the <a href="https://game.ci">GameCI</a> open source project.
 <br />
 <br />
 
-[![Actions status](https://github.com/webbertakken/unity-builder/workflows/Actions/badge.svg?event=push&branch=master)](https://github.com/webbertakken/unity-builder/actions?query=branch%3Amaster+event%3Apush+workflow%3A%22Actions)
+[![Actions status](https://github.com/game-ci/unity-builder/workflows/Actions/badge.svg?event=push&branch=main)](https://github.com/game-ci/unity-builder/actions?query=branch%3Amain+event%3Apush+workflow%3A%22Actions)
 [![lgtm - code quality](https://img.shields.io/lgtm/grade/javascript/g/webbertakken/unity-builder.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/webbertakken/unity-builder/context:javascript)
 [![codecov - test coverage](https://codecov.io/gh/webbertakken/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/webbertakken/unity-builder)
 <br />
@@ -19,9 +19,9 @@ Part of the <a href="https://game.ci">GameCI</a> open source project.
 ## How to use
 
 Find the
-[docs](https://game.ci/docs)
+[docs](https://game.ci/docs/github/builder)
 on the GameCI
-[website](https://game.ci/).
+[documentation website](https://game.ci/docs).
 
 ## Related actions
 
