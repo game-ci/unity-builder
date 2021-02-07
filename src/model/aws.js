@@ -172,7 +172,7 @@ class AWS {
   }
 
   static ab2str(buf) {
-    return String.fromCharCode.apply(undefined, new Uint8Array(buf));
+    return String.fromCharCode.apply(undefined, new Uint16Array(buf));
   }
 }
 export default AWS;
