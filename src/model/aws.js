@@ -131,7 +131,7 @@ class AWS {
         })
         .promise()
     ).ShardIterator;
-
+    
     while ((await getTaskStatus()) === 'RUNNING') {
       const records = await kinesis
         .getRecords({
@@ -140,7 +140,7 @@ class AWS {
         .promise();
       iterator = records.NextShardIterator;
       if (records.Records.length > 0){
-        core.info(Buffer.from(records.Records[0].Data, 'base64').toString('utf-8'));
+        core.info(Buffer.from(records.Records[0].Data.toString(), 'base64').toString('utf-8'));
       }
     }
 
