@@ -110,7 +110,6 @@ class AWS {
         cluster: clusterName,
         tasks: [task.tasks[0].taskArn],
       }).promise();
-      core.info(`Task status is ${tasks.tasks[0].lastStatus}`);
       return tasks.tasks[0].lastStatus;
     };
 
@@ -131,7 +130,9 @@ class AWS {
         })
         .promise()
     ).ShardIterator;
-    
+
+    core.info(`Task status is ${await getTaskStatus()}`);
+
     while ((await getTaskStatus()) === 'RUNNING') {
       const records = await kinesis
         .getRecords({
