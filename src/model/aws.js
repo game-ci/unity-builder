@@ -144,9 +144,11 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          core.info(
+          let json = JSON.parse(
             zlib.gunzipSync(Buffer.from(records.Records[index].Data, 'base64')).toString('utf8'),
           );
+          if("DATA_MESSAGE")
+          core.info(json.message,);
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
