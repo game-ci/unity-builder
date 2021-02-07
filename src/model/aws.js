@@ -148,6 +148,9 @@ class AWS {
           core.info(Buffer.from(record).toString('utf8'));
           core.info(Buffer.from(record, 'utf8').toString('utf8'));
           core.info(Buffer.from(record, 'base64').toString('utf8'));
+          core.info(
+            Buffer.from(Buffer.from(record, 'base64').toString('utf8'), 'base64').toString('utf8'),
+          );
         }
       }
     }
