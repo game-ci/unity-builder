@@ -144,10 +144,10 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          const element = records.Records[index].Data;
-          core.info(Buffer.from(element).toString('utf8'));
-          core.info(Buffer.from(element, 'base64').toString('utf8'));
-          core.info(AWS.ab2str(element));
+          const record = records.Records[index].Data;
+          core.info(Buffer.from(record).toString('utf8'));
+          core.info(Buffer.from(record, 'base64').toString('utf8'));
+          core.info(AWS.ab2str(record));
         }
       }
     }
