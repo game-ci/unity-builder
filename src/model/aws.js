@@ -2,10 +2,10 @@
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
 import { nanoid } from 'nanoid';
-import { CloudWatch, CloudWatchLogs } from 'aws-sdk';
 
 const fs = require('fs');
 const core = require('@actions/core');
+const kcl = require('aws-kcl');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -105,6 +105,60 @@ class AWS {
     core.info(`Build job is running, `);
 
     // watching logs
+    kcl({
+      initialize: (initializeInput, completeCallback) => {
+        // Your application specific initialization logic.
+
+        // After initialization is done, call completeCallback,
+        // to let the KCL know that the initialize operation is
+        // complete.
+        completeCallback();
+      },
+      processRecords: (processRecordsInput, completeCallback) => {
+        // Sample code for record processing.
+        if (!processRecordsInput || !processRecordsInput.records) {
+          // Invoke callback to tell the KCL to process next batch
+          // of records.
+          completeCallback();
+          return;
+        }
+        const { records } = processRecordsInput;
+        let record;
+        let sequenceNumber;
+        let partitionKey;
+        let data;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const element of records) {
+          record = element;
+          sequenceNumber = record.sequenceNumber;
+          partitionKey = record.partitionKey;
+          // Data is in base64 format.
+          data = Buffer.from(record.data, 'base64').toString();
+          // Record processing logic here.
+          core.info(data);
+        }
+        // Checkpoint last sequence number.
+        processRecordsInput.checkpointer.checkpoint(sequenceNumber, (_error, sn) => {
+          // Error handling logic. In this case, we call
+          // completeCallback to process more data.
+          completeCallback();
+        });
+      },
+      shutdown: (shutdownInput, completeCallback) => {
+        // Your shutdown logic.
+
+        if (shutdownInput.reason !== 'TERMINATE') {
+          completeCallback();
+          return;
+        }
+        shutdownInput.checkpointer.checkpoint((err) => {
+          // Error handling logic.
+          // Invoke the callback at the end to mark the shutdown
+          // operation complete.
+          completeCallback();
+        });
+      },
+    }).run();
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
