@@ -144,7 +144,7 @@ class AWS {
         for (let index = 0; index < records.Records.length; index++) {
           const element = records.Records[index];
           core.info(JSON.stringify(element.Data));
-          core.info(Buffer.from(element.Data, 'base64').toString());
+          core.info(Buffer.from(element.Data.toString('utf8'), 'utf8').toString());
         }
       }
     }
@@ -152,6 +152,10 @@ class AWS {
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
       tasks: [task.tasks[0].taskArn],
+    }).promise();
+
+    await CF.deleteStack({
+      StackName: taskDefStackName,
     }).promise();
 
     core.info('Build job has ended');
