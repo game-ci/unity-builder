@@ -144,7 +144,7 @@ class AWS {
         for (let index = 0; index < records.Records.length; index++) {
           const element = records.Records[index];
           core.info(JSON.stringify(element.Data));
-          core.info(Buffer.from(element.Data.toString('utf8'), 'utf8').toString());
+          core.info(AWS.ab2str(element.Data));
         }
       }
     }
@@ -165,6 +165,10 @@ class AWS {
     batch.forEach((log) => {
       core.info(`log: ${log}`);
     });
+  }
+
+  static ab2str(buf) {
+    return String.fromCharCode.apply(undefined, new Uint16Array(buf));
   }
 }
 export default AWS;
