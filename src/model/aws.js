@@ -50,10 +50,6 @@ class AWS {
             ParameterKey: 'ImageUrl',
             ParameterValue: image,
           },
-          {
-            ParameterKey: 'Entrypoint',
-            ParameterValue: commands,
-          },
         ],
       }).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
@@ -82,6 +78,7 @@ class AWS {
           {
             name: 'example',
             environment,
+            command: commands,
           },
         ],
       },

@@ -17,8 +17,6 @@ Parameters:
     Default: nginx
     Description: The url of a docker image that contains the application process that
                  will handle the traffic for this service
-  Entrypoint:
-    Type: List<String>
 
   ContainerPort:
     Type: Number
@@ -117,7 +115,6 @@ Resources:
           Cpu: !Ref 'ContainerCpu'
           Memory: !Ref 'ContainerMemory'
           Image: !Ref 'ImageUrl'
-          Entrypoint: !Ref 'Entrypoint'
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
               Value: 'yes'
