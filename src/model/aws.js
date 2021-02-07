@@ -34,7 +34,7 @@ class AWS {
     const taskDefStackName = `${stackName}-taskDef-${image}-${nanoid()}`
       .toString()
       .replace(/[^\da-z]/gi, '');
-    core.info("Task Definition doesn't exist, creating a task definition stack");
+    core.info('Creating build job resources');
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
