@@ -89,10 +89,11 @@ Resources:
   CloudWatchIAMRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      Statement:
-      - Effect: "Allow"
-        Action: "kinesis:PutRecord"
-        Resource: !Ref 'KinesisStream'
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: "Allow"
+          Action: "kinesis:PutRecord"
+          Resource: !Ref 'KinesisStream'
 
   KinesisStream:
     Type: AWS::Kinesis::Stream
