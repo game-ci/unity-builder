@@ -77,6 +77,7 @@ Resources:
   SubscriptionFilter:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
+      FilterPattern: ''
       RoleArn:
         Fn::GetAtt:
           - "CloudWatchIAMRole"
@@ -110,7 +111,6 @@ Resources:
     Properties:
       Name: !Ref 'ServiceName'
       ShardCount: 1
-      FilterPattern: ''
   # The task definition. This is a simple metadata description of what
   # container to run, and what resource requirements it has.
   TaskDefinition:
