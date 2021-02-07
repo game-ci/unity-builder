@@ -145,7 +145,9 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           core.info(
-            zlib.deflateSync(Buffer.from(records.Records[index].Data, 'base64')).toString('utf8'),
+            zlib
+              .deflateRawSync(Buffer.from(records.Records[index].Data, 'base64'))
+              .toString('utf8'),
           );
         }
       }
