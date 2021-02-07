@@ -123,19 +123,23 @@ class AWS {
       })
       .promise();
 
-    while ((await getTaskStatus()) === 'RUNNING') {
-      const iterator = await kinesis
+    let iterator = (
+      await kinesis
         .getShardIterator({
           ShardIteratorType: 'TRIM_HORIZON',
           StreamName: stream.StreamDescription.StreamName,
           ShardId: stream.StreamDescription.Shards[0].ShardId,
         })
-        .promise();
+        .promise()
+    ).ShardIterator;
+
+    while ((await getTaskStatus()) === 'RUNNING') {
       const records = await kinesis
         .getRecords({
           ShardIterator: iterator.ShardIterator,
         })
         .promise();
+      iterator = records.NextShardIterator;
       core.info(Buffer.from(records.Records[0].Data).toString('base64'));
     }
 
