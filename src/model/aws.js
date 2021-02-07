@@ -33,7 +33,7 @@ class AWS {
     const CF = new SDK.CloudFormation();
 
     const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${new Shortid()}`;
+    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${Shortid.generate()}`;
     const stackExists =
       (await CF.listStacks().promise()).StackSummaries.find(
         (x) => x.StackName === taskDefStackName,
