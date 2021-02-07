@@ -81,8 +81,7 @@ Resources:
         Fn::GetAtt:
           - "CloudWatchIAMRole"
           - "Arn"
-      LogGroupName:
-        Ref: !Ref 'ServiceName'
+      LogGroupName: !Ref 'ServiceName'
       DestinationArn:
         Fn::GetAtt:
           - "KinesisStream"
