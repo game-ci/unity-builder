@@ -32,8 +32,9 @@ class AWS {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
-    const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${nanoid()}`;
+    const taskDefStackName = `${stackName}-taskDef-${image}-${nanoid()}`
+      .toString()
+      .replace(/[^\da-z]/gi, '');
     core.info("Task Definition doesn't exist, creating a task definition stack");
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
