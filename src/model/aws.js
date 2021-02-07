@@ -73,7 +73,7 @@ class AWS {
       overrides: {
         containerOverrides: [
           {
-            name: 'example',
+            name: taskDefStackName,
             environment,
             command: commands,
           },
