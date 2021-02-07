@@ -143,8 +143,7 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          const decoder = new TextDecoder('utf-8');
-          core.info(decoder.decode(records.Records[index].Data));
+          core.info(records.Records[index].Data);
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
