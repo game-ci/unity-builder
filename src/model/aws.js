@@ -141,9 +141,10 @@ class AWS {
         .promise();
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
-        core.info(JSON.stringify(records));
-        core.info(JSON.stringify(records.Records[0].Data.data));
-        core.info(records.Records[0].Data.data);
+        for (let index = 0; index < records.Records.length; index++) {
+          const element = records.Records[index];
+          core.info(Buffer.from(element.Data).toString());
+        }
       }
     }
 
