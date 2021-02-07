@@ -144,8 +144,7 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          const record = records.Records[index].Data;
-          core.info(AWS.ab2str(record));
+          core.info(JSON.stringify(records.Records[index]));
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -169,10 +168,6 @@ class AWS {
     batch.forEach((log) => {
       core.info(`log: ${log}`);
     });
-  }
-
-  static ab2str(buf) {
-    return String.fromCharCode.apply(undefined, new Uint16Array(buf));
   }
 }
 export default AWS;
