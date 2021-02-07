@@ -85,7 +85,8 @@ Resources:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
       FilterPattern: ''
-      RoleArn: !Sub ${EnvironmentName}:CloudWatchIAMRole
+      RoleArn:
+        Fn::ImportValue: !Sub ${EnvironmentName}:CloudWatchIAMRole
       LogGroupName: !Ref 'ServiceName'
       DestinationArn:
         Fn::GetAtt:
