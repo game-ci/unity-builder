@@ -110,6 +110,7 @@ Resources:
     Properties:
       Name: !Ref 'ServiceName'
       ShardCount: 1
+      FilterPattern: ''
   # The task definition. This is a simple metadata description of what
   # container to run, and what resource requirements it has.
   TaskDefinition:
