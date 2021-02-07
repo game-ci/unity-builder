@@ -136,7 +136,7 @@ class AWS {
           ShardIterator: iterator.ShardIterator,
         })
         .promise();
-      core.info(records.Records[0].Data);
+      core.info(Buffer.from(records.Records[0].Data).toString('base64'));
     }
 
     await ECS.waitFor('tasksStopped', {
