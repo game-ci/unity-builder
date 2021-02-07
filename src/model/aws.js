@@ -148,7 +148,9 @@ class AWS {
             zlib.gunzipSync(Buffer.from(records.Records[index].Data, 'base64')).toString('utf8'),
           );
           if (json.messageType === 'DATA_MESSAGE') {
-            core.info(json.message);
+            for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
+              core.info(json.logEvents[logEventsIndex].message);
+            }
           }
         }
       }
