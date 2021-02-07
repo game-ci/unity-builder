@@ -17,7 +17,6 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "1.0.4",
     "@actions/github": "^2.1.1",
-    "@aws-sdk/client-kinesis": "3.4.1",
     "aws-sdk": "^2.812.0",
     "base-64": "^0.1.0",
     "cloudwatch-logs-hose": "0.0.2",
