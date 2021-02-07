@@ -143,7 +143,8 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           const element = records.Records[index];
-          core.info(Buffer.from(element.Data.toString(), 'base64').toString());
+          core.info(JSON.stringify(element.Data));
+          core.info(Buffer.from(element.Data, 'base64').toString());
         }
       }
     }
