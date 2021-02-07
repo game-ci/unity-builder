@@ -93,7 +93,7 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            Service: [logs.*.amazonaws.com]
+            Service: [logs.amazonaws.com]
           Action: ['sts:AssumeRole']
       Path: /
       Policies:
