@@ -87,14 +87,23 @@ Resources:
           - "KinesisStream"
           - "Arn"
   CloudWatchIAMRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
         Statement:
-        - Effect: "Allow"
-          Action: "*"
-          Resource: "*"
+        - Effect: Allow
+          Principal:
+            Service: [logs.*.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: service-autoscaling
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - 'kinesis:PutRecord'
+            Resource: '*'
 
   KinesisStream:
     Type: AWS::Kinesis::Stream
