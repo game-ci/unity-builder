@@ -144,7 +144,7 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          core.info(zlib.deflateSync(records.Records[index].Data).toString('utf8'));
+          core.info(records.Records[index].Data);
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
