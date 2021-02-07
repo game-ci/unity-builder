@@ -34,7 +34,7 @@ Parameters:
     Type: Number
     Default: 512
     Description: How much memory in megabytes to give the container
-    
+
   Prefix:
     Type: String
     Default: "test"
@@ -85,33 +85,12 @@ Resources:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
       FilterPattern: ''
-      RoleArn:
-        Fn::GetAtt:
-          - "CloudWatchIAMRole"
-          - "Arn"
+      RoleArn: !Sub ${EnvironmentName}:CloudWatchIAMRole
       LogGroupName: !Ref 'ServiceName'
       DestinationArn:
         Fn::GetAtt:
           - "KinesisStream"
           - "Arn"
-  CloudWatchIAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service: [logs.amazonaws.com]
-          Action: ['sts:AssumeRole']
-      Path: /
-      Policies:
-      - PolicyName: service-autoscaling
-        PolicyDocument:
-          Statement:
-          - Effect: Allow
-            Action:
-              - 'kinesis:PutRecord'
-            Resource: '*'
 
   KinesisStream:
     Type: AWS::Kinesis::Stream
