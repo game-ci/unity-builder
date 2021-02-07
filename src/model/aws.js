@@ -4,6 +4,7 @@ import * as SDK from 'aws-sdk';
 import { nanoid } from 'nanoid';
 
 const fs = require('fs');
+const zlib = require('zlib');
 const core = require('@actions/core');
 
 class AWS {
@@ -143,7 +144,16 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          core.info(records.Records[index].Data);
+          const result = await new Promise((resolve) => {
+            zlib.gunzip(
+              Buffer.from(records.Records[index].Data, 'base64').toString(),
+              (error, results) => {
+                resolve(results);
+              },
+            );
+          });
+
+          core.info(result);
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
