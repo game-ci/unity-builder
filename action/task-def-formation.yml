@@ -3,6 +3,7 @@ Description: AWS Fargate cluster that can span public and private subnets. Suppo
              public facing load balancers, private internal load balancers, and
              both internal and external service discovery namespaces.
 Parameters:
+
   EnvironmentName:
     Type: String
     Default: development
@@ -12,6 +13,7 @@ Parameters:
     Type: String
     Default: example
     Description: A name for the service
+
   ImageUrl:
     Type: String
     Default: nginx
@@ -22,22 +24,21 @@ Parameters:
     Type: Number
     Default: 80
     Description: What port number the application inside the docker container is binding to
+
   ContainerCpu:
     Type: Number
     Default: 256
     Description: How much CPU to give the container. 1024 is 1 CPU
+
   ContainerMemory:
     Type: Number
     Default: 512
     Description: How much memory in megabytes to give the container
+    
   Prefix:
     Type: String
     Default: "test"
 
-  DesiredCount:
-    Type: Number
-    Default: 1
-    Description: How many copies of the service task to run
   Role:
     Type: String
     Default: ""

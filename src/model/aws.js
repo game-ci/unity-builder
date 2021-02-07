@@ -46,6 +46,10 @@ class AWS {
           ParameterKey: 'ImageUrl',
           ParameterValue: image,
         },
+        {
+          ParameterKey: 'ServiceName',
+          ParameterValue: taskDefStackName,
+        },
       ],
     }).promise();
     await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
