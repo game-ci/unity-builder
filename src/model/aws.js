@@ -143,7 +143,7 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          core.info(Buffer.from(records.Records[index].Data, 'base64').toString());
+          core.info(Buffer.from(records.Records[index].Data, 'base64').toString('ascii'));
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
