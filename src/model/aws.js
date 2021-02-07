@@ -139,9 +139,9 @@ class AWS {
         })
         .promise();
       iterator = records.NextShardIterator;
-      core.info(
-        Buffer.from(Buffer.from(records.Records[0].Data).toString('base64')).toString('base64'),
-      );
+      if (records.Records.length > 0){
+        core.info(Buffer.from(records.Records[0].Data).toString('base64'));
+      }
     }
 
     await ECS.waitFor('tasksStopped', {
