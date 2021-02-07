@@ -140,7 +140,7 @@ class AWS {
         })
         .promise();
       iterator = records.NextShardIterator;
-      core.info()
+      core.info(records);
       if (records.Records.length > 0) {
         core.info(Buffer.from(records.Records[0].Data, 'base64').toString('ascii'));
       }
