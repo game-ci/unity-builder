@@ -1,11 +1,11 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
+import { nanoid } from 'nanoid';
 import { CloudWatch, CloudWatchLogs } from 'aws-sdk';
 
 const fs = require('fs');
 const core = require('@actions/core');
-const Shortid = require('shortid');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -33,7 +33,7 @@ class AWS {
     const CF = new SDK.CloudFormation();
 
     const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${Shortid.generate()}`;
+    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${nanoid()}`;
     const stackExists =
       (await CF.listStacks().promise()).StackSummaries.find(
         (x) => x.StackName === taskDefStackName,
