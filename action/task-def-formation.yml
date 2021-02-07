@@ -92,10 +92,7 @@ Resources:
       Statement:
       - Effect: "Allow"
         Action: "kinesis:PutRecord"
-        Resource:
-          Fn::GetAtt:
-            - "KinesisStream"
-            - "Arn"
+        Resource: !Ref 'KinesisStream'
 
   KinesisStream:
     Type: AWS::Kinesis::Stream
