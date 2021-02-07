@@ -145,7 +145,7 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           const record = records.Records[index].Data;
-          core.info(record.buffer.toString('utf8'));
+          core.info(AWS.ab2str(record.buffer));
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -172,7 +172,7 @@ class AWS {
   }
 
   static ab2str(buf) {
-    return String.fromCharCode.apply(undefined, new Uint16Array(buf));
+    return String.fromCharCode.apply(undefined, new Uint8Array(buf));
   }
 }
 export default AWS;
