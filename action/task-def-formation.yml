@@ -17,6 +17,9 @@ Parameters:
     Default: nginx
     Description: The url of a docker image that contains the application process that
                  will handle the traffic for this service
+  Entrypoint:
+    Type: CommaDelimitedList
+
   ContainerPort:
     Type: Number
     Default: 80
@@ -70,9 +73,14 @@ Mappings:
   # A log group for storing the stdout logs from this service's containers
 Conditions:
   HasCustomRole: !Not [ !Equals [!Ref 'Role', ''] ]
-  
+
 Resources:
 
+  KinesisStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Ref 'ServiceName'
+      ShardCount: 1
   # The task definition. This is a simple metadata description of what
   # container to run, and what resource requirements it has.
   TaskDefinition:
@@ -85,12 +93,12 @@ Resources:
       Volumes:
         - Name: efs-data
           EFSVolumeConfiguration:
-            FilesystemId: 
+            FilesystemId:
               Fn::ImportValue: !Sub ${EnvironmentName}:EfsFileStorageId
             TransitEncryption: ENABLED
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: 
+      ExecutionRoleArn:
         Fn::ImportValue: !Sub ${EnvironmentName}:ECSTaskExecutionRole
       TaskRoleArn:
         Fn::If:
@@ -98,22 +106,25 @@ Resources:
           - !Ref 'Role'
           - !Ref "AWS::NoValue"
       ContainerDefinitions:
-        - Name: !Ref 'ServiceName'
-          Cpu: !Ref 'ContainerCpu'
+        - Name: 'LoggingSidecar'
+          Cpu: '!Ref LoggingCpu'
           Memory: !Ref 'ContainerMemory'
           Image: !Ref 'ImageUrl'
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               HostPort: !Ref ContainerPort
-          Environment: 
+        - Name: !Ref 'ServiceName'
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          Image: !Ref 'ImageUrl'
+          Entrypoint: !Ref 'Entrypoint'
+          Environment:
             - Name: ALLOW_EMPTY_PASSWORD
               Value: 'yes'
           MountPoints:
             - SourceVolume: efs-data
               ContainerPath: !Ref EFSMountPath
               ReadOnly: false
-          
-         
           LogConfiguration:
             LogDriver: 'awslogs'
             Options:

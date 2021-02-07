@@ -1,10 +1,11 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
+import { CloudWatch, CloudWatchLogs } from 'aws-sdk';
 
 const fs = require('fs');
 const core = require('@actions/core');
-const hose = require('cloudwatch-logs-hose');
+const Shortid = require('shortid');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -23,12 +24,7 @@ class AWS {
       buildParameters.awsStackName,
       baseImage.toString(),
       ['bin/bash', '-c', 'echo "test"'],
-      [
-        {
-          name: '',
-          value: '',
-        },
-      ],
+      [],
     );
   }
 
@@ -37,7 +33,7 @@ class AWS {
     const CF = new SDK.CloudFormation();
 
     const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}`;
+    const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${new Shortid()}`;
     const stackExists =
       (await CF.listStacks().promise()).StackSummaries.find(
         (x) => x.StackName === taskDefStackName,
@@ -53,6 +49,10 @@ class AWS {
           {
             ParameterKey: 'ImageUrl',
             ParameterValue: image,
+          },
+          {
+            ParameterKey: 'Entrypoint',
+            ParameterValue: commands,
           },
         ],
       }).promise();
@@ -81,7 +81,6 @@ class AWS {
         containerOverrides: [
           {
             name: 'example',
-            command: commands,
             environment,
           },
         ],
@@ -112,23 +111,6 @@ class AWS {
     core.info(`Build job is running, `);
 
     // watching logs
-
-    try {
-      const source = new hose.Source({
-        LogGroup: baseResources.StackResources.find((x) => x.LogicalResourceId === 'LogGroup'),
-        aws: SDK.config,
-      });
-
-      source.on('logs', AWS.onlog);
-
-      source.on('error', (error) => {
-        core.info('Error: ', error);
-      });
-
-      source.open();
-    } catch (error) {
-      core.info(error);
-    }
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,

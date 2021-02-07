@@ -21,7 +21,9 @@
     "base-64": "^0.1.0",
     "cloudwatch-logs-hose": "0.0.2",
     "kubernetes-client": "^9.0.0",
-    "semver": "^7.3.2"
+    "selfsigned": "1.10.8",
+    "semver": "^7.3.2",
+    "shortid": "2.2.16"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
