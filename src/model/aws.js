@@ -144,7 +144,8 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          const record = records.Records[index].Data;
+          const record = records.Records[index].Data.toString();
+          core.info(records.Records[index]);
           core.info(Buffer.from(record, 'base64').toString('ascii'));
         }
       }
