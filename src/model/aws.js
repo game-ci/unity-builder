@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 
 const fs = require('fs');
 const core = require('@actions/core');
+const zlib = require('zlib');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -143,7 +144,9 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
-          core.info(Buffer.from(records.Records[index].Data, 'base64').toString('ascii'));
+          core.info(
+            zlib.gunzipSync(Buffer.from(records.Records[index].Data, 'base64')).toString('utf8'),
+          );
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
