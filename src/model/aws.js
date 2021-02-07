@@ -106,21 +106,32 @@ class AWS {
     // watching logs
     const kinesis = new SDK.Kinesis();
 
-    const iterator = await kinesis
-      .getShardIterator({
-        ShardIteratorType: 'TRIM_HORIZON',
-        StreamName: taskDefResources.StackResources.find(
-          (x) => x.LogicalResourceId === 'KinesisStream',
-        ).PhysicalResourceId,
-        ShardId: 'example',
-      })
-      .promise();
-    const records = await kinesis
-      .getRecords({
-        ShardIterator: iterator.ShardIterator,
-      })
-      .promise();
-    core.info(records.Records[0].Data);
+    const getTaskStatus = async () => {
+      const tasks = await ECS.describeTasks({
+        cluster: clusterName,
+        tasks: [task.tasks[0].taskArn],
+      }).promise();
+      core.info(`Task status is ${tasks.tasks[0].lastStatus}`);
+      return tasks.tasks[0].lastStatus;
+    };
+
+    while ((await getTaskStatus()) === 'RUNNING') {
+      const iterator = await kinesis
+        .getShardIterator({
+          ShardIteratorType: 'TRIM_HORIZON',
+          StreamName: taskDefResources.StackResources.find(
+            (x) => x.LogicalResourceId === 'KinesisStream',
+          ).PhysicalResourceId,
+          ShardId: 'example',
+        })
+        .promise();
+      const records = await kinesis
+        .getRecords({
+          ShardIterator: iterator.ShardIterator,
+        })
+        .promise();
+      core.info(records.Records[0].Data);
+    }
 
     await ECS.waitFor('tasksStopped', {
       cluster: clusterName,
