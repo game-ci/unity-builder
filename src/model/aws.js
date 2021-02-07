@@ -115,14 +115,20 @@ class AWS {
       return tasks.tasks[0].lastStatus;
     };
 
+    const stream = await kinesis
+      .describeStream({
+        StreamName: taskDefResources.StackResources.find(
+          (x) => x.LogicalResourceId === 'KinesisStream',
+        ).PhysicalResourceId,
+      })
+      .promise();
+
     while ((await getTaskStatus()) === 'RUNNING') {
       const iterator = await kinesis
         .getShardIterator({
           ShardIteratorType: 'TRIM_HORIZON',
-          StreamName: taskDefResources.StackResources.find(
-            (x) => x.LogicalResourceId === 'KinesisStream',
-          ).PhysicalResourceId,
-          ShardId: 'example',
+          StreamName: stream.StreamDescription.StreamName,
+          ShardId: stream.StreamDescription.Shards[0].ShardId,
         })
         .promise();
       const records = await kinesis
