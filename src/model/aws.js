@@ -154,11 +154,13 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
     }).promise();
 
+    core.info('Build job has ended');
+
     await CF.deleteStack({
       StackName: taskDefStackName,
     }).promise();
 
-    core.info('Build job has ended');
+    core.info('Cleanup complete');
   }
 
   static onlog(batch) {
