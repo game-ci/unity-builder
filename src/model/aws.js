@@ -142,7 +142,8 @@ class AWS {
       iterator = records.NextShardIterator;
       if (records.Records.length > 0) {
         core.info(JSON.stringify(records));
-        core.info(JSON.stringify(Buffer.from(records.Records[0].Data.data, 'base64').toString()));
+        core.info(JSON.stringify(records.Records[0].Data.data));
+        core.info(records.Records[0].Data.data);
       }
     }
 
