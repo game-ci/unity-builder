@@ -104,13 +104,6 @@ Resources:
           - !Ref 'Role'
           - !Ref "AWS::NoValue"
       ContainerDefinitions:
-        - Name: 'LoggingSidecar'
-          Cpu: '!Ref LoggingCpu'
-          Memory: !Ref 'ContainerMemory'
-          Image: !Ref 'ImageUrl'
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              HostPort: !Ref ContainerPort
         - Name: !Ref 'ServiceName'
           Cpu: !Ref 'ContainerCpu'
           Memory: !Ref 'ContainerMemory'
