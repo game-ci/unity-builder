@@ -74,6 +74,20 @@ Conditions:
 
 Resources:
 
+  SubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      RoleArn:
+        Fn::GetAtt:
+          - "CloudWatchIAMRole"
+          - "Arn"
+      LogGroupName:
+        Ref: !Ref 'ServiceName'
+      DestinationArn:
+        Fn::GetAtt:
+          - "KinesisStream"
+          - "Arn"
+
   KinesisStream:
     Type: AWS::Kinesis::Stream
     Properties:
