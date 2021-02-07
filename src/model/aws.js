@@ -136,7 +136,7 @@ class AWS {
     while ((await getTaskStatus()) === 'RUNNING') {
       const records = await kinesis
         .getRecords({
-          ShardIterator: iterator.ShardIterator,
+          ShardIterator: iterator,
         })
         .promise();
       iterator = records.NextShardIterator;
