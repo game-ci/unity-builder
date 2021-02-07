@@ -94,13 +94,12 @@ class AWS {
         },
       },
     }).promise();
-
+    core.info('Build job is starting');
     await ECS.waitFor('tasksRunning', {
       cluster: clusterName,
       tasks: [task.tasks[0].taskArn],
     }).promise();
-
-    core.info(`Build job is running, `);
+    core.info(`Build job is running`);
 
     // watching logs
     const kinesis = new SDK.Kinesis();
