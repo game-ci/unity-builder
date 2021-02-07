@@ -18,7 +18,7 @@ Parameters:
     Description: The url of a docker image that contains the application process that
                  will handle the traffic for this service
   Entrypoint:
-    Type: CommaDelimitedList
+    Type: List<String>
 
   ContainerPort:
     Type: Number
