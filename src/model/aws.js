@@ -145,7 +145,7 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           const record = records.Records[index].Data;
-          core.info(AWS.ab2str(record.buffer));
+          core.info(AWS.ab2str(record));
         }
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
