@@ -94,11 +94,14 @@ class AWS {
         },
       },
     }).promise();
+
     core.info('Build job is starting');
+
     await ECS.waitFor('tasksRunning', {
       cluster: clusterName,
       tasks: [task.tasks[0].taskArn],
     }).promise();
+
     core.info(`Build job is running`);
 
     // watching logs
@@ -142,7 +145,8 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           const element = records.Records[index].Data;
-          core.info(element);
+          core.info(Buffer.from(element).toString('utf8'));
+          core.info(Buffer.from(element, 'base64').toString('utf8'));
           core.info(AWS.ab2str(element));
         }
       }
