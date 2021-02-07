@@ -78,8 +78,8 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Ref 'LogGroup'
-      
+      LogGroupName: !Ref 'ServiceName'
+
   SubscriptionFilter:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
