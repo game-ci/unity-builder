@@ -34,28 +34,19 @@ class AWS {
 
     const alphanumericImageName = image.toString().replace(/[^\da-z]/gi, '');
     const taskDefStackName = `${stackName}-taskDef-${alphanumericImageName}-${nanoid()}`;
-    const stackExists =
-      (await CF.listStacks().promise()).StackSummaries.find(
-        (x) => x.StackName === taskDefStackName,
-      ) !== undefined;
-
-    if (!stackExists) {
-      core.info("Task Definition doesn't exist, creating a task definition stack");
-      const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
-      await CF.createStack({
-        StackName: taskDefStackName,
-        TemplateBody: taskDefCloudFormation,
-        Parameters: [
-          {
-            ParameterKey: 'ImageUrl',
-            ParameterValue: image,
-          },
-        ],
-      }).promise();
-      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
-    } else {
-      core.info('Task definition stack exists already');
-    }
+    core.info("Task Definition doesn't exist, creating a task definition stack");
+    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
+    await CF.createStack({
+      StackName: taskDefStackName,
+      TemplateBody: taskDefCloudFormation,
+      Parameters: [
+        {
+          ParameterKey: 'ImageUrl',
+          ParameterValue: image,
+        },
+      ],
+    }).promise();
+    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
 
     const taskDefResources = await CF.describeStackResources({
       StackName: taskDefStackName,

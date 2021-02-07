@@ -87,6 +87,16 @@ Resources:
         Fn::GetAtt:
           - "KinesisStream"
           - "Arn"
+  CloudWatchIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Statement:
+      - Effect: "Allow"
+        Action: "kinesis:PutRecord"
+        Resource:
+          Fn::GetAtt:
+            - "KinesisStream"
+            - "Arn"
 
   KinesisStream:
     Type: AWS::Kinesis::Stream
