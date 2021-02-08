@@ -38,18 +38,9 @@ jobs:
       ###########################
       #         Checkout        #
       ###########################
-      - name: Checkout (default)
-        uses: actions/checkout@v2
-        if: github.event.event_type != 'pull_request_target'
+      - uses: actions/checkout@v2
         with:
           lfs: true
-      - name: Checkout (pull_request_target)
-        uses: actions/checkout@v2
-        if: github.event.event_type == 'pull_request_target'
-        with:
-          lfs: true
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       ###########################
       #          Cache          #
