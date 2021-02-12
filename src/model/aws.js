@@ -12,7 +12,10 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       'alpine/git',
+      ['git'],
       ['clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
+      '/efsdata',
+      '/efsdata/',
       [
         {
           name: 'GITHUB_SHA',
@@ -23,12 +26,15 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       baseImage.toString(),
-      ['bin/bash', '-c', 'echo "test"'],
+      ['bin/bash', '-c'],
+      ['echo', '"test"'],
+      '/efsdata',
+      '/efsdata/',
       [],
     );
   }
 
-  static async run(stackName, image, commands, environment) {
+  static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
@@ -49,6 +55,22 @@ class AWS {
           ParameterKey: 'ServiceName',
           ParameterValue: taskDefStackName,
         },
+        {
+          ParameterKey: 'Command',
+          ParameterValue: commands.join(','),
+        },
+        {
+          ParameterKey: 'EntryPoint',
+          ParameterValue: entrypoint.join(','),
+        },
+        {
+          ParameterKey: 'WorkingDirectory',
+          ParameterValue: workingdir,
+        },
+        {
+          ParameterKey: 'EFSMountDirectory',
+          ParameterValue: mountdir,
+        },
       ],
     }).promise();
     await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
@@ -68,16 +90,15 @@ class AWS {
         (x) => x.LogicalResourceId === 'TaskDefinition',
       ).PhysicalResourceId,
       platformVersion: '1.4.0',
-      launchType: 'FARGATE',
       overrides: {
         containerOverrides: [
           {
             name: taskDefStackName,
             environment,
-            command: commands,
           },
         ],
       },
+      launchType: 'FARGATE',
       networkConfiguration: {
         awsvpcConfiguration: {
           subnets: [

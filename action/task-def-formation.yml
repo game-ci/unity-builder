@@ -30,18 +30,24 @@ Parameters:
     Type: Number
     Default: 512
     Description: How much memory in megabytes to give the container
-  Prefix:
+  Command:
     Type: String
-    Default: test
+    Default: 'ls'
+  EntryPoint:
+    Type: String
+    Default: '/bin/sh,-c'
+  WorkingDirectory:
+    Type: String
+    Default: '/efsdata/'
   Role:
     Type: String
     Default: ''
     Description: >-
       (Optional) An IAM role to give the service's containers if the code within
       needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
-  EFSMountPath:
+  EFSMountDirectory:
     Type: String
-    Default: /usr/share/nginx/html
+    Default: /efsdata
 Mappings:
   SubnetConfig:
     VPC:
@@ -115,12 +121,21 @@ Resources:
           Cpu: !Ref ContainerCpu
           Memory: !Ref ContainerMemory
           Image: !Ref ImageUrl
+          EntryPoint:
+            Fn::Split:
+                - ","
+                - !Ref EntryPoint
+          Command:
+            Fn::Split:
+                - ","
+                - !Ref Commands
+          WorkDir: !Ref WorkingDirectory
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
               Value: 'yes'
           MountPoints:
             - SourceVolume: efs-data
-              ContainerPath: !Ref EFSMountPath
+              ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           LogConfiguration:
             LogDriver: awslogs
