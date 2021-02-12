@@ -13,7 +13,7 @@ class AWS {
       buildParameters.awsStackName,
       'ubuntu',
       ['/bin/sh'],
-      ['-c', 'ls', '&&', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
+      ['ls', '&&', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
       '/efsdata',
       '/efsdata/',
       [
@@ -26,7 +26,7 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       baseImage.toString(),
-      ['/bin/sh', '-c'],
+      ['/bin/sh'],
       ['echo', '"test"'],
       '/efsdata',
       '/efsdata/',
