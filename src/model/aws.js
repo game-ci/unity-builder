@@ -11,7 +11,7 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     await this.run(
       buildParameters.awsStackName,
-      'alpine/git',
+      'valian/git-lfs',
       ['git'],
       ['clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
       '/efsdata',
