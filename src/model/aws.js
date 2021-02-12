@@ -199,7 +199,12 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
     }).promise();
 
-    core.info('Build job has ended');
+    core.info(
+      `Build job has ended ${
+        (await ECS.describeTasks({ tasks: [task.tasks[0].taskArn] }).promise()).tasks[0]
+          .containers[0].exitCode
+      }`,
+    );
 
     await CF.deleteStack({
       StackName: taskDefStackName,
