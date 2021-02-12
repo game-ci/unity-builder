@@ -12,15 +12,8 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       'alpine/git',
-      ['/bin/sh', '-c'],
-      [
-        'ls',
-        '&&',
-        'git',
-        'clone',
-        `https://github.com/${process.env.GITHUB_REPOSITORY}.git`,
-        `repo`,
-      ],
+      ['git'],
+      ['clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
       '/efsdata',
       '/efsdata/',
       [
