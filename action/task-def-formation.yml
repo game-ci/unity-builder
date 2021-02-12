@@ -128,7 +128,7 @@ Resources:
           Command:
             Fn::Split:
                 - ","
-                - !Ref Commands
+                - !Ref Command
           WorkDir: !Ref WorkingDirectory
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
