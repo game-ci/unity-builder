@@ -32,8 +32,8 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       baseImage.toString(),
-      ['sh','-c','echo', '"test"'],
-      [],
+      ['/bin/sh'],
+      ['-c', `echo "test"`],
       '/efsdata',
       '/efsdata/',
       [],
