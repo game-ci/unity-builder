@@ -15,8 +15,10 @@ class AWS {
       ['/bin/sh'],
       [
         '-c', 
-        `ls; 
-         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo
+        `apt update;
+        apt install git-lfs;
+        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
+        ls
       `],
       '/efsdata',
       '/efsdata/',
