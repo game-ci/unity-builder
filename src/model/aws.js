@@ -13,7 +13,7 @@ class AWS {
       buildParameters.awsStackName,
       'ubuntu',
       ['/bin/sh'],
-      ['ls', '&&', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
+      ['-c', 'ls', '&&', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
       '/efsdata',
       '/efsdata/',
       [
