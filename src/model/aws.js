@@ -17,6 +17,7 @@ class AWS {
         '-c', 
         `apt update;
         apt install git-lfs -y;
+        chmod -R 777 .;
         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
         ls
       `],
