@@ -170,7 +170,7 @@ class AWS {
     let readingLogs = true;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      if ((await getTaskStatus()) === 'RUNNING') {
+      if ((await getTaskStatus()) !== 'RUNNING') {
         readingLogs = false;
         await new Promise((resolve) => setTimeout(resolve, 13000));
       }
