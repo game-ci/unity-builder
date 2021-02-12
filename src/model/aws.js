@@ -201,8 +201,12 @@ class AWS {
 
     core.info(
       `Build job has ended ${
-        (await ECS.describeTasks({ tasks: [task.tasks[0].taskArn] }).promise()).tasks[0]
-          .containers[0].exitCode
+        (
+          await ECS.describeTasks({
+            tasks: [task.tasks[0].taskArn],
+            cluster: clusterName,
+          }).promise()
+        ).tasks[0].containers[0].exitCode
       }`,
     );
 
