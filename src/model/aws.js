@@ -12,7 +12,7 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       'alpine/git',
-      ['bin/bash', '-c'],
+      ['/bin/sh', '-c'],
       [
         'ls',
         '&&',
@@ -33,7 +33,7 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       baseImage.toString(),
-      ['bin/bash', '-c'],
+      ['/bin/sh', '-c'],
       ['echo', '"test"'],
       '/efsdata',
       '/efsdata/',
