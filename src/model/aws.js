@@ -165,7 +165,7 @@ class AWS {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       if ((await getTaskStatus()) !== 'RUNNING') {
         readingLogs = false;
-        await new Promise((resolve) => setTimeout(resolve, 13000));
+        await new Promise((resolve) => setTimeout(resolve, 35000));
       }
       const records = await kinesis
         .getRecords({
