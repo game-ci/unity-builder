@@ -12,8 +12,12 @@ class AWS {
     await this.run(
       buildParameters.awsStackName,
       'ubuntu',
-      ['sh', '-c', 'ls;', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
-      [],
+      ['/bin/sh', '-c', 'ls;', 'git', 'clone', `https://github.com/${process.env.GITHUB_REPOSITORY}.git`, `repo`],
+      [
+        '-c', 
+        `ls; 
+         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo
+      `],
       '/efsdata',
       '/efsdata/',
       [
