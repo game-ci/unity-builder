@@ -126,10 +126,14 @@ class AWS {
 
     core.info('Build job is starting');
 
-    await ECS.waitFor('tasksRunning', {
-      cluster: clusterName,
-      tasks: [task.tasks[0].taskArn],
-    }).promise();
+    try {
+      await ECS.waitFor('tasksRunning', {
+        cluster: clusterName,
+        tasks: [task.tasks[0].taskArn],
+      }).promise();
+    } catch (error) {
+      core.error(error);
+    }
 
     core.info(`Build job is running`);
 
@@ -163,7 +167,13 @@ class AWS {
     ).ShardIterator;
 
     core.info(`Task status is ${await getTaskStatus()}`);
-    while ((await getTaskStatus()) === 'RUNNING') {
+    let readingLogs = true;
+    while (readingLogs) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      if ((await getTaskStatus()) === 'RUNNING') {
+        readingLogs = false;
+        await new Promise((resolve) => setTimeout(resolve, 13000));
+      }
       const records = await kinesis
         .getRecords({
           ShardIterator: iterator,
@@ -182,7 +192,6 @@ class AWS {
           }
         }
       }
-      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
 
     await ECS.waitFor('tasksStopped', {
