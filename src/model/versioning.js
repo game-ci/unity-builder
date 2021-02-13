@@ -119,7 +119,9 @@ export default class Versioning {
    * @See: https://semver.org/
    */
   static async generateSemanticVersion() {
-    await this.fetch();
+    if (await this.isShallow()) {
+      await this.fetch();
+    }
 
     await this.logDiff();
 
@@ -201,6 +203,15 @@ export default class Versioning {
         }
       }
     }
+  }
+
+  /**
+   * Returns whether the repository is shallow.
+   */
+  static async isShallow() {
+    const output = await this.git(['rev-parse', '--is-shallow-repository']);
+
+    return output === 'true';
   }
 
   /**

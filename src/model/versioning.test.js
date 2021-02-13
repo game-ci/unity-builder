@@ -104,6 +104,7 @@ describe('Versioning', () => {
     it('calls git diff', async () => {
       // allowDirtyBuild: true
       jest.spyOn(core, 'getInput').mockReturnValue('true');
+      jest.spyOn(Versioning, 'isShallow').mockResolvedValue(true);
       jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
       jest.spyOn(Versioning, 'fetch').mockResolvedValue(undefined);
       jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
@@ -234,6 +235,20 @@ describe('Versioning', () => {
       const runOutput = 'someValue';
       jest.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.getVersionDescription()).resolves.toStrictEqual(runOutput);
+    });
+  });
+
+  describe('isShallow', () => {
+    it('returns true when the repo is shallow', async () => {
+      const runOutput = 'true';
+      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      await expect(Versioning.isShallow()).resolves.toStrictEqual(true);
+    });
+
+    it('returns false when the repo is not shallow', async () => {
+      const runOutput = 'false';
+      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      await expect(Versioning.isShallow()).resolves.toStrictEqual(false);
     });
   });
 
