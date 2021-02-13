@@ -240,13 +240,13 @@ describe('Versioning', () => {
 
   describe('isShallow', () => {
     it('returns true when the repo is shallow', async () => {
-      const runOutput = 'true';
+      const runOutput = 'true\n';
       jest.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isShallow()).resolves.toStrictEqual(true);
     });
 
     it('returns false when the repo is not shallow', async () => {
-      const runOutput = 'false';
+      const runOutput = 'false\n';
       jest.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isShallow()).resolves.toStrictEqual(false);
     });
