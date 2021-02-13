@@ -211,7 +211,7 @@ export default class Versioning {
   static async isShallow() {
     const output = await this.git(['rev-parse', '--is-shallow-repository']);
 
-    return output !== 'false\n';
+    return output === 'true';
   }
 
   /**
