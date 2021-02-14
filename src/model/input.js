@@ -97,6 +97,10 @@ class Input {
     return core.getInput('kubeConfig') || '';
   }
 
+  static get githubToken() {
+    return core.g('githubToken') || '';
+  }
+
   static get kubeContainerMemory() {
     return core.getInput('kubeContainerMemory') || '800M';
   }

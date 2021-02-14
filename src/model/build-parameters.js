@@ -47,6 +47,7 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       customParameters: Input.customParameters,
       kubeConfig: Input.kubeConfig,
+      githubToken: Input.githubToken,
       remote: Input.remote,
       awsStackName: Input.awsStackName,
       kubeContainerMemory: Input.kubeContainerMemory,
