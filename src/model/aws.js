@@ -20,11 +20,13 @@ class AWS {
         '-c', 
         `apk update;
         apk add git-lfs;
+        apk add jq;
         ls;
         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git $BUILD_ID/repo;
         git clone https://github.com/webbertakken/unity-builder.git $BUILD_ID/builder;
         cd $BUILD_ID/repo;
         git checkout $GITHUB_SHA;
+        echo $Secrets | base64 --decode | jq '.[]' | 
       `],
       '/data',
       '/data/',
@@ -45,7 +47,7 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      cat $
+      
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
@@ -107,16 +109,26 @@ class AWS {
         },
       ],
       [
-        {name: 'GITHUB_TOKEN',
-        value: buildParameters.githubToken,},
-        {name: 'UNITY_LICENSE',
-        value: process.env.UNITY_LICENSE,},
-        {name: 'ANDROID_KEYSTORE_BASE64',
-        value: buildParameters.androidKeystoreBase64,},
-        {name: 'ANDROID_KEYSTORE_PASS',
-        value: buildParameters.androidKeystorePass,},
-        {name: 'ANDROID_KEYALIAS_PASS',
-        value: buildParameters.androidKeyaliasPass,},
+        {
+          ParameterKey: 'GITHUB_TOKEN',
+          ParameterValue: buildParameters.githubToken
+        },
+        {
+          ParameterKey: 'UNITY_LICENSE',
+          ParameterValue: process.env.UNITY_LICENSE
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+          ParameterValue: buildParameters.androidKeystoreBase64
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_PASS',
+          ParameterValue: buildParameters.androidKeystorePass
+        },
+        {
+          ParameterKey: 'ANDROID_KEYALIAS_PASS',
+          ParameterValue: buildParameters.androidKeyaliasPass
+        },
       ]
     );
     }
@@ -165,12 +177,8 @@ class AWS {
         {
           ParameterKey: 'SecretName',
           ParameterValue: 'Secrets'+nanoid(),
-        },
-        {
-          ParameterKey: 'SecretValue',
-          ParameterValue: Buffer.from(JSON.stringify(secrets)).toString('base64'),
         }
-      ],
+      ].concat(secrets),
     }).promise();
     await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
 

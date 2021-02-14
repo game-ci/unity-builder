@@ -48,10 +48,19 @@ Parameters:
   EFSMountDirectory:
     Type: String
     Default: /efsdata
-  SecretName:
+  GitHubTokenSecret:
     Type: String
     Default: 'Secret'
-  SecretValue:
+  UnityLicenseSecret:
+    Type: String
+    Default: 'Secret'
+  AndroidKeystoreBase64Secret:
+    Type: String
+    Default: 'Secret'
+  AndroidKeystorePassSecret:
+    Type: String
+    Default: 'Secret'
+  AndroidKeystoreAliasSecret:
     Type: String
     Default: ''
 Mappings:
@@ -100,11 +109,31 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
-  Secret:
+  GitHubTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: !Ref SecretName
-      SecretString: !Ref SecretValue
+      Name: GitHubTokenSecret
+      SecretString: !Ref GitHubTokenSecret
+  UnityLicenseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: UnityLicenseSecret
+      SecretString: !Ref UnityLicenseSecret
+  AndroidKeystoreBase64Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: AndroidKeystoreBase64Secret
+      SecretString: !Ref AndroidKeystoreBase64Secret
+  AndroidKeystorePassSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: AndroidKeystorePassSecret
+      SecretString: !Ref AndroidKeystorePassSecret
+  AndroidKeystoreAliasSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: AndroidKeystoreAliasSecret
+      SecretString: !Ref AndroidKeystoreAliasSecret
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -149,8 +178,18 @@ Resources:
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
-            - Name: !Ref SecretName
-              ValueFrom: !Ref Secret
+            - Name: GitHubTokenSecret
+              ValueFrom: !Ref GitHubTokenSecret
+            - Name: UnityLicenseSecret
+              ValueFrom: !Ref UnityLicenseSecret
+            - Name: !Ref AndroidKeystoreBase64Secret
+              ValueFrom: !Ref AndroidKeystoreBase64Secret
+            - Name: AndroidKeystorePassSecret
+              ValueFrom: !Ref AndroidKeystorePassSecret
+            - Name: AndroidKeystorePassSecret
+              ValueFrom: !Ref AndroidKeystorePassSecret
+            - Name: AndroidKeystoreAliasSecret
+              ValueFrom: !Ref AndroidKeystoreAliasSecret
           LogConfiguration:
             LogDriver: awslogs
             Options:
