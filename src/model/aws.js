@@ -20,7 +20,13 @@ class AWS {
         ls;
         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
         git clone https://github.com/webbertakken/unity-builder.git builder;
-        ls
+        ls;
+        cd repo;
+        git checkout $GITHUB_SHA;
+        ls;
+        cp -r /data/builder/action/default-build-script /UnityBuilderAction;
+        cp -r /data/builder/action/entrypoint.sh /entrypoint.sh;
+        cp -r /data/builder/action/steps /steps;
       `],
       '/efsdata',
       '/efsdata/',
@@ -35,7 +41,13 @@ class AWS {
       buildParameters.awsStackName,
       baseImage.toString(),
       ['/bin/sh'],
-      ['-c', `echo "test"`],
+      ['-c', `
+      ls;
+      cd repo;
+      chmod -R +x /entrypoint.sh;
+      chmod -R +x /steps;
+      /entrypoint.sh;
+      `],
       '/efsdata',
       '/efsdata/',
       [],
