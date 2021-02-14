@@ -9,6 +9,7 @@ const zlib = require('zlib');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
+    let buildId = nanoid();
     await this.run(
       buildParameters.awsStackName,
       'alpine/git',
@@ -37,7 +38,7 @@ class AWS {
         },
         {
           name: 'BUILD_ID',
-          value: nanoid(),
+          value: buildId,
         },
       ],
     );
@@ -47,13 +48,19 @@ class AWS {
       ['/bin/sh'],
       ['-c', `
       ls;
+      cd $BUILD_ID;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
       /entrypoint.sh;
       `],
       '/data',
       '/data/repo/',
-      [],
+      [
+        {
+          name: 'BUILD_ID',
+          value: buildId,
+        },
+      ],
     );
   }
 
