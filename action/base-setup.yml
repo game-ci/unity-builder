@@ -231,8 +231,10 @@ Resources:
             Statement:
             - Effect: Allow
               Action:
+                # Allow the use of secret manager
                 - 'secretsmanager:GetSecretValue'
                 - 'kms:Decrypt'
+
                 # Allow the ECS Tasks to download images from ECR
                 - 'ecr:GetAuthorizationToken'
                 - 'ecr:BatchCheckLayerAvailability'
