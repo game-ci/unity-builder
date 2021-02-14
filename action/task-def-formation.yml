@@ -109,31 +109,37 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
+  
   GithubTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: GithubToken
       SecretString: !Ref GithubToken
+  
   UnityLicenseSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: UnityLicense
       SecretString: !Ref UnityLicense
+  
   AndroidKeystoreBase64Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: AndroidKeystoreBase64
       SecretString: !Ref AndroidKeystoreBase64
+  
   AndroidKeystorePassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: AndroidKeystorePass
       SecretString: !Ref AndroidKeystorePass
+  
   AndroidKeyAliasPassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: AndroidKeyAliasPass
       SecretString: !Ref AndroidKeyAliasPass
+  
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -195,7 +201,7 @@ Resources:
                 ValueFrom: !Ref GitHubTokenSecret
               - Name: UNITY_LICENSE
                 ValueFrom: !Ref UnityLicenseSecret
-              - Name: !Ref ANDROID_KEYSTORE_BASE64
+              - Name: ANDROID_KEYSTORE_BASE64
                 ValueFrom: !Ref AndroidKeystoreBase64Secret
               - Name: ANDROID_KEYSTORE_PASS
                 ValueFrom: !Ref AndroidKeystorePassSecret
