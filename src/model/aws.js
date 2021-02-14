@@ -26,7 +26,6 @@ class AWS {
         git clone https://github.com/webbertakken/unity-builder.git $BUILD_ID/builder;
         cd $BUILD_ID/repo;
         git checkout $GITHUB_SHA;
-        echo $Secrets | base64 --decode | jq '.[]' | 
       `],
       '/data',
       '/data/',
