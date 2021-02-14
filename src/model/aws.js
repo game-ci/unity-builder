@@ -57,6 +57,50 @@ class AWS {
           name: 'BUILD_ID',
           value: buildId,
         },
+        {
+          name: 'GITHUB_WORKSPACE',
+          value: '/data/repo',
+        },
+        {
+          name: 'PROJECT_PATH',
+          value: buildParameters.projectPath,
+        },
+        {
+          name: 'BUILD_PATH',
+          value: buildParameters.buildPath,
+        },
+        {
+          name: 'BUILD_FILE',
+          value: buildParameters.buildFile,
+        },
+        {
+          name: 'BUILD_NAME',
+          value: buildParameters.buildName,
+        },
+        {
+          name: 'BUILD_METHOD',
+          value: buildParameters.buildMethod,
+        },
+        {
+          name: 'CUSTOM_PARAMETERS',
+          value: buildParameters.customParameters,
+        },
+        {
+          name: 'BUILD_TARGET',
+          value: buildParameters.platform,
+        },
+        {
+          name: 'ANDROID_VERSION_CODE',
+          value: buildParameters.androidVersionCode.toString(),
+        },
+        {
+          name: 'ANDROID_KEYSTORE_NAME',
+          value: buildParameters.androidKeystoreName,
+        },
+        {
+          name: 'ANDROID_KEYALIAS_NAME',
+          value: buildParameters.androidKeyaliasName,
+        },
       ],
     );
   }
