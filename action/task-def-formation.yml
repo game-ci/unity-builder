@@ -197,12 +197,12 @@ Resources:
               ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
               ValueFrom: !Ref AndroidKeyAliasPassSecret
-           LogConfiguration:
-             LogDriver: awslogs
-             Options:
-               awslogs-group: !Ref ServiceName
-               awslogs-region: !Ref 'AWS::Region'
-               awslogs-stream-prefix: !Ref ServiceName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ServiceName
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: !Ref ServiceName
           # not needed, excluded by default5
           #   SecretOptions:
           #     - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILDID ] ]
