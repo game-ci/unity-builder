@@ -35,7 +35,7 @@ Parameters:
     Default: 'ls'
   EntryPoint:
     Type: String
-    Default: '/bin/sh,-c'
+    Default: '/bin/sh'
   WorkingDirectory:
     Type: String
     Default: '/efsdata/'
