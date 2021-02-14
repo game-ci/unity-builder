@@ -48,6 +48,12 @@ Parameters:
   EFSMountDirectory:
     Type: String
     Default: /efsdata
+  SecretName:
+    Type: String
+    Default: 'Secret'
+  SecretValue:
+    Type: String
+    Default: ''
 Mappings:
   SubnetConfig:
     VPC:
@@ -94,6 +100,11 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
+  Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Ref SecretName
+      SecretString: !Ref SecretValue
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -137,6 +148,9 @@ Resources:
             - SourceVolume: efs-data
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
+          Secrets:
+            - Name: !Ref SecretName
+              ValueFrom: !Ref Secret
           LogConfiguration:
             LogDriver: awslogs
             Options:

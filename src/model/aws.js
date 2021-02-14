@@ -36,6 +36,7 @@ class AWS {
           value: buildId,
         },
       ],
+      [],
     );
     await this.run(
       buildParameters.awsStackName,
@@ -102,10 +103,22 @@ class AWS {
           value: buildParameters.androidKeyaliasName,
         },
       ],
+      [
+        {name: 'GITHUB_TOKEN',
+        value: base64.encode(buildParameters.githubToken),},
+        {name: 'UNITY_LICENSE',
+        value: base64.encode(process.env.UNITY_LICENSE),},
+        {name: 'ANDROID_KEYSTORE_BASE64',
+        value: base64.encode(buildParameters.androidKeystoreBase64),},
+        {name: 'ANDROID_KEYSTORE_PASS',
+        value: base64.encode(buildParameters.androidKeystorePass),},
+        {name: 'ANDROID_KEYALIAS_PASS',
+        value: base64.encode(buildParameters.androidKeyaliasPass),},
+      ]
     );
   }
 
-  static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment) {
+  static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
@@ -142,6 +155,14 @@ class AWS {
           ParameterKey: 'EFSMountDirectory',
           ParameterValue: mountdir,
         },
+        {
+          ParameterKey: 'SecretName',
+          ParameterValue: 'Secrets'+nanoid(),
+        },
+        {
+          ParameterKey: 'SecretValue',
+          ParameterValue: Buffer.from(JSON.stringify(secrets)).toString('base64'),
+        }
       ],
     }).promise();
     await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
