@@ -50,19 +50,19 @@ Parameters:
     Default: '/efsdata'
   GithubToken:
     Type: String
-    Default: ''
+    Default: 'Secret'
   UnityLicense:
     Type: String
-    Default: ''
+    Default: 'Secret'
   AndroidKeystoreBase64:
     Type: String
-    Default: ''
+    Default: 'Secret'
   AndroidKeystorePass:
     Type: String
-    Default: ''
+    Default: 'Secret'
   AndroidKeyAliasPass:
     Type: String
-    Default: ''
+    Default: 'Secret'
 Mappings:
   SubnetConfig:
     VPC:
