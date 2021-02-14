@@ -105,15 +105,15 @@ class AWS {
       ],
       [
         {name: 'GITHUB_TOKEN',
-        value: base64.encode(buildParameters.githubToken),},
+        value: buildParameters.githubToken,},
         {name: 'UNITY_LICENSE',
-        value: base64.encode(process.env.UNITY_LICENSE),},
+        value: process.env.UNITY_LICENSE,},
         {name: 'ANDROID_KEYSTORE_BASE64',
-        value: base64.encode(buildParameters.androidKeystoreBase64),},
+        value: buildParameters.androidKeystoreBase64,},
         {name: 'ANDROID_KEYSTORE_PASS',
-        value: base64.encode(buildParameters.androidKeystorePass),},
+        value: buildParameters.androidKeystorePass,},
         {name: 'ANDROID_KEYALIAS_PASS',
-        value: base64.encode(buildParameters.androidKeyaliasPass),},
+        value: buildParameters.androidKeyaliasPass,},
       ]
     );
   }
