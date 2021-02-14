@@ -314,16 +314,18 @@ class AWS {
       tasks: [task.tasks[0].taskArn],
     }).promise();
 
-    core.info(
-      `Build job has ended ${
-        (
-          await ECS.describeTasks({
-            tasks: [task.tasks[0].taskArn],
-            cluster: clusterName,
-          }).promise()
-        ).tasks[0].containers[0].exitCode
-      }`,
-    );
+    const exitCode = (await ECS.describeTasks({
+        tasks: [task.tasks[0].taskArn],
+        cluster: clusterName,
+      }).promise()
+    ).tasks[0].containers[0].exitCode;
+
+    if(exitCode!=0){
+      core.error(`job finished with exit code other than 0 (${exitCode})`)
+    }
+    else{
+      core.info(`Build job has ended ${exitCode}`);
+    }
 
     await CF.deleteStack({
       StackName: taskDefStackName,
