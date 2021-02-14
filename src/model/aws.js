@@ -43,13 +43,12 @@ class AWS {
       ['/bin/sh'],
       ['-c', `
       ls;
-      cd repo;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
       /entrypoint.sh;
       `],
       '/data',
-      '/data/',
+      '/data/repo/',
       [],
     );
   }
