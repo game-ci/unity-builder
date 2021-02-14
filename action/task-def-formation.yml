@@ -197,6 +197,10 @@ Resources:
               ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
               ValueFrom: !Ref AndroidKeyAliasPassSecret
+          Options:
+            awslogs-group: !Ref ServiceName
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: !Ref ServiceName
           # not needed, excluded by default
           # LogConfiguration:
           #   LogDriver: awslogs
@@ -211,10 +215,6 @@ Resources:
           #       ValueFrom: !Ref AndroidKeystorePassSecret
           #     - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
           #       ValueFrom: !Ref AndroidKeyAliasPassSecret
-            Options:
-              awslogs-group: !Ref ServiceName
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: !Ref ServiceName
     Metadata:
       'AWS::CloudFormation::Designer':
         id: dabb0116-abe0-48a6-a8af-cf9111c879a5
