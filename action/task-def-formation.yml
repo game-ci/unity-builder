@@ -113,31 +113,31 @@ Resources:
   GithubTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: GithubToken
+      Name: !Join [ "", [ 'GithubToken', !Ref BUILD_ID ] ]
       SecretString: !Ref GithubToken
   
   UnityLicenseSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: UnityLicense
+      Name: !Join [ "", [ 'UnityLicense', !Ref BUILD_ID ] ]
       SecretString: !Ref UnityLicense
   
   AndroidKeystoreBase64Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: AndroidKeystoreBase64
+      Name: !Join [ "", [ 'AndroidKeystoreBase64', !Ref BUILD_ID ] ]
       SecretString: !Ref AndroidKeystoreBase64
   
   AndroidKeystorePassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: AndroidKeystorePass
+      Name: !Join [ "", [ 'AndroidKeystorePass', !Ref BUILD_ID ] ]
       SecretString: !Ref AndroidKeystorePass
   
   AndroidKeyAliasPassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: AndroidKeyAliasPass
+      Name: !Join [ "", [ 'AndroidKeyAliasPass', !Ref BUILD_ID ] ]
       SecretString: !Ref AndroidKeyAliasPass
   
   TaskDefinition:
@@ -184,28 +184,28 @@ Resources:
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
-            - Name: 'GITHUB_TOKEN_${AWS::Random}'
+            - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILD_ID ] ]
               ValueFrom: !Ref GithubTokenSecret
-            - Name: 'UNITY_LICENSE_${AWS::Random}'
+            - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILD_ID ] ]
               ValueFrom: !Ref UnityLicenseSecret
-            - Name: 'ANDROID_KEYSTORE_BASE64_${AWS::Random}'
+            - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILD_ID ] ]
               ValueFrom: !Ref AndroidKeystoreBase64Secret
-            - Name: 'ANDROID_KEYSTORE_PASS_${AWS::Random}'
+            - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILD_ID ] ]
               ValueFrom: !Ref AndroidKeystorePassSecret
-            - Name: 'ANDROID_KEYALIAS_PASS_${AWS::Random}'
+            - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILD_ID ] ]
               ValueFrom: !Ref AndroidKeyAliasPassSecret
           LogConfiguration:
             LogDriver: awslogs
             SecretOptions:
-              - Name: 'GITHUB_TOKEN_${AWS::Random}'
+              - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILD_ID ] ]
                 ValueFrom: !Ref GithubTokenSecret
-              - Name: 'UNITY_LICENSE_${AWS::Random}'
+              - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILD_ID ] ]
                 ValueFrom: !Ref UnityLicenseSecret
-              - Name: 'ANDROID_KEYSTORE_BASE64_${AWS::Random}'
+              - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILD_ID ] ]
                 ValueFrom: !Ref AndroidKeystoreBase64Secret
-              - Name: 'ANDROID_KEYSTORE_PASS_${AWS::Random}'
+              - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILD_ID ] ]
                 ValueFrom: !Ref AndroidKeystorePassSecret
-              - Name: 'ANDROID_KEYALIAS_PASS_${AWS::Random}'
+              - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILD_ID ] ]
                 ValueFrom: !Ref AndroidKeyAliasPassSecret
             Options:
               awslogs-group: !Ref ServiceName
