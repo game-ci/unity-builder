@@ -9,6 +9,8 @@ const zlib = require('zlib');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
+    try{
+
     let buildId = nanoid();
     await this.run(
       buildParameters.awsStackName,
@@ -43,6 +45,7 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
+      cat $
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
@@ -116,6 +119,10 @@ class AWS {
         value: buildParameters.androidKeyaliasPass,},
       ]
     );
+    }
+    catch(error){
+      core.error(error);
+    }
   }
 
   static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
