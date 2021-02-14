@@ -46,9 +46,9 @@ class AWS {
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh ./entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps ./steps;
       ls;
-      chmod -R +x /entrypoint.sh;
-      chmod -R +x /steps;
-      /entrypoint.sh;
+      chmod -R +x ./entrypoint.sh;
+      chmod -R +x ./steps;
+      ./entrypoint.sh;
       `],
       '/data',
       `/data/${buildId}/repo/`,
