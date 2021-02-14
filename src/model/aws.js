@@ -47,11 +47,9 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      if [$GITHUB_TOKEN -eq 'Secret']; then unset GITHUB_TOKEN; fi;
-      if [$UNITY_LICENSE -eq 'Secret']; then unset UNITY_LICENSE; fi;
-      if [$ANDROID_KEYSTORE_BASE64 -eq 'Secret']; then unset ANDROID_KEYSTORE_BASE64; fi;
-      if [$ANDROID_KEYSTORE_PASS -eq 'Secret']; then unset ANDROID_KEYSTORE_PASS; fi;
-      if [$ANDROID_KEYALIAS_PASS -eq 'Secret']; then unset ANDROID_KEYALIAS_PASS; fi;
+      if [$ANDROID_KEYSTORE_BASE64 -eq '0']; then unset ANDROID_KEYSTORE_BASE64; fi;
+      if [$ANDROID_KEYSTORE_PASS -eq '0']; then unset ANDROID_KEYSTORE_PASS; fi;
+      if [$ANDROID_KEYALIAS_PASS -eq '0']; then unset ANDROID_KEYALIAS_PASS; fi;
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
@@ -115,7 +113,7 @@ class AWS {
       [
         {
           ParameterKey: 'GithubToken',
-          ParameterValue: buildParameters.githubToken
+          ParameterValue: buildParameters.githubToken,
         },
         {
           ParameterKey: 'UnityLicense',
@@ -123,15 +121,15 @@ class AWS {
         },
         {
           ParameterKey: 'AndroidKeystoreBase64',
-          ParameterValue: buildParameters.androidKeystoreBase64
+          ParameterValue: buildParameters.androidKeystoreBase64?buildParameters.androidKeystoreBase64:0
         },
         {
           ParameterKey: 'AndroidKeystorePass',
-          ParameterValue: buildParameters.androidKeystorePass
+          ParameterValue: buildParameters.androidKeystorePass?buildParameters.androidKeystorePass:0
         },
         {
           ParameterKey: 'AndroidKeyAliasPass',
-          ParameterValue: buildParameters.androidKeyaliasPass
+          ParameterValue: buildParameters.androidKeyaliasPass?buildParameters.androidKeyaliasPass:0
         },
       ]
     );
