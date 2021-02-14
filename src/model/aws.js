@@ -321,10 +321,10 @@ class AWS {
     ).tasks[0].containers[0].exitCode;
 
     if(exitCode!=0){
-      core.error(`job finished with exit code other than 0 (${exitCode})`)
+      core.error(`job finished with exit code ${exitCode}`)
     }
     else{
-      core.info(`Build job has ended ${exitCode}`);
+      core.info(`Build job has finished with exit code 0`);
     }
 
     await CF.deleteStack({
