@@ -110,7 +110,7 @@ class AWS {
       ],
       [
         {
-          ParameterKey: 'GitHubToken',
+          ParameterKey: 'GithubToken',
           ParameterValue: buildParameters.githubToken
         },
         {

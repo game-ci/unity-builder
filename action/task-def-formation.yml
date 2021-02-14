@@ -182,7 +182,7 @@ Resources:
               ValueFrom: !Ref GitHubTokenSecret
             - Name: UNITY_LICENSE
               ValueFrom: !Ref UnityLicenseSecret
-            - Name: !Ref ANDROID_KEYSTORE_BASE64
+            - Name: ANDROID_KEYSTORE_BASE64
               ValueFrom: !Ref AndroidKeystoreBase64Secret
             - Name: ANDROID_KEYSTORE_PASS
               ValueFrom: !Ref AndroidKeystorePassSecret
