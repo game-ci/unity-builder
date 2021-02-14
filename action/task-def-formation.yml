@@ -28,7 +28,7 @@ Parameters:
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
     Type: Number
-    Default: 1024
+    Default: 512
     Description: How much memory in megabytes to give the container
   Command:
     Type: String
