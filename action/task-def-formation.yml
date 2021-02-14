@@ -187,15 +187,15 @@ Resources:
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
-            - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILDID ] ]
+            - Name: 'GITHUB_TOKEN'
               ValueFrom: !Ref GithubTokenSecret
-            - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILDID ] ]
+            - Name: 'UNITY_LICENSE'
               ValueFrom: !Ref UnityLicenseSecret
-            - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILDID ] ]
+            - Name: 'ANDROID_KEYSTORE_BASE64'
               ValueFrom: !Ref AndroidKeystoreBase64Secret
-            - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILDID ] ]
+            - Name: 'ANDROID_KEYSTORE_PASS'
               ValueFrom: !Ref AndroidKeystorePassSecret
-            - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
+            - Name: 'ANDROID_KEYALIAS_PASS'
               ValueFrom: !Ref AndroidKeyAliasPassSecret
           LogConfiguration:
             LogDriver: awslogs
