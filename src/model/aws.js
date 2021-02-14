@@ -144,8 +144,9 @@ class AWS {
   static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
+    const jobId = nanoid();
 
-    const taskDefStackName = `${stackName}-taskDef-${image}-${nanoid()}`
+    const taskDefStackName = `${stackName}-taskDef-${image}-${jobId}`
       .toString()
       .replace(/[^\da-z]/gi, '');
     core.info('Creating build job resources');
@@ -177,6 +178,10 @@ class AWS {
         {
           ParameterKey: 'EFSMountDirectory',
           ParameterValue: mountdir,
+        },
+        {
+          ParameterKey: 'BUILDID',
+          ParameterValue: jobId,
         }
       ].concat(secrets),
     }).promise();
