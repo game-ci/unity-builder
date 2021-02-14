@@ -282,6 +282,16 @@ class AWS {
     ).ShardIterator;
 
     core.info(`Task status is ${await getTaskStatus()}`);
+
+    const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDefStackName}`;
+    const encode = text => encodeURIComponent(text).replace(/%/g, '$');
+    const awsEncode = text => encodeURIComponent(encodeURIComponent(text)).replace(/%/g, '$');
+    const encodeTimestamp = timestamp => encode('?start=') + awsEncode(new Date(timestamp).toJSON());
+    const awsLambdaLogBaseUrl = `${logBaseUrl}/${awsEncode('/aws/lambda/')}`;
+    const logStreamUrl = (logGroup, logStream, timestamp) =>
+      `${awsLambdaLogBaseUrl}${logGroup}/log-events/${awsEncode(logStream)}${timestamp ? encodeTimestamp(timestamp) : ''}`;
+    core.info(`You can also watch the logs at AWS Cloud Watch: ${logStreamUrl}`);
+
     let readingLogs = true;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
