@@ -236,8 +236,6 @@ class AWS {
         tasks: [task.tasks[0].taskArn],
       }).promise();
     } catch (error) {
-      core.error(error);
-    } finally{
       await new Promise((resolve) => setTimeout(resolve, 3000));
       core.info(
         `Build job has ended ${
@@ -249,7 +247,7 @@ class AWS {
           ).tasks[0].containers[0].lastStatus
         }`,
       );
-  
+      core.error(error);
     }
 
     core.info(`Build job is running`);
