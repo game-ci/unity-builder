@@ -47,7 +47,7 @@ Parameters:
       needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
   EFSMountDirectory:
     Type: String
-    Default: /efsdata
+    Default: '/efsdata'
   GithubToken:
     Type: String
     Default: 'Secret'
@@ -191,7 +191,16 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             SecretOptions:
-              - name: 
+              - Name: GITHUB_TOKEN
+                ValueFrom: !Ref GitHubTokenSecret
+              - Name: UNITY_LICENSE
+                ValueFrom: !Ref UnityLicenseSecret
+              - Name: !Ref ANDROID_KEYSTORE_BASE64
+                ValueFrom: !Ref AndroidKeystoreBase64Secret
+              - Name: ANDROID_KEYSTORE_PASS
+                ValueFrom: !Ref AndroidKeystorePassSecret
+              - Name: ANDROID_KEYALIAS_PASS
+                ValueFrom: !Ref AndroidKeyAliasPassSecret
             Options:
               awslogs-group: !Ref ServiceName
               awslogs-region: !Ref 'AWS::Region'
