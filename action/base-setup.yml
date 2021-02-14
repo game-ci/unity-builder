@@ -279,6 +279,8 @@ Resources:
           - Effect: "Allow"
             Action:
               - "elasticfilesystem:ClientMount"
+              - "elasticfilesystem:ClientWrite"
+              - "elasticfilesystem:ClientRootAccess"
             Principal:
               AWS: "*"
 
