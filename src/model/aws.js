@@ -46,11 +46,11 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      if [$GITHUB_TOKEN -eq '0']; then unset GITHUB_TOKEN; fi;
-      if [$UNITY_LICENSE -eq '0']; then unset UNITY_LICENSE; fi;
-      if [$ANDROID_KEYSTORE_BASE64 -eq '0']; then unset ANDROID_KEYSTORE_BASE64; fi;
-      if [$ANDROID_KEYSTORE_PASS -eq '0']; then unset ANDROID_KEYSTORE_PASS; fi;
-      if [$ANDROID_KEYALIAS_PASS -eq '0']; then unset ANDROID_KEYALIAS_PASS; fi;
+      if [ $GITHUB_TOKEN -eq '0' ]; then unset GITHUB_TOKEN; fi;
+      if [ $UNITY_LICENSE -eq '0' ]; then unset UNITY_LICENSE; fi;
+      if [ $ANDROID_KEYSTORE_BASE64 -eq '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi;
+      if [ $ANDROID_KEYSTORE_PASS -eq '0' ]; then unset ANDROID_KEYSTORE_PASS; fi;
+      if [ $ANDROID_KEYALIAS_PASS -eq '0' ]; then unset ANDROID_KEYALIAS_PASS; fi;
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
