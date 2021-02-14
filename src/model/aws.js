@@ -48,13 +48,12 @@ class AWS {
       ['/bin/sh'],
       ['-c', `
       ls;
-      cd $BUILD_ID;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
       /entrypoint.sh;
       `],
       '/data',
-      '/data/repo/',
+      `/data/${buildId}/repo/`,
       [
         {
           name: 'BUILD_ID',
