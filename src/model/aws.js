@@ -284,7 +284,7 @@ class AWS {
     core.info(`Task status is ${await getTaskStatus()}`);
     let readingLogs = true;
     while (readingLogs) {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       if ((await getTaskStatus()) !== 'RUNNING') {
         readingLogs = false;
         await new Promise((resolve) => setTimeout(resolve, 35000));
