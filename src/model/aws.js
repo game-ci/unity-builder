@@ -173,10 +173,6 @@ class AWS {
         {
           ParameterKey: 'EFSMountDirectory',
           ParameterValue: mountdir,
-        },
-        {
-          ParameterKey: 'SecretName',
-          ParameterValue: 'Secrets'+nanoid(),
         }
       ].concat(secrets),
     }).promise();
