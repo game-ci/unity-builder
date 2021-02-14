@@ -185,7 +185,7 @@ Resources:
               ReadOnly: false
           Secrets:
             - Name: GITHUB_TOKEN
-              ValueFrom: !Ref GitHubTokenSecret
+              ValueFrom: !Ref GithubTokenSecret
             - Name: UNITY_LICENSE
               ValueFrom: !Ref UnityLicenseSecret
             - Name: ANDROID_KEYSTORE_BASE64
