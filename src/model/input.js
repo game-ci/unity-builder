@@ -98,7 +98,7 @@ class Input {
   }
 
   static get githubToken() {
-    return core.g('githubToken') || '';
+    return core.getInput('githubToken') || '';
   }
 
   static get kubeContainerMemory() {
