@@ -110,23 +110,23 @@ class AWS {
       ],
       [
         {
-          ParameterKey: 'GITHUB_TOKEN',
+          ParameterKey: 'GitHubToken',
           ParameterValue: buildParameters.githubToken
         },
         {
-          ParameterKey: 'UNITY_LICENSE',
+          ParameterKey: 'UnityLicense',
           ParameterValue: process.env.UNITY_LICENSE
         },
         {
-          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+          ParameterKey: 'AndroidKeystoreBase64',
           ParameterValue: buildParameters.androidKeystoreBase64
         },
         {
-          ParameterKey: 'ANDROID_KEYSTORE_PASS',
+          ParameterKey: 'AndroidKeystorePass',
           ParameterValue: buildParameters.androidKeystorePass
         },
         {
-          ParameterKey: 'ANDROID_KEYALIAS_PASS',
+          ParameterKey: 'AndroidKeyAliasPass',
           ParameterValue: buildParameters.androidKeyaliasPass
         },
       ]

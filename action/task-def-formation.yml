@@ -48,19 +48,19 @@ Parameters:
   EFSMountDirectory:
     Type: String
     Default: /efsdata
-  GITHUB_TOKEN:
+  GithubToken:
     Type: String
     Default: 'Secret'
-  UNITY_LICENSE:
+  UnityLicense:
     Type: String
     Default: 'Secret'
-  ANDROID_KEYSTORE_BASE64:
+  AndroidKeystoreBase64:
     Type: String
     Default: 'Secret'
-  ANDROID_KEYSTORE_PASS:
+  AndroidKeystorePass:
     Type: String
     Default: 'Secret'
-  ANDROID_KEYALIAS_PASS:
+  AndroidKeyAliasPass:
     Type: String
     Default: ''
 Mappings:
@@ -109,31 +109,31 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
-  GitHubTokenSecret:
+  GithubTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: GITHUB_TOKEN
-      SecretString: !Ref GITHUB_TOKEN
+      Name: GithubToken
+      SecretString: !Ref GithubToken
   UnityLicenseSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: UNITY_LICENSE
-      SecretString: !Ref UNITY_LICENSE
+      Name: UnityLicense
+      SecretString: !Ref UnityLicense
   AndroidKeystoreBase64Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: ANDROID_KEYSTORE_BASE64
-      SecretString: !Ref ANDROID_KEYSTORE_BASE64
+      Name: AndroidKeystoreBase64
+      SecretString: !Ref AndroidKeystoreBase64
   AndroidKeystorePassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: ANDROID_KEYSTORE_PASS
-      SecretString: !Ref ANDROID_KEYSTORE_PASS
-  AndroidKeystoreAliasSecret:
+      Name: AndroidKeystorePass
+      SecretString: !Ref AndroidKeystorePass
+  AndroidKeyAliasPassSecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: ANDROID_KEYALIAS_PASS
-      SecretString: !Ref ANDROID_KEYALIAS_PASS
+      Name: AndroidKeyAliasPass
+      SecretString: !Ref AndroidKeyAliasPass
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -179,17 +179,19 @@ Resources:
               ReadOnly: false
           Secrets:
             - Name: GITHUB_TOKEN
-              ValueFrom: !Ref GITHUB_TOKEN
+              ValueFrom: !Ref GitHubTokenSecret
             - Name: UNITY_LICENSE
-              ValueFrom: !Ref UNITY_LICENSE
+              ValueFrom: !Ref UnityLicenseSecret
             - Name: !Ref ANDROID_KEYSTORE_BASE64
-              ValueFrom: !Ref ANDROID_KEYSTORE_BASE64
+              ValueFrom: !Ref AndroidKeystoreBase64Secret
             - Name: ANDROID_KEYSTORE_PASS
-              ValueFrom: !Ref ANDROID_KEYSTORE_PASS
+              ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: ANDROID_KEYALIAS_PASS
-              ValueFrom: !Ref ANDROID_KEYALIAS_PASS
+              ValueFrom: !Ref AndroidKeyAliasPassSecret
           LogConfiguration:
             LogDriver: awslogs
+            SecretOptions:
+              - name: 
             Options:
               awslogs-group: !Ref ServiceName
               awslogs-region: !Ref 'AWS::Region'
