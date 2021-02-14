@@ -184,15 +184,15 @@ Resources:
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
-            - Name: GITHUB_TOKEN
+            - Name: 'GITHUB_TOKEN_${AWS::Random}'
               ValueFrom: !Ref GithubTokenSecret
-            - Name: UNITY_LICENSE
+            - Name: 'UNITY_LICENSE_${AWS::Random}'
               ValueFrom: !Ref UnityLicenseSecret
-            - Name: ANDROID_KEYSTORE_BASE64
+            - Name: 'ANDROID_KEYSTORE_BASE64_${AWS::Random}'
               ValueFrom: !Ref AndroidKeystoreBase64Secret
-            - Name: ANDROID_KEYSTORE_PASS
+            - Name: 'ANDROID_KEYSTORE_PASS_${AWS::Random}'
               ValueFrom: !Ref AndroidKeystorePassSecret
-            - Name: ANDROID_KEYALIAS_PASS
+            - Name: 'ANDROID_KEYALIAS_PASS_${AWS::Random}'
               ValueFrom: !Ref AndroidKeyAliasPassSecret
           LogConfiguration:
             LogDriver: awslogs
