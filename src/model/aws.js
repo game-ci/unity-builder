@@ -17,8 +17,9 @@ class AWS {
         '-c', 
         `apt update;
         apt install git-lfs -y;
-        chmod -R 777 $PWD;
+        ls;
         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
+        git clone https://github.com/webbertakken/unity-builder.git builder;
         ls
       `],
       '/efsdata',
