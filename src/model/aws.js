@@ -39,7 +39,12 @@ class AWS {
           value: buildId,
         },
       ],
-      [],
+      [
+        {
+          ParameterKey: 'GithubToken',
+          ParameterValue: buildParameters.githubToken,
+        },
+      ],
     );
     await this.run(
       buildParameters.awsStackName,
