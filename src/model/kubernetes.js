@@ -36,7 +36,7 @@ class Kubernetes {
     await Kubernetes.scheduleBuildJob();
     await Kubernetes.watchBuildJobUntilFinished();
     await Kubernetes.cleanup();
-
+core.
     core.setOutput('volume', pvcName);
   }
 
@@ -49,7 +49,6 @@ class Kubernetes {
       },
       type: 'Opaque',
       data: {
-        GITHUB_TOKEN: base64.encode(this.buildParameters.githubToken),
         UNITY_LICENSE: base64.encode(process.env.UNITY_LICENSE),
         ANDROID_KEYSTORE_BASE64: base64.encode(this.buildParameters.androidKeystoreBase64),
         ANDROID_KEYSTORE_PASS: base64.encode(this.buildParameters.androidKeystorePass),

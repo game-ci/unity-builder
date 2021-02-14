@@ -50,10 +50,10 @@ Parameters:
     Default: '/efsdata'
   GithubToken:
     Type: String
-    Default: ''
+    Default: '0'
   UnityLicense:
     Type: String
-    Default: ''
+    Default: '0'
   AndroidKeystoreBase64:
     Type: String
     Default: '0'
