@@ -136,6 +136,7 @@ class AWS {
     );
     }
     catch(error){
+      core.setFailed(error);
       core.error(error);
     }
   }
@@ -247,6 +248,7 @@ class AWS {
           ).tasks[0].containers[0].lastStatus
         }`,
       );
+      core.setFailed(error);
       core.error(error);
     }
 
