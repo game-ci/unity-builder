@@ -11,12 +11,12 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     await this.run(
       buildParameters.awsStackName,
-      'ubuntu',
+      'alpine/git',
       ['/bin/sh'],
       [
         '-c', 
-        `apt update;
-        apt install git-lfs -y;
+        `apk update;
+        apk add git-lfs;
         ls;
         git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
         git clone https://github.com/webbertakken/unity-builder.git builder;
@@ -28,8 +28,8 @@ class AWS {
         cp -r /data/builder/action/entrypoint.sh /entrypoint.sh;
         cp -r /data/builder/action/steps /steps;
       `],
-      '/efsdata',
-      '/efsdata/',
+      '/data',
+      '/data/',
       [
         {
           name: 'GITHUB_SHA',
@@ -48,8 +48,8 @@ class AWS {
       chmod -R +x /steps;
       /entrypoint.sh;
       `],
-      '/efsdata',
-      '/efsdata/',
+      '/data',
+      '/data/',
       [],
     );
   }
