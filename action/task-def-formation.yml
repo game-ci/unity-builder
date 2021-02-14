@@ -197,19 +197,20 @@ Resources:
               ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
               ValueFrom: !Ref AndroidKeyAliasPassSecret
-          LogConfiguration:
-            LogDriver: awslogs
-            SecretOptions:
-              - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILDID ] ]
-                ValueFrom: !Ref GithubTokenSecret
-              - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILDID ] ]
-                ValueFrom: !Ref UnityLicenseSecret
-              - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILDID ] ]
-                ValueFrom: !Ref AndroidKeystoreBase64Secret
-              - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILDID ] ]
-                ValueFrom: !Ref AndroidKeystorePassSecret
-              - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
-                ValueFrom: !Ref AndroidKeyAliasPassSecret
+          # not needed, excluded by default
+          # LogConfiguration:
+          #   LogDriver: awslogs
+          #   SecretOptions:
+          #     - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILDID ] ]
+          #       ValueFrom: !Ref GithubTokenSecret
+          #     - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILDID ] ]
+          #       ValueFrom: !Ref UnityLicenseSecret
+          #     - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILDID ] ]
+          #       ValueFrom: !Ref AndroidKeystoreBase64Secret
+          #     - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILDID ] ]
+          #       ValueFrom: !Ref AndroidKeystorePassSecret
+          #     - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
+          #       ValueFrom: !Ref AndroidKeyAliasPassSecret
             Options:
               awslogs-group: !Ref ServiceName
               awslogs-region: !Ref 'AWS::Region'
