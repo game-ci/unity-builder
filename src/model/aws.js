@@ -123,15 +123,15 @@ class AWS {
         },
         {
           ParameterKey: 'AndroidKeystoreBase64',
-          ParameterValue: buildParameters.androidKeystoreBase64?buildParameters.androidKeystoreBase64:0
+          ParameterValue: buildParameters.androidKeystoreBase64?buildParameters.androidKeystoreBase64:'0'
         },
         {
           ParameterKey: 'AndroidKeystorePass',
-          ParameterValue: buildParameters.androidKeystorePass?buildParameters.androidKeystorePass:0
+          ParameterValue: buildParameters.androidKeystorePass?buildParameters.androidKeystorePass:'0'
         },
         {
           ParameterKey: 'AndroidKeyAliasPass',
-          ParameterValue: buildParameters.androidKeyaliasPass?buildParameters.androidKeyaliasPass:0
+          ParameterValue: buildParameters.androidKeyaliasPass?buildParameters.androidKeyaliasPass:'0'
         },
       ]
     );
