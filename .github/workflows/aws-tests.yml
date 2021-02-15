@@ -38,7 +38,7 @@ jobs:
         if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
-        id: aws-fargate-unity-build
+      - id: aws-fargate-unity-build
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
