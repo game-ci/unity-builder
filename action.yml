@@ -38,18 +38,6 @@ inputs:
     default: 'game-ci'
     required: false
     description: 'The Cloud Formation stack name that must be setup before using this option.'
-  awsRegion:
-    default: 'eu-west-1'
-    required: false
-    description: ''
-  awsAccessKeyId:
-    default: ''
-    required: false
-    description: 'AWS Access Key Id'
-  awsAccessKey:
-    default: ''
-    required: false
-    description: 'AWS Access Key Secret'
   kubeConfig:
     default: ''
     required: false
