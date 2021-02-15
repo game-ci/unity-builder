@@ -70,11 +70,11 @@ Resources:
       GroupName: "task security group"
       GroupDescription: Access to the Fargate containers
       VpcId: !Ref 'VPC'
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          CidrIp: 0.0.0.0/0
+      # SecurityGroupIngress:
+      #   - IpProtocol: tcp
+      #     FromPort: !Ref ContainerPort
+      #     ToPort: !Ref ContainerPort
+      #     CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
           FromPort: 2049
@@ -93,7 +93,7 @@ Resources:
         - Fn::GetAZs: !Ref 'AWS::Region'
       VpcId: !Ref 'VPC'
       CidrBlock: !FindInMap ['SubnetConfig', 'PublicOne', 'CIDR']
-      MapPublicIpOnLaunch: true
+    #  MapPublicIpOnLaunch: true
 
   PublicSubnetTwo:
     Type: AWS::EC2::Subnet
@@ -103,7 +103,7 @@ Resources:
         - Fn::GetAZs: !Ref 'AWS::Region'
       VpcId: !Ref 'VPC'
       CidrBlock: !FindInMap ['SubnetConfig', 'PublicTwo', 'CIDR']
-      MapPublicIpOnLaunch: true
+    #  MapPublicIpOnLaunch: true
 
 
   # Setup networking resources for the public subnets. Containers
