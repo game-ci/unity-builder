@@ -9,12 +9,6 @@ const zlib = require('zlib');
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
-    SDK.config.update({
-      apiVersion: "2010-12-01",
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      accessSecretKey: process.env.AWS_SECRET_KEY,
-      region: process.env.AWS_REGION,
-    });
     try{
 
     let buildId = nanoid();
