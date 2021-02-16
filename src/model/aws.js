@@ -149,8 +149,10 @@ class AWS {
         '-c', 
         `
         zip -r output.zip ./$BUILD_ID/repo/build
+        ls
         aws s3 cp ./$BUILD_ID/repo/build output.zip
         rm -r ./$BUILD_ID
+        ls
       `],
       '/data',
       '/data/',
