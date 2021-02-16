@@ -51,11 +51,11 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      if [ "$GITHUB_TOKEN" == '0' ]; then unset GITHUB_TOKEN; fi;
-      if [ "$UNITY_LICENSE" == '0' ]; then unset UNITY_LICENSE; fi;
-      if [ "$ANDROID_KEYSTORE_BASE64" == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi;
-      if [ "$ANDROID_KEYSTORE_PASS" == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi;
-      if [ "$ANDROID_KEYALIAS_PASS" == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi;
+      if [ $GITHUB_TOKEN == '0' ]; then unset GITHUB_TOKEN; fi;
+      if [ $UNITY_LICENSE == '0' ]; then unset UNITY_LICENSE; fi;
+      if [ $ANDROID_KEYSTORE_BASE64 == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi;
+      if [ $ANDROID_KEYSTORE_PASS == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi;
+      if [ $ANDROID_KEYALIAS_PASS == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi;
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
@@ -63,6 +63,7 @@ class AWS {
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
       /entrypoint.sh;
+      ls
       `],
       '/data',
       `/data/${buildId}/repo/`,
@@ -138,6 +139,37 @@ class AWS {
           ParameterValue: buildParameters.androidKeyaliasPass?buildParameters.androidKeyaliasPass:'0'
         },
       ]
+    );
+    // Cleanup
+    await this.run(
+      buildParameters.awsStackName,
+      'amazon/aws-cli',
+      ['/bin/sh'],
+      [
+        '-c', 
+        `
+        zip -r myfiles.zip mydir
+        aws s3 cp ./$BUILD_ID/repo/build
+        rm -r ./$BUILD_ID
+      `],
+      '/data',
+      '/data/',
+      [
+        {
+          name: 'GITHUB_SHA',
+          value: process.env.GITHUB_SHA,
+        },
+        {
+          name: 'BUILD_ID',
+          value: buildId,
+        },
+      ],
+      [
+        {
+          ParameterKey: 'GithubToken',
+          ParameterValue: buildParameters.githubToken,
+        },
+      ],
     );
     }
     catch(error){
