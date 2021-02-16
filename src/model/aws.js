@@ -148,11 +148,11 @@ class AWS {
       [
         '-c', 
         `
-        apt-get update
-        apt install zip
+        apk update;
+        apk add zip
         zip -r output.zip ./$BUILD_ID/repo/build
         ls
-        aws s3 cp ./$BUILD_ID/repo/build output.zip
+        aws s3 cp output.zip 
         rm -r ./$BUILD_ID
         ls
       `],
