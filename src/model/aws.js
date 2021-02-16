@@ -51,11 +51,11 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      if [ $GITHUB_TOKEN == '0' ]; then unset GITHUB_TOKEN; fi;
-      if [ $UNITY_LICENSE == '0' ]; then unset UNITY_LICENSE; fi;
-      if [ $ANDROID_KEYSTORE_BASE64 == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi;
-      if [ $ANDROID_KEYSTORE_PASS == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi;
-      if [ $ANDROID_KEYALIAS_PASS == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi;
+      if [ $GITHUB_TOKEN == '0' ]; then unset GITHUB_TOKEN; fi
+      if [ $UNITY_LICENSE == '0' ]; then unset UNITY_LICENSE; fi
+      if [ $ANDROID_KEYSTORE_BASE64 == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi
+      if [ $ANDROID_KEYSTORE_PASS == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi
+      if [ $ANDROID_KEYALIAS_PASS == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi
       cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/$BUILD_ID/builder/action/steps /steps;
@@ -148,6 +148,8 @@ class AWS {
       [
         '-c', 
         `
+        apt-get update
+        apt install zip
         zip -r output.zip ./$BUILD_ID/repo/build
         ls
         aws s3 cp ./$BUILD_ID/repo/build output.zip
@@ -224,7 +226,11 @@ class AWS {
         }
       ].concat(secrets),
     }).promise();
-    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+    try{
+      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+    }catch(error){
+      core.error(error);
+    }
 
     const taskDefResources = await CF.describeStackResources({
       StackName: taskDefStackName,
