@@ -314,7 +314,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
     Properties:
-      BucketName: GAME-CI-STORAGE
+      BucketName: game-ci-storage
 
 
 
