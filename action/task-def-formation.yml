@@ -30,6 +30,9 @@ Parameters:
     Type: Number
     Default: 2048
     Description: How much memory in megabytes to give the container
+  BUILDID:
+    Type: String
+    Default: ''
   Command:
     Type: String
     Default: 'ls'
