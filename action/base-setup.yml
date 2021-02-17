@@ -232,9 +232,9 @@ Resources:
             - Effect: Allow
               Action:
                 # Allow upload to S3
-                - s3:GetObject
-                - s3:GetObjectVersion
-                - s3:PutObject
+                - 's3:GetObject'
+                - 's3:GetObjectVersion'
+                - 's3:PutObject'
 
                 # Allow the use of secret manager
                 - 'secretsmanager:GetSecretValue'

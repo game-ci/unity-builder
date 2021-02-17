@@ -151,6 +151,16 @@ Resources:
     Properties: 
       Name: !Join [ "", [ 'AndroidKeyAliasPass', !Ref BUILDID ] ]
       SecretString: !Ref AndroidKeyAliasPass
+  AWSAccessKeyIDSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AWSAccessKeyID', !Ref BUILDID ] ]
+      SecretString: !Ref AWSAccessKeyID
+  AWSSecretAccessKey:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AWSSecretAccessKey', !Ref BUILDID ] ]
+      SecretString: !Ref AWSSecretAccessKey
   
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
