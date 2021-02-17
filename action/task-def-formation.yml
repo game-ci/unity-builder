@@ -71,10 +71,10 @@ Parameters:
     Default: ''
   AWSAccessKeyID:
     Type: String
-    Default: ''
+    Default: '0'
   AWSSecretAccessKey:
     Type: String
-    Default: ''
+    Default: '0'
 Mappings:
   SubnetConfig:
     VPC:
