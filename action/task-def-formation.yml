@@ -63,7 +63,13 @@ Parameters:
   AndroidKeyAliasPass:
     Type: String
     Default: '0'
-  BUILDID:
+  AWSRegion:
+    Type: String
+    Default: ''
+  AWSAccessKeyID:
+    Type: String
+    Default: ''
+  AWSSecretAccessKey:
     Type: String
     Default: ''
 Mappings:
@@ -195,7 +201,9 @@ Resources:
               ValueFrom: !Ref AndroidKeystoreBase64Secret
             - Name: 'ANDROID_KEYSTORE_PASS'
               ValueFrom: !Ref AndroidKeystorePassSecret
-            - Name: 'ANDROID_KEYALIAS_PASS'
+            - Name: 'AWS_ACCESS_KEY_ID'
+              ValueFrom: !Ref AndroidKeyAliasPassSecret
+            - Name: 'AWS_SECRET_ACCESS_KEY'
               ValueFrom: !Ref AndroidKeyAliasPassSecret
           LogConfiguration:
             LogDriver: awslogs
@@ -203,18 +211,6 @@ Resources:
               awslogs-group: !Ref ServiceName
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: !Ref ServiceName
-          # not needed, excluded by default5
-          #   SecretOptions:
-          #     - Name: !Join [ "", [ 'GITHUB_TOKEN_', !Ref BUILDID ] ]
-          #       ValueFrom: !Ref GithubTokenSecret
-          #     - Name: !Join [ "", [ 'UNITY_LICENSE_', !Ref BUILDID ] ]
-          #       ValueFrom: !Ref UnityLicenseSecret
-          #     - Name: !Join [ "", [ 'ANDROID_KEYSTORE_BASE64_', !Ref BUILDID ] ]
-          #       ValueFrom: !Ref AndroidKeystoreBase64Secret
-          #     - Name: !Join [ "", [ 'ANDROID_KEYSTORE_PASS_', !Ref BUILDID ] ]
-          #       ValueFrom: !Ref AndroidKeystorePassSecret
-          #     - Name: !Join [ "", [ 'ANDROID_KEYALIAS_PASS_', !Ref BUILDID ] ]
-          #       ValueFrom: !Ref AndroidKeyAliasPassSecret
     Metadata:
       'AWS::CloudFormation::Designer':
         id: dabb0116-abe0-48a6-a8af-cf9111c879a5

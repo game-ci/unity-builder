@@ -34,10 +34,6 @@ class AWS {
           name: 'GITHUB_SHA',
           value: process.env.GITHUB_SHA,
         },
-        {
-          name: 'BUILD_ID',
-          value: buildId,
-        },
       ],
       [
         {
@@ -68,10 +64,6 @@ class AWS {
       '/data',
       `/data/${buildId}/repo/`,
       [
-        {
-          name: 'BUILD_ID',
-          value: buildId,
-        },
         {
           name: 'GITHUB_WORKSPACE',
           value: `/data/${buildId}/repo/`,
@@ -160,10 +152,6 @@ class AWS {
           name: 'GITHUB_SHA',
           value: process.env.GITHUB_SHA,
         },
-        {
-          name: 'BUILD_ID',
-          value: buildId,
-        },
       ],
       [
         {
@@ -191,14 +179,23 @@ class AWS {
           value: process.env.GITHUB_SHA,
         },
         {
-          name: 'BUILD_ID',
-          value: buildId,
+          name: 'AWS_DEFAULT_REGION',
+          value: process.env.AWS_DEFAULT_REGION,
         },
+
       ],
       [
         {
           ParameterKey: 'GithubToken',
           ParameterValue: buildParameters.githubToken,
+        },
+        {
+          ParameterKey: 'AWSAccessKeyID',
+          ParameterValue: process.env.AWS_ACCESS_KEY_ID,
+        },
+        {
+          ParameterKey: 'AWSSecretAccessKey',
+          ParameterValue: process.env.AWS_SECRET_ACCESS_KEY,
         },
       ],
     );
@@ -247,10 +244,6 @@ class AWS {
           ParameterKey: 'EFSMountDirectory',
           ParameterValue: mountdir,
         },
-        {
-          ParameterKey: 'BUILDID',
-          ParameterValue: jobId,
-        }
       ].concat(secrets),
     }).promise();
     try{

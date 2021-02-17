@@ -116,6 +116,14 @@ class Input {
   static get kubeVolume() {
     return core.getInput('kubeVolume') || '';
   }
+
+  static get AWSAccessKeyID() {
+    return core.getInput('AWSAccessKeyID') || '';
+  }
+
+  static get AWSSecretAccessKey() {
+    return core.getInput('AWSSecretAccessKey') || '';
+  }
 }
 
 export default Input;

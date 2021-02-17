@@ -54,6 +54,7 @@ class BuildParameters {
       kubeContainerCPU: Input.kubeContainerCPU,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
+      
     };
   }
 

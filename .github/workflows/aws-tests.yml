@@ -48,6 +48,9 @@ jobs:
         id: aws-fargate-unity-build
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-2
         with:
           remote: aws
           projectPath: ${{ matrix.projectPath }}
