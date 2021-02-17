@@ -244,6 +244,10 @@ class AWS {
           ParameterKey: 'EFSMountDirectory',
           ParameterValue: mountdir,
         },
+        {
+          ParameterKey: 'BUILDID',
+          ParameterValue: jobId,
+        }
       ].concat(secrets),
     }).promise();
     try{
