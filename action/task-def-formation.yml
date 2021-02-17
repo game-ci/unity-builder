@@ -202,9 +202,9 @@ Resources:
             - Name: 'ANDROID_KEYSTORE_PASS'
               ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: 'AWS_ACCESS_KEY_ID'
-              ValueFrom: !Ref AndroidKeyAliasPassSecret
+              ValueFrom: !Ref AWSAccessKeyID
             - Name: 'AWS_SECRET_ACCESS_KEY'
-              ValueFrom: !Ref AndroidKeyAliasPassSecret
+              ValueFrom: !Ref AWSSecretAccessKey
           LogConfiguration:
             LogDriver: awslogs
             Options:
