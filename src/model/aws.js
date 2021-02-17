@@ -143,7 +143,7 @@ class AWS {
     // Cleanup
     await this.run(
       buildParameters.awsStackName,
-      'amazon/aws-cli',
+      'alpine',
       ['/bin/sh'],
       [
         '-c', 
@@ -152,7 +152,34 @@ class AWS {
         apk add zip
         zip -r output.zip ./$BUILD_ID/repo/build
         ls
-        aws s3 cp output.zip 
+      `],
+      '/data',
+      '/data/',
+      [
+        {
+          name: 'GITHUB_SHA',
+          value: process.env.GITHUB_SHA,
+        },
+        {
+          name: 'BUILD_ID',
+          value: buildId,
+        },
+      ],
+      [
+        {
+          ParameterKey: 'GithubToken',
+          ParameterValue: buildParameters.githubToken,
+        },
+      ],
+    );
+    await this.run(
+      buildParameters.awsStackName,
+      'amazon/aws-cli',
+      ['/bin/sh'],
+      [
+        '-c', 
+        `
+        aws s3 cp output.zip s3://game-ci-storage
         rm -r ./$BUILD_ID
         ls
       `],
