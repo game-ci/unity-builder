@@ -11,8 +11,8 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try{
 
-    let buildId = nanoid();
-    await this.run(
+    let buildUid = nanoid();
+    await this.run(buildUid,
       buildParameters.awsStackName,
       'alpine/git',
       ['/bin/sh'],
@@ -22,9 +22,9 @@ class AWS {
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git $BUILD_ID/repo;
-        git clone https://github.com/webbertakken/unity-builder.git $BUILD_ID/builder;
-        cd $BUILD_ID/repo;
+        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git $BUILDID/repo;
+        git clone https://github.com/webbertakken/unity-builder.git $BUILDID/builder;
+        cd $BUILDID/repo;
         git checkout $GITHUB_SHA;
       `],
       '/data',
@@ -42,7 +42,7 @@ class AWS {
         },
       ],
     );
-    await this.run(
+    await this.run(buildUid,
       buildParameters.awsStackName,
       baseImage.toString(),
       ['/bin/sh'],
@@ -62,11 +62,11 @@ class AWS {
       ls
       `],
       '/data',
-      `/data/${buildId}/repo/`,
+      `/data/${buildUid}/repo/`,
       [
         {
           name: 'GITHUB_WORKSPACE',
-          value: `/data/${buildId}/repo/`,
+          value: `/data/${buildUid}/repo/`,
         },
         {
           name: 'PROJECT_PATH',
@@ -133,7 +133,7 @@ class AWS {
       ]
     );
     // Cleanup
-    await this.run(
+    await this.run(buildUid,
       buildParameters.awsStackName,
       'alpine',
       ['/bin/sh'],
@@ -160,7 +160,7 @@ class AWS {
         },
       ],
     );
-    await this.run(
+    await this.run(buildUid,
       buildParameters.awsStackName,
       'amazon/aws-cli',
       ['/bin/sh'],
@@ -206,12 +206,11 @@ class AWS {
     }
   }
 
-  static async run(stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
+  static async run(buildUid, stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
-    const jobId = nanoid();
 
-    const taskDefStackName = `${stackName}-taskDef-${image}-${jobId}`
+    const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`
       .toString()
       .replace(/[^\da-z]/gi, '');
     core.info('Creating build job resources');
@@ -246,7 +245,7 @@ class AWS {
         },
         {
           ParameterKey: 'BUILDID',
-          ParameterValue: jobId,
+          ParameterValue: buildUid,
         }
       ].concat(secrets),
     }).promise();
@@ -276,7 +275,7 @@ class AWS {
           {
             name: taskDefStackName,
             environment: environment.concat([
-              {name:'BUILDID', value: jobId}
+              {name:'BUILDID', value: buildUid}
             ]),
           },
         ],
