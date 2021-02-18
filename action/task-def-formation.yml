@@ -156,7 +156,7 @@ Resources:
     Properties: 
       Name: !Join [ "", [ 'AWSAccessKeyID', !Ref BUILDID ] ]
       SecretString: !Ref AWSAccessKeyID
-  AWSSecretAccessKey:
+  AWSSecretAccessKeySecret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: !Join [ "", [ 'AWSSecretAccessKey', !Ref BUILDID ] ]
@@ -215,9 +215,9 @@ Resources:
             - Name: 'ANDROID_KEYSTORE_PASS'
               ValueFrom: !Ref AndroidKeystorePassSecret
             - Name: 'AWS_ACCESS_KEY_ID'
-              ValueFrom: !Ref AWSAccessKeyID
+              ValueFrom: !Ref AWSAccessKeyIDSecret
             - Name: 'AWS_SECRET_ACCESS_KEY'
-              ValueFrom: !Ref AWSSecretAccessKey
+              ValueFrom: !Ref AWSSecretAccessKeySecret
           LogConfiguration:
             LogDriver: awslogs
             Options:
