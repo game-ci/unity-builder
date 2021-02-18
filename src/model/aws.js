@@ -167,7 +167,7 @@ class AWS {
       [
         '-c', 
         `
-        aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage
+        aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage/${buildUid}
         rm -r ${buildUid}
         ls
       `],
