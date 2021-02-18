@@ -66,9 +66,6 @@ Parameters:
   AndroidKeyAliasPass:
     Type: String
     Default: '0'
-  AWSRegion:
-    Type: String
-    Default: ''
   AWSAccessKeyID:
     Type: String
     Default: '0'
