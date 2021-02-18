@@ -142,7 +142,7 @@ class AWS {
         `
         apk update;
         apk add zip
-        zip -r output.zip ./$BUILD_ID/repo/build
+        zip -r ./$BUILD_ID/output.zip ./$BUILD_ID/repo/build
         ls
       `],
       '/data',
@@ -168,7 +168,7 @@ class AWS {
         '-c', 
         `
         aws s3 cp output.zip s3://game-ci-storage
-        rm -r ./$BUILD_ID
+        rm -r $BUILD_ID
         ls
       `],
       '/data',
