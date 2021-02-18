@@ -407,6 +407,10 @@ class AWS {
       StackName: taskDefStackName,
     }).promise();
 
+    await CF.waitFor('stackDeleteComplete', {
+      StackName: taskDefStackName
+    }).promise();
+
     core.info('Cleanup complete');
   }
 
