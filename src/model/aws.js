@@ -22,9 +22,9 @@ class AWS {
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git $BUILDID/repo;
-        git clone https://github.com/webbertakken/unity-builder.git $BUILDID/builder;
-        cd $BUILDID/repo;
+        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
+        git clone https://github.com/webbertakken/unity-builder.git ${buildUid}/builder;
+        cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
       `],
       '/data',
@@ -52,9 +52,9 @@ class AWS {
       if [ '$ANDROID_KEYSTORE_BASE64' == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi
       if [ '$ANDROID_KEYSTORE_PASS' == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi
       if [ '$ANDROID_KEYALIAS_PASS' == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi
-      cp -r /data/$BUILD_ID/builder/action/default-build-script /UnityBuilderAction;
-      cp -r /data/$BUILD_ID/builder/action/entrypoint.sh /entrypoint.sh;
-      cp -r /data/$BUILD_ID/builder/action/steps /steps;
+      cp -r /data/${buildUid}/builder/action/default-build-script /UnityBuilderAction;
+      cp -r /data/${buildUid}/builder/action/entrypoint.sh /entrypoint.sh;
+      cp -r /data/${buildUid}/builder/action/steps /steps;
       ls;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
@@ -142,7 +142,7 @@ class AWS {
         `
         apk update;
         apk add zip
-        zip -r ./$BUILD_ID/output.zip ./$BUILD_ID/repo/build
+        zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
         ls
       `],
       '/data',
@@ -167,8 +167,8 @@ class AWS {
       [
         '-c', 
         `
-        aws s3 cp output.zip s3://game-ci-storage
-        rm -r $BUILD_ID
+        aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage
+        rm -r ${buildUid}
         ls
       `],
       '/data',
