@@ -22,8 +22,8 @@ class AWS {
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone https://github.com/webbertakken/unity-builder.git ${buildUid}/builder;
+        git clone https://$GITHUB_TOKEN@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
+        git clone https://$GITHUB_TOKEN@github.com/webbertakken/unity-builder.git ${buildUid}/builder;
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
       `],
