@@ -111,19 +111,19 @@ class AWS {
         },
         {
           ParameterKey: 'UnityLicense',
-          ParameterValue: process.env.UNITY_LICENSE
+          ParameterValue: process.env.UNITY_LICENSE?process.env.UNITY_LICENSE:'0'
         },
         {
           ParameterKey: 'UnityEmail',
-          ParameterValue: process.env.UNITY_EMAIL
+          ParameterValue: process.env.UNITY_EMAIL?process.env.UNITY_EMAIL:'0'
         },
         {
           ParameterKey: 'UnityPassword',
-          ParameterValue: process.env.UNITY_PASSWORD
+          ParameterValue: process.env.UNITY_PASSWORD?process.env.UNITY_PASSWORD:'0'
         },
         {
           ParameterKey: 'UnitySerial',
-          ParameterValue: process.env.UNITY_SERIAL
+          ParameterValue: process.env.UNITY_SERIAL?process.env.UNITY_SERIAL:'0'
         },
         {
           ParameterKey: 'AndroidKeystoreBase64',
