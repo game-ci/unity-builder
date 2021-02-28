@@ -57,6 +57,15 @@ Parameters:
   UnityLicense:
     Type: String
     Default: '0'
+  UnityEmail:
+    Type: String
+    Default: '0'
+  UnityPassword:
+    Type: String
+    Default: '0'
+  UnitySerial:
+    Type: String
+    Default: '0'
   AndroidKeystoreBase64:
     Type: String
     Default: '0'
@@ -129,7 +138,25 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: !Join [ "", [ 'UnityLicense', !Ref BUILDID ] ]
-      SecretString: !Ref UnityLicense
+      SecretString: !Ref UnityLicense  
+      
+  UnityEmailSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnityEmail', !Ref BUILDID ] ]
+      SecretString: !Ref UnityEmail
+      
+  UnityPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnityPassword', !Ref BUILDID ] ]
+      SecretString: !Ref UnityPassword
+      
+  UnitySerialSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnitySerial', !Ref BUILDID ] ]
+      SecretString: !Ref UnitySerial
   
   AndroidKeystoreBase64Secret:
     Type: AWS::SecretsManager::Secret
@@ -207,6 +234,12 @@ Resources:
               ValueFrom: !Ref GithubTokenSecret
             - Name: 'UNITY_LICENSE'
               ValueFrom: !Ref UnityLicenseSecret
+            - Name: 'UNITY_EMAIL'
+              ValueFrom: !Ref UnityEmailSecret
+            - Name: 'UNITY_PASSWORD'
+              ValueFrom: !Ref UnityPasswordSecret
+            - Name: 'UNITY_SERIAL'
+              ValueFrom: !Ref UnitySerialSecret
             - Name: 'ANDROID_KEYSTORE_BASE64'
               ValueFrom: !Ref AndroidKeystoreBase64Secret
             - Name: 'ANDROID_KEYSTORE_PASS'

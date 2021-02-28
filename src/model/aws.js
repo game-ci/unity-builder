@@ -47,11 +47,6 @@ class AWS {
       baseImage.toString(),
       ['/bin/sh'],
       ['-c', `
-      if [ '$GITHUB_TOKEN' == '0' ]; then unset GITHUB_TOKEN; fi
-      if [ '$UNITY_LICENSE' == '0' ]; then unset UNITY_LICENSE; fi
-      if [ '$ANDROID_KEYSTORE_BASE64' == '0' ]; then unset ANDROID_KEYSTORE_BASE64; fi
-      if [ '$ANDROID_KEYSTORE_PASS' == '0' ]; then unset ANDROID_KEYSTORE_PASS; fi
-      if [ '$ANDROID_KEYALIAS_PASS' == '0' ]; then unset ANDROID_KEYALIAS_PASS; fi
       cp -r /data/${buildUid}/builder/action/default-build-script /UnityBuilderAction;
       cp -r /data/${buildUid}/builder/action/entrypoint.sh /entrypoint.sh;
       cp -r /data/${buildUid}/builder/action/steps /steps;
@@ -117,6 +112,18 @@ class AWS {
         {
           ParameterKey: 'UnityLicense',
           ParameterValue: process.env.UNITY_LICENSE
+        },
+        {
+          ParameterKey: 'UnityEmail',
+          ParameterValue: process.env.UNITY_EMAIL
+        },
+        {
+          ParameterKey: 'UnityPassword',
+          ParameterValue: process.env.UNITY_PASSWORD
+        },
+        {
+          ParameterKey: 'UnitySerial',
+          ParameterValue: process.env.UNITY_SERIAL
         },
         {
           ParameterKey: 'AndroidKeystoreBase64',
@@ -249,6 +256,7 @@ class AWS {
         }
       ].concat(secrets),
     }).promise();
+
     try{
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     }catch(error){
