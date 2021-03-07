@@ -1,8 +1,9 @@
+import * as core from '@actions/core';
+
+// @ts-ignore
 import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output } from './model';
 
-const core = require('@actions/core');
-
-async function action() {
+async function run() {
   Action.checkCompatibility();
   Cache.verify();
 
@@ -24,6 +25,6 @@ async function action() {
   await Output.setBuildVersion(buildParameters.buildVersion);
 }
 
-action().catch((error) => {
+run().catch((error) => {
   core.setFailed(error.message);
 });
