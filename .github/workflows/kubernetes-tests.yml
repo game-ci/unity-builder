@@ -41,7 +41,7 @@ jobs:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: ./action/bootstrapper/ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: ./dist/bootstrapper/ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
 
       ###########################
       #          Build          #
@@ -76,5 +76,5 @@ jobs:
       ###########################
       #        Spin down        #
       ###########################
-      - run: ./action/bootstrapper/ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - run: ./dist/bootstrapper/ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
         if: ${{ always() }}
