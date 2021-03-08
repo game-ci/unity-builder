@@ -2,14 +2,15 @@ import { trimEnd, trimStart } from 'lodash-es';
 import Platform from './platform';
 
 class ImageTag {
+  private repository: string;
+  private name: string;
+  private version: string;
+  private platform: any;
+  private builderPlatform: string;
+  private customImage: any;
+
   constructor(imageProperties) {
-    const {
-      repository = 'unityci',
-      name = 'editor',
-      version = '2019.2.11f1',
-      platform,
-      customImage,
-    } = imageProperties;
+    const { repository = 'unityci', name = 'editor', version = '2019.2.11f1', platform, customImage } = imageProperties;
 
     if (!ImageTag.versionPattern.test(version)) {
       throw new Error(`Invalid version "${version}".`);
@@ -17,7 +18,12 @@ class ImageTag {
 
     const builderPlatform = ImageTag.getTargetPlatformToImageSuffixMap(platform, version);
 
-    Object.assign(this, { repository, name, version, platform, builderPlatform, customImage });
+    this.repository = repository;
+    this.name = name;
+    this.version = version;
+    this.platform = platform;
+    this.builderPlatform = builderPlatform;
+    this.customImage = customImage;
   }
 
   static get versionPattern() {
@@ -39,17 +45,7 @@ class ImageTag {
   }
 
   static getTargetPlatformToImageSuffixMap(platform, version) {
-    const {
-      generic,
-      webgl,
-      mac,
-      windows,
-      linux,
-      linuxIl2cpp,
-      android,
-      ios,
-      facebook,
-    } = ImageTag.imageSuffixes;
+    const { generic, webgl, mac, windows, linux, linuxIl2cpp, android, ios, facebook } = ImageTag.imageSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html

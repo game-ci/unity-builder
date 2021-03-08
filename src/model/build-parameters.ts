@@ -6,26 +6,13 @@ import Versioning from './versioning';
 
 class BuildParameters {
   static async create() {
-    const buildFile = this.parseBuildFile(
-      Input.buildName,
-      Input.targetPlatform,
-      Input.androidAppBundle,
-    );
+    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
 
-    const unityVersion = UnityVersioning.determineUnityVersion(
-      Input.projectPath,
-      Input.unityVersion,
-    );
+    const unityVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
 
-    const buildVersion = await Versioning.determineVersion(
-      Input.versioningStrategy,
-      Input.specifiedVersion,
-    );
+    const buildVersion = await Versioning.determineVersion(Input.versioningStrategy, Input.specifiedVersion);
 
-    const androidVersionCode = AndroidVersioning.determineVersionCode(
-      buildVersion,
-      Input.androidVersionCode,
-    );
+    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
     return {
       version: unityVersion,

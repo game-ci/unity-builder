@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Client, KubeConfig } from 'kubernetes-client';
 import Request from 'kubernetes-client/backends/request';
 
@@ -7,6 +8,15 @@ const base64 = require('base-64');
 const pollInterval = 10000;
 
 class Kubernetes {
+  private static kubeClient: any;
+  private static buildId: string;
+  private static buildParameters: any;
+  private static baseImage: any;
+  private static pvcName: string;
+  private static secretName: string;
+  private static jobName: string;
+  private static namespace: string;
+
   static async runBuildJob(buildParameters, baseImage) {
     const kubeconfig = new KubeConfig();
     kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
@@ -20,16 +30,14 @@ class Kubernetes {
     const jobName = `unity-builder-job-${buildId}`;
     const namespace = 'default';
 
-    Object.assign(this, {
-      kubeClient,
-      buildId,
-      buildParameters,
-      baseImage,
-      pvcName,
-      secretName,
-      jobName,
-      namespace,
-    });
+    this.kubeClient = kubeClient;
+    this.buildId = buildId;
+    this.buildParameters = buildParameters;
+    this.baseImage = baseImage;
+    this.pvcName = pvcName;
+    this.secretName = secretName;
+    this.jobName = jobName;
+    this.namespace = namespace;
 
     await Kubernetes.createSecret();
     await Kubernetes.createPersistentVolumeClaim();
@@ -81,9 +89,7 @@ class Kubernetes {
         },
       },
     };
-    await this.kubeClient.api.v1
-      .namespaces(this.namespace)
-      .persistentvolumeclaims.post({ body: pvcManifest });
+    await this.kubeClient.api.v1.namespaces(this.namespace).persistentvolumeclaims.post({ body: pvcManifest });
     core.info('Persistent Volume created, waiting for ready state...');
     await Kubernetes.watchPersistentVolumeClaimUntilReady();
     core.info('Persistent Volume ready for claims');

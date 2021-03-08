@@ -4,9 +4,7 @@ import BuildParameters from './build-parameters';
 import Input from './input';
 import Platform from './platform';
 
-const determineVersion = jest
-  .spyOn(Versioning, 'determineVersion')
-  .mockImplementation(() => '1.3.37');
+const determineVersion = jest.spyOn(Versioning, 'determineVersion').mockImplementation(() => '1.3.37');
 
 const determineUnityVersion = jest
   .spyOn(UnityVersioning, 'determineUnityVersion')
@@ -43,33 +41,25 @@ describe('BuildParameters', () => {
     it('returns the android version code from version by default', async () => {
       const mockValue = '';
       jest.spyOn(Input, 'androidVersionCode', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ androidVersionCode: 1003037 }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ androidVersionCode: 1003037 }));
     });
 
     it('returns the platform', async () => {
       const mockValue = 'somePlatform';
       jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ platform: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ platform: mockValue }));
     });
 
     it('returns the project path', async () => {
       const mockValue = 'path/to/project';
       jest.spyOn(Input, 'projectPath', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ projectPath: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ projectPath: mockValue }));
     });
 
     it('returns the build name', async () => {
       const mockValue = 'someBuildName';
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ buildName: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ buildName: mockValue }));
     });
 
     it('returns the build path', async () => {
@@ -86,9 +76,7 @@ describe('BuildParameters', () => {
     it('returns the build file', async () => {
       const mockValue = 'someBuildName';
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ buildFile: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ buildFile: mockValue }));
     });
 
     test.each([Platform.types.StandaloneWindows, Platform.types.StandaloneWindows64])(
@@ -123,9 +111,7 @@ describe('BuildParameters', () => {
     it('returns the build method', async () => {
       const mockValue = 'Namespace.ClassName.BuildMethod';
       jest.spyOn(Input, 'buildMethod', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ buildMethod: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ buildMethod: mockValue }));
     });
 
     it('returns the android keystore name', async () => {
@@ -171,9 +157,7 @@ describe('BuildParameters', () => {
     it('returns the custom parameters', async () => {
       const mockValue = '-profile SomeProfile -someBoolean -someValue exampleValue';
       jest.spyOn(Input, 'customParameters', 'get').mockReturnValue(mockValue);
-      await expect(BuildParameters.create()).resolves.toEqual(
-        expect.objectContaining({ customParameters: mockValue }),
-      );
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ customParameters: mockValue }));
     });
   });
 });

@@ -13,7 +13,7 @@ class Action {
     return path.basename(__dirname) === 'model';
   }
 
-  static get name() {
+  static get canonicalName() {
     return 'unity-builder';
   }
 

@@ -82,9 +82,7 @@ export default class Versioning {
   static async determineVersion(strategy, inputVersion) {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
-      throw new ValidationError(
-        `Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`,
-      );
+      throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
     }
 
     let version;
@@ -167,6 +165,7 @@ export default class Versioning {
     const description = await this.getVersionDescription();
 
     try {
+      // @ts-ignore
       const [match, tag, commits, hash] = this.descriptionRegex1.exec(description);
 
       return {

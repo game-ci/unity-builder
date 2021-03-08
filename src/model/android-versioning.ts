@@ -19,8 +19,7 @@ export default class AndroidVersioning {
 
     // The greatest value Google Plays allows is 2100000000.
     // Allow for 3 patch digits, 3 minor digits and 3 major digits.
-    const versionCode =
-      parsedVersion.major * 1000000 + parsedVersion.minor * 1000 + parsedVersion.patch;
+    const versionCode = parsedVersion.major * 1000000 + parsedVersion.minor * 1000 + parsedVersion.patch;
 
     if (versionCode >= 1000000000) {
       throw new Error(
