@@ -10,8 +10,10 @@ export default class AndroidVersioning {
   }
 
   static versionToVersionCode(version) {
-    const parsedVersion = semver.parse(version);
+    const [major, minor, patch] = version.split('.');
+    const threeDigitVersion = patch ? version : `${major}.0.${minor}`;
 
+    const parsedVersion = semver.parse(threeDigitVersion);
     if (!parsedVersion) {
       core.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
       return 1;
