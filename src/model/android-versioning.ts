@@ -11,7 +11,7 @@ export default class AndroidVersioning {
 
   static versionToVersionCode(version) {
     const [major, minor, patch] = version.split('.');
-    const threeDigitVersion = patch ? version : `${major}.0.${minor}`;
+    const threeDigitVersion = /^\d+$/.test(patch) ? version : `${major}.0.${minor}`;
 
     const parsedVersion = semver.parse(threeDigitVersion);
     if (!parsedVersion) {
