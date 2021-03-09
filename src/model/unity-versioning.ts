@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
-import * as path from 'path';
+import path from 'path';
 
 export default class UnityVersioning {
   static get versionPattern() {

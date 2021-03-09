@@ -1,5 +1,5 @@
 class NotImplementedException extends Error {
-  constructor(message) {
+  constructor(message = '') {
     super(message);
     this.name = 'NotImplementedException';
   }

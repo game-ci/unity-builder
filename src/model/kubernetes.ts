@@ -278,22 +278,17 @@ class Kubernetes {
     let podname;
     let ready = false;
     while (!ready) {
-      // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      // eslint-disable-next-line no-await-in-loop
       const pods = await this.kubeClient.api.v1.namespaces(this.namespace).pods.get();
-      // eslint-disable-next-line no-plusplus
       for (let index = 0; index < pods.body.items.length; index++) {
         const element = pods.body.items[index];
-        if (element.metadata.labels['job-name'] === this.jobName) {
-          if (element.status.phase !== 'Pending') {
-            core.info('Pod no longer pending');
-            if (element.status.phase === 'Failure') {
-              core.error('Kubernetes job failed');
-            } else {
-              ready = true;
-              podname = element.metadata.name;
-            }
+        if (element.metadata.labels['job-name'] === this.jobName && element.status.phase !== 'Pending') {
+          core.info('Pod no longer pending');
+          if (element.status.phase === 'Failure') {
+            core.error('Kubernetes job failed');
+          } else {
+            ready = true;
+            podname = element.metadata.name;
           }
         }
       }
@@ -303,14 +298,13 @@ class Kubernetes {
     let logQueryTime;
     let complete = false;
     while (!complete) {
-      // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      // eslint-disable-next-line no-await-in-loop
+
       const podStatus = await this.kubeClient.api.v1.namespaces(this.namespace).pod(podname).get();
       if (podStatus.body.status.phase !== 'Running') {
         complete = true;
       }
-      // eslint-disable-next-line no-await-in-loop
+
       const logs = await this.kubeClient.api.v1
         .namespaces(this.namespace)
         .pod(podname)
@@ -322,9 +316,7 @@ class Kubernetes {
         });
       if (logs.body !== undefined) {
         const arrayOfLines = logs.body.match(/[^\n\r]+/g).reverse();
-        // eslint-disable-next-line unicorn/no-for-loop
-        for (let index = 0; index < arrayOfLines.length; index += 1) {
-          const element = arrayOfLines[index];
+        for (const element of arrayOfLines) {
           const [time, ...line] = element.split(' ');
           if (time !== logQueryTime) {
             core.info(line.join(' '));
@@ -337,7 +329,6 @@ class Kubernetes {
           throw new Error('Kubernetes job failed');
         }
 
-        // eslint-disable-next-line prefer-destructuring
         logQueryTime = arrayOfLines[0].split(' ')[0];
       }
     }
@@ -350,9 +341,7 @@ class Kubernetes {
 
   static uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      // eslint-disable-next-line no-bitwise
-      const r = (Math.random() * 16) | 0;
-      // eslint-disable-next-line no-bitwise
+      const r = Math.trunc(Math.random() * 16);
       const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });

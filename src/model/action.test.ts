@@ -23,7 +23,7 @@ describe('Action', () => {
   it('returns the action folder', () => {
     const { actionFolder } = Action;
 
-    expect(path.basename(actionFolder)).toStrictEqual('action');
+    expect(path.basename(actionFolder)).toStrictEqual('dist');
     expect(fs.existsSync(actionFolder)).toStrictEqual(true);
   });
 

@@ -1,13 +1,12 @@
-import { trimEnd, trimStart } from 'lodash-es';
 import Platform from './platform';
 
 class ImageTag {
-  private repository: string;
-  private name: string;
-  private version: string;
-  private platform: any;
-  private builderPlatform: string;
-  private customImage: any;
+  public repository: string;
+  public name: string;
+  public version: string;
+  public platform: any;
+  public builderPlatform: string;
+  public customImage: any;
 
   constructor(imageProperties) {
     const { repository = 'unityci', name = 'editor', version = '2019.2.11f1', platform, customImage } = imageProperties;
@@ -102,18 +101,18 @@ class ImageTag {
   }
 
   get tag() {
-    return trimEnd(`${this.version}-${this.builderPlatform}`, '-');
+    return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
   }
 
   get image() {
-    return trimStart(`${this.repository}/${this.name}`, '/');
+    return `${this.repository}/${this.name}`.replace(/^\/+/, '');
   }
 
   toString() {
-    const { image, tag } = this;
+    const { image, tag, customImage } = this;
 
-    if (this.customImage && this.customImage !== '') {
-      return this.customImage;
+    if (customImage && customImage !== '') {
+      return customImage;
     }
 
     return `${image}:${tag}-0`; // '0' here represents the docker repo version

@@ -25,7 +25,7 @@ describe('System', () => {
     });
 
     it('throws when no arguments are given', async () => {
-      await expect(System.run()).rejects.toThrowError();
+      await expect(System.run('')).rejects.toThrowError();
     });
 
     it('outputs info', async () => {
@@ -49,8 +49,9 @@ describe('System', () => {
       await expect(
         System.run('sh', undefined, {
           input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
-        }),
-      ).resolves.toBeParsableToANumber();
+          // eslint-disable-next-line github/no-then
+        }).then((result) => Number(result)),
+      ).resolves.not.toBeNaN();
     });
   });
 });

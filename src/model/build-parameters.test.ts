@@ -4,7 +4,7 @@ import BuildParameters from './build-parameters';
 import Input from './input';
 import Platform from './platform';
 
-const determineVersion = jest.spyOn(Versioning, 'determineVersion').mockImplementation(() => '1.3.37');
+const determineVersion = jest.spyOn(Versioning, 'determineVersion').mockImplementation(async () => '1.3.37');
 
 const determineUnityVersion = jest
   .spyOn(UnityVersioning, 'determineUnityVersion')

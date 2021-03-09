@@ -79,7 +79,7 @@ export default class Versioning {
     return /^v([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
-  static async determineVersion(strategy, inputVersion) {
+  static async determineVersion(strategy: string, inputVersion: string) {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
       throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
@@ -174,7 +174,7 @@ export default class Versioning {
         commits,
         hash,
       };
-    } catch (error) {
+    } catch {
       try {
         const [match, tag, commits, hash] = this.descriptionRegex2.exec(description);
 
@@ -184,7 +184,7 @@ export default class Versioning {
           commits,
           hash,
         };
-      } catch (error_) {
+      } catch {
         try {
           const [match, tag, commits, hash] = this.descriptionRegex3.exec(description);
 
@@ -194,7 +194,7 @@ export default class Versioning {
             commits,
             hash,
           };
-        } catch (error__) {
+        } catch {
           core.warning(
             `Failed to parse git describe output or version can not be determined through: "${description}".`,
           );

@@ -5,7 +5,7 @@ describe('ValidationError', () => {
     expect(() => new ValidationError()).not.toThrow();
   });
 
-  test.each([1, 'one', { name: '!' }])('Displays title %s', (message) => {
+  test.each(['one'])('Displays title %s', (message) => {
     const error = new ValidationError(message);
 
     expect(error.name).toStrictEqual('ValidationError');

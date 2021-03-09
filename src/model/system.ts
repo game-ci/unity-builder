@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
 class System {
-  static async run(command, arguments_, options) {
+  static async run(command, arguments_: any = [], options = {}) {
     let result = '';
     let error = '';
     let debug = '';
