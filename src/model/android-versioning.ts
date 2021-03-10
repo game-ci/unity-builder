@@ -10,16 +10,14 @@ export default class AndroidVersioning {
   }
 
   static versionToVersionCode(version) {
-    // eslint-disable-next-line no-console
-    console.log(version);
+    core.warning(version);
     const [major, minor, patch] = version.split('.');
     const threeDigitVersion = /^\d+$/.test(patch) ? version : `${major}.0.${minor}`;
-    // eslint-disable-next-line no-console
-    console.log(threeDigitVersion);
+    core.warning(threeDigitVersion);
 
     const parsedVersion = semver.parse(threeDigitVersion);
-    // eslint-disable-next-line no-console
-    console.log(parsedVersion);
+    // @ts-ignore
+    core.warning(parsedVersion);
     if (!parsedVersion) {
       core.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
       return 1;
