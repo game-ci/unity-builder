@@ -268,9 +268,9 @@ class AWS {
         },
         {
           ParameterKey: 'TTL',
-          ParameterValue: 100,
+          ParameterValue: "100",
         },
-      ].concat(secrets),
+      ],
     }).promise();
 
     try{
