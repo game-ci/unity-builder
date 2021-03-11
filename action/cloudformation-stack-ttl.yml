@@ -25,9 +25,9 @@ Parameters:
     Description: Time-to-live in minutes for the stack.
 Resources:
   DeleteCFNLambdaExecutionRole:
-    Name: !Join [ "", [ 'DeleteCFNLambdaExecutionRole', !Ref BUILDID ] ]
     Type: "AWS::IAM::Role"
     Properties:
+      Name: !Join [ "", [ 'DeleteCFNLambdaExecutionRole', !Ref BUILDID ] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -52,11 +52,11 @@ Resources:
             - "cloudformation:DeleteStack"
             Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${StackName}/*"
   DeleteCFNLambda:
-    Name: !Join [ "", [ 'DeleteCFNLambda', !Ref BUILDID ] ]
     Type: "AWS::Lambda::Function"
     DependsOn:
       - DeleteCFNLambdaExecutionRole
     Properties:
+      Name: !Join [ "", [ 'DeleteCFNLambda', !Ref BUILDID ] ]
       FunctionName: !Sub "DeleteCFNLambda-${StackName}"
       Code:
         ZipFile: |
@@ -87,12 +87,12 @@ Resources:
       Timeout: "5"
       Role: !GetAtt DeleteCFNLambdaExecutionRole.Arn
   DeleteStackEventRule:
-     Name: !Join [ "", [ 'DeleteStackEventRule', !Ref BUILDID ] ]
      DependsOn:
        - DeleteCFNLambda
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
+       Name: !Join [ "", [ 'DeleteStackEventRule', !Ref BUILDID ] ]
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
@@ -101,17 +101,17 @@ Resources:
             Arn: !GetAtt DeleteCFNLambda.Arn
             Id: 'DeleteCFNLambda' 
   PermissionForDeleteCFNLambda: 
-    Name: !Join [ "", [ 'PermissionForDeleteCFNLambda', !Ref BUILDID ] ]
     Type: "AWS::Lambda::Permission"
     Properties: 
+      Name: !Join [ "", [ 'PermissionForDeleteCFNLambda', !Ref BUILDID ] ]
       FunctionName: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:DeleteCFNLambda-${StackName}"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
   BasicLambdaExecutionRole:
-    Name: !Join [ "", [ 'BasicLambdaExecutionRole', !Ref BUILDID ] ]
     Type: "AWS::IAM::Role"
     Properties:
+      Name: !Join [ "", [ 'BasicLambdaExecutionRole', !Ref BUILDID ] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -132,9 +132,9 @@ Resources:
             - "logs:PutLogEvents"
             Resource: "arn:aws:logs:*:*:*"
   GenerateCronExpLambda:
-    Name: !Join [ "", [ 'GenerateCronExpLambda', !Ref BUILDID ] ]
     Type: "AWS::Lambda::Function"
     Properties:
+      Name: !Join [ "", [ 'GenerateCronExpLambda', !Ref BUILDID ] ]
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
@@ -175,9 +175,9 @@ Resources:
       Role: !GetAtt BasicLambdaExecutionRole.Arn
 
   GenerateCronExpression:
-    Name: !Join [ "", [ 'GenerateCronExpression', !Ref BUILDID ] ]
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
     Properties:
+      Name: !Join [ "", [ 'GenerateCronExpression', !Ref BUILDID ] ]
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
