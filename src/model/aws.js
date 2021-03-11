@@ -257,8 +257,25 @@ class AWS {
       ].concat(secrets),
     }).promise();
 
+    const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
+    await CF.createStack({
+      StackName: taskDefStackName+"-ttl",
+      TemplateBody: ttlCloudFormation,
+      Parameters: [
+        {
+          ParameterKey: 'StackName',
+          ParameterValue: taskDefStackName,
+        },
+        {
+          ParameterKey: 'TTL',
+          ParameterValue: 100,
+        },
+      ].concat(secrets),
+    }).promise();
+
     try{
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName+"-ttl" }).promise();
     }catch(error){
       core.error(error);
     }
@@ -415,8 +432,16 @@ class AWS {
       StackName: taskDefStackName,
     }).promise();
 
+    await CF.deleteStack({
+      StackName: taskDefStackName+"-ttl",
+    }).promise();
+
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDefStackName
+    }).promise();
+
+    await CF.waitFor('stackDeleteComplete', {
+      StackName: taskDefStackName+"-ttl"
     }).promise();
 
     core.info('Cleanup complete');

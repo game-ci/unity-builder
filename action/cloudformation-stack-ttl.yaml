@@ -1,0 +1,173 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Schedule automatic deletion of CloudFormation stacks
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Input configuration
+        Parameters:
+          - StackName
+          - TTL
+    ParameterLabels:
+      StackName:
+        default: Stack name
+      TTL:
+        default: Time-to-live
+Parameters:
+  StackName:
+    Type: String
+    Description: Stack name that will be deleted.
+  TTL:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+Resources:
+  DeleteCFNLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service: ["lambda.amazonaws.com"]
+          Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+      - PolicyName: "lambda_policy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+          - Effect: "Allow"
+            Action:
+            - "cloudformation:DeleteStack"
+            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${StackName}/*"
+  DeleteCFNLambda:
+    Type: "AWS::Lambda::Function"
+    DependsOn:
+      - DeleteCFNLambdaExecutionRole
+    Properties:
+      FunctionName: !Sub "DeleteCFNLambda-${StackName}"
+      Code:
+        ZipFile: |
+          import boto3
+          import os
+          import json
+          
+          stack_name = os.environ['stackName']
+          
+          def delete_cfn(stack_name):
+              try:
+                  cfn = boto3.resource('cloudformation')
+                  stack = cfn.Stack(stack_name)
+                  stack.delete()
+                  return "SUCCESS"
+              except:
+                  return "ERROR" 
+          
+          def handler(event, context):
+              print("Received event:")
+              print(json.dumps(event))
+              return delete_cfn(stack_name)
+      Environment:
+        Variables:
+          stackName: !Ref 'StackName'
+      Handler: "index.handler"
+      Runtime: "python3.6"
+      Timeout: "5"
+      Role: !GetAtt DeleteCFNLambdaExecutionRole.Arn
+  DeleteStackEventRule:
+     DependsOn:
+       - DeleteCFNLambda
+       - GenerateCronExpression
+     Type: "AWS::Events::Rule"
+     Properties:
+       Description: Delete stack event
+       ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
+       State: "ENABLED"
+       Targets: 
+          - 
+            Arn: !GetAtt DeleteCFNLambda.Arn
+            Id: 'DeleteCFNLambda' 
+  PermissionForDeleteCFNLambda: 
+    Type: "AWS::Lambda::Permission"
+    Properties: 
+      FunctionName: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:DeleteCFNLambda-${StackName}"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt DeleteStackEventRule.Arn
+  BasicLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service: ["lambda.amazonaws.com"]
+          Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+      - PolicyName: "lambda_policy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+  GenerateCronExpLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        ZipFile: |
+          from datetime import datetime, timedelta
+          import os
+          import logging
+          import json
+          import cfnresponse
+          
+          def deletion_time(ttl):
+              delete_at_time = datetime.now() + timedelta(minutes=int(ttl))
+              hh = delete_at_time.hour
+              mm = delete_at_time.minute
+              yyyy = delete_at_time.year
+              month = delete_at_time.month
+              dd = delete_at_time.day
+              # minutes hours day month day-of-week year
+              cron_exp = "cron({} {} {} {} ? {})".format(mm, hh, dd, month, yyyy)
+              return cron_exp
+          
+          def handler(event, context):
+            print('Received event: %s' % json.dumps(event))
+            status = cfnresponse.SUCCESS
+            try:
+                if event['RequestType'] == 'Delete':
+                    cfnresponse.send(event, context, status, {})
+                else:
+                    ttl = event['ResourceProperties']['ttl']
+                    responseData = {}
+                    responseData['cron_exp'] = deletion_time(ttl)
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+            except Exception as e:
+                logging.error('Exception: %s' % e, exc_info=True)
+                status = cfnresponse.FAILED
+                cfnresponse.send(event, context, status, {}, None)
+      Handler: "index.handler"
+      Runtime: "python3.6"
+      Timeout: "5"
+      Role: !GetAtt BasicLambdaExecutionRole.Arn
+
+  GenerateCronExpression:
+    Type: "Custom::GenerateCronExpression"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt GenerateCronExpLambda.Arn
+      ttl: !Ref 'TTL'
