@@ -261,6 +261,7 @@ class AWS {
     await CF.createStack({
       StackName: taskDefStackName+"-ttl",
       TemplateBody: ttlCloudFormation,
+      Capabilities: [ "CAPABILITY_IAM" ],
       Parameters: [
         {
           ParameterKey: 'StackName',
