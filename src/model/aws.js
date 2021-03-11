@@ -276,7 +276,6 @@ class AWS {
 
     try{
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
-      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName+"-ttl" }).promise();
     }catch(error){
       core.error(error);
     }
@@ -379,6 +378,8 @@ class AWS {
         .promise()
     ).ShardIterator;
 
+    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName+"-ttl" }).promise();
+    
     core.info(`Task status is ${await getTaskStatus()}`);
 
     const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDefStackName}`;
