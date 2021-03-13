@@ -1,21 +1,19 @@
 {
-  "parser": "babel-eslint",
+  "plugins": ["jest", "@typescript-eslint", "prettier", "unicorn"],
+  "extends": ["plugin:unicorn/recommended", "plugin:github/recommended", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module"
+  },
   "env": {
     "node": true,
     "es6": true,
-    "jest": true
+    "jest/globals": true
   },
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "ecmaFeatures": {
-      "impliedStrict": true
-    }
-  },
-  "extends": ["airbnb", "plugin:unicorn/recommended", "prettier"],
-  "plugins": ["react", "jsx-a11y", "import", "prettier", "flowtype", "unicorn"],
-  "settings": { "react": { "version": "latest" } },
   "rules": {
     "prettier/prettier": "error",
-    "import/no-extraneous-dependencies": 0
+    "import/no-extraneous-dependencies": 0,
+    "import/no-namespace": "off"
   }
 }

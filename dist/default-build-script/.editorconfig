@@ -1,0 +1,4 @@
+﻿root = true
+
+[*.cs]
+resharper_check_namespace_highlighting = do_not_show

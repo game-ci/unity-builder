@@ -1,9 +1,11 @@
-const esModules = ['lodash-es'].join('|');
-
 module.exports = {
+  clearMocks: true,
+  moduleFileExtensions: ['js', 'ts'],
   testEnvironment: 'node',
-  moduleFileExtensions: ['js', 'jsx', 'json', 'vue'],
-  transform: { '^.+\\.(js|jsx)?$': 'babel-jest' },
-  transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
-  setupFilesAfterEnv: ['./src/jest.setup.js'],
+  testMatch: ['**/*.test.ts'],
+  testRunner: 'jest-circus/runner',
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
+  verbose: true,
 };

@@ -1,0 +1,3 @@
+dist/index* -diff linguist-generated=true
+dist/licenses* -diff linguist-generated=true
+dist/sourcemap* -diff linguist-generated=true

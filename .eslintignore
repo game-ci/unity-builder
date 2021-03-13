@@ -1,2 +1,4 @@
-**/node_modules/**
-**/action/**
+dist/
+lib/
+node_modules/
+jest.config.js
