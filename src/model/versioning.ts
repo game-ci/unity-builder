@@ -171,8 +171,7 @@ export default class Versioning {
     const description = await this.getVersionDescription();
 
     try {
-      // @ts-ignore
-      const [match, tag, commits, hash] = this.descriptionRegex1.exec(description);
+      const [match, tag, commits, hash] = this.descriptionRegex1.exec(description) as RegExpExecArray;
 
       return {
         match,
@@ -182,7 +181,7 @@ export default class Versioning {
       };
     } catch {
       try {
-        const [match, tag, commits, hash] = this.descriptionRegex2.exec(description);
+        const [match, tag, commits, hash] = this.descriptionRegex2.exec(description) as RegExpExecArray;
 
         return {
           match,
@@ -192,7 +191,7 @@ export default class Versioning {
         };
       } catch {
         try {
-          const [match, tag, commits, hash] = this.descriptionRegex3.exec(description);
+          const [match, tag, commits, hash] = this.descriptionRegex3.exec(description) as RegExpExecArray;
 
           return {
             match,
