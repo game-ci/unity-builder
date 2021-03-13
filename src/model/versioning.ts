@@ -134,12 +134,18 @@ export default class Versioning {
     }
 
     const versionDescriptor = await this.parseSemanticVersion();
-
     if (versionDescriptor) {
       const { tag, commits, hash } = versionDescriptor;
-      core.info(`Found semantic version ${tag}.${commits} for ${this.branch}@${hash}`);
-      return `${tag}.${commits}`;
+
+      // Ensure 3 digits (commits should always be patch level)
+      const [major, minor, patch] = `${tag}.${commits}`.split('.');
+      const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
+
+      core.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
+
+      return `${threeDigitVersion}`;
     }
+
     const version = `0.0.${await this.getTotalNumberOfCommits()}`;
     core.info(`Generated version ${version} (semantic version couldn't be determined).`);
     return version;
