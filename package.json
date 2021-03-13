@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn",
-    "build": "tsc && ncc build --source-map --license licenses.txt",
+    "build": "tsc && ncc build lib --source-map --license licenses.txt",
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "test": "jest"
