@@ -13,10 +13,10 @@ Metadata:
         default: Stack name
       TTL:
         default: Time-to-live
-      BUILDID:
-        Type: String
-        Default: ''
 Parameters:
+  BUILDID:
+    Type: String
+    Default: ''
   StackName:
     Type: String
     Description: Stack name that will be deleted.
