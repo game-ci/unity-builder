@@ -55,7 +55,6 @@ Resources:
     DependsOn:
       - DeleteCFNLambdaExecutionRole
     Properties:
-      Name: !Join [ "", [ 'DeleteCFNLambda', !Ref BUILDID ] ]
       FunctionName: !Sub "DeleteCFNLambda-${StackName}"
       Code:
         ZipFile: |
@@ -102,7 +101,6 @@ Resources:
   PermissionForDeleteCFNLambda: 
     Type: "AWS::Lambda::Permission"
     Properties: 
-      Name: !Join [ "", [ 'PermissionForDeleteCFNLambda', !Ref BUILDID ] ]
       FunctionName: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:DeleteCFNLambda-${StackName}"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
