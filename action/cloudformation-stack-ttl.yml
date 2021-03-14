@@ -130,7 +130,7 @@ Resources:
   GenerateCronExpLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      Name: !Join [ "", [ 'GenerateCronExpLambda', !Ref BUILDID ] ]
+      FunctionName: !Join [ "", [ 'GenerateCronExpLambda', !Ref BUILDID ] ]
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
