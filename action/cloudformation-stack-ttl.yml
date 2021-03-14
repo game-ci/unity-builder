@@ -36,7 +36,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Join [ "", [ 'DeleteCFNLambdaExecutionRole', !Ref BUILDID ] ]
+      - PolicyName: !Sub "DeleteCFNLambdaExecutionRole-${StackName}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -117,7 +117,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Join [ "", [ 'BasicLambdaExecutionRole', !Ref BUILDID ] ]
+      - PolicyName: !Sub "BasicLambdaExecutionRole-${StackName}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -174,6 +174,6 @@ Resources:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
     Properties:
-      Name: !Join [ "", [ 'GenerateCronExpression', !Ref BUILDID ] ]
+      Name: !Sub "GenerateCronExpression-${StackName}"
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
