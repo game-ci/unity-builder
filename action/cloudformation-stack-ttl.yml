@@ -27,7 +27,6 @@ Resources:
   DeleteCFNLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
-      Name: !Join [ "", [ 'DeleteCFNLambdaExecutionRole', !Ref BUILDID ] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -37,7 +36,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: "lambda_policy"
+      - PolicyName: !Join [ "", [ 'DeleteCFNLambdaExecutionRole', !Ref BUILDID ] ]
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -111,7 +110,6 @@ Resources:
   BasicLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
-      Name: !Join [ "", [ 'BasicLambdaExecutionRole', !Ref BUILDID ] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -121,7 +119,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: "lambda_policy"
+      - PolicyName: !Join [ "", [ 'BasicLambdaExecutionRole', !Ref BUILDID ] ]
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
