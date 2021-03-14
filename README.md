@@ -10,9 +10,9 @@ Part of the <a href="https://game.ci">GameCI</a> open source project.
 <br />
 <br />
 
-[![Actions status](https://github.com/game-ci/unity-builder/workflows/Actions/badge.svg?event=push&branch=main)](https://github.com/game-ci/unity-builder/actions?query=branch%3Amain+event%3Apush+workflow%3A%22Actions)
+[![Actions status](https://github.com/game-ci/unity-builder/workflows/Builds/badge.svg?event=push&branch=main)](https://github.com/game-ci/unity-builder/actions?query=branch%3Amain+event%3Apush+workflow%3A%22Builds)
 [![lgtm - code quality](https://img.shields.io/lgtm/grade/javascript/g/webbertakken/unity-builder.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/webbertakken/unity-builder/context:javascript)
-[![codecov - test coverage](https://codecov.io/gh/webbertakken/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/webbertakken/unity-builder)
+[![codecov - test coverage](https://codecov.io/gh/game-ci/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/game-ci/unity-builder)
 <br />
 <br />
 
