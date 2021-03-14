@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Build Unity projects for different platforms.",
   "main": "dist/index.js",
-  "repository": "git@github.com:webbertakken/unity-builder.git",
+  "repository": "git@github.com:game-ci/unity-builder.git",
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
