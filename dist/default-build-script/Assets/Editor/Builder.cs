@@ -7,6 +7,10 @@ using UnityBuilderAction.Versioning;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 
+#if USE_ADDRESSABLES
+using UnityEditor.AddressableAssets.Settings;
+#endif
+
 namespace UnityBuilderAction
 {
   static class Builder
@@ -43,6 +47,12 @@ namespace UnityBuilderAction
       // Apply Android settings
       if (buildPlayerOptions.target == BuildTarget.Android)
         AndroidSettings.Apply(options);
+
+      // Execute default AddressableAsset content build, if the package is installed
+#if USE_ADDRESSABLES
+      AddressableAssetSettings.CleanPlayerContent();
+      AddressableAssetSettings.BuildPlayerContent();
+#endif
 
       // Perform build
       BuildReport buildReport = BuildPipeline.BuildPlayer(buildPlayerOptions);
