@@ -36,7 +36,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Sub "DeleteLambdaExRole-${BUILDID}"
+      - PolicyName: "DeleteLambdaExRole-${BUILDID}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -55,7 +55,7 @@ Resources:
     DependsOn:
       - DeleteCFNLambdaExecutionRole
     Properties:
-      FunctionName: !Sub "DeleteCFNLambda-${BUILDID}"
+      FunctionName: "DeleteCFNLambda-${BUILDID}"
       Code:
         ZipFile: |
           import boto3
@@ -101,7 +101,7 @@ Resources:
   PermissionForDeleteCFNLambda: 
     Type: "AWS::Lambda::Permission"
     Properties: 
-      FunctionName: !Sub "DeleteCFNLambda-${BUILDID}"
+      FunctionName: "DeleteCFNLambda-${BUILDID}"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
@@ -117,7 +117,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Sub "BasicLambdaExecutionRole-${BUILDID}"
+      - PolicyName: "BasicLambdaExecutionRole-${BUILDID}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -130,7 +130,7 @@ Resources:
   GenerateCronExpLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: !Sub "MakeCronLambda-${BUILDID}"
+      FunctionName: "MakeCronLambda-${BUILDID}"
       Code:
         ZipFile: |
           from datetime import datetime, timedelta

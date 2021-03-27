@@ -220,7 +220,6 @@ class AWS {
       .toString()
       .replace(/[^\da-z]/gi, '');
     const taskDefStackNameTTL = taskDefStackName+"-ttl";
-    core.info('Creating build job resources');
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
@@ -286,8 +285,8 @@ class AWS {
       StackName: taskDefStackName,
     }).promise();
 
-    const baseResources = await CF.describeStackResources({ StackName: taskDefStackName }).promise();
 
+    const baseResources = await CF.describeStackResources({ StackName: taskDefStackName }).promise();
 
     const clusterName = baseResources.StackResources?.find(
       (x) => x.LogicalResourceId === 'ECSCluster',
