@@ -2,10 +2,9 @@
 /* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
 import { nanoid } from 'nanoid';
-
-const fs = require('fs');
-const core = require('@actions/core');
-const zlib = require('zlib');
+import * as fs from 'fs';
+import * as core from '@actions/core';
+import * as zlib from 'zlib';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
