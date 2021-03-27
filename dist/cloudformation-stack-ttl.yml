@@ -23,39 +23,32 @@ Parameters:
   TTL:
     Type: Number
     Description: Time-to-live in minutes for the stack.
+  DeleteLambdaExRoleName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  DeleteCFNLambdaName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  DeleteStackEventRuleName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  DeleteCFNLambdaPermissionName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  LambdaExecutionRoleName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  GenerateCronExpressionLambdaName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
+  GenerateCronExpressionName:
+    Type: Number
+    Description: Time-to-live in minutes for the stack.
 Resources:
-  DeleteCFNLambdaExecutionRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: "Allow"
-          Principal:
-            Service: ["lambda.amazonaws.com"]
-          Action: "sts:AssumeRole"
-      Path: "/"
-      Policies:
-      - PolicyName: "DeleteLambdaExRole${BUILDID}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: "Allow"
-            Action:
-            - "logs:CreateLogGroup"
-            - "logs:CreateLogStream"
-            - "logs:PutLogEvents"
-            Resource: "arn:aws:logs:*:*:*"
-          - Effect: "Allow"
-            Action:
-            - "cloudformation:DeleteStack"
-            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${BUILDID}/*"
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
-    DependsOn:
-      - DeleteCFNLambdaExecutionRole
     Properties:
-      FunctionName: "DeleteCFNLambda-${BUILDID}"
+      FunctionName: !Ref "DeleteCFNLambdaName"
       Code:
         ZipFile: |
           import boto3
@@ -83,14 +76,14 @@ Resources:
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
-      Role: !GetAtt DeleteCFNLambdaExecutionRole.Arn
+      Role: 'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   DeleteStackEventRule:
      DependsOn:
        - DeleteCFNLambda
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: "DeleteStackEventRule${BUILDID}"
+       Name: !Ref "DeleteStackEventRuleName"
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
@@ -101,36 +94,14 @@ Resources:
   PermissionForDeleteCFNLambda: 
     Type: "AWS::Lambda::Permission"
     Properties: 
-      FunctionName: "DeleteCFNLambda-${BUILDID}"
+      FunctionName: "DeleteCFNLambdaPermission"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
-  BasicLambdaExecutionRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: "Allow"
-          Principal:
-            Service: ["lambda.amazonaws.com"]
-          Action: "sts:AssumeRole"
-      Path: "/"
-      Policies:
-      - PolicyName: "BasicLambdaExecutionRole-${BUILDID}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: "Allow"
-            Action:
-            - "logs:CreateLogGroup"
-            - "logs:CreateLogStream"
-            - "logs:PutLogEvents"
-            Resource: "arn:aws:logs:*:*:*"
   GenerateCronExpLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: "MakeCronLambda-${BUILDID}"
+      FunctionName: "GenerateCronExpressionLambda"
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
@@ -168,12 +139,11 @@ Resources:
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
-      Role: !GetAtt BasicLambdaExecutionRole.Arn
-
+      Role: 'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
     Properties:
-      Name: !Sub "GenerateCronExpression-${BUILDID}"
+      Name: "GenerateCronExpression"
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
