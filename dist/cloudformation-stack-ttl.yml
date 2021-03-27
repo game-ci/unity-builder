@@ -60,7 +60,7 @@ Resources:
       Runtime: "python3.6"
       Timeout: "5"
       Role: 
-      - 'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
+       'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   DeleteStackEventRule:
      DependsOn:
        - DeleteCFNLambda
@@ -124,7 +124,7 @@ Resources:
       Runtime: "python3.6"
       Timeout: "5"
       Role: 
-      - 'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
+       'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
