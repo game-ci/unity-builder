@@ -1,0 +1,322 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS Fargate cluster that can span public and private subnets. Supports public
+  facing load balancers, private internal load balancers, and both internal and
+  external service discovery namespaces.
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: development
+    Description: 'Your deployment environment: DEV, QA , PROD'
+  ServiceName:
+    Type: String
+    Default: example
+    Description: A name for the service
+  ImageUrl:
+    Type: String
+    Default: nginx
+    Description: >-
+      The url of a docker image that contains the application process that will
+      handle the traffic for this service
+  ContainerPort:
+    Type: Number
+    Default: 80
+    Description: What port number the application inside the docker container is binding to
+  ContainerCpu:
+    Type: Number
+    Default: 1024
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 2048
+    Description: How much memory in megabytes to give the container
+  BUILDID:
+    Type: String
+    Default: ''
+  Command:
+    Type: String
+    Default: 'ls'
+  EntryPoint:
+    Type: String
+    Default: '/bin/sh'
+  WorkingDirectory:
+    Type: String
+    Default: '/efsdata/'
+  Role:
+    Type: String
+    Default: ''
+    Description: >-
+      (Optional) An IAM role to give the service's containers if the code within
+      needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
+  EFSMountDirectory:
+    Type: String
+    Default: '/efsdata'
+  GithubToken:
+    Type: String
+    Default: '0'
+  UnityLicense:
+    Type: String
+    Default: '0'
+  UnityEmail:
+    Type: String
+    Default: '0'
+  UnityPassword:
+    Type: String
+    Default: '0'
+  UnitySerial:
+    Type: String
+    Default: '0'
+  AndroidKeystoreBase64:
+    Type: String
+    Default: '0'
+  AndroidKeystorePass:
+    Type: String
+    Default: '0'
+  AndroidKeyAliasPass:
+    Type: String
+    Default: '0'
+  AWSAccessKeyID:
+    Type: String
+    Default: '0'
+  AWSSecretAccessKey:
+    Type: String
+    Default: '0'
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: 10.0.0.0/16
+    PublicOne:
+      CIDR: 10.0.0.0/24
+    PublicTwo:
+      CIDR: 10.0.1.0/24
+Conditions:
+  HasCustomRole: !Not
+    - !Equals
+      - Ref: Role
+      - ''
+Resources:
+  LogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Ref ServiceName
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: aece53ae-b82d-4267-bc16-ed964b05db27
+  SubscriptionFilter:
+    Type: 'AWS::Logs::SubscriptionFilter'
+    Properties:
+      FilterPattern: ''
+      RoleArn:
+        'Fn::ImportValue': !Sub '${EnvironmentName}:CloudWatchIAMRole'
+      LogGroupName: !Ref ServiceName
+      DestinationArn:
+        'Fn::GetAtt':
+          - KinesisStream
+          - Arn
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7f809e91-9e5d-4678-98c1-c5085956c480
+    DependsOn:
+      - LogGroup
+      - KinesisStream
+  KinesisStream:
+    Type: 'AWS::Kinesis::Stream'
+    Properties:
+      Name: !Ref ServiceName
+      ShardCount: 1
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: c6f18447-b879-4696-8873-f981b2cedd2b
+  
+  GithubTokenSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'GithubToken', !Ref BUILDID ] ]
+      SecretString: !Ref GithubToken
+  
+  UnityLicenseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnityLicense', !Ref BUILDID ] ]
+      SecretString: !Ref UnityLicense  
+      
+  UnityEmailSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnityEmail', !Ref BUILDID ] ]
+      SecretString: !Ref UnityEmail
+      
+  UnityPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnityPassword', !Ref BUILDID ] ]
+      SecretString: !Ref UnityPassword
+      
+  UnitySerialSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'UnitySerial', !Ref BUILDID ] ]
+      SecretString: !Ref UnitySerial
+  
+  AndroidKeystoreBase64Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AndroidKeystoreBase64', !Ref BUILDID ] ]
+      SecretString: !Ref AndroidKeystoreBase64
+  
+  AndroidKeystorePassSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AndroidKeystorePass', !Ref BUILDID ] ]
+      SecretString: !Ref AndroidKeystorePass
+  
+  AndroidKeyAliasPassSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AndroidKeyAliasPass', !Ref BUILDID ] ]
+      SecretString: !Ref AndroidKeyAliasPass
+  AWSAccessKeyIDSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AWSAccessKeyID', !Ref BUILDID ] ]
+      SecretString: !Ref AWSAccessKeyID
+  AWSSecretAccessKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'AWSSecretAccessKey', !Ref BUILDID ] ]
+      SecretString: !Ref AWSSecretAccessKey
+  
+  TaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: !Ref ServiceName
+      Cpu: !Ref ContainerCpu
+      Memory: !Ref ContainerMemory
+      NetworkMode: awsvpc
+      Volumes:
+        - Name: efs-data
+          EFSVolumeConfiguration:
+            FilesystemId:
+              'Fn::ImportValue': !Sub '${EnvironmentName}:EfsFileStorageId'
+            TransitEncryption: ENABLED
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn:
+        'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
+      TaskRoleArn:
+        'Fn::If':
+          - HasCustomRole
+          - !Ref Role
+          - !Ref 'AWS::NoValue'
+      ContainerDefinitions:
+        - Name: !Ref ServiceName
+          Cpu: !Ref ContainerCpu
+          Memory: !Ref ContainerMemory
+          Image: !Ref ImageUrl
+          EntryPoint:
+            Fn::Split:
+                - ","
+                - !Ref EntryPoint
+          Command:
+            Fn::Split:
+                - ","
+                - !Ref Command
+          WorkingDirectory: !Ref WorkingDirectory
+          Environment:
+            - Name: ALLOW_EMPTY_PASSWORD
+              Value: 'yes'
+          MountPoints:
+            - SourceVolume: efs-data
+              ContainerPath: !Ref EFSMountDirectory
+              ReadOnly: false
+          Secrets:
+            - Name: 'GITHUB_TOKEN'
+              ValueFrom: !Ref GithubTokenSecret
+            - Name: 'UNITY_LICENSE'
+              ValueFrom: !Ref UnityLicenseSecret
+            - Name: 'UNITY_EMAIL'
+              ValueFrom: !Ref UnityEmailSecret
+            - Name: 'UNITY_PASSWORD'
+              ValueFrom: !Ref UnityPasswordSecret
+            - Name: 'UNITY_SERIAL'
+              ValueFrom: !Ref UnitySerialSecret
+            - Name: 'ANDROID_KEYSTORE_BASE64'
+              ValueFrom: !Ref AndroidKeystoreBase64Secret
+            - Name: 'ANDROID_KEYSTORE_PASS'
+              ValueFrom: !Ref AndroidKeystorePassSecret
+            - Name: 'AWS_ACCESS_KEY_ID'
+              ValueFrom: !Ref AWSAccessKeyIDSecret
+            - Name: 'AWS_SECRET_ACCESS_KEY'
+              ValueFrom: !Ref AWSSecretAccessKeySecret
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ServiceName
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: !Ref ServiceName
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: dabb0116-abe0-48a6-a8af-cf9111c879a5
+    DependsOn:
+      - LogGroup
+Metadata:
+  'AWS::CloudFormation::Designer':
+    dabb0116-abe0-48a6-a8af-cf9111c879a5:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 270
+        'y': 90
+      z: 1
+      embeds: []
+      dependson:
+        - aece53ae-b82d-4267-bc16-ed964b05db27
+    c6f18447-b879-4696-8873-f981b2cedd2b:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 270
+        'y': 210
+      z: 1
+      embeds: []
+    7f809e91-9e5d-4678-98c1-c5085956c480:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 300
+      z: 1
+      embeds: []
+      dependson:
+        - aece53ae-b82d-4267-bc16-ed964b05db27
+        - c6f18447-b879-4696-8873-f981b2cedd2b
+    aece53ae-b82d-4267-bc16-ed964b05db27:
+      size:
+        width: 150
+        height: 150
+      position:
+        x: 60
+        'y': 90
+      z: 1
+      embeds: []
+    4d2da56c-3643-46b8-aaee-e46e19f95fcc:
+      source:
+        id: 7f809e91-9e5d-4678-98c1-c5085956c480
+      target:
+        id: aece53ae-b82d-4267-bc16-ed964b05db27
+      z: 11
+    14eb957b-f094-4653-93c4-77b2f851953c:
+      source:
+        id: 7f809e91-9e5d-4678-98c1-c5085956c480
+      target:
+        id: c6f18447-b879-4696-8873-f981b2cedd2b
+      z: 12
+    85c57444-e5bb-4230-bc85-e545cd4558f6:
+      source:
+        id: dabb0116-abe0-48a6-a8af-cf9111c879a5
+      target:
+        id: aece53ae-b82d-4267-bc16-ed964b05db27
+      z: 13
