@@ -31,9 +31,13 @@ inputs:
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
   remoteBuildCluster:
-    default: ''
+    default: 'local'
     required: false
-    description: 'To use a remote build cluster specify either, aws or k8s as well as the required parameters.'
+    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+  awsStackName:
+    default: 'game-ci'
+    required: false
+    description: 'The Cloud Formation stack name that must be setup before using this option.'
   kubeConfig:
     default: ''
     required: false
