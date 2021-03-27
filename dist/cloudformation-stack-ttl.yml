@@ -23,32 +23,11 @@ Parameters:
   TTL:
     Type: Number
     Description: Time-to-live in minutes for the stack.
-  DeleteLambdaExRoleName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  DeleteCFNLambdaName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  DeleteStackEventRuleName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  DeleteCFNLambdaPermissionName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  LambdaExecutionRoleName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  GenerateCronExpressionLambdaName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
-  GenerateCronExpressionName:
-    Type: Number
-    Description: Time-to-live in minutes for the stack.
 Resources:
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: !Ref "DeleteCFNLambdaName"
+      FunctionName: "DeleteCFNLambdaName"
       Code:
         ZipFile: |
           import boto3
@@ -84,7 +63,7 @@ Resources:
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: !Ref "DeleteStackEventRuleName"
+       Name: "DeleteStackEventRuleName"
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
