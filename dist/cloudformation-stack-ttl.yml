@@ -14,9 +14,6 @@ Metadata:
       TTL:
         default: Time-to-live
 Parameters:
-  BUILDID:
-    Type: String
-    Default: ''
   StackName:
     Type: String
     Description: Stack name that will be deleted.
@@ -90,7 +87,7 @@ Resources:
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: !Join [ "", [ 'DeleteStackEventRule', !Ref BUILDID ] ]
+       Name: !Sub "DeleteStackEventRule-${StackName}"
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
@@ -101,7 +98,7 @@ Resources:
   PermissionForDeleteCFNLambda: 
     Type: "AWS::Lambda::Permission"
     Properties: 
-      FunctionName: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:DeleteCFNLambda-${StackName}"
+      FunctionName: !Sub "DeleteCFNLambda-${StackName}"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
