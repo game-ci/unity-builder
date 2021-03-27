@@ -286,7 +286,7 @@ class AWS {
       StackName: taskDefStackName,
     }).promise();
 
-    const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
+    const baseResources = await CF.describeStackResources({ StackName: taskDefStackName }).promise();
 
 
     const clusterName = baseResources.StackResources?.find(
