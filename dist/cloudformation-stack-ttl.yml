@@ -36,7 +36,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: "DeleteLambdaExRole-${BUILDID}"
+      - PolicyName: "DeleteLambdaExRole${BUILDID}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -90,7 +90,7 @@ Resources:
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: !Sub "DeleteStackEventRule-${BUILDID}"
+       Name: "DeleteStackEventRule${BUILDID}"
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
