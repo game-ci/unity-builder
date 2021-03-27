@@ -36,7 +36,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Sub "DeleteCFNLambdaExecutionRole-${StackName}"
+      - PolicyName: !Sub "DeleteLambdaExRole-${StackName}"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
