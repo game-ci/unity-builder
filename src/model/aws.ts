@@ -219,6 +219,7 @@ class AWS {
     const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`
       .toString()
       .replace(/[^\da-z]/gi, '');
+    const taskDefStackNameTTL = taskDefStackName+"-ttl";
     core.info('Creating build job resources');
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
@@ -255,10 +256,11 @@ class AWS {
         }
       ].concat(secrets),
     }).promise();
+    core.info("Creating build cluster...");
 
     const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
-      StackName: taskDefStackName+"-ttl",
+      StackName: taskDefStackNameTTL,
       TemplateBody: ttlCloudFormation,
       Capabilities: [ "CAPABILITY_IAM" ],
       Parameters: [
@@ -272,6 +274,7 @@ class AWS {
         },
       ],
     }).promise();
+    core.info("Creating cleanup cluster...");
 
     try{
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
@@ -369,7 +372,7 @@ class AWS {
         .promise()
     ).ShardIterator||"";
 
-    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName+"-ttl" }).promise();
+    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackNameTTL }).promise();
     
     core.info(`Task status is ${await getTaskStatus()}`);
 
@@ -423,7 +426,7 @@ class AWS {
     }).promise();
 
     await CF.deleteStack({
-      StackName: taskDefStackName+"-ttl",
+      StackName: taskDefStackNameTTL,
     }).promise();
 
     await CF.waitFor('stackDeleteComplete', {
@@ -431,7 +434,7 @@ class AWS {
     }).promise();
 
     await CF.waitFor('stackDeleteComplete', {
-      StackName: taskDefStackName+"-ttl"
+      StackName: taskDefStackNameTTL
     }).promise();
 
     core.info('Cleanup complete');
