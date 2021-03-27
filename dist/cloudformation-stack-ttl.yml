@@ -140,7 +140,8 @@ Resources:
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
-      Role: 'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
+      Role: 
+      - 'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
