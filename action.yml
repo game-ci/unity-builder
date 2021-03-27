@@ -30,6 +30,10 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
+  remoteBuildCluster:
+    default: ''
+    required: false
+    description: 'To use a remote build cluster specify either, aws or k8s as well as the required parameters.'
   kubeConfig:
     default: ''
     required: false
