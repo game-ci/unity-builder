@@ -212,14 +212,13 @@ class AWS {
     }
   }
 
-  static async run(buildUid, stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets) {
+  static async run(buildUid:string, stackName:string, image:string, entrypoint, commands, mountdir, workingdir, environment, secrets) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
     const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`
       .toString()
       .replace(/[^\da-z]/gi, '');
-    const taskDefStackNameTTL = taskDefStackName+"-ttl";
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
@@ -257,6 +256,7 @@ class AWS {
     }).promise();
     core.info("Creating build cluster...");
 
+    const taskDefStackNameTTL = taskDefStackName+"-ttl";
     const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackNameTTL,
@@ -280,13 +280,14 @@ class AWS {
     }catch(error){
       core.error(error);
     }
+    core.info("Cloud formation stack created");
 
     const taskDefResources = await CF.describeStackResources({
       StackName: taskDefStackName,
     }).promise();
 
 
-    const baseResources = await CF.describeStackResources({ StackName: taskDefStackName }).promise();
+    const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
 
     const clusterName = baseResources.StackResources?.find(
       (x) => x.LogicalResourceId === 'ECSCluster',
