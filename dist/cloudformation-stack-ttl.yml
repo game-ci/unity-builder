@@ -77,6 +77,8 @@ Resources:
             Id: 'DeleteCFNLambda' 
   PermissionForDeleteCFNLambda: 
     Type: "AWS::Lambda::Permission"
+    DependsOn:
+      - DeleteStackEventRule
     Properties: 
       FunctionName: "DeleteCFNLambdaPermission"
       Action: "lambda:InvokeFunction"
