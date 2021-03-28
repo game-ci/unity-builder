@@ -263,7 +263,7 @@ Resources:
           Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: "DeleteLambdaExRoleName"
+      - PolicyName: DeleteCFNLambdaExecutionRole
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -380,7 +380,7 @@ Outputs:
       Name: !Sub ${EnvironmentName}:ECSTaskExecutionRole
   
   DeleteCFNLambdaExecutionRole:
-    Description: s3
+    Description: Lambda execution role for cleaning up cloud formations
     Value: !GetAtt 'DeleteCFNLambdaExecutionRole.Arn'
     Export:
       Name: !Sub ${EnvironmentName}:DeleteCFNLambdaExecutionRole
