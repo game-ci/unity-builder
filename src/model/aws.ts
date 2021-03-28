@@ -400,7 +400,7 @@ class AWS {
       if (records.Records.length > 0) {
         for (let index = 0; index < records.Records.length; index++) {
           const json = JSON.parse(
-            zlib.gunzipSync(Buffer.from(records.Records[index].Data.toString(), 'base64')).toString('utf8'),
+            zlib.gunzipSync(Buffer.from((records.Records[index].Data as string), 'base64')).toString('utf8'),
           );
           if (json.messageType === 'DATA_MESSAGE') {
             for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
