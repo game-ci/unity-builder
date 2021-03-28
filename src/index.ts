@@ -17,12 +17,12 @@ async function run() {
         core.info('Building with Kubernetes');
         await Kubernetes.runBuildJob(buildParameters, baseImage);
         break;
-  
+
       case 'aws':
         core.info('Building with AWS');
         await AWS.runBuildJob(buildParameters, baseImage);
         break;
-  
+
       // default and local case
       default:
         core.info('Building locally');
