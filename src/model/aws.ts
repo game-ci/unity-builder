@@ -272,6 +272,10 @@ class AWS {
           ParameterKey: 'TTL',
           ParameterValue: "100",
         },
+        {
+          ParameterKey: 'BUILDID',
+          ParameterValue: buildUid,
+        }
       ],
     }).promise();
     core.info("Creating cleanup cluster...");

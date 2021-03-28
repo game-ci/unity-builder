@@ -67,7 +67,7 @@ Resources:
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: !Join [ "", [ 'DeleteStackEventRuleName', !Ref BUILDID ] ]
+       Name: !Join [ "", [ 'DeleteStackEventRule', !Ref BUILDID ] ]
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
