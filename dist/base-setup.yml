@@ -278,7 +278,6 @@ Resources:
             - "cloudformation:DeleteStack"
             Resource: "*"
 
-
 ### cloud watch to kinesis role
 
   CloudWatchIAMRole:

@@ -124,7 +124,7 @@ Resources:
       Runtime: "python3.6"
       Timeout: "5"
       Role: 
-       'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
+       'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
