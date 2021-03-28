@@ -85,11 +85,11 @@ class Input {
     return core.getInput('customParameters') || '';
   }
 
-  static get remoteBuildCluster(){
+  static get remoteBuildCluster() {
     return core.getInput('remoteBuildCluster') || '';
   }
 
-  static get awsStackName(){
+  static get awsStackName() {
     return core.getInput('awsStackName') || '';
   }
 

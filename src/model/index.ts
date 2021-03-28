@@ -25,5 +25,5 @@ export {
   Unity,
   Versioning,
   Kubernetes,
-  AWS
+  AWS,
 };
