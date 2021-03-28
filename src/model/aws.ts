@@ -1,16 +1,13 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable no-await-in-loop */
 import * as SDK from 'aws-sdk';
 import { nanoid } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
-import BuildParameters from './build-parameters';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
-      let buildUid = nanoid();
+      const buildUid = nanoid();
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -268,11 +265,12 @@ class AWS {
           ParameterKey: 'BUILDID',
           ParameterValue: buildUid,
         },
-      ].concat(secrets),
+        ...secrets
+      ],
     }).promise();
     core.info('Creating build cluster...');
 
-    const taskDefStackNameTTL = taskDefStackName + '-ttl';
+    const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
     const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackNameTTL,
@@ -310,40 +308,37 @@ class AWS {
 
     const clusterName =
       baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
-    const task = await ECS.runTask(
-      {
-        cluster: clusterName,
-        taskDefinition:
-          taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId ||
-          '',
-        platformVersion: '1.4.0',
-        overrides: {
-          containerOverrides: [
-            {
-              name: taskDefStackName,
-              environment: environment.concat([{ name: 'BUILDID', value: buildUid }]),
-            },
+    const task = await ECS.runTask({
+      cluster: clusterName,
+      taskDefinition:
+        taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId ||
+        '',
+      platformVersion: '1.4.0',
+      overrides: {
+        containerOverrides: [
+          {
+            name: taskDefStackName,
+            environment: [...environment, { name: 'BUILDID', value: buildUid }],
+          },
+        ],
+      },
+      launchType: 'FARGATE',
+      networkConfiguration: {
+        awsvpcConfiguration: {
+          subnets: [
+            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')?.PhysicalResourceId ||
+              '',
+            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')?.PhysicalResourceId ||
+              '',
+          ],
+          assignPublicIp: 'ENABLED',
+          securityGroups: [
+            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
+              ?.PhysicalResourceId || '',
           ],
         },
-        launchType: 'FARGATE',
-        networkConfiguration: {
-          awsvpcConfiguration: {
-            subnets: [
-              baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')
-                ?.PhysicalResourceId || '',
-              baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')
-                ?.PhysicalResourceId || '',
-            ],
-            assignPublicIp: 'ENABLED',
-            securityGroups: [
-              baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
-                ?.PhysicalResourceId || '',
-            ],
-          },
-        },
       },
-      undefined,
-    ).promise();
+    }).promise();
 
     core.info('Build job is starting');
 
@@ -351,7 +346,7 @@ class AWS {
       await ECS.waitFor('tasksRunning', { tasks: [task.tasks?.[0].taskArn || ''], cluster: clusterName }).promise();
     } catch (error) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      let describeTasks = await ECS.describeTasks({
+      const describeTasks = await ECS.describeTasks({
         tasks: [task.tasks?.[0].taskArn || ''],
         cluster: clusterName,
       }).promise();
@@ -374,14 +369,11 @@ class AWS {
     };
 
     const stream = await kinesis
-      .describeStream(
-        {
-          StreamName:
-            taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId ||
-            '',
-        },
-        undefined,
-      )
+      .describeStream({
+        StreamName:
+          taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId ||
+          '',
+      })
       .promise();
 
     let iterator =
@@ -438,7 +430,7 @@ class AWS {
       }).promise()
     ).tasks?.[0].containers?.[0].exitCode;
 
-    if (exitCode != 0) {
+    if (exitCode !== 0) {
       core.error(`job finished with exit code ${exitCode}`);
     } else {
       core.info(`Build job has finished with exit code 0`);
@@ -464,9 +456,9 @@ class AWS {
   }
 
   static onlog(batch) {
-    batch.forEach((log) => {
+    for (const log of batch) {
       core.info(`log: ${log}`);
-    });
+    }
   }
 }
 export default AWS;
