@@ -47,6 +47,7 @@ class Docker {
         --env UNITY_PASSWORD \
         --env UNITY_SERIAL \
         --env UNITY_VERSION="${version}" \
+        --env USYM_UPLOAD_AUTH_TOKEN \
         --env PROJECT_PATH="${projectPath}" \
         --env BUILD_TARGET="${platform}" \
         --env BUILD_NAME="${buildName}" \
