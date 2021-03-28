@@ -31,7 +31,7 @@ Resources:
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: "DeleteCFNLambdaName"
+      FunctionName: "DeleteCFNLambda"
       Code:
         ZipFile: |
           import boto3
@@ -80,7 +80,7 @@ Resources:
     DependsOn:
       - DeleteStackEventRule
     Properties: 
-      FunctionName: "DeleteCFNLambdaPermission"
+      FunctionName: "DeleteCFNLambda"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
