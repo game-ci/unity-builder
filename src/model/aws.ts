@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
+import BuildParameters from './build-parameters';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {

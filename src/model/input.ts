@@ -89,6 +89,10 @@ class Input {
     return core.getInput('remoteBuildCluster') || '';
   }
 
+  static get awsStackName(){
+    return core.getInput('awsStackName') || '';
+  }
+
   static get kubeConfig() {
     return core.getInput('kubeConfig') || '';
   }
