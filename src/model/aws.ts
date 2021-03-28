@@ -212,7 +212,7 @@ class AWS {
     }
   }
 
-  static async run(buildUid:string, stackName:string, image:string, entrypoint, commands, mountdir, workingdir, environment, secrets) {
+  static async run(buildUid:string, stackName:string, image:string, entrypoint:string[], commands, mountdir, workingdir, environment, secrets) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
