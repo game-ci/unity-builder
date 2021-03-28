@@ -381,7 +381,7 @@ Outputs:
   
   DeleteCFNLambdaExecutionRole:
     Description: s3
-    Value: !GetAtt 'ECSTaskExecutionRole.Arn'
+    Value: !GetAtt 'DeleteCFNLambdaExecutionRole.Arn'
     Export:
       Name: !Sub ${EnvironmentName}:DeleteCFNLambdaExecutionRole
 
