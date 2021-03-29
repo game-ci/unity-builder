@@ -24,6 +24,9 @@ Parameters:
   StackName:
     Type: String
     Description: Stack name that will be deleted.
+  DeleteStackName:
+    Type: String
+    Description: Stack name that will be deleted.
   TTL:
     Type: Number
     Description: Time-to-live in minutes for the stack.
@@ -39,6 +42,7 @@ Resources:
           import json
           
           stack_name = os.environ['stackName']
+          delete_stack_name = os.environ['deleteStackName']
           
           def delete_cfn(stack_name):
               try:
@@ -52,10 +56,13 @@ Resources:
           def handler(event, context):
               print("Received event:")
               print(json.dumps(event))
-              return delete_cfn(stack_name)
+              result = delete_cfn(stack_name)
+              delete_cfn(delete_stack_name)
+              return result
       Environment:
         Variables:
           stackName: !Ref 'StackName'
+          deleteStackName: !Ref 'DeleteStackName'
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
