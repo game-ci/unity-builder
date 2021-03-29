@@ -265,7 +265,7 @@ class AWS {
           ParameterKey: 'BUILDID',
           ParameterValue: buildUid,
         },
-        ...secrets
+        ...secrets,
       ],
     }).promise();
     core.info('Creating build cluster...');
