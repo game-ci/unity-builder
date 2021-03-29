@@ -282,6 +282,10 @@ class AWS {
           ParameterValue: taskDefStackName,
         },
         {
+          ParameterKey: 'DeleteStackName',
+          ParameterValue: taskDefStackNameTTL,
+        },
+        {
           ParameterKey: 'TTL',
           ParameterValue: '100',
         },
