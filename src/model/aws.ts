@@ -48,9 +48,9 @@ class AWS {
         [
           '-c',
           `
-      cp -R /data/${buildUid}/builder/action/default-build-script/ /UnityBuilderAction;
-      cp -R /data/${buildUid}/builder/action/entrypoint.sh /entrypoint.sh;
-      cp -R /data/${buildUid}/builder/action/steps/ /steps;
+      cp -R /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+      cp -R /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+      cp -R /data/${buildUid}/builder/dist/steps/ /steps;
       ls;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
