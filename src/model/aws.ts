@@ -25,7 +25,7 @@ class AWS {
         if [ -f "./${process.env.GITHUB_REF}/lib.zip" ]; then
           echo "Cache exists"
           zip -r ./${process.env.GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
-        else; then
+        else
           echo "Cache does not exist"
         fi
         cd ${buildUid}/repo;
