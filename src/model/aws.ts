@@ -20,11 +20,11 @@ class AWS {
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://${GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone https://${GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
-        if [ -f "./${GITHUB_REF}/lib.zip" ]; then
+        git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
+        git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
+        if [ -f "./${process.env.GITHUB_REF}/lib.zip" ]; then
           echo "Cache exists"
-          zip -r ./${GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+          zip -r ./${process.env.GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
         else; then
           echo "Cache does not exist"
         fi
@@ -58,7 +58,7 @@ class AWS {
           `
         apk update;
         apk add zip
-        zip -r /${GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+        zip -r /${process.env.GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
         ls
       `,
         ],
