@@ -239,81 +239,12 @@ class AWS {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
-    const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`.toString().replace(/[^\da-z]/gi, '');
-    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
-    await CF.createStack({
-      StackName: taskDefStackName,
-      TemplateBody: taskDefCloudFormation,
-      Parameters: [
-        {
-          ParameterKey: 'ImageUrl',
-          ParameterValue: image,
-        },
-        {
-          ParameterKey: 'ServiceName',
-          ParameterValue: taskDefStackName,
-        },
-        {
-          ParameterKey: 'Command',
-          ParameterValue: commands.join(','),
-        },
-        {
-          ParameterKey: 'EntryPoint',
-          ParameterValue: entrypoint.join(','),
-        },
-        {
-          ParameterKey: 'WorkingDirectory',
-          ParameterValue: workingdir,
-        },
-        {
-          ParameterKey: 'EFSMountDirectory',
-          ParameterValue: mountdir,
-        },
-        {
-          ParameterKey: 'BUILDID',
-          ParameterValue: buildUid,
-        },
-        ...secrets,
-      ],
-    }).promise();
-    core.info('Creating build cluster...');
+    const taskDef = await this.setupClusters(ECS, CF, buildUid, stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets);
 
-    const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
-    const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
-    await CF.createStack({
-      StackName: taskDefStackNameTTL,
-      TemplateBody: ttlCloudFormation,
-      Capabilities: ['CAPABILITY_IAM'],
-      Parameters: [
-        {
-          ParameterKey: 'StackName',
-          ParameterValue: taskDefStackName,
-        },
-        {
-          ParameterKey: 'DeleteStackName',
-          ParameterValue: taskDefStackNameTTL,
-        },
-        {
-          ParameterKey: 'TTL',
-          ParameterValue: '100',
-        },
-        {
-          ParameterKey: 'BUILDID',
-          ParameterValue: buildUid,
-        },
-      ],
-    }).promise();
-    core.info('Creating cleanup cluster...');
-
-    try {
-      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
-    } catch (error) {
-      core.error(error);
-    }
     core.info('Build cluster created successfully (skipping waiting for cleanup cluster to start)');
 
     const taskDefResources = await CF.describeStackResources({
-      StackName: taskDefStackName,
+      StackName: taskDef.taskDefStackName,
     }).promise();
 
     const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
@@ -329,7 +260,7 @@ class AWS {
       overrides: {
         containerOverrides: [
           {
-            name: taskDefStackName,
+            name: taskDef.taskDefStackName,
             environment: [...environment, { name: 'BUILDID', value: buildUid }],
           },
         ],
@@ -399,11 +330,11 @@ class AWS {
           .promise()
       ).ShardIterator || '';
 
-    await CF.waitFor('stackCreateComplete', { StackName: taskDefStackNameTTL }).promise();
+    await CF.waitFor('stackCreateComplete', { StackName: taskDef.taskDefStackNameTTL }).promise();
 
     core.info(`Task status is ${await getTaskStatus()}`);
 
-    const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDefStackName}`;
+    const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDef.taskDefStackName}`;
     core.info(`You can also watch the logs at AWS Cloud Watch: ${logBaseUrl}`);
 
     let readingLogs = true;
@@ -449,23 +380,111 @@ class AWS {
     }
 
     await CF.deleteStack({
-      StackName: taskDefStackName,
+      StackName: taskDef.taskDefStackName,
     }).promise();
 
     await CF.deleteStack({
-      StackName: taskDefStackNameTTL,
+      StackName: taskDef.taskDefStackNameTTL,
     }).promise();
 
     await CF.waitFor('stackDeleteComplete', {
-      StackName: taskDefStackName,
+      StackName: taskDef.taskDefStackName,
     }).promise();
 
     // Currently too slow and causes too much waiting
     await CF.waitFor('stackDeleteComplete', {
-      StackName: taskDefStackNameTTL,
+      StackName: taskDef.taskDefStackNameTTL,
     }).promise();
 
     core.info('Cleanup complete');
+  }
+
+  static async setupClusters(
+    ECS,
+    CF,
+    buildUid: string,
+    stackName: string,
+    image: string,
+    entrypoint: string[],
+    commands,
+    mountdir,
+    workingdir,
+    environment,
+    secrets) {
+
+      const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`.toString().replace(/[^\da-z]/gi, '');
+      const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
+      await CF.createStack({
+        StackName: taskDefStackName,
+        TemplateBody: taskDefCloudFormation,
+        Parameters: [
+          {
+            ParameterKey: 'ImageUrl',
+            ParameterValue: image,
+          },
+          {
+            ParameterKey: 'ServiceName',
+            ParameterValue: taskDefStackName,
+          },
+          {
+            ParameterKey: 'Command',
+            ParameterValue: commands.join(','),
+          },
+          {
+            ParameterKey: 'EntryPoint',
+            ParameterValue: entrypoint.join(','),
+          },
+          {
+            ParameterKey: 'WorkingDirectory',
+            ParameterValue: workingdir,
+          },
+          {
+            ParameterKey: 'EFSMountDirectory',
+            ParameterValue: mountdir,
+          },
+          {
+            ParameterKey: 'BUILDID',
+            ParameterValue: buildUid,
+          },
+          ...secrets,
+        ],
+      }).promise();
+      core.info('Creating build cluster...');
+  
+      const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
+      const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
+      await CF.createStack({
+        StackName: taskDefStackNameTTL,
+        TemplateBody: ttlCloudFormation,
+        Capabilities: ['CAPABILITY_IAM'],
+        Parameters: [
+          {
+            ParameterKey: 'StackName',
+            ParameterValue: taskDefStackName,
+          },
+          {
+            ParameterKey: 'DeleteStackName',
+            ParameterValue: taskDefStackNameTTL,
+          },
+          {
+            ParameterKey: 'TTL',
+            ParameterValue: '100',
+          },
+          {
+            ParameterKey: 'BUILDID',
+            ParameterValue: buildUid,
+          },
+        ],
+      }).promise();
+      core.info('Creating cleanup cluster...');
+  
+      try {
+        await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+      } catch (error) {
+        core.error(error);
+    }
+    
+    return { taskDefStackName, taskDefCloudFormation, taskDefStackNameTTL, ttlCloudFormation };
   }
 
   static onlog(batch) {
