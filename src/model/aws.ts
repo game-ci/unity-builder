@@ -47,36 +47,6 @@ class AWS {
           },
         ],
       );
-      // Unzip
-      await this.run(
-        buildUid,
-        buildParameters.awsStackName,
-        'alpine',
-        ['/bin/sh'],
-        [
-          '-c',
-          `
-        apk update;
-        apk add zip
-        zip -r /${process.env.GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
-        ls
-      `,
-        ],
-        '/data',
-        '/data/',
-        [
-          {
-            name: 'GITHUB_SHA',
-            value: process.env.GITHUB_SHA,
-          },
-        ],
-        [
-          {
-            ParameterKey: 'GithubToken',
-            ParameterValue: buildParameters.githubToken,
-          },
-        ],
-      );
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -217,7 +187,7 @@ class AWS {
         [
           '-c',
           `
-        aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage/${buildUid}
+        aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage/${buildUid}.zip
         rm -r ${buildUid}
         ls
       `,
