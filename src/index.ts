@@ -26,8 +26,6 @@ async function run() {
       // default and local case
       default:
         core.info('Building locally');
-        // Build docker image
-        // TODO: No image required (instead use a version published to dockerhub for the action, supply credentials for github cloning)
         builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
         await Docker.run(builtImage, { workspace, ...buildParameters });
         break;
