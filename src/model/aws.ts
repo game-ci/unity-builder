@@ -20,7 +20,7 @@ class AWS {
         apk add jq;
         ls;
         git clone https://$GITHUB_TOKEN@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone https://$GITHUB_TOKEN@github.com/webbertakken/unity-builder.git ${buildUid}/builder;
+        git clone https://$GITHUB_TOKEN@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
       `,
@@ -48,9 +48,9 @@ class AWS {
         [
           '-c',
           `
-      cp -r /data/${buildUid}/builder/action/default-build-script /UnityBuilderAction;
-      cp -r /data/${buildUid}/builder/action/entrypoint.sh /entrypoint.sh;
-      cp -r /data/${buildUid}/builder/action/steps /steps;
+      cp -R /data/${buildUid}/builder/action/default-build-script/ /UnityBuilderAction;
+      cp -R /data/${buildUid}/builder/action/entrypoint.sh /entrypoint.sh;
+      cp -R /data/${buildUid}/builder/action/steps/ /steps;
       ls;
       chmod -R +x /entrypoint.sh;
       chmod -R +x /steps;
