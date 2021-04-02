@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityBuilderAction.Input;
 using UnityBuilderAction.Reporting;
 using UnityBuilderAction.Versioning;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
-
-#if USE_ADDRESSABLES
-using UnityEditor.AddressableAssets.Settings;
-#endif
+using UnityEngine;
 
 namespace UnityBuilderAction
 {
@@ -48,11 +45,28 @@ namespace UnityBuilderAction
       if (buildPlayerOptions.target == BuildTarget.Android)
         AndroidSettings.Apply(options);
 
-      // Execute default AddressableAsset content build, if the package is installed
-#if USE_ADDRESSABLES
-      AddressableAssetSettings.CleanPlayerContent();
-      AddressableAssetSettings.BuildPlayerContent();
-#endif
+      // Execute default AddressableAsset content build, if the package is installed.
+      // Version defines would be the best solution here, but Unity 2018 doesn't support that,
+      // so we fall back to using reflection instead.
+      var addressableAssetSettingsType = Type.GetType(
+        "UnityEditor.AddressableAssets.Settings.AddressableAssetSettings,Unity.Addressables.Editor");
+      if (addressableAssetSettingsType != null)
+      {
+        // ReSharper disable once PossibleNullReferenceException, used from try-catch
+        void CallAddressablesMethod(string methodName, object[] args) => addressableAssetSettingsType
+          .GetMethod(methodName, BindingFlags.Static | BindingFlags.Public)
+          .Invoke(null, args);
+
+        try
+        {
+          CallAddressablesMethod("CleanPlayerContent", new object[] { null });
+          CallAddressablesMethod("BuildPlayerContent", Array.Empty<object>());
+        }
+        catch (Exception e)
+        {
+          Debug.LogError($"Failed to run default addressables build:\n{e}");
+        }
+      }
 
       // Perform build
       BuildReport buildReport = BuildPipeline.BuildPlayer(buildPlayerOptions);
