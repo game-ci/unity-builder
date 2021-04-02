@@ -16,13 +16,47 @@ class AWS {
         [
           '-c',
           `apk update;
+        apk add zip;
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://$GITHUB_TOKEN@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone https://$GITHUB_TOKEN@github.com/game-ci/unity-builder.git ${buildUid}/builder;
+        git clone https://${GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
+        git clone https://${GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
+        if [ -f "./${GITHUB_REF}/lib.zip" ]; then
+          zip -r ./${GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+        fi
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
+      `,
+        ],
+        '/data',
+        '/data/',
+        [
+          {
+            name: 'GITHUB_SHA',
+            value: process.env.GITHUB_SHA,
+          },
+        ],
+        [
+          {
+            ParameterKey: 'GithubToken',
+            ParameterValue: buildParameters.githubToken,
+          },
+        ],
+      );
+      // Unzip
+      await this.run(
+        buildUid,
+        buildParameters.awsStackName,
+        'alpine',
+        ['/bin/sh'],
+        [
+          '-c',
+          `
+        apk update;
+        apk add zip
+        zip -r /${GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+        ls
       `,
         ],
         '/data',
@@ -152,6 +186,7 @@ class AWS {
           `
         apk update;
         apk add zip
+        zip -r ./${buildUid}/Library/. ./${GITHUB_REF}/lib.zip
         zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
         ls
       `,
