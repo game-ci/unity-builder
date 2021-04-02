@@ -23,7 +23,10 @@ class AWS {
         git clone https://${GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone https://${GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         if [ -f "./${GITHUB_REF}/lib.zip" ]; then
+          echo "Cache exists"
           zip -r ./${GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+        else; then
+          echo "Cache does not exist"
         fi
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
@@ -186,7 +189,7 @@ class AWS {
           `
         apk update;
         apk add zip
-        zip -r ./${buildUid}/Library/. ./${GITHUB_REF}/lib.zip
+        zip -r ./${buildUid}/Library/. ./${process.env.GITHUB_REF}/lib.zip
         zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
         ls
       `,
