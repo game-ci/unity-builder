@@ -310,7 +310,7 @@ class AWS {
     } catch (error) {
       core.error(error);
     }
-    core.info('Cloud formation stack created');
+    core.info('Build cluster created successfully (skipping waiting for cleanup cluster to start)');
 
     const taskDefResources = await CF.describeStackResources({
       StackName: taskDefStackName,
