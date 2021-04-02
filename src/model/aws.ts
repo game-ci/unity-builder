@@ -453,9 +453,9 @@ class AWS {
     }).promise();
 
     // Currently too slow and causes too much waiting
-    // await CF.waitFor('stackDeleteComplete', {
-    //   StackName: taskDefStackNameTTL,
-    // }).promise();
+    await CF.waitFor('stackDeleteComplete', {
+      StackName: taskDefStackNameTTL,
+    }).promise();
 
     core.info('Cleanup complete');
   }
