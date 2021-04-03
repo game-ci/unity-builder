@@ -440,9 +440,9 @@ class AWS {
       }).promise()
     ).tasks?.[0].containers?.[0].exitCode;
     if (exitCode !== 0) {
-      core.error(`job finished with exit code ${exitCode}`);
+      core.error(`job failed with exit code ${exitCode}`);
     } else {
-      core.info(`Build job has finished with exit code 0`);
+      core.info(`Build job has finished successfully`);
     }
   }
 
