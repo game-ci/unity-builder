@@ -299,7 +299,9 @@ class AWS {
     workingdir,
     secrets,
   ) {
-    const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`.toString().replace(/[^\da-z]/gi, '');
+    const imageStackName = image.replace(/[^\da-z]/gi, '');
+    const buildUidStackName = buildUid.replace(/[^\da-z]/gi, '');
+    const taskDefStackName = `${stackName}-taskDef-${imageStackName}-${buildUidStackName}`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
