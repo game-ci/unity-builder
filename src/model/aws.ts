@@ -9,7 +9,7 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const nanoid = customAlphabet(alphabet, 9);
-      const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${nanoid()}`;
+      const buildUid = `${nanoid()}-build-${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
@@ -50,10 +50,13 @@ class AWS {
           mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
           unzip -q "$latest" -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
           echo ' '
+          echo 'Repo:'
           ls /data/${buildUid}/repo/
           echo ' '
+          echo 'Project:'
           ls /data/${buildUid}/repo/${buildParameters.projectPath}
           echo ' '
+          echo 'Library:'
           ls /data/${buildUid}/repo/${buildParameters.projectPath}/Library/
           echo ' '
         else
@@ -79,7 +82,6 @@ class AWS {
             ParameterValue: buildParameters.githubToken,
           },
         ],
-        buildParameters.platform,
       );
 
       core.info('Starting part 2/4 (build unity project)');
@@ -91,14 +93,12 @@ class AWS {
         [
           '-c',
           `
-          cp -r /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-          cp -r /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-          cp -r /data/${buildUid}/builder/dist/steps/ /steps;
-          ls;
-          chmod -R +x /entrypoint.sh;
-          chmod -R +x /steps;
-          /entrypoint.sh;
-          ls
+            cp -r /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+            cp -r /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+            cp -r /data/${buildUid}/builder/dist/steps/ /steps;
+            chmod -R +x /entrypoint.sh;
+            chmod -R +x /steps;
+            /entrypoint.sh;
           `,
         ],
         '/data',
@@ -183,7 +183,6 @@ class AWS {
             ParameterValue: buildParameters.androidKeyaliasPass ? buildParameters.androidKeyaliasPass : '0',
           },
         ],
-        buildParameters.platform,
       );
       core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
@@ -218,7 +217,6 @@ class AWS {
             ParameterValue: buildParameters.githubToken,
           },
         ],
-        buildParameters.platform,
       );
 
       core.info('Starting part 4/4 (upload build to s3)');
@@ -261,7 +259,6 @@ class AWS {
             ParameterValue: process.env.AWS_SECRET_ACCESS_KEY,
           },
         ],
-        buildParameters.platform,
       );
     } catch (error) {
       core.setFailed(error);
@@ -279,7 +276,6 @@ class AWS {
     workingdir,
     environment,
     secrets,
-    platform,
   ) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
@@ -294,7 +290,6 @@ class AWS {
       mountdir,
       workingdir,
       secrets,
-      platform,
     );
 
     await this.runTask(taskDef, ECS, CF, environment, buildUid);
@@ -312,9 +307,8 @@ class AWS {
     mountdir,
     workingdir,
     secrets,
-    platform,
   ) {
-    const taskDefStackName = `${stackName}-${platform}-${buildUid}-build`;
+    const taskDefStackName = `${stackName}-${buildUid}`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
