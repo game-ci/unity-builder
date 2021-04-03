@@ -22,12 +22,23 @@ class AWS {
         ls;
         git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
-        if [ -f "./${process.env.GITHUB_REF}/lib.zip" ]; then
+        
+        if [ ! -d "cache" ]; then
+          mkdir "cache"
+        fi
+
+        cd cache
+        
+        latest=$(ls -t | head -1)
+        if [ -f $latest ]; then
           echo "Cache exists"
-          zip -r ./${process.env.GITHUB_REF}/lib.zip ./${buildUid}/repo/Library/.
+          zip -r ./cache/lib.zip ./${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
+
+        cd ..
+
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
       `,
@@ -239,23 +250,141 @@ class AWS {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
 
-    const taskDef = await this.setupClusters(ECS, CF, buildUid, stackName, image, entrypoint, commands, mountdir, workingdir, environment, secrets);
+    const taskDef = await this.setupCloudFormations(
+      CF,
+      buildUid,
+      stackName,
+      image,
+      entrypoint,
+      commands,
+      mountdir,
+      workingdir,
+      secrets,
+    );
 
-    core.info('Build cluster created successfully (skipping waiting for cleanup cluster to start)');
+    await this.runTask(taskDef, ECS, CF, environment, buildUid);
 
+    await this.cleanupResources(CF, taskDef);
+  }
+
+  static async setupCloudFormations(
+    CF,
+    buildUid: string,
+    stackName: string,
+    image: string,
+    entrypoint: string[],
+    commands,
+    mountdir,
+    workingdir,
+    secrets,
+  ) {
+    const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`.toString().replace(/[^\da-z]/gi, '');
+    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
+    await CF.createStack({
+      StackName: taskDefStackName,
+      TemplateBody: taskDefCloudFormation,
+      Parameters: [
+        {
+          ParameterKey: 'ImageUrl',
+          ParameterValue: image,
+        },
+        {
+          ParameterKey: 'ServiceName',
+          ParameterValue: taskDefStackName,
+        },
+        {
+          ParameterKey: 'Command',
+          ParameterValue: commands.join(','),
+        },
+        {
+          ParameterKey: 'EntryPoint',
+          ParameterValue: entrypoint.join(','),
+        },
+        {
+          ParameterKey: 'WorkingDirectory',
+          ParameterValue: workingdir,
+        },
+        {
+          ParameterKey: 'EFSMountDirectory',
+          ParameterValue: mountdir,
+        },
+        {
+          ParameterKey: 'BUILDID',
+          ParameterValue: buildUid,
+        },
+        ...secrets,
+      ],
+    }).promise();
+    core.info('Creating build cluster...');
+
+    const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
+    const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
+    await CF.createStack({
+      StackName: taskDefStackNameTTL,
+      TemplateBody: ttlCloudFormation,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: [
+        {
+          ParameterKey: 'StackName',
+          ParameterValue: taskDefStackName,
+        },
+        {
+          ParameterKey: 'DeleteStackName',
+          ParameterValue: taskDefStackNameTTL,
+        },
+        {
+          ParameterKey: 'TTL',
+          ParameterValue: '100',
+        },
+        {
+          ParameterKey: 'BUILDID',
+          ParameterValue: buildUid,
+        },
+      ],
+    }).promise();
+    core.info('Creating cleanup cluster...');
+
+    try {
+      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+    } catch (error) {
+      core.error(error);
+    }
     const taskDefResources = await CF.describeStackResources({
-      StackName: taskDef.taskDefStackName,
+      StackName: taskDefStackName,
     }).promise();
 
     const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
 
+    core.info('Build cluster created successfully (skipping waiting for cleanup cluster to start)');
+
+    return {
+      taskDefStackName,
+      taskDefCloudFormation,
+      taskDefStackNameTTL,
+      ttlCloudFormation,
+      taskDefResources,
+      baseResources,
+    };
+  }
+
+  static async runTask(taskDef, ECS, CF, environment, buildUid) {
     const clusterName =
-      baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
+    const taskDefinition = taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')
+      ?.PhysicalResourceId || '';
+    const SubnetOne = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')
+      ?.PhysicalResourceId || '';
+    const SubnetTwo = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')
+      ?.PhysicalResourceId || '';
+    const ContainerSecurityGroup = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
+      ?.PhysicalResourceId || '';
+    const streamName =
+      taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'KinesisStream')
+        ?.PhysicalResourceId || '';
+    
     const task = await ECS.runTask({
       cluster: clusterName,
-      taskDefinition:
-        taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId ||
-        '',
+      taskDefinition: taskDefinition,
       platformVersion: '1.4.0',
       overrides: {
         containerOverrides: [
@@ -268,54 +397,59 @@ class AWS {
       launchType: 'FARGATE',
       networkConfiguration: {
         awsvpcConfiguration: {
-          subnets: [
-            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')?.PhysicalResourceId ||
-              '',
-            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')?.PhysicalResourceId ||
-              '',
-          ],
+          subnets: [ SubnetOne, SubnetTwo ],
           assignPublicIp: 'ENABLED',
-          securityGroups: [
-            baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
-              ?.PhysicalResourceId || '',
-          ],
+          securityGroups: [ ContainerSecurityGroup ],
         },
       },
     }).promise();
 
     core.info('Build job is starting');
+    const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
-      await ECS.waitFor('tasksRunning', { tasks: [task.tasks?.[0].taskArn || ''], cluster: clusterName }).promise();
+      await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster: clusterName }).promise();
     } catch (error) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       const describeTasks = await ECS.describeTasks({
-        tasks: [task.tasks?.[0].taskArn || ''],
+        tasks: [taskArn],
         cluster: clusterName,
       }).promise();
       core.info(`Build job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
       core.setFailed(error);
       core.error(error);
     }
-
     core.info(`Build job is running`);
+    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, streamName);
+    await ECS.waitFor('tasksStopped', { cluster: clusterName, tasks: [taskArn] }).promise();
+    const exitCode = (
+      await ECS.describeTasks({
+        tasks: [taskArn],
+        cluster: clusterName,
+      }).promise()
+    ).tasks?.[0].containers?.[0].exitCode;
+    if (exitCode !== 0) {
+      core.error(`job finished with exit code ${exitCode}`);
+    } else {
+      core.info(`Build job has finished with exit code 0`);
+    }
+  }
 
+  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName) {
     // watching logs
     const kinesis = new SDK.Kinesis();
 
     const getTaskStatus = async () => {
       const tasks = await ECS.describeTasks({
         cluster: clusterName,
-        tasks: [task.tasks?.[0].taskArn || ''],
+        tasks: [taskArn],
       }).promise();
       return tasks.tasks?.[0].lastStatus;
     };
 
     const stream = await kinesis
       .describeStream({
-        StreamName:
-          taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId ||
-          '',
+        StreamName: kinesisStreamName,
       })
       .promise();
 
@@ -363,22 +497,9 @@ class AWS {
         }
       }
     }
+  }
 
-    await ECS.waitFor('tasksStopped', { cluster: clusterName, tasks: [task.tasks?.[0].taskArn || ''] }).promise();
-
-    const exitCode = (
-      await ECS.describeTasks({
-        tasks: [task.tasks?.[0].taskArn || ''],
-        cluster: clusterName,
-      }).promise()
-    ).tasks?.[0].containers?.[0].exitCode;
-
-    if (exitCode !== 0) {
-      core.error(`job finished with exit code ${exitCode}`);
-    } else {
-      core.info(`Build job has finished with exit code 0`);
-    }
-
+  static async cleanupResources(CF, taskDef) {
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
@@ -397,94 +518,6 @@ class AWS {
     }).promise();
 
     core.info('Cleanup complete');
-  }
-
-  static async setupClusters(
-    ECS,
-    CF,
-    buildUid: string,
-    stackName: string,
-    image: string,
-    entrypoint: string[],
-    commands,
-    mountdir,
-    workingdir,
-    environment,
-    secrets) {
-
-      const taskDefStackName = `${stackName}-taskDef-${image}-${buildUid}`.toString().replace(/[^\da-z]/gi, '');
-      const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
-      await CF.createStack({
-        StackName: taskDefStackName,
-        TemplateBody: taskDefCloudFormation,
-        Parameters: [
-          {
-            ParameterKey: 'ImageUrl',
-            ParameterValue: image,
-          },
-          {
-            ParameterKey: 'ServiceName',
-            ParameterValue: taskDefStackName,
-          },
-          {
-            ParameterKey: 'Command',
-            ParameterValue: commands.join(','),
-          },
-          {
-            ParameterKey: 'EntryPoint',
-            ParameterValue: entrypoint.join(','),
-          },
-          {
-            ParameterKey: 'WorkingDirectory',
-            ParameterValue: workingdir,
-          },
-          {
-            ParameterKey: 'EFSMountDirectory',
-            ParameterValue: mountdir,
-          },
-          {
-            ParameterKey: 'BUILDID',
-            ParameterValue: buildUid,
-          },
-          ...secrets,
-        ],
-      }).promise();
-      core.info('Creating build cluster...');
-  
-      const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
-      const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
-      await CF.createStack({
-        StackName: taskDefStackNameTTL,
-        TemplateBody: ttlCloudFormation,
-        Capabilities: ['CAPABILITY_IAM'],
-        Parameters: [
-          {
-            ParameterKey: 'StackName',
-            ParameterValue: taskDefStackName,
-          },
-          {
-            ParameterKey: 'DeleteStackName',
-            ParameterValue: taskDefStackNameTTL,
-          },
-          {
-            ParameterKey: 'TTL',
-            ParameterValue: '100',
-          },
-          {
-            ParameterKey: 'BUILDID',
-            ParameterValue: buildUid,
-          },
-        ],
-      }).promise();
-      core.info('Creating cleanup cluster...');
-  
-      try {
-        await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
-      } catch (error) {
-        core.error(error);
-    }
-    
-    return { taskDefStackName, taskDefCloudFormation, taskDefStackNameTTL, ttlCloudFormation };
   }
 
   static onlog(batch) {
