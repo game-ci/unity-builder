@@ -209,8 +209,8 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage
-          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage
+          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
         rm -r ${buildUid}
         ls
       `,
