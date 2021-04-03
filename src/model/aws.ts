@@ -1,13 +1,14 @@
 import * as SDK from 'aws-sdk';
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
-import { BuildParameters } from '.';
+const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
+      const nanoid = customAlphabet(alphabet, 9);
       const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${nanoid()}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
 
@@ -313,9 +314,7 @@ class AWS {
     secrets,
     platform,
   ) {
-    const imageStackName = image.replace(/[^\da-z]/gi, '');
-    const buildUidStackName = buildUid.replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-${platform}-${buildUidStackName}-build`;
+    const taskDefStackName = `${stackName}-${platform}-${buildUid}-build`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
