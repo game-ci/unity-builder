@@ -18,7 +18,7 @@ class AWS {
         [
           '-c',
           `apk update;
-        apk add zip;
+        apk add unzip;
         apk add git-lfs;
         apk add jq;
         ls;
@@ -38,7 +38,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          zip -r $latest ../${buildUid}/repo/Library/.
+          unzip $latest ../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
