@@ -187,8 +187,7 @@ class AWS {
             apk update;
             apk add zip;
             ls;
-            zip -r lib-${buildUid}.zip Library
-            mv lib-${buildUid}.zip /data/cache/${branchName}/
+            zip -r lib-${buildUid}.zip Library -o /data/cache/${branchName}/
             zip -r build-${buildUid}.zip build
           `,
         ],
