@@ -9,6 +9,7 @@ class AWS {
     try {
       const buildUid = nanoid();
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
+
       core.info('Starting part 1/4 (clone from github and restore cache)');
       await this.run(
         buildUid,
@@ -184,13 +185,15 @@ class AWS {
           '-c',
           `
             apk update;
-            apk add zip
-            zip -r -o cache/${branchName}/lib-${buildUid}.zip ${buildUid}/repo/Library/*
-            zip -r -o ${buildUid}/build-${buildUid}.zip ${buildUid}/repo/build/*
+            apk add zip;
+            ls;
+            zip -r lib-${buildUid}.zip Library
+            mv lib-${buildUid}.zip /data/cache/${branchName}/
+            zip -r build-${buildUid}.zip build
           `,
         ],
         '/data',
-        '/data/',
+        `/data/${buildUid}/repo/`,
         [
           {
             name: 'GITHUB_SHA',
@@ -214,14 +217,14 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
-          aws s3 cp cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp ${buildUid}/repo/build-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp /data/cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
           rm -r ${buildUid}
           ls
       `,
         ],
         '/data',
-        '/data/',
+        `/data/`,
         [
           {
             name: 'GITHUB_SHA',
