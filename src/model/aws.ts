@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
+import { BuildParameters } from '.';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -77,6 +78,7 @@ class AWS {
             ParameterValue: buildParameters.githubToken,
           },
         ],
+        buildParameters.platform,
       );
 
       core.info('Starting part 2/4 (build unity project)');
@@ -180,6 +182,7 @@ class AWS {
             ParameterValue: buildParameters.androidKeyaliasPass ? buildParameters.androidKeyaliasPass : '0',
           },
         ],
+        buildParameters.platform,
       );
       core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
@@ -214,6 +217,7 @@ class AWS {
             ParameterValue: buildParameters.githubToken,
           },
         ],
+        buildParameters.platform,
       );
 
       core.info('Starting part 4/4 (upload build to s3)');
@@ -256,6 +260,7 @@ class AWS {
             ParameterValue: process.env.AWS_SECRET_ACCESS_KEY,
           },
         ],
+        buildParameters.platform,
       );
     } catch (error) {
       core.setFailed(error);
@@ -273,6 +278,7 @@ class AWS {
     workingdir,
     environment,
     secrets,
+    platform,
   ) {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
@@ -287,6 +293,7 @@ class AWS {
       mountdir,
       workingdir,
       secrets,
+      platform,
     );
 
     await this.runTask(taskDef, ECS, CF, environment, buildUid);
@@ -304,10 +311,11 @@ class AWS {
     mountdir,
     workingdir,
     secrets,
+    platform,
   ) {
     const imageStackName = image.replace(/[^\da-z]/gi, '');
     const buildUidStackName = buildUid.replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-${imageStackName}-${buildUidStackName}-build`;
+    const taskDefStackName = `${stackName}-${platform}-${buildUidStackName}-build`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
