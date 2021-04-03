@@ -45,7 +45,7 @@ class AWS {
         latest=$(ls -t | head -1)
         echo $latest
         if [ ! -z $latest ]; then
-          echo "Library cache exists from build $latest from $branchName"
+          echo "Library cache exists from build $latest from ${branchName}"
           mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
           unzip -q $latest -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
         else
@@ -434,7 +434,7 @@ class AWS {
       },
     }).promise();
 
-    core.info('Task is starting');
+    core.info('Task is starting on worker cluster');
     const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
@@ -449,7 +449,7 @@ class AWS {
       core.setFailed(error);
       core.error(error);
     }
-    core.info(`Task is running`);
+    core.info(`Task is running on worker cluster`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
