@@ -38,7 +38,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          zip -r $latest ./${buildUid}/repo/Library/.
+          zip -r $latest ../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
