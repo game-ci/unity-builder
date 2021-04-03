@@ -44,9 +44,9 @@ class AWS {
 
         latest=$(ls -t | head -1)
         echo $latest
+        cd ../../
         if [ ! -z $latest ]; then
           echo "Cache exists"
-          cd ../../
           unzip "cache/${branchName}/$latest" ./${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
