@@ -23,7 +23,6 @@ class AWS {
         apk add git-lfs;
         apk add jq;
 
-        ls;
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         
@@ -38,7 +37,7 @@ class AWS {
         cd "${branchName}"
 
         echo ' '
-        echo 'Cached Libraries for ${branchName}'
+        echo 'Cached Libraries for ${branchName} from previous builds:'
         ls
         echo ' '
 
@@ -187,7 +186,7 @@ class AWS {
             apk update;
             apk add zip
             zip -r -o ./cache/${branchName}/lib-${buildUid}.zip ./${buildUid}/repo/Library/*
-            zip -r -o ./build-${buildUid}.zip ./${buildUid}/repo/build/*
+            zip -r -o ./${buildUid}/build-${buildUid}.zip ./${buildUid}/repo/build/*
             ls
           `,
         ],
@@ -216,7 +215,7 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp ./${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
           aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
         rm -r ${buildUid}
         ls
@@ -376,7 +375,8 @@ class AWS {
 
     const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
 
-    core.info('Build cluster created successfully (skipping wait for cleanup cluster to create)');
+    // in the future we should offer a parameter to choose if you want the guarnteed shutdown.
+    core.info('Build cluster created successfully (skipping wait for cleanup cluster to be ready)');
 
     return {
       taskDefStackName,
