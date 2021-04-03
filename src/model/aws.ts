@@ -198,9 +198,10 @@ class AWS {
           `
             apk update
             apk add zip
-            zip -q -r lib-${buildUid}.zip Library/*
+            cd Library
+            zip -q -r lib-${buildUid}.zip .*
             mv lib-${buildUid}.zip /data/cache/${branchName}/lib-${buildUid}.zip
-            cd ..
+            cd ../../
             zip -q -r build-${buildUid}.zip ${buildParameters.buildPath}/*
             mv build-${buildUid}.zip /data/${buildUid}/build-${buildUid}.zip
           `,

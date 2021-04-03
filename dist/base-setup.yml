@@ -285,6 +285,7 @@ Resources:
             - "lambda:DeleteFunction"
             - "lambda:InvokeFunction"
             - "events:RemoveTargets"
+            - "events:DeleteRule"
             - "lambda:RemovePermission"
             Resource: "*"
 
