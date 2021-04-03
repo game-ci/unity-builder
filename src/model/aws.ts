@@ -167,7 +167,7 @@ class AWS {
           },
         ],
       );
-      core.info('starting part 3/4 (zip and publish latest Library to cache)');
+      core.info('starting part 3/4 (zip build and latest Library for caching)');
       // Cleanup
       await this.run(
         buildUid,
@@ -179,7 +179,7 @@ class AWS {
           `
         apk update;
         apk add zip
-        zip -r ./${buildUid}/Library/. ./cache/lib-${buildUid}.zip
+        zip -r ./${buildUid}/Library/* ./cache/lib-${buildUid}.zip
         zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
         ls
       `,
@@ -367,7 +367,7 @@ class AWS {
 
     const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
 
-    core.info('Build cluster created successfully (skipping waiting for cleanup cluster to start)');
+    core.info('Build cluster created successfully (skipping wait for cleanup cluster to create)');
 
     return {
       taskDefStackName,
@@ -380,8 +380,9 @@ class AWS {
   }
 
   static async runTask(taskDef, ECS, CF, environment, buildUid) {
-    const clusterName =
-      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
+    const cluster =
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')
+        ?.PhysicalResourceId || '';
     const taskDefinition =
       taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')
         ?.PhysicalResourceId || '';
@@ -399,7 +400,7 @@ class AWS {
         ?.PhysicalResourceId || '';
 
     const task = await ECS.runTask({
-      cluster: clusterName,
+      cluster,
       taskDefinition,
       platformVersion: '1.4.0',
       overrides: {
@@ -424,24 +425,24 @@ class AWS {
     const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
-      await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster: clusterName }).promise();
+      await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
     } catch (error) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       const describeTasks = await ECS.describeTasks({
         tasks: [taskArn],
-        cluster: clusterName,
+        cluster,
       }).promise();
       core.info(`Build job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
       core.setFailed(error);
       core.error(error);
     }
     core.info(`Build job is running`);
-    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, streamName);
-    await ECS.waitFor('tasksStopped', { cluster: clusterName, tasks: [taskArn] }).promise();
+    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+    await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
       await ECS.describeTasks({
         tasks: [taskArn],
-        cluster: clusterName,
+        cluster,
       }).promise()
     ).tasks?.[0].containers?.[0].exitCode;
     if (exitCode !== 0) {
@@ -485,7 +486,7 @@ class AWS {
     core.info(`Task status is ${await getTaskStatus()}`);
 
     const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDef.taskDefStackName}`;
-    core.info(`You can also watch the logs at AWS Cloud Watch: ${logBaseUrl}`);
+    core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
 
     let readingLogs = true;
     while (readingLogs) {
