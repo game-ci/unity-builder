@@ -338,11 +338,11 @@ class AWS {
     }).promise();
     core.info('Creating build cluster...');
 
-    const taskDefStackNameTTL = `${taskDefStackName}-cleanup`;
-    const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
+    const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
+    const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
-      StackName: taskDefStackNameTTL,
-      TemplateBody: ttlCloudFormation,
+      StackName: cleanupTaskDefStackName,
+      TemplateBody: cleanupCloudFormation,
       Capabilities: ['CAPABILITY_IAM'],
       Parameters: [
         {
@@ -351,7 +351,7 @@ class AWS {
         },
         {
           ParameterKey: 'DeleteStackName',
-          ParameterValue: taskDefStackNameTTL,
+          ParameterValue: cleanupTaskDefStackName,
         },
         {
           ParameterKey: 'TTL',
@@ -381,8 +381,8 @@ class AWS {
     return {
       taskDefStackName,
       taskDefCloudFormation,
-      taskDefStackNameTTL,
-      ttlCloudFormation,
+      taskDefStackNameTTL: cleanupTaskDefStackName,
+      ttlCloudFormation: cleanupCloudFormation,
       taskDefResources,
       baseResources,
     };
