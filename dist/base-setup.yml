@@ -282,6 +282,10 @@ Resources:
             - "logs:DeleteLogGroup"
             - "logs:DeleteSubscriptionFilter"
             - "ecs:DeregisterTaskDefinition"
+            - "lambda:DeleteFunction"
+            - "lambda:InvokeFunction"
+            - "events:RemoveTargets"
+            - "lambda:RemovePermission"
             Resource: "*"
 
 ### cloud watch to kinesis role
