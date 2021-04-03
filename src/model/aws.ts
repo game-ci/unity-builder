@@ -74,15 +74,15 @@ class AWS {
         [
           '-c',
           `
-      cp -R /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-      cp -R /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-      cp -R /data/${buildUid}/builder/dist/steps/ /steps;
-      ls;
-      chmod -R +x /entrypoint.sh;
-      chmod -R +x /steps;
-      /entrypoint.sh;
-      ls
-      `,
+          cp -R /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+          cp -R /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+          cp -R /data/${buildUid}/builder/dist/steps/ /steps;
+          ls;
+          chmod -R +x /entrypoint.sh;
+          chmod -R +x /steps;
+          /entrypoint.sh;
+          ls
+          `,
         ],
         '/data',
         `/data/${buildUid}/repo/`,
@@ -209,8 +209,8 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage/${buildUid}.zip
-          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/lib-${buildUid}.zip
+          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage
+          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage
         rm -r ${buildUid}
         ls
       `,
