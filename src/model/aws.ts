@@ -47,7 +47,7 @@ class AWS {
         cd ../../
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from $branchName"
-          unzip "cache/${branchName}/$latest" ./${buildUid}/repo/Library/.
+          unzip -q "cache/${branchName}/$latest" ./${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
@@ -187,8 +187,8 @@ class AWS {
             apk update;
             apk add zip;
             ls;
-            zip -r lib-${buildUid}.zip Library -o /data/cache/${branchName}/
-            zip -r build-${buildUid}.zip ${buildParameters.buildPath} -o /data/${buildUid}
+            zip -r -q lib-${buildUid}.zip Library -o /data/cache/${branchName}/
+            zip -r -q build-${buildUid}.zip ${buildParameters.buildPath} -o /data/${buildUid}
           `,
         ],
         '/data',
