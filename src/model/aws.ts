@@ -28,7 +28,8 @@ class AWS {
         if [ ! -d "cache/${branchName}" ]; then
           mkdir "cache/${branchName}"
         fi
-
+        
+        ls
         cd ./cache/${branchName}
         ls
 
@@ -38,7 +39,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          unzip $latest ../../${buildUid}/repo/Library/.
+          unzip "$latest" ../../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
