@@ -22,8 +22,8 @@ class AWS {
         apk add git-lfs;
         apk add jq;
         ls;
-        git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
+        git clone -q https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
+        git clone -q https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         
         if [ ! -d "cache/${branchName}" ]; then
           mkdir "cache/${branchName}"
