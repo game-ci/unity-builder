@@ -8,7 +8,7 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const buildUid = nanoid();
-
+      const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
       core.info('starting part 1/4 (clone from github and restore cache)');
       await this.run(
         buildUid,
@@ -25,11 +25,11 @@ class AWS {
         git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         
-        if [ ! -d "cache" ]; then
-          mkdir "cache"
+        if [ ! -d "cache/${branchName}" ]; then
+          mkdir "cache/${branchName}"
         fi
 
-        cd cache
+        cd ./cache/${branchName}
         ls
 
         echo ''
@@ -38,7 +38,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          unzip $latest ../${buildUid}/repo/Library/.
+          unzip $latest ../../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
@@ -179,7 +179,7 @@ class AWS {
           `
         apk update;
         apk add zip
-        zip -r ./${buildUid}/repo/Library/* ./cache/lib-${buildUid}.zip
+        zip -r ./${buildUid}/repo/Library/* ./cache/${branchName}/lib-${buildUid}.zip
         zip -r ./${buildUid}/repo/build/* ./build-${buildUid}.zip
         ls
       `,
@@ -210,7 +210,7 @@ class AWS {
           '-c',
           `
           aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage/${buildUid}.zip
-          aws s3 cp ./cache/lib-${buildUid}.zip s3://game-ci-storage/lib-${buildUid}.zip
+          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/lib-${buildUid}.zip
         rm -r ${buildUid}
         ls
       `,
