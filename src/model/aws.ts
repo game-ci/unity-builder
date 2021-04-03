@@ -38,7 +38,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          zip -r ./cache/lib.zip ./${buildUid}/repo/Library/.
+          zip -r $latest ./${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
@@ -179,7 +179,7 @@ class AWS {
           `
         apk update;
         apk add zip
-        zip -r ./${buildUid}/Library/. ./${process.env.GITHUB_REF}/lib.zip
+        zip -r ./${buildUid}/Library/. ./cache/lib-${buildUid}.zip
         zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
         ls
       `,
