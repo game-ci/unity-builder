@@ -37,9 +37,9 @@ class AWS {
         fi
         cd "${branchName}"
 
-
+        echo ''
+        echo 'Cached Libraries for ${branchName}'
         ls
-
         echo ''
 
         latest=$(ls -t | head -1)
@@ -47,7 +47,7 @@ class AWS {
         if [ -f $latest ]; then
           echo "Cache exists"
           cd ../../
-          unzip "cache/${branchName}/"$latest ../${buildUid}/repo/Library/.
+          unzip "cache/${branchName}/$latest" ../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
