@@ -459,6 +459,7 @@ class AWS {
       }).promise()
     ).tasks?.[0].containers?.[0].exitCode;
     if (exitCode !== 0) {
+      await this.cleanupResources(CF, taskDef);
       core.error(`job failed with exit code ${exitCode}`);
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
