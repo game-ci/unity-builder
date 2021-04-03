@@ -50,7 +50,7 @@ class AWS {
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from ${branchName}"
           mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
-          unzip -q "$latest" -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
+          unzip -q "$latest" -d /data/${buildUid}/repo/${buildParameters.projectPath}/.
           echo ' '
           echo 'Repo:'
           ls /data/${buildUid}/repo/
