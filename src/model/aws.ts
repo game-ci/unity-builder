@@ -18,9 +18,11 @@ class AWS {
         [
           '-c',
           `apk update;
+          
         apk add unzip;
         apk add git-lfs;
         apk add jq;
+
         ls;
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
