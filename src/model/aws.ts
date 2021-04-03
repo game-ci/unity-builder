@@ -188,11 +188,11 @@ class AWS {
             apk add zip;
             ls;
             zip -r lib-${buildUid}.zip Library -o /data/cache/${branchName}/
-            zip -r build-${buildUid}.zip build
+            zip -r build-${buildUid}.zip build -o /data/${buildUid}
           `,
         ],
         '/data',
-        `/data/${buildUid}/repo/`,
+        `/data/${buildUid}/repo/${buildParameters.projectPath}`,
         [
           {
             name: 'GITHUB_SHA',
@@ -216,7 +216,7 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ${buildUid}/repo/build-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
           aws s3 cp /data/cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
           rm -r ${buildUid}
           ls
