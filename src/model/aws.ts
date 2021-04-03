@@ -52,8 +52,6 @@ class AWS {
           echo "Cache does not exist"
         fi
 
-        cd ..
-
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;
       `,
