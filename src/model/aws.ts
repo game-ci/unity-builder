@@ -9,7 +9,7 @@ class AWS {
     try {
       const buildUid = nanoid();
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
-      core.info('starting part 1/4 (clone from github and restore cache)');
+      core.info('Starting part 1/4 (clone from github and restore cache)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -71,7 +71,7 @@ class AWS {
         ],
       );
 
-      core.info('starting part 2/4 (build)');
+      core.info('Starting part 2/4 (build unity project)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -173,7 +173,7 @@ class AWS {
           },
         ],
       );
-      core.info('starting part 3/4 (zip build and latest Library for caching)');
+      core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
       await this.run(
         buildUid,
@@ -206,7 +206,7 @@ class AWS {
         ],
       );
 
-      core.info('starting part 4/4 (upload to s3)');
+      core.info('Starting part 4/4 (upload build to s3)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,

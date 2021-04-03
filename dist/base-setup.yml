@@ -276,6 +276,7 @@ Resources:
           - Effect: "Allow"
             Action:
             - "cloudformation:DeleteStack"
+            - "kinesis:DeleteStream"
             Resource: "*"
 
 ### cloud watch to kinesis role
