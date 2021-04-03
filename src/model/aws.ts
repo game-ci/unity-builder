@@ -299,7 +299,7 @@ class AWS {
   ) {
     const imageStackName = image.replace(/[^\da-z]/gi, '');
     const buildUidStackName = buildUid.replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-${imageStackName}-build-${buildUidStackName}`;
+    const taskDefStackName = `${stackName}-${imageStackName}-${buildUidStackName}-build`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
@@ -336,7 +336,7 @@ class AWS {
         ...secrets,
       ],
     }).promise();
-    core.info('Creating build cluster...');
+    core.info('Creating worker cluster...');
 
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
@@ -377,7 +377,7 @@ class AWS {
     const baseResources = await CF.describeStackResources({ StackName: stackName }).promise();
 
     // in the future we should offer a parameter to choose if you want the guarnteed shutdown.
-    core.info('Build cluster created successfully (skipping wait for cleanup cluster to be ready)');
+    core.info('Worker cluster created successfully (skipping wait for cleanup cluster to be ready)');
 
     return {
       taskDefStackName,
@@ -430,7 +430,7 @@ class AWS {
       },
     }).promise();
 
-    core.info('Build job is starting');
+    core.info('Task is starting');
     const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
@@ -441,11 +441,11 @@ class AWS {
         tasks: [taskArn],
         cluster,
       }).promise();
-      core.info(`Build job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
+      core.info(`Task has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
       core.setFailed(error);
       core.error(error);
     }
-    core.info(`Build job is running`);
+    core.info(`Task is running`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
@@ -458,7 +458,7 @@ class AWS {
       core.error(`job failed with exit code ${exitCode}`);
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
-      core.info(`Build job has finished successfully`);
+      core.info(`Task has finished successfully`);
     }
   }
 
