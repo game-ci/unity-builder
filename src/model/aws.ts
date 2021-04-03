@@ -28,8 +28,12 @@ class AWS {
         fi
 
         cd cache
-        
+        ls
+
+        echo ''
+
         latest=$(ls -t | head -1)
+        echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
           zip -r ./cache/lib.zip ./${buildUid}/repo/Library/.
