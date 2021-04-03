@@ -185,9 +185,8 @@ class AWS {
           `
             apk update;
             apk add zip
-            zip -r -o ./cache/${branchName}/lib-${buildUid}.zip ./${buildUid}/repo/Library/*
-            zip -r -o ./${buildUid}/build-${buildUid}.zip ./${buildUid}/repo/build/*
-            ls
+            zip -r -o cache/${branchName}/lib-${buildUid}.zip ${buildUid}/repo/Library/*
+            zip -r -o ${buildUid}/build-${buildUid}.zip ${buildUid}/repo/build/*
           `,
         ],
         '/data',
@@ -215,10 +214,10 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ./${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
-          aws s3 cp ./cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
-        rm -r ${buildUid}
-        ls
+          aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
+          aws s3 cp cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
+          rm -r ${buildUid}
+          ls
       `,
         ],
         '/data',
