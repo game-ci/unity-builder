@@ -8,8 +8,8 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const buildUid = nanoid();
-      
-      core.info("starting part 1/4 (clone from github and restore cache)");
+
+      core.info('starting part 1/4 (clone from github and restore cache)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -64,8 +64,8 @@ class AWS {
           },
         ],
       );
-      
-      core.info("starting part 2/4 (build)");
+
+      core.info('starting part 2/4 (build)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -167,7 +167,7 @@ class AWS {
           },
         ],
       );
-      core.info("starting part 3/4 (zip and publish latest Library to cache)");
+      core.info('starting part 3/4 (zip and publish latest Library to cache)');
       // Cleanup
       await this.run(
         buildUid,
@@ -200,7 +200,7 @@ class AWS {
         ],
       );
 
-      core.info("starting part 4/4 (upload to s3)");
+      core.info('starting part 4/4 (upload to s3)');
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -382,21 +382,25 @@ class AWS {
   static async runTask(taskDef, ECS, CF, environment, buildUid) {
     const clusterName =
       taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
-    const taskDefinition = taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')
-      ?.PhysicalResourceId || '';
-    const SubnetOne = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')
-      ?.PhysicalResourceId || '';
-    const SubnetTwo = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')
-      ?.PhysicalResourceId || '';
-    const ContainerSecurityGroup = taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
-      ?.PhysicalResourceId || '';
+    const taskDefinition =
+      taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')
+        ?.PhysicalResourceId || '';
+    const SubnetOne =
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')
+        ?.PhysicalResourceId || '';
+    const SubnetTwo =
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'PublicSubnetTwo')
+        ?.PhysicalResourceId || '';
+    const ContainerSecurityGroup =
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ContainerSecurityGroup')
+        ?.PhysicalResourceId || '';
     const streamName =
       taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'KinesisStream')
         ?.PhysicalResourceId || '';
-    
+
     const task = await ECS.runTask({
       cluster: clusterName,
-      taskDefinition: taskDefinition,
+      taskDefinition,
       platformVersion: '1.4.0',
       overrides: {
         containerOverrides: [
@@ -409,9 +413,9 @@ class AWS {
       launchType: 'FARGATE',
       networkConfiguration: {
         awsvpcConfiguration: {
-          subnets: [ SubnetOne, SubnetTwo ],
+          subnets: [SubnetOne, SubnetTwo],
           assignPublicIp: 'ENABLED',
-          securityGroups: [ ContainerSecurityGroup ],
+          securityGroups: [ContainerSecurityGroup],
         },
       },
     }).promise();

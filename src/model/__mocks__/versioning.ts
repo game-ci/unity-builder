@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/prevent-abbreviations */
-
 // Import these named export into your test file:
 export const mockProjectPath = jest.fn().mockResolvedValue('mockProjectPath');
 export const mockIsDirtyAllowed = jest.fn().mockResolvedValue(false);
