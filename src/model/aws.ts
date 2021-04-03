@@ -301,7 +301,7 @@ class AWS {
   ) {
     const imageStackName = image.replace(/[^\da-z]/gi, '');
     const buildUidStackName = buildUid.replace(/[^\da-z]/gi, '');
-    const taskDefStackName = `${stackName}-taskDef-${imageStackName}-${buildUidStackName}`;
+    const taskDefStackName = `${stackName}-${imageStackName}-build-${buildUidStackName}`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
