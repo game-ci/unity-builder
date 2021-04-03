@@ -338,7 +338,7 @@ class AWS {
     }).promise();
     core.info('Creating build cluster...');
 
-    const taskDefStackNameTTL = `${taskDefStackName}-ttl`;
+    const taskDefStackNameTTL = `${taskDefStackName}-cleanup`;
     const ttlCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackNameTTL,
