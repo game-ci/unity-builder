@@ -485,7 +485,7 @@ class AWS {
 
     core.info(`Task status is ${await getTaskStatus()}`);
 
-    const logBaseUrl = `https://console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/${taskDef.taskDefStackName}`;
+    const logBaseUrl = `https://${SDK.config.region}.console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
 
     let readingLogs = true;
