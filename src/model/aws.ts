@@ -9,7 +9,9 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const nanoid = customAlphabet(alphabet, 9);
-      const buildUid = `${nanoid()}-build-${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform}`;
+      const buildUid = `${nanoid()}-build-${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
+        .replace('Standalone', '')
+        .replace('standalone', '')}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
