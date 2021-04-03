@@ -23,8 +23,8 @@ class AWS {
         apk add git-lfs;
         apk add jq;
 
-        git clone -q https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
-        git clone -q https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
+        git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo -q
+        git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
         
         if [ ! -d "cache" ]; then
           mkdir "cache"
@@ -80,9 +80,9 @@ class AWS {
         [
           '-c',
           `
-          cp -R /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-          cp -R /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-          cp -R /data/${buildUid}/builder/dist/steps/ /steps;
+          cp -r /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+          cp -r /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+          cp -r /data/${buildUid}/builder/dist/steps/ /steps;
           ls;
           chmod -R +x /entrypoint.sh;
           chmod -R +x /steps;
