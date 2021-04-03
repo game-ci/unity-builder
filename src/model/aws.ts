@@ -193,7 +193,6 @@ class AWS {
           `
             apk update
             apk add zip
-            ls
             zip -q -r lib-${buildUid}.zip Library/*
             mv lib-${buildUid}.zip /data/cache/${branchName}/lib-${buildUid}.zip
             cd ..
@@ -226,11 +225,10 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
-          aws s3 cp /data/cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
-          rm -r ${buildUid}
-          ls
-      `,
+            aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
+            aws s3 cp /data/cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
+            rm -r ${buildUid}
+          `,
         ],
         '/data',
         `/data/`,
