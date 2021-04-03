@@ -44,13 +44,13 @@ class AWS {
 
         latest=$(ls -t | head -1)
         echo $latest
-        cd ../../
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from $branchName"
-          unzip -q $latest -d ./${buildUid}/repo/${buildParameters.projectPath}/Library/.
+          unzip -q $latest -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
         else
           echo "Cache does not exist"
         fi
+        cd ../../
 
         cd ${buildUid}/repo;
         git checkout $GITHUB_SHA;

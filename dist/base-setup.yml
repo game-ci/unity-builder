@@ -277,6 +277,11 @@ Resources:
             Action:
             - "cloudformation:DeleteStack"
             - "kinesis:DeleteStream"
+            - "secretsmanager:DeleteSecret"
+            - "kinesis:DescribeStreamSummary"
+            - "logs:DeleteLogGroup"
+            - "logs:DeleteSubscriptionFilter"
+            - "ecs:DeregisterTaskDefinition"
             Resource: "*"
 
 ### cloud watch to kinesis role
