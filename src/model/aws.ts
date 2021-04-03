@@ -43,7 +43,6 @@ class AWS {
         echo ' '
 
         latest=$(ls -t | head -1)
-        echo $latest
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from ${branchName}"
           mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
