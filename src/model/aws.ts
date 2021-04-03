@@ -25,12 +25,12 @@ class AWS {
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo;
         git clone -q https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder;
         
-        if [ ! -d "cache/${branchName}" ]; then
-          mkdir "cache/${branchName}"
+        if [ ! -d "cache" ]; then
+          mkdir "cache"
         fi
         
         ls
-        cd ./cache/${branchName}
+        cd cache
         ls
 
         echo ''
@@ -39,7 +39,7 @@ class AWS {
         echo $latest
         if [ -f $latest ]; then
           echo "Cache exists"
-          unzip "$latest" ../../${buildUid}/repo/Library/.
+          unzip "$latest" ../${buildUid}/repo/Library/.
         else
           echo "Cache does not exist"
         fi
