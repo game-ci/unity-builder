@@ -47,7 +47,7 @@ class AWS {
         cd ../../
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from $branchName"
-          unzip -q "cache/${branchName}/$latest" ./${buildUid}/repo/Library/.
+          unzip -q $latest -d ./${buildUid}/repo/${buildParameters.projectPath}/Library/.
         else
           echo "Cache does not exist"
         fi
