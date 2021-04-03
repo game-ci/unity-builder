@@ -184,12 +184,12 @@ class AWS {
         [
           '-c',
           `
-        apk update;
-        apk add zip
-        zip -r ./${buildUid}/repo/Library/* ./cache/${branchName}/lib-${buildUid}.zip
-        zip -r ./${buildUid}/repo/build/* ./build-${buildUid}.zip
-        ls
-      `,
+            apk update;
+            apk add zip
+            zip -r -o ./cache/${branchName}/lib-${buildUid}.zip ./${buildUid}/repo/Library/*
+            zip -r -o ./build-${buildUid}.zip ./${buildUid}/repo/build/*
+            ls
+          `,
         ],
         '/data',
         '/data/',
