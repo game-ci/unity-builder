@@ -180,7 +180,7 @@ class AWS {
         apk update;
         apk add zip
         zip -r ./${buildUid}/Library/* ./cache/lib-${buildUid}.zip
-        zip -r ./${buildUid}/output.zip ./${buildUid}/repo/build
+        zip -r ./${buildUid}/repo/build/* ./build-${buildUid}.zip
         ls
       `,
         ],
@@ -209,7 +209,7 @@ class AWS {
         [
           '-c',
           `
-          aws s3 cp ./${buildUid}/output.zip s3://game-ci-storage/${buildUid}.zip
+          aws s3 cp ./build-${buildUid}.zip s3://game-ci-storage/${buildUid}.zip
           aws s3 cp ./cache/lib-${buildUid}.zip s3://game-ci-storage/cache/lib-${buildUid}.zip
         rm -r ${buildUid}
         ls
