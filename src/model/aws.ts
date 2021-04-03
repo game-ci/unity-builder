@@ -46,10 +46,14 @@ class AWS {
         if [ ! -z $latest ]; then
           echo "Library cache exists from build $latest from ${branchName}"
           mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
-          unzip -q $latest -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
+          unzip -q "$latest" -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
+          echo ' '
           ls /data/${buildUid}/repo/
+          echo ' '
           ls /data/${buildUid}/repo/${buildParameters.projectPath}
+          echo ' '
           ls /data/${buildUid}/repo/${buildParameters.projectPath}/Library/
+          echo ' '
         else
           echo "Cache does not exist"
         fi
@@ -463,8 +467,7 @@ class AWS {
     if (exitCode !== 0) {
       try {
         await this.cleanupResources(CF, taskDef);
-      }
-      catch (error) {
+      } catch (error) {
         core.warning(`failed to cleanup ${error}`);
       }
       core.error(`job failed with exit code ${exitCode}`);
