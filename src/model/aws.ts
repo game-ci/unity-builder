@@ -8,6 +8,8 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const buildUid = nanoid();
+      
+      core.info("starting part 1/4 (clone from github and restore cache)");
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -62,6 +64,8 @@ class AWS {
           },
         ],
       );
+      
+      core.info("starting part 2/4 (build)");
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -163,6 +167,7 @@ class AWS {
           },
         ],
       );
+      core.info("starting part 3/4 (zip and publish latest Library to cache)");
       // Cleanup
       await this.run(
         buildUid,
@@ -194,6 +199,8 @@ class AWS {
           },
         ],
       );
+
+      core.info("starting part 4/4 (upload to s3)");
       await this.run(
         buildUid,
         buildParameters.awsStackName,
