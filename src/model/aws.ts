@@ -457,6 +457,7 @@ class AWS {
     ).tasks?.[0].containers?.[0].exitCode;
     if (exitCode !== 0) {
       core.error(`job failed with exit code ${exitCode}`);
+      throw new Error(`job failed with exit code ${exitCode}`);
     } else {
       core.info(`Build job has finished successfully`);
     }
