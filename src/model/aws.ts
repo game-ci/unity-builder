@@ -7,7 +7,7 @@ import * as zlib from 'zlib';
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
-      const buildUid = nanoid();
+      const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${nanoid()}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
