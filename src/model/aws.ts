@@ -381,8 +381,7 @@ class AWS {
 
   static async runTask(taskDef, ECS, CF, environment, buildUid) {
     const cluster =
-      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')
-        ?.PhysicalResourceId || '';
+      taskDef.baseResources.StackResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
     const taskDefinition =
       taskDef.taskDefResources.StackResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')
         ?.PhysicalResourceId || '';
