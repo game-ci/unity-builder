@@ -53,9 +53,11 @@ class AWS {
 
           # TODO
           # if library directory doesn't exist create it
-          # mkdir /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
-          # else empty it
-          # rm -r /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
+          if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
+            mkdir /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
+          else
+            rm -r /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/*
+          fi
 
           # Restore cache
           latest=$(ls -t | head -1)
