@@ -51,11 +51,11 @@ class AWS {
           ls
           echo ' '
 
-          # TODO
-          # if library directory doesn't exist create it
+          # if library directory doesn't exist create it, 
           if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
             mkdir /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
           else
+            echo 'Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!'
             rm -r /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/*
           fi
 
