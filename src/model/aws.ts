@@ -4,6 +4,9 @@ import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
 const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const repositoryDirectoryName = 'repo';
+const efsDirectoryName = 'data';
+const cacheDirectoryName = 'cache';
 
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
@@ -23,55 +26,62 @@ class AWS {
         [
           '-c',
           `apk update;
+          apk add unzip;
+          apk add git-lfs;
+          apk add jq;
+
+          # Get source repo for project to be built and game-ci repo for utilties
+          git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
+          git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
+          cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
+          git checkout $GITHUB_SHA
+          cd /${efsDirectoryName}/
           
-        apk add unzip;
-        apk add git-lfs;
-        apk add jq;
+          # Look for usable cache
+          if [ ! -d "$cacheDirectoryName" ]; then
+            mkdir "$cacheDirectoryName"
+          fi
+          cd $cacheDirectoryName
+          if [ ! -d "${branchName}" ]; then
+            mkdir "${branchName}"
+          fi
+          cd "${branchName}"
+          echo ' '
+          echo 'Cached Libraries for ${branchName} from previous builds:'
+          ls
+          echo ' '
 
-        git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/repo -q
-        git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
-        
-        if [ ! -d "cache" ]; then
-          mkdir "cache"
-        fi
-        cd cache
+          # TODO
+          # if library directory doesn't exist create it
+          # mkdir /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
+          # else empty it
+          # rm -r /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library
 
-        if [ ! -d "${branchName}" ]; then
-          mkdir "${branchName}"
-        fi
-        cd "${branchName}"
+          # Restore cache
+          latest=$(ls -t | head -1)
+          if [ ! -z $latest ]; then
+            echo "Library cache exists from build $latest from ${branchName}"
+            unzip -q "$latest" -d /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.
+          else
+            echo "Cache does not exist"
+          fi
+          
 
-        echo ' '
-        echo 'Cached Libraries for ${branchName} from previous builds:'
-        ls
-        echo ' '
-
-        latest=$(ls -t | head -1)
-        if [ ! -z $latest ]; then
-          echo "Library cache exists from build $latest from ${branchName}"
-          mkdir /data/${buildUid}/repo/${buildParameters.projectPath}/Library
-          unzip -q "$latest" -d /data/${buildUid}/repo/${buildParameters.projectPath}/Library/.
+          # Print out important directories
           echo ' '
           echo 'Repo:'
-          ls /data/${buildUid}/repo/
+          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
           echo ' '
           echo 'Project:'
-          ls /data/${buildUid}/repo/${buildParameters.projectPath}
+          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}
           echo ' '
           echo 'Library:'
-          ls /data/${buildUid}/repo/${buildParameters.projectPath}/Library/
+          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/
           echo ' '
-        else
-          echo "Cache does not exist"
-        fi
-        cd ../../
-
-        cd ${buildUid}/repo;
-        git checkout $GITHUB_SHA;
       `,
         ],
-        '/data',
-        '/data/',
+        `/${efsDirectoryName}`,
+        `/${efsDirectoryName}/`,
         [
           {
             name: 'GITHUB_SHA',
@@ -95,20 +105,20 @@ class AWS {
         [
           '-c',
           `
-            cp -r /data/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-            cp -r /data/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-            cp -r /data/${buildUid}/builder/dist/steps/ /steps;
+            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/steps/ /steps;
             chmod -R +x /entrypoint.sh;
             chmod -R +x /steps;
             /entrypoint.sh;
           `,
         ],
-        '/data',
-        `/data/${buildUid}/repo/`,
+        `/${efsDirectoryName}`,
+        `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
         [
           {
             name: 'GITHUB_WORKSPACE',
-            value: `/data/${buildUid}/repo/`,
+            value: `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
           },
           {
             name: 'PROJECT_PATH',
@@ -200,14 +210,14 @@ class AWS {
             apk add zip
             cd Library
             zip -q -r lib-${buildUid}.zip .*
-            mv lib-${buildUid}.zip /data/cache/${branchName}/lib-${buildUid}.zip
+            mv lib-${buildUid}.zip /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip
             cd ../../
             zip -q -r build-${buildUid}.zip ${buildParameters.buildPath}/*
-            mv build-${buildUid}.zip /data/${buildUid}/build-${buildUid}.zip
+            mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
           `,
         ],
-        '/data',
-        `/data/${buildUid}/repo/${buildParameters.projectPath}`,
+        `/${efsDirectoryName}`,
+        `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}`,
         [
           {
             name: 'GITHUB_SHA',
@@ -233,12 +243,12 @@ class AWS {
           `
             aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
-            # aws s3 cp /data/cache/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
+            # aws s3 cp /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
             rm -r ${buildUid}
           `,
         ],
-        '/data',
-        `/data/`,
+        `/${efsDirectoryName}`,
+        `/${efsDirectoryName}/`,
         [
           {
             name: 'GITHUB_SHA',
