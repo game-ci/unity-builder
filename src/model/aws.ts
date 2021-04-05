@@ -12,9 +12,9 @@ class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
       const nanoid = customAlphabet(alphabet, 9);
-      const buildUid = `${nanoid()}-build-${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
+      const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
         .replace('Standalone', '')
-        .replace('standalone', '')}`;
+        .replace('standalone', '')}-${nanoid()}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
@@ -541,7 +541,7 @@ class AWS {
         })
         .promise();
       iterator = records.NextShardIterator || '';
-      if (records.Records.length > 0) {
+      if (records.Records.length > 0 && iterator) {
         for (let index = 0; index < records.Records.length; index++) {
           const json = JSON.parse(
             zlib.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
@@ -554,6 +554,7 @@ class AWS {
         }
       }
     }
+    core.info('End of task logs');
   }
 
   static async cleanupResources(CF, taskDef) {
