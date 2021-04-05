@@ -38,10 +38,10 @@ class AWS {
           cd /${efsDirectoryName}/
           
           # Look for usable cache
-          if [ ! -d $cacheDirectoryName ]; then
-            mkdir $cacheDirectoryName
+          if [ ! -d ${cacheDirectoryName} ]; then
+            mkdir ${cacheDirectoryName}
           fi
-          cd $cacheDirectoryName
+          cd ${cacheDirectoryName}
           if [ ! -d "${branchName}" ]; then
             mkdir "${branchName}"
           fi
