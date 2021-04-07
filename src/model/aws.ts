@@ -51,6 +51,8 @@ class AWS {
           ls
           echo ' '
 
+          echo "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+
           # if library directory doesn't exist create it, 
           if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
             echo 'Creating Library folder'
