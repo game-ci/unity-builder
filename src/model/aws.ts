@@ -55,7 +55,7 @@ class AWS {
 
           # if library directory doesn't exist create it, 
           if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
-            echo 'Creating Library folder'
+            echo "Creating Library folder"
             mkdir "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           else
             echo 'Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!'
@@ -537,18 +537,16 @@ class AWS {
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
 
     let readingLogs = true;
-    const timestampReady = (t1, t2, tlimit) => {
-      return t2 - t1 / 1000 < tlimit;
-    };
     let timestamp: number = 0;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await getTaskData();
       if (taskData?.lastStatus !== 'RUNNING') {
         if (timestamp == 0) {
+          core.info('Task stopped, streaming end of logs');
           timestamp = Date.now();
         }
-        if (timestampReady(timestamp, Date.now(), 30)) {
+        if (Date.now() - timestamp < 30000) {
           core.info('Task status is not RUNNING for 30 seconds, last query for logs');
           readingLogs = false;
         }
