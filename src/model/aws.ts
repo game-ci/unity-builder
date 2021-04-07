@@ -11,7 +11,7 @@ const cacheDirectoryName = 'cache';
 class AWS {
   static async runBuildJob(buildParameters, baseImage) {
     try {
-      const nanoid = customAlphabet(alphabet, 9);
+      const nanoid = customAlphabet(alphabet, 4);
       const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
         .replace('Standalone', '')
         .replace('standalone', '')}-${nanoid()}`;
@@ -498,16 +498,16 @@ class AWS {
     }
   }
 
-  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName) {
+  static async streamLogsUntilTaskStops(ECS: AWS.ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName) {
     // watching logs
     const kinesis = new SDK.Kinesis();
 
-    const getTaskStatus = async () => {
+    const getTaskData = async () => {
       const tasks = await ECS.describeTasks({
         cluster: clusterName,
         tasks: [taskArn],
       }).promise();
-      return tasks.tasks?.[0].lastStatus;
+      return tasks.tasks?.[0];
     };
 
     const stream = await kinesis
@@ -529,7 +529,7 @@ class AWS {
 
     await CF.waitFor('stackCreateComplete', { StackName: taskDef.taskDefStackNameTTL }).promise();
 
-    core.info(`Task status is ${await getTaskStatus()}`);
+    core.info(`Task status is ${(await getTaskData())?.lastStatus}`);
 
     const logBaseUrl = `https://${SDK.config.region}.console.aws.amazon.com/cloudwatch/home?region=${SDK.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
@@ -537,7 +537,8 @@ class AWS {
     let readingLogs = true;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      if ((await getTaskStatus()) !== 'RUNNING') {
+      const taskData = await getTaskData();
+      if (taskData?.lastStatus !== 'RUNNING' && taskData?.containers?.[0].exitCode !== 0) {
         readingLogs = false;
         core.info('Task status is not RUNNING waiting 45 seconds for end of logs.');
         await new Promise((resolve) => setTimeout(resolve, 45000));
@@ -555,10 +556,11 @@ class AWS {
           );
           if (json.messageType === 'DATA_MESSAGE') {
             for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
-              core.info(json.logEvents[logEventsIndex].message);
               if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
                 core.info('End of task logs');
                 readingLogs = false;
+              } else {
+                core.info(json.logEvents[logEventsIndex].message);
               }
             }
           }
