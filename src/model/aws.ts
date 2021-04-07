@@ -416,6 +416,7 @@ class AWS {
       ttlCloudFormation: cleanupCloudFormation,
       taskDefResources,
       baseResources,
+      logid,
     };
   }
 
@@ -476,7 +477,7 @@ class AWS {
       core.error(error);
     }
     core.info(`Task is running on worker cluster`);
-    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName, logid);
+    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
       await ECS.describeTasks({
@@ -497,7 +498,7 @@ class AWS {
     }
   }
 
-  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName, logid) {
+  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName) {
     // watching logs
     const kinesis = new SDK.Kinesis();
 
@@ -555,7 +556,8 @@ class AWS {
           if (json.messageType === 'DATA_MESSAGE') {
             for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
               core.info(json.logEvents[logEventsIndex].message);
-              if (json.logEvents[logEventsIndex].message.includes(logid)) {
+              if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
+                core.info('End of task logs');
                 readingLogs = false;
               }
             }
@@ -563,7 +565,6 @@ class AWS {
         }
       }
     }
-    core.info('End of task logs');
   }
 
   static async cleanupResources(CF, taskDef) {
