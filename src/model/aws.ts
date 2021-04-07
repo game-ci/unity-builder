@@ -53,6 +53,7 @@ class AWS {
 
           # if library directory doesn't exist create it, 
           if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
+            echo 'Creating Library folder'
             mkdir "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           else
             echo 'Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!'
@@ -61,7 +62,7 @@ class AWS {
 
           # Restore cache
           latest=$(ls -t | head -1)
-          if [ ! -z $latest ]; then
+          if [ ! -z "$latest" ]; then
             echo "Library cache exists from build $latest from ${branchName}"
             unzip -q "$latest" -d /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.
           else
