@@ -535,13 +535,15 @@ class AWS {
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
 
     let readingLogs = true;
+    const timestampReady = (t1, t2, tlimit) => {
+      return t2 - t1 / 1000 < tlimit;
+    };
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await getTaskData();
-      if (taskData?.lastStatus !== 'RUNNING' && taskData?.containers?.[0].exitCode !== 0) {
+      if (taskData?.lastStatus !== 'RUNNING' && timestampReady(taskData?.stoppedAt, Date.now(), 30)) {
+        core.info('Task status is not RUNNING for 30 seconds, last query for logs');
         readingLogs = false;
-        core.info('Task status is not RUNNING waiting 45 seconds for end of logs.');
-        await new Promise((resolve) => setTimeout(resolve, 45000));
       }
       const records = await kinesis
         .getRecords({
