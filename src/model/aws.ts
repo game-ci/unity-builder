@@ -325,7 +325,7 @@ class AWS {
     workingdir,
     secrets,
   ) {
-    const logid = customAlphabet(alphabet, 9);
+    const logid = customAlphabet(alphabet, 9)();
     commands[1] += `
       echo "${logid}"
     `;
