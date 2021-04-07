@@ -1,5 +1,5 @@
 import * as SDK from 'aws-sdk';
-import { customAlphabet } from 'nanoid';
+import { customAlphabet, nanoid } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
@@ -325,6 +325,10 @@ class AWS {
     workingdir,
     secrets,
   ) {
+    const logid = customAlphabet(alphabet, 9);
+    commands[1] += `
+      echo "${logid}"
+    `;
     const taskDefStackName = `${stackName}-${buildUid}`;
     const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
     await CF.createStack({
@@ -472,7 +476,7 @@ class AWS {
       core.error(error);
     }
     core.info(`Task is running on worker cluster`);
-    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName, logid);
     await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
       await ECS.describeTasks({
@@ -493,7 +497,7 @@ class AWS {
     }
   }
 
-  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName) {
+  static async streamLogsUntilTaskStops(ECS, CF, taskDef, clusterName, taskArn, kinesisStreamName, logid) {
     // watching logs
     const kinesis = new SDK.Kinesis();
 
@@ -534,7 +538,8 @@ class AWS {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       if ((await getTaskStatus()) !== 'RUNNING') {
         readingLogs = false;
-        await new Promise((resolve) => setTimeout(resolve, 35000));
+        core.info('Task status is not RUNNING waiting 45 seconds for end of logs.');
+        await new Promise((resolve) => setTimeout(resolve, 45000));
       }
       const records = await kinesis
         .getRecords({
@@ -550,6 +555,9 @@ class AWS {
           if (json.messageType === 'DATA_MESSAGE') {
             for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
               core.info(json.logEvents[logEventsIndex].message);
+              if (json.logEvents[logEventsIndex].message.includes(logid)) {
+                readingLogs = false;
+              }
             }
           }
         }
