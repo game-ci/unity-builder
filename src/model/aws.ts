@@ -546,7 +546,7 @@ class AWS {
           core.info('Task stopped, streaming end of logs');
           timestamp = Date.now();
         }
-        if (Date.now() - timestamp < 30000) {
+        if (timestamp !== 0 && Date.now() - timestamp < 30000) {
           core.info('Task status is not RUNNING for 30 seconds, last query for logs');
           readingLogs = false;
         }
