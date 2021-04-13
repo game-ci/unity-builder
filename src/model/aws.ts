@@ -51,15 +51,19 @@ class AWS {
           ls
           echo ' '
 
-          echo "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+          libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+
+          echo $libDir
+
+          ls "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}"
 
           # if library directory doesn't exist create it, 
-          if [ ! -d "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"  ]; then
-            echo "Creating Library folder"
-            mkdir "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
-          else
+          if [ -d $libDir  ]; then
             echo 'Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!'
-            rm -r "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/*"
+            rm -r "$libDir/*"
+          else
+            echo "Creating Library folder"
+            mkdir $libDir
           fi
 
           # Restore cache
