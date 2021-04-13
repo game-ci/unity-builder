@@ -53,23 +53,18 @@ class AWS {
 
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
 
-          echo $libDir
-
-          ls "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}"
-
           # if library directory doesn't exist create it, 
           if [ -d $libDir  ]; then
             echo "Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!"
             rm -r $libDir
-          else
-            echo "Creating Library folder"
-            mkdir $libDir
           fi
 
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
             echo "Library cache exists from build $latest from ${branchName}"
+            echo "Creating empty Library folder for cache"
+            mkdir $libDir
             unzip -q "$latest" -d /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.
           else
             echo "Cache does not exist"
