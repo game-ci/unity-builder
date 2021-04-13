@@ -29,14 +29,12 @@ class AWS {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
-
           # Get source repo for project to be built and game-ci repo for utilties
           git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
           git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
           cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
           git checkout $GITHUB_SHA
           cd /${efsDirectoryName}/
-          
           # Look for usable cache
           if [ ! -d ${cacheDirectoryName} ]; then
             mkdir ${cacheDirectoryName}
@@ -50,17 +48,13 @@ class AWS {
           echo 'Cached Libraries for ${branchName} from previous builds:'
           ls
           echo ' '
-
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
-
-          # if library directory doesn't exist create it, 
-          # if [ -d $libDir  ]; then
-          #   echo "Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!"
-          #   rm -r $libDir
-          # fi
-
+          if library directory doesn't exist create it, 
+          if [ -d $libDir  ]; then
+            echo "Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!"
+            rm -r $libDir
+          fi
           echo "Checking cache"
-
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
@@ -71,8 +65,6 @@ class AWS {
           else
             echo "Cache does not exist"
           fi
-          
-
           # Print out important directories
           echo ' '
           echo 'Repo:'
