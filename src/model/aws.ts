@@ -59,6 +59,8 @@ class AWS {
             rm -r $libDir
           fi
 
+          echo "Checking cache"
+
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
