@@ -59,8 +59,8 @@ class AWS {
 
           # if library directory doesn't exist create it, 
           if [ -d $libDir  ]; then
-            echo 'Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!'
-            rm -r "$libDir/*"
+            echo "Library folder already present, make sure you setup .gitignore correctly (cleaning out Library folder for this build)!"
+            rm -r $libDir
           else
             echo "Creating Library folder"
             mkdir $libDir
