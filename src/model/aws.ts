@@ -1,5 +1,5 @@
 import * as SDK from 'aws-sdk';
-import { customAlphabet, nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as zlib from 'zlib';
@@ -546,7 +546,7 @@ class AWS {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await getTaskData();
       if (taskData?.lastStatus !== 'RUNNING') {
-        if (timestamp == 0) {
+        if (timestamp === 0) {
           core.info('Task stopped, streaming end of logs');
           timestamp = Date.now();
         }
