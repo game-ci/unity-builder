@@ -51,7 +51,7 @@ class AWS {
           ls
           echo ' '
 
-          libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+          libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/"
 
           # if library directory doesn't exist create it, 
           if [ -d $libDir  ]; then
