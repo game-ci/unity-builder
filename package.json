@@ -19,7 +19,9 @@
     "@actions/github": "^2.2.0",
     "base-64": "^1.0.0",
     "kubernetes-client": "^9.0.0",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "nanoid": "3.1.20",
+    "aws-sdk": "^2.812.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
