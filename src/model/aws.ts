@@ -50,9 +50,9 @@ class AWS {
           echo " "
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           if [ -d "$libDir"  ]; then
-          echo "Library folder already present, make sure you setup .gitignore correctly"
-          echo "Cleaning out Library folder for this build"
-          rm -r "$libDir"
+            echo "Library folder already present, make sure you setup .gitignore correctly"
+            echo "Cleaning out Library folder for this build"
+            rm -r "$libDir"
           fi
           echo 'Checking cache'
           # Restore cache
@@ -325,7 +325,7 @@ class AWS {
       echo "${logid}"
     `;
     const taskDefStackName = `${stackName}-${buildUid}`;
-    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/task-def-formation.yml`, 'utf8');
+    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
     await CF.createStack({
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
@@ -364,7 +364,7 @@ class AWS {
     core.info('Creating worker cluster...');
 
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
-    const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloudformation-stack-ttl.yml`, 'utf8');
+    const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
     await CF.createStack({
       StackName: cleanupTaskDefStackName,
       TemplateBody: cleanupCloudFormation,
