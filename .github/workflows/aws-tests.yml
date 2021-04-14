@@ -1,7 +1,7 @@
 name: AWS
 
 on:
-  push: { branches: [aws, aws-ts] }
+  push: { branches: [aws, aws-ts-clean] }
 
 env:
   AWS_REGION: "eu-west-1"
