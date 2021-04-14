@@ -50,9 +50,8 @@ class AWS {
           echo " "
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           if [ -d "$libDir" ]; then
-            echo "Library folder already present, make sure you setup .gitignore correctly"
-            echo "Cleaning out Library folder for this build"
             rm -r "$libDir"
+            echo "Setup .gitignore to ignore Library folder and remove it from builds"
           fi
           echo 'Checking cache'
           # Restore cache
