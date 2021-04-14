@@ -61,7 +61,7 @@ class AWS {
             echo 'Library cache exists from build $latest from ${branchName}'
             echo 'Creating empty Library folder for cache'
             mkdir '$libDir'
-            unzip -q $latest -d /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.
+            unzip -q '$latest' -d '/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.'
           else
             echo 'Cache does not exist'
           fi
