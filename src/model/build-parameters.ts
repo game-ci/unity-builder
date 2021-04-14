@@ -37,8 +37,8 @@ class BuildParameters {
       awsStackName: Input.awsStackName,
       kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
-      kubeContainerMemory: Input.kubeContainerMemory,
-      kubeContainerCPU: Input.kubeContainerCPU,
+      remoteBuildMemory: Input.remoteBuildMemory,
+      remoteBuildCpu: Input.remoteBuilderCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
     };

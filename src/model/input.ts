@@ -101,12 +101,12 @@ class Input {
     return core.getInput('githubToken') || '';
   }
 
-  static get kubeContainerMemory() {
-    return core.getInput('kubeContainerMemory') || '800M';
+  static get remoteBuildMemory() {
+    return core.getInput('remoteBuildMemory') || '800M';
   }
 
-  static get kubeContainerCPU() {
-    return core.getInput('kubeContainerCPU') || '0.25';
+  static get remoteBuildCPU() {
+    return core.getInput('remoteBuildCpu') || '0.25';
   }
 
   static get kubeVolumeSize() {

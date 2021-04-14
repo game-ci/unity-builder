@@ -114,6 +114,14 @@ class AWS {
         `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
         [
           {
+            name: 'ContainerMemory',
+            value: buildParameters.remoteBuildMemory,
+          },
+          {
+            name: 'ContainerCpu',
+            value: buildParameters.remoteBuildCpu,
+          },
+          {
             name: 'GITHUB_WORKSPACE',
             value: `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
           },
