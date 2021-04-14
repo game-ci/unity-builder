@@ -44,23 +44,23 @@ class AWS {
             mkdir "${branchName}"
           fi
           cd "${branchName}"
-          echo ' '
-          echo 'Cached Libraries for ${branchName} from previous builds:'
+          echo " "
+          echo "Cached Libraries for ${branchName} from previous builds:"
           ls
-          echo ' '
-          libDir='/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library'
-          if [ -d '$libDir'  ]; then
-          echo 'Library folder already present, make sure you setup .gitignore correctly'
-          echo 'Cleaning out Library folder for this build'
-          rm -r '$libDir'
+          echo " "
+          libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+          if [ -d "$libDir"  ]; then
+          echo "Library folder already present, make sure you setup .gitignore correctly"
+          echo "Cleaning out Library folder for this build"
+          rm -r "$libDir"
           fi
           echo 'Checking cache'
           # Restore cache
           latest=$(ls -t | head -1)
-          if [ ! -z '$latest' ]; then
+          if [ ! -z "$latest" ]; then
             echo 'Library cache exists from build $latest from ${branchName}'
             echo 'Creating empty Library folder for cache'
-            mkdir '$libDir'
+            mkdir "$libDir"
             unzip -q '$latest' -d '/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.'
           else
             echo 'Cache does not exist'
