@@ -38,7 +38,7 @@ class BuildParameters {
       kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
       remoteBuildMemory: Input.remoteBuildMemory,
-      remoteBuildCpu: Input.remoteBuilderCpu,
+      remoteBuildCpu: Input.remoteBuildCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
     };

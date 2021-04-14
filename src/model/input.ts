@@ -105,7 +105,7 @@ class Input {
     return core.getInput('remoteBuildMemory') || '800M';
   }
 
-  static get remoteBuildCPU() {
+  static get remoteBuildCpu() {
     return core.getInput('remoteBuildCpu') || '0.25';
   }
 
