@@ -30,6 +30,14 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
+  remoteBuildCluster:
+    default: 'local'
+    required: false
+    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+  awsStackName:
+    default: 'game-ci'
+    required: false
+    description: 'The Cloud Formation stack name that must be setup before using this option.'
   kubeConfig:
     default: ''
     required: false
@@ -38,18 +46,18 @@ inputs:
     default: ''
     required: false
     description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
-  kubeContainerMemory:
+  remoteBuildMemory:
     default: '800M'
     required: false
-    description: 'Amount of memory to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
-  kubeContainerCPU:
+    description: 'Amount of memory to assign the remote build container'
+  remoteBuildCpu:
     default: '0.25'
     required: false
-    description: 'Amount of CPU time to assign the build container in Kubernetes (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+    description: 'Amount of CPU time to assign the remote build container'
   kubeVolumeSize:
     default: '5Gi'
     required: false
-    description: 'Amount of disc space to assign the Kubernetes Persistent Volume (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes)'
+    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
   githubToken:
     default: ''
     required: false

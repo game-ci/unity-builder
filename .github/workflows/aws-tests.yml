@@ -1,0 +1,60 @@
+name: AWS
+
+on:
+  push: { branches: [aws, aws-ts-clean] }
+
+env:
+  AWS_REGION: "eu-west-1"
+
+jobs:
+  buildForAllPlatforms:
+    name: AWS Fargate Build
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - test-project
+        unityVersion:
+        #  - 2019.2.11f1
+          - 2019.3.15f1
+        targetPlatform:
+          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          #- StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          #- iOS # Build an iOS player.
+          #- Android # Build an Android .apk.
+          #- WebGL # WebGL.
+          #          - StandaloneWindows # Build a Windows standalone.
+          #          - WSAPlayer # Build an Windows Store Apps player.
+          #          - PS4 # Build a PS4 Standalone.
+          #          - XboxOne # Build a Xbox One Standalone.
+          #          - tvOS # Build to Apple's tvOS platform.
+          #          - Switch # Build a Nintendo Switch player
+    # steps
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
+        with:
+          lfs: true
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - uses: ./
+        id: aws-fargate-unity-build
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-2
+        with:
+          remoteBuildCluster: aws
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}

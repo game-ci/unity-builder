@@ -85,6 +85,14 @@ class Input {
     return core.getInput('customParameters') || '';
   }
 
+  static get remoteBuildCluster() {
+    return core.getInput('remoteBuildCluster') || '';
+  }
+
+  static get awsStackName() {
+    return core.getInput('awsStackName') || '';
+  }
+
   static get kubeConfig() {
     return core.getInput('kubeConfig') || '';
   }
@@ -93,12 +101,12 @@ class Input {
     return core.getInput('githubToken') || '';
   }
 
-  static get kubeContainerMemory() {
-    return core.getInput('kubeContainerMemory') || '800M';
+  static get remoteBuildMemory() {
+    return core.getInput('remoteBuildMemory') || '800M';
   }
 
-  static get kubeContainerCPU() {
-    return core.getInput('kubeContainerCPU') || '0.25';
+  static get remoteBuildCpu() {
+    return core.getInput('remoteBuildCpu') || '0.25';
   }
 
   static get kubeVolumeSize() {
