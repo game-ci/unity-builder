@@ -9,6 +9,7 @@ env:
 jobs:
   buildForAllPlatforms:
     name: AWS Fargate Build
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
