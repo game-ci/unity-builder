@@ -104,7 +104,7 @@ namespace UnityBuilderAction.Versioning
     static string Run(string arguments)
     {
       using (var process = new System.Diagnostics.Process()) {
-        string workingDirectory = Application.dataPath;
+        string workingDirectory = UnityEngine.Application.dataPath;
 
         int exitCode = process.Run(application, arguments, workingDirectory, out string output, out string errors);
         if (exitCode != 0) { throw new GitException(exitCode, errors); }
