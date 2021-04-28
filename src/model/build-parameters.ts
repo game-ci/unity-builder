@@ -1,3 +1,4 @@
+import os from 'os';
 import AndroidVersioning from './android-versioning';
 import Input from './input';
 import Platform from './platform';
@@ -14,10 +15,13 @@ class BuildParameters {
 
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
+    const { uid, gid } = os.userInfo();
+
     return {
       version: unityVersion,
       customImage: Input.customImage,
-
+      uid,
+      gid,
       runnerTempPath: process.env.RUNNER_TEMP,
       platform: Input.targetPlatform,
       projectPath: Input.projectPath,

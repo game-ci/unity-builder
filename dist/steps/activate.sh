@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo "Exporting HOME as /github/home"
+export HOME=/github/home
+
 if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   #
   # PERSONAL LICENSE MODE
