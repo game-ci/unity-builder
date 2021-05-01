@@ -33,6 +33,7 @@ class BuildParameters {
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
       customParameters: Input.customParameters,
+      chownFilesTo: Input.chownFilesTo,
       remoteBuildCluster: Input.remoteBuildCluster,
       awsStackName: Input.awsStackName,
       kubeConfig: Input.kubeConfig,

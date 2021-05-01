@@ -143,6 +143,12 @@ if [[ "$BUILD_TARGET" == "StandaloneOSX" ]]; then
   chmod +x $ADD_PERMISSIONS_PATH
 fi
 
+
+if [[ -n "$CHOWN_FILES_TO" ]]; then
+  chown -R $CHOWN_FILES_TO $BUILD_PATH_FULL
+  chown -R $CHOWN_FILES_TO $UNITY_PROJECT_PATH
+fi
+
 #
 # Results
 #

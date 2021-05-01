@@ -85,6 +85,10 @@ class Input {
     return core.getInput('customParameters') || '';
   }
 
+  static get chownFilesTo() {
+    return core.getInput('chownFilesTo') || '';
+  }
+
   static get remoteBuildCluster() {
     return core.getInput('remoteBuildCluster') || '';
   }

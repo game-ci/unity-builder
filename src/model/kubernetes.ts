@@ -223,6 +223,10 @@ class Kubernetes {
                     value: this.buildParameters.customParameters,
                   },
                   {
+                    name: 'CHOWN_FILES_TO',
+                    value: this.buildParameters.chownFilesTo,
+                  },
+                  {
                     name: 'BUILD_TARGET',
                     value: this.buildParameters.platform,
                   },

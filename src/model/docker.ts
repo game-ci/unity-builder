@@ -36,6 +36,7 @@ class Docker {
       androidKeyaliasName,
       androidKeyaliasPass,
       customParameters,
+      chownFilesTo,
     } = parameters;
 
     const command = `docker run \
@@ -62,6 +63,7 @@ class Docker {
         --env ANDROID_KEYALIAS_NAME="${androidKeyaliasName}" \
         --env ANDROID_KEYALIAS_PASS="${androidKeyaliasPass}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
+        --env CHOWN_FILES_TO="${chownFilesTo}" \
         --env GITHUB_REF \
         --env GITHUB_SHA \
         --env GITHUB_REPOSITORY \
