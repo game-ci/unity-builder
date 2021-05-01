@@ -30,8 +30,8 @@ class AWS {
           apk add git-lfs;
           apk add jq;
           # Get source repo for project to be built and game-ci repo for utilties
-          git clone https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
-          git clone https://${process.env.GITHUB_TOKEN}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
+          git clone https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
           cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
           git checkout $GITHUB_SHA
           cd /${efsDirectoryName}/
