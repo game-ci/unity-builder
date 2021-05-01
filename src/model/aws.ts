@@ -150,6 +150,10 @@ class AWS {
             value: buildParameters.customParameters,
           },
           {
+            name: 'CHOWN_FILES_TO',
+            value: buildParameters.chownFilesTo,
+          },
+          {
             name: 'BUILD_TARGET',
             value: buildParameters.platform,
           },

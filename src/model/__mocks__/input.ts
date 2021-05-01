@@ -10,6 +10,7 @@ export const mockGetFromUser = jest.fn().mockResolvedValue({
   buildMethod: undefined,
   buildVersion: '1.3.37',
   customParameters: '',
+  chownFilesTo: '',
 });
 
 export default {
