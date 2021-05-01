@@ -109,7 +109,7 @@ inputs:
   chownFilesTo:
     required: false
     default: ''
-    description: After building, change the ownership of the created files to this user
+    description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
   allowDirtyBuild:
     required: false
     default: ''
