@@ -332,7 +332,19 @@ class AWS {
       echo "${logid}"
     `;
     const taskDefStackName = `${stackName}-${buildUid}`;
-    const taskDefCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
+    let taskDefCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
+    const p3string = 'p3 - container def';
+    const indexp3 = taskDefCloudFormation.search(p3string) + p3string.length + '\n'.length;
+    const template = `
+    - Name: 'test'
+      ValueFrom: !Ref GithubTokenSecret
+    `;
+    taskDefCloudFormation = [
+      taskDefCloudFormation.slice(0, indexp3),
+      template,
+      taskDefCloudFormation.slice(indexp3),
+    ].join('');
+
     await CF.createStack({
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,

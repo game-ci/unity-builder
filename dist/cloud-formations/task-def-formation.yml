@@ -81,6 +81,7 @@ Parameters:
   AWSSecretAccessKey:
     Type: String
     Default: '0'
+  # template secrets p1 - input
 Mappings:
   SubnetConfig:
     VPC:
@@ -185,7 +186,9 @@ Resources:
     Properties: 
       Name: !Join [ "", [ 'AWSSecretAccessKey', !Ref BUILDID ] ]
       SecretString: !Ref AWSSecretAccessKey
-  
+
+  # template secrets p2 - secret
+
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -230,6 +233,7 @@ Resources:
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
+            # template secrets p3 - container def
             - Name: 'GITHUB_TOKEN'
               ValueFrom: !Ref GithubTokenSecret
             - Name: 'UNITY_LICENSE'
