@@ -16,6 +16,14 @@ class AWS {
         .replace('Standalone', '')
         .replace('standalone', '')}-${nanoid()}`;
       const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
+      const token: string = buildParameters.githubToken;
+      const defaultSecretsArray = [
+        {
+          ParameterKey: 'GithubToken',
+          EnvironmentVariable: 'GITHUB_TOKEN',
+          ParameterValue: token,
+        },
+      ];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
       await this.run(
@@ -85,15 +93,64 @@ class AWS {
             value: process.env.GITHUB_SHA,
           },
         ],
-        [
-          {
-            ParameterKey: 'GithubToken',
-            ParameterValue: buildParameters.githubToken,
-          },
-        ],
+        defaultSecretsArray,
       );
 
       core.info('Starting part 2/4 (build unity project)');
+
+      const buildSecrets = new Array();
+
+      buildSecrets.push(defaultSecretsArray);
+
+      if (process.env.UNITY_LICENSE)
+        buildSecrets.push({
+          ParameterKey: 'UnityLicense',
+          EnvironmentVariable: 'UNITY_LICENSE',
+          ParameterValue: process.env.UNITY_LICENSE,
+        });
+
+      if (process.env.UNITY_EMAIL)
+        buildSecrets.push({
+          ParameterKey: 'UnityEmail',
+          EnvironmentVariable: 'UNITY_EMAIL',
+          ParameterValue: process.env.UNITY_EMAIL,
+        });
+
+      if (process.env.UNITY_PASSWORD)
+        buildSecrets.push({
+          ParameterKey: 'UnityPassword',
+          EnvironmentVariable: 'UNITY_PASSWORD',
+          ParameterValue: process.env.UNITY_PASSWORD,
+        });
+
+      if (process.env.UNITY_SERIAL)
+        buildSecrets.push({
+          ParameterKey: 'UnitySerial',
+          EnvironmentVariable: 'UNITY_SERIAL',
+          ParameterValue: process.env.UNITY_SERIAL,
+        });
+
+      if (buildParameters.androidKeystoreBase64)
+        buildSecrets.push({
+          ParameterKey: 'AndroidKeystoreBase64',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
+          ParameterValue: buildParameters.androidKeystoreBase64,
+        });
+
+      if (buildParameters.androidKeystorePass)
+        buildSecrets.push({
+          ParameterKey: 'AndroidKeystorePass',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
+          ParameterValue: buildParameters.androidKeystorePass,
+        });
+
+      if (buildParameters.androidKeyaliasPass)
+        buildSecrets.push({
+          ParameterKey: 'AndroidKeyAliasPass',
+          EnvironmentVariable: 'AWS_ACCESS_KEY_ALIAS_PASS',
+          ParameterValue: buildParameters.androidKeyaliasPass,
+        });
+
       await this.run(
         buildUid,
         buildParameters.awsStackName,
@@ -166,40 +223,7 @@ class AWS {
             value: buildParameters.androidKeyaliasName,
           },
         ],
-        [
-          {
-            ParameterKey: 'GithubToken',
-            ParameterValue: buildParameters.githubToken,
-          },
-          {
-            ParameterKey: 'UnityLicense',
-            ParameterValue: process.env.UNITY_LICENSE ? process.env.UNITY_LICENSE : '0',
-          },
-          {
-            ParameterKey: 'UnityEmail',
-            ParameterValue: process.env.UNITY_EMAIL ? process.env.UNITY_EMAIL : '0',
-          },
-          {
-            ParameterKey: 'UnityPassword',
-            ParameterValue: process.env.UNITY_PASSWORD ? process.env.UNITY_PASSWORD : '0',
-          },
-          {
-            ParameterKey: 'UnitySerial',
-            ParameterValue: process.env.UNITY_SERIAL ? process.env.UNITY_SERIAL : '0',
-          },
-          {
-            ParameterKey: 'AndroidKeystoreBase64',
-            ParameterValue: buildParameters.androidKeystoreBase64 ? buildParameters.androidKeystoreBase64 : '0',
-          },
-          {
-            ParameterKey: 'AndroidKeystorePass',
-            ParameterValue: buildParameters.androidKeystorePass ? buildParameters.androidKeystorePass : '0',
-          },
-          {
-            ParameterKey: 'AndroidKeyAliasPass',
-            ParameterValue: buildParameters.androidKeyaliasPass ? buildParameters.androidKeyaliasPass : '0',
-          },
-        ],
+        buildSecrets,
       );
       core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
@@ -229,12 +253,7 @@ class AWS {
             value: process.env.GITHUB_SHA,
           },
         ],
-        [
-          {
-            ParameterKey: 'GithubToken',
-            ParameterValue: buildParameters.githubToken,
-          },
-        ],
+        defaultSecretsArray,
       );
 
       core.info('Starting part 4/4 (upload build to s3)');
@@ -266,17 +285,16 @@ class AWS {
         ],
         [
           {
-            ParameterKey: 'GithubToken',
-            ParameterValue: buildParameters.githubToken,
-          },
-          {
             ParameterKey: 'AWSAccessKeyID',
+            EnvironmentVariable: 'AWS_ACCESS_KEY_ID',
             ParameterValue: process.env.AWS_ACCESS_KEY_ID,
           },
           {
             ParameterKey: 'AWSSecretAccessKey',
+            EnvironmentVariable: 'AWS_SECRET_ACCESS_KEY',
             ParameterValue: process.env.AWS_SECRET_ACCESS_KEY,
           },
+          ...defaultSecretsArray,
         ],
       );
     } catch (error) {
@@ -334,22 +352,24 @@ class AWS {
     const taskDefStackName = `${stackName}-${buildUid}`;
     let taskDefCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
     for (const secret of secrets) {
-      const p1string = 'p1 - input';
-      const p2string = 'p2 - secret';
-      const p3string = 'p3 - container def';
-      const indexp1 = taskDefCloudFormation.search(p1string) + p1string.length + '\n'.length;
-      const template1 = `
+      const insertionStringParameters = 'p1 - input';
+      const insertionStringSecrets = 'p2 - secret';
+      const insertionStringContainerSecrets = 'p3 - container def';
+      const indexp1 =
+        taskDefCloudFormation.search(insertionStringParameters) + insertionStringParameters.length + '\n'.length;
+      const parameterTemplate = `
   ${secret.ParameterKey}:
     Type: String
     Default: ''
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp1),
-        template1,
+        parameterTemplate,
         taskDefCloudFormation.slice(indexp1),
       ].join('');
-      const indexp2 = taskDefCloudFormation.search(p2string) + p2string.length + '\n'.length;
-      const template2 = `
+      const indexp2 =
+        taskDefCloudFormation.search(insertionStringSecrets) + insertionStringSecrets.length + '\n'.length;
+      const secretTemplate = `
   ${secret.ParameterKey}Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
@@ -358,17 +378,20 @@ class AWS {
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp2),
-        template2,
+        secretTemplate,
         taskDefCloudFormation.slice(indexp2),
       ].join('');
-      const indexp3 = taskDefCloudFormation.search(p3string) + p3string.length + '\n'.length;
-      const template3 = `
-            - Name: '${secret.ParameterKey.toUpperCase()}'
+      const indexp3 =
+        taskDefCloudFormation.search(insertionStringContainerSecrets) +
+        insertionStringContainerSecrets.length +
+        '\n'.length;
+      const containerDefinitionSecretTemplate = `
+            - Name: '${secret.EnvironmentVariable ? secret.EnvironmentVariable : secret.ParameterKey}'
               ValueFrom: !Ref ${secret.ParameterKey}Secret
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp3),
-        template3,
+        containerDefinitionSecretTemplate,
         taskDefCloudFormation.slice(indexp3),
       ].join('');
     }
