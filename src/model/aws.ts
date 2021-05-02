@@ -350,7 +350,7 @@ class AWS {
       ].join('');
       const indexp2 = taskDefCloudFormation.search(p2string) + p2string.length + '\n'.length;
       const template2 = `
-    ${secret.ParameterKey}Secret:
+  ${secret.ParameterKey}Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Name: !Join [ "", [ '${secret.ParameterKey}', !Ref BUILDID ] ]
@@ -364,7 +364,8 @@ class AWS {
       const indexp3 = taskDefCloudFormation.search(p3string) + p3string.length + '\n'.length;
       const template3 = `
             - Name: '${secret.ParameterKey.toUpperCase()}'
-              ValueFrom: !Ref ${secret.ParameterKey}Secret`;
+              ValueFrom: !Ref ${secret.ParameterKey}Secret
+            `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp3),
         template3,
