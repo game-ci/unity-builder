@@ -338,9 +338,9 @@ class AWS {
     const p3string = 'p3 - container def';
     const indexp1 = taskDefCloudFormation.search(p1string) + p1string.length + '\n'.length;
     const template1 = `
-    AWSSecretAccessKeyssss:
-      Type: String
-      Default: '0'
+  AWSSecretAccessKeyssss:
+    Type: String
+    Default: '0'
     `;
     taskDefCloudFormation = [
       taskDefCloudFormation.slice(0, indexp1),
