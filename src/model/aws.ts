@@ -394,6 +394,7 @@ class AWS {
         containerDefinitionSecretTemplate,
         taskDefCloudFormation.slice(indexp3),
       ].join('');
+      delete secret.EnvironmentVariable;
     }
 
     core.info(taskDefCloudFormation);
