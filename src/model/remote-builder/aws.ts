@@ -122,8 +122,8 @@ class AWS {
         insertionStringKeyContainerDef.length +
         '\n'.length;
       const parameterContainerDefTemplate = `
-      - Name: '${environmentVariable.name}'
-        ValueFrom: !Ref ${environmentVariable.name}
+          - Name: '${environmentVariable.name}'
+            ValueFrom: !Ref ${environmentVariable.name}
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexContainerDef),
