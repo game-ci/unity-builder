@@ -140,6 +140,7 @@ Resources:
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
               Value: 'yes'
+            # template - env vars
           MountPoints:
             - SourceVolume: efs-data
               ContainerPath: !Ref EFSMountDirectory

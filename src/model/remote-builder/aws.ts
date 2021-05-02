@@ -116,6 +116,20 @@ class AWS {
         parameterTemplate,
         taskDefCloudFormation.slice(index),
       ].join('');
+      const insertionStringKeyContainerDef = 'template - env vars';
+      const indexContainerDef =
+        taskDefCloudFormation.search(insertionStringKeyContainerDef) +
+        insertionStringKeyContainerDef.length +
+        '\n'.length;
+      const parameterContainerDefTemplate = `
+      - Name: '${environmentVariable.name}'
+        ValueFrom: !Ref ${environmentVariable.name}
+`;
+      taskDefCloudFormation = [
+        taskDefCloudFormation.slice(0, indexContainerDef),
+        parameterContainerDefTemplate,
+        taskDefCloudFormation.slice(indexContainerDef),
+      ].join('');
     }
 
     core.info(taskDefCloudFormation);
