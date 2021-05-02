@@ -133,9 +133,7 @@ class AWS {
     }
 
     core.info(taskDefCloudFormation);
-    const mappedSecrets = new Array();
-    mappedSecrets.push(...secrets);
-    mappedSecrets.map((x) => {
+    const mappedSecrets = secrets.map((x) => {
       return { ParameterKey: x.ParameterKey, ParameterValue: x.ParameterValue };
     });
     await CF.createStack({
