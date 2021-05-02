@@ -342,7 +342,7 @@ class AWS {
   ${secret.ParameterKey}:
     Type: String
     Default: ''
-      `;
+`;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp1),
         template1,
@@ -355,7 +355,7 @@ class AWS {
     Properties: 
       Name: !Join [ "", [ '${secret.ParameterKey}', !Ref BUILDID ] ]
       SecretString: !Ref ${secret.ParameterKey}
-      `;
+`;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp2),
         template2,
