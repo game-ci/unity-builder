@@ -119,7 +119,11 @@ class AWS {
     }
 
     core.info(taskDefCloudFormation);
-
+    const mappedSecrets = new Array();
+    mappedSecrets.push(secrets);
+    mappedSecrets.map((x) => {
+      x.ParameterKey, x.ParameterValue;
+    });
     await CF.createStack({
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
@@ -152,7 +156,7 @@ class AWS {
           ParameterKey: 'BUILDID',
           ParameterValue: buildUid,
         },
-        ...secrets,
+        ...mappedSecrets,
       ],
     }).promise();
     core.info('Creating worker cluster...');
