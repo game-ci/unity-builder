@@ -134,7 +134,7 @@ class AWS {
 
     core.info(taskDefCloudFormation);
     const mappedSecrets = new Array();
-    mappedSecrets.push(secrets);
+    mappedSecrets.push(...secrets);
     mappedSecrets.map((x) => {
       return { ParameterKey: x.ParameterKey, ParameterValue: x.ParameterValue };
     });
