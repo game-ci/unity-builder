@@ -136,7 +136,7 @@ class AWS {
     const mappedSecrets = new Array();
     mappedSecrets.push(secrets);
     mappedSecrets.map((x) => {
-      x.ParameterKey, x.ParameterValue;
+      return { ParameterKey: x.ParameterKey, ParameterValue: x.ParameterValue };
     });
     await CF.createStack({
       StackName: taskDefStackName,
