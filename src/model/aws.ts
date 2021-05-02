@@ -333,17 +333,45 @@ class AWS {
     `;
     const taskDefStackName = `${stackName}-${buildUid}`;
     let taskDefCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
+    const p1string = 'p1 - input';
+    const p2string = 'p2 - secret';
     const p3string = 'p3 - container def';
+    const indexp1 = taskDefCloudFormation.search(p1string) + p1string.length + '\n'.length;
+    const template1 = `
+    AWSSecretAccessKeyssss:
+      Type: String
+      Default: '0'
+    `;
+    taskDefCloudFormation = [
+      taskDefCloudFormation.slice(0, indexp1),
+      template1,
+      taskDefCloudFormation.slice(indexp1),
+    ].join('');
+    const indexp2 = taskDefCloudFormation.search(p2string) + p2string.length + '\n'.length;
+    const template2 = `
+    TestSec:
+      Type: AWS::SecretsManager::Secret
+      Properties: 
+        Name: !Join [ "", [ 'testsec', !Ref BUILDID ] ]
+        SecretString: !Ref AWSSecretAccessKey
+    `;
+    taskDefCloudFormation = [
+      taskDefCloudFormation.slice(0, indexp2),
+      template2,
+      taskDefCloudFormation.slice(indexp2),
+    ].join('');
     const indexp3 = taskDefCloudFormation.search(p3string) + p3string.length + '\n'.length;
-    const template = `
+    const template3 = `
     - Name: 'test'
       ValueFrom: !Ref GithubTokenSecret
     `;
     taskDefCloudFormation = [
       taskDefCloudFormation.slice(0, indexp3),
-      template,
+      template3,
       taskDefCloudFormation.slice(indexp3),
     ].join('');
+
+    core.info(taskDefCloudFormation);
 
     await CF.createStack({
       StackName: taskDefStackName,
