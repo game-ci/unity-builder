@@ -107,7 +107,7 @@ class AWS {
       const insertionStringKey = 'p1 - input';
       const index = taskDefCloudFormation.search(insertionStringKey) + insertionStringKey.length + '\n'.length;
       const parameterTemplate = `
-  ${environmentVariable.name}:
+  ${environmentVariable.name.replace(/[^\dA-Za-z]/g, '')}:
     Type: String
     Default: ''
 `;
@@ -123,7 +123,7 @@ class AWS {
         '\n'.length;
       const parameterContainerDefTemplate = `
             - Name: '${environmentVariable.name}'
-              ValueFrom: !Ref ${environmentVariable.name}
+              ValueFrom: !Ref ${environmentVariable.name.replace(/[^\dA-Za-z]/g, '')}
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexContainerDef),
@@ -131,10 +131,8 @@ class AWS {
         taskDefCloudFormation.slice(indexContainerDef),
       ].join('');
     }
-
-    core.info(taskDefCloudFormation);
     const mappedSecrets = secrets.map((x) => {
-      return { ParameterKey: x.ParameterKey, ParameterValue: x.ParameterValue };
+      return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
     });
     await CF.createStack({
       StackName: taskDefStackName,
