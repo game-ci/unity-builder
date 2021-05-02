@@ -1,5 +1,5 @@
 import { customAlphabet } from 'nanoid';
-import AWSBuildEnvironment from './aws-build-environment';
+import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
 import RemoteBuilderAlphabet from './remote-builder-alphabet';
 import { BuildParameters } from '..';
@@ -25,7 +25,7 @@ class RemoteBuilder {
       ];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
-      await AWSBuildEnvironment.run(
+      await AWSBuildPlatform.runBuild(
         buildUid,
         buildParameters.awsStackName,
         'alpine/git',
@@ -38,6 +38,7 @@ class RemoteBuilder {
           # Get source repo for project to be built and game-ci repo for utilties
           git clone https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${buildUid}/steam -q
           cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
           git checkout $GITHUB_SHA
           cd /${efsDirectoryName}/
@@ -149,7 +150,7 @@ class RemoteBuilder {
           ParameterValue: buildParameters.androidKeyaliasPass,
         });
 
-      await AWSBuildEnvironment.run(
+      await AWSBuildPlatform.runBuild(
         buildUid,
         buildParameters.awsStackName,
         baseImage.toString(),
@@ -224,7 +225,7 @@ class RemoteBuilder {
       );
       core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
-      await AWSBuildEnvironment.run(
+      await AWSBuildPlatform.runBuild(
         buildUid,
         buildParameters.awsStackName,
         'alpine',
@@ -253,7 +254,7 @@ class RemoteBuilder {
       );
 
       core.info('Starting part 4/4 (upload build to s3)');
-      await AWSBuildEnvironment.run(
+      await AWSBuildPlatform.runBuild(
         buildUid,
         buildParameters.awsStackName,
         'amazon/aws-cli',
@@ -291,6 +292,26 @@ class RemoteBuilder {
           },
           ...defaultSecretsArray,
         ],
+      );
+
+      core.info('Starting steam deployment');
+      await AWSBuildPlatform.runBuild(
+        buildUid,
+        buildParameters.awsStackName,
+        'cm2network/steamcmd:root',
+        [
+          '-c',
+          `
+            ls
+            chmod -R +x /entrypoint.sh;
+            chmod -R +x /steps;
+            /entrypoint.sh;
+          `,
+        ],
+        `/${efsDirectoryName}`,
+        `/${efsDirectoryName}/${buildUid}/steam/action/`,
+        [],
+        [],
       );
     } catch (error) {
       core.setFailed(error);

@@ -9,7 +9,7 @@ import RemoteBuilderAlphabet from './remote-builder-alphabet';
 import AWSBuildRunner from './aws-build-runner';
 
 class AWSBuildEnvironment {
-  static async run(
+  static async runBuild(
     buildId: string,
     stackName: string,
     image: string,
