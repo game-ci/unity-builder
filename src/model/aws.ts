@@ -340,8 +340,7 @@ class AWS {
     const template1 = `
   AWSSecretAccessKeyssss:
     Type: String
-    Default: '0'
-    `;
+    Default: '0'`;
     taskDefCloudFormation = [
       taskDefCloudFormation.slice(0, indexp1),
       template1,
@@ -349,12 +348,11 @@ class AWS {
     ].join('');
     const indexp2 = taskDefCloudFormation.search(p2string) + p2string.length + '\n'.length;
     const template2 = `
-    TestSec:
-      Type: AWS::SecretsManager::Secret
-      Properties: 
-        Name: !Join [ "", [ 'testsec', !Ref BUILDID ] ]
-        SecretString: !Ref AWSSecretAccessKey
-    `;
+  TestSec:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ 'testsec', !Ref BUILDID ] ]
+      SecretString: !Ref AWSSecretAccessKey`;
     taskDefCloudFormation = [
       taskDefCloudFormation.slice(0, indexp2),
       template2,
@@ -362,9 +360,8 @@ class AWS {
     ].join('');
     const indexp3 = taskDefCloudFormation.search(p3string) + p3string.length + '\n'.length;
     const template3 = `
-    - Name: 'test'
-      ValueFrom: !Ref GithubTokenSecret
-    `;
+            - Name: 'test'
+              ValueFrom: !Ref GithubTokenSecret`;
     taskDefCloudFormation = [
       taskDefCloudFormation.slice(0, indexp3),
       template3,
