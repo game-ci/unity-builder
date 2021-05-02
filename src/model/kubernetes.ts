@@ -1,6 +1,7 @@
 // @ts-ignore
 import { Client, KubeConfig } from 'kubernetes-client';
 import Request from 'kubernetes-client/backends/request';
+import BuildParameters from './build-parameters';
 
 const core = require('@actions/core');
 const base64 = require('base-64');
@@ -17,7 +18,7 @@ class Kubernetes {
   private static jobName: string;
   private static namespace: string;
 
-  static async runBuildJob(buildParameters, baseImage) {
+  static async runBuildJob(buildParameters: BuildParameters, baseImage) {
     const kubeconfig = new KubeConfig();
     kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
     const backend = new Request({ kubeconfig });

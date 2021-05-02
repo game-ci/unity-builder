@@ -5,7 +5,33 @@ import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 
 class BuildParameters {
-  static async create() {
+  public version!: string;
+  public customImage!: string;
+  public runnerTempPath: string | undefined;
+  public platform!: string;
+  public projectPath!: string;
+  public buildName!: string;
+  public buildPath!: string;
+  public buildFile!: string;
+  public buildMethod!: string;
+  public buildVersion!: string;
+  public androidVersionCode!: string;
+  public androidKeystoreName!: string;
+  public androidKeystoreBase64!: string;
+  public androidKeystorePass!: string;
+  public androidKeyaliasName!: string;
+  public androidKeyaliasPass!: string;
+  public customParameters!: string;
+  public remoteBuildCluster!: string;
+  public awsStackName!: string;
+  public kubeConfig!: string;
+  public githubToken!: string;
+  public remoteBuildMemory!: string;
+  public remoteBuildCpu!: string;
+  public kubeVolumeSize!: string;
+  public kubeVolume!: string;
+
+  static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
 
     const unityVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
