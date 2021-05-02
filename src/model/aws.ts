@@ -365,7 +365,7 @@ class AWS {
       const template3 = `
             - Name: '${secret.ParameterKey.toUpperCase()}'
               ValueFrom: !Ref ${secret.ParameterKey}Secret
-  `;
+`;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp3),
         template3,
