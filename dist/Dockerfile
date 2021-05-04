@@ -17,4 +17,6 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN ls
 
+RUN apt-get update && apt-get install -y openssh-client
+
 ENTRYPOINT ["/entrypoint.sh"]

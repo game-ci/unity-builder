@@ -37,6 +37,10 @@ class Action {
     return process.env.GITHUB_WORKSPACE;
   }
 
+  static get sshAgent() {
+    return process.env.SSH_AUTH_SOCK;
+  }
+
   static checkCompatibility() {
     const currentPlatform = process.platform;
     if (!Action.supportedPlatforms.includes(currentPlatform)) {

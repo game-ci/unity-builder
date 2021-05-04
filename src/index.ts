@@ -6,7 +6,7 @@ async function run() {
     Action.checkCompatibility();
     Cache.verify();
 
-    const { dockerfile, workspace, actionFolder } = Action;
+    const { dockerfile, workspace, actionFolder, sshAgent } = Action;
 
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
@@ -27,7 +27,7 @@ async function run() {
       default:
         core.info('Building locally');
         builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-        await Docker.run(builtImage, { workspace, ...buildParameters });
+        await Docker.run(builtImage, { workspace, sshAgent, ...buildParameters });
         break;
     }
 
