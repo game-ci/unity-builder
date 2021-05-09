@@ -250,18 +250,12 @@ export default class Versioning {
    * Returns whether there are uncommitted changes that are not ignored.
    */
   static async isDirty() {
-    const output = await System.run('sh', undefined, {
-      input: Buffer.from('git status --porcelain'),
-      silent: true,
-    });
-
-    core.info('Output: ');
-    core.info(output);
-
+    const output = await this.git(['status', '--porcelain']);
     const isDirty = output !== '';
+
     if (isDirty) {
-      core.info('Changes were made to the following files and folders:\n');
-      core.info(output);
+      core.warning('Changes were made to the following files and folders:\n');
+      core.warning(output);
     }
 
     return isDirty;
