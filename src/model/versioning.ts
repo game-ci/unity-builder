@@ -251,8 +251,14 @@ export default class Versioning {
    */
   static async isDirty() {
     const output = await this.git(['status', '--porcelain']);
+    const isDirty = output !== '';
 
-    return output !== '';
+    if (isDirty) {
+      core.warning('Changes were made to the following files and folders:\n');
+      core.warning(output);
+    }
+
+    return isDirty;
   }
 
   /**

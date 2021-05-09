@@ -65,6 +65,7 @@ fi
 #
 # Create Android keystore, if needed
 #
+
 if [[ -z $ANDROID_KEYSTORE_NAME || -z $ANDROID_KEYSTORE_BASE64 ]]; then
   echo "Not creating Android keystore."
 else
@@ -73,16 +74,16 @@ else
 fi
 
 #
-# Display custom parameters
+# Pre-build debug information
 #
-echo "Using custom parameters $CUSTOM_PARAMETERS."
 
-# The build specification below may require Unity 2019.2.11f1 or later (not tested below).
-# Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
+echo ""
+echo "###########################"
+echo "#    Custom parameters    #"
+echo "###########################"
+echo ""
 
-#
-# Build info
-#
+echo "$CUSTOM_PARAMETERS"
 
 echo ""
 echo "###########################"
@@ -100,13 +101,19 @@ echo "#    Project directory    #"
 echo "###########################"
 echo ""
 
-ls -alh $UNITY_PROJECT_PATH
+ls -alh "$UNITY_PROJECT_PATH"
+
+#
+# Build
+#
 
 echo ""
 echo "###########################"
-echo "#    Building platform    #"
+echo "#    Building project     #"
 echo "###########################"
 echo ""
+
+# Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
 unity-editor \
   -nographics \
@@ -136,17 +143,24 @@ else
   echo "Build failed, with exit code $BUILD_EXIT_CODE";
 fi
 
-# Add permissions to make app runnable
-if [[ "$BUILD_TARGET" == "StandaloneOSX" ]]; then
-  ADD_PERMISSIONS_PATH=$BUILD_PATH_FULL/StandaloneOSX.app/Contents/MacOS/*
-  echo "Making the following path executable: $ADD_PERMISSIONS_PATH"
-  chmod +x $ADD_PERMISSIONS_PATH
+#
+# Permissions
+#
+
+# Make a given user owner of all artifacts
+if [[ -n "$CHOWN_FILES_TO" ]]; then
+  chown -R "$CHOWN_FILES_TO" "$BUILD_PATH_FULL"
+  chown -R "$CHOWN_FILES_TO" "$UNITY_PROJECT_PATH"
 fi
 
+# Add read permissions for everyone to all artifacts
+chmod -R a+r "$BUILD_PATH_FULL"
+chmod -R a+r "$UNITY_PROJECT_PATH"
 
-if [[ -n "$CHOWN_FILES_TO" ]]; then
-  chown -R $CHOWN_FILES_TO $BUILD_PATH_FULL
-  chown -R $CHOWN_FILES_TO $UNITY_PROJECT_PATH
+# Add execute permissions to specific files
+if [[ "$BUILD_TARGET" == "StandaloneOSX" ]]; then
+  OSX_EXECUTABLE_PATH="$BUILD_PATH_FULL/StandaloneOSX.app/Contents/MacOS/*"
+  chmod +x "$OSX_EXECUTABLE_PATH"
 fi
 
 #
@@ -155,7 +169,7 @@ fi
 
 echo ""
 echo "###########################"
-echo "#     Build directory     #"
+echo "#       Build output      #"
 echo "###########################"
 echo ""
 
