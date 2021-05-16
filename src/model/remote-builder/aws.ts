@@ -78,11 +78,11 @@ class AWS {
       const indexp2 =
         taskDefCloudFormation.search(insertionStringSecrets) + insertionStringSecrets.length + '\n'.length;
       const secretTemplate = `
-  ${secret.ParameterKey}Secret:
+  ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}Secret:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Name: !Join [ "", [ '${secret.ParameterKey}', !Ref BUILDID ] ]
-      SecretString: !Ref ${secret.ParameterKey}
+      Name: !Join [ "", [ '${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}', !Ref BUILDID ] ]
+      SecretString: !Ref ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp2),
@@ -94,8 +94,12 @@ class AWS {
         insertionStringContainerSecrets.length +
         '\n'.length;
       const containerDefinitionSecretTemplate = `
-            - Name: '${secret.EnvironmentVariable ? secret.EnvironmentVariable : secret.ParameterKey}'
-              ValueFrom: !Ref ${secret.ParameterKey}Secret
+            - Name: '${
+              secret.EnvironmentVariable.replace(/[^\dA-Za-z]/g, '')
+                ? secret.EnvironmentVariable.replace(/[^\dA-Za-z]/g, '')
+                : secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')
+            }'
+              ValueFrom: !Ref ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}Secret
 `;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp3),
