@@ -60,6 +60,7 @@ class BuildParameters {
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
       customParameters: Input.customParameters,
+      sshAgent: Input.sshAgent,
       chownFilesTo: Input.chownFilesTo,
       remoteBuildCluster: Input.remoteBuildCluster,
       awsStackName: Input.awsStackName,
