@@ -7,7 +7,7 @@ if [[ -n "$UNITY_SERIAL" ]]; then
   # This will return the license that is currently in use.
   #
   unity-editor \
-    -nographics \
+    -batchmode \
     -logFile /dev/stdout \
     -quit \
     -returnlicense
