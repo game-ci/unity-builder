@@ -116,7 +116,7 @@ echo ""
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
 unity-editor \
-  -nographics \
+  -batchmode \
   -logfile /dev/stdout \
   -quit \
   -customBuildName "$BUILD_NAME" \
