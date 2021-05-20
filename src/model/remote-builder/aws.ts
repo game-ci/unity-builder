@@ -138,6 +138,7 @@ class AWS {
     const mappedSecrets = secrets.map((x) => {
       return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
     });
+    core.info(taskDefCloudFormation);
     await CF.createStack({
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
