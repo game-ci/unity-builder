@@ -207,6 +207,13 @@ class AWS {
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
       core.error(error);
+
+      const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
+      const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
+      core.info(JSON.stringify(events, undefined, 4));
+      core.info(JSON.stringify(resources, undefined, 4));
+
+      throw error;
     }
 
     const taskDefResources = (
