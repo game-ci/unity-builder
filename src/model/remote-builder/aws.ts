@@ -32,7 +32,6 @@ class AWS {
       commands,
       mountdir,
       workingdir,
-      environment,
       secrets,
     );
 
@@ -50,7 +49,6 @@ class AWS {
     commands: string[],
     mountdir: string,
     workingdir: string,
-    environment: RemoteBuilderEnvironmentVariable[],
     secrets: RemoteBuilderSecret[],
   ): Promise<RemoteBuilderTaskDef> {
     const logid = customAlphabet(RemoteBuilderAlphabet.alphabet, 9)();
@@ -102,31 +100,6 @@ class AWS {
         taskDefCloudFormation.slice(0, indexp3),
         containerDefinitionSecretTemplate,
         taskDefCloudFormation.slice(indexp3),
-      ].join('');
-    }
-    for (const environmentVariable of environment) {
-      const insertionStringKey = 'p1 - input';
-      const index = taskDefCloudFormation.search(insertionStringKey) + insertionStringKey.length + '\n'.length;
-      const parameterTemplate = `
-  ${environmentVariable.name.replace(/[^\dA-Za-z]/g, '')}:
-    Type: String
-    Default: ''
-`;
-      taskDefCloudFormation = [
-        taskDefCloudFormation.slice(0, index),
-        parameterTemplate,
-        taskDefCloudFormation.slice(index),
-      ].join('');
-      const insertionStringKeyContainerDef = 'template - env vars';
-      const indexContainerDef =
-        taskDefCloudFormation.search(insertionStringKeyContainerDef) + insertionStringKeyContainerDef.length;
-      const parameterContainerDefTemplate = `
-            - Name: '${environmentVariable.name}'
-              ValueFrom: !Ref ${environmentVariable.name.replace(/[^\dA-Za-z]/g, '')}`;
-      taskDefCloudFormation = [
-        taskDefCloudFormation.slice(0, indexContainerDef),
-        parameterContainerDefTemplate,
-        taskDefCloudFormation.slice(indexContainerDef),
       ].join('');
     }
     const mappedSecrets = secrets.map((x) => {
