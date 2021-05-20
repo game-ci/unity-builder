@@ -53,14 +53,11 @@ namespace UnityBuilderAction
       if (addressableAssetSettingsType != null)
       {
         // ReSharper disable once PossibleNullReferenceException, used from try-catch
-        void CallAddressablesMethod(string methodName, object[] args) => addressableAssetSettingsType
-          .GetMethod(methodName, BindingFlags.Static | BindingFlags.Public)
-          .Invoke(null, args);
-
         try
         {
-          CallAddressablesMethod("CleanPlayerContent", new object[] { null });
-          CallAddressablesMethod("BuildPlayerContent", Array.Empty<object>());
+          addressableAssetSettingsType.GetMethod("CleanPlayerContent", BindingFlags.Static | BindingFlags.Public)
+                .Invoke(null, new object[] {null});
+          addressableAssetSettingsType.GetMethod("BuildPlayerContent", new Type[0]).Invoke(null, new object[0]);
         }
         catch (Exception e)
         {
