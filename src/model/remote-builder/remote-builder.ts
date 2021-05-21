@@ -98,7 +98,7 @@ class RemoteBuilder {
 
       const buildSecrets = new Array();
 
-      buildSecrets.push(defaultSecretsArray);
+      buildSecrets.push(...defaultSecretsArray);
 
       if (process.env.UNITY_LICENSE)
         buildSecrets.push({
