@@ -95,11 +95,7 @@ class AWSBuildEnvironment {
       const indexp3 =
         taskDefCloudFormation.search(insertionStringContainerSecrets) + insertionStringContainerSecrets.length;
       const containerDefinitionSecretTemplate = `
-            - Name: '${
-              secret.EnvironmentVariable.replace(/[^\dA-Za-z]/g, '')
-                ? secret.EnvironmentVariable.replace(/[^\dA-Za-z]/g, '')
-                : secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')
-            }'
+            - Name: '${secret.EnvironmentVariable}'
               ValueFrom: !Ref ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}Secret`;
       taskDefCloudFormation = [
         taskDefCloudFormation.slice(0, indexp3),
