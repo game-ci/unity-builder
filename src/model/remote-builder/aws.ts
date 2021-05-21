@@ -57,8 +57,8 @@ class AWS {
     `;
     const taskDefStackName = `${stackName}-${buildUid}`;
     let taskDefCloudFormation = this.readTaskCloudFormationTemplate();
+    core.info(JSON.stringify(secrets, undefined, 4));
     for (const secret of secrets) {
-      core.info(`adding secret ${secret.ParameterKey} : ${secret.EnvironmentVariable}`);
       const insertionStringParameters = 'p1 - input';
       const insertionStringSecrets = 'p2 - secret';
       const insertionStringContainerSecrets = 'p3 - container def';
