@@ -69,7 +69,7 @@ class AWSBuildEnvironment {
       const indexp1 =
         taskDefCloudFormation.search(insertionStringParameters) + insertionStringParameters.length + '\n'.length;
       const parameterTemplate = `
-  ${secret.ParameterKey}:
+  ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}:
     Type: String
     Default: ''
 `;
