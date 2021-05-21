@@ -1,5 +1,5 @@
 import { customAlphabet } from 'nanoid';
-import AWS from './aws';
+import AWSBuildEnvironment from './aws-build-environment';
 import * as core from '@actions/core';
 import RemoteBuilderAlphabet from './remote-builder-alphabet';
 import { BuildParameters } from '..';
@@ -25,7 +25,7 @@ class RemoteBuilder {
       ];
 
       core.info('Starting part 1/4 (clone from github and restore cache)');
-      await AWS.run(
+      await AWSBuildEnvironment.run(
         buildUid,
         buildParameters.awsStackName,
         'alpine/git',
@@ -149,7 +149,7 @@ class RemoteBuilder {
           ParameterValue: buildParameters.androidKeyaliasPass,
         });
 
-      await AWS.run(
+      await AWSBuildEnvironment.run(
         buildUid,
         buildParameters.awsStackName,
         baseImage.toString(),
@@ -224,7 +224,7 @@ class RemoteBuilder {
       );
       core.info('Starting part 3/4 (zip unity build and Library for caching)');
       // Cleanup
-      await AWS.run(
+      await AWSBuildEnvironment.run(
         buildUid,
         buildParameters.awsStackName,
         'alpine',
@@ -253,7 +253,7 @@ class RemoteBuilder {
       );
 
       core.info('Starting part 4/4 (upload build to s3)');
-      await AWS.run(
+      await AWSBuildEnvironment.run(
         buildUid,
         buildParameters.awsStackName,
         'amazon/aws-cli',
