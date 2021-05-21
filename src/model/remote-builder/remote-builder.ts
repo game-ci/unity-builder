@@ -325,7 +325,7 @@ class RemoteBuilder {
             echo "Library cache exists from build $latest from ${branchName}"
             echo 'Creating empty Library folder for cache'
             mkdir "$libDir"
-            unzip -q $latest -d $libDir
+            unzip -q $latest
           else
             echo 'Cache does not exist'
           fi
