@@ -312,6 +312,7 @@ class RemoteBuilder {
           echo "Cached Libraries for ${branchName} from previous builds:"
           ls
           echo " "
+          ls "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}"
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           if [ -d "$libDir" ]; then
             rm -r "$libDir"
@@ -324,7 +325,7 @@ class RemoteBuilder {
             echo "Library cache exists from build $latest from ${branchName}"
             echo 'Creating empty Library folder for cache'
             mkdir "$libDir"
-            unzip -q $latest -o -d '/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/.'
+            unzip -q $latest -d $libDir
           else
             echo 'Cache does not exist'
           fi
