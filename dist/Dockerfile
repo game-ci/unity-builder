@@ -17,4 +17,10 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN ls
 
+RUN apt-get -q update \
+ && apt-get -q install -y --no-install-recommends --allow-downgrades \
+ libnotify4 \
+ libnotify-bin \
+ && apt-get clean
+
 ENTRYPOINT ["/entrypoint.sh"]
