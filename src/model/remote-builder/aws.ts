@@ -58,6 +58,7 @@ class AWS {
     const taskDefStackName = `${stackName}-${buildUid}`;
     let taskDefCloudFormation = this.readTaskCloudFormationTemplate();
     for (const secret of secrets) {
+      core.info(`adding secret ${secret.ParameterKey} : ${secret.EnvironmentVariable}`);
       const insertionStringParameters = 'p1 - input';
       const insertionStringSecrets = 'p2 - secret';
       const insertionStringContainerSecrets = 'p3 - container def';
@@ -102,10 +103,10 @@ class AWS {
         taskDefCloudFormation.slice(indexp3),
       ].join('');
     }
+    core.info(taskDefCloudFormation);
     const mappedSecrets = secrets.map((x) => {
       return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
     });
-    core.info(taskDefCloudFormation);
     await CF.createStack({
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
