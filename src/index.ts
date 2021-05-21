@@ -20,7 +20,7 @@ async function run() {
 
       case 'aws':
         core.info('Building with AWS');
-        await AWS.runBuildJob(buildParameters, baseImage);
+        await AWS.build(buildParameters, baseImage);
         break;
 
       // default and local case

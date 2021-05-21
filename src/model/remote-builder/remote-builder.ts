@@ -8,7 +8,7 @@ const efsDirectoryName = 'data';
 const cacheDirectoryName = 'cache';
 
 class RemoteBuilder {
-  static async runBuildJob(buildParameters: BuildParameters, baseImage) {
+  static async build(buildParameters: BuildParameters, baseImage) {
     try {
       const nanoid = customAlphabet(RemoteBuilderAlphabet.alphabet, 4);
       const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
