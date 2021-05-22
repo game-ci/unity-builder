@@ -82,7 +82,7 @@ class RemoteBuilder {
             aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
             # aws s3 cp /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
-            rm -r ${buildUid}
+            # rm -r ${buildUid}
           `,
       ],
       `/${efsDirectoryName}`,
