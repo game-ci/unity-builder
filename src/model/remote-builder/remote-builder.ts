@@ -127,7 +127,6 @@ class RemoteBuilder {
             cd ../../
             zip -r build-${buildUid}.zip ${buildParameters.buildPath}/*
             mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
-            echo "zips created, compression step complete"
           `,
       ],
       `/${efsDirectoryName}`,
@@ -140,6 +139,7 @@ class RemoteBuilder {
       ],
       defaultSecretsArray,
     );
+    core.info('compression step complete');
   }
 
   private static async BuildStep(
