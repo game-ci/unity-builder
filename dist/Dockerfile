@@ -17,13 +17,4 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN ls
 
-# Set frontend to Noninteractive
-# https://github.com/phusion/baseimage-docker/issues/58#issuecomment-47995343
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
-RUN apt-get -q update \
- && apt-get -q install -y --no-install-recommends --allow-downgrades \
- libnotify4 \
- && apt-get clean
-
 ENTRYPOINT ["/entrypoint.sh"]
