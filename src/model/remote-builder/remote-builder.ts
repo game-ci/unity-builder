@@ -52,9 +52,9 @@ class RemoteBuilder {
         '-c',
         `
             ls
-            chmod -R +x /entrypoint.sh;
-            chmod -R +x /steps;
-            /entrypoint.sh;
+            chmod -R +x entrypoint.sh;
+            chmod -R +x steps;
+            entrypoint.sh;
           `,
       ],
       `/${efsDirectoryName}`,
@@ -340,7 +340,8 @@ class RemoteBuilder {
             echo 'Creating empty Library folder for cache'
             mkdir $libDir
             unzip -q $latest -d $libDir
-            rm -r $libDir
+            # purge cache
+            # rm -r $libDir
           else
             echo 'Cache does not exist'
           fi
