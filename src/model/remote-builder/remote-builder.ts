@@ -27,14 +27,18 @@ class RemoteBuilder {
       await RemoteBuilder.BuildStep(buildUid, buildParameters, baseImage, defaultSecretsArray);
       await RemoteBuilder.CompressionStep(buildUid, buildParameters, branchName, defaultSecretsArray);
       await RemoteBuilder.UploadArtifacts(buildUid, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.DeployToSteam(buildUid, buildParameters);
+      await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
     } catch (error) {
       core.setFailed(error);
       core.error(error);
     }
   }
 
-  private static async DeployToSteam(buildUid: string, buildParameters: BuildParameters) {
+  private static async DeployToSteam(
+    buildUid: string,
+    buildParameters: BuildParameters,
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
     core.info('Starting steam deployment');
     await AWSBuildPlatform.runBuild(
       buildUid,
@@ -51,8 +55,13 @@ class RemoteBuilder {
       ],
       `/${efsDirectoryName}`,
       `/${efsDirectoryName}/${buildUid}/steam/action/`,
-      [],
-      [],
+      [
+        {
+          name: 'GITHUB_SHA',
+          value: process.env.GITHUB_SHA || '',
+        },
+      ],
+      defaultSecretsArray,
     );
   }
 
