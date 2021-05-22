@@ -62,7 +62,8 @@ class AWSBuildEnvironment {
   static getSecretDefinitionTemplate(p1, p2) {
     return `
             - Name: '${p1}'
-              ValueFrom: !Ref ${p2}Secret`;
+              ValueFrom: !Ref ${p2}Secret
+              `;
   }
 
   static insertAtTemplate(template, insertionKey, insertion) {
