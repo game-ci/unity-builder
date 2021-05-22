@@ -62,7 +62,7 @@ class RemoteBuilder {
     branchName: string | undefined,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    core.info('Starting part 4/4 (upload build to s3)');
+    core.info('Starting step 4/4 upload build to s3');
     await AWSBuildPlatform.runBuild(
       buildUid,
       buildParameters.awsStackName,
@@ -110,7 +110,7 @@ class RemoteBuilder {
     branchName: string | undefined,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    core.info('Starting part 3/4 (zip unity build and Library for caching)');
+    core.info('Starting step 3/4 build compression');
     // Cleanup
     await AWSBuildPlatform.runBuild(
       buildUid,
@@ -127,6 +127,7 @@ class RemoteBuilder {
             cd ../../
             zip -q -r build-${buildUid}.zip ${buildParameters.buildPath}/*
             mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
+            echo 'zips created, compression step complete'
           `,
       ],
       `/${efsDirectoryName}`,
@@ -281,7 +282,7 @@ class RemoteBuilder {
     branchName: string | undefined,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    core.info('Starting part 1/4 (clone from github and restore cache)');
+    core.info('Starting step 1/4 clone and restore cache)');
     await AWSBuildPlatform.runBuild(
       buildUid,
       buildParameters.awsStackName,

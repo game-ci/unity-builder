@@ -206,14 +206,13 @@ class AWSBuildEnvironment {
     taskDefStackName: string,
     taskDefCloudFormation: string,
   ) {
-    core.error(error);
-
     const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
     const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
 
     core.info(taskDefCloudFormation);
     core.info(JSON.stringify(events, undefined, 4));
     core.info(JSON.stringify(resources, undefined, 4));
+    core.error(error);
   }
 
   static readTaskCloudFormationTemplate(): string {
