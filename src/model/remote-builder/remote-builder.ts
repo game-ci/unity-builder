@@ -52,9 +52,9 @@ class RemoteBuilder {
         '-c',
         `
             ls
-            chmod -R +x entrypoint.sh;
-            chmod -R +x steps;
-            entrypoint.sh;
+            chmod -R +x ./entrypoint.sh;
+            chmod -R +x ./steps;
+            ./entrypoint.sh;
           `,
       ],
       `/${efsDirectoryName}`,
