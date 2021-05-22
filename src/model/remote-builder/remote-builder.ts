@@ -127,7 +127,7 @@ class RemoteBuilder {
             cd ../../
             zip -r build-${buildUid}.zip ${buildParameters.buildPath}/*
             mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
-            echo 'zips created, compression step complete'
+            echo "zips created, compression step complete"
           `,
       ],
       `/${efsDirectoryName}`,
