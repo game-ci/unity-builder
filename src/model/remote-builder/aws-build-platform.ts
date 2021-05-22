@@ -63,7 +63,7 @@ class AWSBuildEnvironment {
     return `
             - Name: '${p1}'
               ValueFrom: !Ref ${p2}Secret
-  `;
+`;
   }
 
   static insertAtTemplate(template, insertionKey, insertion) {
