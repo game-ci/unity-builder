@@ -41,6 +41,36 @@ class AWSBuildEnvironment {
     }
   }
 
+  static getParameterTemplate(p1) {
+    return `
+  ${p1}:
+    Type: String
+    Default: ''
+`;
+  }
+
+  static getSecretTemplate(p1) {
+    return `
+  ${p1}Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Join [ "", [ '${p1}', !Ref BUILDID ] ]
+      SecretString: !Ref ${p1}
+`;
+  }
+
+  static getSecretDefinitionTemplate(p1, p2) {
+    return `
+            - Name: '${p1}'
+              ValueFrom: !Ref ${p2}Secret`;
+  }
+
+  static insertAtTemplate(template, insertionKey, insertion) {
+    const index = template.search(insertionKey) + insertionKey.length + '\n'.length;
+    template = [template.slice(0, index), insertion, template.slice(index)].join('');
+    return template;
+  }
+
   static async setupCloudFormations(
     CF: SDK.CloudFormation,
     buildUid: string,
@@ -61,55 +91,28 @@ class AWSBuildEnvironment {
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
 
-    // Debug secrets
-    // core.info(JSON.stringify(secrets, undefined, 4));
-
-    for (const secret of secrets) {
-      const insertionStringParameters = 'p1 - input';
-      const insertionStringSecrets = 'p2 - secret';
-      const insertionStringContainerSecrets = 'p3 - container def';
-      const indexp1 =
-        taskDefCloudFormation.search(insertionStringParameters) + insertionStringParameters.length + '\n'.length;
-      const parameterTemplate = `
-  ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}:
-    Type: String
-    Default: ''
-`;
-      taskDefCloudFormation = [
-        taskDefCloudFormation.slice(0, indexp1),
-        parameterTemplate,
-        taskDefCloudFormation.slice(indexp1),
-      ].join('');
-      const indexp2 =
-        taskDefCloudFormation.search(insertionStringSecrets) + insertionStringSecrets.length + '\n'.length;
-      const secretTemplate = `
-  ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}Secret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ '${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}', !Ref BUILDID ] ]
-      SecretString: !Ref ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}
-`;
-      taskDefCloudFormation = [
-        taskDefCloudFormation.slice(0, indexp2),
-        secretTemplate,
-        taskDefCloudFormation.slice(indexp2),
-      ].join('');
-      const indexp3 =
-        taskDefCloudFormation.search(insertionStringContainerSecrets) + insertionStringContainerSecrets.length;
-      const containerDefinitionSecretTemplate = `
-            - Name: '${secret.EnvironmentVariable}'
-              ValueFrom: !Ref ${secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')}Secret`;
-      taskDefCloudFormation = [
-        taskDefCloudFormation.slice(0, indexp3),
-        containerDefinitionSecretTemplate,
-        taskDefCloudFormation.slice(indexp3),
-      ].join('');
-    }
-    const mappedSecrets = secrets.map((x) => {
-      return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
-    });
-
     try {
+      for (const secret of secrets) {
+        taskDefCloudFormation = this.insertAtTemplate(
+          taskDefCloudFormation,
+          'p1 - input',
+          this.getParameterTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+        );
+        taskDefCloudFormation = this.insertAtTemplate(
+          taskDefCloudFormation,
+          'p2 - secret',
+          this.getSecretTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+        );
+        taskDefCloudFormation = this.insertAtTemplate(
+          taskDefCloudFormation,
+          'p3 - container def',
+          this.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+        );
+      }
+      const mappedSecrets = secrets.map((x) => {
+        return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
+      });
+
       await CF.createStack({
         StackName: taskDefStackName,
         TemplateBody: taskDefCloudFormation,
@@ -173,7 +176,7 @@ class AWSBuildEnvironment {
 
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
-      await AWSBuildEnvironment.handleStackCreationFailure(error, CF, taskDefStackName, taskDefCloudFormation);
+      await AWSBuildEnvironment.handleStackCreationFailure(error, CF, taskDefStackName, taskDefCloudFormation, secrets);
 
       throw error;
     }
@@ -205,10 +208,11 @@ class AWSBuildEnvironment {
     CF: SDK.CloudFormation,
     taskDefStackName: string,
     taskDefCloudFormation: string,
+    secrets: RemoteBuilderSecret[],
   ) {
     const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
     const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
-
+    core.info(JSON.stringify(secrets, undefined, 4));
     core.info(taskDefCloudFormation);
     core.info(JSON.stringify(events, undefined, 4));
     core.info(JSON.stringify(resources, undefined, 4));
