@@ -41,6 +41,10 @@ class AWSBuildEnvironment {
     }
   }
 
+  // static async setupPlatformResources() {
+  //   throw new Error('Method not implemented.');
+  // }
+
   static getParameterTemplate(p1) {
     return `
   ${p1}:

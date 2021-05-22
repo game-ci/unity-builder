@@ -23,6 +23,7 @@ class RemoteBuilder {
           ParameterValue: token,
         },
       ];
+      // await RemoteBuilder.ProvisionPlatformResources();
       await RemoteBuilder.SetupStep(buildUid, buildParameters, branchName, defaultSecretsArray);
       await RemoteBuilder.BuildStep(buildUid, buildParameters, baseImage, defaultSecretsArray);
       await RemoteBuilder.CompressionStep(buildUid, buildParameters, branchName, defaultSecretsArray);
@@ -33,6 +34,9 @@ class RemoteBuilder {
       core.error(error);
     }
   }
+  // static async ProvisionPlatformResources() {
+  //   await AWSBuildPlatform.setupPlatformResources();
+  // }
 
   private static async DeployToSteam(
     buildUid: string,
@@ -336,6 +340,7 @@ class RemoteBuilder {
             echo 'Creating empty Library folder for cache'
             mkdir $libDir
             unzip -q $latest -d $libDir
+            rm -r $libDir
           else
             echo 'Cache does not exist'
           fi
