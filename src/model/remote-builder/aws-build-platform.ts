@@ -53,7 +53,7 @@ class AWSBuildEnvironment {
     return `
   ${p1}Secret:
     Type: AWS::SecretsManager::Secret
-    Properties: 
+    Properties:
       Name: !Join [ "", [ '${p1}', !Ref BUILDID ] ]
       SecretString: !Ref ${p1}
 `;
@@ -210,10 +210,10 @@ class AWSBuildEnvironment {
     taskDefCloudFormation: string,
     secrets: RemoteBuilderSecret[],
   ) {
-    const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
-    const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
     core.info(JSON.stringify(secrets, undefined, 4));
     core.info(taskDefCloudFormation);
+    const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
+    const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
     core.info(JSON.stringify(events, undefined, 4));
     core.info(JSON.stringify(resources, undefined, 4));
     core.error(error);
