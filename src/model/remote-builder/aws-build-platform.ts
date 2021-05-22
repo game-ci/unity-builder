@@ -225,6 +225,7 @@ class AWSBuildEnvironment {
   }
 
   static async cleanupResources(CF: SDK.CloudFormation, taskDef: RemoteBuilderTaskDef) {
+    core.info('Cleanup starting');
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
