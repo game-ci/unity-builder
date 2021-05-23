@@ -51,36 +51,7 @@ Parameters:
   EFSMountDirectory:
     Type: String
     Default: '/efsdata'
-  GithubToken:
-    Type: String
-    Default: '0'
-  UnityLicense:
-    Type: String
-    Default: '0'
-  UnityEmail:
-    Type: String
-    Default: '0'
-  UnityPassword:
-    Type: String
-    Default: '0'
-  UnitySerial:
-    Type: String
-    Default: '0'
-  AndroidKeystoreBase64:
-    Type: String
-    Default: '0'
-  AndroidKeystorePass:
-    Type: String
-    Default: '0'
-  AndroidKeyAliasPass:
-    Type: String
-    Default: '0'
-  AWSAccessKeyID:
-    Type: String
-    Default: '0'
-  AWSSecretAccessKey:
-    Type: String
-    Default: '0'
+  # template secrets p1 - input
 Mappings:
   SubnetConfig:
     VPC:
@@ -128,64 +99,8 @@ Resources:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
   
-  GithubTokenSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'GithubToken', !Ref BUILDID ] ]
-      SecretString: !Ref GithubToken
-  
-  UnityLicenseSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'UnityLicense', !Ref BUILDID ] ]
-      SecretString: !Ref UnityLicense  
-      
-  UnityEmailSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'UnityEmail', !Ref BUILDID ] ]
-      SecretString: !Ref UnityEmail
-      
-  UnityPasswordSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'UnityPassword', !Ref BUILDID ] ]
-      SecretString: !Ref UnityPassword
-      
-  UnitySerialSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'UnitySerial', !Ref BUILDID ] ]
-      SecretString: !Ref UnitySerial
-  
-  AndroidKeystoreBase64Secret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'AndroidKeystoreBase64', !Ref BUILDID ] ]
-      SecretString: !Ref AndroidKeystoreBase64
-  
-  AndroidKeystorePassSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'AndroidKeystorePass', !Ref BUILDID ] ]
-      SecretString: !Ref AndroidKeystorePass
-  
-  AndroidKeyAliasPassSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'AndroidKeyAliasPass', !Ref BUILDID ] ]
-      SecretString: !Ref AndroidKeyAliasPass
-  AWSAccessKeyIDSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'AWSAccessKeyID', !Ref BUILDID ] ]
-      SecretString: !Ref AWSAccessKeyID
-  AWSSecretAccessKeySecret:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Join [ "", [ 'AWSSecretAccessKey', !Ref BUILDID ] ]
-      SecretString: !Ref AWSSecretAccessKey
-  
+  # template secrets p2 - secret
+
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -225,29 +140,13 @@ Resources:
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
               Value: 'yes'
+            # template - env vars
           MountPoints:
             - SourceVolume: efs-data
               ContainerPath: !Ref EFSMountDirectory
               ReadOnly: false
           Secrets:
-            - Name: 'GITHUB_TOKEN'
-              ValueFrom: !Ref GithubTokenSecret
-            - Name: 'UNITY_LICENSE'
-              ValueFrom: !Ref UnityLicenseSecret
-            - Name: 'UNITY_EMAIL'
-              ValueFrom: !Ref UnityEmailSecret
-            - Name: 'UNITY_PASSWORD'
-              ValueFrom: !Ref UnityPasswordSecret
-            - Name: 'UNITY_SERIAL'
-              ValueFrom: !Ref UnitySerialSecret
-            - Name: 'ANDROID_KEYSTORE_BASE64'
-              ValueFrom: !Ref AndroidKeystoreBase64Secret
-            - Name: 'ANDROID_KEYSTORE_PASS'
-              ValueFrom: !Ref AndroidKeystorePassSecret
-            - Name: 'AWS_ACCESS_KEY_ID'
-              ValueFrom: !Ref AWSAccessKeyIDSecret
-            - Name: 'AWS_SECRET_ACCESS_KEY'
-              ValueFrom: !Ref AWSSecretAccessKeySecret
+            # template secrets p3 - container def
           LogConfiguration:
             LogDriver: awslogs
             Options:
