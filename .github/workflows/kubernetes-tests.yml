@@ -34,22 +34,23 @@ jobs:
           lfs: true
 
       ###########################
-      #         Spin up         #
+      #          Setup          #
       ###########################
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: ./dist/bootstrapper/ApplyClusterAndAcquireLock.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
+      - name: Get GKE cluster credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
 
       ###########################
       #          Build          #
       ###########################
-      - uses: frostebite/File-To-Base64@master
-        id: read-base64
-        with:
-          filePath: ~/.kube/config
+      # - uses: frostebite/File-To-Base64@master
+      #   id: read-base64
+      #   with:
+      #     filePath: ~/.kube/config
       - uses: ./
         id: k8s-unity-build
         with:
@@ -62,19 +63,13 @@ jobs:
       ###########################
       #          Upload         #
       ###########################
-      - uses: frostebite/K8s-Download-Volume@master
-        with:
-          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
-          volume: ${{ steps.k8s-unity-build.outputs.volume }}
-          sourcePath: repo/build/
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Kubernetes Build (${{ matrix.targetPlatform }})
-          path: k8s-volume-download
-          retention-days: 14
-
-      ###########################
-      #        Spin down        #
-      ###########################
-      - run: ./dist/bootstrapper/ReleaseLockAndAttemptShutdown.sh ${{ env.GKE_PROJECT }} ${{ env.GKE_CLUSTER }} ${{ env.GKE_ZONE }}
-        if: ${{ always() }}
+      # - uses: frostebite/K8s-Download-Volume@master
+      #   with:
+      #     kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+      #     volume: ${{ steps.k8s-unity-build.outputs.volume }}
+      #     sourcePath: repo/build/
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: Kubernetes Build (${{ matrix.targetPlatform }})
+      #     path: k8s-volume-download
+      #     retention-days: 14
