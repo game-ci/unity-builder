@@ -193,6 +193,9 @@ class Kubernetes {
                 '-c',
                 `ls
                 for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
+                ls /data
+                ls /data/builder
+                ls /data/builder/action
                 cp -r /data/builder/action/default-build-script /UnityBuilderAction
                 cp -r /data/builder/action/entrypoint.sh /entrypoint.sh
                 cp -r /data/builder/action/steps /steps
