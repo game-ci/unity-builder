@@ -342,12 +342,7 @@ class Kubernetes {
     );
     let logs;
     try {
-      logs = await this.kubeClient.readNamespacedPodLog(
-        pod.metadata?.name || '',
-        this.namespace,
-        pod.status?.containerStatuses?.[0].containerID,
-        true,
-      );
+      logs = await this.kubeClient.readNamespacedPodLog(pod.metadata?.name || '', this.namespace, undefined, true);
     } catch (error) {
       core.error(error);
       throw error;
