@@ -298,15 +298,6 @@ class Kubernetes {
 
   static async watchPodUntilReadyAndRead() {
     let ready = false;
-    new Promise(() =>
-      setTimeout(() => {
-        if (!ready) {
-          const error = new Error('failed to find pod - timeout');
-          core.error(error);
-          throw error;
-        }
-      }, pollInterval * 15),
-    );
 
     while (!ready) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
