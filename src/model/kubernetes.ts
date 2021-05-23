@@ -291,7 +291,8 @@ class Kubernetes {
       },
     };
     job.spec.backoffLimit = 1;
-    await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
+    const jobResults = await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
+    core.info(jobResults.body);
     core.info('Job created');
   }
 
@@ -318,39 +319,15 @@ class Kubernetes {
     }
 
     core.info(`Watching build job ${podname}`);
-    let logQueryTime;
-    let complete = false;
-    while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
 
-      const podStatus = await this.kubeClient.readNamespacedPod(podname, this.namespace);
-      if (podStatus.body?.status?.phase !== 'Running') {
-        complete = true;
-      }
-
-      const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, undefined, true);
-
-      if (logs.body !== undefined) {
-        const arrayOfLines = logs.body?.match(/[^\n\r]+/g)?.reverse();
-        if (!arrayOfLines) {
-          continue;
-        }
-        for (const element of arrayOfLines) {
-          const [time, ...line] = element.split(' ');
-          if (time !== logQueryTime) {
-            core.info(line.join(' '));
-          } else {
-            break;
-          }
-        }
-
-        if (podStatus.body?.status?.phase === 'Failed') {
-          throw new Error('Kubernetes job failed');
-        }
-
-        logQueryTime = arrayOfLines[0].split(' ')[0];
-      }
-    }
+    const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, undefined, true);
+    await new Promise((resolve) => {
+      logs.response.on('data', (chunk) => {
+        core.info(chunk);
+      });
+      logs.response.on('close', resolve);
+      logs.response.on('end', resolve);
+    });
   }
 
   static async cleanup() {
