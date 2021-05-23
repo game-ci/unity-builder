@@ -84,10 +84,10 @@ class RemoteBuilder {
             mkdir "${branchName}"
           fi
           cd "${branchName}"
-          echo " "
+          
           echo "Cached Libraries for ${branchName} from previous builds:"
           ls
-          echo " "
+          
           ls "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}"
           libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
           if [ -d "$libDir" ]; then
@@ -108,16 +108,16 @@ class RemoteBuilder {
             echo 'Cache does not exist'
           fi
           # Print out important directories
-          echo ' '
+          
           echo 'Repo:'
           ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
-          echo ' '
+          
           echo 'Project:'
           ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}
-          echo ' '
+          
           echo 'Library:'
           ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/
-          echo ' '
+          
       `,
       ],
       `/${efsDirectoryName}`,
