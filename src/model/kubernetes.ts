@@ -331,7 +331,13 @@ class Kubernetes {
   static async watchBuildJobUntilFinished() {
     const pod = (await Kubernetes.watchPodUntilReadyAndRead()) || {};
 
-    core.info(`Watching build job ${pod.metadata?.name} ${pod.status?.containerStatuses?.[0].state}`);
+    core.info(
+      `Watching build job ${pod.metadata?.name} ${JSON.stringify(
+        pod.status?.containerStatuses?.[0].state,
+        undefined,
+        4,
+      )}`,
+    );
 
     core.info(
       JSON.stringify(
