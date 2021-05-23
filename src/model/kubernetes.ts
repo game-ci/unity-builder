@@ -333,12 +333,29 @@ class Kubernetes {
 
     core.info(`Watching build job ${pod.metadata?.name}`);
 
-    const logs = await this.kubeClient.readNamespacedPodLog(
-      pod.metadata?.name || '',
-      this.namespace,
-      pod.status?.containerStatuses?.[0].containerID,
-      true,
+    core.info(
+      JSON.stringify(
+        {
+          name: pod.metadata?.name || '',
+          namespace: this.namespace,
+          container: pod.status?.containerStatuses?.[0].containerID,
+        },
+        undefined,
+        4,
+      ),
     );
+    let logs;
+    try {
+      logs = await this.kubeClient.readNamespacedPodLog(
+        pod.metadata?.name || '',
+        this.namespace,
+        pod.status?.containerStatuses?.[0].containerID,
+        true,
+      );
+    } catch (error) {
+      core.error(error);
+      throw error;
+    }
 
     core.info('opening log stream');
 
