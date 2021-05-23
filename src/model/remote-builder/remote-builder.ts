@@ -284,6 +284,9 @@ class RemoteBuilder {
             zip -r lib-${buildUid}.zip .*
             mv lib-${buildUid}.zip /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip
             cd ../../
+            ls
+            echo ' '
+            ls ${buildParameters.buildPath}
             zip -r build-${buildUid}.zip ${buildParameters.buildPath}/*
             mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
           `,
