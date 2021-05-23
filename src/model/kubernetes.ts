@@ -297,7 +297,7 @@ class Kubernetes {
   }
 
   static async watchBuildJobUntilFinished() {
-    let podname;
+    let podname, containerId;
     let ready = false;
     while (!ready) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
@@ -313,7 +313,7 @@ class Kubernetes {
           } else {
             ready = true;
             podname = element.metadata?.name;
-            core.info(JSON.stringify(element, undefined, 4));
+            containerId = element.status?.containerStatuses?.[0].containerID;
           }
         }
       }
@@ -321,7 +321,7 @@ class Kubernetes {
 
     core.info(`Watching build job ${podname}`);
 
-    const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, undefined, true);
+    const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, containerId, true);
     await new Promise((resolve, reject) => {
       logs.response.on('data', (chunk) => {
         core.info(chunk);
