@@ -1,8 +1,7 @@
-import { customAlphabet } from 'nanoid';
 import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
-import RemoteBuilderConstants from './remote-builder-constants';
 import { BuildParameters } from '..';
+import RemoteBuilderNamespace from './remote-builder-namespace';
 const repositoryDirectoryName = 'repo';
 const efsDirectoryName = 'data';
 const cacheDirectoryName = 'cache';
@@ -12,10 +11,10 @@ class RemoteBuilder {
   static async build(buildParameters: BuildParameters, baseImage) {
     try {
       this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
-      const nanoid = customAlphabet(RemoteBuilderConstants.alphabet, 4);
-      const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
-        .replace('Standalone', '')
-        .replace('standalone', '')}-${nanoid()}`;
+      const buildUid = RemoteBuilderNamespace.generateBuildName(
+        process.env.GITHUB_RUN_NUMBER,
+        buildParameters.platform,
+      );
       const defaultBranchName =
         process.env.GITHUB_REF?.split('/')
           .filter((x) => {
