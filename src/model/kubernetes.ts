@@ -339,13 +339,21 @@ class Kubernetes {
       pod.status?.containerStatuses?.[0].containerID,
       true,
     );
+
+    core.info('opening log stream');
+
     await new Promise((resolve, reject) => {
-      logs.response.on('data', (chunk) => {
-        core.info(chunk);
-      });
-      logs.response.on('close', resolve);
-      logs.response.on('error', reject);
-      logs.response.on('end', resolve);
+      try {
+        logs.response.on('data', (chunk) => {
+          core.info(chunk);
+        });
+        logs.response.on('close', resolve);
+        logs.response.on('error', reject);
+        logs.response.on('end', resolve);
+      } catch (error) {
+        core.error(error);
+        throw error;
+      }
     });
   }
 
