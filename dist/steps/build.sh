@@ -109,7 +109,6 @@ echo "###########################"
 echo ""
 
 unity-editor \
-  -nographics \
   -logfile /dev/stdout \
   -quit \
   -customBuildName "$BUILD_NAME" \

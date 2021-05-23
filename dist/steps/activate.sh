@@ -25,7 +25,6 @@ if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
 
   # Activate license
   ACTIVATION_OUTPUT=$(unity-editor \
-      -nographics \
       -logFile /dev/stdout \
       -quit \
       -manualLicenseFile $FILE_PATH)
@@ -62,8 +61,6 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
 
   # Activate license
   unity-editor \
-    -batchmode \
-    -nographics \
     -logFile /dev/stdout \
     -quit \
     -serial "$UNITY_SERIAL" \
