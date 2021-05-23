@@ -1,7 +1,7 @@
 // @ts-ignore
 import { Client, KubeConfig } from 'kubernetes-client';
 import Request from 'kubernetes-client/backends/request';
-
+const k8s = require('@kubernetes/client-node');
 const core = require('@actions/core');
 const base64 = require('base-64');
 
@@ -18,6 +18,10 @@ class Kubernetes {
   private static namespace: string;
 
   static async runBuildJob(buildParameters, baseImage) {
+    core.info('Starting up k8s');
+    const kc = new k8s.KubeConfig();
+    kc.loadFromDefault();
+    core.info('loaded from default');
     const kubeconfig = new KubeConfig();
     kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
     const backend = new Request({ kubeconfig });
