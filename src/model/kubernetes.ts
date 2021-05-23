@@ -199,9 +199,9 @@ class Kubernetes {
                 cp -r /data/builder/dist/default-build-script /UnityBuilderAction
                 cp -r /data/builder/dist/entrypoint.sh /entrypoint.sh
                 cp -r /data/builder/dist/steps /steps
-                chmod -R +x /entrypoint.sh;
-                chmod -R +x /steps;
-                /entrypoint.sh;
+                chmod -R +x /entrypoint.sh
+                chmod -R +x /steps
+                /entrypoint.sh
                 `,
               ],
               resources: {
@@ -328,19 +328,7 @@ class Kubernetes {
         complete = true;
       }
 
-      const logs = await this.kubeClient.readNamespacedPodLog(
-        podname,
-        this.namespace,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        logQueryTime,
-        undefined,
-        true,
-      );
+      const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, undefined, true);
 
       if (logs.body !== undefined) {
         const arrayOfLines = logs.body?.match(/[^\n\r]+/g)?.reverse();
