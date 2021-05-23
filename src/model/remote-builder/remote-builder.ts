@@ -32,7 +32,6 @@ class RemoteBuilder {
           ParameterValue: token,
         },
       ];
-      // await RemoteBuilder.ProvisionPlatformResources();
       await RemoteBuilder.SetupStep(buildUid, buildParameters, branchName, defaultSecretsArray);
       await RemoteBuilder.BuildStep(buildUid, buildParameters, baseImage, defaultSecretsArray);
       await RemoteBuilder.CompressionStep(buildUid, buildParameters, branchName, defaultSecretsArray);
@@ -45,9 +44,6 @@ class RemoteBuilder {
       core.error(error);
     }
   }
-  // static async ProvisionPlatformResources() {
-  //   await AWSBuildPlatform.setupPlatformResources();
-  // }
 
   private static async SetupStep(
     buildUid: string,
