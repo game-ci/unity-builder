@@ -346,7 +346,7 @@ class Kubernetes {
       logs = await this.kubeClient.readNamespacedPodLog(
         pod.metadata?.name || '',
         this.namespace,
-        pod.status?.containerStatuses?.[0].containerID,
+        pod.status?.containerStatuses?.[0].name,
         true,
       );
     } catch (error) {
