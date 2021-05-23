@@ -8,7 +8,7 @@ on:
 #      - '.github/**'
 
 env:
-  GKE_ZONE: 'us-central1-c'
+  GKE_ZONE: 'us-central1'
   GKE_REGION: 'us-central1'
   GKE_PROJECT: 'unitykubernetesbuilder'
   GKE_CLUSTER: 'unity-builder-cluster'
