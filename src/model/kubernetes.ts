@@ -345,7 +345,7 @@ class Kubernetes {
       logs = await this.kubeClient.readNamespacedPodLog(
         pod.metadata?.name || '',
         this.namespace,
-        pod.status?.containerStatuses?.[0].name,
+        pod.status?.containerStatuses?.[0].containerID,
         true,
       );
     } catch (error) {
@@ -358,7 +358,7 @@ class Kubernetes {
     await new Promise((resolve, reject) => {
       try {
         logs.response.on('data', (chunk) => {
-          core.info(chunk);
+          core.info(chunk.toString());
         });
         logs.response.on('close', resolve);
         logs.response.on('error', reject);
