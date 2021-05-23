@@ -5,7 +5,7 @@ import RemoteBuilderEnvironmentVariable from './remote-builder-environment-varia
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import RemoteBuilderTaskDef from './remote-builder-task-def';
-import RemoteBuilderAlphabet from './remote-builder-alphabet';
+import RemoteBuilderConstants from './remote-builder-constants';
 import AWSBuildRunner from './aws-build-runner';
 
 class AWSBuildEnvironment {
@@ -87,7 +87,7 @@ class AWSBuildEnvironment {
     workingdir: string,
     secrets: RemoteBuilderSecret[],
   ): Promise<RemoteBuilderTaskDef> {
-    const logid = customAlphabet(RemoteBuilderAlphabet.alphabet, 9)();
+    const logid = customAlphabet(RemoteBuilderConstants.alphabet, 9)();
     commands[1] += `
       echo "${logid}"
     `;
