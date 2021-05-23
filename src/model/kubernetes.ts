@@ -296,9 +296,18 @@ class Kubernetes {
     core.info('Job created');
   }
 
-  static async watchBuildJobUntilFinished() {
-    let podname, containerId;
+  static async watchPodUntilReadyAndRead() {
     let ready = false;
+    new Promise(() =>
+      setTimeout(() => {
+        if (!ready) {
+          const error = new Error('failed to find pod - timeout');
+          core.error(error);
+          throw error;
+        }
+      }, pollInterval * 15),
+    );
+
     while (!ready) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
       const pods = await this.kubeClient.listNamespacedPod(this.namespace);
@@ -312,16 +321,24 @@ class Kubernetes {
             core.error('Kubernetes job failed');
           } else {
             ready = true;
-            podname = element.metadata?.name;
-            containerId = element.status?.containerStatuses?.[0].containerID;
+            return element;
           }
         }
       }
     }
+  }
 
-    core.info(`Watching build job ${podname}`);
+  static async watchBuildJobUntilFinished() {
+    const pod = (await Kubernetes.watchPodUntilReadyAndRead()) || {};
 
-    const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, containerId, true);
+    core.info(`Watching build job ${pod.metadata?.name}`);
+
+    const logs = await this.kubeClient.readNamespacedPodLog(
+      pod.metadata?.name || '',
+      this.namespace,
+      pod.status?.containerStatuses?.[0].containerID,
+      true,
+    );
     await new Promise((resolve, reject) => {
       logs.response.on('data', (chunk) => {
         core.info(chunk);
