@@ -16,7 +16,14 @@ class RemoteBuilder {
       const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
         .replace('Standalone', '')
         .replace('standalone', '')}-${nanoid()}`;
-      const branchName = process.env.GITHUB_REF?.split('/').reverse()[0];
+      const defaultBranchName =
+        process.env.GITHUB_REF?.split('/')
+          .filter((x) => {
+            x = x[0].toUpperCase() + x.slice(1);
+            return x;
+          })
+          .join('') || '';
+      const branchName = process.env.REMOTE_BUILDER_CACHE !== '' ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
       const token: string = buildParameters.githubToken;
       const defaultSecretsArray = [
         {
