@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, AWS } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, RemoteBuilder } from './model';
 
 async function run() {
   try {
@@ -20,7 +20,7 @@ async function run() {
 
       case 'aws':
         core.info('Building with AWS');
-        await AWS.runBuildJob(buildParameters, baseImage);
+        await RemoteBuilder.build(buildParameters, baseImage);
         break;
 
       // default and local case
