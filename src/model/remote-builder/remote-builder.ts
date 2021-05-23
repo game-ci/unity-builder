@@ -11,7 +11,7 @@ class RemoteBuilder {
   static SteamDeploy: boolean = false;
   static async build(buildParameters: BuildParameters, baseImage) {
     try {
-      this.SteamDeploy = process.env.STEAM_DEPLOY !== '' || false;
+      this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
       const nanoid = customAlphabet(RemoteBuilderConstants.alphabet, 4);
       const buildUid = `${process.env.GITHUB_RUN_NUMBER}-${buildParameters.platform
         .replace('Standalone', '')
@@ -23,7 +23,8 @@ class RemoteBuilder {
             return x;
           })
           .join('') || '';
-      const branchName = process.env.REMOTE_BUILDER_CACHE !== '' ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
+      const branchName =
+        process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
       const token: string = buildParameters.githubToken;
       const defaultSecretsArray = [
         {
@@ -99,7 +100,7 @@ class RemoteBuilder {
             mkdir $libDir
             unzip -q $latest -d $libDir
             # purge cache
-            ${process.env.PURGE_REMOTE_BUILDER_CACHE === '' ? '#' : ''} rm -r $libDir
+            ${process.env.PURGE_REMOTE_BUILDER_CACHE === undefined ? '#' : ''} rm -r $libDir
           else
             echo 'Cache does not exist'
           fi
