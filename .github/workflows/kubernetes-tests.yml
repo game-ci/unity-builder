@@ -54,6 +54,7 @@ jobs:
       - uses: ./
         id: k8s-unity-build
         with:
+          remoteBuildCluster: k8s
           targetPlatform: ${{ matrix.targetPlatform }}
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
