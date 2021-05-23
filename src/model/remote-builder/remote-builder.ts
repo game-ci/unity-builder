@@ -397,7 +397,7 @@ class RemoteBuilder {
         {
           EnvironmentVariable: 'INPUT_ROOTPATH',
           ParameterKey: 'rootPath',
-          ParameterValue: process.env.ROOT_PATH || '',
+          ParameterValue: buildParameters.buildPath,
         },
         {
           EnvironmentVariable: 'INPUT_RELEASEBRANCH',
