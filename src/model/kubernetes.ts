@@ -291,8 +291,7 @@ class Kubernetes {
       },
     };
     job.spec.backoffLimit = 1;
-    const jobResults = await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
-    core.info(JSON.stringify(jobResults.body, undefined, 4));
+    await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
     core.info('Job created');
   }
 
