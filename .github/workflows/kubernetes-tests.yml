@@ -1,7 +1,7 @@
 name: Kubernetes
 
 on:
-  workflow_dispatch: {}
+  push: { branches: [remote-builder/k8s] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
