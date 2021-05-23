@@ -60,7 +60,9 @@ class RemoteBuilder {
           apk add git-lfs;
           apk add jq;
           # Get source repo for project to be built and game-ci repo for utilties
-          git clone https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git ${buildUid}/${repositoryDirectoryName} -q
+          git clone https://${buildParameters.githubToken}@github.com/${
+          process.env.GITHUB_REPOSITORY
+        }.git ${buildUid}/${repositoryDirectoryName} -q
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${buildUid}/steam -q
           cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
@@ -94,7 +96,7 @@ class RemoteBuilder {
             mkdir $libDir
             unzip -q $latest -d $libDir
             # purge cache
-            # rm -r $libDir
+            ${process.env.PURGE_REMOTE_BUILDER_CACHE === '' ? '#' : ''} rm -r $libDir
           else
             echo 'Cache does not exist'
           fi
@@ -378,32 +380,32 @@ class RemoteBuilder {
         {
           EnvironmentVariable: 'INPUT_APPID',
           ParameterKey: 'appId',
-          ParameterValue: 'XX',
+          ParameterValue: process.env.APP_ID || '',
         },
         {
           EnvironmentVariable: 'INPUT_BUILDDESCRIPTION',
           ParameterKey: 'buildDescription',
-          ParameterValue: 'XX',
+          ParameterValue: process.env.BUILD_DESCRIPTION || '',
         },
         {
           EnvironmentVariable: 'INPUT_ROOTPATH',
           ParameterKey: 'rootPath',
-          ParameterValue: 'XX',
+          ParameterValue: process.env.ROOT_PATH || '',
         },
         {
           EnvironmentVariable: 'INPUT_RELEASEBRANCH',
           ParameterKey: 'releaseBranch',
-          ParameterValue: '',
+          ParameterValue: process.env.RELEASE_BRANCH || '',
         },
         {
           EnvironmentVariable: 'INPUT_LOCALCONTENTSERVER',
           ParameterKey: 'localContentServer',
-          ParameterValue: '',
+          ParameterValue: process.env.LOCAL_CONTENT_SERVER || '',
         },
         {
           EnvironmentVariable: 'INPUT_PREVIEWENABLED',
           ParameterKey: 'previewEnabled',
-          ParameterValue: '',
+          ParameterValue: process.env.PREVIEW_ENABLED || '',
         },
         ...defaultSecretsArray,
       ],
