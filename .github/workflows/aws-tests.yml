@@ -1,10 +1,10 @@
 name: AWS
 
 on:
-  push: { branches: [aws, aws-ts-clean] }
+  push: { branches: [aws, remote-builder/refactor] }
 
 env:
-  AWS_REGION: "eu-west-1"
+  AWS_REGION: 'eu-west-1'
 
 jobs:
   buildForAllPlatforms:
@@ -17,7 +17,7 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-        #  - 2019.2.11f1
+          #  - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
           #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
