@@ -292,7 +292,7 @@ class Kubernetes {
     };
     job.spec.backoffLimit = 1;
     const jobResults = await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
-    core.info(jobResults.body);
+    core.info(JSON.stringify(jobResults.body, undefined, 4));
     core.info('Job created');
   }
 
@@ -313,6 +313,7 @@ class Kubernetes {
           } else {
             ready = true;
             podname = element.metadata?.name;
+            core.info(JSON.stringify(element, undefined, 4));
           }
         }
       }
@@ -321,11 +322,12 @@ class Kubernetes {
     core.info(`Watching build job ${podname}`);
 
     const logs = await this.kubeClient.readNamespacedPodLog(podname, this.namespace, undefined, true);
-    await new Promise((resolve) => {
+    await new Promise((resolve, reject) => {
       logs.response.on('data', (chunk) => {
         core.info(chunk);
       });
       logs.response.on('close', resolve);
+      logs.response.on('error', reject);
       logs.response.on('end', resolve);
     });
   }
