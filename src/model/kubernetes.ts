@@ -47,11 +47,19 @@ class Kubernetes {
     this.jobName = jobName;
     this.namespace = namespace;
 
+    // setup
     await Kubernetes.createSecret();
     await Kubernetes.createPersistentVolumeClaim();
-    // await Kubernetes.scheduleBuildJob();
-    // await Kubernetes.watchBuildJobUntilFinished();
-    // await Kubernetes.cleanup();
+
+    // start
+    await Kubernetes.scheduleBuildJob();
+
+    // watch
+    await Kubernetes.watchPersistentVolumeClaimUntilReady();
+    await Kubernetes.watchBuildJobUntilFinished();
+
+    // cleanup
+    await Kubernetes.cleanup();
 
     core.setOutput('volume', pvcName);
   }
@@ -99,8 +107,6 @@ class Kubernetes {
     };
     await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
     core.info('Persistent Volume created, waiting for ready state...');
-    await Kubernetes.watchPersistentVolumeClaimUntilReady();
-    core.info('Persistent Volume ready for claims');
   }
 
   static async watchPersistentVolumeClaimUntilReady() {
@@ -109,6 +115,8 @@ class Kubernetes {
 
     if (queryResult.body.status?.phase === 'Pending') {
       await Kubernetes.watchPersistentVolumeClaimUntilReady();
+    } else {
+      core.info('Persistent Volume ready for claims');
     }
   }
 
@@ -283,70 +291,80 @@ class Kubernetes {
     core.info('Job created');
   }
 
-  // static async watchBuildJobUntilFinished() {
-  //   let podname;
-  //   let ready = false;
-  //   while (!ready) {
-  //     await new Promise((resolve) => setTimeout(resolve, pollInterval));
-  //     const pods = await this.kubeClient.api.v1.namespaces(this.namespace).pods.get();
-  //     for (let index = 0; index < pods.body.items.length; index++) {
-  //       const element = pods.body.items[index];
-  //       if (element.metadata.labels['job-name'] === this.jobName && element.status.phase !== 'Pending') {
-  //         core.info('Pod no longer pending');
-  //         if (element.status.phase === 'Failure') {
-  //           core.error('Kubernetes job failed');
-  //         } else {
-  //           ready = true;
-  //           podname = element.metadata.name;
-  //         }
-  //       }
-  //     }
-  //   }
+  static async watchBuildJobUntilFinished() {
+    let podname;
+    let ready = false;
+    while (!ready) {
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      const pods = await this.kubeClient.listNamespacedPod(this.namespace);
+      for (let index = 0; index < pods.body.items.length; index++) {
+        const element = pods.body.items[index];
+        const jobname = element.metadata?.labels?.['job-name'];
+        const phase = element.status?.phase;
+        if (jobname === this.jobName && phase !== 'Pending') {
+          core.info('Pod no longer pending');
+          if (phase === 'Failure') {
+            core.error('Kubernetes job failed');
+          } else {
+            ready = true;
+            podname = element.metadata?.name;
+          }
+        }
+      }
+    }
 
-  //   core.info(`Watching build job ${podname}`);
-  //   let logQueryTime;
-  //   let complete = false;
-  //   while (!complete) {
-  //     await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    core.info(`Watching build job ${podname}`);
+    let logQueryTime;
+    let complete = false;
+    while (!complete) {
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
 
-  //     const podStatus = await this.kubeClient.api.v1.namespaces(this.namespace).pod(podname).get();
-  //     if (podStatus.body.status.phase !== 'Running') {
-  //       complete = true;
-  //     }
+      const podStatus = await this.kubeClient.readNamespacedPod(podname, this.namespace);
+      if (podStatus.body?.status?.phase !== 'Running') {
+        complete = true;
+      }
 
-  //     const logs = await this.kubeClient.api.v1
-  //       .namespaces(this.namespace)
-  //       .pod(podname)
-  //       .log.get({
-  //         qs: {
-  //           sinceTime: logQueryTime,
-  //           timestamps: true,
-  //         },
-  //       });
-  //     if (logs.body !== undefined) {
-  //       const arrayOfLines = logs.body.match(/[^\n\r]+/g).reverse();
-  //       for (const element of arrayOfLines) {
-  //         const [time, ...line] = element.split(' ');
-  //         if (time !== logQueryTime) {
-  //           core.info(line.join(' '));
-  //         } else {
-  //           break;
-  //         }
-  //       }
+      const logs = await this.kubeClient.readNamespacedPodLog(
+        podname,
+        this.namespace,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        logQueryTime,
+        undefined,
+        true,
+      );
 
-  //       if (podStatus.body.status.phase === 'Failed') {
-  //         throw new Error('Kubernetes job failed');
-  //       }
+      if (logs.body !== undefined) {
+        const arrayOfLines = logs.body?.match(/[^\n\r]+/g)?.reverse();
+        if (!arrayOfLines) {
+          continue;
+        }
+        for (const element of arrayOfLines) {
+          const [time, ...line] = element.split(' ');
+          if (time !== logQueryTime) {
+            core.info(line.join(' '));
+          } else {
+            break;
+          }
+        }
 
-  //       logQueryTime = arrayOfLines[0].split(' ')[0];
-  //     }
-  //   }
-  // }
+        if (podStatus.body?.status?.phase === 'Failed') {
+          throw new Error('Kubernetes job failed');
+        }
 
-  // static async cleanup() {
-  //   await this.kubeClient.apis.batch.v1.namespaces(this.namespace).jobs(this.jobName).delete();
-  //   await this.kubeClient.api.v1.namespaces(this.namespace).secrets(this.secretName).delete();
-  // }
+        logQueryTime = arrayOfLines[0].split(' ')[0];
+      }
+    }
+  }
+
+  static async cleanup() {
+    await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
+    await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+  }
 
   static uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
