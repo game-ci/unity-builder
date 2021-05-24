@@ -339,35 +339,8 @@ class Kubernetes {
         4,
       ),
     );
-    try {
-      await new Promise((resolve, reject) => {
-        this.kubeClient
-          .readNamespacedPodLog(pod.metadata?.name || '', this.namespace, undefined, true)
-          // eslint-disable-next-line github/no-then
-          .then((logs) => {
-            try {
-              logs.response.on('data', (chunk) => {
-                core.info(chunk.toString());
-              });
-              logs.response.on('close', resolve);
-              logs.response.on('error', reject);
-              logs.response.on('end', resolve);
-            } catch (error) {
-              core.error(error);
-              throw error;
-            }
-          })
-          // eslint-disable-next-line github/no-then
-          .catch((error) => {
-            reject(error);
-          });
-      });
-
-      core.info('opening log stream');
-    } catch (error) {
-      core.error(error);
-      throw error;
-    }
+    const logs = await this.kubeClient.readNamespacedPodLog(pod.metadata?.name || '', this.namespace);
+    core.info(JSON.stringify(logs.body));
   }
 
   static async cleanup() {
