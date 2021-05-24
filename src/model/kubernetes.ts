@@ -400,6 +400,8 @@ class Kubernetes {
       throw error;
     }
 
+    core.info(JSON.stringify(logs, undefined, 4));
+
     core.info('opening log stream');
 
     await new Promise((resolve, reject) => {
