@@ -393,7 +393,7 @@ class Kubernetes {
         this.kubeConfig,
         this.namespace,
         pod.metadata?.name || '',
-        pod.status?.containerStatuses?.[0].name || '',
+        pod.status?.containerStatuses?.[0].containerID || '',
       );
     } catch (error) {
       core.error(error);
