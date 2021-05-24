@@ -1,12 +1,16 @@
 // @ts-ignore
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '.';
+import fetch, { Response } from 'node-fetch';
+import request from 'request';
 const core = require('@actions/core');
+const https = require('https');
 const base64 = require('base-64');
 
 const pollInterval = 10000;
 
 class Kubernetes {
+  private static kubeConfig: k8s.KubeConfig;
   private static kubeClient: k8s.CoreV1Api;
   private static kubeClientBatch: k8s.BatchV1Api;
   private static buildId: string;
@@ -37,6 +41,7 @@ class Kubernetes {
     const jobName = `unity-builder-job-${buildId}`;
     const namespace = 'default';
 
+    this.kubeConfig = kc;
     this.kubeClient = k8sApi;
     this.kubeClientBatch = k8sBatchApi;
     this.buildId = buildId;
@@ -318,6 +323,48 @@ class Kubernetes {
     }
   }
 
+  static async getLogs(
+    config: k8s.KubeConfig,
+    namespace: string,
+    podName: string,
+    container: string,
+  ): Promise<Response> {
+    const cluster = config.getCurrentCluster();
+    if (!cluster) {
+      throw new Error('No current cluster found');
+    }
+    const server = cluster.server;
+    const parameters = new URLSearchParams({ container, follow: 'true' });
+
+    const url = `${server}/api/v1/namespaces/${encodeURIComponent(namespace)}/pods/${encodeURIComponent(
+      podName,
+    )}/log?${parameters}`;
+    const options = await Kubernetes.buildOptions(config, url);
+    return await fetch(url, options);
+  }
+
+  static async buildOptions(config: k8s.KubeConfig, url: string) {
+    const draftOptions: request.Options = {
+      url,
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
+    await config.applyToRequest(draftOptions);
+    const { headers, ca, key, cert } = draftOptions;
+    // fetch has a different parameter handling for ssl than request lib, this i
+    const httpsAgent = new https.Agent({
+      cert,
+      ca,
+      key,
+    });
+    return {
+      agent: httpsAgent,
+      headers,
+    };
+  }
+
   static async watchBuildJobUntilFinished() {
     const pod = (await Kubernetes.watchPodUntilReadyAndRead()) || {};
 
@@ -342,7 +389,12 @@ class Kubernetes {
     );
     let logs;
     try {
-      logs = await this.kubeClient.readNamespacedPodLog(pod.metadata?.name || '', this.namespace, undefined, true);
+      logs = await Kubernetes.getLogs(
+        this.kubeConfig,
+        this.namespace,
+        pod.metadata?.name || '',
+        pod.status?.containerStatuses?.[0].name || '',
+      );
     } catch (error) {
       core.error(error);
       throw error;
