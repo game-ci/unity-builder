@@ -340,7 +340,7 @@ class Kubernetes {
       ),
     );
     const logs = await this.kubeClient.readNamespacedPodLog(pod.metadata?.name || '', this.namespace);
-    core.info(JSON.stringify(logs.body));
+    core.info(logs.body);
   }
 
   static async cleanup() {
