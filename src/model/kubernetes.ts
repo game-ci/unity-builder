@@ -389,12 +389,7 @@ class Kubernetes {
     );
     let logs;
     try {
-      logs = await Kubernetes.getLogs(
-        this.kubeConfig,
-        this.namespace,
-        pod.metadata?.name || '',
-        pod.status?.containerStatuses?.[0].containerID || '',
-      );
+      logs = await Kubernetes.getLogs(this.kubeConfig, this.namespace, pod.metadata?.name || '', '');
     } catch (error) {
       core.error(error);
       throw error;
