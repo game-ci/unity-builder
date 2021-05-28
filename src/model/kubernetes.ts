@@ -319,7 +319,7 @@ class Kubernetes {
   static async streamLogs(name: string, namespace: string) {
     try {
       let running = true;
-      let logQueryTime: number = 999;
+      let mostRecentLogTime: number = 999;
       let mostRecentLine: string = '';
       while (running) {
         const pod = await this.kubeClient.readNamespacedPod(name, namespace);
@@ -337,7 +337,7 @@ class Kubernetes {
             undefined,
             undefined,
             undefined,
-            logQueryTime,
+            mostRecentLogTime,
             undefined,
             true,
           );
@@ -354,9 +354,9 @@ class Kubernetes {
             const [time, ...line] = element.split(' ');
             const lineString: string = line.join(' ');
             const lineDate: number = Date.parse(time);
-            if (mostRecentLine !== lineString || lineDate !== logQueryTime) {
+            if (mostRecentLine !== lineString || lineDate > mostRecentLogTime) {
               core.info(lineString);
-              logQueryTime = lineDate;
+              mostRecentLogTime = lineDate;
               mostRecentLine = lineString;
             } else {
               break;
