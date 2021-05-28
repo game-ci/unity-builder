@@ -374,6 +374,7 @@ class Kubernetes {
         }
       }
     } catch (error) {
+      core.error(JSON.stringify(error, undefined, 4));
       throw error;
     }
   }
