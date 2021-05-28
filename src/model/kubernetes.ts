@@ -336,6 +336,7 @@ class Kubernetes {
     let logQueryTime;
     while (running) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      core.info('Polling logs...');
       const logs = await this.kubeClient.readNamespacedPodLog(
         name,
         namespace,
@@ -349,7 +350,6 @@ class Kubernetes {
         undefined,
         true,
       );
-      core.info(logs.body);
       const arrayOfLines = logs.body.match(/[^\n\r]+/g)?.reverse();
       if (arrayOfLines) {
         for (const element of arrayOfLines) {
