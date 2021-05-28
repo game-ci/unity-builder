@@ -335,6 +335,7 @@ class Kubernetes {
     let running = true;
     let logQueryTime;
     while (running) {
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
       const logs = await this.kubeClient.readNamespacedPodLog(
         name,
         namespace,
