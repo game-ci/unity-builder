@@ -295,7 +295,7 @@ class Kubernetes {
     core.info('Job created');
   }
 
-  static async watchPodUntilReadyAndRead() {
+  static async watchPodUntilReadyAndRead(statusFilter: string) {
     let ready = false;
 
     while (!ready) {
@@ -305,7 +305,7 @@ class Kubernetes {
         const element = pods.body.items[index];
         const jobname = element.metadata?.labels?.['job-name'];
         const phase = element.status?.phase;
-        if (jobname === this.jobName && phase !== 'Pending') {
+        if (jobname === this.jobName && phase !== statusFilter) {
           core.info('Pod no longer pending');
           if (phase === 'Failure') {
             core.error('Kubernetes job failed');
@@ -319,7 +319,7 @@ class Kubernetes {
   }
 
   static async watchBuildJobUntilFinished() {
-    const pod = (await Kubernetes.watchPodUntilReadyAndRead()) || {};
+    const pod = (await Kubernetes.watchPodUntilReadyAndRead('Pending')) || {};
 
     core.info(
       `Watching build job ${pod.metadata?.name} ${JSON.stringify(
@@ -328,19 +328,42 @@ class Kubernetes {
         4,
       )}`,
     );
-    core.info(
-      JSON.stringify(
-        {
-          name: pod.metadata?.name || '',
-          namespace: this.namespace,
-          container: pod.status?.containerStatuses?.[0].containerID,
-        },
+    await Kubernetes.streamLogs(pod.metadata?.name || '', this.namespace);
+  }
+
+  static async streamLogs(name: string, namespace: string) {
+    let running = true;
+    let logQueryTime;
+    while (running) {
+      const logs = await this.kubeClient.readNamespacedPodLog(
+        name,
+        namespace,
         undefined,
-        4,
-      ),
-    );
-    const logs = await this.kubeClient.readNamespacedPodLog(pod.metadata?.name || '', this.namespace);
-    core.info(logs.body);
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        logQueryTime,
+        undefined,
+        true,
+      );
+      core.info(logs.body);
+      const arrayOfLines = logs.body.match(/[^\n\r]+/g)?.reverse();
+      if (arrayOfLines) {
+        for (const element of arrayOfLines) {
+          const [time, ...line] = element.split(' ');
+          if (time !== logQueryTime) {
+            core.info(line.join(' '));
+          } else {
+            break;
+          }
+        }
+        logQueryTime = arrayOfLines[0].split(' ')[0];
+      }
+      const pod = await this.kubeClient.readNamespacedPod(name, namespace);
+      running = pod.body.status?.phase === 'Running';
+    }
   }
 
   static async cleanup() {
