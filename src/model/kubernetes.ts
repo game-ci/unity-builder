@@ -103,7 +103,7 @@ class Kubernetes {
     core.info('Persistent Volume created, waiting for ready state...');
   }
 
-  static async runJob(command: string, image: string) {
+  static async runJob(command: string[], image: string) {
     core.info('Creating build job');
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
@@ -135,7 +135,7 @@ class Kubernetes {
             {
               name: 'main',
               image,
-              command: ['bin/bash', '-c', command],
+              command,
               resources: {
                 requests: {
                   memory: this.buildParameters.remoteBuildMemory,
@@ -242,7 +242,10 @@ class Kubernetes {
 
   static async runCloneJob() {
     await Kubernetes.runJob(
-      `apk update;
+      [
+        'bin/sh',
+        '-c',
+        `apk update;
     apk add git-lfs;
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
     cd /data;
@@ -251,13 +254,17 @@ class Kubernetes {
     cd repo;
     git checkout $GITHUB_SHA;
     ls`,
+      ],
       'alpine/git',
     );
   }
 
   static async runBuildJob() {
     await this.runJob(
-      `ls
+      [
+        'bin/bash',
+        '-c',
+        `ls
     for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
     ls /data
     ls /data/builder
@@ -269,6 +276,7 @@ class Kubernetes {
     chmod -R +x /steps
     /entrypoint.sh
     `,
+      ],
       this.baseImage.toString(),
     );
   }
