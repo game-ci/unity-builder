@@ -4,7 +4,7 @@ import { BuildParameters } from '.';
 const core = require('@actions/core');
 const base64 = require('base-64');
 
-const pollInterval = 10000;
+const pollInterval = 50000;
 
 class Kubernetes {
   private static kubeClient: k8s.CoreV1Api;
