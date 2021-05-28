@@ -17,7 +17,7 @@ class Kubernetes {
   private static jobName: string;
   private static namespace: string;
 
-  static async runBuildJob(buildParameters: BuildParameters, baseImage) {
+  static async run(buildParameters: BuildParameters, baseImage) {
     core.info('Starting up k8s');
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
@@ -52,14 +52,8 @@ class Kubernetes {
     await Kubernetes.createPersistentVolumeClaim();
 
     // start
-    await Kubernetes.scheduleBuildJob();
-
-    // watch
-    await Kubernetes.watchPersistentVolumeClaimUntilReady();
-    await Kubernetes.watchBuildJobUntilFinished();
-
-    // cleanup
-    await Kubernetes.cleanup();
+    await Kubernetes.runCloneJob();
+    await Kubernetes.runBuildJob();
 
     core.setOutput('volume', pvcName);
   }
@@ -109,18 +103,7 @@ class Kubernetes {
     core.info('Persistent Volume created, waiting for ready state...');
   }
 
-  static async watchPersistentVolumeClaimUntilReady() {
-    await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    const queryResult = await this.kubeClient.readNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-
-    if (queryResult.body.status?.phase === 'Pending') {
-      await Kubernetes.watchPersistentVolumeClaimUntilReady();
-    } else {
-      core.info('Persistent Volume ready for claims');
-    }
-  }
-
-  static async scheduleBuildJob() {
+  static async runJob(command: string, image: string) {
     core.info('Creating build job');
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
@@ -148,62 +131,11 @@ class Kubernetes {
               },
             },
           ],
-          initContainers: [
-            {
-              name: 'clone',
-              image: 'alpine/git',
-              command: [
-                '/bin/sh',
-                '-c',
-                `apk update;
-                apk add git-lfs;
-                export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
-                cd /data;
-                git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
-                git clone https://github.com/webbertakken/unity-builder.git builder;
-                cd repo;
-                git checkout $GITHUB_SHA;
-                ls`,
-              ],
-              volumeMounts: [
-                {
-                  name: 'data',
-                  mountPath: '/data',
-                },
-                {
-                  name: 'credentials',
-                  mountPath: '/credentials',
-                  readOnly: true,
-                },
-              ],
-              env: [
-                {
-                  name: 'GITHUB_SHA',
-                  value: this.buildId,
-                },
-              ],
-            },
-          ],
           containers: [
             {
               name: 'main',
-              image: `${this.baseImage.toString()}`,
-              command: [
-                'bin/bash',
-                '-c',
-                `ls
-                for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
-                ls /data
-                ls /data/builder
-                ls /data/builder/dist
-                cp -r /data/builder/dist/default-build-script /UnityBuilderAction
-                cp -r /data/builder/dist/entrypoint.sh /entrypoint.sh
-                cp -r /data/builder/dist/steps /steps
-                chmod -R +x /entrypoint.sh
-                chmod -R +x /steps
-                /entrypoint.sh
-                `,
-              ],
+              image,
+              command: ['bin/bash', '-c', command],
               resources: {
                 requests: {
                   memory: this.buildParameters.remoteBuildMemory,
@@ -211,6 +143,10 @@ class Kubernetes {
                 },
               },
               env: [
+                {
+                  name: 'GITHUB_SHA',
+                  value: this.buildId,
+                },
                 {
                   name: 'GITHUB_WORKSPACE',
                   value: '/data/repo',
@@ -293,6 +229,57 @@ class Kubernetes {
     job.spec.backoffLimit = 1;
     await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
     core.info('Job created');
+
+    // watch
+    await Kubernetes.watchPersistentVolumeClaimUntilReady();
+    await Kubernetes.watchBuildJobUntilFinished();
+
+    // cleanup
+    await Kubernetes.cleanup();
+  }
+
+  static async runCloneJob() {
+    await Kubernetes.runJob(
+      `apk update;
+    apk add git-lfs;
+    export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
+    cd /data;
+    git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
+    git clone https://github.com/webbertakken/unity-builder.git builder;
+    cd repo;
+    git checkout $GITHUB_SHA;
+    ls`,
+      'alpine/git',
+    );
+  }
+
+  static async runBuildJob() {
+    await this.runJob(
+      `ls
+    for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
+    ls /data
+    ls /data/builder
+    ls /data/builder/dist
+    cp -r /data/builder/dist/default-build-script /UnityBuilderAction
+    cp -r /data/builder/dist/entrypoint.sh /entrypoint.sh
+    cp -r /data/builder/dist/steps /steps
+    chmod -R +x /entrypoint.sh
+    chmod -R +x /steps
+    /entrypoint.sh
+    `,
+      this.baseImage.toString(),
+    );
+  }
+
+  static async watchPersistentVolumeClaimUntilReady() {
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    const queryResult = await this.kubeClient.readNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+
+    if (queryResult.body.status?.phase === 'Pending') {
+      await Kubernetes.watchPersistentVolumeClaimUntilReady();
+    } else {
+      core.info('Persistent Volume ready for claims');
+    }
   }
 
   static async watchPodUntilReadyAndRead(statusFilter: string) {
@@ -321,14 +308,7 @@ class Kubernetes {
   static async watchBuildJobUntilFinished() {
     try {
       const pod = (await Kubernetes.watchPodUntilReadyAndRead('Pending')) || {};
-
-      core.info(
-        `Watching build job ${pod.metadata?.name} ${JSON.stringify(
-          pod.status?.containerStatuses?.[0].state,
-          undefined,
-          4,
-        )}`,
-      );
+      core.info(`Watching build job ${pod.metadata?.name}`);
       await Kubernetes.streamLogs(pod.metadata?.name || '', this.namespace);
     } catch (error) {
       core.error('Failed while watching build job');
@@ -339,7 +319,7 @@ class Kubernetes {
   static async streamLogs(name: string, namespace: string) {
     try {
       let running = true;
-      let logQueryTime: number = 0;
+      let logQueryTime: number = 999;
       let mostRecentLine: string = '';
       while (running) {
         const pod = await this.kubeClient.readNamespacedPod(name, namespace);

@@ -15,7 +15,7 @@ async function run() {
     switch (buildParameters.remoteBuildCluster) {
       case 'k8s':
         core.info('Building with Kubernetes');
-        await Kubernetes.runBuildJob(buildParameters, baseImage);
+        await Kubernetes.run(buildParameters, baseImage);
         break;
 
       case 'aws':
