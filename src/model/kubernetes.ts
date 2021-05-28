@@ -230,12 +230,14 @@ class Kubernetes {
     await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
     core.info('Job created');
 
-    // watch
-    await Kubernetes.watchPersistentVolumeClaimUntilReady();
-    await Kubernetes.watchBuildJobUntilFinished();
-
-    // cleanup
-    await Kubernetes.cleanup();
+    try {
+      await Kubernetes.watchPersistentVolumeClaimUntilReady();
+      await Kubernetes.watchBuildJobUntilFinished();
+    } catch (error) {
+      core.error(error);
+    } finally {
+      await Kubernetes.cleanup();
+    }
   }
 
   static async runCloneJob() {
