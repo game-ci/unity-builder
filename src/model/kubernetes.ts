@@ -4,7 +4,7 @@ import { BuildParameters } from '.';
 import * as core from '@actions/core';
 const base64 = require('base-64');
 
-const pollInterval = 50000;
+const pollInterval = 10000;
 
 class Kubernetes {
   private static kubeClient: k8s.CoreV1Api;
@@ -342,6 +342,8 @@ class Kubernetes {
       let logQueryTime: number = 0;
       let mostRecentLine: string = '';
       while (running) {
+        const pod = await this.kubeClient.readNamespacedPod(name, namespace);
+        running = pod.body.status?.phase === 'Running';
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         core.info('Polling logs...');
         let logs;
@@ -381,8 +383,6 @@ class Kubernetes {
             }
           }
         }
-        const pod = await this.kubeClient.readNamespacedPod(name, namespace);
-        running = pod.body.status?.phase === 'Running';
       }
     } catch (error) {
       throw error;
