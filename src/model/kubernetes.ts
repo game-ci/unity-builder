@@ -304,12 +304,11 @@ class Kubernetes {
       const phase = pod.status?.phase;
       if (phase === 'Running') {
         core.info('Pod no longer pending');
+        ready = true;
+        return pod;
       }
       if (phase !== 'Pending') {
         core.error('Kubernetes job failed');
-      } else {
-        ready = true;
-        return pod;
       }
     }
   }
