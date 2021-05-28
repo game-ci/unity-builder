@@ -339,7 +339,8 @@ class Kubernetes {
   static async streamLogs(name: string, namespace: string) {
     try {
       let running = true;
-      let logQueryTime;
+      let logQueryTime: number = 0;
+      let mostRecentLine: string = '';
       while (running) {
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         core.info('Polling logs...');
@@ -360,13 +361,16 @@ class Kubernetes {
         if (arrayOfLines) {
           for (const element of arrayOfLines) {
             const [time, ...line] = element.split(' ');
-            if (time !== logQueryTime) {
-              core.info(line.join(' '));
+            const lineString: string = line.join(' ');
+            const lineDate: number = Date.parse(time);
+            if (mostRecentLine !== lineString || lineDate !== logQueryTime) {
+              core.info(lineString);
+              logQueryTime = lineDate;
+              mostRecentLine = lineString;
             } else {
               break;
             }
           }
-          logQueryTime = arrayOfLines[0].split(' ')[0];
         }
         const pod = await this.kubeClient.readNamespacedPod(name, namespace);
         running = pod.body.status?.phase === 'Running';
