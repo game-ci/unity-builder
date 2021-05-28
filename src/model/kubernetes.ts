@@ -292,34 +292,33 @@ class Kubernetes {
     }
   }
 
-  static async watchPodUntilReadyAndRead(statusFilter: string) {
+  static async watchPodUntilRunningAndRead() {
     let ready = false;
 
     while (!ready) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      const pods = await this.kubeClient.listNamespacedPod(this.namespace);
-      for (let index = 0; index < pods.body.items.length; index++) {
-        const element = pods.body.items[index];
-        const jobname = element.metadata?.labels?.['job-name'];
-        const phase = element.status?.phase;
-        if (jobname === this.jobName && phase !== statusFilter) {
-          core.info('Pod no longer pending');
-          if (phase === 'Failure') {
-            core.error('Kubernetes job failed');
-          } else {
-            ready = true;
-            return element;
-          }
-        }
+      const pod = (await this.kubeClient.readNamespacedPod(this.name, this.namespace))?.body;
+      if (pod === undefined) {
+        throw new Error('no pod found');
+      }
+      const phase = pod.status?.phase;
+      if (phase === 'Running') {
+        core.info('Pod no longer pending');
+      }
+      if (phase !== 'Pending') {
+        core.error('Kubernetes job failed');
+      } else {
+        ready = true;
+        return pod;
       }
     }
   }
 
   static async watchBuildJobUntilFinished() {
     try {
-      const pod = (await Kubernetes.watchPodUntilReadyAndRead('Pending')) || {};
-      core.info(`Watching build job ${pod.metadata?.name}`);
-      await Kubernetes.streamLogs(pod.metadata?.name || '', this.namespace);
+      const pod = await Kubernetes.watchPodUntilRunningAndRead();
+      core.info(`Watching build job ${pod?.metadata?.name}`);
+      await Kubernetes.streamLogs(pod?.metadata?.name || '', this.namespace);
     } catch (error) {
       core.error('Failed while watching build job');
       throw error;
@@ -380,6 +379,7 @@ class Kubernetes {
   }
 
   static async cleanup() {
+    core.info('cleaning up');
     await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
     await this.kubeClient.deletePersistentVolume(this.pvcName, this.namespace);
     await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
