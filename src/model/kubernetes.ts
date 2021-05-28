@@ -378,6 +378,7 @@ class Kubernetes {
 
   static async cleanup() {
     await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
+    await this.kubeClient.deletePersistentVolume(this.pvcName, this.namespace);
     await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
   }
 
