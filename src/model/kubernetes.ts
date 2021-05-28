@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '.';
-const core = require('@actions/core');
+import * as core from '@actions/core';
 const base64 = require('base-64');
 
 const pollInterval = 50000;
@@ -319,51 +319,60 @@ class Kubernetes {
   }
 
   static async watchBuildJobUntilFinished() {
-    const pod = (await Kubernetes.watchPodUntilReadyAndRead('Pending')) || {};
+    try {
+      const pod = (await Kubernetes.watchPodUntilReadyAndRead('Pending')) || {};
 
-    core.info(
-      `Watching build job ${pod.metadata?.name} ${JSON.stringify(
-        pod.status?.containerStatuses?.[0].state,
-        undefined,
-        4,
-      )}`,
-    );
-    await Kubernetes.streamLogs(pod.metadata?.name || '', this.namespace);
+      core.info(
+        `Watching build job ${pod.metadata?.name} ${JSON.stringify(
+          pod.status?.containerStatuses?.[0].state,
+          undefined,
+          4,
+        )}`,
+      );
+      await Kubernetes.streamLogs(pod.metadata?.name || '', this.namespace);
+    } catch (error) {
+      core.error('Failed while watching build job');
+      throw error;
+    }
   }
 
   static async streamLogs(name: string, namespace: string) {
-    let running = true;
-    let logQueryTime;
-    while (running) {
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      core.info('Polling logs...');
-      const logs = await this.kubeClient.readNamespacedPodLog(
-        name,
-        namespace,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        logQueryTime,
-        undefined,
-        true,
-      );
-      const arrayOfLines = logs.body.match(/[^\n\r]+/g)?.reverse();
-      if (arrayOfLines) {
-        for (const element of arrayOfLines) {
-          const [time, ...line] = element.split(' ');
-          if (time !== logQueryTime) {
-            core.info(line.join(' '));
-          } else {
-            break;
+    try {
+      let running = true;
+      let logQueryTime;
+      while (running) {
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+        core.info('Polling logs...');
+        const logs = await this.kubeClient.readNamespacedPodLog(
+          name,
+          namespace,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          logQueryTime,
+          undefined,
+          true,
+        );
+        const arrayOfLines = logs.body.match(/[^\n\r]+/g)?.reverse();
+        if (arrayOfLines) {
+          for (const element of arrayOfLines) {
+            const [time, ...line] = element.split(' ');
+            if (time !== logQueryTime) {
+              core.info(line.join(' '));
+            } else {
+              break;
+            }
           }
+          logQueryTime = arrayOfLines[0].split(' ')[0];
         }
-        logQueryTime = arrayOfLines[0].split(' ')[0];
+        const pod = await this.kubeClient.readNamespacedPod(name, namespace);
+        running = pod.body.status?.phase === 'Running';
       }
-      const pod = await this.kubeClient.readNamespacedPod(name, namespace);
-      running = pod.body.status?.phase === 'Running';
+    } catch (error) {
+      throw error;
     }
   }
 
