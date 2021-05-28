@@ -344,20 +344,29 @@ class Kubernetes {
       while (running) {
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         core.info('Polling logs...');
-        const logs = await this.kubeClient.readNamespacedPodLog(
-          name,
-          namespace,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          logQueryTime,
-          undefined,
-          true,
-        );
-        const arrayOfLines = logs.body.match(/[^\n\r]+/g)?.reverse();
+        let logs;
+        try {
+          logs = await this.kubeClient.readNamespacedPodLog(
+            name,
+            namespace,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            logQueryTime,
+            undefined,
+            true,
+          );
+        } catch (error) {
+          core.info(error);
+          if (error.message === 'HTTP request failed') {
+            core.info('!warning - K8S HTTP FAILED');
+            continue;
+          }
+        }
+        const arrayOfLines = logs?.body.match(/[^\n\r]+/g)?.reverse();
         if (arrayOfLines) {
           for (const element of arrayOfLines) {
             const [time, ...line] = element.split(' ');
