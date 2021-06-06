@@ -235,8 +235,10 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     try {
       // We watch the PVC first to allow some time for K8s to notice the job we created and setup a pod.
       await this.watchPersistentVolumeClaimUntilReady();
+
       // TODO: Wait for something more reliable so we don't potentially get the pod before k8s has created it based on the job.
-      await this.getPodAndCache();
+      this.setPodNameAndContainerName(await this.getPod());
+
       await this.watchUntilPodRunning();
       await this.streamLogs();
     } catch (error) {
@@ -246,12 +248,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  async getPodAndCache() {
+  async getPod() {
     if (this.podName === undefined) {
       const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
         (x) => x.metadata?.labels?.['job-name'] === this.jobName,
       );
-      this.setPod(pod);
       return pod;
     } else {
       return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
@@ -271,7 +272,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     git clone https://github.com/webbertakken/unity-builder.git builder;
     cd repo;
     git checkout $GITHUB_SHA;
-    ls`,
+    ls
+    echo "end"`,
       ],
       'alpine/git',
     );
@@ -331,7 +333,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  setPod(pod: k8s.V1Pod | any) {
+  setPodNameAndContainerName(pod: k8s.V1Pod | any) {
     this.podName = pod?.metadata?.name || '';
     this.containerName = pod?.status?.containerStatuses?.[0].name || '';
   }
