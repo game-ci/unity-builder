@@ -240,7 +240,7 @@ class Kubernetes {
       await Kubernetes.watchUntilPodRunning();
       await Kubernetes.streamLogs();
     } catch (error) {
-      core.error(error);
+      core.error(JSON.stringify(error, undefined, 4));
     } finally {
       await Kubernetes.cleanup();
     }
