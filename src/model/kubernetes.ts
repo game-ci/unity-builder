@@ -1,4 +1,3 @@
-// @ts-ignore
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '.';
 import * as core from '@actions/core';
@@ -24,12 +23,6 @@ class Kubernetes {
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
     const k8sBatchApi = kc.makeApiClient(k8s.BatchV1Api);
     core.info('loaded from default');
-
-    // const kubeconfig = new KubeConfig();
-    // kubeconfig.loadFromString(base64.decode(buildParameters.kubeConfig));
-    // const backend = new Request({ kubeconfig });
-    // const kubeClient = new Client(backend);
-    // await kubeClient.loadSpec();
 
     const buildId = Kubernetes.uuidv4();
     const pvcName = `unity-builder-pvc-${buildId}`;
@@ -317,60 +310,42 @@ class Kubernetes {
     try {
       const pod = await Kubernetes.watchPodUntilRunningAndRead();
       core.info(`Watching build job ${pod?.metadata?.name}`);
-      await Kubernetes.streamLogs(pod?.metadata?.name || '', this.namespace);
+      await Kubernetes.streamLogs(
+        pod?.metadata?.name || '',
+        this.namespace,
+        pod?.status?.containerStatuses?.[0].name || '',
+      );
     } catch (error) {
       core.error('Failed while watching build job');
       throw error;
     }
   }
 
-  static async streamLogs(name: string, namespace: string) {
+  static async streamLogs(name: string, namespace: string, container: string) {
     try {
       let running = true;
-      let mostRecentLogTime: number = 999;
-      let mostRecentLine: string = '';
       while (running) {
         const pod = await this.kubeClient.readNamespacedPod(name, namespace);
         running = pod.body.status?.phase === 'Running';
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         core.info('Polling logs...');
-        let logs;
-        try {
-          logs = await this.kubeClient.readNamespacedPodLog(
-            name,
-            namespace,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            mostRecentLogTime,
-            undefined,
-            true,
-          );
-        } catch (error) {
-          core.info(error);
-          if (error.message === 'HTTP request failed') {
-            core.info('!warning - K8S HTTP FAILED');
-            continue;
-          }
-        }
-        const arrayOfLines = logs?.body.match(/[^\n\r]+/g)?.reverse();
-        if (arrayOfLines) {
-          for (const element of arrayOfLines) {
-            const [time, ...line] = element.split(' ');
-            const lineString: string = line.join(' ');
-            const lineDate: number = Date.parse(time);
-            if (mostRecentLine !== lineString || lineDate > mostRecentLogTime) {
-              core.info(lineString);
-              mostRecentLogTime = lineDate;
-              mostRecentLine = lineString;
-            } else {
-              break;
-            }
-          }
-        }
+        const logs = await this.kubeClient.readNamespacedPodLog(
+          name,
+          namespace,
+          container,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          true,
+        );
+        logs.response.on('data', (data) => {
+          core.info('LOGS RECEIVED');
+          core.info(data);
+        });
       }
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
