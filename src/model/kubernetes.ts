@@ -90,7 +90,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
     for (const buildSecret of secrets) {
       secret.data[buildSecret.EnvironmentVariable] = base64.encode(buildSecret.ParameterValue);
-      secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = buildSecret.ParameterKey;
+      secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = base64.encode(buildSecret.ParameterKey);
     }
 
     try {
