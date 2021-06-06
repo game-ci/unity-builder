@@ -3,25 +3,26 @@ import { BuildParameters } from '.';
 import * as core from '@actions/core';
 import { KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
+import { RemoteBuilderProviderInterface } from './remote-builder/remote-builder-provider-interface';
 const base64 = require('base-64');
 
 const pollInterval = 20000;
 
-class Kubernetes {
-  private static kubeConfig: KubeConfig;
-  private static kubeClient: k8s.CoreV1Api;
-  private static kubeClientBatch: k8s.BatchV1Api;
-  private static buildId: string;
-  private static buildParameters: BuildParameters;
-  private static baseImage: any;
-  private static pvcName: string;
-  private static secretName: string;
-  private static jobName: string;
-  private static podName: string;
-  private static containerName: string;
-  private static namespace: string;
+class Kubernetes implements RemoteBuilderProviderInterface {
+  private kubeConfig: KubeConfig;
+  private kubeClient: k8s.CoreV1Api;
+  private kubeClientBatch: k8s.BatchV1Api;
+  private buildId: string;
+  private buildParameters: BuildParameters;
+  private baseImage: any;
+  private pvcName: string;
+  private secretName: string;
+  private jobName: string;
+  private podName: string | any;
+  private containerName: string | any;
+  private namespace: string;
 
-  static async run(buildParameters: BuildParameters, baseImage) {
+  constructor(buildParameters: BuildParameters, baseImage) {
     core.info('Starting up k8s');
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
@@ -39,25 +40,27 @@ class Kubernetes {
     this.kubeClient = k8sApi;
     this.kubeClientBatch = k8sBatchApi;
     this.buildId = buildId;
-    this.buildParameters = buildParameters;
-    this.baseImage = baseImage;
     this.pvcName = pvcName;
     this.secretName = secretName;
     this.jobName = jobName;
     this.namespace = namespace;
-
-    // setup
-    await Kubernetes.createSecret();
-    await Kubernetes.createPersistentVolumeClaim();
-
-    // start
-    await Kubernetes.runCloneJob();
-    await Kubernetes.runBuildJob();
-
-    core.setOutput('volume', pvcName);
+    this.buildParameters = buildParameters;
+    this.baseImage = baseImage;
   }
 
-  static async createSecret() {
+  async run() {
+    // setup
+    await this.createSecret();
+    await this.createPersistentVolumeClaim();
+
+    // run
+    await this.runCloneJob();
+    await this.runBuildJob();
+
+    core.setOutput('volume', this.pvcName);
+  }
+
+  async createSecret() {
     const secret = new k8s.V1Secret();
     secret.apiVersion = 'v1';
     secret.kind = 'Secret';
@@ -77,7 +80,7 @@ class Kubernetes {
     await this.kubeClient.createNamespacedSecret(this.namespace, secret);
   }
 
-  static async createPersistentVolumeClaim() {
+  async createPersistentVolumeClaim() {
     if (this.buildParameters.kubeVolume) {
       core.info(this.buildParameters.kubeVolume);
       this.pvcName = this.buildParameters.kubeVolume;
@@ -102,7 +105,7 @@ class Kubernetes {
     core.info('Persistent Volume created, waiting for ready state...');
   }
 
-  static async runJob(command: string[], image: string) {
+  async runJob(command: string[], image: string) {
     core.info('Creating build job');
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
@@ -230,24 +233,33 @@ class Kubernetes {
     core.info('Job created');
 
     try {
-      await Kubernetes.watchPersistentVolumeClaimUntilReady();
       // We watch the PVC first to allow some time for K8s to notice the job we created and setup a pod.
-      // TODO: Wait for something more reliable.
-      const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
-        (x) => x.metadata?.labels?.['job-name'] === this.jobName,
-      );
-      Kubernetes.setPod(pod);
-      await Kubernetes.watchUntilPodRunning();
-      await Kubernetes.streamLogs();
+      await this.watchPersistentVolumeClaimUntilReady();
+      // TODO: Wait for something more reliable so we don't potentially get the pod before k8s has created it based on the job.
+      await this.getPodAndCache();
+      await this.watchUntilPodRunning();
+      await this.streamLogs();
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
     } finally {
-      await Kubernetes.cleanup();
+      await this.cleanup();
     }
   }
 
-  static async runCloneJob() {
-    await Kubernetes.runJob(
+  async getPodAndCache() {
+    if (this.podName === undefined) {
+      const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
+        (x) => x.metadata?.labels?.['job-name'] === this.jobName,
+      );
+      this.setPod(pod);
+      return pod;
+    } else {
+      return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+    }
+  }
+
+  async runCloneJob() {
+    await this.runJob(
       [
         '/bin/ash',
         '-c',
@@ -265,7 +277,7 @@ class Kubernetes {
     );
   }
 
-  static async runBuildJob() {
+  async runBuildJob() {
     await this.runJob(
       [
         'bin/bash',
@@ -287,18 +299,18 @@ class Kubernetes {
     );
   }
 
-  static async watchPersistentVolumeClaimUntilReady() {
+  async watchPersistentVolumeClaimUntilReady() {
     await new Promise((resolve) => setTimeout(resolve, pollInterval));
     const queryResult = await this.kubeClient.readNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
 
     if (queryResult.body.status?.phase === 'Pending') {
-      await Kubernetes.watchPersistentVolumeClaimUntilReady();
+      await this.watchPersistentVolumeClaimUntilReady();
     } else {
       core.info('Persistent Volume ready for claims');
     }
   }
 
-  static async watchUntilPodRunning() {
+  async watchUntilPodRunning() {
     let ready = false;
 
     while (!ready) {
@@ -319,12 +331,12 @@ class Kubernetes {
     }
   }
 
-  static setPod(pod: k8s.V1Pod | any) {
+  setPod(pod: k8s.V1Pod | any) {
     this.podName = pod?.metadata?.name || '';
     this.containerName = pod?.status?.containerStatuses?.[0].name || '';
   }
 
-  static async streamLogs() {
+  async streamLogs() {
     try {
       core.info(
         `Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`,
@@ -344,7 +356,7 @@ class Kubernetes {
     }
   }
 
-  static async cleanup() {
+  async cleanup() {
     core.info('cleaning up');
     await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
     await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
