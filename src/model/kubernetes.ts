@@ -13,12 +13,12 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: KubeConfig;
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
-  private buildId: string;
+  private buildId: string = '';
   private buildParameters: BuildParameters;
   private baseImage: any;
-  private pvcName: string;
-  private secretName: string;
-  private jobName: string;
+  private pvcName: string = '';
+  private secretName: string = '';
+  private jobName: string = '';
   private namespace: string;
   private podName: string = '';
   private containerName: string = '';
@@ -30,22 +30,27 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     const k8sBatchApi = kc.makeApiClient(k8s.BatchV1Api);
     core.info('Loaded default Kubernetes configuration for this environment');
 
+    this.kubeConfig = kc;
+    this.kubeClient = k8sApi;
+    this.kubeClientBatch = k8sBatchApi;
+
+    this.namespace = 'default';
+    this.buildParameters = buildParameters;
+    this.baseImage = baseImage;
+
+    this.setUniqueBuildId();
+  }
+
+  setUniqueBuildId() {
     const buildId = Kubernetes.uuidv4();
     const pvcName = `unity-builder-pvc-${buildId}`;
     const secretName = `build-credentials-${buildId}`;
     const jobName = `unity-builder-job-${buildId}`;
-    const namespace = 'default';
 
-    this.kubeConfig = kc;
-    this.kubeClient = k8sApi;
-    this.kubeClientBatch = k8sBatchApi;
     this.buildId = buildId;
     this.pvcName = pvcName;
     this.secretName = secretName;
     this.jobName = jobName;
-    this.namespace = namespace;
-    this.buildParameters = buildParameters;
-    this.baseImage = baseImage;
   }
 
   async run() {
@@ -85,7 +90,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.runCloneJob();
       await this.runBuildJob();
     } catch (error) {
-      core.error(JSON.stringify(error, undefined, 4));
+      core.error(JSON.stringify(error.response.body, undefined, 4));
       throw error;
     }
 
@@ -263,21 +268,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     return job;
   }
 
-  async runJob(jobSpec: k8s.V1Job) {
+  async runJob(command: string[], image: string) {
     try {
+      this.setUniqueBuildId();
+      const jobSpec = this.getJobSpec(command, image);
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
-      // We watch the PVC first to allow some time for K8s to notice the job we created and setup a pod.
-      await this.watchPersistentVolumeClaimUntilReady();
-
-      // TODO: Wait for something more reliable so we don't potentially get the pod before k8s has created it based on the job.
+      await this.watchPersistentVolumeClaimUntilBoundToContainer();
       this.setPodNameAndContainerName(await this.getPod());
-
       await this.watchUntilPodRunning();
       await this.streamLogs();
     } catch (error) {
-      core.error(JSON.stringify(error.response.body, undefined, 4));
+      throw error;
     } finally {
       await this.cleanup();
     }
@@ -288,6 +291,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
         (x) => x.metadata?.labels?.['job-name'] === this.jobName,
       );
+      if (pod === undefined) {
+        throw new Error("pod with job-name label doesn't exist");
+      }
       return pod;
     } else {
       return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
@@ -296,11 +302,10 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async runCloneJob() {
     await this.runJob(
-      this.getJobSpec(
-        [
-          '/bin/ash',
-          '-c',
-          `apk update;
+      [
+        '/bin/ash',
+        '-c',
+        `apk update;
     apk add git-lfs;
     ls /credentials/
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
@@ -311,19 +316,17 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     git checkout $GITHUB_SHA;
     ls
     echo "end"`,
-        ],
-        'alpine/git',
-      ),
+      ],
+      'alpine/git',
     );
   }
 
   async runBuildJob() {
     await this.runJob(
-      this.getJobSpec(
-        [
-          'bin/bash',
-          '-c',
-          `ls
+      [
+        'bin/bash',
+        '-c',
+        `ls
     for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
     ls /data
     ls /data/builder
@@ -335,18 +338,17 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     chmod -R +x /steps
     /entrypoint.sh
     `,
-        ],
-        this.baseImage.toString(),
-      ),
+      ],
+      this.baseImage.toString(),
     );
   }
 
-  async watchPersistentVolumeClaimUntilReady() {
+  async watchPersistentVolumeClaimUntilBoundToContainer() {
     await new Promise((resolve) => setTimeout(resolve, pollInterval));
     const queryResult = await this.kubeClient.readNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
 
     if (queryResult.body.status?.phase === 'Pending') {
-      await this.watchPersistentVolumeClaimUntilReady();
+      await this.watchPersistentVolumeClaimUntilBoundToContainer();
     } else {
       core.info('Persistent Volume ready for claims');
     }
@@ -373,9 +375,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  setPodNameAndContainerName(pod: k8s.V1Pod | any) {
-    this.podName = pod?.metadata?.name || '';
-    this.containerName = pod?.status?.containerStatuses?.[0].name || '';
+  setPodNameAndContainerName(pod: k8s.V1Pod) {
+    this.podName = pod.metadata?.name || '';
+    this.containerName = pod.status?.containerStatuses?.[0].name || '';
   }
 
   async streamLogs() {
