@@ -231,7 +231,14 @@ class Kubernetes {
 
     try {
       await Kubernetes.watchPersistentVolumeClaimUntilReady();
-      await Kubernetes.watchBuildJobUntilFinished();
+      // We watch the PVC first to allow some time for K8s to notice the job we created and setup a pod.
+      // TODO: Wait for something more reliable.
+      const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
+        (x) => x.metadata?.labels?.['job-name'] === this.jobName,
+      );
+      Kubernetes.setPod(pod);
+      await Kubernetes.watchUntilPodRunning();
+      await Kubernetes.streamLogs();
     } catch (error) {
       core.error(error);
     } finally {
@@ -291,7 +298,7 @@ class Kubernetes {
     }
   }
 
-  static async watchPodUntilRunningAndRead() {
+  static async watchUntilPodRunning() {
     let ready = false;
 
     while (!ready) {
@@ -304,7 +311,7 @@ class Kubernetes {
       if (phase === 'Running') {
         core.info('Pod no longer pending');
         ready = true;
-        return pod;
+        return;
       }
       if (phase !== 'Pending') {
         core.error('Kubernetes job failed');
@@ -312,35 +319,24 @@ class Kubernetes {
     }
   }
 
-  static async watchBuildJobUntilFinished() {
-    try {
-      this.podName =
-        (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
-          (x) => x.metadata?.labels?.['job-name'] === this.jobName,
-        )?.metadata?.name || '';
-      core.info(this.podName);
-      const pod = await Kubernetes.watchPodUntilRunningAndRead();
-      core.info(`Watching build job ${pod?.metadata?.name}`);
-      await Kubernetes.streamLogs(
-        pod?.metadata?.name || '',
-        this.namespace,
-        pod?.status?.containerStatuses?.[0].name || '',
-      );
-    } catch (error) {
-      core.error('Failed while watching build job');
-      throw error;
-    }
+  static setPod(pod: k8s.V1Pod | any) {
+    this.podName = pod?.metadata?.name || '';
+    this.containerName = pod?.status?.containerStatuses?.[0].name || '';
   }
 
-  static async streamLogs(name: string, namespace: string, container: string) {
+  static async streamLogs() {
     try {
-      core.info('Polling logs...');
+      core.info(
+        `Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`,
+      );
       const stream = new Writable();
       stream._write = (chunk, encoding, next) => {
         core.info(chunk.toString());
         next();
       };
-      await new Promise((resolve) => new Log(this.kubeConfig).log(namespace, name, container, stream, resolve));
+      await new Promise((resolve) =>
+        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve),
+      );
       core.info('end of log stream');
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
