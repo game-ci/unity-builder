@@ -125,8 +125,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     core.info('Persistent Volume created, waiting for ready state...');
   }
 
-  async runJob(command: string[], image: string) {
-    core.info('Creating build job');
+  getJobSpec(command: string[], image: string) {
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
     job.kind = 'Job';
@@ -249,10 +248,14 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       },
     };
     job.spec.backoffLimit = 1;
-    await this.kubeClientBatch.createNamespacedJob(this.namespace, job);
-    core.info('Job created');
+    return job;
+  }
 
+  async runJob(jobSpec: k8s.V1Job) {
     try {
+      core.info('Creating build job');
+      await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+      core.info('Job created');
       // We watch the PVC first to allow some time for K8s to notice the job we created and setup a pod.
       await this.watchPersistentVolumeClaimUntilReady();
 
@@ -281,10 +284,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async runCloneJob() {
     await this.runJob(
-      [
-        '/bin/ash',
-        '-c',
-        `apk update;
+      this.getJobSpec(
+        [
+          '/bin/ash',
+          '-c',
+          `apk update;
     apk add git-lfs;
     ls /credentials/
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
@@ -295,17 +299,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     git checkout $GITHUB_SHA;
     ls
     echo "end"`,
-      ],
-      'alpine/git',
+        ],
+        'alpine/git',
+      ),
     );
   }
 
   async runBuildJob() {
     await this.runJob(
-      [
-        'bin/bash',
-        '-c',
-        `ls
+      this.getJobSpec(
+        [
+          'bin/bash',
+          '-c',
+          `ls
     for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
     ls /data
     ls /data/builder
@@ -317,8 +323,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     chmod -R +x /steps
     /entrypoint.sh
     `,
-      ],
-      this.baseImage.toString(),
+        ],
+        this.baseImage.toString(),
+      ),
     );
   }
 
