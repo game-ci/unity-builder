@@ -3,7 +3,7 @@ import { BuildParameters } from '.';
 import * as core from '@actions/core';
 const base64 = require('base-64');
 
-const pollInterval = 10000;
+const pollInterval = 20000;
 
 class Kubernetes {
   private static kubeClient: k8s.CoreV1Api;
@@ -14,6 +14,8 @@ class Kubernetes {
   private static pvcName: string;
   private static secretName: string;
   private static jobName: string;
+  private static podName: string;
+  private static containerName: string;
   private static namespace: string;
 
   static async run(buildParameters: BuildParameters, baseImage) {
@@ -290,7 +292,7 @@ class Kubernetes {
 
     while (!ready) {
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      const pod = (await this.kubeClient.readNamespacedPod(this.name, this.namespace))?.body;
+      const pod = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace))?.body;
       if (pod === undefined) {
         throw new Error('no pod found');
       }
@@ -308,6 +310,11 @@ class Kubernetes {
 
   static async watchBuildJobUntilFinished() {
     try {
+      this.podName =
+        (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
+          (x) => x.metadata?.labels?.['job-name'] === this.jobName,
+        )?.metadata?.name || '';
+      core.info(this.podName);
       const pod = await Kubernetes.watchPodUntilRunningAndRead();
       core.info(`Watching build job ${pod?.metadata?.name}`);
       await Kubernetes.streamLogs(
