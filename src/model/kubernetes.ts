@@ -238,7 +238,6 @@ class Kubernetes {
   static async runCloneJob() {
     await Kubernetes.runJob(
       [
-        'bin/sh',
         '-c',
         `apk update;
     apk add git-lfs;
