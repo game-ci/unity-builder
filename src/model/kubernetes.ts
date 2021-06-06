@@ -265,7 +265,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.watchUntilPodRunning();
       await this.streamLogs();
     } catch (error) {
-      core.error(JSON.stringify(error, undefined, 4));
+      core.error(JSON.stringify(error.response.body, undefined, 4));
     } finally {
       await this.cleanup();
     }
