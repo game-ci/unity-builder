@@ -50,11 +50,31 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async run() {
     core.info('Running Remote Builder on Kubernetes');
-    const defaultSecretsArray = [
+    const defaultSecretsArray: RemoteBuilderSecret[] = [
       {
         ParameterKey: 'GithubToken',
         EnvironmentVariable: 'GITHUB_TOKEN',
         ParameterValue: this.buildParameters.githubToken,
+      },
+      {
+        ParameterKey: 'UNITY_LICENSE',
+        EnvironmentVariable: 'UNITY_LICENSE',
+        ParameterValue: process.env.UNITY_LICENSE || '',
+      },
+      {
+        ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+        EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
+        ParameterValue: this.buildParameters.androidKeystoreBase64,
+      },
+      {
+        ParameterKey: 'ANDROID_KEYSTORE_PASS',
+        EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
+        ParameterValue: this.buildParameters.androidKeystorePass,
+      },
+      {
+        ParameterKey: 'ANDROID_KEYALIAS_PASS',
+        EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
+        ParameterValue: this.buildParameters.androidKeyaliasPass,
       },
     ];
     try {
@@ -80,19 +100,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     secret.metadata = {
       name: this.secretName,
     };
-
-    secret.data = {
-      UNITY_LICENSE: base64.encode(process.env.UNITY_LICENSE),
-      ANDROID_KEYSTORE_BASE64: base64.encode(this.buildParameters.androidKeystoreBase64),
-      ANDROID_KEYSTORE_PASS: base64.encode(this.buildParameters.androidKeystorePass),
-      ANDROID_KEYALIAS_PASS: base64.encode(this.buildParameters.androidKeyaliasPass),
-    };
-
+    secret.data = {};
     for (const buildSecret of secrets) {
       secret.data[buildSecret.EnvironmentVariable] = base64.encode(buildSecret.ParameterValue);
       secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = base64.encode(buildSecret.ParameterKey);
     }
-
     try {
       await this.kubeClient.createNamespacedSecret(this.namespace, secret);
     } catch (error) {
