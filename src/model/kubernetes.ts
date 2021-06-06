@@ -353,6 +353,7 @@ class Kubernetes {
           core.info('LOGS RECEIVED');
           core.info(data);
         });
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
       }
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
