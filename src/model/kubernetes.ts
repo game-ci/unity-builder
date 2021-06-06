@@ -19,9 +19,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private pvcName: string;
   private secretName: string;
   private jobName: string;
-  private podName: string | any;
-  private containerName: string | any;
   private namespace: string;
+  private podName: string = '';
+  private containerName: string = '';
 
   constructor(buildParameters: BuildParameters, baseImage) {
     const kc = new k8s.KubeConfig();
@@ -57,13 +57,17 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         ParameterValue: this.buildParameters.githubToken,
       },
     ];
-    // setup
-    await this.createSecret(defaultSecretsArray);
-    await this.createPersistentVolumeClaim();
-
-    // run
-    await this.runCloneJob();
-    await this.runBuildJob();
+    try {
+      // setup
+      await this.createSecret(defaultSecretsArray);
+      await this.createPersistentVolumeClaim();
+      // run
+      await this.runCloneJob();
+      await this.runBuildJob();
+    } catch (error) {
+      core.info(JSON.stringify(error, undefined, 4));
+      core.error(error);
+    }
 
     core.setOutput('volume', this.pvcName);
   }
@@ -265,7 +269,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async getPod() {
-    if (this.podName === undefined) {
+    if (this.podName === '') {
       const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
         (x) => x.metadata?.labels?.['job-name'] === this.jobName,
       );
@@ -356,15 +360,13 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async streamLogs() {
+    core.info(`Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`);
+    const stream = new Writable();
+    stream._write = (chunk, encoding, next) => {
+      core.info(chunk.toString());
+      next();
+    };
     try {
-      core.info(
-        `Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`,
-      );
-      const stream = new Writable();
-      stream._write = (chunk, encoding, next) => {
-        core.info(chunk.toString());
-        next();
-      };
       await new Promise((resolve) =>
         new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve, {
           follow: true,
