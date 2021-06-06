@@ -362,7 +362,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         next();
       };
       await new Promise((resolve) =>
-        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve),
+        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve, {
+          follow: true,
+          pretty: true,
+          previous: true,
+        }),
       );
       core.info('end of log stream');
     } catch (error) {
