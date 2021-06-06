@@ -366,19 +366,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.info(chunk.toString());
       next();
     };
+    const logOptions = {
+      follow: true,
+      pretty: true,
+      previous: true,
+    };
     try {
       await new Promise((resolve) =>
-        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve, {
-          follow: true,
-          pretty: true,
-          previous: true,
-        }),
+        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve, logOptions),
       );
-      core.info('end of log stream');
     } catch (error) {
-      core.error(JSON.stringify(error, undefined, 4));
       throw error;
     }
+    core.info('end of log stream');
   }
 
   async cleanup() {
