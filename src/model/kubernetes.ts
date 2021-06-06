@@ -85,7 +85,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.runCloneJob();
       await this.runBuildJob();
     } catch (error) {
-      core.info(JSON.stringify(error, undefined, 4));
+      core.error(JSON.stringify(error, undefined, 4));
       throw error;
     }
 
