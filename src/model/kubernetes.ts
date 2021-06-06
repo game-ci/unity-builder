@@ -334,19 +334,14 @@ class Kubernetes {
 
   static async streamLogs(name: string, namespace: string, container: string) {
     try {
-      let running = true;
-      while (running) {
-        const pod = await this.kubeClient.readNamespacedPod(name, namespace);
-        running = pod.body.status?.phase === 'Running';
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        core.info('Polling logs...');
-        const stream = new Writable();
-        stream._write = (chunk, encoding, next) => {
-          core.info(chunk.toString());
-          next();
-        };
-        await new Promise((resolve) => new Log(this.kubeConfig).log(namespace, name, container, stream, resolve));
-      }
+      core.info('Polling logs...');
+      const stream = new Writable();
+      stream._write = (chunk, encoding, next) => {
+        core.info(chunk.toString());
+        next();
+      };
+      await new Promise((resolve) => new Log(this.kubeConfig).log(namespace, name, container, stream, resolve));
+      core.info('end of log stream');
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
       throw error;
