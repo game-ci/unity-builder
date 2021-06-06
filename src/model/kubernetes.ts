@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import { KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import { RemoteBuilderProviderInterface } from './remote-builder/remote-builder-provider-interface';
+import RemoteBuilderSecret from './remote-builder/remote-builder-secret';
 const base64 = require('base-64');
 
 const pollInterval = 20000;
@@ -49,8 +50,15 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async run() {
+    const defaultSecretsArray = [
+      {
+        ParameterKey: 'GithubToken',
+        EnvironmentVariable: 'GITHUB_TOKEN',
+        ParameterValue: this.buildParameters.githubToken,
+      },
+    ];
     // setup
-    await this.createSecret();
+    await this.createSecret(defaultSecretsArray);
     await this.createPersistentVolumeClaim();
 
     // run
@@ -60,7 +68,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     core.setOutput('volume', this.pvcName);
   }
 
-  async createSecret() {
+  async createSecret(secrets: RemoteBuilderSecret[]) {
     const secret = new k8s.V1Secret();
     secret.apiVersion = 'v1';
     secret.kind = 'Secret';
@@ -70,12 +78,16 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     };
 
     secret.data = {
-      GITHUB_TOKEN: base64.encode(this.buildParameters.githubToken),
       UNITY_LICENSE: base64.encode(process.env.UNITY_LICENSE),
       ANDROID_KEYSTORE_BASE64: base64.encode(this.buildParameters.androidKeystoreBase64),
       ANDROID_KEYSTORE_PASS: base64.encode(this.buildParameters.androidKeystorePass),
       ANDROID_KEYALIAS_PASS: base64.encode(this.buildParameters.androidKeyaliasPass),
     };
+
+    for (const buildSecret of secrets) {
+      secret.data[buildSecret.EnvironmentVariable] = base64.encode(buildSecret.ParameterValue);
+      secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = buildSecret.ParameterKey;
+    }
 
     await this.kubeClient.createNamespacedSecret(this.namespace, secret);
   }
@@ -266,6 +278,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         '-c',
         `apk update;
     apk add git-lfs;
+    ls /credentials/
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
     cd /data;
     git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;

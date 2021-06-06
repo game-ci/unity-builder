@@ -2,6 +2,7 @@ import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
 import RemoteBuilderNamespace from './remote-builder-namespace';
+import RemoteBuilderSecret from './remote-builder-secret';
 const repositoryDirectoryName = 'repo';
 const efsDirectoryName = 'data';
 const cacheDirectoryName = 'cache';
@@ -49,7 +50,7 @@ class RemoteBuilder {
     buildUid: string,
     buildParameters: BuildParameters,
     branchName: string | undefined,
-    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+    defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
     await AWSBuildPlatform.runBuild(
@@ -132,7 +133,7 @@ class RemoteBuilder {
     buildUid: string,
     buildParameters: BuildParameters,
     baseImage: any,
-    defaultSecretsArray: any[],
+    defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     const buildSecrets = new Array();
 
@@ -266,7 +267,7 @@ class RemoteBuilder {
     buildUid: string,
     buildParameters: BuildParameters,
     branchName: string | undefined,
-    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+    defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 3/4 build compression');
     // Cleanup
@@ -307,7 +308,7 @@ class RemoteBuilder {
     buildUid: string,
     buildParameters: BuildParameters,
     branchName: string | undefined,
-    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+    defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 4/4 upload build to s3');
     await AWSBuildPlatform.runBuild(
@@ -354,7 +355,7 @@ class RemoteBuilder {
   private static async DeployToSteam(
     buildUid: string,
     buildParameters: BuildParameters,
-    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+    defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting steam deployment');
     await AWSBuildPlatform.runBuild(
