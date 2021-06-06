@@ -1,11 +1,14 @@
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '.';
 import * as core from '@actions/core';
+import { KubeConfig, Log } from '@kubernetes/client-node';
+import { Writable } from 'stream';
 const base64 = require('base-64');
 
 const pollInterval = 20000;
 
 class Kubernetes {
+  private static kubeConfig: KubeConfig;
   private static kubeClient: k8s.CoreV1Api;
   private static kubeClientBatch: k8s.BatchV1Api;
   private static buildId: string;
@@ -32,6 +35,7 @@ class Kubernetes {
     const jobName = `unity-builder-job-${buildId}`;
     const namespace = 'default';
 
+    this.kubeConfig = kc;
     this.kubeClient = k8sApi;
     this.kubeClientBatch = k8sBatchApi;
     this.buildId = buildId;
@@ -336,24 +340,12 @@ class Kubernetes {
         running = pod.body.status?.phase === 'Running';
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         core.info('Polling logs...');
-        const logs = await this.kubeClient.readNamespacedPodLog(
-          name,
-          namespace,
-          container,
-          true,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          true,
-        );
-        logs.response.on('data', (data) => {
-          core.info('LOGS RECEIVED');
-          core.info(data);
-        });
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+        const stream = new Writable();
+        stream._write = (chunk, encoding, next) => {
+          core.info(chunk.toString());
+          next();
+        };
+        await new Promise((resolve) => new Log(this.kubeConfig).log(namespace, name, container, stream, resolve));
       }
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
