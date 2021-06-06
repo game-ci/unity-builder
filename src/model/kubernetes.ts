@@ -24,12 +24,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private namespace: string;
 
   constructor(buildParameters: BuildParameters, baseImage) {
-    core.info('Starting up k8s');
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
     const k8sBatchApi = kc.makeApiClient(k8s.BatchV1Api);
-    core.info('loaded from default');
+    core.info('Loaded default Kubernetes configuration for this environment');
 
     const buildId = Kubernetes.uuidv4();
     const pvcName = `unity-builder-pvc-${buildId}`;
@@ -50,6 +49,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async run() {
+    core.info('Running Remote Builder on Kubernetes');
     const defaultSecretsArray = [
       {
         ParameterKey: 'GithubToken',
@@ -89,7 +89,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = buildSecret.ParameterKey;
     }
 
-    await this.kubeClient.createNamespacedSecret(this.namespace, secret);
+    try {
+      await this.kubeClient.createNamespacedSecret(this.namespace, secret);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async createPersistentVolumeClaim() {
