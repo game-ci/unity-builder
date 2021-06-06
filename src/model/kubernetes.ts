@@ -66,7 +66,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.runBuildJob();
     } catch (error) {
       core.info(JSON.stringify(error, undefined, 4));
-      core.error(error);
+      throw error;
     }
 
     core.setOutput('volume', this.pvcName);
