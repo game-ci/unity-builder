@@ -140,8 +140,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         },
       },
     };
-    await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
-    core.info('Persistent Volume created, waiting for ready state...');
+    const pvcResult = await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
+    core.info(`Persistent Volume created, ${pvcResult.body.status?.phase}`);
   }
 
   getJobSpec(command: string[], image: string) {
