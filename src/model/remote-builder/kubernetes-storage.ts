@@ -7,11 +7,7 @@ class KubernetesStorage {
   public static async getPVCPhase(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
     return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
   }
-  public static async watchPersistentVolumeClaimUntilBoundToContainer(
-    kubeClient: k8s.CoreV1Api,
-    name: string,
-    namespace: string,
-  ) {
+  public static async watchUntilPVCNotPending(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
       timeout: 500000,
       intervalBetweenAttempts: 15000,
@@ -44,9 +40,8 @@ class KubernetesStorage {
         },
       },
     };
-    await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
-    core.info(`Persistent Volume Claim created`);
-    core.info(`PVC state: ${await this.getPVCPhase(kubeClient, pvcName, namespace)}`);
+    const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
+    core.info(`Persistent Volume Claim ${result.body.metadata?.name} created`);
   }
 }
 
