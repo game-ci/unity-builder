@@ -5,7 +5,7 @@ import BuildParameters from '../build-parameters';
 
 class KubernetesStorage {
   public static async getPVCPhase(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
-    return (await kubeClient.readNamespacedPersistentVolumeClaimStatus(name, namespace)).body.status?.phase;
+    return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
   }
   public static async watchPersistentVolumeClaimUntilBoundToContainer(
     kubeClient: k8s.CoreV1Api,
@@ -44,10 +44,7 @@ class KubernetesStorage {
       },
     };
     await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
-    core.info(`Persistent Volume created, ${await KubernetesStorage.getPVCPhase(kubeClient, pvcName, namespace)}`);
-    await new Promise((resolve) => setTimeout(resolve, 100000));
-    // await this.watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, pvcName, namespace);
-    core.info(JSON.stringify((await kubeClient.listPersistentVolume(namespace)).body, undefined, 4));
+    core.info(`Persistent Volume Claim created`);
   }
 }
 
