@@ -9,8 +9,6 @@ import { waitUntil } from 'async-wait-until';
 
 const base64 = require('base-64');
 
-const pollInterval = 20000;
-
 class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: KubeConfig;
   private kubeClient: k8s.CoreV1Api;
@@ -149,7 +147,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     };
     await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
     core.info(`Persistent Volume created, ${await this.getPVCPhase()}`);
-    await waitUntil(async () => (await this.getPVCPhase()) !== 'Pending');
   }
 
   getJobSpec(command: string[], image: string) {
@@ -285,7 +282,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
-      // await this.watchPersistentVolumeClaimUntilBoundToContainer();
+      await this.watchPersistentVolumeClaimUntilBoundToContainer();
       core.info('PVC Bound');
       this.setPodNameAndContainerName(await this.getPod());
       core.info('Watching pod and streaming logs');
@@ -356,14 +353,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async watchPersistentVolumeClaimUntilBoundToContainer() {
-    await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    const queryResult = await this.kubeClient.readNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-
-    if (queryResult.body.status?.phase === 'Pending') {
-      await this.watchPersistentVolumeClaimUntilBoundToContainer();
-    } else {
-      core.info('Persistent Volume ready for claims');
-    }
+    await waitUntil(async () => (await this.getPVCPhase()) !== 'Pending');
   }
 
   async getPodStatusPhase() {
