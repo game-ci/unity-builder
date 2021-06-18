@@ -442,8 +442,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
     } catch (error) {
-      core.info('Failed to cleanup');
+      core.info('Failed to cleanup, error:');
       core.error(JSON.stringify(error, undefined, 4));
+      core.info('Abandoning cleanup, build error:');
     }
   }
 

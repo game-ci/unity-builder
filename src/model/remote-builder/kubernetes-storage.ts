@@ -14,6 +14,7 @@ class KubernetesStorage {
   ) {
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
       timeout: 500000,
+      intervalBetweenAttempts: 15000,
     });
   }
 
