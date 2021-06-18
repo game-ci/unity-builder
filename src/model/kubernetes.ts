@@ -5,6 +5,8 @@ import { KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import { RemoteBuilderProviderInterface } from './remote-builder/remote-builder-provider-interface';
 import RemoteBuilderSecret from './remote-builder/remote-builder-secret';
+import { waitUntil } from 'async-wait-until';
+
 const base64 = require('base-64');
 
 const pollInterval = 20000;
@@ -119,6 +121,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
+  async getPVCPhase() {
+    return (await this.kubeClient.readNamespacedPersistentVolumeClaimStatus(this.pvcName, this.namespace)).body.status
+      ?.phase;
+  }
+
   async createPersistentVolumeClaim() {
     if (this.buildParameters.kubeVolume) {
       core.info(this.buildParameters.kubeVolume);
@@ -140,8 +147,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         },
       },
     };
-    const pvcResult = await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
-    core.info(`Persistent Volume created, ${pvcResult.body.status?.phase}`);
+    await this.kubeClient.createNamespacedPersistentVolumeClaim(this.namespace, pvc);
+    core.info(`Persistent Volume created, ${await this.getPVCPhase()}`);
+    await waitUntil(async () => (await this.getPVCPhase()) !== 'Pending');
   }
 
   getJobSpec(command: string[], image: string) {
@@ -277,7 +285,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
-      await this.watchPersistentVolumeClaimUntilBoundToContainer();
+      // await this.watchPersistentVolumeClaimUntilBoundToContainer();
       core.info('PVC Bound');
       this.setPodNameAndContainerName(await this.getPod());
       core.info('Watching pod and streaming logs');
@@ -358,24 +366,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  async watchUntilPodRunning() {
-    let ready = false;
+  async getPodStatusPhase() {
+    return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace))?.body.status?.phase;
+  }
 
-    while (!ready) {
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      const pod = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace))?.body;
-      if (pod === undefined) {
-        throw new Error('no pod found');
-      }
-      const phase = pod.status?.phase;
-      if (phase === 'Running') {
-        core.info('Pod no longer pending');
-        ready = true;
-        return;
-      }
-      if (phase !== 'Pending') {
-        core.error('Kubernetes job failed');
-      }
+  async watchUntilPodRunning() {
+    await waitUntil(async () => {
+      (await this.getPodStatusPhase()) !== 'Pending';
+    });
+    const phase = await this.getPodStatusPhase();
+    if (phase === 'Running') {
+      core.info('Pod no longer pending');
+    } else {
+      core.error('Pod failed to reach running phase');
     }
   }
 
