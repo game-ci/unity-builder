@@ -7,7 +7,9 @@ class KubernetesStorage {
     return (await kubeClient.readNamespacedPersistentVolumeClaimStatus(name, namespace)).body.status?.phase;
   }
   public static async watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, name, namespace) {
-    await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending');
+    await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
+      timeout: 50000,
+    });
   }
 
   public static async createPersistentVolumeClaim(buildParameters, pvcName, kubeClient, namespace) {
