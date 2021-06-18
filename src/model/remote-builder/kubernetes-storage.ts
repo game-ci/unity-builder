@@ -46,6 +46,7 @@ class KubernetesStorage {
     };
     await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     core.info(`Persistent Volume Claim created`);
+    core.info(`PVC state: ${await this.getPVCPhase(kubeClient, pvcName, namespace)}`);
   }
 }
 

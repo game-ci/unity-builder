@@ -157,6 +157,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
       await this.cleanup();
     } catch (error) {
+      core.error(error);
       core.error(JSON.stringify(error.response, undefined, 4));
       throw error;
     }
