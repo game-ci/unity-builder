@@ -54,20 +54,11 @@ class KubernetesStorage {
         4,
       ),
     );
-
-    core.info(JSON.stringify(pvc, undefined, 4));
-
     core.info(
       JSON.stringify((await kubeClient.readNamespacedPersistentVolumeClaim(pvcName, namespace)).body, undefined, 4),
     );
-
-    core.info(
-      JSON.stringify(
-        (await kubeClient.replaceNamespacedPersistentVolumeClaimStatus(pvcName, namespace, pvc)).body,
-        undefined,
-        4,
-      ),
-    );
+    core.info(JSON.stringify((await kubeClient.readPersistentVolume(pvcName, namespace)).body, undefined, 4));
+    core.info(JSON.stringify((await kubeClient.readPersistentVolumeStatus(pvcName, namespace)).body, undefined, 4));
   }
 }
 
