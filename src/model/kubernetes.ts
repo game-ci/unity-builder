@@ -92,7 +92,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
       await this.cleanup();
     } catch (error) {
-      core.error(JSON.stringify(error.response.body, undefined, 4));
+      core.error(JSON.stringify(error.response, undefined, 4));
       throw error;
     }
 
@@ -281,6 +281,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       this.setPodNameAndContainerName(await this.getPod());
       await this.watchUntilPodRunning();
       await this.streamLogs();
+      await this.cleanup();
     } catch (error) {
       await this.cleanup();
       throw error;
