@@ -329,6 +329,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.streamLogs();
       await this.cleanup();
     } catch (error) {
+      core.info('Running job failed');
       await this.cleanup();
       throw error;
     }
@@ -436,9 +437,14 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async cleanup() {
     core.info('cleaning up');
-    await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
-    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-    await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    try {
+      await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
+      await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+      await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    } catch (error) {
+      core.info('Failed to cleanup');
+      core.error(JSON.stringify(error, undefined, 4));
+    }
   }
 
   static uuidv4() {
