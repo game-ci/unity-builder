@@ -15,26 +15,6 @@ class KubernetesStorage {
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
       timeout: 500000,
     });
-
-    core.info(
-      JSON.stringify((await kubeClient.readNamespacedPersistentVolumeClaimStatus(name, namespace)).body, undefined, 4),
-    );
-
-    const pvc = (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body;
-
-    core.info(JSON.stringify(pvc, undefined, 4));
-
-    core.info(
-      JSON.stringify((await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body, undefined, 4),
-    );
-
-    core.info(
-      JSON.stringify(
-        (await kubeClient.replaceNamespacedPersistentVolumeClaimStatus(name, namespace, pvc)).body,
-        undefined,
-        4,
-      ),
-    );
   }
 
   public static async createPersistentVolumeClaim(
@@ -65,6 +45,29 @@ class KubernetesStorage {
     };
     await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     core.info(`Persistent Volume created, ${await KubernetesStorage.getPVCPhase(kubeClient, pvcName, namespace)}`);
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
+    core.info(
+      JSON.stringify(
+        (await kubeClient.readNamespacedPersistentVolumeClaimStatus(pvcName, namespace)).body,
+        undefined,
+        4,
+      ),
+    );
+
+    core.info(JSON.stringify(pvc, undefined, 4));
+
+    core.info(
+      JSON.stringify((await kubeClient.readNamespacedPersistentVolumeClaim(pvcName, namespace)).body, undefined, 4),
+    );
+
+    core.info(
+      JSON.stringify(
+        (await kubeClient.replaceNamespacedPersistentVolumeClaimStatus(pvcName, namespace, pvc)).body,
+        undefined,
+        4,
+      ),
+    );
   }
 }
 
