@@ -278,7 +278,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
       await this.watchPersistentVolumeClaimUntilBoundToContainer();
+      core.info('PVC Bound');
       this.setPodNameAndContainerName(await this.getPod());
+      core.info('Watching pod and streaming logs');
       await this.watchUntilPodRunning();
       await this.streamLogs();
       await this.cleanup();
