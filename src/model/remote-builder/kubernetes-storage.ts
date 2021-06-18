@@ -8,7 +8,7 @@ class KubernetesStorage {
   }
   public static async watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, name, namespace) {
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
-      timeout: 50000,
+      timeout: 500000,
     });
   }
 
@@ -35,7 +35,7 @@ class KubernetesStorage {
     };
     await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     core.info(`Persistent Volume created, ${await KubernetesStorage.getPVCPhase(kubeClient, pvcName, namespace)}`);
-    // await this.watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, pvcName, namespace);
+    await this.watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, pvcName, namespace);
     core.info(
       JSON.stringify(
         (await kubeClient.readNamespacedPersistentVolumeClaimStatus(pvcName, namespace)).body,
