@@ -9,7 +9,7 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
-import Kubernetes from './kubernetes';
+import Kubernetes from './remote-builder/kubernetes-build-platform';
 import RemoteBuilder from './remote-builder/remote-builder';
 
 export {
