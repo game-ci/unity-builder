@@ -7,9 +7,13 @@ import * as core from '@actions/core';
 import RemoteBuilderTaskDef from './remote-builder-task-def';
 import RemoteBuilderConstants from './remote-builder-constants';
 import AWSBuildRunner from './aws-build-runner';
+import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 
-class AWSBuildEnvironment {
-  static async runBuild(
+class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
+  run(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  async runBuild(
     buildId: string,
     stackName: string,
     image: string,
@@ -18,12 +22,12 @@ class AWSBuildEnvironment {
     workingdir: string,
     environment: RemoteBuilderEnvironmentVariable[],
     secrets: RemoteBuilderSecret[],
-  ) {
+  ): Promise<void> {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
     const entrypoint = ['/bin/sh'];
 
-    const taskDef = await this.setupCloudFormations(
+    const taskDef = await AWSBuildEnvironment.setupCloudFormations(
       CF,
       buildId,
       stackName,
@@ -37,7 +41,7 @@ class AWSBuildEnvironment {
     try {
       await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId);
     } finally {
-      await this.cleanupResources(CF, taskDef);
+      await AWSBuildEnvironment.cleanupResources(CF, taskDef);
     }
   }
 

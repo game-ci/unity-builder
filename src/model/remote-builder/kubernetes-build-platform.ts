@@ -7,6 +7,7 @@ import { RemoteBuilderProviderInterface } from './remote-builder-provider-interf
 import RemoteBuilderSecret from './remote-builder-secret';
 import { waitUntil } from 'async-wait-until';
 import KubernetesStorage from './kubernetes-storage';
+import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
 
 const base64 = require('base-64');
 
@@ -40,6 +41,63 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.baseImage = baseImage;
 
     this.setUniqueBuildId();
+  }
+  async runBuild(
+    buildId: string,
+    stackName: string,
+    image: string,
+    commands: string[],
+    mountdir: string,
+    workingdir: string,
+    environment: RemoteBuilderEnvironmentVariable[],
+    secrets: RemoteBuilderSecret[],
+  ): Promise<void> {
+    const defaultSecretsArray: RemoteBuilderSecret[] = [
+      {
+        ParameterKey: 'GithubToken',
+        EnvironmentVariable: 'GITHUB_TOKEN',
+        ParameterValue: this.buildParameters.githubToken,
+      },
+      {
+        ParameterKey: 'UNITY_LICENSE',
+        EnvironmentVariable: 'UNITY_LICENSE',
+        ParameterValue: process.env.UNITY_LICENSE || '',
+      },
+      {
+        ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+        EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
+        ParameterValue: this.buildParameters.androidKeystoreBase64,
+      },
+      {
+        ParameterKey: 'ANDROID_KEYSTORE_PASS',
+        EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
+        ParameterValue: this.buildParameters.androidKeystorePass,
+      },
+      {
+        ParameterKey: 'ANDROID_KEYALIAS_PASS',
+        EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
+        ParameterValue: this.buildParameters.androidKeyaliasPass,
+      },
+    ];
+    defaultSecretsArray.push(...secrets);
+    try {
+      // setup
+      await this.createSecret(defaultSecretsArray);
+      await KubernetesStorage.createPersistentVolumeClaim(
+        this.buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
+
+      // run
+      await this.runJob(commands, image);
+
+      await this.cleanup();
+    } catch (error) {
+      core.error(JSON.stringify(error.response, undefined, 4));
+      throw error;
+    }
   }
 
   setUniqueBuildId() {
