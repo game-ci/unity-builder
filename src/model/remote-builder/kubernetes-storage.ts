@@ -1,18 +1,28 @@
 import waitUntil from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
+import BuildParameters from '../build-parameters';
 
 class KubernetesStorage {
-  public static async getPVCPhase(kubeClient, name, namespace) {
+  public static async getPVCPhase(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
     return (await kubeClient.readNamespacedPersistentVolumeClaimStatus(name, namespace)).body.status?.phase;
   }
-  public static async watchPersistentVolumeClaimUntilBoundToContainer(kubeClient, name, namespace) {
+  public static async watchPersistentVolumeClaimUntilBoundToContainer(
+    kubeClient: k8s.CoreV1Api,
+    name: string,
+    namespace: string,
+  ) {
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
       timeout: 500000,
     });
   }
 
-  public static async createPersistentVolumeClaim(buildParameters, pvcName, kubeClient, namespace) {
+  public static async createPersistentVolumeClaim(
+    buildParameters: BuildParameters,
+    pvcName: string,
+    kubeClient: k8s.CoreV1Api,
+    namespace: string,
+  ) {
     if (buildParameters.kubeVolume) {
       core.info(buildParameters.kubeVolume);
       pvcName = buildParameters.kubeVolume;
