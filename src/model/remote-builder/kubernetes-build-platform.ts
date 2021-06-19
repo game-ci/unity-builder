@@ -255,7 +255,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
               name: 'main',
               image,
               command,
-              workingDir: workingDirectory,
+              workingDir: `/${workingDirectory}`,
               resources: {
                 requests: {
                   memory: this.buildParameters.remoteBuildMemory,
@@ -387,8 +387,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     ls
     echo "end"`,
       ],
-      '',
-      '',
+      'data',
+      'data',
       [],
       [],
     );
@@ -415,8 +415,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     /entrypoint.sh
     `,
       ],
-      '',
-      '',
+      'data',
+      'data',
       [],
       [],
     );
@@ -470,7 +470,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         throw new Error(
           JSON.stringify(
             {
-              message: 'Failed to stream any logs, listing namespace events',
+              message: 'Failed to stream any logs, listing namespace events, check for an error with the container',
               events: (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
                 .filter((x) => {
                   return x.involvedObject.name === this.podName || x.involvedObject.name === this.jobName;
