@@ -412,7 +412,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async getPodStatusPhase() {
-    return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace))?.body.status?.phase;
+    return (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace))?.body.status?.phase;
   }
 
   async watchUntilPodRunning() {
