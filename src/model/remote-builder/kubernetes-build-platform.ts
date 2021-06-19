@@ -444,7 +444,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     const logOptions = {
       follow: true,
       pretty: true,
-      previous: true,
+      previous: false,
     };
     try {
       const resultError = await new Promise(async (resolve) =>
