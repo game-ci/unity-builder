@@ -448,7 +448,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   async streamLogs() {
     core.info(`Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`);
     const stream = new Writable();
+    let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
+      didStreamAnyLogs = true;
       core.info(chunk.toString());
       next();
     };
@@ -463,6 +465,18 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       );
       if (resultError) {
         throw resultError;
+      }
+      if (!didStreamAnyLogs) {
+        throw new Error(
+          JSON.stringify(
+            {
+              message: 'Failed to stream any logs, listing namespace events',
+              items: (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items,
+            },
+            undefined,
+            4,
+          ),
+        );
       }
     } catch (error) {
       throw error;
