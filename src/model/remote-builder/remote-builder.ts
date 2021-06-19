@@ -17,12 +17,12 @@ class RemoteBuilder {
       switch (buildParameters.remoteBuildCluster) {
         case 'aws':
           core.info('Building with AWS');
-          this.RemoteBuilderProviderPlatform = new AWSBuildPlatform();
+          this.RemoteBuilderProviderPlatform = new AWSBuildPlatform(buildParameters);
           break;
         default:
         case 'k8s':
           core.info('Building with Kubernetes');
-          this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters, baseImage);
+          this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters);
           break;
       }
       this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
@@ -69,7 +69,6 @@ class RemoteBuilder {
     core.info('Starting step 1/4 clone and restore cache)');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
-      buildParameters.awsStackName,
       'alpine/git',
       [
         '-c',
@@ -204,7 +203,6 @@ class RemoteBuilder {
     core.info('Starting part 2/4 (build unity project)');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
-      buildParameters.awsStackName,
       baseImage.toString(),
       [
         '-c',
@@ -287,7 +285,6 @@ class RemoteBuilder {
     // Cleanup
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
-      buildParameters.awsStackName,
       'alpine',
       [
         '-c',
@@ -327,7 +324,6 @@ class RemoteBuilder {
     core.info('Starting step 4/4 upload build to s3');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
-      buildParameters.awsStackName,
       'amazon/aws-cli',
       [
         '-c',
@@ -374,7 +370,6 @@ class RemoteBuilder {
     core.info('Starting steam deployment');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
-      buildParameters.awsStackName,
       'cm2network/steamcmd:root',
       [
         '-c',

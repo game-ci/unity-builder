@@ -15,9 +15,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
   private buildId: string = '';
-  private buildCorrelationId: string = '';
   private buildParameters: BuildParameters;
-  private baseImage: any;
   private pvcName: string = '';
   private secretName: string = '';
   private jobName: string = '';
@@ -25,7 +23,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private podName: string = '';
   private containerName: string = '';
 
-  constructor(buildParameters: BuildParameters, baseImage) {
+  constructor(buildParameters: BuildParameters) {
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
@@ -36,15 +34,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.kubeClient = k8sApi;
     this.kubeClientBatch = k8sBatchApi;
 
-    this.buildCorrelationId = Kubernetes.uuidv4();
-
     this.namespace = 'default';
     this.buildParameters = buildParameters;
-    this.baseImage = baseImage;
   }
   async runBuildTask(
     buildId: string,
-    stackName: string,
     image: string,
     commands: string[],
     mountdir: string,
@@ -53,37 +47,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     secrets: RemoteBuilderSecret[],
   ): Promise<void> {
     try {
-      this.setUniqueBuildId();
-      const defaultSecretsArray: RemoteBuilderSecret[] = [
-        {
-          ParameterKey: 'GithubToken',
-          EnvironmentVariable: 'GITHUB_TOKEN',
-          ParameterValue: this.buildParameters.githubToken,
-        },
-        {
-          ParameterKey: 'UNITY_LICENSE',
-          EnvironmentVariable: 'UNITY_LICENSE',
-          ParameterValue: process.env.UNITY_LICENSE || '',
-        },
-        {
-          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
-          EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-          ParameterValue: this.buildParameters.androidKeystoreBase64,
-        },
-        {
-          ParameterKey: 'ANDROID_KEYSTORE_PASS',
-          EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-          ParameterValue: this.buildParameters.androidKeystorePass,
-        },
-        {
-          ParameterKey: 'ANDROID_KEYALIAS_PASS',
-          EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
-          ParameterValue: this.buildParameters.androidKeyaliasPass,
-        },
-      ];
-      defaultSecretsArray.push(...secrets);
+      this.setUniqueBuildId(buildId);
       // setup
-      await this.createSecret(defaultSecretsArray);
+      await this.createSecret(secrets);
       await KubernetesStorage.createPersistentVolumeClaim(
         this.buildParameters,
         this.pvcName,
@@ -106,14 +72,13 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.cleanup();
     } catch (error) {
       core.info('Running job failed');
+      core.error(JSON.stringify(error, undefined, 4));
       await this.cleanup();
-      core.error(JSON.stringify(error.response, undefined, 4));
       throw error;
     }
   }
 
-  setUniqueBuildId() {
-    const buildId = Kubernetes.uuidv4();
+  setUniqueBuildId(buildId: string) {
     const pvcName = `unity-builder-pvc-${buildId}`;
     const secretName = `build-credentials-${buildId}`;
     const jobName = `unity-builder-job-${buildId}`;
@@ -280,66 +245,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     return job;
   }
 
-  async runJobInKubernetesPod(command: string[], image: string) {
-    try {
-      this.setUniqueBuildId();
-      const defaultSecretsArray: RemoteBuilderSecret[] = [
-        {
-          ParameterKey: 'GithubToken',
-          EnvironmentVariable: 'GITHUB_TOKEN',
-          ParameterValue: this.buildParameters.githubToken,
-        },
-        {
-          ParameterKey: 'UNITY_LICENSE',
-          EnvironmentVariable: 'UNITY_LICENSE',
-          ParameterValue: process.env.UNITY_LICENSE || '',
-        },
-        {
-          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
-          EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-          ParameterValue: this.buildParameters.androidKeystoreBase64,
-        },
-        {
-          ParameterKey: 'ANDROID_KEYSTORE_PASS',
-          EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-          ParameterValue: this.buildParameters.androidKeystorePass,
-        },
-        {
-          ParameterKey: 'ANDROID_KEYALIAS_PASS',
-          EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
-          ParameterValue: this.buildParameters.androidKeyaliasPass,
-        },
-      ];
-
-      // setup
-      await this.createSecret(defaultSecretsArray);
-      await KubernetesStorage.createPersistentVolumeClaim(
-        this.buildParameters,
-        this.pvcName,
-        this.kubeClient,
-        this.namespace,
-      );
-
-      //run
-      const jobSpec = this.getJobSpec(command, image, 'data', 'data', []);
-      core.info('Creating build job');
-      await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      core.info('Job created');
-      await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
-      core.info('PVC Bound');
-      this.setPodNameAndContainerName(await this.findPod());
-      core.info('Watching pod until running');
-      await this.watchUntilPodRunning();
-      core.info('Pod running, streaming logs');
-      await this.streamLogs();
-      await this.cleanup();
-    } catch (error) {
-      core.info('Running job failed');
-      await this.cleanup();
-      throw error;
-    }
-  }
-
   async findPod() {
     const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
       (x) => x.metadata?.labels?.['job-name'] === this.jobName,
@@ -433,14 +338,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.error(JSON.stringify(error, undefined, 4));
       core.info('Abandoning cleanup, build error:');
     }
-  }
-
-  static uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.trunc(Math.random() * 16);
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
   }
 }
 export default Kubernetes;

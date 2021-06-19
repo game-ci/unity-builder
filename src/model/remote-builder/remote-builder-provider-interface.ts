@@ -6,8 +6,6 @@ export interface RemoteBuilderProviderInterface {
     // eslint-disable-next-line no-unused-vars
     buildId: string,
     // eslint-disable-next-line no-unused-vars
-    stackName: string,
-    // eslint-disable-next-line no-unused-vars
     image: string,
     // eslint-disable-next-line no-unused-vars
     commands: string[],
