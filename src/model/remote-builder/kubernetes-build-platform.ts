@@ -16,6 +16,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
   private buildId: string = '';
+  private buildCorrelationId: string = '';
   private buildParameters: BuildParameters;
   private baseImage: any;
   private pvcName: string = '';
@@ -36,11 +37,11 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.kubeClient = k8sApi;
     this.kubeClientBatch = k8sBatchApi;
 
+    this.buildCorrelationId = Kubernetes.uuidv4();
+
     this.namespace = 'default';
     this.buildParameters = buildParameters;
     this.baseImage = baseImage;
-
-    this.setUniqueBuildId();
   }
   async runBuild(
     buildId: string,
@@ -91,7 +92,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       );
 
       // run
-      await this.runJob(commands, image);
+      await this.runJobInKubernetesPod(commands, image);
 
       await this.cleanup();
     } catch (error) {
@@ -114,48 +115,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async run() {
     core.info('Running Remote Builder on Kubernetes');
-    const defaultSecretsArray: RemoteBuilderSecret[] = [
-      {
-        ParameterKey: 'GithubToken',
-        EnvironmentVariable: 'GITHUB_TOKEN',
-        ParameterValue: this.buildParameters.githubToken,
-      },
-      {
-        ParameterKey: 'UNITY_LICENSE',
-        EnvironmentVariable: 'UNITY_LICENSE',
-        ParameterValue: process.env.UNITY_LICENSE || '',
-      },
-      {
-        ParameterKey: 'ANDROID_KEYSTORE_BASE64',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-        ParameterValue: this.buildParameters.androidKeystoreBase64,
-      },
-      {
-        ParameterKey: 'ANDROID_KEYSTORE_PASS',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-        ParameterValue: this.buildParameters.androidKeystorePass,
-      },
-      {
-        ParameterKey: 'ANDROID_KEYALIAS_PASS',
-        EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
-        ParameterValue: this.buildParameters.androidKeyaliasPass,
-      },
-    ];
     try {
-      // setup
-      await this.createSecret(defaultSecretsArray);
-      await KubernetesStorage.createPersistentVolumeClaim(
-        this.buildParameters,
-        this.pvcName,
-        this.kubeClient,
-        this.namespace,
-      );
-
-      // run
       await this.runCloneJob();
       await this.runBuildJob();
-
-      await this.cleanup();
     } catch (error) {
       core.error(error);
       core.error(JSON.stringify(error.response, undefined, 4));
@@ -311,9 +273,47 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     return job;
   }
 
-  async runJob(command: string[], image: string) {
+  async runJobInKubernetesPod(command: string[], image: string) {
     try {
       this.setUniqueBuildId();
+      const defaultSecretsArray: RemoteBuilderSecret[] = [
+        {
+          ParameterKey: 'GithubToken',
+          EnvironmentVariable: 'GITHUB_TOKEN',
+          ParameterValue: this.buildParameters.githubToken,
+        },
+        {
+          ParameterKey: 'UNITY_LICENSE',
+          EnvironmentVariable: 'UNITY_LICENSE',
+          ParameterValue: process.env.UNITY_LICENSE || '',
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
+          ParameterValue: this.buildParameters.androidKeystoreBase64,
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_PASS',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
+          ParameterValue: this.buildParameters.androidKeystorePass,
+        },
+        {
+          ParameterKey: 'ANDROID_KEYALIAS_PASS',
+          EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
+          ParameterValue: this.buildParameters.androidKeyaliasPass,
+        },
+      ];
+
+      // setup
+      await this.createSecret(defaultSecretsArray);
+      await KubernetesStorage.createPersistentVolumeClaim(
+        this.buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
+
+      //run
       const jobSpec = this.getJobSpec(command, image);
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
@@ -321,8 +321,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
       core.info('PVC Bound');
       this.setPodNameAndContainerName(await this.getPod());
-      core.info('Watching pod and streaming logs');
+      core.info('Watching pod until running');
       await this.watchUntilPodRunning();
+      core.info('Pod running, streaming logs');
       await this.streamLogs();
       await this.cleanup();
     } catch (error) {
@@ -347,7 +348,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runCloneJob() {
-    await this.runJob(
+    await this.runJobInKubernetesPod(
       [
         '/bin/ash',
         '-c',
@@ -368,7 +369,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runBuildJob() {
-    await this.runJob(
+    await this.runJobInKubernetesPod(
       [
         'bin/bash',
         '-c',
@@ -396,7 +397,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   async watchUntilPodRunning() {
     await waitUntil(async () => {
       (await this.getPodStatusPhase()) !== 'Pending';
-    });
+    }, 500000);
     const phase = await this.getPodStatusPhase();
     if (phase === 'Running') {
       core.info('Pod no longer pending');
