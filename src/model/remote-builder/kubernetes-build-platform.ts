@@ -320,7 +320,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.info('Job created');
       await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
       core.info('PVC Bound');
-      this.setPodNameAndContainerName(await this.getPod());
+      this.setPodNameAndContainerName(await this.findPod());
       core.info('Watching pod until running');
       await this.watchUntilPodRunning();
       core.info('Pod running, streaming logs');
@@ -333,18 +333,14 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  async getPod() {
-    if (this.podName === '') {
-      const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
-        (x) => x.metadata?.labels?.['job-name'] === this.jobName,
-      );
-      if (pod === undefined) {
-        throw new Error("pod with job-name label doesn't exist");
-      }
-      return pod;
-    } else {
-      return (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+  async findPod() {
+    const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
+      (x) => x.metadata?.labels?.['job-name'] === this.jobName,
+    );
+    if (pod === undefined) {
+      throw new Error("pod with job-name label doesn't exist");
     }
+    return pod;
   }
 
   async runCloneJob() {
