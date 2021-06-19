@@ -10,10 +10,10 @@ import AWSBuildRunner from './aws-build-runner';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 
 class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
-  run(): Promise<void> {
+  runFullBuildFlow(): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  async runBuild(
+  async runBuildTask(
     buildId: string,
     stackName: string,
     image: string,

@@ -65,7 +65,7 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
-    await this.RemoteBuilderProviderPlatform.runBuild(
+    await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       buildParameters.awsStackName,
       'alpine/git',
@@ -200,7 +200,7 @@ class RemoteBuilder {
         ParameterValue: buildParameters.androidKeyaliasPass,
       });
     core.info('Starting part 2/4 (build unity project)');
-    await this.RemoteBuilderProviderPlatform.runBuild(
+    await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       buildParameters.awsStackName,
       baseImage.toString(),
@@ -283,7 +283,7 @@ class RemoteBuilder {
   ) {
     core.info('Starting step 3/4 build compression');
     // Cleanup
-    await this.RemoteBuilderProviderPlatform.runBuild(
+    await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       buildParameters.awsStackName,
       'alpine',
@@ -323,7 +323,7 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 4/4 upload build to s3');
-    await this.RemoteBuilderProviderPlatform.runBuild(
+    await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       buildParameters.awsStackName,
       'amazon/aws-cli',
@@ -370,7 +370,7 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting steam deployment');
-    await this.RemoteBuilderProviderPlatform.runBuild(
+    await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       buildParameters.awsStackName,
       'cm2network/steamcmd:root',

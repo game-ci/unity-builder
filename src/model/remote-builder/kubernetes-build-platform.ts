@@ -43,7 +43,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.buildParameters = buildParameters;
     this.baseImage = baseImage;
   }
-  async runBuild(
+  async runBuildTask(
     buildId: string,
     stackName: string,
     image: string,
@@ -124,7 +124,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.jobName = jobName;
   }
 
-  async run() {
+  async runFullBuildFlow() {
     core.info('Running Remote Builder on Kubernetes');
     try {
       await this.runCloneJob();
@@ -355,7 +355,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runCloneJob() {
-    await this.runBuild(
+    await this.runBuildTask(
       this.buildCorrelationId,
       '',
       'alpine/git',
@@ -384,7 +384,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runBuildJob() {
-    await this.runBuild(
+    await this.runBuildTask(
       this.buildCorrelationId,
       '',
       this.baseImage.toString(),
@@ -411,26 +411,22 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     );
   }
 
-  async getPodStatusPhase() {
-    return (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace))?.body.status?.phase;
-  }
-
   async watchUntilPodRunning() {
+    let success: boolean = false;
+    core.info(`Watching ${this.podName} ${this.namespace}`);
     await waitUntil(
       async () => {
-        (await this.getPodStatusPhase()) !== 'Pending';
+        const phase = (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace))?.body.status?.phase;
+        success = phase === 'Running';
+        if (success || phase !== 'Pending') return true;
+        return false;
       },
       {
         timeout: 500000,
         intervalBetweenAttempts: 15000,
       },
     );
-    const phase = await this.getPodStatusPhase();
-    if (phase === 'Running') {
-      core.info('Pod no longer pending');
-    } else {
-      core.error('Pod failed to reach running phase');
-    }
+    return success;
   }
 
   setPodNameAndContainerName(pod: k8s.V1Pod) {
