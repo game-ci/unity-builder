@@ -48,7 +48,7 @@ class RemoteBuilder {
           this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters);
           break;
       }
-      await this.RemoteBuilderProviderPlatform.SetupSharedBuildResources(
+      await this.RemoteBuilderProviderPlatform.setupSharedBuildResources(
         buildUid,
         buildParameters,
         branchName,
@@ -61,16 +61,16 @@ class RemoteBuilder {
       if (this.SteamDeploy) {
         await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
       }
-      await this.RemoteBuilderProviderPlatform.CleanupSharedBuildResources(
+      await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
         buildUid,
         buildParameters,
         branchName,
         defaultSecretsArray,
       );
     } catch (error) {
-      core.setFailed(error);
-      core.error(error);
-      await this.RemoteBuilderProviderPlatform.CleanupSharedBuildResources(
+      core.error(JSON.stringify(error, undefined, 4));
+      core.setFailed('Remote Builder failed');
+      await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
         buildUid,
         buildParameters,
         branchName,

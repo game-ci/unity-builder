@@ -1,17 +1,16 @@
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '..';
 import * as core from '@actions/core';
-import { KubeConfig, Log } from '@kubernetes/client-node';
-import { Writable } from 'stream';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import RemoteBuilderSecret from './remote-builder-secret';
-import { waitUntil } from 'async-wait-until';
 import KubernetesStorage from './kubernetes-storage';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import KubernetesLogging from './kubernetes-logging';
+import KubernetesSecret from './kubernetes-secret';
+import KubernetesUtilities from './kubernetes-utils';
 
-const base64 = require('base-64');
 class Kubernetes implements RemoteBuilderProviderInterface {
-  private kubeConfig: KubeConfig;
+  private kubeConfig: k8s.KubeConfig;
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
   private buildId: string = '';
@@ -37,19 +36,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
-  async CleanupSharedBuildResources(
-    // eslint-disable-next-line no-unused-vars
-    buildUid: string,
-    // eslint-disable-next-line no-unused-vars
-    buildParameters: BuildParameters,
-    // eslint-disable-next-line no-unused-vars
-    branchName: string,
-    // eslint-disable-next-line no-unused-vars
-    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {
-    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-  }
-  public async SetupSharedBuildResources(
+  public async setupSharedBuildResources(
     buildUid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -57,6 +44,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
+    const pvcName = `unity-builder-pvc-${buildUid}`;
+    this.pvcName = pvcName;
     await KubernetesStorage.createPersistentVolumeClaim(buildParameters, this.pvcName, this.kubeClient, this.namespace);
   }
 
@@ -70,64 +59,45 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     secrets: RemoteBuilderSecret[],
   ): Promise<void> {
     try {
-      this.setUniqueBuildId(buildId);
       // setup
-      await this.createSecret(secrets);
+      this.buildId = buildId;
+      this.secretName = `build-credentials-${buildId}`;
+      this.jobName = `unity-builder-job-${buildId}`;
+      await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       await KubernetesStorage.createPersistentVolumeClaim(
         this.buildParameters,
         this.pvcName,
         this.kubeClient,
         this.namespace,
       );
+      const jobSpec = this.getJobSpec(commands, image, mountdir, workingdir, environment);
 
       //run
-      const jobSpec = this.getJobSpec(commands, image, mountdir, workingdir, environment);
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
       await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
       core.info('PVC Bound');
-      this.setPodNameAndContainerName(await this.findPod());
+      this.setPodNameAndContainerName(
+        await KubernetesUtilities.findPodFromJob(this.kubeClient, this.jobName, this.namespace),
+      );
       core.info('Watching pod until running');
-      await this.watchUntilPodRunning();
+      await KubernetesUtilities.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       core.info('Pod running, streaming logs');
-      await this.streamLogs();
-      await this.cleanup();
+      await KubernetesLogging.streamLogs(
+        this.kubeConfig,
+        this.kubeClient,
+        this.jobName,
+        this.podName,
+        this.containerName,
+        this.namespace,
+        core.info,
+      );
+      await this.cleanupTaskResources();
     } catch (error) {
       core.info('Running job failed');
       core.error(JSON.stringify(error, undefined, 4));
-      await this.cleanup();
-      throw error;
-    }
-  }
-
-  setUniqueBuildId(buildId: string) {
-    const pvcName = `unity-builder-pvc-${buildId}`;
-    const secretName = `build-credentials-${buildId}`;
-    const jobName = `unity-builder-job-${buildId}`;
-
-    this.buildId = buildId;
-    this.pvcName = pvcName;
-    this.secretName = secretName;
-    this.jobName = jobName;
-  }
-
-  async createSecret(secrets: RemoteBuilderSecret[]) {
-    const secret = new k8s.V1Secret();
-    secret.apiVersion = 'v1';
-    secret.kind = 'Secret';
-    secret.type = 'Opaque';
-    secret.metadata = {
-      name: this.secretName,
-    };
-    secret.data = {};
-    for (const buildSecret of secrets) {
-      secret.data[buildSecret.EnvironmentVariable] = base64.encode(buildSecret.ParameterValue);
-      secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = base64.encode(buildSecret.ParameterKey);
-    }
-    try {
-      await this.kubeClient.createNamespacedSecret(this.namespace, secret);
-    } catch (error) {
+      await this.cleanupTaskResources();
       throw error;
     }
   }
@@ -269,89 +239,12 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     return job;
   }
 
-  async findPod() {
-    const pod = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.find(
-      (x) => x.metadata?.labels?.['job-name'] === this.jobName,
-    );
-    if (pod === undefined) {
-      throw new Error("pod with job-name label doesn't exist");
-    }
-    return pod;
-  }
-
-  async watchUntilPodRunning() {
-    let success: boolean = false;
-    core.info(`Watching ${this.podName} ${this.namespace}`);
-    await waitUntil(
-      async () => {
-        const phase = (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace))?.body.status?.phase;
-        success = phase === 'Running';
-        if (success || phase !== 'Pending') return true;
-        return false;
-      },
-      {
-        timeout: 500000,
-        intervalBetweenAttempts: 15000,
-      },
-    );
-    return success;
-  }
-
   setPodNameAndContainerName(pod: k8s.V1Pod) {
     this.podName = pod.metadata?.name || '';
     this.containerName = pod.status?.containerStatuses?.[0].name || '';
   }
 
-  async streamLogs() {
-    core.info(`Streaming logs from pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace}`);
-    const stream = new Writable();
-    let didStreamAnyLogs: boolean = false;
-    stream._write = (chunk, encoding, next) => {
-      didStreamAnyLogs = true;
-      core.info(chunk.toString());
-      next();
-    };
-    const logOptions = {
-      follow: true,
-      pretty: true,
-      previous: false,
-    };
-    try {
-      const resultError = await new Promise(async (resolve) =>
-        new Log(this.kubeConfig).log(this.namespace, this.podName, this.containerName, stream, resolve, logOptions),
-      );
-      if (resultError) {
-        throw resultError;
-      }
-      if (!didStreamAnyLogs) {
-        throw new Error(
-          JSON.stringify(
-            {
-              message: 'Failed to stream any logs, listing namespace events, check for an error with the container',
-              events: (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
-                .filter((x) => {
-                  return x.involvedObject.name === this.podName || x.involvedObject.name === this.jobName;
-                })
-                .map((x) => {
-                  return {
-                    type: x.involvedObject.kind,
-                    name: x.involvedObject.name,
-                    message: x.message,
-                  };
-                }),
-            },
-            undefined,
-            4,
-          ),
-        );
-      }
-    } catch (error) {
-      throw error;
-    }
-    core.info('end of log stream');
-  }
-
-  async cleanup() {
+  async cleanupTaskResources() {
     core.info('cleaning up');
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
@@ -361,6 +254,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.error(JSON.stringify(error, undefined, 4));
       core.info('Abandoning cleanup, build error:');
     }
+  }
+
+  async cleanupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
+    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
   }
 }
 export default Kubernetes;

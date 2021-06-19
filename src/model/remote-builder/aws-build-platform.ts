@@ -16,7 +16,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.stackName = buildParameters.awsStackName;
   }
-  CleanupSharedBuildResources(
+  cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildUid: string,
     // eslint-disable-next-line no-unused-vars
@@ -28,7 +28,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   ) {
     throw new Error('Method not implemented.');
   }
-  SetupSharedBuildResources(
+  setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildUid: string,
     // eslint-disable-next-line no-unused-vars

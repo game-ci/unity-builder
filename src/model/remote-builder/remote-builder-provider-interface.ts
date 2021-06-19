@@ -3,7 +3,7 @@ import RemoteBuilderEnvironmentVariable from './remote-builder-environment-varia
 import RemoteBuilderSecret from './remote-builder-secret';
 
 export interface RemoteBuilderProviderInterface {
-  CleanupSharedBuildResources(
+  cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildUid: string,
     // eslint-disable-next-line no-unused-vars
@@ -13,7 +13,7 @@ export interface RemoteBuilderProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
-  SetupSharedBuildResources(
+  setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildUid: string,
     // eslint-disable-next-line no-unused-vars
