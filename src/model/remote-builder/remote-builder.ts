@@ -16,10 +16,12 @@ class RemoteBuilder {
     try {
       switch (buildParameters.remoteBuildCluster) {
         case 'aws':
+          core.info('Building with AWS');
           this.RemoteBuilderProviderPlatform = new AWSBuildPlatform();
           break;
-        case 'k8s':
         default:
+        case 'k8s':
+          core.info('Building with Kubernetes');
           this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters, baseImage);
           break;
       }

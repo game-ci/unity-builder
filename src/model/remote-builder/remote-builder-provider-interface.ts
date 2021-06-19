@@ -2,7 +2,6 @@ import RemoteBuilderEnvironmentVariable from './remote-builder-environment-varia
 import RemoteBuilderSecret from './remote-builder-secret';
 
 export interface RemoteBuilderProviderInterface {
-  runFullBuildFlow(): Promise<void>;
   runBuildTask(
     // eslint-disable-next-line no-unused-vars
     buildId: string,

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, RemoteBuilder } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output, RemoteBuilder } from './model';
 
 async function run() {
   try {
@@ -13,13 +13,8 @@ async function run() {
     let builtImage;
 
     switch (buildParameters.remoteBuildCluster) {
-      case 'k8s':
-        core.info('Building with Kubernetes');
-        await new Kubernetes(buildParameters, baseImage).runFullBuildFlow();
-        break;
-
       case 'aws':
-        core.info('Building with AWS');
+      case 'k8s':
         await RemoteBuilder.build(buildParameters, baseImage);
         break;
 

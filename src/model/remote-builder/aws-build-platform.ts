@@ -10,9 +10,6 @@ import AWSBuildRunner from './aws-build-runner';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 
 class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
-  runFullBuildFlow(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
   async runBuildTask(
     buildId: string,
     stackName: string,
@@ -44,10 +41,6 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       await AWSBuildEnvironment.cleanupResources(CF, taskDef);
     }
   }
-
-  // static async setupPlatformResources() {
-  //   throw new Error('Method not implemented.');
-  // }
 
   static getParameterTemplate(p1) {
     return `

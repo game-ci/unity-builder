@@ -1,7 +1,7 @@
 name: Kubernetes GKE + Autopilot
 
 on:
-  push: { branches: [remote-builder/k8s] }
+  push: { branches: [remote-builder/k8s, remote-builder/unified-providers] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:

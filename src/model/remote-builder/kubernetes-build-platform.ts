@@ -10,9 +10,6 @@ import KubernetesStorage from './kubernetes-storage';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
 
 const base64 = require('base-64');
-const repositoryFolder = 'repo';
-const buildVolumeFolder = 'data';
-// const cacheFolder = 'cache';
 class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: KubeConfig;
   private kubeClient: k8s.CoreV1Api;
@@ -110,6 +107,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     } catch (error) {
       core.info('Running job failed');
       await this.cleanup();
+      core.error(JSON.stringify(error.response, undefined, 4));
       throw error;
     }
   }
@@ -124,20 +122,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.pvcName = pvcName;
     this.secretName = secretName;
     this.jobName = jobName;
-  }
-
-  async runFullBuildFlow() {
-    core.info('Running Remote Builder on Kubernetes');
-    try {
-      await this.runCloneJob();
-      await this.runBuildJob();
-    } catch (error) {
-      core.error(error);
-      core.error(JSON.stringify(error.response, undefined, 4));
-      throw error;
-    }
-
-    core.setOutput('volume', this.pvcName);
   }
 
   async createSecret(secrets: RemoteBuilderSecret[]) {
@@ -364,62 +348,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       throw new Error("pod with job-name label doesn't exist");
     }
     return pod;
-  }
-
-  async runCloneJob() {
-    await this.runBuildTask(
-      this.buildCorrelationId,
-      '',
-      'alpine/git',
-      [
-        '/bin/ash',
-        '-c',
-        `apk update;
-    apk add unzip;
-    apk add git-lfs;
-    apk add jq;
-    ls /credentials/
-    export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
-    git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git ${buildVolumeFolder}/${repositoryFolder};
-    git clone https://github.com/webbertakken/unity-builder.git ${buildVolumeFolder}/builder;
-    cd ${buildVolumeFolder}/${repositoryFolder};
-    git checkout $GITHUB_SHA;
-    ls
-    echo "end"`,
-      ],
-      'data',
-      'data',
-      [],
-      [],
-    );
-  }
-
-  async runBuildJob() {
-    await this.runBuildTask(
-      this.buildCorrelationId,
-      '',
-      this.baseImage.toString(),
-      [
-        'bin/bash',
-        '-c',
-        `ls
-    for f in ./credentials/*; do export $(basename $f)="$(cat $f)"; done
-    ls /data
-    ls /data/builder
-    ls /data/builder/dist
-    cp -r /data/builder/dist/default-build-script /UnityBuilderAction
-    cp -r /data/builder/dist/entrypoint.sh /entrypoint.sh
-    cp -r /data/builder/dist/steps /steps
-    chmod -R +x /entrypoint.sh
-    chmod -R +x /steps
-    /entrypoint.sh
-    `,
-      ],
-      'data',
-      'data',
-      [],
-      [],
-    );
   }
 
   async watchUntilPodRunning() {
