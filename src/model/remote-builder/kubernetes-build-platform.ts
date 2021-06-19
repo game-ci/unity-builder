@@ -395,9 +395,15 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async watchUntilPodRunning() {
-    await waitUntil(async () => {
-      (await this.getPodStatusPhase()) !== 'Pending';
-    }, 500000);
+    await waitUntil(
+      async () => {
+        (await this.getPodStatusPhase()) !== 'Pending';
+      },
+      {
+        timeout: 500000,
+        intervalBetweenAttempts: 15000,
+      },
+    );
     const phase = await this.getPodStatusPhase();
     if (phase === 'Running') {
       core.info('Pod no longer pending');
