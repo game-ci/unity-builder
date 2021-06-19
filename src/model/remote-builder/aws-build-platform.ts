@@ -25,9 +25,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {
-    throw new Error('Method not implemented.');
-  }
+  ) {}
   setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildUid: string,
@@ -37,9 +35,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {
-    throw new Error('Method not implemented.');
-  }
+  ) {}
 
   async runBuildTask(
     buildId: string,
