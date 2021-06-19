@@ -41,7 +41,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       secrets,
     );
     try {
-      await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId);
+      await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
     } finally {
       await this.cleanupResources(CF, taskDef);
     }
@@ -133,7 +133,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           },
           {
             ParameterKey: 'Command',
-            ParameterValue: commands.join(','),
+            ParameterValue: 'echo "this template should be overwritten when running a task"',
           },
           {
             ParameterKey: 'EntryPoint',

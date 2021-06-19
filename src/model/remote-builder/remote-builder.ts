@@ -72,7 +72,6 @@ class RemoteBuilder {
       buildUid,
       'alpine/git',
       [
-        '-c',
         `apk update;
           apk add unzip;
           apk add git-lfs;
@@ -206,7 +205,6 @@ class RemoteBuilder {
       buildUid,
       baseImage.toString(),
       [
-        '-c',
         `
             cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
             cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
@@ -288,7 +286,6 @@ class RemoteBuilder {
       buildUid,
       'alpine',
       [
-        '-c',
         `
             apk update
             apk add zip
@@ -327,7 +324,6 @@ class RemoteBuilder {
       buildUid,
       'amazon/aws-cli',
       [
-        '-c',
         `
             aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
@@ -373,7 +369,6 @@ class RemoteBuilder {
       buildUid,
       'cm2network/steamcmd:root',
       [
-        '-c',
         `
             ls
             ls /
