@@ -64,12 +64,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       this.secretName = `build-credentials-${buildId}`;
       this.jobName = `unity-builder-job-${buildId}`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      await KubernetesStorage.createPersistentVolumeClaim(
-        this.buildParameters,
-        this.pvcName,
-        this.kubeClient,
-        this.namespace,
-      );
       const jobSpec = this.getJobSpec(commands, image, mountdir, workingdir, environment);
 
       //run
