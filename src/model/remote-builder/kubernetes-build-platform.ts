@@ -53,35 +53,36 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     environment: RemoteBuilderEnvironmentVariable[],
     secrets: RemoteBuilderSecret[],
   ): Promise<void> {
-    const defaultSecretsArray: RemoteBuilderSecret[] = [
-      {
-        ParameterKey: 'GithubToken',
-        EnvironmentVariable: 'GITHUB_TOKEN',
-        ParameterValue: this.buildParameters.githubToken,
-      },
-      {
-        ParameterKey: 'UNITY_LICENSE',
-        EnvironmentVariable: 'UNITY_LICENSE',
-        ParameterValue: process.env.UNITY_LICENSE || '',
-      },
-      {
-        ParameterKey: 'ANDROID_KEYSTORE_BASE64',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-        ParameterValue: this.buildParameters.androidKeystoreBase64,
-      },
-      {
-        ParameterKey: 'ANDROID_KEYSTORE_PASS',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-        ParameterValue: this.buildParameters.androidKeystorePass,
-      },
-      {
-        ParameterKey: 'ANDROID_KEYALIAS_PASS',
-        EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
-        ParameterValue: this.buildParameters.androidKeyaliasPass,
-      },
-    ];
-    defaultSecretsArray.push(...secrets);
     try {
+      this.setUniqueBuildId();
+      const defaultSecretsArray: RemoteBuilderSecret[] = [
+        {
+          ParameterKey: 'GithubToken',
+          EnvironmentVariable: 'GITHUB_TOKEN',
+          ParameterValue: this.buildParameters.githubToken,
+        },
+        {
+          ParameterKey: 'UNITY_LICENSE',
+          EnvironmentVariable: 'UNITY_LICENSE',
+          ParameterValue: process.env.UNITY_LICENSE || '',
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_BASE64',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
+          ParameterValue: this.buildParameters.androidKeystoreBase64,
+        },
+        {
+          ParameterKey: 'ANDROID_KEYSTORE_PASS',
+          EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
+          ParameterValue: this.buildParameters.androidKeystorePass,
+        },
+        {
+          ParameterKey: 'ANDROID_KEYALIAS_PASS',
+          EnvironmentVariable: 'ANDROID_KEYALIAS_PASS',
+          ParameterValue: this.buildParameters.androidKeyaliasPass,
+        },
+      ];
+      defaultSecretsArray.push(...secrets);
       // setup
       await this.createSecret(defaultSecretsArray);
       await KubernetesStorage.createPersistentVolumeClaim(
@@ -91,12 +92,22 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         this.namespace,
       );
 
-      // run
-      await this.runJobInKubernetesPod(commands, image);
-
+      //run
+      const jobSpec = this.getJobSpec(commands, image);
+      core.info('Creating build job');
+      await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+      core.info('Job created');
+      await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
+      core.info('PVC Bound');
+      this.setPodNameAndContainerName(await this.findPod());
+      core.info('Watching pod until running');
+      await this.watchUntilPodRunning();
+      core.info('Pod running, streaming logs');
+      await this.streamLogs();
       await this.cleanup();
     } catch (error) {
-      core.error(JSON.stringify(error.response, undefined, 4));
+      core.info('Running job failed');
+      await this.cleanup();
       throw error;
     }
   }
@@ -344,12 +355,17 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runCloneJob() {
-    await this.runJobInKubernetesPod(
+    await this.runBuild(
+      this.buildCorrelationId,
+      '',
+      'alpine/git',
       [
         '/bin/ash',
         '-c',
         `apk update;
+    apk add unzip;
     apk add git-lfs;
+    apk add jq;
     ls /credentials/
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
     cd /data;
@@ -360,12 +376,18 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     ls
     echo "end"`,
       ],
-      'alpine/git',
+      '',
+      '',
+      [],
+      [],
     );
   }
 
   async runBuildJob() {
-    await this.runJobInKubernetesPod(
+    await this.runBuild(
+      this.buildCorrelationId,
+      '',
+      this.baseImage.toString(),
       [
         'bin/bash',
         '-c',
@@ -382,7 +404,10 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     /entrypoint.sh
     `,
       ],
-      this.baseImage.toString(),
+      '',
+      '',
+      [],
+      [],
     );
   }
 

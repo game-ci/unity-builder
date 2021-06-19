@@ -5,9 +5,9 @@ import RemoteBuilderNamespace from './remote-builder-namespace';
 import RemoteBuilderSecret from './remote-builder-secret';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import Kubernetes from './kubernetes-build-platform';
-const repositoryDirectoryName = 'repo';
-const efsDirectoryName = 'data';
-const cacheDirectoryName = 'cache';
+const repositoryFolder = 'repo';
+const buildVolumeFolder = 'data';
+const cacheFolder = 'cache';
 
 class RemoteBuilder {
   static SteamDeploy: boolean = false;
@@ -78,17 +78,17 @@ class RemoteBuilder {
           # Get source repo for project to be built and game-ci repo for utilties
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
-        }.git ${buildUid}/${repositoryDirectoryName} -q
+        }.git ${buildUid}/${repositoryFolder} -q
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder -q
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${buildUid}/steam -q
-          cd /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
+          cd /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
           git checkout $GITHUB_SHA
-          cd /${efsDirectoryName}/
+          cd /${buildVolumeFolder}/
           # Look for usable cache
-          if [ ! -d ${cacheDirectoryName} ]; then
-            mkdir ${cacheDirectoryName}
+          if [ ! -d ${cacheFolder} ]; then
+            mkdir ${cacheFolder}
           fi
-          cd ${cacheDirectoryName}
+          cd ${cacheFolder}
           if [ ! -d "${branchName}" ]; then
             mkdir "${branchName}"
           fi
@@ -97,8 +97,8 @@ class RemoteBuilder {
           echo "Cached Libraries for ${branchName} from previous builds:"
           ls
           echo ''
-          ls "/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}"
-          libDir="/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library"
+          ls "/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}"
+          libDir="/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library"
           if [ -d "$libDir" ]; then
             rm -r "$libDir"
             echo "Setup .gitignore to ignore Library folder and remove it from builds"
@@ -119,18 +119,18 @@ class RemoteBuilder {
           # Print out important directories
           echo ''
           echo 'Repo:'
-          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/
+          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
           echo ''
           echo 'Project:'
-          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}
+          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}
           echo ''
           echo 'Library:'
-          ls /${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}/Library/
+          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library/
           echo ''
       `,
       ],
-      `/${efsDirectoryName}`,
-      `/${efsDirectoryName}/`,
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/`,
       [
         {
           name: 'GITHUB_SHA',
@@ -207,16 +207,16 @@ class RemoteBuilder {
       [
         '-c',
         `
-            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-            cp -r /${efsDirectoryName}/${buildUid}/builder/dist/steps/ /steps;
+            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
+            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
+            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/steps/ /steps;
             chmod -R +x /entrypoint.sh;
             chmod -R +x /steps;
             /entrypoint.sh;
           `,
       ],
-      `/${efsDirectoryName}`,
-      `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/`,
       [
         {
           name: 'ContainerMemory',
@@ -228,7 +228,7 @@ class RemoteBuilder {
         },
         {
           name: 'GITHUB_WORKSPACE',
-          value: `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/`,
+          value: `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/`,
         },
         {
           name: 'PROJECT_PATH',
@@ -294,17 +294,17 @@ class RemoteBuilder {
             apk add zip
             cd Library
             zip -r lib-${buildUid}.zip .*
-            mv lib-${buildUid}.zip /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip
+            mv lib-${buildUid}.zip /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${buildUid}.zip
             cd ../../
             ls
             echo ' '
             ls ${buildParameters.buildPath}
             zip -r build-${buildUid}.zip ${buildParameters.buildPath}/*
-            mv build-${buildUid}.zip /${efsDirectoryName}/${buildUid}/build-${buildUid}.zip
+            mv build-${buildUid}.zip /${buildVolumeFolder}/${buildUid}/build-${buildUid}.zip
           `,
       ],
-      `/${efsDirectoryName}`,
-      `/${efsDirectoryName}/${buildUid}/${repositoryDirectoryName}/${buildParameters.projectPath}`,
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}`,
       [
         {
           name: 'GITHUB_SHA',
@@ -332,12 +332,12 @@ class RemoteBuilder {
         `
             aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
-            # aws s3 cp /${efsDirectoryName}/${cacheDirectoryName}/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
+            # aws s3 cp /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
             ${this.SteamDeploy ? '#' : ''} rm -r ${buildUid}
           `,
       ],
-      `/${efsDirectoryName}`,
-      `/${efsDirectoryName}/`,
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/`,
       [
         {
           name: 'GITHUB_SHA',
@@ -379,16 +379,16 @@ class RemoteBuilder {
         `
             ls
             ls /
-            cp -r /${efsDirectoryName}/${buildUid}/steam/action/entrypoint.sh /entrypoint.sh;
-            cp -r /${efsDirectoryName}/${buildUid}/steam/action/steps/ /steps;
+            cp -r /${buildVolumeFolder}/${buildUid}/steam/action/entrypoint.sh /entrypoint.sh;
+            cp -r /${buildVolumeFolder}/${buildUid}/steam/action/steps/ /steps;
             chmod -R +x /entrypoint.sh;
             chmod -R +x /steps;
             /entrypoint.sh;
-            rm -r /${efsDirectoryName}/${buildUid}
+            rm -r /${buildVolumeFolder}/${buildUid}
           `,
       ],
-      `/${efsDirectoryName}`,
-      `/${efsDirectoryName}/${buildUid}/steam/action/`,
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/${buildUid}/steam/action/`,
       [
         {
           name: 'GITHUB_SHA',
