@@ -2,6 +2,7 @@ import waitUntil from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../build-parameters';
+import { strict as assert } from 'assert';
 
 class KubernetesStorage {
   public static async getPVCPhase(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
@@ -42,6 +43,7 @@ class KubernetesStorage {
     };
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     core.info(`Persistent Volume Claim ${result.body.metadata?.name} created`);
+    assert(result.body.metadata?.name === pvcName);
   }
 }
 
