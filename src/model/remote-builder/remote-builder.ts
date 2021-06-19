@@ -25,11 +25,12 @@ class RemoteBuilder {
           this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters);
           break;
       }
+      const runNumber = process.env.GITHUB_RUN_NUMBER;
+      if (!runNumber || runNumber === '') {
+        throw new Error('no run number found, exiting');
+      }
       this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
-      const buildUid = RemoteBuilderNamespace.generateBuildName(
-        process.env.GITHUB_RUN_NUMBER,
-        buildParameters.platform,
-      );
+      const buildUid = RemoteBuilderNamespace.generateBuildName(runNumber, buildParameters.platform);
       const defaultBranchName =
         process.env.GITHUB_REF?.split('/')
           .filter((x) => {
