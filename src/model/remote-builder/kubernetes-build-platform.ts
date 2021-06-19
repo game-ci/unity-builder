@@ -471,12 +471,17 @@ class Kubernetes implements RemoteBuilderProviderInterface {
           JSON.stringify(
             {
               message: 'Failed to stream any logs, listing namespace events',
-              events: (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items.map((x) => {
-                return {
-                  objectType: x.involvedObject.kind,
-                  eventMessage: x.message,
-                };
-              }),
+              events: (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
+                .filter((x) => {
+                  return x.involvedObject.name === this.podName || x.involvedObject.name === this.jobName;
+                })
+                .map((x) => {
+                  return {
+                    type: x.involvedObject.kind,
+                    name: x.involvedObject.name,
+                    message: x.message,
+                  };
+                }),
             },
             undefined,
             4,
