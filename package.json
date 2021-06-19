@@ -12,8 +12,8 @@
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "test": "jest",
-    "commit": "yarn build && git add . && git commit -m $npm_config_message -q",
-    "push": "yarn build && git add . && git commit -m $npm_config_message -q && git push"
+    "commit": "yarn build && git add . && git commit -m ${npm_config_message} -q",
+    "push": "yarn build && git add . && git commit -m ${npm_config_message} -q && git push"
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
