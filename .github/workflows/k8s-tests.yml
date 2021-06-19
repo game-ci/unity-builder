@@ -1,4 +1,4 @@
-name: Kubernetes
+name: Kubernetes GKE + Autopilot
 
 on:
   push: { branches: [remote-builder/k8s] }
