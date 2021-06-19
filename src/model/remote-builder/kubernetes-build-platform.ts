@@ -10,7 +10,9 @@ import KubernetesStorage from './kubernetes-storage';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
 
 const base64 = require('base-64');
-
+const repositoryFolder = 'repo';
+const buildVolumeFolder = 'data';
+// const cacheFolder = 'cache';
 class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: KubeConfig;
   private kubeClient: k8s.CoreV1Api;
@@ -93,7 +95,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       );
 
       //run
-      const jobSpec = this.getJobSpec(commands, image);
+      const jobSpec = this.getJobSpec(commands, image, mountdir, workingdir, environment);
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
@@ -158,7 +160,69 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     }
   }
 
-  getJobSpec(command: string[], image: string) {
+  getJobSpec(
+    command: string[],
+    image: string,
+    mountdir: string,
+    workingDirectory: string,
+    environment: RemoteBuilderEnvironmentVariable[],
+  ) {
+    environment.push(
+      ...[
+        {
+          name: 'GITHUB_SHA',
+          value: this.buildId,
+        },
+        {
+          name: 'GITHUB_WORKSPACE',
+          value: '/data/repo',
+        },
+        {
+          name: 'PROJECT_PATH',
+          value: this.buildParameters.projectPath,
+        },
+        {
+          name: 'BUILD_PATH',
+          value: this.buildParameters.buildPath,
+        },
+        {
+          name: 'BUILD_FILE',
+          value: this.buildParameters.buildFile,
+        },
+        {
+          name: 'BUILD_NAME',
+          value: this.buildParameters.buildName,
+        },
+        {
+          name: 'BUILD_METHOD',
+          value: this.buildParameters.buildMethod,
+        },
+        {
+          name: 'CUSTOM_PARAMETERS',
+          value: this.buildParameters.customParameters,
+        },
+        {
+          name: 'CHOWN_FILES_TO',
+          value: this.buildParameters.chownFilesTo,
+        },
+        {
+          name: 'BUILD_TARGET',
+          value: this.buildParameters.platform,
+        },
+        {
+          name: 'ANDROID_VERSION_CODE',
+          value: this.buildParameters.androidVersionCode.toString(),
+        },
+        {
+          name: 'ANDROID_KEYSTORE_NAME',
+          value: this.buildParameters.androidKeystoreName,
+        },
+        {
+          name: 'ANDROID_KEYALIAS_NAME',
+          value: this.buildParameters.androidKeyaliasName,
+        },
+      ],
+    );
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
     job.kind = 'Job';
@@ -169,11 +233,12 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       },
     };
     job.spec = {
+      backoffLimit: 1,
       template: {
         spec: {
           volumes: [
             {
-              name: 'data',
+              name: 'buildMount',
               persistentVolumeClaim: {
                 claimName: this.pvcName,
               },
@@ -190,70 +255,18 @@ class Kubernetes implements RemoteBuilderProviderInterface {
               name: 'main',
               image,
               command,
+              workingDir: workingDirectory,
               resources: {
                 requests: {
                   memory: this.buildParameters.remoteBuildMemory,
                   cpu: this.buildParameters.remoteBuildCpu,
                 },
               },
-              env: [
-                {
-                  name: 'GITHUB_SHA',
-                  value: this.buildId,
-                },
-                {
-                  name: 'GITHUB_WORKSPACE',
-                  value: '/data/repo',
-                },
-                {
-                  name: 'PROJECT_PATH',
-                  value: this.buildParameters.projectPath,
-                },
-                {
-                  name: 'BUILD_PATH',
-                  value: this.buildParameters.buildPath,
-                },
-                {
-                  name: 'BUILD_FILE',
-                  value: this.buildParameters.buildFile,
-                },
-                {
-                  name: 'BUILD_NAME',
-                  value: this.buildParameters.buildName,
-                },
-                {
-                  name: 'BUILD_METHOD',
-                  value: this.buildParameters.buildMethod,
-                },
-                {
-                  name: 'CUSTOM_PARAMETERS',
-                  value: this.buildParameters.customParameters,
-                },
-                {
-                  name: 'CHOWN_FILES_TO',
-                  value: this.buildParameters.chownFilesTo,
-                },
-                {
-                  name: 'BUILD_TARGET',
-                  value: this.buildParameters.platform,
-                },
-                {
-                  name: 'ANDROID_VERSION_CODE',
-                  value: this.buildParameters.androidVersionCode.toString(),
-                },
-                {
-                  name: 'ANDROID_KEYSTORE_NAME',
-                  value: this.buildParameters.androidKeystoreName,
-                },
-                {
-                  name: 'ANDROID_KEYALIAS_NAME',
-                  value: this.buildParameters.androidKeyaliasName,
-                },
-              ],
+              env: environment,
               volumeMounts: [
                 {
-                  name: 'data',
-                  mountPath: '/data',
+                  name: 'buildMount',
+                  mountPath: `/${mountdir}`,
                 },
                 {
                   name: 'credentials',
@@ -280,7 +293,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         },
       },
     };
-    job.spec.backoffLimit = 1;
     return job;
   }
 
@@ -325,7 +337,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       );
 
       //run
-      const jobSpec = this.getJobSpec(command, image);
+      const jobSpec = this.getJobSpec(command, image, 'data', 'data', []);
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
@@ -368,10 +380,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     apk add jq;
     ls /credentials/
     export GITHUB_TOKEN=$(cat /credentials/GITHUB_TOKEN);
-    cd /data;
-    git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git repo;
-    git clone https://github.com/webbertakken/unity-builder.git builder;
-    cd repo;
+    git clone https://github.com/${process.env.GITHUB_REPOSITORY}.git ${buildVolumeFolder}/${repositoryFolder};
+    git clone https://github.com/webbertakken/unity-builder.git ${buildVolumeFolder}/builder;
+    cd ${buildVolumeFolder}/${repositoryFolder};
     git checkout $GITHUB_SHA;
     ls
     echo "end"`,
