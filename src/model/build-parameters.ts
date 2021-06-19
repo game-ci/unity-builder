@@ -22,6 +22,7 @@ class BuildParameters {
   public androidKeyaliasName!: string;
   public androidKeyaliasPass!: string;
   public customParameters!: string;
+  public sshAgent!: string;
   public remoteBuildCluster!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
@@ -60,6 +61,7 @@ class BuildParameters {
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
       customParameters: Input.customParameters,
+      sshAgent: Input.sshAgent,
       chownFilesTo: Input.chownFilesTo,
       remoteBuildCluster: Input.remoteBuildCluster,
       awsStackName: Input.awsStackName,

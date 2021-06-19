@@ -36,6 +36,7 @@ class Docker {
       androidKeyaliasName,
       androidKeyaliasPass,
       customParameters,
+      sshAgent,
       chownFilesTo,
     } = parameters;
 
@@ -79,10 +80,13 @@ class Docker {
         --env RUNNER_TOOL_CACHE \
         --env RUNNER_TEMP \
         --env RUNNER_WORKSPACE \
+        ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
         --volume "${runnerTempPath}/_github_home":"/root" \
         --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
         --volume "${workspace}":"/github/workspace" \
+        ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
+        ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
         ${image}`;
 
     await exec(command, undefined, { silent });
