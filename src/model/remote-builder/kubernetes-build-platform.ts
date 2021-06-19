@@ -203,7 +203,8 @@ class Kubernetes implements RemoteBuilderProviderInterface {
             {
               name: 'main',
               image,
-              command,
+              args: command,
+
               workingDir: `/${workingDirectory}`,
               resources: {
                 requests: {
