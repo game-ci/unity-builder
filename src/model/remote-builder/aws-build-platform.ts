@@ -16,6 +16,30 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.stackName = buildParameters.awsStackName;
   }
+  CleanupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
+    throw new Error('Method not implemented.');
+  }
+  SetupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
+    throw new Error('Method not implemented.');
+  }
 
   async runBuildTask(
     buildId: string,

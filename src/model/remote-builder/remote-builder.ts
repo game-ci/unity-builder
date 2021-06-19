@@ -13,6 +13,29 @@ class RemoteBuilder {
   static SteamDeploy: boolean = false;
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
   static async build(buildParameters: BuildParameters, baseImage) {
+    const runNumber = process.env.GITHUB_RUN_NUMBER;
+    if (!runNumber || runNumber === '') {
+      throw new Error('no run number found, exiting');
+    }
+    const buildUid = RemoteBuilderNamespace.generateBuildName(runNumber, buildParameters.platform);
+    const defaultBranchName =
+      process.env.GITHUB_REF?.split('/')
+        .filter((x) => {
+          x = x[0].toUpperCase() + x.slice(1);
+          return x;
+        })
+        .join('') || '';
+    const branchName =
+      process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
+    this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
+    const token: string = buildParameters.githubToken;
+    const defaultSecretsArray = [
+      {
+        ParameterKey: 'GithubToken',
+        EnvironmentVariable: 'GITHUB_TOKEN',
+        ParameterValue: token,
+      },
+    ];
     try {
       switch (buildParameters.remoteBuildCluster) {
         case 'aws':
@@ -25,29 +48,12 @@ class RemoteBuilder {
           this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters);
           break;
       }
-      const runNumber = process.env.GITHUB_RUN_NUMBER;
-      if (!runNumber || runNumber === '') {
-        throw new Error('no run number found, exiting');
-      }
-      this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
-      const buildUid = RemoteBuilderNamespace.generateBuildName(runNumber, buildParameters.platform);
-      const defaultBranchName =
-        process.env.GITHUB_REF?.split('/')
-          .filter((x) => {
-            x = x[0].toUpperCase() + x.slice(1);
-            return x;
-          })
-          .join('') || '';
-      const branchName =
-        process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
-      const token: string = buildParameters.githubToken;
-      const defaultSecretsArray = [
-        {
-          ParameterKey: 'GithubToken',
-          EnvironmentVariable: 'GITHUB_TOKEN',
-          ParameterValue: token,
-        },
-      ];
+      await this.RemoteBuilderProviderPlatform.SetupSharedBuildResources(
+        buildUid,
+        buildParameters,
+        branchName,
+        defaultSecretsArray,
+      );
       await RemoteBuilder.SetupStep(buildUid, buildParameters, branchName, defaultSecretsArray);
       await RemoteBuilder.BuildStep(buildUid, buildParameters, baseImage, defaultSecretsArray);
       await RemoteBuilder.CompressionStep(buildUid, buildParameters, branchName, defaultSecretsArray);
@@ -55,9 +61,21 @@ class RemoteBuilder {
       if (this.SteamDeploy) {
         await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
       }
+      await this.RemoteBuilderProviderPlatform.CleanupSharedBuildResources(
+        buildUid,
+        buildParameters,
+        branchName,
+        defaultSecretsArray,
+      );
     } catch (error) {
       core.setFailed(error);
       core.error(error);
+      await this.RemoteBuilderProviderPlatform.CleanupSharedBuildResources(
+        buildUid,
+        buildParameters,
+        branchName,
+        defaultSecretsArray,
+      );
     }
   }
 

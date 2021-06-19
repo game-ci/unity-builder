@@ -37,6 +37,29 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
+  async CleanupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
+    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+  }
+  public async SetupSharedBuildResources(
+    buildUid: string,
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  ) {
+    await KubernetesStorage.createPersistentVolumeClaim(buildParameters, this.pvcName, this.kubeClient, this.namespace);
+  }
+
   async runBuildTask(
     buildId: string,
     image: string,
@@ -332,7 +355,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     core.info('cleaning up');
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
-      await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
     } catch (error) {
       core.info('Failed to cleanup, error:');

@@ -1,7 +1,28 @@
+import BuildParameters from '../build-parameters';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
 import RemoteBuilderSecret from './remote-builder-secret';
 
 export interface RemoteBuilderProviderInterface {
+  CleanupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  );
+  SetupSharedBuildResources(
+    // eslint-disable-next-line no-unused-vars
+    buildUid: string,
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+    // eslint-disable-next-line no-unused-vars
+    branchName: string,
+    // eslint-disable-next-line no-unused-vars
+    defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
+  );
   runBuildTask(
     // eslint-disable-next-line no-unused-vars
     buildId: string,
