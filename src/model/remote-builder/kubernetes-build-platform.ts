@@ -238,7 +238,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         spec: {
           volumes: [
             {
-              name: 'buildMount',
+              name: 'build-mount',
               persistentVolumeClaim: {
                 claimName: this.pvcName,
               },
@@ -265,7 +265,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
               env: environment,
               volumeMounts: [
                 {
-                  name: 'buildMount',
+                  name: 'build-mount',
                   mountPath: `/${mountdir}`,
                 },
                 {
