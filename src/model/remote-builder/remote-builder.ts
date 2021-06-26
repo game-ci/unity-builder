@@ -54,10 +54,10 @@ class RemoteBuilder {
         branchName,
         defaultSecretsArray,
       );
-      await RemoteBuilder.SetupStep(buildUid, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.BuildStep(buildUid, buildParameters, baseImage, defaultSecretsArray);
-      await RemoteBuilder.CompressionStep(buildUid, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.UploadArtifacts(buildUid, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.SetupStep(`setup${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.BuildStep(`build${buildUid}`, buildParameters, baseImage, defaultSecretsArray);
+      await RemoteBuilder.CompressionStep(`compress${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.UploadArtifacts(`upload${buildUid}`, buildParameters, branchName, defaultSecretsArray);
       if (this.SteamDeploy) {
         await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
       }

@@ -78,10 +78,11 @@ class KubernetesJobSpecFactory {
       name: jobName,
       labels: {
         app: 'unity-builder',
+        buildId,
       },
     };
     job.spec = {
-      backoffLimit: 1,
+      backoffLimit: 0,
       template: {
         spec: {
           volumes: [
