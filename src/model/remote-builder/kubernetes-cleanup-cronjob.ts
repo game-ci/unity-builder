@@ -33,7 +33,7 @@ class KubernetesCleanupCronJob {
         ],
       };
       batchJob.spec = {
-        schedule: '0 1 * * *',
+        schedule: `0 ${new Date().getUTCHours() + 3} * * *`,
         jobTemplate: {
           spec: {
             template: { spec },
