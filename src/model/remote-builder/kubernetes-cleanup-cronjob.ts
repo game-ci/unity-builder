@@ -15,6 +15,7 @@ class KubernetesCleanupCronJob {
         },
       };
       const spec = {
+        restartPolicy: 'Never',
         containers: [
           {
             name: 'main',
@@ -28,7 +29,6 @@ class KubernetesCleanupCronJob {
               kubectl get pods
               `,
             ],
-            restartPolicy: 'Never',
           },
         ],
       };
