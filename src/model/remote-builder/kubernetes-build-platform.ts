@@ -145,6 +145,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       core.info('Failed to cleanup, error:');
       core.error(JSON.stringify(error, undefined, 4));
       core.info('Abandoning cleanup, build error:');
+      throw error;
     }
   }
 
