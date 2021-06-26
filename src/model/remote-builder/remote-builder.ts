@@ -95,7 +95,7 @@ class RemoteBuilder {
           apk add git-lfs;
           apk add jq;
           # Get source repo for project to be built and game-ci repo for utilties
-          
+
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
         }.git ${buildUid}/${repositoryFolder}

@@ -1,6 +1,5 @@
 import { BatchV1beta1Api, V1beta1CronJob } from '@kubernetes/client-node';
 import * as core from '@actions/core';
-const Cron = require('cron-converter');
 class KubernetesCleanupCronJob {
   static async cleanup(api: BatchV1beta1Api, name: string, namespace: string) {
     await api.deleteNamespacedCronJob('name', namespace);
@@ -15,9 +14,6 @@ class KubernetesCleanupCronJob {
           app: 'unity-builder',
         },
       };
-      const cronInstance = new Cron();
-      const date = Date.now() + 1000 * 60 * 60;
-      const cronString = cronInstance.schedule(new Date(date)).toString();
       const spec = {
         containers: [
           {
@@ -37,7 +33,7 @@ class KubernetesCleanupCronJob {
         ],
       };
       batchJob.spec = {
-        schedule: cronString,
+        schedule: '0 1 * * *',
         jobTemplate: {
           spec: {
             template: { spec },
