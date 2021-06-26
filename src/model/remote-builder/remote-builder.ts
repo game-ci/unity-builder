@@ -76,6 +76,7 @@ class RemoteBuilder {
         branchName,
         defaultSecretsArray,
       );
+      throw error;
     }
   }
 
