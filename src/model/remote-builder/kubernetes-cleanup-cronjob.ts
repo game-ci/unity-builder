@@ -28,7 +28,7 @@ class KubernetesCleanupCronJob {
               kubectl get pods
               `,
             ],
-            restartPolicy: '',
+            restartPolicy: 'Never',
           },
         ],
       };
