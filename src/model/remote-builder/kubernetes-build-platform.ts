@@ -46,14 +46,23 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    this.pvcName = `unity-builder-pvc-${buildUid}`;
-    this.cleanupCronJobName = `unity-builder-cronjob-${buildUid}`;
-    await KubernetesStorage.createPersistentVolumeClaim(buildParameters, this.pvcName, this.kubeClient, this.namespace);
-    await KubernetesCleanupCronJob.createCleanupCronJob(
-      this.kubeClientBatchBeta,
-      this.cleanupCronJobName,
-      this.namespace,
-    );
+    try {
+      this.pvcName = `unity-builder-pvc-${buildUid}`;
+      this.cleanupCronJobName = `unity-builder-cronjob-${buildUid}`;
+      await KubernetesStorage.createPersistentVolumeClaim(
+        buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
+      await KubernetesCleanupCronJob.createCleanupCronJob(
+        this.kubeClientBatchBeta,
+        this.cleanupCronJobName,
+        this.namespace,
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
   async runBuildTask(
