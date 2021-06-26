@@ -9,6 +9,8 @@ import KubernetesLogging from './kubernetes-logging';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
+import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
+import KubernetesCleanupCronJob from './kubernetes-cleanup-cronjob';
 
 class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -22,17 +24,16 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private namespace: string;
   private podName: string = '';
   private containerName: string = '';
+  private cleanupCronJobName: string = '';
+  private kubeClientBatchBeta: k8s.BatchV1beta1Api;
 
   constructor(buildParameters: BuildParameters) {
-    const kc = new k8s.KubeConfig();
-    kc.loadFromDefault();
-    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-    const k8sBatchApi = kc.makeApiClient(k8s.BatchV1Api);
+    this.kubeConfig = new k8s.KubeConfig();
+    this.kubeConfig.loadFromDefault();
+    this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+    this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+    this.kubeClientBatchBeta = this.kubeConfig.makeApiClient(k8s.BatchV1beta1Api);
     core.info('Loaded default Kubernetes configuration for this environment');
-
-    this.kubeConfig = kc;
-    this.kubeClient = k8sApi;
-    this.kubeClientBatch = k8sBatchApi;
 
     this.namespace = 'default';
     this.buildParameters = buildParameters;
@@ -45,9 +46,14 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    const pvcName = `unity-builder-pvc-${buildUid}`;
-    this.pvcName = pvcName;
+    this.pvcName = `unity-builder-pvc-${buildUid}`;
+    this.cleanupCronJobName = `unity-builder-cronjob-${buildUid}`;
     await KubernetesStorage.createPersistentVolumeClaim(buildParameters, this.pvcName, this.kubeClient, this.namespace);
+    await KubernetesCleanupCronJob.createCleanupCronJob(
+      this.kubeClientBatchBeta,
+      this.cleanupCronJobName,
+      this.namespace,
+    );
   }
 
   async runBuildTask(
@@ -65,7 +71,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       this.secretName = `build-credentials-${buildId}`;
       this.jobName = `unity-builder-job-${buildId}`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      const jobSpec = this.getJobSpec(commands, image, mountdir, workingdir, environment);
+      const jobSpec = KubernetesJobSpecFactory.getJobSpec(
+        commands,
+        image,
+        mountdir,
+        workingdir,
+        environment,
+        this.buildId,
+        this.buildParameters,
+        this.secretName,
+        this.pvcName,
+        this.jobName,
+        k8s,
+      );
 
       //run
       core.info('Creating build job');
@@ -95,144 +113,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
       await this.cleanupTaskResources();
       throw error;
     }
-  }
-
-  getJobSpec(
-    command: string[],
-    image: string,
-    mountdir: string,
-    workingDirectory: string,
-    environment: RemoteBuilderEnvironmentVariable[],
-  ) {
-    environment.push(
-      ...[
-        {
-          name: 'GITHUB_SHA',
-          value: this.buildId,
-        },
-        {
-          name: 'GITHUB_WORKSPACE',
-          value: '/data/repo',
-        },
-        {
-          name: 'PROJECT_PATH',
-          value: this.buildParameters.projectPath,
-        },
-        {
-          name: 'BUILD_PATH',
-          value: this.buildParameters.buildPath,
-        },
-        {
-          name: 'BUILD_FILE',
-          value: this.buildParameters.buildFile,
-        },
-        {
-          name: 'BUILD_NAME',
-          value: this.buildParameters.buildName,
-        },
-        {
-          name: 'BUILD_METHOD',
-          value: this.buildParameters.buildMethod,
-        },
-        {
-          name: 'CUSTOM_PARAMETERS',
-          value: this.buildParameters.customParameters,
-        },
-        {
-          name: 'CHOWN_FILES_TO',
-          value: this.buildParameters.chownFilesTo,
-        },
-        {
-          name: 'BUILD_TARGET',
-          value: this.buildParameters.platform,
-        },
-        {
-          name: 'ANDROID_VERSION_CODE',
-          value: this.buildParameters.androidVersionCode.toString(),
-        },
-        {
-          name: 'ANDROID_KEYSTORE_NAME',
-          value: this.buildParameters.androidKeystoreName,
-        },
-        {
-          name: 'ANDROID_KEYALIAS_NAME',
-          value: this.buildParameters.androidKeyaliasName,
-        },
-      ],
-    );
-    const job = new k8s.V1Job();
-    job.apiVersion = 'batch/v1';
-    job.kind = 'Job';
-    job.metadata = {
-      name: this.jobName,
-      labels: {
-        app: 'unity-builder',
-      },
-    };
-    job.spec = {
-      backoffLimit: 1,
-      template: {
-        spec: {
-          volumes: [
-            {
-              name: 'build-mount',
-              persistentVolumeClaim: {
-                claimName: this.pvcName,
-              },
-            },
-            {
-              name: 'credentials',
-              secret: {
-                secretName: this.secretName,
-              },
-            },
-          ],
-          containers: [
-            {
-              name: 'main',
-              image,
-              command: ['/bin/sh'],
-              args: ['-c', ...command],
-
-              workingDir: `/${workingDirectory}`,
-              resources: {
-                requests: {
-                  memory: this.buildParameters.remoteBuildMemory,
-                  cpu: this.buildParameters.remoteBuildCpu,
-                },
-              },
-              env: environment,
-              volumeMounts: [
-                {
-                  name: 'build-mount',
-                  mountPath: `/${mountdir}`,
-                },
-                {
-                  name: 'credentials',
-                  mountPath: '/credentials',
-                  readOnly: true,
-                },
-              ],
-              lifecycle: {
-                preStop: {
-                  exec: {
-                    command: [
-                      'bin/bash',
-                      '-c',
-                      `cd /data/builder/action/steps;
-                      chmod +x /return_license.sh;
-                      /return_license.sh;`,
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-          restartPolicy: 'Never',
-        },
-      },
-    };
-    return job;
   }
 
   setPodNameAndContainerName(pod: k8s.V1Pod) {
@@ -270,6 +150,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    await KubernetesCleanupCronJob.cleanup(this.kubeClientBatchBeta, this.cleanupCronJobName, this.namespace);
   }
 }
 export default Kubernetes;
