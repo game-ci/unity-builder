@@ -95,11 +95,15 @@ class RemoteBuilder {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
+
           # Get source repo for project to be built and game-ci repo for utilties
 
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
         }.git ${buildUid}/${repositoryFolder}
+          cd ${buildUid}/${repositoryFolder}/
+          git lfs ls-files -l | cut -d' ' -f1 | sort > .assets-id
+          cd ../../
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${buildUid}/steam
           cd /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
