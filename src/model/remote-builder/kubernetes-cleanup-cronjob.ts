@@ -4,7 +4,7 @@ class KubernetesCleanupCronJob {
   static async cleanup(api: BatchV1beta1Api, name: string, namespace: string) {
     await api.deleteNamespacedCronJob('name', namespace);
   }
-  static createCleanupCronJob(kubeClientBatch: BatchV1beta1Api, name: string, namespace: string) {
+  static async createCleanupCronJob(kubeClientBatch: BatchV1beta1Api, name: string, namespace: string) {
     try {
       const batchJob = new V1beta1CronJob();
       batchJob.kind = 'CronJob';
@@ -43,7 +43,7 @@ class KubernetesCleanupCronJob {
         },
       };
 
-      kubeClientBatch.createNamespacedCronJob(namespace, batchJob);
+      await kubeClientBatch.createNamespacedCronJob(namespace, batchJob);
     } catch (error) {
       throw error;
     }
