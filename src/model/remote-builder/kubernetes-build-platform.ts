@@ -191,7 +191,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
             {
               name: 'main',
               image,
-              command: ['bash'],
+              command: ['/bin/sh'],
               args: ['-c', ...command],
 
               workingDir: `/${workingDirectory}`,
