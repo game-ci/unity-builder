@@ -1,6 +1,6 @@
 import { BatchV1beta1Api, V1beta1CronJob } from '@kubernetes/client-node';
-import { Cron } from 'cron-converter';
 import * as core from '@actions/core';
+const Cron = require('cron-converter');
 class KubernetesCleanupCronJob {
   static async cleanup(api: BatchV1beta1Api, name: string, namespace: string) {
     await api.deleteNamespacedCronJob('name', namespace);
