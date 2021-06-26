@@ -83,7 +83,6 @@ class KubernetesJobSpecFactory {
     };
     job.spec = {
       backoffLimit: 0,
-      ttlSecondsAfterFinished: 300,
       template: {
         spec: {
           volumes: [

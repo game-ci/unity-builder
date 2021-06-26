@@ -8,7 +8,6 @@ import RemoteBuilderEnvironmentVariable from './remote-builder-environment-varia
 import KubernetesLogging from './kubernetes-logging';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
-import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesCleanupCronJob from './kubernetes-cleanup-cronjob';
 
@@ -134,13 +133,6 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-      await waitUntil(
-        async () => (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body === null,
-        {
-          timeout: 500000,
-          intervalBetweenAttempts: 15000,
-        },
-      );
     } catch (error) {
       core.info('Failed to cleanup, error:');
       core.error(JSON.stringify(error, undefined, 4));
