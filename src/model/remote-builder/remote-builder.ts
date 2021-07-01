@@ -87,7 +87,12 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
-    const projectPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}`;
+    const repoPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}`;
+    const builderPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/builder`;
+    const steamPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/steam`;
+    const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
+    const cacheFolderFull = `${buildVolumeFolder}/${cacheFolder}`;
+    const libraryFolderFull = `${projectPathFull}/Library`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -96,43 +101,45 @@ class RemoteBuilder {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
-
+          # Disable LFS
+          git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
+          git config --global filter.lfs.process "git-lfs filter-process --skip"
           # Get source repo for project to be built and game-ci repo for utilties
-
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
         }.git ${buildUid}/${repositoryFolder}
+          # Enable LFS
+          git lfs ls-files -l --work-tree=${repoPathFull} | cut -d' ' -f1 | sort > .lfs-assets-id
+          ls
+          cat libraryCache.chk
+          # Get source repo for project to be built and game-ci repo for utilties
+          git config --global filter.lfs.smudge "git-lfs smudge -- %f"
+          git config --global filter.lfs.process "git-lfs filter-process"
           cd ${buildUid}/${repositoryFolder}/
           git lfs ls-files -l | cut -d' ' -f1 | sort > .assets-id
           cd ../../
-          git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${buildUid}/builder
-          git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${buildUid}/steam
-          cd /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
-          git checkout $GITHUB_SHA
-          cd /${buildVolumeFolder}/
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
+          git checkout $GITHUB_SHA --work-tree=${repoPathFull}
+          echo 'checking cache'
           # Look for usable cache
-          if [ ! -d ${cacheFolder} ]; then
-            mkdir ${cacheFolder}
+          if [ ! -d ${cacheFolderFull} ]; then
+            mkdir ${cacheFolderFull}
+            echo "creating new cache folder"
           fi
-          cd ${cacheFolder}
-          if [ ! -d "${branchName}" ]; then
-            mkdir "${branchName}"
+          if [ ! -d ${cacheFolderFull}/${branchName} ]; then
+            mkdir ${cacheFolderFull}/${branchName}
+            echo "creating new cache branch folder for: ${branchName}"
           fi
-          cd "${branchName}"
+          else
+          echo "Library cache for branch: ${branchName}"
+          ls ${cacheFolderFull}/${branchName}
           echo ''
-          echo "Cached Libraries for ${branchName} from previous builds:"
-          ls
-          echo ''
-          ls "${projectPathFull}"
-          libDir="/${projectPathFull}/Library"
-          if [ -d "$libDir" ]; then
-            rm -r "$libDir"
+          if [ -d ${libraryFolderFull} ]; then
+            rm -r ${libraryFolderFull}
             echo "Setup .gitignore to ignore Library folder and remove it from builds"
           fi
           echo 'Checking cache'
-          find "${projectPathFull}/Library" -type f -exec md5sum "{}" + > libraryCache.chk
-          ls
-          cat libraryCache.chk
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
