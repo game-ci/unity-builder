@@ -87,6 +87,7 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
+    const projectPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -122,13 +123,16 @@ class RemoteBuilder {
           echo "Cached Libraries for ${branchName} from previous builds:"
           ls
           echo ''
-          ls "/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}"
-          libDir="/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library"
+          ls "${projectPathFull}"
+          libDir="/${projectPathFull}/Library"
           if [ -d "$libDir" ]; then
             rm -r "$libDir"
             echo "Setup .gitignore to ignore Library folder and remove it from builds"
           fi
           echo 'Checking cache'
+          find "${projectPathFull}/Library" -type f -exec md5sum "{}" + > libraryCache.chk
+          ls
+          cat libraryCache.chk
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
