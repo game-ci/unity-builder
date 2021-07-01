@@ -101,28 +101,26 @@ class RemoteBuilder {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
-          # Disable LFS
+          echo "Disable LFS"
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
           git config --global filter.lfs.process "git-lfs filter-process --skip"
-          # Get source repo for project to be built and game-ci repo for utilties
+          echo "Get source repo for project to be built and game-ci repo for utilties"
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
         }.git ${buildUid}/${repositoryFolder}
-          # Enable LFS
+          echo "Checkout"
+          git checkout $GITHUB_SHA --work-tree=${repoPathFull}
+          echo "Enable LFS"
+          git config --global filter.lfs.smudge "git-lfs smudge -- %f"
+          git config --global filter.lfs.process "git-lfs filter-process"
+          echo "combine lfs hashes to one file, hash that"
           git lfs ls-files -l --work-tree=${repoPathFull} | cut -d' ' -f1 | sort > .lfs-assets-id
           ls
           cat libraryCache.chk
-          # Get source repo for project to be built and game-ci repo for utilties
-          git config --global filter.lfs.smudge "git-lfs smudge -- %f"
-          git config --global filter.lfs.process "git-lfs filter-process"
-          cd ${buildUid}/${repositoryFolder}/
-          git lfs ls-files -l | cut -d' ' -f1 | sort > .assets-id
-          cd ../../
+          echo "Get game.ci/unity-builder and game.ci/steam-deploy"
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
-          git checkout $GITHUB_SHA --work-tree=${repoPathFull}
-          echo 'checking cache'
-          # Look for usable cache
+          # time to handle library cache
           if [ ! -d ${cacheFolderFull} ]; then
             mkdir ${cacheFolderFull}
             echo "creating new cache folder"
@@ -131,15 +129,14 @@ class RemoteBuilder {
             mkdir ${cacheFolderFull}/${branchName}
             echo "creating new cache branch folder for: ${branchName}"
           fi
-          else
           echo "Library cache for branch: ${branchName}"
           ls ${cacheFolderFull}/${branchName}
           echo ''
           if [ -d ${libraryFolderFull} ]; then
             rm -r ${libraryFolderFull}
-            echo "Setup .gitignore to ignore Library folder and remove it from builds"
+            echo "Git must ignore the Library folder"
           fi
-          echo 'Checking cache'
+          echo "Checking cache"
           # Restore cache
           latest=$(ls -t | head -1)
           if [ ! -z "$latest" ]; then
