@@ -107,16 +107,16 @@ class RemoteBuilder {
           echo "Get source repo for project to be built and game-ci repo for utilties"
           git clone https://${buildParameters.githubToken}@github.com/${
           process.env.GITHUB_REPOSITORY
-        }.git ${buildUid}/${repositoryFolder}
+        }.git ${repoPathFull}
           echo "Checkout"
           git checkout $GITHUB_SHA --work-tree=${repoPathFull}
           echo "Enable LFS"
           git config --global filter.lfs.smudge "git-lfs smudge -- %f"
           git config --global filter.lfs.process "git-lfs filter-process"
           echo "combine lfs hashes to one file, hash that"
-          git lfs ls-files -l --work-tree=${repoPathFull} | cut -d' ' -f1 | sort > .lfs-assets-id
-          ls
-          cat libraryCache.chk
+          find ${repoPathFull}/.git/lfs -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
+          ls ${repoPathFull}
+          cat ${repoPathFull}/lfsSum.chk
           echo "Get game.ci/unity-builder and game.ci/steam-deploy"
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
