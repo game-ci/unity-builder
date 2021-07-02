@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, RemoteBuilder } from './model';
 
 async function run() {
+  core.info('running builder --- ');
   try {
     Action.checkCompatibility();
     Cache.verify();
