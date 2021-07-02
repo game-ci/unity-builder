@@ -106,21 +106,21 @@ class RemoteBuilder {
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
-          echo "Clone game.ci/unity-builder and game.ci/steam-deploy"
+          echo "Cloning utility repositories required for building:"
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
           cd ${repoPathFull}
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
           git config --global filter.lfs.process "git-lfs filter-process --skip"
-          echo "Clone repo being built while LFS disabled"
+          echo "Cloning the repository being built:"
           git init
           git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
           git fetch origin
           git reset --hard $GITHUB_SHA
-          echo "combine lfs hashes to one file, hash that"
+          echo "Combining LFS hash files into one hash, this is used as the cache key:"
           git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.chk
-          ls ${repoPathFull} -a
+          ls -a
           cat ${repoPathFull}/lfsSum.chk
           # time to handle library cache
           if [ ! -d ${cacheFolderFull} ]; then
