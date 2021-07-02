@@ -119,9 +119,10 @@ class RemoteBuilder {
           git fetch origin
           git reset --hard $GITHUB_SHA
           echo "Combining LFS hash files into one hash, this is used as the cache key:"
-          git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.chk
+          git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.txt
           ls -a
-          cat ${repoPathFull}/lfsSum.chk
+          cat ${repoPathFull}/lfsSum.txt
+          echo '^ checksum'
           # time to handle library cache
           if [ ! -d ${cacheFolderFull} ]; then
             mkdir ${cacheFolderFull}
