@@ -87,10 +87,11 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
-    const repoPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}`;
     const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
-    const builderPathFull = `/${buildVolumeFolder}/${buildUid}/builder`;
-    const steamPathFull = `/${buildVolumeFolder}/${buildUid}/steam`;
+    const buildPathFull = `/${buildVolumeFolder}/${buildUid}`;
+    const builderPathFull = `${buildPathFull}/builder`;
+    const steamPathFull = `${buildPathFull}/steam`;
+    const repoPathFull = `${buildPathFull}/${repositoryFolder}`;
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
@@ -101,6 +102,7 @@ class RemoteBuilder {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
+          mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
