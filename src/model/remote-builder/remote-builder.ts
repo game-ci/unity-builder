@@ -117,7 +117,7 @@ class RemoteBuilder {
           cd
           echo "combine lfs hashes to one file, hash that"
           find ${repoPathFull}/.git/lfs/ -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
-          ls ${repoPathFull}
+          ls ${repoPathFull} -a
           cat ${repoPathFull}/lfsSum.chk
           echo "Get game.ci/unity-builder and game.ci/steam-deploy"
           git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
