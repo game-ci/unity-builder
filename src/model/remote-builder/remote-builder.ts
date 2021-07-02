@@ -98,10 +98,12 @@ class RemoteBuilder {
       buildUid,
       'alpine/git',
       [
-        `apk update;
-          apk add unzip;
-          apk add git-lfs;
-          apk add jq;
+        ` apk update
+          apk add unzip
+          apk add git-lfs
+          apk add jq
+          apk add jq
+          apk add nodejs
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
@@ -109,6 +111,7 @@ class RemoteBuilder {
           echo "Cloning utility repositories required for building:"
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
+          node ${builderPathFull}/dist/index.js
           cd ${repoPathFull}
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
