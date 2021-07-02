@@ -101,27 +101,25 @@ class RemoteBuilder {
           apk add unzip;
           apk add git-lfs;
           apk add jq;
-          echo "Disable LFS"
+          mkdir ${builderPathFull}
+          mkdir ${repoPathFull}
+          mkdir ${steamPathFull}
+          echo "Clone game.ci/unity-builder and game.ci/steam-deploy"
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
+          git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
+          cd ${repoPathFull}
+          # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
           git config --global filter.lfs.process "git-lfs filter-process --skip"
-          echo "Get source repo for project to be built and game-ci repo for utilties"
-          git clone https://${buildParameters.githubToken}@github.com/${
-          process.env.GITHUB_REPOSITORY
-        }.git ${repoPathFull}
-          echo "Checkout"
-          cd ${repoPathFull}
+          echo "Clone repo being built while LFS disabled"
+          git init
+          git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
+          git fetch origin
           git reset --hard $GITHUB_SHA
-          echo "Enable LFS"
-          git config --global filter.lfs.smudge "git-lfs smudge -- %f"
-          git config --global filter.lfs.process "git-lfs filter-process"
-          cd
           echo "combine lfs hashes to one file, hash that"
           find ${repoPathFull}/.git/lfs/ -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
           ls ${repoPathFull} -a
           cat ${repoPathFull}/lfsSum.chk
-          echo "Get game.ci/unity-builder and game.ci/steam-deploy"
-          git clone https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
-          git clone https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
           # time to handle library cache
           if [ ! -d ${cacheFolderFull} ]; then
             mkdir ${cacheFolderFull}
