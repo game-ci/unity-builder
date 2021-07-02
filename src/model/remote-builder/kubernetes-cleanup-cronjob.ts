@@ -34,7 +34,7 @@ class KubernetesCleanupCronJob {
       };
       const hours = new Date().getUTCHours() + 3;
       batchJob.spec = {
-        schedule: `0 ${hours > 24 ? hours - 24 : hours} * * *`,
+        schedule: `0 ${hours > 23 ? hours - 23 : hours} * * *`,
         jobTemplate: {
           spec: {
             template: { spec },
