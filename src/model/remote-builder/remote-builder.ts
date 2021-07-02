@@ -89,8 +89,8 @@ class RemoteBuilder {
     core.info('Starting step 1/4 clone and restore cache)');
     const repoPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}`;
     const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
-    const builderPathFull = `${repoPathFull}/builder`;
-    const steamPathFull = `${repoPathFull}/steam`;
+    const builderPathFull = `/${buildVolumeFolder}/${buildUid}/builder`;
+    const steamPathFull = `/${buildVolumeFolder}/${buildUid}/steam`;
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
