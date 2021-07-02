@@ -109,10 +109,12 @@ class RemoteBuilder {
           process.env.GITHUB_REPOSITORY
         }.git ${repoPathFull}
           echo "Checkout"
-          git checkout $GITHUB_SHA --work-tree=${repoPathFull}
+          cd ${repoPathFull}
+          git checkout $GITHUB_SHA
           echo "Enable LFS"
           git config --global filter.lfs.smudge "git-lfs smudge -- %f"
           git config --global filter.lfs.process "git-lfs filter-process"
+          cd
           echo "combine lfs hashes to one file, hash that"
           find ${repoPathFull}/.git/lfs/ -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
           ls ${repoPathFull}
