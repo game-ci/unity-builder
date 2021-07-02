@@ -110,7 +110,7 @@ class RemoteBuilder {
         }.git ${repoPathFull}
           echo "Checkout"
           cd ${repoPathFull}
-          git checkout $GITHUB_SHA
+          git reset --hard $GITHUB_SHA
           echo "Enable LFS"
           git config --global filter.lfs.smudge "git-lfs smudge -- %f"
           git config --global filter.lfs.process "git-lfs filter-process"
