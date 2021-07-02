@@ -88,10 +88,10 @@ class RemoteBuilder {
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
     const repoPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}`;
-    const builderPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/builder`;
-    const steamPathFull = `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/steam`;
+    const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
+    const builderPathFull = `${repoPathFull}/builder`;
+    const steamPathFull = `${repoPathFull}/steam`;
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
-    const cacheFolderFull = `${buildVolumeFolder}/${cacheFolder}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
@@ -114,7 +114,7 @@ class RemoteBuilder {
           git config --global filter.lfs.smudge "git-lfs smudge -- %f"
           git config --global filter.lfs.process "git-lfs filter-process"
           echo "combine lfs hashes to one file, hash that"
-          find ${repoPathFull}/.git/lfs -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
+          find ${repoPathFull}/.git/lfs/ -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
           ls ${repoPathFull}
           cat ${repoPathFull}/lfsSum.chk
           echo "Get game.ci/unity-builder and game.ci/steam-deploy"
