@@ -113,16 +113,19 @@ class RemoteBuilder {
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
           git config --global filter.lfs.process "git-lfs filter-process --skip"
+          echo ''
           echo "Cloning the repository being built:"
           git init
           git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
           git fetch origin
           git reset --hard $GITHUB_SHA
+          echo ''
           echo "Combining LFS hash files into one hash, this is used as the cache key:"
           git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.txt
           ls -a
           cat ${repoPathFull}/lfsSum.txt
           echo '^ checksum'
+          echo ''
           # time to handle library cache
           if [ ! -d ${cacheFolderFull} ]; then
             mkdir ${cacheFolderFull}
