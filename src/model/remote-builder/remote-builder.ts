@@ -117,7 +117,7 @@ class RemoteBuilder {
           git fetch origin
           git reset --hard $GITHUB_SHA
           echo "combine lfs hashes to one file, hash that"
-          find ${repoPathFull}/.git/lfs/ -type f -exec md5sum "{}" + > ${repoPathFull}/lfsSum.chk
+          git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.chk
           ls ${repoPathFull} -a
           cat ${repoPathFull}/lfsSum.chk
           # time to handle library cache
