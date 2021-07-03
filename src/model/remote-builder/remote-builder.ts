@@ -111,7 +111,6 @@ class RemoteBuilder {
           echo "Cloning utility repositories required for building:"
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
-          node ${builderPathFull}/dist/index.js
           cd ${repoPathFull}
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
@@ -122,6 +121,7 @@ class RemoteBuilder {
           git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
           git fetch origin
           git reset --hard $GITHUB_SHA
+          git lfs ls-files --all
           echo ''
           echo "Combining LFS hash files into one hash, this is used as the cache key:"
           git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.txt
