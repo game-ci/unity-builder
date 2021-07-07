@@ -109,8 +109,8 @@ class RemoteBuilder {
           mkdir ${steamPathFull}
           echo "Cloning utility repositories required for building:"
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
-          nodejs ${builderPathFull}/dist/index.js
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
+          nodejs ${builderPathFull}/dist/index.js
           cd ${repoPathFull}
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"

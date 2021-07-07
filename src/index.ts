@@ -2,8 +2,6 @@ import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, RemoteBuilder } from './model';
 
 async function run() {
-  // eslint-disable-next-line no-console
-  console.log('test');
   try {
     Action.checkCompatibility();
     Cache.verify();
@@ -35,4 +33,6 @@ async function run() {
   }
 }
 
+// eslint-disable-next-line no-console
+console.log('test');
 run();
