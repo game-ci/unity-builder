@@ -102,7 +102,6 @@ class RemoteBuilder {
           apk add unzip
           apk add git-lfs
           apk add jq
-          apk add jq
           apk add nodejs
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
@@ -110,6 +109,7 @@ class RemoteBuilder {
           mkdir ${steamPathFull}
           echo "Cloning utility repositories required for building:"
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
+          nodejs ${builderPathFull}/dist/index.js
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
           cd ${repoPathFull}
           # DISABLE LFS
