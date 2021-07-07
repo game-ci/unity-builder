@@ -102,7 +102,6 @@ class RemoteBuilder {
           apk add unzip
           apk add git-lfs
           apk add jq
-          apk add --update nodejs npm
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
@@ -110,16 +109,16 @@ class RemoteBuilder {
           echo "Cloning utility repositories required for building:"
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
           git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
-          node ${builderPathFull}/dist/index.js
           cd ${repoPathFull}
           # DISABLE LFS
           git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
           git config --global filter.lfs.process "git-lfs filter-process --skip"
           echo ''
           echo "Cloning the repository being built:"
-          git init
+          git init -q
           git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
           git fetch origin
+          echo $GITHUB_SHA
           git reset --hard $GITHUB_SHA
           git lfs ls-files --all
           echo ''
