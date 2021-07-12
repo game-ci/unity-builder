@@ -109,36 +109,22 @@ class RemoteBuilder {
           apk add git-lfs
           apk add jq
           apk add tree
+          # tree the entire remote volume for debugging
+          tree ${buildPathFull}
+          #
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
-          tree ${buildPathFull}
-          tree ${builderPathFull}
-          tree ${repoPathFull}
-          tree ${steamPathFull}
           echo "Cloning utility repositories required for building:"
-          git clone ${repo} ${builderPathFull}
-          git reset --hard --work-tree=${builderPathFull}
-          git checkout unified-providers --work-tree=${builderPathFull}
+          git clone ${repo} ${builderPathFull} "unified-providers"
           git clone ${repo2} ${steamPathFull}
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
           ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
           ${builderPathFull}/dist/remote-builder/handleCaching.sh ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
-          echo 'Printing out important directories'
-          echo 'Repo:'
-          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
-          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
-          echo ''
-          echo 'Project:'
-          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}
-          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}
-          echo ''
-          echo 'Library:'
-          ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library/
-          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library/
-          echo ''
+          echo 'build volumes:'
+          tree /${buildVolumeFolder}/
       `,
       ],
       `/${buildVolumeFolder}`,
