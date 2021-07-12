@@ -9,8 +9,7 @@ cd $repoPathFull
 echo ' '
 echo "Cloning the repository being built:"
 # DISABLE LFS
-git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
-git config --global filter.lfs.process "git-lfs filter-process --skip"
+export GIT_LFS_SKIP_SMUDGE=1
 # Init new repo and setup origin
 git init
 git remote add origin $cloneUrl
@@ -18,10 +17,15 @@ git remote add origin $cloneUrl
 git fetch origin
 git reset --hard $githubSha
 # ENABLE LFS
-git config --global filter.lfs.smudge "git-lfs smudge -- %f"
-git config --global filter.lfs.process "git-lfs filter-process"
+export GIT_LFS_SKIP_SMUDGE=0
 
 tree
+echo ' '
 # List git lfs files
 git lfs ls-files --all
+echo ' '
+git lfs ls-files -l | cut -d ' ' -f1 | sort
+echo ' '
+git lfs ls-files -l | cut -d ' ' -f1 | sort > $1/.lfs-assets-id
+
 echo ' '

@@ -125,7 +125,6 @@ class RemoteBuilder {
           git clone ${repo2} ${steamPathFull}
           #
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
-          ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
           ${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
           #
