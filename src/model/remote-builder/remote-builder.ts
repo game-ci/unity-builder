@@ -134,7 +134,7 @@ class RemoteBuilder {
           tree ${buildPathFull}
           #
           echo 'Root build volume folder:'
-          ls ${buildVolumeFolder}
+          ls /${buildVolumeFolder}
           #
       `,
       ],
