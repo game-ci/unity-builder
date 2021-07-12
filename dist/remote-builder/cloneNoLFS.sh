@@ -13,7 +13,7 @@ git config --global filter.lfs.process "git-lfs filter-process --skip"
 git init --work-tree=$repoPathFull
 git remote add origin $cloneUrl --work-tree=$repoPathFull
 # Get remote version
-git fetch origin --work-tree=$repoPathFull
-git reset --hard $githubSha --work-tree=$repoPathFull
+git fetch --work-tree=$repoPathFull origin
+git reset --work-tree=$repoPathFull --hard $githubSha
 git lfs ls-files --all --work-tree=$repoPathFull
 echo ''
