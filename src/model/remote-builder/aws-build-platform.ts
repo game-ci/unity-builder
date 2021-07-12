@@ -215,8 +215,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
 
     const baseResources = (await CF.describeStackResources({ StackName: this.stackName }).promise()).StackResources;
 
-    // in the future we should offer a parameter to choose if you want the guarnteed shutdown.
-    core.info('Worker cluster created successfully (skipping wait for cleanup cluster to be ready)');
+    // TODO: offer a parameter to decide if you want the guarenteed shutdown or fastest startup time possible
 
     return {
       taskDefStackName,
