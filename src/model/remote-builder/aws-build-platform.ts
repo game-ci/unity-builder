@@ -174,7 +174,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           ...mappedSecrets,
         ],
       }).promise();
-      core.info('Creating worker cluster...');
+      core.info('Creating main job...');
       await CF.createStack({
         StackName: cleanupTaskDefStackName,
         TemplateBody: cleanupCloudFormation,
@@ -198,7 +198,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           },
         ],
       }).promise();
-      core.info('Creating cleanup cluster...');
+      core.info('Creating cleanup double checker cron job...');
 
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
