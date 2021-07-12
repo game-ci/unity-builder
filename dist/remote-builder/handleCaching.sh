@@ -1,13 +1,14 @@
 #!/bin/sh
 
-branchName=$1
-libDir=$2
-purgeRemoteBuilderCache=$3
+cacheDir=$1
+branchName=$2
+libDir=$3
+purgeRemoteBuilderCache=$4
 
 echo "Checking cache"
 
 # Restore library cache
-latest=$(ls -t | head -1)
+latest=$(ls -t $cacheDir | head -1)
 if [ ! -z "$latest" ]; then
   echo "Library cache exists from build $latest from $branchName"
   echo 'Creating empty Library folder for cache'
