@@ -129,15 +129,15 @@ class RemoteBuilder {
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
           ${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
           #
-          echo ''
+          echo ' '
           #
           echo 'Tree for the folder of this specific build:'
           tree -L 3 ${buildPathFull}
           #
-          echo ''
+          echo ' '
           #
           echo 'Root build volume folder:'
-          ls /${buildVolumeFolder}
+          tree -L 1 /${buildVolumeFolder}
           #
       `,
       ],
