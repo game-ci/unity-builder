@@ -109,22 +109,33 @@ class RemoteBuilder {
           apk add git-lfs
           apk add jq
           apk add tree
-          # tree the entire remote volume for debugging
-          tree ${buildPathFull}
           #
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
+          #
+          echo "after making directories"
+          tree ${buildPathFull}
+          #
           echo "Cloning utility repositories required for building:"
           git clone ${repo} ${builderPathFull} "unified-providers"
           git clone ${repo2} ${steamPathFull}
+          #
+          echo "after cloning utility repos"
+          tree ${buildPathFull}
+          #
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
           ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
           ${builderPathFull}/dist/remote-builder/handleCaching.sh ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
-          echo 'build volumes:'
-          tree /${buildVolumeFolder}/
+          #
+          echo 'Tree for the folder of this specific build:'
+          tree ${buildPathFull}
+          #
+          echo 'Root build volume folder:'
+          ls ${buildVolumeFolder}
+          #
       `,
       ],
       `/${buildVolumeFolder}`,
