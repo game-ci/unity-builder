@@ -108,6 +108,8 @@ class RemoteBuilder {
           apk add unzip
           apk add git-lfs
           apk add jq
+          apk add sort
+          apk add cut
           apk add tree
           #
           mkdir ${buildPathFull}
