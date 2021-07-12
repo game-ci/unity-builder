@@ -13,6 +13,7 @@ if [ ! -d $cacheFolderFull/$branchName ]; then
   mkdir $cacheFolderFull/$branchName
   echo "creating new cache branch folder for: ${branchName}"
 fi
+
 echo "Library cache for branch: $branchName"
 ls $cacheFolderFull/$branchName
 echo ''
