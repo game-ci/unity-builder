@@ -94,6 +94,12 @@ class RemoteBuilder {
     const repoPathFull = `${buildPathFull}/${repositoryFolder}`;
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
+
+    const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
+    const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
+    const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+
+    const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -107,58 +113,17 @@ class RemoteBuilder {
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
           echo "Cloning utility repositories required for building:"
-          git clone -q https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git ${builderPathFull}
-          git clone -q https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git ${steamPathFull}
-          cd ${repoPathFull}
-          # DISABLE LFS
-          git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
-          git config --global filter.lfs.process "git-lfs filter-process --skip"
-          echo ''
-          echo "Cloning the repository being built:"
-          git init -q
-          git remote add origin https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git
-          git fetch origin
-          echo $GITHUB_SHA
-          git reset --hard $GITHUB_SHA
-          git lfs ls-files --all
-          echo ''
-          echo "Combining LFS hash files into one hash, this is used as the cache key:"
-          git lfs ls-files -l | cut -d' ' -f1 | sort > ${repoPathFull}/lfsSum.txt
-          ls -a
-          cat ${repoPathFull}/lfsSum.txt
-          echo '^ checksum'
-          echo ''
-          # time to handle library cache
-          if [ ! -d ${cacheFolderFull} ]; then
-            mkdir ${cacheFolderFull}
-            echo "creating new cache folder"
-          fi
-          if [ ! -d ${cacheFolderFull}/${branchName} ]; then
-            mkdir ${cacheFolderFull}/${branchName}
-            echo "creating new cache branch folder for: ${branchName}"
-          fi
-          echo "Library cache for branch: ${branchName}"
-          ls ${cacheFolderFull}/${branchName}
-          echo ''
-          if [ -d ${libraryFolderFull} ]; then
-            rm -r ${libraryFolderFull}
-            echo "Git must ignore the Library folder"
-          fi
-          echo "Checking cache"
-          # Restore cache
-          latest=$(ls -t | head -1)
-          if [ ! -z "$latest" ]; then
-            echo "Library cache exists from build $latest from ${branchName}"
-            echo 'Creating empty Library folder for cache'
-            mkdir $libDir
-            unzip -q $latest -d $libDir
-            # purge cache
-            ${process.env.PURGE_REMOTE_BUILDER_CACHE === undefined ? '#' : ''} rm -r $libDir
-          else
-            echo 'Cache does not exist'
-          fi
-          # Print out important directories
-          echo ''
+          git clone -q ${repo} ${builderPathFull}
+          git clone -q ${repo2} ${steamPathFull}
+          ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh
+          ${builderPathFull}/dist/remote-builder/combineLFSHash.sh
+          ${builderPathFull}/dist/remote-builder/setupCache.sh
+          ${builderPathFull}/dist/remote-builder/handleCaching.sh
+          ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
+          ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
+          ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
+          ${builderPathFull}/dist/remote-builder/handleCaching.sh ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
+          echo 'Printing out important directories'
           echo 'Repo:'
           ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
           echo ''
