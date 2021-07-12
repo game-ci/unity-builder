@@ -119,6 +119,8 @@ class RemoteBuilder {
           tree ${steamPathFull}
           echo "Cloning utility repositories required for building:"
           git clone ${repo} ${builderPathFull}
+          git reset --hard --work-tree=${builderPathFull}
+          git checkout unified-providers --work-tree=${builderPathFull}
           git clone ${repo2} ${steamPathFull}
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
           ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
