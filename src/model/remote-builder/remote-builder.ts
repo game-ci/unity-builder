@@ -115,15 +115,12 @@ class RemoteBuilder {
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
           #
-          echo "after making directories"
+          echo "root folders setup for remote build"
           tree ${buildPathFull}
           #
           echo "Cloning utility repositories required for building"
           git clone --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
           git clone ${repo2} ${steamPathFull}
-          #
-          echo "after cloning utility repos"
-          tree ${buildPathFull}
           #
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
           ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}

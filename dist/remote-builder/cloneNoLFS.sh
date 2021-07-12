@@ -4,7 +4,7 @@ repoPathFull=$1
 cloneUrl=$2
 githubSha=$3
 
-export GIT_DIR=$repoPathFull
+cd $repoPathFull
 
 echo ''
 echo "Cloning the repository being built:"
