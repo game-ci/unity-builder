@@ -118,7 +118,7 @@ class RemoteBuilder {
           echo "after making directories"
           tree ${buildPathFull}
           #
-          echo "Cloning utility repositories required for building:"
+          echo "Cloning utility repositories required for building"
           git clone --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
           git clone ${repo2} ${steamPathFull}
           #
