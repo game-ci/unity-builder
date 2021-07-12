@@ -113,12 +113,8 @@ class RemoteBuilder {
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
           echo "Cloning utility repositories required for building:"
-          git clone -q ${repo} ${builderPathFull}
-          git clone -q ${repo2} ${steamPathFull}
-          ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh
-          ${builderPathFull}/dist/remote-builder/combineLFSHash.sh
-          ${builderPathFull}/dist/remote-builder/setupCache.sh
-          ${builderPathFull}/dist/remote-builder/handleCaching.sh
+          git clone ${repo} ${builderPathFull}
+          git clone ${repo2} ${steamPathFull}
           ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
           ${builderPathFull}/dist/remote-builder/combineLFSHash.sh ${repoPathFull}
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
