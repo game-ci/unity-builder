@@ -108,10 +108,15 @@ class RemoteBuilder {
           apk add unzip
           apk add git-lfs
           apk add jq
+          apk add tree
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
+          tree ${buildPathFull}
+          tree ${builderPathFull}
+          tree ${repoPathFull}
+          tree ${steamPathFull}
           echo "Cloning utility repositories required for building:"
           git clone ${repo} ${builderPathFull}
           git clone ${repo2} ${steamPathFull}
@@ -122,12 +127,15 @@ class RemoteBuilder {
           echo 'Printing out important directories'
           echo 'Repo:'
           ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
+          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/
           echo ''
           echo 'Project:'
           ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}
+          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}
           echo ''
           echo 'Library:'
           ls /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library/
+          tree /${buildVolumeFolder}/${buildUid}/${repositoryFolder}/${buildParameters.projectPath}/Library/
           echo ''
       `,
       ],
