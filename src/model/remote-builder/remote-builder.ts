@@ -111,7 +111,6 @@ class RemoteBuilder {
           apk add sort
           apk add cut
           apk add tree
-          #
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
           mkdir ${repoPathFull}
@@ -124,7 +123,14 @@ class RemoteBuilder {
           git clone --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
           git clone ${repo2} ${steamPathFull}
           #
-          ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
+          export GIT_LFS_SKIP_SMUDGE=1
+          #
+          git clone --filter=blob:none ${repo3} ${repoPathFull} $GITHUB_SHA
+          #
+          export GIT_LFS_SKIP_SMUDGE=0
+          #
+          cd ${repoPathFull}
+          git lfs ls-files -l | cut -d ' ' -f1 | sort > lfs-assets-id
           ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
           ${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
           #
