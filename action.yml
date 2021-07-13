@@ -110,6 +110,13 @@ inputs:
     required: false
     default: ''
     description: 'SSH Agent path to forward to the container'
+  gitCredential:
+    required: false
+    default: ''
+    description: >
+      Git credential configuration
+
+      example: https://$token@github.com/
   chownFilesTo:
     required: false
     default: ''

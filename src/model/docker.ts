@@ -37,6 +37,7 @@ class Docker {
       androidKeyaliasPass,
       customParameters,
       sshAgent,
+      gitCredential,
       chownFilesTo,
     } = parameters;
 
@@ -80,6 +81,7 @@ class Docker {
         --env RUNNER_TOOL_CACHE \
         --env RUNNER_TEMP \
         --env RUNNER_WORKSPACE \
+        ${gitCredential ? '--env GIT_CREDENTIAL': ''} \
         ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
         --volume "${runnerTempPath}/_github_home":"/root" \
