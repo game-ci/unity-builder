@@ -89,8 +89,8 @@ class Input {
     return core.getInput('sshAgent') || '';
   }
 
-  static get gitCredential() {
-    return core.getInput('gitCredential') || '';
+  static get gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || '';
   }
 
   static get chownFilesTo() {

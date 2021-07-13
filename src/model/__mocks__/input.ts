@@ -12,7 +12,7 @@ export const mockGetFromUser = jest.fn().mockResolvedValue({
   customParameters: '',
   sshAgent: '',
   chownFilesTo: '',
-  gitCredential: '',
+  gitPrivateToken: '',
 });
 
 export default {

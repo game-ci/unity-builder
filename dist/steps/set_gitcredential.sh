@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
-if [ -z "${GIT_CREDENTIAL}" ]
+if [ -z "${GIT_PRIVATE_TOKEN}" ]
 then
-  echo "GIT_CREDENTIAL unset skipping"
+  echo "GIT_PRIVATE_TOKEN unset skipping"
 else
-  echo "GIT_CREDENTIAL is set configuring git credentials"
+  echo "GIT_PRIVATE_TOKEN is set configuring git credentials"
 
 	git config --global credential.helper store
 	git config --global --replace-all url.https://github.com/.insteadOf ssh://git@github.com/
 	git config --global --add url.https://github.com/.insteadOf git@github.com
 
-  git config --global url."https://token:$GIT_CREDENTIAL@github.com/".insteadOf "https://github.com/"
-  git config --global url."https://ssh:$GIT_CREDENTIAL@github.com/".insteadOf "ssh://git@github.com/"
-  git config --global url."https://git:$GIT_CREDENTIAL@github.com/".insteadOf "git@github.com:"
+  git config --global url."https://token:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "https://github.com/"
+  git config --global url."https://ssh:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
+  git config --global url."https://git:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "git@github.com:"
 
 fi
 
