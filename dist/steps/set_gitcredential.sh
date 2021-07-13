@@ -10,7 +10,7 @@ else
 	git config --global --replace-all url.https://github.com/.insteadOf ssh://git@github.com/
 	git config --global --add url.https://github.com/.insteadOf git@github.com
 
-  git config --global url."https://api:$GIT_CREDENTIAL@github.com/".insteadOf "https://github.com/"
+  git config --global url."https://token:$GIT_CREDENTIAL@github.com/".insteadOf "https://github.com/"
   git config --global url."https://ssh:$GIT_CREDENTIAL@github.com/".insteadOf "ssh://git@github.com/"
   git config --global url."https://git:$GIT_CREDENTIAL@github.com/".insteadOf "git@github.com:"
 
