@@ -29,8 +29,3 @@ else
   configure_git_credentials
 fi
 
-
-
-
-
-
