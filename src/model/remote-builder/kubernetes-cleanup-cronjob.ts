@@ -4,7 +4,12 @@ class KubernetesCleanupCronJob {
   static async cleanup(api: BatchV1beta1Api, name: string, namespace: string) {
     await api.deleteNamespacedCronJob('name', namespace);
   }
-  static async createCleanupCronJob(kubeClientBatch: BatchV1beta1Api, name: string, namespace: string) {
+  static async createCleanupCronJob(
+    kubeClientBatch: BatchV1beta1Api,
+    name: string,
+    serviceAccountName: string,
+    namespace: string,
+  ) {
     try {
       const batchJob = new V1beta1CronJob();
       batchJob.kind = 'CronJob';
@@ -16,6 +21,7 @@ class KubernetesCleanupCronJob {
       };
       const spec = {
         restartPolicy: 'Never',
+        serviceAccountName,
         containers: [
           {
             name: 'main',

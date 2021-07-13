@@ -11,6 +11,7 @@ import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesCleanupCronJob from './kubernetes-cleanup-cronjob';
+import KubernetesServiceAccount from './kubernetes-service-account';
 
 class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -25,6 +26,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private podName: string = '';
   private containerName: string = '';
   private cleanupCronJobName: string = '';
+  private serviceAccountName: string = '';
   private kubeClientBatchBeta: k8s.BatchV1beta1Api;
 
   constructor(buildParameters: BuildParameters) {
@@ -49,15 +51,19 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     try {
       this.pvcName = `unity-builder-pvc-${buildUid}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${buildUid}`;
+      this.serviceAccountName = `service-account-${buildUid}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,
         this.kubeClient,
         this.namespace,
       );
+
+      await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
       await KubernetesCleanupCronJob.createCleanupCronJob(
         this.kubeClientBatchBeta,
         this.cleanupCronJobName,
+        this.serviceAccountName,
         this.namespace,
       );
     } catch (error) {
