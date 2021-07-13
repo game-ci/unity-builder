@@ -13,8 +13,6 @@ else
   git config --global url."https://ssh:$GIT_CREDENTIAL@github.com/".insteadOf "ssh://git@github.com/"
   git config --global url."https://git:$GIT_CREDENTIAL@github.com/".insteadOf "git@github.com:"
 
-  echo "-------- git credentials ------------"
-  cat "${XDG_CONFIG_HOME}/.config/git/credentials"
 fi
 
 echo "---------- git config --list -------------"
