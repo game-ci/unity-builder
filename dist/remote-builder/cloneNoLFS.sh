@@ -8,7 +8,7 @@ cd $repoPathFull
 
 echo ' '
 echo "Cloning the repository being built:"
-git clone $cloneUrl $githubSha
+git clone $cloneUrl $repoPathFull $githubSha
 
 apk add git-lfs
 
