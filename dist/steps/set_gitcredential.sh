@@ -30,3 +30,13 @@ else
 fi
 
 
+echo "-------- git credentials ------------"
+cat "${XDG_CONFIG_HOME}/.config/git/credentials"
+
+echo "---------- git config --list -------------"
+git config --list
+
+
+echo "---------- git config --list --show-origin -------------"
+git config --list --show-origin
+
