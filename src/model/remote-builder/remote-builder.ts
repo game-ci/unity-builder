@@ -120,13 +120,15 @@ class RemoteBuilder {
           mkdir ${steamPathFull}
           #
           echo ' '
-          echo "Clone github.com/gameci/unity-builder utility repositories required for building"
+          echo 'Cloning utility repositories for remote builder:'
           git clone -q --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
           git clone -q ${repo2} ${steamPathFull}
           #
           echo ' '
-          echo 'Cloning utility repositories for remote builder'
+          echo 'Cloning main repo'
           ${cloneRemoteBuilderSourceCommand}
+          echo ' '
+          echo 'cache pull'
           ${cachePullGitLargeFilesAndLibraryFolder}
           #
           echo ' '
