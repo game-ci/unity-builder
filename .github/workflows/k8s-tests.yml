@@ -29,13 +29,14 @@ jobs:
       #         Checkout        #
       ###########################
       - uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
 
       ###########################
       #          Setup          #
       ###########################
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - uses: google-github-actions/setup-gcloud@master
         with:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
