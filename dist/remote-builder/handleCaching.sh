@@ -8,11 +8,16 @@ purgeRemoteBuilderCache=$4
 # handle library cache
 if [ ! -d $cacheFolderFull ]; then
   mkdir $cacheFolderFull
-  echo "creating new cache folder"
+  echo "creating new cache folder $cacheFolderFull"
+else
+  echo "cache folder already exists $cacheFolderFull"
 fi
-if [ ! -d $cacheFolderFull/$branchName ]; then
+
+if [ ! -d "$cacheFolderFull/$branchName" ]; then
   mkdir $cacheFolderFull/$branchName
-  echo "creating new cache branch folder for: ${branchName}"
+  echo "creating new cache branch folder for: $cacheFolderFull/$branchName"
+else
+  echo "cache branch folder already exists for: $cacheFolderFull/$branchName"
 fi
 
 echo "Library cache for branch: $branchName"
