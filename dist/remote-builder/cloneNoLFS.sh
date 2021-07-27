@@ -1,5 +1,7 @@
 #!/bin/sh
 
+apk add git-lfs
+
 repoPathFull=$1
 cloneUrl=$2
 githubSha=$3
@@ -8,9 +10,8 @@ cd $repoPathFull
 
 echo ' '
 echo "Cloning the repository being built:"
-git clone $cloneUrl $githubSha
-
-apk add git-lfs
+git clone --filter=blob:none --no-checkout $cloneUrl $repoPathFull
+git --work-tree=$repoPathFull checkout $githubSha
 
 tree
 echo ' '
