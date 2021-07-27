@@ -100,6 +100,8 @@ class RemoteBuilder {
     const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
+    const cachePullGitLargeFilesAndLibraryFolder = `${builderPathFull}/dist/remote-builder/cachePullLFSAndLibrary.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
+    const cloneRemoteBuilderSourceCommand = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -117,24 +119,16 @@ class RemoteBuilder {
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
           #
-          echo "root folders setup for remote build"
-          tree ${buildPathFull}
+          echo "Clone github.com/gameci/unity-builder utility repositories required for building"
+          git clone -q --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
+          git clone -q ${repo2} ${steamPathFull}
           #
-          echo "Cloning utility repositories required for building"
-          git clone --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
-          git clone ${repo2} ${steamPathFull}
-          #
-          ${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA
-          ${builderPathFull}/dist/remote-builder/setupCache.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull}
-          ${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}
-          #
-          echo ' '
+          ${cloneRemoteBuilderSourceCommand}
+          ${cachePullGitLargeFilesAndLibraryFolder}
           #
           echo 'Tree for the folder of this specific build:'
           tree -L 3 ${buildPathFull}
-          #
           echo ' '
-          #
           echo 'Root build volume folder:'
           tree -L 1 /${buildVolumeFolder}
           #
