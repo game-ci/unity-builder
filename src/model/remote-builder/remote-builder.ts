@@ -119,18 +119,22 @@ class RemoteBuilder {
           mkdir ${repoPathFull}
           mkdir ${steamPathFull}
           #
+          echo ' '
           echo "Clone github.com/gameci/unity-builder utility repositories required for building"
           git clone -q --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
           git clone -q ${repo2} ${steamPathFull}
           #
+          echo ' '
+          echo 'Cloning utility repositories for remote builder'
           ${cloneRemoteBuilderSourceCommand}
           ${cachePullGitLargeFilesAndLibraryFolder}
           #
+          echo ' '
           echo 'Tree for the folder of this specific build:'
           tree -L 3 ${buildPathFull}
           echo ' '
           echo 'Root build volume folder:'
-          tree -L 1 /${buildVolumeFolder}
+          ls -lh /${buildVolumeFolder}
           #
       `,
       ],
