@@ -1,7 +1,5 @@
 #!/bin/sh
 
-apk add git-lfs
-
 repoPathFull=$1
 cloneUrl=$2
 githubSha=$3

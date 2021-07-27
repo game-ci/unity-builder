@@ -6,25 +6,24 @@ libDir=$3
 purgeRemoteBuilderCache=$4
 
 # handle library cache
-if [ ! -d $cacheFolderFull ]; then
+if [ ! -d "$cacheFolderFull" ]; then
   mkdir $cacheFolderFull
   echo "creating new cache folder $cacheFolderFull"
+  if [ ! -d "$cacheFolderFull/$branchName" ]; then
+    mkdir $cacheFolderFull/$branchName
+    echo "creating new cache branch folder for: $cacheFolderFull/$branchName"
+  else
+    echo "cache branch folder already exists for: $cacheFolderFull/$branchName"
+  fi
 else
   echo "cache folder already exists $cacheFolderFull"
-fi
-
-if [ ! -d "$cacheFolderFull/$branchName" ]; then
-  mkdir $cacheFolderFull/$branchName
-  echo "creating new cache branch folder for: $cacheFolderFull/$branchName"
-else
-  echo "cache branch folder already exists for: $cacheFolderFull/$branchName"
 fi
 
 echo "Library cache for branch: $branchName"
 ls $cacheFolderFull/$branchName
 echo ''
 
-if [ -d $libraryFolderFull ]; then
+if [ -d "$libraryFolderFull" ]; then
   rm -r $libraryFolderFull
   echo "Git must ignore the Library folder"
 fi
