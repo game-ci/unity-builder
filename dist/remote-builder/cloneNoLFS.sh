@@ -20,7 +20,7 @@ tree
 
 echo ' '
 echo 'List all LFS file hashes:'
-git lfs ls-files --all | cut -d ' ' -f1 | sort
+git lfs ls-files -l | cut -d ' ' -f1 | sort
 
 
 echo ' '
