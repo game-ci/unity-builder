@@ -110,8 +110,6 @@ class RemoteBuilder {
           apk add unzip
           apk add git-lfs
           apk add jq
-          apk add sort
-          apk add cut
           apk add tree
           #
           mkdir ${buildPathFull}
@@ -120,9 +118,11 @@ class RemoteBuilder {
           mkdir ${steamPathFull}
           #
           echo ' '
-          echo 'Cloning utility repositories for remote builder:'
+          echo 'Cloning utility repositories for remote builder'
           git clone -q --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
+          echo 'Cloned ${repo}'
           git clone -q ${repo2} ${steamPathFull}
+          echo 'Cloned ${repo2}'
           #
           echo ' '
           echo 'Cloning main repo'

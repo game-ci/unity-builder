@@ -11,7 +11,8 @@ cd $repoPathFull
 echo ' '
 echo "Cloning the repository being built:"
 git clone --filter=blob:none --no-checkout $cloneUrl $repoPathFull
-git --work-tree=$repoPathFull checkout $githubSha
+git --work-tree=$repoPathFull -q checkout $githubSha
+echo "Checked out $githubSha"
 
 echo ' '
 echo 'Tree of cloned target repository:'
