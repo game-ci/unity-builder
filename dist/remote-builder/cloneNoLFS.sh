@@ -27,10 +27,10 @@ md5sum .lfs-assets-id > .lfs-assets-id-sum
 
 echo ' '
 echo 'Contents of .lfs-assets-id file:'
-echo .lfs-assets-id
+cat .lfs-assets-id
 
 echo ' '
 echo 'Contents of .lfs-assets-id-sum file:'
-echo .lfs-assets-id-sum
+cat .lfs-assets-id-sum
 
 echo ' '
