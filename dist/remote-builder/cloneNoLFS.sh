@@ -22,10 +22,15 @@ echo ' '
 echo 'List all LFS file hashes:'
 git lfs ls-files -l | cut -d ' ' -f1 | sort
 
+git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-id
+md5sum .lfs-assets-id > .lfs-assets-id-sum
 
 echo ' '
 echo 'Contents of .lfs-assets-id file:'
-git lfs ls-files --all | cut -d ' ' -f1 | sort > .lfs-assets-id
 echo .lfs-assets-id
+
+echo ' '
+echo 'Contents of .lfs-assets-id-sum file:'
+echo .lfs-assets-id-sum
 
 echo ' '
