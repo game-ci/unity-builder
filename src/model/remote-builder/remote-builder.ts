@@ -132,8 +132,9 @@ class RemoteBuilder {
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
           echo 'Caching complete'
+          cd ${repoPathFull}
+          git lfs pull
           #
-          echo ' '
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
           tree -L 3 ${buildPathFull} > ${repoPathFull}/buildVolumeReport.txt
           ls -lh /${buildVolumeFolder} > ${repoPathFull}/buildVolumeReport.txt
