@@ -15,14 +15,6 @@ echo "Checked out $githubSha"
 
 ls -l "$testLFSFile"
 
-echo ' '
-echo 'Tree of cloned target repository:'
-tree
-
-echo ' '
-echo 'List all LFS file hashes:'
-git lfs ls-files -l | cut -d ' ' -f1 | sort
-
 git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-id
 md5sum .lfs-assets-id > .lfs-assets-id-sum
 
