@@ -95,7 +95,8 @@ class RemoteBuilder {
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
 
-    const testLFSFile = 'test-project/Assets/LFS_Test_File.jpg';
+    const lfsDirectory = `${repoPathFull}/.git/lfs`;
+    const testLFSFile = `${repoPathFull}/test-project/Assets/LFS_Test_File.jpg`;
 
     const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
     const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
@@ -103,7 +104,7 @@ class RemoteBuilder {
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
     const initializeSourceRepoForCaching = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA ${testLFSFile}`;
-    const handleCaching = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
+    const handleCaching = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${lfsDirectory} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -304,7 +305,7 @@ class RemoteBuilder {
             apk add zip
             cd Library
             zip -r lib-${buildUid}.zip .*
-            mv lib-${buildUid}.zip /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${buildUid}.zip
+            mv lib-${buildUid}.zip /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib/lib-${buildUid}.zip
             cd ../../
             ls
             echo ' '
