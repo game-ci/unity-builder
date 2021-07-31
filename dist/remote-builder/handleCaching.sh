@@ -46,6 +46,15 @@ if [ ! -z "$latest" ]; then
   unzip -q "$cacheFolderWithBranch/lfs/$latest" -d "$gitLFSDestinationFolder"
 fi
 
+du -sch "$cacheFolderWithBranch/lfs"
+
+du -sch "$cacheFolderWithBranch/lib"
+
+du -sch "$cacheFolderWithBranch"
+
+du -sch "$cacheFolderFull"
+
+echo "purge $purgeRemoteBuilderCache"
 # purge cache
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
   rm -r "$cacheFolderFull"
