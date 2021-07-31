@@ -5,14 +5,14 @@ branchName=$2
 libraryFolderFull=$3
 purgeRemoteBuilderCache=$4
 
-echo ""
+echo " "
 echo "Caching starting, parameters:"
 echo "$cacheFolderFull"
 echo "$branchName"
 echo "$libraryFolderFull"
 echo "$purgeRemoteBuilderCache"
 
-echo ""
+echo " "
 # handle library cache
 if [ ! -d "$cacheFolderFull" ]; then
   echo "creating new cache folder $cacheFolderFull"
@@ -40,7 +40,7 @@ fi
 echo "Checking cache"
 
 # Restore library cache
-latest=$(ls -t $cacheDir | head -1)
+latest=$(ls -t "$cacheFolderFull/$branchName" | head -1)
 if [ ! -z "$latest" ]; then
   echo "Library cache exists from build $latest from $branchName"
   echo 'Creating empty Library folder for cache'
