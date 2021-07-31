@@ -12,23 +12,25 @@ echo "$branchName"
 echo "$libraryFolderFull"
 echo "$purgeRemoteBuilderCache"
 
+cacheFolderWithBranch="$cacheFolderFull/$branchName"
+
 echo " "
 # handle library cache
 if [ ! -d "$cacheFolderFull" ]; then
   echo "creating new cache folder $cacheFolderFull"
   mkdir "$cacheFolderFull"
-  if [ ! -d "$cacheFolderFull/$branchName" ]; then
-    echo "creating new cache branch folder for: $cacheFolderFull/$branchName"
-    mkdir "$cacheFolderFull/$branchName"
+  if [ ! -d "$cacheFolderWithBranch" ]; then
+    echo "creating new cache branch folder for: $cacheFolderWithBranch"
+    mkdir "$cacheFolderWithBranch"
   else
-    echo "cache branch folder already exists for: $cacheFolderFull/$branchName"
+    echo "cache branch folder already exists for: $cacheFolderWithBranch"
   fi
 else
   echo "cache folder already exists $cacheFolderFull"
 fi
 
 echo "Library cache for branch: $branchName"
-ls "$cacheFolderFull/$branchName"
+ls -lh "$cacheFolderWithBranch"
 echo ''
 
 if [ -d "$libraryFolderFull" ]; then
@@ -40,12 +42,15 @@ fi
 echo "Checking cache"
 
 # Restore library cache
-latest=$(ls -t "$cacheFolderFull/$branchName" | head -1)
-if [ ! -z "$latest" ]; then
+latest=$(ls -t "$cacheFolderWithBranch" | egrep -i -e '\\.zip$' | head -1)
+
+if [ "$(ls -A $latest)" ]; then
+  echo 'Cache empty'
+else if [ ! -z "$latest" ]; then
   echo "Library cache exists from build $latest from $branchName"
   echo 'Creating empty Library folder for cache'
   mkdir "$libraryFolderFull"
-  unzip -q "$cacheFolderFull/$branchName/$latest" -d "$libraryFolderFull"
+  unzip -q "$cacheFolderWithBranch/$latest" -d "$libraryFolderFull"
 else
   echo 'Cache does not exist'
 fi
