@@ -5,12 +5,20 @@ branchName=$2
 libDir=$3
 purgeRemoteBuilderCache=$4
 
+echo ""
+echo "Caching starting, parameters:"
+echo "$cacheDir"
+echo "$branchName"
+echo "$libDir"
+echo "$purgeRemoteBuilderCache"
+
+echo ""
 # handle library cache
 if [ ! -d "$cacheFolderFull" ]; then
-  mkdir $cacheFolderFull
+  mkdir "$cacheFolderFull"
   echo "creating new cache folder $cacheFolderFull"
   if [ ! -d "$cacheFolderFull/$branchName" ]; then
-    mkdir $cacheFolderFull/$branchName
+    mkdir "$cacheFolderFull/$branchName"
     echo "creating new cache branch folder for: $cacheFolderFull/$branchName"
   else
     echo "cache branch folder already exists for: $cacheFolderFull/$branchName"
