@@ -45,7 +45,7 @@ if [ ! -z "$latest" ]; then
   echo "Library cache exists from build $latest from $branchName"
   echo 'Creating empty Library folder for cache'
   mkdir "$libraryFolderFull"
-  unzip -q "$latest" -d "$libraryFolderFull"
+  unzip -q "$cacheFolderFull/$branchName/$latest" -d "$libraryFolderFull"
 else
   echo 'Cache does not exist'
 fi

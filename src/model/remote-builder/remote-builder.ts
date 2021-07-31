@@ -106,11 +106,11 @@ class RemoteBuilder {
       buildUid,
       'alpine/git',
       [
-        ` apk update
-          apk add unzip
-          apk add git-lfs
-          apk add jq
-          apk add tree
+        ` apk update -q
+          apk add unzip -q
+          apk add git-lfs -q
+          apk add jq -q
+          apk add tree -q
           #
           mkdir ${buildPathFull}
           mkdir ${builderPathFull}
