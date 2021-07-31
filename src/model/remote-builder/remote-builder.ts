@@ -100,8 +100,8 @@ class RemoteBuilder {
     const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
-    const cachePullGitLargeFilesAndLibraryFolder = `${builderPathFull}/dist/remote-builder/cachePullLFSAndLibrary.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
     const cloneRemoteBuilderSourceCommand = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA`;
+    const cachePullGitLargeFilesAndLibraryFolder = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
