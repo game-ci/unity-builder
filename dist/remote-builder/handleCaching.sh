@@ -6,13 +6,6 @@ libraryFolderFull=$3
 gitLFSDestinationFolder=$4
 purgeRemoteBuilderCache=$5
 
-echo " "
-echo "Caching starting, parameters:"
-echo "$cacheFolderFull"
-echo "$branchName"
-echo "$libraryFolderFull"
-echo "$purgeRemoteBuilderCache"
-
 cacheFolderWithBranch="$cacheFolderFull/$branchName"
 
 echo " "
@@ -56,6 +49,6 @@ fi
 
 # purge cache
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
-  rm -r "$libraryFolderFull"
+  rm -r "$cacheFolderFull"
 fi
 
