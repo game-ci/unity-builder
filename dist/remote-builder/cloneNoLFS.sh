@@ -9,7 +9,7 @@ cd $repoPathFull
 
 echo ' '
 echo "Cloning the repository being built:"
-git clone --filter=blob:none --no-checkout $cloneUrl $repoPathFull
+git clone --filter=blob:none --no-checkout $cloneUrl
 git checkout $githubSha
 echo "Checked out $githubSha"
 
