@@ -106,7 +106,7 @@ class RemoteBuilder {
     core.info('Starting step 1/4 clone and restore cache)');
 
     const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
-    const testLFSFile = `${this.repoPathFull}/test-project/Assets/LFS_Test_File.jpg`;
+    const testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
 
     const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
     const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
@@ -140,6 +140,8 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
+          ls -alh "${testLFSFile}"
+          ls -alh "${lfsDirectory}"
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
@@ -147,8 +149,8 @@ class RemoteBuilder {
           echo 'Caching complete'
           cd ${this.repoPathFull}
           git lfs pull
-          ls -l "${testLFSFile}"
-          ls -l ".git/lfs"
+          ls -alh "${testLFSFile}"
+          ls -alh "${lfsDirectory}"
           zip -r lib-${buildUid}.zip ".git/lfs/.*"
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
