@@ -149,6 +149,7 @@ class RemoteBuilder {
           git lfs pull
           ls -l "${testLFSFile}"
           ls -l ".git/lfs"
+          zip -r lib-${buildUid}.zip ".git/lfs/.*"
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
           tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/buildVolumeReport.txt
