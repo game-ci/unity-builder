@@ -125,18 +125,18 @@ class RemoteBuilder {
           echo 'Cloned ${repo2}'
           #
           echo ' '
-          echo 'Cloning main repo'
+          echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
+          echo 'Source repository initialized'
           echo ' '
-          echo 'cache pull'
+          echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
+          echo 'Caching complete'
           #
           echo ' '
-          echo 'Tree for the folder of this specific build:'
-          tree -L 3 ${buildPathFull}
-          echo ' '
-          echo 'Root build volume folder:'
-          ls -lh /${buildVolumeFolder}
+          echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
+          tree -L 3 ${buildPathFull} > ${repoPathFull}/buildVolumeReport.txt
+          ls -lh /${buildVolumeFolder} > ${repoPathFull}/buildVolumeReport.txt
           #
       `,
       ],
