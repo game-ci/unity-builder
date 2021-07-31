@@ -44,15 +44,11 @@ echo "Checking cache"
 # Restore library cache
 latest=$(ls -t "$cacheFolderWithBranch" | egrep -i -e '\\.zip$' | head -1)
 
-if [ "$(ls -A $latest)" ]; then
-  echo 'Cache empty'
-else if [ ! -z "$latest" ]; then
+if [ ! -z "$latest" ]; then
   echo "Library cache exists from build $latest from $branchName"
   echo 'Creating empty Library folder for cache'
   mkdir "$libraryFolderFull"
   unzip -q "$cacheFolderWithBranch/$latest" -d "$libraryFolderFull"
-else
-  echo 'Cache does not exist'
 fi
 
 # Restore LFS cache
