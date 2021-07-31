@@ -120,10 +120,7 @@ class RemoteBuilder {
       'alpine/git',
       [
         ` apk update -q
-          apk add unzip -q
-          apk add git-lfs -q
-          apk add jq -q
-          apk add tree -q
+          apk add unzip zip git-lfs jq tree -q
           #
           mkdir ${this.buildPathFull}
           mkdir ${this.builderPathFull}
@@ -147,15 +144,18 @@ class RemoteBuilder {
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
           echo 'Caching complete'
+          echo ' '
           cd ${this.repoPathFull}
           git lfs pull
           ls -alh "${testLFSFile}"
           ls -alh "${lfsDirectory}"
           zip -r lib-${buildUid}.zip ".git/lfs/.*"
+          echo ' '
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
           tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/buildVolumeReport.txt
           ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/buildVolumeReport.txt
+          echo ' '
           #
       `,
       ],
