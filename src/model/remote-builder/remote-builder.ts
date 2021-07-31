@@ -8,11 +8,12 @@ import Kubernetes from './kubernetes-build-platform';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
+const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
 
 class RemoteBuilder {
   static SteamDeploy: boolean = false;
-
-  private static cacheFolderFull: string = `/${buildVolumeFolder}/${cacheFolder}`;
+  private static readonly remoteBuilderUtilityRepoFolder: string;
+  private static readonly remoteBuilderSteamUtilityRepoFolder: string;
   private static buildPathFull: string;
   private static builderPathFull: string;
   private static steamPathFull: string;
@@ -113,7 +114,7 @@ class RemoteBuilder {
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${this.repoPathFull} ${repo3} $GITHUB_SHA ${testLFSFile}`;
-    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh ${this.cacheFolderFull} ${branchName} ${this.libraryFolderFull} ${lfsDirectory} ${purgeRemoteCache}`;
+    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${this.libraryFolderFull} ${lfsDirectory} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -230,16 +231,16 @@ class RemoteBuilder {
       baseImage.toString(),
       [
         `
-            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/default-build-script/ /UnityBuilderAction;
-            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/entrypoint.sh /entrypoint.sh;
-            cp -r /${buildVolumeFolder}/${buildUid}/builder/dist/steps/ /steps;
-            chmod -R +x /entrypoint.sh;
-            chmod -R +x /steps;
-            /entrypoint.sh;
+            cp -r "${this.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
+            cp -r "${this.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
+            cp -r "${this.builderPathFull}/dist/steps/" "/steps"
+            chmod -R +x "/entrypoint.sh"
+            chmod -R +x "/steps"
+            /entrypoint.sh
           `,
       ],
       `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/`,
+      `/${this.repoPathFull}`,
       [
         {
           name: 'ContainerMemory',
