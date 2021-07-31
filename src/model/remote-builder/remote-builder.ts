@@ -146,6 +146,7 @@ class RemoteBuilder {
           echo 'Caching complete'
           cd ${this.repoPathFull}
           git lfs pull
+          ls -l "${testLFSFile}"
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
           tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/buildVolumeReport.txt
