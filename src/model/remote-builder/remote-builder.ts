@@ -100,8 +100,8 @@ class RemoteBuilder {
     const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
-    const cloneRemoteBuilderSourceCommand = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA`;
-    const cachePullGitLargeFilesAndLibraryFolder = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
+    const initializeSourceRepoForCaching = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA`;
+    const handleCaching = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -126,10 +126,10 @@ class RemoteBuilder {
           #
           echo ' '
           echo 'Cloning main repo'
-          ${cloneRemoteBuilderSourceCommand}
+          ${initializeSourceRepoForCaching}
           echo ' '
           echo 'cache pull'
-          ${cachePullGitLargeFilesAndLibraryFolder}
+          ${handleCaching}
           #
           echo ' '
           echo 'Tree for the folder of this specific build:'
