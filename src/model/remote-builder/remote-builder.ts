@@ -95,12 +95,14 @@ class RemoteBuilder {
     const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
     const libraryFolderFull = `${projectPathFull}/Library`;
 
+    const testLFSFile = 'test-project/Assets/LFS_Test_File.jpg';
+
     const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
     const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
     const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
-    const initializeSourceRepoForCaching = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA`;
+    const initializeSourceRepoForCaching = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA ${testLFSFile}`;
     const handleCaching = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
