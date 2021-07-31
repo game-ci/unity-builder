@@ -11,6 +11,14 @@ const cacheFolder = 'cache';
 
 class RemoteBuilder {
   static SteamDeploy: boolean = false;
+
+  private static cacheFolderFull: string = `/${buildVolumeFolder}/${cacheFolder}`;
+  private static buildPathFull: string;
+  private static builderPathFull: string;
+  private static steamPathFull: string;
+  private static repoPathFull: string;
+  private static projectPathFull: string;
+  private static libraryFolderFull: string;
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
   static async build(buildParameters: BuildParameters, baseImage) {
     const runNumber = process.env.GITHUB_RUN_NUMBER;
@@ -54,6 +62,14 @@ class RemoteBuilder {
         branchName,
         defaultSecretsArray,
       );
+
+      this.buildPathFull = `/${buildVolumeFolder}/${buildUid}`;
+      this.builderPathFull = `${this.buildPathFull}/builder`;
+      this.steamPathFull = `${this.buildPathFull}/steam`;
+      this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
+      this.projectPathFull = `${this.repoPathFull}/${buildParameters.projectPath}`;
+      this.libraryFolderFull = `${this.projectPathFull}/Library`;
+
       await RemoteBuilder.SetupStep(`setup${buildUid}`, buildParameters, branchName, defaultSecretsArray);
       await RemoteBuilder.BuildStep(`build${buildUid}`, buildParameters, baseImage, defaultSecretsArray);
       await RemoteBuilder.CompressionStep(`compress${buildUid}`, buildParameters, branchName, defaultSecretsArray);
@@ -87,24 +103,17 @@ class RemoteBuilder {
     defaultSecretsArray: RemoteBuilderSecret[],
   ) {
     core.info('Starting step 1/4 clone and restore cache)');
-    const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
-    const buildPathFull = `/${buildVolumeFolder}/${buildUid}`;
-    const builderPathFull = `${buildPathFull}/builder`;
-    const steamPathFull = `${buildPathFull}/steam`;
-    const repoPathFull = `${buildPathFull}/${repositoryFolder}`;
-    const projectPathFull = `${repoPathFull}/${buildParameters.projectPath}`;
-    const libraryFolderFull = `${projectPathFull}/Library`;
 
-    const lfsDirectory = `${repoPathFull}/.git/lfs`;
-    const testLFSFile = `${repoPathFull}/test-project/Assets/LFS_Test_File.jpg`;
+    const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
+    const testLFSFile = `${this.repoPathFull}/test-project/Assets/LFS_Test_File.jpg`;
 
     const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
     const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
     const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE === undefined;
-    const initializeSourceRepoForCaching = `${builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${repoPathFull} ${repo3} $GITHUB_SHA ${testLFSFile}`;
-    const handleCaching = `${builderPathFull}/dist/remote-builder/handleCaching.sh ${cacheFolderFull} ${branchName} ${libraryFolderFull} ${lfsDirectory} ${purgeRemoteCache}`;
+    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh ${this.repoPathFull} ${repo3} $GITHUB_SHA ${testLFSFile}`;
+    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh ${this.cacheFolderFull} ${branchName} ${this.libraryFolderFull} ${lfsDirectory} ${purgeRemoteCache}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       buildUid,
       'alpine/git',
@@ -115,16 +124,16 @@ class RemoteBuilder {
           apk add jq -q
           apk add tree -q
           #
-          mkdir ${buildPathFull}
-          mkdir ${builderPathFull}
-          mkdir ${repoPathFull}
-          mkdir ${steamPathFull}
+          mkdir ${this.buildPathFull}
+          mkdir ${this.builderPathFull}
+          mkdir ${this.repoPathFull}
+          mkdir ${this.steamPathFull}
           #
           echo ' '
           echo 'Cloning utility repositories for remote builder'
-          git clone -q --branch "remote-builder/unified-providers" ${repo} ${builderPathFull}
+          git clone -q --branch "remote-builder/unified-providers" ${repo} ${this.builderPathFull}
           echo 'Cloned ${repo}'
-          git clone -q ${repo2} ${steamPathFull}
+          git clone -q ${repo2} ${this.steamPathFull}
           echo 'Cloned ${repo2}'
           #
           echo ' '
@@ -135,12 +144,12 @@ class RemoteBuilder {
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
           echo 'Caching complete'
-          cd ${repoPathFull}
+          cd ${this.repoPathFull}
           git lfs pull
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
-          tree -L 3 ${buildPathFull} > ${repoPathFull}/buildVolumeReport.txt
-          ls -lh /${buildVolumeFolder} > ${repoPathFull}/buildVolumeReport.txt
+          tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/buildVolumeReport.txt
+          ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/buildVolumeReport.txt
           #
       `,
       ],
@@ -301,9 +310,9 @@ class RemoteBuilder {
       'alpine',
       [
         `
-            apk update
-            apk add zip
-            cd Library
+            apk update -q
+            apk add zip -q
+            cd ${this.libraryFolderFull}
             zip -r lib-${buildUid}.zip .*
             mv lib-${buildUid}.zip /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib/lib-${buildUid}.zip
             cd ../../

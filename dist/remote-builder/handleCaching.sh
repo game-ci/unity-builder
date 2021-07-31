@@ -24,7 +24,6 @@ if [ -d "$libraryFolderFull" ]; then
   echo "Git must ignore the Library folder"
 fi
 
-
 echo "Checking cache"
 
 # Restore library cache
@@ -51,4 +50,3 @@ fi
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
   rm -r "$cacheFolderFull"
 fi
-
