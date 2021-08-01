@@ -33,7 +33,7 @@ fi
 echo "Checking cache"
 
 # Restore library cache
-latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | egrep -i -e '\\.zip$' | head -1)
+latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 if [ ! -z "$latestLibraryCacheFile" ]; then
   echo "Library cache exists from build $latestLibraryCacheFile from $branchName"
@@ -45,7 +45,7 @@ fi
 # Restore LFS cache
 if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$LFS_ASSETS_HASH" ]
 then latestLFSCacheFile=LFS_ASSETS_HASH
-else latestLFSCacheFile=$(ls -t "$cacheFolderWithBranch/lfs" | egrep -i -e '\\.zip$' | head -1)
+else latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
 fi
 
 if [ ! -z "$latestLFSCacheFile" ]; then
