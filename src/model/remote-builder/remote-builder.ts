@@ -2,7 +2,6 @@ import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
 import RemoteBuilderNamespace from './remote-builder-namespace';
-import RemoteBuilderSecret from './remote-builder-secret';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import Kubernetes from './kubernetes-build-platform';
 const repositoryFolder = 'repo';
@@ -18,13 +17,17 @@ class RemoteBuilder {
   private static repoPathFull: string;
   private static projectPathFull: string;
   private static libraryFolderFull: string;
+  private static buildId: string;
+  private static buildParams: BuildParameters;
+  private static defaultSecrets;
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
   static async build(buildParameters: BuildParameters, baseImage) {
     const runNumber = process.env.GITHUB_RUN_NUMBER;
     if (!runNumber || runNumber === '') {
       throw new Error('no run number found, exiting');
     }
-    const buildUid = RemoteBuilderNamespace.generateBuildName(runNumber, buildParameters.platform);
+    RemoteBuilder.buildParams = buildParameters;
+    RemoteBuilder.buildId = RemoteBuilderNamespace.generateBuildName(runNumber, buildParameters.platform);
     const defaultBranchName =
       process.env.GITHUB_REF?.split('/')
         .filter((x) => {
@@ -35,8 +38,8 @@ class RemoteBuilder {
     const branchName =
       process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
     this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
-    const token: string = buildParameters.githubToken;
-    const defaultSecretsArray = [
+    const token: string = this.buildParams.githubToken;
+    this.defaultSecrets = [
       {
         ParameterKey: 'GithubToken',
         EnvironmentVariable: 'GITHUB_TOKEN',
@@ -44,77 +47,73 @@ class RemoteBuilder {
       },
     ];
     try {
-      switch (buildParameters.remoteBuildCluster) {
+      switch (this.buildParams.remoteBuildCluster) {
         case 'aws':
           core.info('Building with AWS');
-          this.RemoteBuilderProviderPlatform = new AWSBuildPlatform(buildParameters);
+          this.RemoteBuilderProviderPlatform = new AWSBuildPlatform(this.buildParams);
           break;
         default:
         case 'k8s':
           core.info('Building with Kubernetes');
-          this.RemoteBuilderProviderPlatform = new Kubernetes(buildParameters);
+          this.RemoteBuilderProviderPlatform = new Kubernetes(this.buildParams);
           break;
       }
+
       await this.RemoteBuilderProviderPlatform.setupSharedBuildResources(
-        buildUid,
-        buildParameters,
+        this.buildId,
+        this.buildParams,
         branchName,
-        defaultSecretsArray,
+        this.defaultSecrets,
       );
 
-      this.buildPathFull = `/${buildVolumeFolder}/${buildUid}`;
+      this.buildPathFull = `/${buildVolumeFolder}/${this.buildId}`;
       this.builderPathFull = `${this.buildPathFull}/builder`;
       this.steamPathFull = `${this.buildPathFull}/steam`;
       this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
-      this.projectPathFull = `${this.repoPathFull}/${buildParameters.projectPath}`;
+      this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
       this.libraryFolderFull = `${this.projectPathFull}/Library`;
 
-      await RemoteBuilder.SetupStep(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.BuildStep(`${buildUid}`, buildParameters, baseImage, defaultSecretsArray);
-      await RemoteBuilder.CompressionStep(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.UploadArtifacts(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.SetupStep(branchName);
+      await RemoteBuilder.BuildStep(baseImage);
+      await RemoteBuilder.CompressionStep();
+      await RemoteBuilder.UploadArtifacts(branchName);
       if (this.SteamDeploy) {
-        await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
+        await RemoteBuilder.DeployToSteam();
       }
       await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
-        buildUid,
-        buildParameters,
+        this.buildId,
+        this.buildParams,
         branchName,
-        defaultSecretsArray,
+        this.defaultSecrets,
       );
     } catch (error) {
       core.error(JSON.stringify(error, undefined, 4));
       core.setFailed('Remote Builder failed');
       await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
-        buildUid,
-        buildParameters,
+        this.buildId,
+        this.buildParams,
         branchName,
-        defaultSecretsArray,
+        this.defaultSecrets,
       );
       throw error;
     }
   }
 
-  private static async SetupStep(
-    buildUid: string,
-    buildParameters: BuildParameters,
-    branchName: string | undefined,
-    defaultSecretsArray: RemoteBuilderSecret[],
-  ) {
+  private static async SetupStep(branchName: string | undefined) {
     core.info('Starting step 1/4 clone and restore cache)');
 
     const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
     const testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
 
-    const repo = `https://${buildParameters.githubToken}@github.com/game-ci/unity-builder.git`;
-    const repo2 = `https://${buildParameters.githubToken}@github.com/game-ci/steam-deploy.git`;
-    const repo3 = `https://${buildParameters.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    const repo = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
+    const repo2 = `https://${this.buildParams.githubToken}@github.com/game-ci/steam-deploy.git`;
+    const repo3 = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${repo3}" "$GITHUB_SHA" "${testLFSFile}"`;
     const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" "${branchName}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      buildUid,
+      this.buildId,
       'alpine/git',
       [
         ` apk update -q
@@ -166,19 +165,14 @@ class RemoteBuilder {
           value: process.env.GITHUB_SHA || '',
         },
       ],
-      defaultSecretsArray,
+      this.defaultSecrets,
     );
   }
 
-  private static async BuildStep(
-    buildUid: string,
-    buildParameters: BuildParameters,
-    baseImage: any,
-    defaultSecretsArray: RemoteBuilderSecret[],
-  ) {
+  private static async BuildStep(baseImage: any) {
     const buildSecrets = new Array();
 
-    buildSecrets.push(...defaultSecretsArray);
+    buildSecrets.push(...this.defaultSecrets);
 
     if (process.env.UNITY_LICENSE)
       buildSecrets.push({
@@ -208,29 +202,29 @@ class RemoteBuilder {
         ParameterValue: process.env.UNITY_SERIAL,
       });
 
-    if (buildParameters.androidKeystoreBase64)
+    if (this.buildParams.androidKeystoreBase64)
       buildSecrets.push({
         ParameterKey: 'AndroidKeystoreBase64',
         EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-        ParameterValue: buildParameters.androidKeystoreBase64,
+        ParameterValue: this.buildParams.androidKeystoreBase64,
       });
 
-    if (buildParameters.androidKeystorePass)
+    if (this.buildParams.androidKeystorePass)
       buildSecrets.push({
         ParameterKey: 'AndroidKeystorePass',
         EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-        ParameterValue: buildParameters.androidKeystorePass,
+        ParameterValue: this.buildParams.androidKeystorePass,
       });
 
-    if (buildParameters.androidKeyaliasPass)
+    if (this.buildParams.androidKeyaliasPass)
       buildSecrets.push({
         ParameterKey: 'AndroidKeyAliasPass',
         EnvironmentVariable: 'AWS_ACCESS_KEY_ALIAS_PASS',
-        ParameterValue: buildParameters.androidKeyaliasPass,
+        ParameterValue: this.buildParams.androidKeyaliasPass,
       });
     core.info('Starting part 2/4 (build unity project)');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      buildUid,
+      this.buildId,
       baseImage.toString(),
       [
         `
@@ -247,83 +241,78 @@ class RemoteBuilder {
       [
         {
           name: 'ContainerMemory',
-          value: buildParameters.remoteBuildMemory,
+          value: this.buildParams.remoteBuildMemory,
         },
         {
           name: 'ContainerCpu',
-          value: buildParameters.remoteBuildCpu,
+          value: this.buildParams.remoteBuildCpu,
         },
         {
           name: 'GITHUB_WORKSPACE',
-          value: `/${buildVolumeFolder}/${buildUid}/${repositoryFolder}/`,
+          value: `/${buildVolumeFolder}/${this.buildId}/${repositoryFolder}/`,
         },
         {
           name: 'PROJECT_PATH',
-          value: buildParameters.projectPath,
+          value: this.buildParams.projectPath,
         },
         {
           name: 'BUILD_PATH',
-          value: buildParameters.buildPath,
+          value: this.buildParams.buildPath,
         },
         {
           name: 'BUILD_FILE',
-          value: buildParameters.buildFile,
+          value: this.buildParams.buildFile,
         },
         {
           name: 'BUILD_NAME',
-          value: buildParameters.buildName,
+          value: this.buildParams.buildName,
         },
         {
           name: 'BUILD_METHOD',
-          value: buildParameters.buildMethod,
+          value: this.buildParams.buildMethod,
         },
         {
           name: 'CUSTOM_PARAMETERS',
-          value: buildParameters.customParameters,
+          value: this.buildParams.customParameters,
         },
         {
           name: 'BUILD_TARGET',
-          value: buildParameters.platform,
+          value: this.buildParams.platform,
         },
         {
           name: 'ANDROID_VERSION_CODE',
-          value: buildParameters.androidVersionCode.toString(),
+          value: this.buildParams.androidVersionCode.toString(),
         },
         {
           name: 'ANDROID_KEYSTORE_NAME',
-          value: buildParameters.androidKeystoreName,
+          value: this.buildParams.androidKeystoreName,
         },
         {
           name: 'ANDROID_KEYALIAS_NAME',
-          value: buildParameters.androidKeyaliasName,
+          value: this.buildParams.androidKeyaliasName,
         },
       ],
       buildSecrets,
     );
   }
 
-  private static async CompressionStep(
-    buildUid: string,
-    buildParameters: BuildParameters,
-    branchName: string | undefined,
-    defaultSecretsArray: RemoteBuilderSecret[],
-  ) {
+  private static async CompressionStep() {
     core.info('Starting step 3/4 build compression');
     // Cleanup
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      buildUid,
+      this.buildId,
       'alpine',
       [
         `
             apk update -q
             apk add zip -q
             cd "${this.libraryFolderFull}"
-            zip -r "lib-${buildUid}.zip" "${this.libraryFolderFull}"
-            mv "lib-${buildUid}.zip" "${cacheFolderFull}/lib/lib-${buildUid}.zip"
+            zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
+            mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib/lib-${this.buildId}.zip"
             cd "${this.projectPathFull}"
-            ls -lh "${buildParameters.buildPath}"
-            zip -r "build-${buildUid}.zip" "${buildParameters.buildPath}"
-            mv "build-${buildUid}.zip" "/${buildVolumeFolder}/${buildUid}/build-${buildUid}.zip"
+            ls -lh "${RemoteBuilder.buildParams.buildPath}"
+            zip -r "build-${this.buildId}.zip" "${RemoteBuilder.buildParams.buildPath}"
+            mv "build-${this.buildId}.zip" "/${buildVolumeFolder}/${this.buildId}/build-${this.buildId}.zip"
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -334,27 +323,22 @@ class RemoteBuilder {
           value: process.env.GITHUB_SHA || '',
         },
       ],
-      defaultSecretsArray,
+      this.defaultSecrets,
     );
     core.info('compression step complete');
   }
 
-  private static async UploadArtifacts(
-    buildUid: string,
-    buildParameters: BuildParameters,
-    branchName: string | undefined,
-    defaultSecretsArray: RemoteBuilderSecret[],
-  ) {
+  private static async UploadArtifacts(branchName: string | undefined) {
     core.info('Starting step 4/4 upload build to s3');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      buildUid,
+      this.buildId,
       'amazon/aws-cli',
       [
         `
-            aws s3 cp ${buildUid}/build-${buildUid}.zip s3://game-ci-storage/
+            aws s3 cp ${this.buildId}/build-${this.buildId}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
-            # aws s3 cp /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${buildUid}.zip s3://game-ci-storage/
-            ${this.SteamDeploy ? '#' : ''} rm -r ${buildUid}
+            # aws s3 cp /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${this.buildId}.zip s3://game-ci-storage/
+            ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildId}
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -380,34 +364,30 @@ class RemoteBuilder {
           EnvironmentVariable: 'AWS_SECRET_ACCESS_KEY',
           ParameterValue: process.env.AWS_SECRET_ACCESS_KEY || '',
         },
-        ...defaultSecretsArray,
+        ...this.defaultSecrets,
       ],
     );
   }
 
-  private static async DeployToSteam(
-    buildUid: string,
-    buildParameters: BuildParameters,
-    defaultSecretsArray: RemoteBuilderSecret[],
-  ) {
+  private static async DeployToSteam() {
     core.info('Starting steam deployment');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      buildUid,
+      this.buildId,
       'cm2network/steamcmd:root',
       [
         `
             ls
             ls /
-            cp -r /${buildVolumeFolder}/${buildUid}/steam/action/entrypoint.sh /entrypoint.sh;
-            cp -r /${buildVolumeFolder}/${buildUid}/steam/action/steps/ /steps;
+            cp -r /${buildVolumeFolder}/${this.buildId}/steam/action/entrypoint.sh /entrypoint.sh;
+            cp -r /${buildVolumeFolder}/${this.buildId}/steam/action/steps/ /steps;
             chmod -R +x /entrypoint.sh;
             chmod -R +x /steps;
             /entrypoint.sh;
-            rm -r /${buildVolumeFolder}/${buildUid}
+            rm -r /${buildVolumeFolder}/${this.buildId}
           `,
       ],
       `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/${buildUid}/steam/action/`,
+      `/${buildVolumeFolder}/${this.buildId}/steam/action/`,
       [
         {
           name: 'GITHUB_SHA',
@@ -428,7 +408,7 @@ class RemoteBuilder {
         {
           EnvironmentVariable: 'INPUT_ROOTPATH',
           ParameterKey: 'rootPath',
-          ParameterValue: buildParameters.buildPath,
+          ParameterValue: RemoteBuilder.buildParams.buildPath,
         },
         {
           EnvironmentVariable: 'INPUT_RELEASEBRANCH',
@@ -445,7 +425,7 @@ class RemoteBuilder {
           ParameterKey: 'previewEnabled',
           ParameterValue: process.env.PREVIEW_ENABLED || '',
         },
-        ...defaultSecretsArray,
+        ...this.defaultSecrets,
       ],
     );
   }
