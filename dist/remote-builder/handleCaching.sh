@@ -44,15 +44,15 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
 fi
 
 if [ ! -v "$LFS_ASSETS_HASH" ]; then
-  echo "no LFS hash environment variable set this is meant to happen automatically (required for LFS caching)"
+  echo "no LFS hash environment variable set, this is meant to happen automatically (required for LFS caching)"
   LFS_ASSETS_HASH="noHashFound"
 fi
 
 echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 
-if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
+if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH" ]; then
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
-  latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
+  latestLFSCacheFile="$LFS_ASSETS_HASH"
 else
   latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
   echo "Match not found: using latest large file cache $latestLFSCacheFile"
