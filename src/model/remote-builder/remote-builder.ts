@@ -317,13 +317,13 @@ class RemoteBuilder {
         `
             apk update -q
             apk add zip -q
-            cd ${this.libraryFolderFull}
-            zip -r lib-${buildUid}.zip .*
-            mv lib-${buildUid}.zip "${cacheFolderFull}/lib/lib-${buildUid}.zip"
-            cd ${this.projectPathFull}
-            ls -lh ${buildParameters.buildPath}
-            zip -r build-${buildUid}.zip ${buildParameters.buildPath}/*
-            mv build-${buildUid}.zip /${buildVolumeFolder}/${buildUid}/build-${buildUid}.zip
+            cd "${this.libraryFolderFull}"
+            zip -r "lib-${buildUid}.zip" "${this.libraryFolderFull}"
+            mv "lib-${buildUid}.zip" "${cacheFolderFull}/lib/lib-${buildUid}.zip"
+            cd "${this.projectPathFull}"
+            ls -lh "${buildParameters.buildPath}"
+            zip -r "build-${buildUid}.zip" "${buildParameters.buildPath}"
+            mv "build-${buildUid}.zip" "/${buildVolumeFolder}/${buildUid}/build-${buildUid}.zip"
           `,
       ],
       `/${buildVolumeFolder}`,
