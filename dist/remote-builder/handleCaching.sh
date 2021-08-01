@@ -15,6 +15,9 @@ echo ' '
 echo "LFS cache for branch: $branchName"
 mkdir -p "$lfsCacheFolder"
 ls -lh "$lfsCacheFolder"
+
+echo ' '
+
 echo "Library cache for branch: $branchName"
 mkdir -p "$libraryCacheFolder"
 ls -lh "$libraryCacheFolder"
@@ -53,20 +56,24 @@ if [ ! -z "$latestLFSCacheFile" ]; then
   unzip -q "$cacheFolderWithBranch/lfs/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
+echo " "
 du -sch "$cacheFolderWithBranch/lfs"
-
 du -sch "$cacheFolderWithBranch/lib"
-
+echo " "
 du -sch "$cacheFolderWithBranch"
-
+echo " "
 du -sch "$cacheFolderFull"
+echo " "
 
 echo "purge $purgeRemoteBuilderCache"
 # purge cache
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
   rm -r "$cacheFolderFull"
 fi
+echo " "
 
 git lfs pull
 zip -r $LFS_ASSETS_HASH "${lfsDirectory}"
 cp $LFS_ASSETS_HASH "${cacheFolderFull}/${branchName}/lfs"
+
+echo " "
