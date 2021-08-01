@@ -135,6 +135,8 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
+          export LFS_ASSETS_HASH="$(cat .lfs-assets-id)"
+          echo "LFS_ASSETS_HASH $LFS_ASSETS_HASH"
           echo ' '
           echo 'Large File before LFS caching and pull'
           ls -alh "${testLFSFile}"
@@ -142,7 +144,7 @@ class RemoteBuilder {
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
-          ${handleCaching}
+          ${handleCaching} "$LFS_ASSETS_HASH"
           echo 'Caching complete'
           echo ' '
           echo 'Large File after LFS caching and pull'
