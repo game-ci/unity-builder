@@ -2,6 +2,7 @@ import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
 import RemoteBuilderNamespace from './remote-builder-namespace';
+import RemoteBuilderSecret from './remote-builder-secret';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import Kubernetes from './kubernetes-build-platform';
 const repositoryFolder = 'repo';
@@ -19,7 +20,7 @@ class RemoteBuilder {
   private static libraryFolderFull: string;
   private static buildId: string;
   private static buildParams: BuildParameters;
-  private static defaultSecrets;
+  private static defaultSecrets: RemoteBuilderSecret[];
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
   static async build(buildParameters: BuildParameters, baseImage) {
     const runNumber = process.env.GITHUB_RUN_NUMBER;
@@ -39,13 +40,7 @@ class RemoteBuilder {
       process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
     this.SteamDeploy = process.env.STEAM_DEPLOY !== undefined || false;
     const token: string = this.buildParams.githubToken;
-    this.defaultSecrets = [
-      {
-        ParameterKey: 'GithubToken',
-        EnvironmentVariable: 'GITHUB_TOKEN',
-        ParameterValue: token,
-      },
-    ];
+    RemoteBuilder.newMethod(token);
     try {
       switch (this.buildParams.remoteBuildCluster) {
         case 'aws':
@@ -97,6 +92,16 @@ class RemoteBuilder {
       );
       throw error;
     }
+  }
+
+  private static newMethod(token: string) {
+    this.defaultSecrets = [
+      {
+        ParameterKey: 'GithubToken',
+        EnvironmentVariable: 'GITHUB_TOKEN',
+        ParameterValue: token,
+      },
+    ];
   }
 
   private static async SetupStep(branchName: string | undefined) {
