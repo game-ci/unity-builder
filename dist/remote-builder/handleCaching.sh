@@ -43,11 +43,12 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
   echo 'Unzipped library'
 fi
 
-echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
-
 if [ ! -v "$LFS_ASSETS_HASH" ]; then
+  echo "no LFS hash environment variable set this is meant to happen automatically (required for LFS caching)"
   LFS_ASSETS_HASH="noHashFound"
 fi
+
+echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 
 if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
