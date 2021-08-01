@@ -43,8 +43,8 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
 fi
 
 # Restore LFS cache
-if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$LFS_ASSETS_HASH" ]
-then latestLFSCacheFile=LFS_ASSETS_HASH
+if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$LFS_ASSETS_HASH.zip" ]
+then latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
 else latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
 fi
 

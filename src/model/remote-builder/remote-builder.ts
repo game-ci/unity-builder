@@ -12,8 +12,6 @@ const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
 
 class RemoteBuilder {
   static SteamDeploy: boolean = false;
-  private static readonly remoteBuilderUtilityRepoFolder: string;
-  private static readonly remoteBuilderSteamUtilityRepoFolder: string;
   private static buildPathFull: string;
   private static builderPathFull: string;
   private static steamPathFull: string;
@@ -71,10 +69,10 @@ class RemoteBuilder {
       this.projectPathFull = `${this.repoPathFull}/${buildParameters.projectPath}`;
       this.libraryFolderFull = `${this.projectPathFull}/Library`;
 
-      await RemoteBuilder.SetupStep(`setup${buildUid}`, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.BuildStep(`build${buildUid}`, buildParameters, baseImage, defaultSecretsArray);
-      await RemoteBuilder.CompressionStep(`compress${buildUid}`, buildParameters, branchName, defaultSecretsArray);
-      await RemoteBuilder.UploadArtifacts(`upload${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.SetupStep(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.BuildStep(`${buildUid}`, buildParameters, baseImage, defaultSecretsArray);
+      await RemoteBuilder.CompressionStep(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
+      await RemoteBuilder.UploadArtifacts(`${buildUid}`, buildParameters, branchName, defaultSecretsArray);
       if (this.SteamDeploy) {
         await RemoteBuilder.DeployToSteam(buildUid, buildParameters, defaultSecretsArray);
       }
