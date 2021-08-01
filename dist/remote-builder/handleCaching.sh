@@ -45,6 +45,8 @@ fi
 
 latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
 
+echo 'Checking cache for an exact match of LFS hash'
+
 if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
   echo 'Exact LFS hash match'
   latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
