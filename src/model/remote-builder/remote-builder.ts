@@ -135,7 +135,6 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
-          export LFS_ASSETS_HASH=$(cat ".lfs-assets-id-sum")
           echo ' '
           echo 'Large File before LFS caching and pull'
           ls -alh "${testLFSFile}"
@@ -151,8 +150,8 @@ class RemoteBuilder {
           echo ' '
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
-          tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/buildVolumeReport.txt
-          ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/buildVolumeReport.txt
+          tree -L 3 ${this.buildPathFull} > ${this.repoPathFull}/preBuildVolumeReport.txt
+          ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/preBuildVolumeReport.txt
           echo ' '
           #
       `,

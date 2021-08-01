@@ -1,24 +1,24 @@
 #!/bin/sh
 
 cacheFolderFull=$1
-branchName=$2
+cacheKey=$2
 libraryFolderFull=$3
 gitLFSDestinationFolder=$4
 purgeRemoteBuilderCache=$5
 
-cacheFolderWithBranch="$cacheFolderFull/$branchName"
-lfsCacheFolder="$cacheFolderFull/$branchName/lfs"
-libraryCacheFolder="$cacheFolderFull/$branchName/lib"
+cacheFolderWithBranch="$cacheFolderFull/$cacheKey"
+lfsCacheFolder="$cacheFolderFull/$cacheKey/lfs"
+libraryCacheFolder="$cacheFolderFull/$cacheKey/lib"
 
 echo ' '
 
-echo "LFS cache for branch: $branchName"
+echo "LFS cache for branch: $cacheKey"
 mkdir -p "$lfsCacheFolder"
 ls -lh "$lfsCacheFolder"
 
 echo ' '
 
-echo "Library cache for branch: $branchName"
+echo "Library cache for branch: $cacheKey"
 mkdir -p "$libraryCacheFolder"
 ls -lh "$libraryCacheFolder"
 
@@ -36,11 +36,9 @@ echo "Checking cache"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 if [ ! -z "$latestLibraryCacheFile" ]; then
-  echo "Library cache exists from build $latestLibraryCacheFile from $branchName"
-  echo 'Creating empty Library folder for cache'
+  echo "Library cache exists from build $latestLibraryCacheFile from $cacheKey"
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
-  echo 'Unzipped library'
 fi
 
 echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
@@ -55,7 +53,7 @@ fi
 
 
 if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
-  echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
+  echo "LFS cache exists from build $latestLFSCacheFile from $cacheKey"
   rm -r "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
   unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
