@@ -39,7 +39,7 @@ latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 if [ ! -z "$latestLibraryCacheFile" ]; then
   echo "Library cache exists from build $latestLibraryCacheFile from $cacheKey"
   mkdir -p "$libraryFolderFull"
-  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
+  unzip "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
 
 echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
@@ -57,7 +57,7 @@ if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $cacheKey"
   rm -r "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
-  unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
+  unzip "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
 echo ' '
