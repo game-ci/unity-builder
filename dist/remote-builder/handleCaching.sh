@@ -43,16 +43,18 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
   echo 'Unzipped library'
 fi
 
-latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
-
-echo "Checking cache for an exact match of LFS hash or using $latestLFSCacheFile"
+echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 
 if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
-  echo "Exact LFS hash match"
+  echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
   latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
+else
+  latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
+  echo "Match not found: using latest large file cache $latestLFSCacheFile"
 fi
 
-if [ ! -z "$lfsCacheFolder/$latestLFSCacheFile" ]; then
+
+if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
   echo "$gitLFSDestinationFolder"
   rm -r "$gitLFSDestinationFolder"
