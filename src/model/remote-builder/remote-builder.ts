@@ -127,7 +127,7 @@ class RemoteBuilder {
           echo ' '
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
-          tree -L 3 ${this.buildPathFull}
+          tree -L 4 ${this.buildPathFull}
           ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/preBuildVolumeReport.txt
           echo ' '
           #
