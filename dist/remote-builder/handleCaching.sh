@@ -42,17 +42,17 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
 
-# Restore LFS cache
-if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$LFS_ASSETS_HASH.zip" ]
-then latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
-else latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
+latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
+
+if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
+  latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
 fi
 
-if [ ! -z "$latestLFSCacheFile" ]; then
+if [ ! -z "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
   rm -r "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
-  unzip -q "$gitLFSDestinationFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
+  unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
 echo ' '
