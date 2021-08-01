@@ -49,6 +49,7 @@ if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ];
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
   latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
 else
+  echo "d1"
   latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
   echo "Match not found: using latest large file cache $latestLFSCacheFile"
 fi
