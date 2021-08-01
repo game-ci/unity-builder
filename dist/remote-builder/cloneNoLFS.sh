@@ -25,6 +25,4 @@ echo ' '
 echo 'Contents of .lfs-assets-id-sum file:'
 cat .lfs-assets-id-sum
 
-export LFS_ASSETS_HASH=$(cat ".lfs-assets-id")
-
 echo ' '

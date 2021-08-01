@@ -135,6 +135,7 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
+          export LFS_ASSETS_HASH=$(cat ".lfs-assets-id-sum")
           echo ' '
           echo 'Large File before LFS caching and pull'
           ls -alh "${testLFSFile}"
