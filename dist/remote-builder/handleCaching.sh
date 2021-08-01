@@ -54,8 +54,12 @@ fi
 
 if [ ! -z "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
+  echo "$gitLFSDestinationFolder"
   rm -r "$gitLFSDestinationFolder"
+  echo "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
+  echo "$lfsCacheFolder/$latestLFSCacheFile"
+  echo "$gitLFSDestinationFolder"
   unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
