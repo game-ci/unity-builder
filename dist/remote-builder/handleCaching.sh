@@ -83,7 +83,7 @@ if [ "$purgeRemoteBuilderCache" == "true" ]; then
 fi
 
 git lfs pull
-zip -r "$gitLFSDestinationFolder/$LFS_ASSETS_HASH"
+zip -r "$LFS_ASSETS_HASH" "$gitLFSDestinationFolder"
 cp "$LFS_ASSETS_HASH" "$lfsCacheFolder"
 echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 
