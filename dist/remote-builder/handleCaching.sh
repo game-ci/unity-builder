@@ -7,43 +7,50 @@ gitLFSDestinationFolder=$4
 purgeRemoteBuilderCache=$5
 
 cacheFolderWithBranch="$cacheFolderFull/$branchName"
+lfsCacheFolder="$cacheFolderFull/$branchName/lfs"
+libraryCacheFolder="$cacheFolderFull/$branchName/lib"
 
-echo " "
+echo ' '
 
-mkdir -p "$cacheFolderWithBranch/lib"
-mkdir -p "$cacheFolderWithBranch/lfs"
-
+echo "LFS cache for branch: $branchName"
+mkdir -p "$lfsCacheFolder"
+ls -lh "$lfsCacheFolder"
 echo "Library cache for branch: $branchName"
-ls -lh "$cacheFolderWithBranch"
-ls -lh "$cacheFolderWithBranch/lib"
-ls -lh "$cacheFolderWithBranch/lfs"
-echo ''
+mkdir -p "$libraryCacheFolder"
+ls -lh "$libraryCacheFolder"
 
+echo ' '
+
+# if the unity git project has included the library delete it and echo a warning
 if [ -d "$libraryFolderFull" ]; then
   rm -r "$libraryFolderFull"
-  echo "Git must ignore the Library folder"
+  echo "!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)"
 fi
 
 echo "Checking cache"
 
 # Restore library cache
-latest=$(ls -t "$cacheFolderWithBranch/lib" | egrep -i -e '\\.zip$' | head -1)
+latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | egrep -i -e '\\.zip$' | head -1)
 
-if [ ! -z "$latest" ]; then
-  echo "Library cache exists from build $latest from $branchName"
+if [ ! -z "$latestLibraryCacheFile" ]; then
+  echo "Library cache exists from build $latestLibraryCacheFile from $branchName"
   echo 'Creating empty Library folder for cache'
   mkdir "$libraryFolderFull"
-  unzip -q "$cacheFolderWithBranch/lib/$latest" -d "$libraryFolderFull"
+  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
 
 # Restore LFS cache
-latest=$(ls -t "$cacheFolderWithBranch/lfs" | egrep -i -e '\\.zip$' | head -1)
+if [[ ! -v "$LFS_ASSETS_HASH" ]]; then
+  latestLFSCacheFile=LFS_ASSETS_HASH
+else
+  latestLFSCacheFile=$(ls -t "$cacheFolderWithBranch/lfs" | egrep -i -e '\\.zip$' | head -1)
+fi
 
-if [ ! -z "$latest" ]; then
-  echo "Library cache exists from build $latest from $branchName"
-  echo 'Creating empty Library folder for cache'
-  mkdir "$libraryFolderFull"
-  unzip -q "$cacheFolderWithBranch/lfs/$latest" -d "$gitLFSDestinationFolder"
+if [ ! -z "$latestLFSCacheFile" ]; then
+  echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
+  rm -r "$gitLFSDestinationFolder"
+  mkdir -p "$gitLFSDestinationFolder"
+  unzip -q "$cacheFolderWithBranch/lfs/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
 du -sch "$cacheFolderWithBranch/lfs"
@@ -59,3 +66,7 @@ echo "purge $purgeRemoteBuilderCache"
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
   rm -r "$cacheFolderFull"
 fi
+
+git lfs pull
+zip -r $LFS_ASSETS_HASH "${lfsDirectory}"
+cp $LFS_ASSETS_HASH "${cacheFolderFull}/${branchName}/lfs"

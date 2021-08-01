@@ -138,19 +138,13 @@ class RemoteBuilder {
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
           ls -alh "${testLFSFile}"
-          ls -alh "${lfsDirectory}"
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
           echo 'Caching complete'
           echo ' '
-          cd ${this.repoPathFull}
-          git lfs pull
           ls -alh "${testLFSFile}"
-          ls -alh "${lfsDirectory}"
-          zip -r lib-${buildUid}.zip "${lfsDirectory}"
-          cp lib-${buildUid}.zip "${cacheFolderFull}/${branchName}/lfs"
           echo ' '
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
