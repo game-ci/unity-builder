@@ -149,7 +149,7 @@ class RemoteBuilder {
           git lfs pull
           ls -alh "${testLFSFile}"
           ls -alh "${lfsDirectory}"
-          zip -r lib-${buildUid}.zip "./.git/lfs/*"
+          zip -r lib-${buildUid}.zip "${lfsDirectory}/*"
           cp lib-${buildUid}.zip "${cacheFolderFull}/${branchName}/lfs"
           echo ' '
           #
