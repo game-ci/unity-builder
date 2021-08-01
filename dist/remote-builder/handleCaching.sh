@@ -84,8 +84,6 @@ fi
 
 git lfs pull
 zip -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
-ls -lh
-ls -lh "$gitLFSDestinationFolder/../"
 cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
 echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 
