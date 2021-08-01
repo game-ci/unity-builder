@@ -56,20 +56,24 @@ if [ ! -z "$latestLFSCacheFile" ]; then
 fi
 
 echo ' '
+echo 'Size of LFS cache folder for this branch'
 du -sch "$gitLFSDestinationFolder"
+echo 'Size of Library cache folder for this branch'
 du -sch "$latestLibraryCacheFile"
 echo ' '
+echo 'Size of cache folder for this branch'
 du -sch "$cacheFolderWithBranch"
 echo ' '
+echo 'Size of LFS cache folder'
 du -sch "$cacheFolderFull"
 echo ' '
 
-echo "purge $purgeRemoteBuilderCache"
 # purge cache
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
+  echo "purging the entire cache"
   rm -r "$cacheFolderFull"
+  echo ' '
 fi
-echo ' '
 
 git lfs pull
 zip -r $LFS_ASSETS_HASH -d "$gitLFSDestinationFolder"
