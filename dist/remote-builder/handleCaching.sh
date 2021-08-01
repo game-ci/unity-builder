@@ -40,11 +40,13 @@ if [ ! -z "$latestLibraryCacheFile" ]; then
   echo 'Creating empty Library folder for cache'
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
+  echo 'Unzipped library'
 fi
 
 latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
 
 if [ ! -v "$LFS_ASSETS_HASH" ] && [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
+  echo 'Exact LFS hash match'
   latestLFSCacheFile="$LFS_ASSETS_HASH.zip"
 fi
 
@@ -59,11 +61,13 @@ echo ' '
 echo 'Size of LFS cache folder for this branch'
 du -sch "$gitLFSDestinationFolder"
 echo 'Size of Library cache folder for this branch'
-du -sch "$latestLibraryCacheFile"
+du -sch "$latestLibraryCacheFolder"
 echo ' '
+
 echo 'Size of cache folder for this branch'
 du -sch "$cacheFolderWithBranch"
 echo ' '
+
 echo 'Size of LFS cache folder'
 du -sch "$cacheFolderFull"
 echo ' '
