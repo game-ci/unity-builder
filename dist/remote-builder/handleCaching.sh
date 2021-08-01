@@ -56,20 +56,16 @@ fi
 
 if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branchName"
-  echo "$gitLFSDestinationFolder"
   rm -r "$gitLFSDestinationFolder"
-  echo "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
-  echo "$lfsCacheFolder/$latestLFSCacheFile"
-  echo "$gitLFSDestinationFolder"
   unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
 echo ' '
 echo 'Size of LFS cache folder for this branch'
-du -sch "$gitLFSDestinationFolder"
+du -sch "$lfsCacheFolder"
 echo 'Size of Library cache folder for this branch'
-du -sch "$latestLibraryCacheFolder"
+du -sch "$libraryCacheFolder"
 echo ' '
 
 echo 'Size of cache folder for this branch'
