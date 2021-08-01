@@ -56,24 +56,24 @@ if [ ! -z "$latestLFSCacheFile" ]; then
   unzip -q "$cacheFolderWithBranch/lfs/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
-echo " "
-du -sch "$cacheFolderWithBranch/lfs"
-du -sch "$cacheFolderWithBranch/lib"
-echo " "
+echo ' '
+du -sch "$gitLFSDestinationFolder"
+du -sch "$latestLibraryCacheFile"
+echo ' '
 du -sch "$cacheFolderWithBranch"
-echo " "
+echo ' '
 du -sch "$cacheFolderFull"
-echo " "
+echo ' '
 
 echo "purge $purgeRemoteBuilderCache"
 # purge cache
 if [ "$purgeRemoteBuilderCache" == "true" ]; then
   rm -r "$cacheFolderFull"
 fi
-echo " "
+echo ' '
 
 git lfs pull
-zip -r $LFS_ASSETS_HASH "${lfsDirectory}"
-cp $LFS_ASSETS_HASH "${cacheFolderFull}/${branchName}/lfs"
+zip -r $LFS_ASSETS_HASH "$gitLFSDestinationFolder"
+cp $LFS_ASSETS_HASH "$lfsCacheFolder"
 
-echo " "
+echo ' '
