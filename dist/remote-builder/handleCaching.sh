@@ -38,7 +38,7 @@ latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 if [ ! -z "$latestLibraryCacheFile" ]; then
   echo "Library cache exists from build $latestLibraryCacheFile from $branchName"
   echo 'Creating empty Library folder for cache'
-  mkdir "$libraryFolderFull"
+  mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
 
