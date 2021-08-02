@@ -112,25 +112,24 @@ class RemoteBuilder {
           ${initializeSourceRepoForCaching}
           export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
           echo "LFS_ASSETS_HASH $LFS_ASSETS_HASH"
-          echo ' '
-          echo 'Large File before LFS caching and pull'
-          ls -alh "${testLFSFile}"
-          cat "${testLFSFile}"
+          ${process.env.DEBUG ? '#' : ''}echo ' '
+          ${process.env.DEBUG ? '#' : ''}echo 'Large File before LFS caching and pull'
+          ${process.env.DEBUG ? '#' : ''}ls -alh "${testLFSFile}"
+          ${process.env.DEBUG ? '#' : ''}cat "${testLFSFile}"
           echo ' '
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching} "$LFS_ASSETS_HASH"
-          echo 'Caching complete'
+          ${process.env.DEBUG ? '#' : ''}echo 'Caching complete'
           echo ' '
-          echo 'Large File after LFS caching and pull'
-          ls -alh "${testLFSFile}"
-          cat "${testLFSFile}"
+          ${process.env.DEBUG ? '#' : ''}echo 'Large File after LFS caching and pull'
+          ${process.env.DEBUG ? '#' : ''}ls -alh "${testLFSFile}"
+          ${process.env.DEBUG ? '#' : ''}cat "${testLFSFile}"
           echo ' '
           #
-          echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
-          tree -L 4 ${this.buildPathFull}
-          ls -lh ${buildVolumeFolder}
+          ${process.env.DEBUG ? '#' : ''}tree -L 4 ${this.buildPathFull}
+          ${process.env.DEBUG ? '#' : ''}ls -lh ${buildVolumeFolder}
           echo ' '
           #
       `,
