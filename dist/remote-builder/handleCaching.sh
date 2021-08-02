@@ -60,19 +60,25 @@ if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   unzip "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
+
 echo ' '
 echo 'Size of LFS cache folder for this branch'
 du -sch "$lfsCacheFolder"
+echo ' '
 echo 'Size of Library cache folder for this branch'
 du -sch "$libraryCacheFolder"
 echo ' '
-
 echo 'Size of cache folder for this branch'
 du -sch "$cacheFolderWithBranch"
 echo ' '
-
-echo 'Size of LFS cache folder'
+echo 'Size of cache folder'
 du -sch "$cacheFolderFull"
+echo ' '
+git lfs pull
+echo 'pulled latest LFS files'
+zip -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
+cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
+echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 echo ' '
 
 # purge cache
@@ -82,9 +88,3 @@ if [ "$purgeRemoteBuilderCache" == "true" ]; then
   echo ' '
 fi
 
-git lfs pull
-zip -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
-cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
-echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
-
-echo ' '
