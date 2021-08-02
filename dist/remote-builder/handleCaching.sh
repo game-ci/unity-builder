@@ -1,29 +1,18 @@
 #!/bin/sh
 
 cacheFolderFull=$1
-cacheKey=$2
+branch=$2
 libraryFolderFull=$3
 gitLFSDestinationFolder=$4
 purgeRemoteBuilderCache=$5
 LFS_ASSETS_HASH=$6
 
-cacheFolderWithBranch="$cacheFolderFull/$cacheKey"
-lfsCacheFolder="$cacheFolderFull/$cacheKey/lfs"
-libraryCacheFolder="$cacheFolderFull/$cacheKey/lib"
+cacheFolderWithBranch="$cacheFolderFull/$branch"
+lfsCacheFolder="$cacheFolderFull/$branch/lfs"
+libraryCacheFolder="$cacheFolderFull/$branch/lib"
 
-echo ' '
-
-echo "LFS cache for branch: $cacheKey"
 mkdir -p "$lfsCacheFolder"
-ls -lh "$lfsCacheFolder"
-
-echo ' '
-
-echo "Library cache for branch: $cacheKey"
 mkdir -p "$libraryCacheFolder"
-ls -lh "$libraryCacheFolder"
-
-echo ' '
 
 # if the unity git project has included the library delete it and echo a warning
 if [ -d "$libraryFolderFull" ]; then
@@ -37,7 +26,7 @@ echo "Checking cache"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 if [ ! -z "$latestLibraryCacheFile" ]; then
-  echo "Library cache exists from build $latestLibraryCacheFile from $cacheKey"
+  echo "Library cache exists from build $latestLibraryCacheFile from $branch"
   mkdir -p "$libraryFolderFull"
   unzip "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
@@ -54,21 +43,28 @@ fi
 
 
 if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
-  echo "LFS cache exists from build $latestLFSCacheFile from $cacheKey"
+  echo "LFS cache exists from build $latestLFSCacheFile from $branch"
   rm -r "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
   unzip "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
 fi
 
 
+
 echo ' '
-echo 'Size of LFS cache folder for this branch'
+echo "LFS cache for branch: $branch"
+ls -lh "$lfsCacheFolder"
+echo ' '
+echo "Library cache for branch: $branch"
+ls -lh "$libraryCacheFolder"
+echo ' '
+echo "Size of LFS cache folder for branch: $branch"
 du -sch "$lfsCacheFolder"
 echo ' '
-echo 'Size of Library cache folder for this branch'
+echo "Size of Library cache folder for branch: $branch"
 du -sch "$libraryCacheFolder"
 echo ' '
-echo 'Size of cache folder for this branch'
+echo "Size of cache folder for branch: $branch"
 du -sch "$cacheFolderWithBranch"
 echo ' '
 echo 'Size of cache folder'
