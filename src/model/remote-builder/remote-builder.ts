@@ -95,10 +95,10 @@ class RemoteBuilder {
         ` apk update -q
           apk add unzip zip git-lfs jq tree -q
           #
-          mkdir ${this.buildPathFull}
-          mkdir ${this.builderPathFull}
-          mkdir ${this.repoPathFull}
-          mkdir ${this.steamPathFull}
+          mkdir -p ${this.buildPathFull}
+          mkdir -p ${this.builderPathFull}
+          mkdir -p ${this.repoPathFull}
+          mkdir -p ${this.steamPathFull}
           #
           echo ' '
           echo 'Cloning utility repositories for remote builder'
@@ -130,7 +130,7 @@ class RemoteBuilder {
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
           tree -L 4 ${this.buildPathFull}
-          ls -lh /${buildVolumeFolder} > ${this.repoPathFull}/preBuildVolumeReport.txt
+          ls -lh ${buildVolumeFolder}
           echo ' '
           #
       `,
