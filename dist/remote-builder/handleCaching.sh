@@ -44,7 +44,7 @@ fi
 
 echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 
-if [ -z "$LFS_ASSETS_HASH" -a -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
+if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
   latestLFSCacheFile="$LFS_ASSETS_HASH"
 else
