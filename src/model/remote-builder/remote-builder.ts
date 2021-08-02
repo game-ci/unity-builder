@@ -115,6 +115,7 @@ class RemoteBuilder {
           echo ' '
           echo 'Large File before LFS caching and pull'
           ls -alh "${testLFSFile}"
+          cat "${testLFSFile}"
           echo ' '
           echo 'Source repository initialized'
           echo ' '
@@ -124,6 +125,7 @@ class RemoteBuilder {
           echo ' '
           echo 'Large File after LFS caching and pull'
           ls -alh "${testLFSFile}"
+          cat "${testLFSFile}"
           echo ' '
           #
           echo 'buildVolumeReport.txt and buildVolumeReport.txt saved to repository workspace directory'
