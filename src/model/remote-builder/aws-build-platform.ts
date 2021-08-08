@@ -230,20 +230,14 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   }
 
   async setupBaseStack(CF: SDK.CloudFormation) {
-    let createBaseStack: Boolean = true;
     const baseStackName = process.env.baseStackName || 'game-ci-base-stack-01';
     const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
-    for (const stack of (await CF.listStacks().promise())?.StackSummaries || []) {
-      if (stack.StackName === baseStackName) {
-        const updateInput: SDK.CloudFormation.UpdateStackInput = {
-          StackName: baseStackName,
-          TemplateBody: baseStack,
-        };
-        await CF.updateStack(updateInput).promise();
-        createBaseStack = false;
-      }
-    }
-    if (createBaseStack) {
+    const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
+      StackName: baseStackName,
+    };
+    let CFState = await CF.describeStacks(describeStackInput).promise();
+    const stackExists: Boolean = CFState.Stacks === null || CFState.Stacks === [];
+    if (stackExists) {
       await CF.createStack({
         StackName: baseStackName,
         TemplateBody: baseStack,
@@ -252,9 +246,25 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
         ],
       });
+      CFState = await CF.describeStacks(describeStackInput).promise();
+    } else {
+      const stack = CFState.Stacks?.[0];
+      if (!stack) {
+        throw new Error('expected base stack to exist');
+      }
+      if (stack.StackName === baseStackName) {
+        const updateInput: SDK.CloudFormation.UpdateStackInput = {
+          StackName: baseStackName,
+          TemplateBody: baseStack,
+        };
+        await CF.updateStack(updateInput).promise();
+      }
     }
-
-    // wait for base stack to be finished...
+    if (CFState.Stacks?.[0].StackStatus === 'CREATE_IN_PROGRESS') {
+      await CF.waitFor('stackCreateComplete', describeStackInput).promise();
+    } else if (CFState.Stacks?.[0].StackStatus === 'UPDATE_IN_PROGRESS') {
+      await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
+    }
   }
 
   async handleStackCreationFailure(
