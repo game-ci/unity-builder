@@ -9,8 +9,11 @@ Parameters:
     Description: "Your deployment environment: DEV, QA , PROD"
   Storage:
     Type: String
-    Default: development
-    Description: "Your deployment environment: DEV, QA , PROD"
+    Default: game-ci-storage
+    Description: "Your s3 storage bucket"
+  Version:
+    Type: String
+    Description: "hash of template"
 
   # ContainerPort:
   #   Type: Number

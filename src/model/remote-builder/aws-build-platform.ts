@@ -9,6 +9,7 @@ import RemoteBuilderConstants from './remote-builder-constants';
 import AWSBuildRunner from './aws-build-runner';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import BuildParameters from '../build-parameters';
+const crypto = require('crypto');
 
 class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   private stackName: string;
@@ -232,6 +233,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   async setupBaseStack(CF: SDK.CloudFormation) {
     const baseStackName = process.env.baseStackName || 'game-ci-base-stack-01';
     const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
+    const hash = crypto.createHash('md5').update(baseStack).digest('hex');
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
       StackName: baseStackName,
     };
@@ -244,6 +246,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
         Parameters: [
           { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
           { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
+          { ParameterKey: 'Version', ParameterValue: `hash` },
         ],
       });
       CFState = await CF.describeStacks(describeStackInput).promise();
@@ -252,12 +255,21 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       if (!stack) {
         throw new Error('expected base stack to exist');
       }
-      if (stack.StackName === baseStackName) {
+      if (
+        stack.StackName === baseStackName &&
+        hash !== stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue
+      ) {
         const updateInput: SDK.CloudFormation.UpdateStackInput = {
           StackName: baseStackName,
           TemplateBody: baseStack,
         };
         await CF.updateStack(updateInput).promise();
+      } else {
+        core.info(
+          `Skipping any update for base stack ${stack.StackName} ${stack.Parameters?.find(
+            (x) => x.ParameterKey === 'Version',
+          )}`,
+        );
       }
     }
     if (CFState.Stacks?.[0].StackStatus === 'CREATE_IN_PROGRESS') {
