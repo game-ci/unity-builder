@@ -2,7 +2,7 @@ Arguments:
   C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js
 
 PATH: 
-  C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git LFS;C:\Program Files\Git\cmd;C:\ProgramData\chocolatey\bin;;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\dotnet\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\nodejs\;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm
+  C:\Users\Mark\AppData\Local\Temp\yarn--1628404931380-0.33374152167182647;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\Mark\AppData\Local\Temp\yarn--1628404915082-0.09674333480309039;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Program Files\Git\mingw64\libexec\git-core;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\Mark\bin;C:\Users\Mark\AppData\Local\cloud-code\installer\google-cloud-sdk\bin;C:\Users\Mark\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git LFS;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet;C:\Program Files (x86)\Yarn\bin;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Amazon\AWSCLIV2;C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\Mark\AppData\Local\Microsoft\PowerAppsCLI;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm;C:\Program Files (x86)\GitHub CLI
 
 Yarn version: 
   1.22.5
@@ -14,7 +14,8 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: EPERM: operation not permitted, unlink 'C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin\lint-staged'
+  Error: getaddrinfo ENOTFOUND registry.yarnpkg.com
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:66:26)
 
 npm manifest: 
   {
@@ -37,6 +38,7 @@ npm manifest:
       "@actions/exec": "^1.0.4",
       "@actions/github": "^2.2.0",
       "@kubernetes/client-node": "^0.14.3",
+      "async-wait-until": "^2.0.7",
       "aws-sdk": "^2.812.0",
       "base-64": "^1.0.0",
       "nanoid": "3.1.20",
@@ -1302,6 +1304,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-2.0.0.tgz#483143c567aeed4785759c0865786dc77d7d2e31"
     integrity sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==
   
+  async-wait-until@^2.0.7:
+    version "2.0.7"
+    resolved "https://registry.yarnpkg.com/async-wait-until/-/async-wait-until-2.0.7.tgz#ed4ccfe076850105c1de555381630b9fad882f5d"
+    integrity sha512-SjHxM2f5ev4o87gYppr8HmWPjOHw06Pg5KZvkSl6FMqa3TTHzDGIWCZx61XWjxO5ArPcZBuJYbAa809FNyx3QQ==
+  
   asynckit@^0.4.0:
     version "0.4.0"
     resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -1480,13 +1487,13 @@ Lockfile:
     integrity sha512-9o5UecI3GhkpM6DrXr69PblIuWxPKk9Y0jHBRhdocZ2y7YECBFCsHm79Pr3OyR2AvjhDkabFJaDJMYRazHgsow==
   
   browserslist@^4.14.5:
-    version "4.16.4"
-    resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.16.4.tgz#7ebf913487f40caf4637b892b268069951c35d58"
-    integrity sha512-d7rCxYV8I9kj41RH8UKYnvDYCRENUlHRgyXy/Rhr/1BaeLGfiCptEdFE8MIrvGfWbBFNjVYx76SQWvNX1j+/cQ==
+    version "4.16.6"
+    resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.16.6.tgz#d7901277a5a88e554ed305b183ec9b0c08f66fa2"
+    integrity sha512-Wspk/PqO+4W9qp5iUTJsa1B/QrYn1keNCcEP5OvP7WBwT4KaDly0uONYmC6Xa3Z5IqnUgS0KcgLYu1l74x0ZXQ==
     dependencies:
-      caniuse-lite "^1.0.30001208"
+      caniuse-lite "^1.0.30001219"
       colorette "^1.2.2"
-      electron-to-chromium "^1.3.712"
+      electron-to-chromium "^1.3.723"
       escalade "^3.1.1"
       node-releases "^1.1.71"
   
@@ -1584,10 +1591,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.2.0.tgz#924af881c9d525ac9d87f40d964e5cea982a1809"
     integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
   
-  caniuse-lite@^1.0.30001208:
-    version "1.0.30001214"
-    resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001214.tgz#70f153c78223515c6d37a9fde6cd69250da9d872"
-    integrity sha512-O2/SCpuaU3eASWVaesQirZv1MSjUNOvmugaD8zNSJqw6Vv5SGwoOpA9LJs3pNPfM745nxqPvfZY3MQKY4AKHYg==
+  caniuse-lite@^1.0.30001219:
+    version "1.0.30001230"
+    resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001230.tgz#8135c57459854b2240b57a4a6786044bdc5a9f71"
+    integrity sha512-5yBd5nWCBS+jWKTcHOzXwo5xzcj4ePE/yjtkZyUV1BTUmrBaA9MRGC+e7mxnqXSA90CmCA8L3eKLaSUkt099IQ==
   
   capture-exit@^2.0.0:
     version "2.0.0"
@@ -2004,10 +2011,10 @@ Lockfile:
       jsbn "~0.1.0"
       safer-buffer "^2.1.0"
   
-  electron-to-chromium@^1.3.712:
-    version "1.3.717"
-    resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.717.tgz#78d4c857070755fb58ab64bcc173db1d51cbc25f"
-    integrity sha512-OfzVPIqD1MkJ7fX+yTl2nKyOE4FReeVfMCzzxQS+Kp43hZYwHwThlGP+EGIZRXJsxCM7dqo8Y65NOX/HP12iXQ==
+  electron-to-chromium@^1.3.723:
+    version "1.3.738"
+    resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.738.tgz#aec24b091c82acbfabbdcce08076a703941d17ca"
+    integrity sha512-vCMf4gDOpEylPSLPLSwAEsz+R3ShP02Y3cAKMZvTqule3XcPp7tgc/0ESI7IS6ZeyBlGClE50N53fIOkcIVnpw==
   
   emittery@^0.7.1:
     version "0.7.2"
@@ -4185,9 +4192,9 @@ Lockfile:
       which "^2.0.2"
   
   node-releases@^1.1.71:
-    version "1.1.71"
-    resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.71.tgz#cb1334b179896b1c89ecfdd4b725fb7bbdfc7dbb"
-    integrity sha512-zR6HoT6LrLCRBwukmrVbHv0EpEQjksO6GmFcZQQuCAy139BEsoVKPYnf3jongYW83fAa1torLGYwxxky/p28sg==
+    version "1.1.72"
+    resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.72.tgz#14802ab6b1039a79a0c7d662b610a5bbd76eacbe"
+    integrity sha512-LLUo+PpH3dU6XizX3iVoubUNheF/owjXCZZ5yACDxNnPtgFuludV1ZL3ayK1kVep42Rmm0+R9/Y60NQbZ2bifw==
   
   normalize-package-data@^2.3.2, normalize-package-data@^2.5.0:
     version "2.5.0"
