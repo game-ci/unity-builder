@@ -7,6 +7,10 @@ Parameters:
     Type: String
     Default: development
     Description: "Your deployment environment: DEV, QA , PROD"
+  Storage:
+    Type: String
+    Default: development
+    Description: "Your deployment environment: DEV, QA , PROD"
 
   # ContainerPort:
   #   Type: Number
@@ -250,7 +254,7 @@ Resources:
                 - 'logs:CreateLogStream'
                 - 'logs:PutLogEvents'
               Resource: '*'
-  
+
   DeleteCFNLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -352,7 +356,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
     Properties:
-      BucketName: game-ci-storage
+      BucketName: !Ref Storage
 
 
 
@@ -388,7 +392,7 @@ Outputs:
     Value: !GetAtt 'ECSTaskExecutionRole.Arn'
     Export:
       Name: !Sub ${EnvironmentName}:ECSTaskExecutionRole
-  
+
   DeleteCFNLambdaExecutionRole:
     Description: Lambda execution role for cleaning up cloud formations
     Value: !GetAtt 'DeleteCFNLambdaExecutionRole.Arn'

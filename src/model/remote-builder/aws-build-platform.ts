@@ -112,6 +112,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     commands[1] += `
       echo "${logid}"
     `;
+    await this.setupBaseStack(CF);
     const taskDefStackName = `${this.stackName}-${buildUid}`;
     let taskDefCloudFormation = this.readTaskCloudFormationTemplate();
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
@@ -226,6 +227,34 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       baseResources,
       logid,
     };
+  }
+
+  async setupBaseStack(CF: SDK.CloudFormation) {
+    let createBaseStack: Boolean = true;
+    const baseStackName = process.env.baseStackName || 'game-ci-base-stack-01';
+    const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
+    for (const stack of (await CF.listStacks().promise())?.StackSummaries || []) {
+      if (stack.StackName === baseStackName) {
+        const updateInput: SDK.CloudFormation.UpdateStackInput = {
+          StackName: baseStackName,
+          TemplateBody: baseStack,
+        };
+        await CF.updateStack(updateInput).promise();
+        createBaseStack = false;
+      }
+    }
+    if (createBaseStack) {
+      await CF.createStack({
+        StackName: baseStackName,
+        TemplateBody: baseStack,
+        Parameters: [
+          { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
+          { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
+        ],
+      });
+    }
+
+    // wait for base stack to be finished...
   }
 
   async handleStackCreationFailure(
