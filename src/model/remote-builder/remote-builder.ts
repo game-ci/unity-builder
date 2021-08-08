@@ -126,8 +126,8 @@ class RemoteBuilder {
           ${process.env.DEBUG ? '#' : ''}ls -alh "${lfsDirectory}"
           echo ' '
           #
-          ${process.env.DEBUG ? '#' : ''}tree -L 4 ${this.buildPathFull}
-          ${process.env.DEBUG ? '#' : ''}ls -lh ${buildVolumeFolder}
+          ${process.env.DEBUG ? '#' : ''}tree -L 4 "${this.buildPathFull}"
+          ${process.env.DEBUG ? '#' : ''}ls -lh "${buildVolumeFolder}"
           echo ' '
           #
       `,
