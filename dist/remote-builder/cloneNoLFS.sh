@@ -7,6 +7,9 @@ testLFSFile=$4
 
 cd $repoPathFull
 
+# stop annoying git detatched head info
+git config --global advice.detachedHead false
+
 echo ' '
 echo "Cloning the repository being built:"
 git lfs install --skip-smudge
