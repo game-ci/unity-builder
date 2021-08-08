@@ -178,7 +178,7 @@ class RemoteBuilder {
             mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib"
             cd "${this.projectPathFull}"
             ls -lh "${this.buildPathFull}"
-            zip -r "build-${this.buildId}.zip" "${this.buildPathFull}"
+            zip -r "build-${this.buildId}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"
             mv "build-${this.buildId}.zip" "/${buildVolumeFolder}/${this.buildId}/build-${this.buildId}.zip"
           `,
       ],
