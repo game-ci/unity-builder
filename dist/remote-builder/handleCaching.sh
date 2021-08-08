@@ -47,6 +47,8 @@ if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   rm -r "$gitLFSDestinationFolder"
   mkdir -p "$gitLFSDestinationFolder"
   unzip "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
+  echo "git LFS folder, (should not contain $latestLFSCacheFile)"
+  ls -lh "$gitLFSDestinationFolder"
 fi
 
 
