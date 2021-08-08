@@ -49,6 +49,8 @@ jobs:
       ###########################
       - uses: ./
         id: k8s-unity-build
+        env:
+          DEBUG: true
         with:
           remoteBuildCluster: k8s
           targetPlatform: ${{ matrix.targetPlatform }}
