@@ -238,7 +238,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       StackName: baseStackName,
     };
     let CFState = await CF.describeStacks(describeStackInput).promise();
-    const stackExists: Boolean = CFState.Stacks === null || CFState.Stacks === [];
+    const stackExists: Boolean = CFState.Stacks !== null && CFState.Stacks !== [];
     if (stackExists) {
       await CF.createStack({
         StackName: baseStackName,
