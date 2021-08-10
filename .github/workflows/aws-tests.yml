@@ -53,7 +53,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          baseStackName: game-ci
+          baseStackName: game-ci-base-stack
         with:
           remoteBuildCluster: aws
           projectPath: ${{ matrix.projectPath }}
