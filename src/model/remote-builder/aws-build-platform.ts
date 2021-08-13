@@ -144,6 +144,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       await CF.createStack({
         StackName: taskDefStackName,
         TemplateBody: taskDefCloudFormation,
+        Capabilities: ['CAPABILITY_IAM'],
         Parameters: [
           {
             ParameterKey: 'ImageUrl',
