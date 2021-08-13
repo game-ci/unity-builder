@@ -251,6 +251,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           { ParameterKey: 'Version', ParameterValue: `hash` },
         ],
       });
+      core.info('created stack');
     }
     const CFState = await CF.describeStacks(describeStackInput).promise();
     let stack = CFState.Stacks?.[0];
