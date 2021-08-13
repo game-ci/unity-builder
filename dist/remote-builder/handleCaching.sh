@@ -20,19 +20,17 @@ if [ -d "$libraryFolderFull" ]; then
   echo "!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)"
 fi
 
-echo "Checking cache"
-
 # Restore library cache
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
-if [ ! -z "$latestLibraryCacheFile" ]; then
-  echo "Library cache exists from build $latestLibraryCacheFile from $branch"
+echo "Checking if $libraryCacheFolder/$latestLibraryCacheFile exists from $branch"
+if [ ! -z "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
+  echo "Library cache exists"
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
 
-echo "Checking cache for a cache match based on the combined large files hash ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
-
+echo "Checking large file cache exists ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
   latestLFSCacheFile="$LFS_ASSETS_HASH"
