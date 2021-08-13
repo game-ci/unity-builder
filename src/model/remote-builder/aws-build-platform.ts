@@ -250,7 +250,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
           { ParameterKey: 'Version', ParameterValue: `hash` },
         ],
-      });
+      }).promise();
       core.info('created stack');
     }
     const CFState = await CF.describeStacks(describeStackInput).promise();
