@@ -235,55 +235,59 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     const baseStackName = process.env.baseStackName || 'game-ci-base-stack-01';
     const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
     const hash = crypto.createHash('md5').update(baseStack).digest('hex');
+
+    // Cloud Formation Input
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
       StackName: baseStackName,
     };
+    const parameters: SDK.CloudFormation.Parameter[] = [
+      { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
+      { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
+      { ParameterKey: 'Version', ParameterValue: `hash` },
+    ];
+    const updateInput: SDK.CloudFormation.UpdateStackInput = {
+      StackName: baseStackName,
+      TemplateBody: baseStack,
+      Parameters: parameters,
+    };
+    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+      StackName: baseStackName,
+      TemplateBody: baseStack,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: parameters,
+    };
+
     const stacks = (await CF.listStacks().promise()).StackSummaries?.map((x) => x.StackName);
     const stackExists: Boolean = stacks?.includes(baseStackName) || false;
+    const describeStack = async () => {
+      return await CF.describeStacks(describeStackInput).promise();
+    };
 
     if (!stackExists) {
       core.info('stack does not exist');
-      await CF.createStack({
-        StackName: baseStackName,
-        TemplateBody: baseStack,
-        Capabilities: ['CAPABILITY_IAM'],
-        Parameters: [
-          { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
-          { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
-          { ParameterKey: 'Version', ParameterValue: `hash` },
-        ],
-      }).promise();
+      await CF.createStack(createStackInput).promise();
       core.info('created stack');
     }
-    const CFState = await CF.describeStacks(describeStackInput).promise();
+    const CFState = await describeStack();
     let stack = CFState.Stacks?.[0];
     if (!stack) {
       throw new Error(`Base stack doesn't exist, even after creation, stackExists check: ${stackExists}`);
     }
+    const stackVersion = stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue;
 
     if (stack.StackStatus === 'CREATE_IN_PROGRESS') {
       await CF.waitFor('stackCreateComplete', describeStackInput).promise();
     }
 
     if (stackExists) {
-      core.info('stack exists');
-      if (
-        stack.StackName === baseStackName &&
-        hash !== stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue
-      ) {
-        const updateInput: SDK.CloudFormation.UpdateStackInput = {
-          StackName: baseStackName,
-          TemplateBody: baseStack,
-        };
+      core.info(`stack exists, stack version is ${stackVersion}, local version is ${hash}`);
+      if (hash !== stackVersion) {
+        core.info(`Updating`);
         await CF.updateStack(updateInput).promise();
       } else {
-        core.info(
-          `Skipping any update for base stack ${stack.StackName} ${stack.Parameters?.find(
-            (x) => x.ParameterKey === 'Version',
-          )}`,
-        );
+        core.info(`No update required`);
       }
-      stack = (await CF.describeStacks(describeStackInput).promise()).Stacks?.[0];
+      stack = (await describeStack()).Stacks?.[0];
       if (!stack) {
         throw new Error(
           `Base stack doesn't exist, even after updating and creation, stackExists check: ${stackExists}`,
