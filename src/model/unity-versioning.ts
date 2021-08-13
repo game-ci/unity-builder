@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -17,8 +16,7 @@ export default class UnityVersioning {
   static read(projectPath) {
     const filePath = path.join(projectPath, 'ProjectSettings', 'ProjectVersion.txt');
     if (!fs.existsSync(filePath)) {
-      core.warning(`Could not find "${filePath}", keeping unityVersion as "auto"`);
-      return 'auto';
+      throw new Error(`Project settings file not found at "${filePath}". Have you correctly set the projectPath?`);
     }
     return UnityVersioning.parse(fs.readFileSync(filePath, 'utf8'));
   }

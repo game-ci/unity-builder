@@ -14,8 +14,8 @@ describe('Unity Versioning', () => {
   });
 
   describe('read', () => {
-    it('does not throw', () => {
-      expect(() => UnityVersioning.read('')).not.toThrow();
+    it('throws for invalid path', () => {
+      expect(() => UnityVersioning.read('')).toThrow(Error);
     });
 
     it('reads from test-project', () => {
