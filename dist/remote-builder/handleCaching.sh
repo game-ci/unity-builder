@@ -49,27 +49,23 @@ if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   ls -lh "$gitLFSDestinationFolder"
 fi
 
-
-
 echo ' '
-echo "LFS cache for branch: $branch"
+echo "LFS cache for $branch"
+du -sch "$lfsCacheFolder"
 ls -lh "$lfsCacheFolder"
 echo ' '
-echo "Library cache for branch: $branch"
+echo "Library cache for $branch"
+du -sch "$libraryCacheFolder"
 ls -lh "$libraryCacheFolder"
 echo ' '
-echo "Size of LFS cache folder for branch: $branch"
-du -sch "$lfsCacheFolder"
-echo ' '
-echo "Size of Library cache folder for branch: $branch"
-du -sch "$libraryCacheFolder"
-echo ' '
-echo "Size of cache folder for branch: $branch"
+echo "Branch: $branch"
 du -sch "$cacheFolderWithBranch"
 echo ' '
-echo 'Size of cache folder'
+echo 'Full cache'
 du -sch "$cacheFolderFull"
 echo ' '
+
+ls
 git lfs pull
 echo 'pulled latest LFS files'
 zip -q -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
