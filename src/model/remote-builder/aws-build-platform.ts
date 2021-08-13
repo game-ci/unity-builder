@@ -246,6 +246,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       await CF.createStack({
         StackName: baseStackName,
         TemplateBody: baseStack,
+        Capabilities: ['CAPABILITY_IAM'],
         Parameters: [
           { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
           { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
