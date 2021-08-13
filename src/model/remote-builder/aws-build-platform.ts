@@ -243,7 +243,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     const parameters: SDK.CloudFormation.Parameter[] = [
       { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
       { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
-      { ParameterKey: 'Version', ParameterValue: `hash` },
+      { ParameterKey: 'Version', ParameterValue: hash },
     ];
     const updateInput: SDK.CloudFormation.UpdateStackInput = {
       StackName: baseStackName,
