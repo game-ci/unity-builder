@@ -73,8 +73,7 @@ class AWSBuildRunner {
       }).promise()
     ).tasks?.[0].containers?.[0].exitCode;
     if (exitCode !== 0) {
-      core.error(`job failed with exit code ${exitCode}`);
-      throw new Error(
+      core.error(
         `job failed with exit code ${exitCode} ${JSON.stringify(
           await ECS.describeTasks({
             tasks: [taskArn],
@@ -84,6 +83,7 @@ class AWSBuildRunner {
           4,
         )}`,
       );
+      throw new Error(`job failed with exit code ${exitCode}`);
     } else {
       core.info(`Task has finished successfully`);
     }
