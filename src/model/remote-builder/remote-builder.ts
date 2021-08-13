@@ -92,7 +92,9 @@ class RemoteBuilder {
       this.buildId,
       'alpine/git',
       [
-        ` apk update -q
+        ` printenv
+          #
+          apk update -q
           apk add unzip zip git-lfs jq tree -q
           #
           mkdir -p ${this.buildPathFull}

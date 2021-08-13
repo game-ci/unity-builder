@@ -267,7 +267,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     if (!stackExists) {
       core.info('stack does not exist');
       await CF.createStack(createStackInput).promise();
-      core.info('created stack');
+      core.info(`created stack (version: ${hash})`);
     }
     const CFState = await describeStack();
     let stack = CFState.Stacks?.[0];
@@ -281,7 +281,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     }
 
     if (stackExists) {
-      core.info(`stack exists, stack version is ${stackVersion}, local version is ${hash}`);
+      core.info(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
       if (hash !== stackVersion) {
         core.info(`Updating`);
         await CF.updateStack(updateInput).promise();
