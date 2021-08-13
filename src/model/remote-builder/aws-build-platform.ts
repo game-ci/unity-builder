@@ -249,12 +249,13 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       StackName: baseStackName,
       TemplateBody: baseStack,
       Parameters: parameters,
+      Capabilities: ['CAPABILITY_IAM'],
     };
     const createStackInput: SDK.CloudFormation.CreateStackInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
-      Capabilities: ['CAPABILITY_IAM'],
       Parameters: parameters,
+      Capabilities: ['CAPABILITY_IAM'],
     };
 
     const stacks = (await CF.listStacks().promise()).StackSummaries?.map((x) => x.StackName);
