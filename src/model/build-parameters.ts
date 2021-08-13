@@ -24,7 +24,7 @@ class BuildParameters {
   public customParameters!: string;
   public sshAgent!: string;
   public remoteBuildCluster!: string;
-  public awsStackName!: string;
+  public awsBaseStackName!: string;
   public kubeConfig!: string;
   public githubToken!: string;
   public remoteBuildMemory!: string;
@@ -64,7 +64,7 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       chownFilesTo: Input.chownFilesTo,
       remoteBuildCluster: Input.remoteBuildCluster,
-      awsStackName: Input.awsStackName,
+      awsBaseStackName: Input.awsBaseStackName,
       kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
       remoteBuildMemory: Input.remoteBuildMemory,

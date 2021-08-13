@@ -2,7 +2,7 @@ Arguments:
   C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js
 
 PATH: 
-  C:\Users\Mark\AppData\Local\Temp\yarn--1628404931380-0.33374152167182647;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\Mark\AppData\Local\Temp\yarn--1628404915082-0.09674333480309039;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Program Files\Git\mingw64\libexec\git-core;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\Mark\bin;C:\Users\Mark\AppData\Local\cloud-code\installer\google-cloud-sdk\bin;C:\Users\Mark\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git LFS;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet;C:\Program Files (x86)\Yarn\bin;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Amazon\AWSCLIV2;C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\Mark\AppData\Local\Microsoft\PowerAppsCLI;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm;C:\Program Files (x86)\GitHub CLI
+  C:\Users\Mark\AppData\Local\Temp\yarn--1628884715167-0.3847568910300898;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\Mark\AppData\Local\cloud-code\installer\google-cloud-sdk\bin;c:\Users\Mark\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git LFS;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\Mark\AppData\Local\Microsoft\PowerAppsCLI\;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm;C:\Program Files (x86)\GitHub CLI\
 
 Yarn version: 
   1.22.5
@@ -14,8 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: getaddrinfo ENOTFOUND registry.yarnpkg.com
-      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:66:26)
+  Error: EPERM: operation not permitted, unlink 'C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin\lint-staged'
 
 npm manifest: 
   {
@@ -4219,9 +4218,9 @@ Lockfile:
     integrity sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==
   
   normalize-url@^4.1.0:
-    version "4.5.0"
-    resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
-    integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
+    version "4.5.1"
+    resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.1.tgz#0dd90cf1288ee1d1313b87081c9a5932ee48518a"
+    integrity sha512-9UZCFRHQdNrfTpGg8+1INIg93B6zE0aXMVFkw1WFwvO4SlZywU6aLg5Of0Ap/PgcbSw4LNxvMWXMeugwMCX0AA==
   
   npm-run-path@^2.0.0:
     version "2.0.2"
@@ -4499,9 +4498,9 @@ Lockfile:
     integrity sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==
   
   path-parse@^1.0.6:
-    version "1.0.6"
-    resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
-    integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
+    version "1.0.7"
+    resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
+    integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
   
   path-type@^2.0.0:
     version "2.0.0"

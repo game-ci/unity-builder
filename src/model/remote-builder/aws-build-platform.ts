@@ -12,10 +12,10 @@ import BuildParameters from '../build-parameters';
 const crypto = require('crypto');
 
 class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
-  private stackName: string;
+  private baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
-    this.stackName = buildParameters.awsStackName;
+    this.baseStackName = buildParameters.awsBaseStackName;
   }
   cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
@@ -114,7 +114,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       echo "${logid}"
     `;
     await this.setupBaseStack(CF);
-    const taskDefStackName = `${this.stackName}-${buildUid}`;
+    const taskDefStackName = `${this.baseStackName}-${buildUid}`;
     let taskDefCloudFormation = this.readTaskCloudFormationTemplate();
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
@@ -216,7 +216,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       }).promise()
     ).StackResources;
 
-    const baseResources = (await CF.describeStackResources({ StackName: this.stackName }).promise()).StackResources;
+    const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
 
     // TODO: offer a parameter to decide if you want the guarenteed shutdown or fastest startup time possible
 
@@ -232,7 +232,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   }
 
   async setupBaseStack(CF: SDK.CloudFormation) {
-    const baseStackName = process.env.baseStackName || 'game-ci-base-stack-01';
+    const baseStackName = this.baseStackName;
     const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
     const hash = crypto.createHash('md5').update(baseStack).digest('hex');
 
