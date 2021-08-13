@@ -237,15 +237,11 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
       StackName: baseStackName,
     };
-    let CFState;
-    try {
-      CFState = await CF.describeStacks(describeStackInput).promise();
-    } catch {
-      CFState = { Stacks: [] };
-    }
-    const stackExists: Boolean = CFState.Stacks !== null && CFState.Stacks !== [];
+    const stacks = (await CF.listStacks().promise()).StackSummaries?.map((x) => x.StackName);
+    const stackExists: Boolean = stacks?.includes(baseStackName) || false;
+
     if (!stackExists) {
-      core.info('stack exists');
+      core.info('stack does not exist');
       await CF.createStack({
         StackName: baseStackName,
         TemplateBody: baseStack,
@@ -255,12 +251,19 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           { ParameterKey: 'Version', ParameterValue: `hash` },
         ],
       });
-      CFState = await CF.describeStacks(describeStackInput).promise();
-    } else {
-      const stack = CFState.Stacks?.[0];
-      if (!stack) {
-        throw new Error('expected base stack to exist');
-      }
+    }
+    const CFState = await CF.describeStacks(describeStackInput).promise();
+    let stack = CFState.Stacks?.[0];
+    if (!stack) {
+      throw new Error(`Base stack doesn't exist, even after creation, stackExists check: ${stackExists}`);
+    }
+
+    if (stack.StackStatus === 'CREATE_IN_PROGRESS') {
+      await CF.waitFor('stackCreateComplete', describeStackInput).promise();
+    }
+
+    if (stackExists) {
+      core.info('stack exists');
       if (
         stack.StackName === baseStackName &&
         hash !== stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue
@@ -277,12 +280,17 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           )}`,
         );
       }
+      stack = (await CF.describeStacks(describeStackInput).promise()).Stacks?.[0];
+      if (!stack) {
+        throw new Error(
+          `Base stack doesn't exist, even after updating and creation, stackExists check: ${stackExists}`,
+        );
+      }
+      if (stack.StackStatus === 'UPDATE_IN_PROGRESS') {
+        await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
+      }
     }
-    if (CFState.Stacks?.[0].StackStatus === 'CREATE_IN_PROGRESS') {
-      await CF.waitFor('stackCreateComplete', describeStackInput).promise();
-    } else if (CFState.Stacks?.[0].StackStatus === 'UPDATE_IN_PROGRESS') {
-      await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
-    }
+    core.info('base stack exists and is ready');
   }
 
   async handleStackCreationFailure(
