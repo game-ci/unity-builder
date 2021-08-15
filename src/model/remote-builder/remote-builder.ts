@@ -294,6 +294,16 @@ class RemoteBuilder {
         EnvironmentVariable: 'branch',
         ParameterValue: this.branchName,
       },
+      {
+        ParameterKey: 'buildPathFull',
+        EnvironmentVariable: 'buildPathFull',
+        ParameterValue: this.buildPathFull,
+      },
+      {
+        ParameterKey: 'projectPathFull',
+        EnvironmentVariable: 'projectPathFull',
+        ParameterValue: this.projectPathFull,
+      },
     ];
   }
 
