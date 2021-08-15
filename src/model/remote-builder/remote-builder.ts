@@ -303,6 +303,26 @@ class RemoteBuilder {
         EnvironmentVariable: 'projectPathFull',
         ParameterValue: this.projectPathFull,
       },
+      {
+        ParameterKey: 'libraryFolderFull',
+        EnvironmentVariable: 'libraryFolderFull',
+        ParameterValue: this.libraryFolderFull,
+      },
+      {
+        ParameterKey: 'builderPathFull',
+        EnvironmentVariable: 'builderPathFull',
+        ParameterValue: this.builderPathFull,
+      },
+      {
+        ParameterKey: 'repoPathFull',
+        EnvironmentVariable: 'repoPathFull',
+        ParameterValue: this.repoPathFull,
+      },
+      {
+        ParameterKey: 'steamPathFull',
+        EnvironmentVariable: 'steamPathFull',
+        ParameterValue: this.steamPathFull,
+      },
     ];
   }
 
