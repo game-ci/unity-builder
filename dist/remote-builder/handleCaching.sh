@@ -28,6 +28,7 @@ if [ -z "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
+  ls "$libraryFolderFull"
 fi
 
 echo ' '
