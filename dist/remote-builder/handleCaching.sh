@@ -50,11 +50,9 @@ fi
 echo ' '
 echo "LFS cache for $branch"
 du -sch "$lfsCacheFolder"
-ls -lh "$lfsCacheFolder"
 echo ' '
 echo "Library cache for $branch"
 du -sch "$libraryCacheFolder"
-ls -lh "$libraryCacheFolder"
 echo ' '
 echo "Branch: $branch"
 du -sch "$cacheFolderWithBranch"
