@@ -64,7 +64,7 @@ du -sch "$cacheFolderFull"
 echo ' '
 
 ls
-cd
+cd "$repoPathFull"
 git lfs pull
 echo 'pulled latest LFS files'
 zip -q -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
