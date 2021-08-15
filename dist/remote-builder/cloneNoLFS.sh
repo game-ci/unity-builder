@@ -18,15 +18,15 @@ git clone $cloneUrl $repoPathFull
 git checkout $githubSha
 echo "Checked out $githubSha"
 
-git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-id
-md5sum .lfs-assets-id > .lfs-assets-id-sum
+git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
+md5sum .lfs-assets-guid > .lfs-assets-guid-sum
 
 echo ' '
-echo 'Contents of .lfs-assets-id file:'
-cat .lfs-assets-id
+echo 'Contents of .lfs-assets-guid file:'
+cat .lfs-assets-guid
 
 echo ' '
-echo 'Contents of .lfs-assets-id-sum file:'
-cat .lfs-assets-id-sum
+echo 'Contents of .lfs-assets-guid-sum file:'
+cat .lfs-assets-guid-sum
 
 echo ' '

@@ -135,7 +135,7 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
-          export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
+          export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-guid)"
           echo 'Source repository initialized'
           echo ' '
           ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
@@ -197,13 +197,13 @@ class RemoteBuilder {
             printenv
             apk update -q
             apk add zip -q
-            cd "${this.libraryFolderFull}"
-            zip -r "lib-${this.buildGuid}.zip" "${this.libraryFolderFull}"
-            mv "lib-${this.buildGuid}.zip" "${this.cacheFolderFull}/lib"
-            cd "${this.projectPathFull}"
-            ls -lh "${this.projectPathFull}"
-            zip -r "build-${this.buildGuid}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"
-            mv "build-${this.buildGuid}.zip" "/${buildVolumeFolder}/${this.buildGuid}/build-${this.buildGuid}.zip"
+            cd "$libraryFolderFull"
+            zip -r "lib-$buildGuid.zip" "$libraryFolderFull"
+            mv "lib-$buildGuid.zip" "$cacheFolderFull/lib"
+            cd "$projectPathFull"
+            ls -lh "$projectPathFull"
+            zip -r "build-$buildGuid.zip" "$projectPathFull/${RemoteBuilder.buildParams.buildPath}"
+            mv "build-$buildGuid.zip" "/${buildVolumeFolder}/$buildGuid/build-$buildGuid.zip"
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -305,58 +305,6 @@ class RemoteBuilder {
         };
       }),
     );
-  }
-
-  private static readUploadArtifactsSecrets() {
-    return [
-      {
-        ParameterKey: 'AWSAccessKeyID',
-        EnvironmentVariable: 'AWS_ACCESS_KEY_ID',
-        ParameterValue: process.env.AWS_ACCESS_KEY_ID || '',
-      },
-      {
-        ParameterKey: 'AWSSecretAccessKey',
-        EnvironmentVariable: 'AWS_SECRET_ACCESS_KEY',
-        ParameterValue: process.env.AWS_SECRET_ACCESS_KEY || '',
-      },
-      ...this.defaultSecrets,
-    ];
-  }
-
-  private static readDeployToSteamSecrets(): RemoteBuilderSecret[] {
-    return [
-      {
-        EnvironmentVariable: 'INPUT_APPID',
-        ParameterKey: 'appId',
-        ParameterValue: process.env.APP_ID || '',
-      },
-      {
-        EnvironmentVariable: 'INPUT_BUILDDESCRIPTION',
-        ParameterKey: 'buildDescription',
-        ParameterValue: process.env.BUILD_DESCRIPTION || '',
-      },
-      {
-        EnvironmentVariable: 'INPUT_ROOTPATH',
-        ParameterKey: 'rootPath',
-        ParameterValue: RemoteBuilder.buildParams.buildPath,
-      },
-      {
-        EnvironmentVariable: 'INPUT_RELEASEBRANCH',
-        ParameterKey: 'releaseBranch',
-        ParameterValue: process.env.RELEASE_BRANCH || '',
-      },
-      {
-        EnvironmentVariable: 'INPUT_LOCALCONTENTSERVER',
-        ParameterKey: 'localContentServer',
-        ParameterValue: process.env.LOCAL_CONTENT_SERVER || '',
-      },
-      {
-        EnvironmentVariable: 'INPUT_PREVIEWENABLED',
-        ParameterKey: 'previewEnabled',
-        ParameterValue: process.env.PREVIEW_ENABLED || '',
-      },
-      ...this.defaultSecrets,
-    ];
   }
 
   private static readBuildEnvironmentVariables(): RemoteBuilderEnvironmentVariable[] {
