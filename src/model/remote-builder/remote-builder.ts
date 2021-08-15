@@ -11,7 +11,6 @@ import YAML from 'yaml';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
-const cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}`;
 
 class RemoteBuilder {
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
@@ -25,6 +24,7 @@ class RemoteBuilder {
   private static repoPathFull: string;
   private static projectPathFull: string;
   private static libraryFolderFull: string;
+  private static cacheFolderFull: string;
   static SteamDeploy: boolean = process.env.STEAM_DEPLOY !== undefined || false;
   private static readonly defaultGitShaEnvironmentVariable = [
     {
@@ -98,6 +98,7 @@ class RemoteBuilder {
     this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
     this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
     this.libraryFolderFull = `${this.projectPathFull}/Library`;
+    this.cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}/${this.branchName}`;
   }
 
   private static async SetupStep() {
@@ -112,7 +113,7 @@ class RemoteBuilder {
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
-    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
+    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
       'alpine/git',
@@ -204,7 +205,7 @@ class RemoteBuilder {
             apk add zip -q
             cd "${this.libraryFolderFull}"
             zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
-            mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib"
+            mv "lib-${this.buildId}.zip" "${this.cacheFolderFull}/lib"
             cd "${this.projectPathFull}"
             ls -lh "${this.projectPathFull}"
             zip -r "build-${this.buildId}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"

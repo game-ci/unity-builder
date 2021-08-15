@@ -5,9 +5,9 @@ libraryFolderFull=$2
 gitLFSDestinationFolder=$3
 purgeRemoteBuilderCache=$4
 
-cacheFolderWithBranch="$cacheFolderFull/$branch"
-lfsCacheFolder="$cacheFolderFull/$branch/lfs"
-libraryCacheFolder="$cacheFolderFull/$branch/lib"
+cacheFolderWithBranch="$cacheFolderFull"
+lfsCacheFolder="$cacheFolderFull/lfs"
+libraryCacheFolder="$cacheFolderFull/lib"
 
 mkdir -p "$lfsCacheFolder"
 mkdir -p "$libraryCacheFolder"
@@ -24,7 +24,7 @@ fi
 ls -lh "$libraryCacheFolder"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
-echo "Checking if $libraryCacheFolder/$latestLibraryCacheFile exists from $branch"
+echo "Checking if $libraryCacheFolder/$latestLibraryCacheFile"
 if [ -z "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
   mkdir -p "$libraryFolderFull"
