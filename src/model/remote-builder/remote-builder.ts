@@ -61,6 +61,14 @@ class RemoteBuilder {
       this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
       for (const step of this.buildParams.postBuildSteps) {
+        const stepSecrets: RemoteBuilderSecret[] = step.secrets.map((x) => {
+          const secret: RemoteBuilderSecret = {
+            ParameterKey: x.name,
+            EnvironmentVariable: x.name,
+            ParameterValue: x.value,
+          };
+          return secret;
+        });
         await this.RemoteBuilderProviderPlatform.runBuildTask(
           this.buildGuid,
           step['image'],
@@ -73,7 +81,7 @@ class RemoteBuilder {
               value: process.env.GITHUB_SHA || '',
             },
           ],
-          this.defaultSecrets,
+          [...this.defaultSecrets, ...stepSecrets],
         );
       }
       await RemoteBuilder.CompressionStep();
