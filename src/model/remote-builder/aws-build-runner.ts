@@ -48,7 +48,7 @@ class AWSBuildRunner {
       },
     }).promise();
 
-    core.info('Task is starting on worker cluster');
+    core.info('Cloud runner job is starting');
     const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
@@ -59,7 +59,7 @@ class AWSBuildRunner {
         tasks: [taskArn],
         cluster,
       }).promise();
-      core.info(`Task has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
+      core.info(`Cloud runner job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
       core.setFailed(error);
       core.error(error);
     }

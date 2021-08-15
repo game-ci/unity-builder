@@ -51,21 +51,21 @@ if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   mkdir -p "$gitLFSDestinationFolder"
   unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder"
   echo "git LFS folder, (should not contain $latestLFSCacheFile)"
-  ls -lh "$gitLFSDestinationFolder"
+  ls -lh "$gitLFSDestinationFolder/"
 fi
 
 echo ' '
 echo "LFS cache for $branch"
-du -sch "$lfsCacheFolder"
+du -sch "$lfsCacheFolder/"
 echo '**'
 echo "Library cache for $branch"
-du -sch "$libraryCacheFolder"
+du -sch "$libraryCacheFolder/"
 echo '**'
 echo "Branch: $branch"
-du -sch "$cacheFolderWithBranch"
+du -sch "$cacheFolderWithBranch/"
 echo '**'
 echo 'Full cache'
-du -sch "$cacheFolderFull"
+du -sch "$cacheFolderFull/"
 echo ' '
 
 cd "$repoPathFull"
