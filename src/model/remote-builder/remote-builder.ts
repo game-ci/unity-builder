@@ -42,21 +42,17 @@ class RemoteBuilder {
     RemoteBuilder.setupDefaultSecrets();
     try {
       RemoteBuilder.setupBuildPlatform();
-
       await this.RemoteBuilderProviderPlatform.setupSharedBuildResources(
         this.buildId,
         this.buildParams,
         this.branchName,
         this.defaultSecrets,
       );
-
       await RemoteBuilder.SetupStep();
       await RemoteBuilder.BuildStep(baseImage);
       await RemoteBuilder.CompressionStep();
       await RemoteBuilder.UploadArtifacts();
-      if (this.SteamDeploy) {
-        await RemoteBuilder.DeployToSteam();
-      }
+      if (this.SteamDeploy) await RemoteBuilder.DeployToSteam();
       await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
         this.buildId,
         this.buildParams,
