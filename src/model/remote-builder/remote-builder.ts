@@ -34,6 +34,7 @@ class RemoteBuilder {
   ];
 
   static async build(buildParameters: BuildParameters, baseImage) {
+    const t = Date.now();
     RemoteBuilder.buildId = RemoteBuilderNamespace.generateBuildName(
       RemoteBuilder.readRunNumber(),
       buildParameters.platform,
@@ -51,7 +52,11 @@ class RemoteBuilder {
         this.defaultSecrets,
       );
       await RemoteBuilder.SetupStep();
+      const t2 = Date.now();
+      core.info(`Setup time: ${Math.floor((t2 - t) / 1000)}`);
       await RemoteBuilder.BuildStep(baseImage);
+      const t3 = Date.now();
+      core.info(`Build time: ${Math.floor((t3 - t2) / 1000)}`);
       core.info(`Post build steps ${this.buildParams.postBuildSteps}`);
       this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
