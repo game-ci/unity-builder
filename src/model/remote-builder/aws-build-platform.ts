@@ -121,6 +121,9 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
 
     try {
       for (const secret of secrets) {
+        if (!secret.ParameterValue || secret.ParameterValue === '') {
+          continue;
+        }
         taskDefCloudFormation = this.insertAtTemplate(
           taskDefCloudFormation,
           'p1 - input',
