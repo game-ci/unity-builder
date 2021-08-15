@@ -206,9 +206,11 @@ class RemoteBuilder {
       'amazon/aws-cli',
       [
         `
-            aws s3 cp ${this.buildId}/build-${this.buildId}.zip s3://game-ci-storage/
+            aws s3 cp ${this.buildId}/build-${this.buildId}.zip "s3://${this.buildParams.awsBaseStackName}/"
             # no need to upload Library cache for now
-            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildId}.zip" "s3://game-ci-storage/"
+            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildId}.zip" "s3://${
+          this.buildParams.awsBaseStackName
+        }/"
             ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildId}
           `,
       ],
