@@ -173,6 +173,7 @@ class RemoteBuilder {
       'alpine',
       [
         `
+            printenv
             apk update -q
             apk add zip -q
             cd "${this.libraryFolderFull}"
