@@ -21,6 +21,7 @@ if [ -d "$libraryFolderFull" ]; then
 fi
 
 # Restore library cache
+ls -lh "$libraryCacheFolder"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 echo "Checking if $libraryCacheFolder/$latestLibraryCacheFile exists from $branch"
