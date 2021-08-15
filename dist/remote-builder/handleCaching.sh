@@ -63,7 +63,6 @@ echo 'Full cache'
 du -sch "$cacheFolderFull"
 echo ' '
 
-ls
 cd "$repoPathFull"
 git lfs pull
 echo 'pulled latest LFS files'
