@@ -12,6 +12,8 @@ libraryCacheFolder="$cacheFolderFull/$branch/lib"
 mkdir -p "$lfsCacheFolder"
 mkdir -p "$libraryCacheFolder"
 
+echo 'Library Caching'
+
 # if the unity git project has included the library delete it and echo a warning
 if [ -d "$libraryFolderFull" ]; then
   rm -r "$libraryFolderFull"
@@ -27,6 +29,10 @@ if [ -z "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
 fi
+
+echo ' '
+
+echo 'Large File Caching'
 
 echo "Checking large file cache exists ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
 if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
@@ -50,13 +56,13 @@ fi
 echo ' '
 echo "LFS cache for $branch"
 du -sch "$lfsCacheFolder"
-echo ' '
+echo '**'
 echo "Library cache for $branch"
 du -sch "$libraryCacheFolder"
-echo ' '
+echo '**'
 echo "Branch: $branch"
 du -sch "$cacheFolderWithBranch"
-echo ' '
+echo '**'
 echo 'Full cache'
 du -sch "$cacheFolderFull"
 echo ' '
