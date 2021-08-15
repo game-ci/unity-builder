@@ -119,7 +119,7 @@ class RemoteBuilder {
           ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
           ${process.env.DEBUG ? '' : '#'}echo ' '
           echo ' '
-          echo 'Checking cache for the Unity project Library and git LFS files'
+          echo 'Starting checks of cache for the Unity project Library and git LFS files'
           ${handleCaching}
           ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
           ${process.env.DEBUG ? '' : '#'}echo ' '
@@ -128,7 +128,7 @@ class RemoteBuilder {
           echo ' '
           #
           ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
-          ${process.env.DEBUG ? '' : '#'}ls -lh "${buildVolumeFolder}"
+          ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
           echo ' '
           #
       `,
@@ -176,7 +176,6 @@ class RemoteBuilder {
         `
             apk update -q
             apk add zip -q
-            apk add tree -q
             cd "${this.libraryFolderFull}"
             zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
             mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib"
