@@ -307,7 +307,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
         await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
       }
     }
-    core.info('base stack exists and is ready');
+    core.info('base stack is ready');
   }
 
   async handleStackCreationFailure(
