@@ -51,6 +51,23 @@ class RemoteBuilder {
       );
       await RemoteBuilder.SetupStep();
       await RemoteBuilder.BuildStep(baseImage);
+      core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
+      for (const step of this.buildParams.postBuildSteps) {
+        await this.RemoteBuilderProviderPlatform.runBuildTask(
+          this.buildId,
+          step['image'],
+          step['commands'],
+          `/${buildVolumeFolder}`,
+          `/${buildVolumeFolder}`,
+          [
+            {
+              name: 'GITHUB_SHA',
+              value: process.env.GITHUB_SHA || '',
+            },
+          ],
+          this.defaultSecrets,
+        );
+      }
       await RemoteBuilder.CompressionStep();
       await RemoteBuilder.UploadArtifacts();
       if (this.SteamDeploy) await RemoteBuilder.DeployToSteam();

@@ -22,6 +22,9 @@ inputs:
     required: false
     default: ''
     description: 'Name of the build.'
+  postBuildSteps:
+    required: false
+    default: ''
   buildsPath:
     required: false
     default: ''

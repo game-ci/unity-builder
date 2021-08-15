@@ -33,6 +33,8 @@ class BuildParameters {
   public kubeVolume!: string;
   public chownFilesTo!: string;
 
+  public postBuildSteps;
+
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
 
@@ -71,6 +73,7 @@ class BuildParameters {
       remoteBuildCpu: Input.remoteBuildCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
+      postBuildSteps: Input.postBuildSteps,
     };
   }
 

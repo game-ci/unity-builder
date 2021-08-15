@@ -93,6 +93,10 @@ class Input {
     return core.getInput('chownFilesTo') || '';
   }
 
+  static get postBuildSteps() {
+    return core.getInput('postBuildSteps');
+  }
+
   static get remoteBuildCluster() {
     return core.getInput('remoteBuildCluster') || '';
   }
