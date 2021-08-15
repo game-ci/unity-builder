@@ -17,7 +17,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   private kubeConfig: k8s.KubeConfig;
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
-  private buildId: string = '';
+  private buildGuid: string = '';
   private buildParameters: BuildParameters;
   private pvcName: string = '';
   private secretName: string = '';
@@ -41,7 +41,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     this.buildParameters = buildParameters;
   }
   public async setupSharedBuildResources(
-    buildUid: string,
+    buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
@@ -49,9 +49,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.pvcName = `unity-builder-pvc-${buildUid}`;
-      this.cleanupCronJobName = `unity-builder-cronjob-${buildUid}`;
-      this.serviceAccountName = `service-account-${buildUid}`;
+      this.pvcName = `unity-builder-pvc-${buildGuid}`;
+      this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
+      this.serviceAccountName = `service-account-${buildGuid}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,
@@ -72,7 +72,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   }
 
   async runBuildTask(
-    buildId: string,
+    buildGuid: string,
     image: string,
     commands: string[],
     mountdir: string,
@@ -82,9 +82,9 @@ class Kubernetes implements RemoteBuilderProviderInterface {
   ): Promise<void> {
     try {
       // setup
-      this.buildId = buildId;
-      this.secretName = `build-credentials-${buildId}`;
-      this.jobName = `unity-builder-job-${buildId}`;
+      this.buildGuid = buildGuid;
+      this.secretName = `build-credentials-${buildGuid}`;
+      this.jobName = `unity-builder-job-${buildGuid}`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       const jobSpec = KubernetesJobSpecFactory.getJobSpec(
         commands,
@@ -92,7 +92,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
         mountdir,
         workingdir,
         environment,
-        this.buildId,
+        this.buildGuid,
         this.buildParameters,
         this.secretName,
         this.pvcName,
@@ -161,7 +161,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
 
   async cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
-    buildUid: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars

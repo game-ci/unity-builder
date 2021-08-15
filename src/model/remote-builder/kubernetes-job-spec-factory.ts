@@ -8,7 +8,7 @@ class KubernetesJobSpecFactory {
     mountdir: string,
     workingDirectory: string,
     environment: RemoteBuilderEnvironmentVariable[],
-    buildId: string,
+    buildGuid: string,
     buildParameters: BuildParameters,
     secretName,
     pvcName,
@@ -19,7 +19,7 @@ class KubernetesJobSpecFactory {
       ...[
         {
           name: 'GITHUB_SHA',
-          value: buildId,
+          value: buildGuid,
         },
         {
           name: 'GITHUB_WORKSPACE',
@@ -78,7 +78,7 @@ class KubernetesJobSpecFactory {
       name: jobName,
       labels: {
         app: 'unity-builder',
-        buildId,
+        buildGuid,
       },
     };
     job.spec = {

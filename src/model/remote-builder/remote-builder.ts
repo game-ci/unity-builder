@@ -16,7 +16,7 @@ class RemoteBuilder {
   static RemoteBuilderProviderPlatform: RemoteBuilderProviderInterface;
   private static buildParams: BuildParameters;
   private static defaultSecrets: RemoteBuilderSecret[];
-  private static buildId: string;
+  private static buildGuid: string;
   private static branchName: string;
   private static buildPathFull: string;
   private static builderPathFull: string;
@@ -35,7 +35,7 @@ class RemoteBuilder {
 
   static async build(buildParameters: BuildParameters, baseImage) {
     const t = Date.now();
-    RemoteBuilder.buildId = RemoteBuilderNamespace.generateBuildName(
+    RemoteBuilder.buildGuid = RemoteBuilderNamespace.generateBuildName(
       RemoteBuilder.readRunNumber(),
       buildParameters.platform,
     );
@@ -46,7 +46,7 @@ class RemoteBuilder {
     try {
       RemoteBuilder.setupBuildPlatform();
       await this.RemoteBuilderProviderPlatform.setupSharedBuildResources(
-        this.buildId,
+        this.buildGuid,
         this.buildParams,
         this.branchName,
         this.defaultSecrets,
@@ -62,7 +62,7 @@ class RemoteBuilder {
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
       for (const step of this.buildParams.postBuildSteps) {
         await this.RemoteBuilderProviderPlatform.runBuildTask(
-          this.buildId,
+          this.buildGuid,
           step['image'],
           step['commands'],
           `/${buildVolumeFolder}`,
@@ -80,7 +80,7 @@ class RemoteBuilder {
       await RemoteBuilder.UploadArtifacts();
       if (this.SteamDeploy) await RemoteBuilder.DeployToSteam();
       await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
-        this.buildId,
+        this.buildGuid,
         this.buildParams,
         this.branchName,
         this.defaultSecrets,
@@ -92,7 +92,7 @@ class RemoteBuilder {
   }
 
   private static setupFolderVariables() {
-    this.buildPathFull = `/${buildVolumeFolder}/${this.buildId}`;
+    this.buildPathFull = `/${buildVolumeFolder}/${this.buildGuid}`;
     this.builderPathFull = `${this.buildPathFull}/builder`;
     this.steamPathFull = `${this.buildPathFull}/steam`;
     this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
@@ -115,7 +115,7 @@ class RemoteBuilder {
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
     const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildId,
+      this.buildGuid,
       'alpine/git',
       [
         ` printenv
@@ -170,7 +170,7 @@ class RemoteBuilder {
   private static async BuildStep(baseImage: any) {
     core.info('Starting part 2/4 (build unity project)');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildId,
+      this.buildGuid,
       baseImage.toString(),
       [
         `
@@ -196,7 +196,7 @@ class RemoteBuilder {
     core.info('Starting step 3/4 build compression');
     // Cleanup
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildId,
+      this.buildGuid,
       'alpine',
       [
         `
@@ -204,12 +204,12 @@ class RemoteBuilder {
             apk update -q
             apk add zip -q
             cd "${this.libraryFolderFull}"
-            zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
-            mv "lib-${this.buildId}.zip" "${this.cacheFolderFull}/lib"
+            zip -r "lib-${this.buildGuid}.zip" "${this.libraryFolderFull}"
+            mv "lib-${this.buildGuid}.zip" "${this.cacheFolderFull}/lib"
             cd "${this.projectPathFull}"
             ls -lh "${this.projectPathFull}"
-            zip -r "build-${this.buildId}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"
-            mv "build-${this.buildId}.zip" "/${buildVolumeFolder}/${this.buildId}/build-${this.buildId}.zip"
+            zip -r "build-${this.buildGuid}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"
+            mv "build-${this.buildGuid}.zip" "/${buildVolumeFolder}/${this.buildGuid}/build-${this.buildGuid}.zip"
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -228,16 +228,16 @@ class RemoteBuilder {
   private static async UploadArtifacts() {
     core.info('Starting step 4/4 upload build to s3');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildId,
+      this.buildGuid,
       'amazon/aws-cli',
       [
         `
-            aws s3 cp ${this.buildId}/build-${this.buildId}.zip "s3://${this.buildParams.awsBaseStackName}-storage/"
+            aws s3 cp ${this.buildGuid}/build-${this.buildGuid}.zip "s3://${this.buildParams.awsBaseStackName}-storage/"
             # no need to upload Library cache for now
-            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildId}.zip" "s3://${
+            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildGuid}.zip" "s3://${
           this.buildParams.awsBaseStackName
         }-storage/"
-            ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildId}
+            ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildGuid}
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -250,22 +250,22 @@ class RemoteBuilder {
   private static async DeployToSteam() {
     core.info('Starting steam deployment');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildId,
+      this.buildGuid,
       'cm2network/steamcmd:root',
       [
         `
             ls
             ls /
-            cp -r /${buildVolumeFolder}/${this.buildId}/steam/action/entrypoint.sh /entrypoint.sh;
-            cp -r /${buildVolumeFolder}/${this.buildId}/steam/action/steps/ /steps;
+            cp -r /${buildVolumeFolder}/${this.buildGuid}/steam/action/entrypoint.sh /entrypoint.sh;
+            cp -r /${buildVolumeFolder}/${this.buildGuid}/steam/action/steps/ /steps;
             chmod -R +x /entrypoint.sh;
             chmod -R +x /steps;
             /entrypoint.sh;
-            rm -r /${buildVolumeFolder}/${this.buildId}
+            rm -r /${buildVolumeFolder}/${this.buildGuid}
           `,
       ],
       `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/${this.buildId}/steam/action/`,
+      `/${buildVolumeFolder}/${this.buildGuid}/steam/action/`,
       [
         {
           name: 'GITHUB_SHA',
@@ -428,7 +428,7 @@ class RemoteBuilder {
       },
       {
         name: 'GITHUB_WORKSPACE',
-        value: `/${buildVolumeFolder}/${this.buildId}/${repositoryFolder}/`,
+        value: `/${buildVolumeFolder}/${this.buildGuid}/${repositoryFolder}/`,
       },
       {
         name: 'PROJECT_PATH',
@@ -490,7 +490,7 @@ class RemoteBuilder {
     core.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Remote Builder failed');
     await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
-      this.buildId,
+      this.buildGuid,
       this.buildParams,
       this.branchName,
       this.defaultSecrets,

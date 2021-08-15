@@ -19,7 +19,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   }
   cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
-    buildUid: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -29,7 +29,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   ) {}
   setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
-    buildUid: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -101,7 +101,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
 
   async setupCloudFormations(
     CF: SDK.CloudFormation,
-    buildUid: string,
+    buildGuid: string,
     image: string,
     entrypoint: string[],
     commands: string[],
@@ -109,12 +109,12 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     workingdir: string,
     secrets: RemoteBuilderSecret[],
   ): Promise<RemoteBuilderTaskDef> {
-    const logid = customAlphabet(RemoteBuilderConstants.alphabet, 9)();
+    const logGuid = customAlphabet(RemoteBuilderConstants.alphabet, 9)();
     commands[1] += `
-      echo "${logid}"
+      echo "${logGuid}"
     `;
     await this.setupBaseStack(CF);
-    const taskDefStackName = `${this.baseStackName}-${buildUid}`;
+    const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = this.readTaskCloudFormationTemplate();
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
@@ -179,7 +179,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           },
           {
             ParameterKey: 'BUILDID',
-            ParameterValue: buildUid,
+            ParameterValue: buildGuid,
           },
           ...mappedSecrets,
         ],
@@ -204,7 +204,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           },
           {
             ParameterKey: 'BUILDID',
-            ParameterValue: buildUid,
+            ParameterValue: buildGuid,
           },
         ],
       }).promise();
@@ -234,7 +234,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       ttlCloudFormation: cleanupCloudFormation,
       taskDefResources,
       baseResources,
-      logid,
+      logid: logGuid,
     };
   }
 

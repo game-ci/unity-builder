@@ -5,7 +5,7 @@ import RemoteBuilderSecret from './remote-builder-secret';
 export interface RemoteBuilderProviderInterface {
   cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
-    buildUid: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -15,7 +15,7 @@ export interface RemoteBuilderProviderInterface {
   );
   setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
-    buildUid: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -25,7 +25,7 @@ export interface RemoteBuilderProviderInterface {
   );
   runBuildTask(
     // eslint-disable-next-line no-unused-vars
-    buildId: string,
+    buildGuid: string,
     // eslint-disable-next-line no-unused-vars
     image: string,
     // eslint-disable-next-line no-unused-vars
