@@ -49,7 +49,7 @@ class Kubernetes implements RemoteBuilderProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.pvcName = `unity-builder-pvc-${buildGuid}`;
+      this.pvcName = `unity-builder-pvc`;
       this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
       this.serviceAccountName = `service-account-${buildGuid}`;
       await KubernetesStorage.createPersistentVolumeClaim(

@@ -57,6 +57,7 @@ class RemoteBuilder {
       await RemoteBuilder.BuildStep(baseImage);
       const t3 = Date.now();
       core.info(`Build time: ${Math.floor((t3 - t2) / 1000)}`);
+      await RemoteBuilder.CompressionStep();
       core.info(`Post build steps ${this.buildParams.postBuildSteps}`);
       this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
@@ -84,9 +85,6 @@ class RemoteBuilder {
           [...this.defaultSecrets, ...stepSecrets],
         );
       }
-      await RemoteBuilder.CompressionStep();
-      await RemoteBuilder.UploadArtifacts();
-      if (this.SteamDeploy) await RemoteBuilder.DeployToSteam();
       await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
         this.buildGuid,
         this.buildParams,
@@ -231,57 +229,6 @@ class RemoteBuilder {
       this.defaultSecrets,
     );
     core.info('compression step complete');
-  }
-
-  private static async UploadArtifacts() {
-    core.info('Starting step 4/4 upload build to s3');
-    await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildGuid,
-      'amazon/aws-cli',
-      [
-        `
-            aws s3 cp ${this.buildGuid}/build-${this.buildGuid}.zip "s3://${this.buildParams.awsBaseStackName}-storage/"
-            # no need to upload Library cache for now
-            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildGuid}.zip" "s3://${
-          this.buildParams.awsBaseStackName
-        }-storage/"
-            ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildGuid}
-          `,
-      ],
-      `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/`,
-      RemoteBuilder.readUploadArtifactEnvironmentVariables(),
-      RemoteBuilder.readUploadArtifactsSecrets(),
-    );
-  }
-
-  private static async DeployToSteam() {
-    core.info('Starting steam deployment');
-    await this.RemoteBuilderProviderPlatform.runBuildTask(
-      this.buildGuid,
-      'cm2network/steamcmd:root',
-      [
-        `
-            ls
-            ls /
-            cp -r /${buildVolumeFolder}/${this.buildGuid}/steam/action/entrypoint.sh /entrypoint.sh;
-            cp -r /${buildVolumeFolder}/${this.buildGuid}/steam/action/steps/ /steps;
-            chmod -R +x /entrypoint.sh;
-            chmod -R +x /steps;
-            /entrypoint.sh;
-            rm -r /${buildVolumeFolder}/${this.buildGuid}
-          `,
-      ],
-      `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/${this.buildGuid}/steam/action/`,
-      [
-        {
-          name: 'GITHUB_SHA',
-          value: process.env.GITHUB_SHA || '',
-        },
-      ],
-      RemoteBuilder.readDeployToSteamSecrets(),
-    );
   }
 
   private static setupBuildPlatform() {
