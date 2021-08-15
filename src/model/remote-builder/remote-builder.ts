@@ -149,6 +149,7 @@ class RemoteBuilder {
       baseImage.toString(),
       [
         `
+            printenv
             cp -r "${this.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
             cp -r "${this.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
             cp -r "${this.builderPathFull}/dist/steps/" "/steps"
