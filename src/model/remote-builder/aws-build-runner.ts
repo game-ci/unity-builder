@@ -164,7 +164,11 @@ class AWSBuildRunner {
                 core.info('End of cloud runner job logs');
                 readingLogs = false;
               } else {
-                core.info(json.logEvents[logEventsIndex].message);
+                const message = json.logEvents[logEventsIndex].message;
+                if (message.includes('Rebuilding Library because the asset database could not be found!')) {
+                  core.warning('LIBRARY NOT FOUND!');
+                }
+                core.info(message);
               }
             }
           }
