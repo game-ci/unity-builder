@@ -6,6 +6,7 @@ import RemoteBuilderSecret from './remote-builder-secret';
 import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
 import Kubernetes from './kubernetes-build-platform';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import ImageEnvironmentFactory from '../image-environment-factory';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
@@ -324,6 +325,15 @@ class RemoteBuilder {
         ParameterValue: this.steamPathFull,
       },
     ];
+    this.defaultSecrets.push(
+      ...ImageEnvironmentFactory.getEnvironmentVariables(this.buildParams).map((x) => {
+        return {
+          ParameterKey: x.name,
+          EnvironmentVariable: x.name,
+          ParameterValue: x.value,
+        };
+      }),
+    );
   }
 
   private static readBuildSecrets(buildSecrets: any[]) {
