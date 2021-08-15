@@ -114,7 +114,7 @@ class RemoteBuilder {
           ${initializeSourceRepoForCaching}
           echo 'Source repository initialized'
           export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
-          ${process.env.DEBUG ? '' : '#'}echo '$LFS_ASSETS_HASH'
+          ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
           ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
           ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
