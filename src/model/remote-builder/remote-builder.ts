@@ -50,13 +50,6 @@ class RemoteBuilder {
         this.defaultSecrets,
       );
 
-      this.buildPathFull = `/${buildVolumeFolder}/${this.buildId}`;
-      this.builderPathFull = `${this.buildPathFull}/builder`;
-      this.steamPathFull = `${this.buildPathFull}/steam`;
-      this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
-      this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
-      this.libraryFolderFull = `${this.projectPathFull}/Library`;
-
       await RemoteBuilder.SetupStep();
       await RemoteBuilder.BuildStep(baseImage);
       await RemoteBuilder.CompressionStep();
