@@ -1,5 +1,6 @@
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
+import ImageEnvironmentFactory from './image-environment-factory';
 
 class Docker {
   static async build(buildParameters, silent = false) {
@@ -18,69 +19,12 @@ class Docker {
   }
 
   static async run(image, parameters, silent = false) {
-    const {
-      version,
-      workspace,
-      runnerTempPath,
-      platform,
-      projectPath,
-      buildName,
-      buildPath,
-      buildFile,
-      buildMethod,
-      buildVersion,
-      androidVersionCode,
-      androidKeystoreName,
-      androidKeystoreBase64,
-      androidKeystorePass,
-      androidKeyaliasName,
-      androidKeyaliasPass,
-      customParameters,
-      sshAgent,
-      chownFilesTo,
-    } = parameters;
+    const { workspace, runnerTempPath, sshAgent } = parameters;
 
     const command = `docker run \
         --workdir /github/workspace \
         --rm \
-        --env UNITY_LICENSE \
-        --env UNITY_LICENSE_FILE \
-        --env UNITY_EMAIL \
-        --env UNITY_PASSWORD \
-        --env UNITY_SERIAL \
-        --env UNITY_VERSION="${version}" \
-        --env USYM_UPLOAD_AUTH_TOKEN \
-        --env PROJECT_PATH="${projectPath}" \
-        --env BUILD_TARGET="${platform}" \
-        --env BUILD_NAME="${buildName}" \
-        --env BUILD_PATH="${buildPath}" \
-        --env BUILD_FILE="${buildFile}" \
-        --env BUILD_METHOD="${buildMethod}" \
-        --env VERSION="${buildVersion}" \
-        --env ANDROID_VERSION_CODE="${androidVersionCode}" \
-        --env ANDROID_KEYSTORE_NAME="${androidKeystoreName}" \
-        --env ANDROID_KEYSTORE_BASE64="${androidKeystoreBase64}" \
-        --env ANDROID_KEYSTORE_PASS="${androidKeystorePass}" \
-        --env ANDROID_KEYALIAS_NAME="${androidKeyaliasName}" \
-        --env ANDROID_KEYALIAS_PASS="${androidKeyaliasPass}" \
-        --env CUSTOM_PARAMETERS="${customParameters}" \
-        --env CHOWN_FILES_TO="${chownFilesTo}" \
-        --env GITHUB_REF \
-        --env GITHUB_SHA \
-        --env GITHUB_REPOSITORY \
-        --env GITHUB_ACTOR \
-        --env GITHUB_WORKFLOW \
-        --env GITHUB_HEAD_REF \
-        --env GITHUB_BASE_REF \
-        --env GITHUB_EVENT_NAME \
-        --env GITHUB_WORKSPACE=/github/workspace \
-        --env GITHUB_ACTION \
-        --env GITHUB_EVENT_PATH \
-        --env RUNNER_OS \
-        --env RUNNER_TOOL_CACHE \
-        --env RUNNER_TEMP \
-        --env RUNNER_WORKSPACE \
-        ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
+        ${ImageEnvironmentFactory.getEnvVarString(parameters)}
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
         --volume "${runnerTempPath}/_github_home":"/root" \
         --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
