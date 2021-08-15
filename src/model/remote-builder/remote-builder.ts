@@ -7,6 +7,7 @@ import { RemoteBuilderProviderInterface } from './remote-builder-provider-interf
 import Kubernetes from './kubernetes-build-platform';
 import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
 import ImageEnvironmentFactory from '../image-environment-factory';
+import YAML from 'yaml';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
@@ -51,6 +52,8 @@ class RemoteBuilder {
       );
       await RemoteBuilder.SetupStep();
       await RemoteBuilder.BuildStep(baseImage);
+      core.info(`Post build steps ${this.buildParams.postBuildSteps}`);
+      this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
       for (const step of this.buildParams.postBuildSteps) {
         await this.RemoteBuilderProviderPlatform.runBuildTask(
