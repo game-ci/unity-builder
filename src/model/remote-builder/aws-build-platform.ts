@@ -258,14 +258,16 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
       Capabilities: ['CAPABILITY_IAM'],
     };
 
-    const stacks = (await CF.listStacks().promise()).StackSummaries?.map((x) => x.StackName);
+    const stacks = (
+      await CF.listStacks({ StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE'] }).promise()
+    ).StackSummaries?.map((x) => x.StackName);
     const stackExists: Boolean = stacks?.includes(baseStackName) || false;
     const describeStack = async () => {
       return await CF.describeStacks(describeStackInput).promise();
     };
 
     if (!stackExists) {
-      core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks, undefined, 4)})`);
+      core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
       await CF.createStack(createStackInput).promise();
       core.info(`created stack (version: ${hash})`);
     }
