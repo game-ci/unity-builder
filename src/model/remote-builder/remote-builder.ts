@@ -114,56 +114,44 @@ class RemoteBuilder {
     const testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
 
     const unityBuilderRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
-    const steamDeployRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/steam-deploy.git`;
     const targetBuildRepoUrl = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
     const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
+    const remoteBuilderBranch = process.env.remoteBuilderBranch ? `--branch "${process.env.remoteBuilderBranch}"` : '';
+    const cloneRemoteBuilder = `git clone -q ${remoteBuilderBranch} ${unityBuilderRepoUrl} ${this.builderPathFull}`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildGuid,
       'alpine/git',
       [
         ` printenv
-          #
           apk update -q
           apk add unzip zip git-lfs jq tree -q
-          #
           mkdir -p ${this.buildPathFull}
           mkdir -p ${this.builderPathFull}
           mkdir -p ${this.repoPathFull}
-          mkdir -p ${this.steamPathFull}
-          #
-          echo ' '
-          echo 'Cloning utility repositories for remote builder'
-          git clone -q --branch "remote-builder/unified-providers" ${unityBuilderRepoUrl} ${this.builderPathFull}
-          echo 'Cloned ${unityBuilderRepoUrl}'
-          git clone -q ${steamDeployRepoUrl} ${this.steamPathFull}
-          echo 'Cloned ${steamDeployRepoUrl}'
-          #
+          ${cloneRemoteBuilder}
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
-          echo 'Source repository initialized'
           export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
+          echo 'Source repository initialized'
+          echo ' '
           ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
-          ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
           ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
           ${process.env.DEBUG ? '' : '#'}echo ' '
-          echo ' '
           echo 'Starting checks of cache for the Unity project Library and git LFS files'
           ${handleCaching}
           ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
           ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
           ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
-          echo ' '
-          #
+          ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
           ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
-          echo ' '
-          #
+          ${process.env.DEBUG ? '' : '#'}echo ' '
       `,
       ],
       `/${buildVolumeFolder}`,

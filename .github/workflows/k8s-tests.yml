@@ -51,6 +51,7 @@ jobs:
         id: k8s-unity-build
         env:
           DEBUG: true
+          remoteBuilderBranch: remote-builder/unified-providers
         with:
           remoteBuildCluster: k8s
           targetPlatform: ${{ matrix.targetPlatform }}
