@@ -63,7 +63,7 @@ class AWSBuildRunner {
       core.setFailed(error);
       core.error(error);
     }
-    core.info(`Task is running on worker cluster`);
+    core.info(`Cloud runner job is running`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
     const exitCode = (
@@ -85,7 +85,7 @@ class AWSBuildRunner {
       );
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
-      core.info(`Task has finished successfully`);
+      core.info(`Cloud runner job has finished successfully`);
     }
   }
 
@@ -127,7 +127,7 @@ class AWSBuildRunner {
 
     await CF.waitFor('stackCreateComplete', { StackName: taskDef.taskDefStackNameTTL }).promise();
 
-    core.info(`Task status is ${(await getTaskData())?.lastStatus}`);
+    core.info(`Cloud runner job status is ${(await getTaskData())?.lastStatus}`);
 
     const logBaseUrl = `https://${AWS.config.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
@@ -139,11 +139,11 @@ class AWSBuildRunner {
       const taskData = await getTaskData();
       if (taskData?.lastStatus !== 'RUNNING') {
         if (timestamp === 0) {
-          core.info('Task stopped, streaming end of logs');
+          core.info('Cloud runner job stopped, streaming end of logs');
           timestamp = Date.now();
         }
         if (timestamp !== 0 && Date.now() - timestamp < 30000) {
-          core.info('Task status is not RUNNING for 30 seconds, last query for logs');
+          core.info('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
           readingLogs = false;
         }
       }
@@ -161,7 +161,7 @@ class AWSBuildRunner {
           if (json.messageType === 'DATA_MESSAGE') {
             for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
               if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
-                core.info('End of task logs');
+                core.info('End of cloud runner job logs');
                 readingLogs = false;
               } else {
                 core.info(json.logEvents[logEventsIndex].message);
