@@ -265,7 +265,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     };
 
     if (!stackExists) {
-      core.info(`${baseStackName} stack does not exist`);
+      core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks, undefined, 4)})`);
       await CF.createStack(createStackInput).promise();
       core.info(`created stack (version: ${hash})`);
     }
