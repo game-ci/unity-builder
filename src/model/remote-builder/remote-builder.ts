@@ -142,8 +142,6 @@ class RemoteBuilder {
   }
 
   private static async BuildStep(baseImage: any) {
-    const buildSecrets = new Array();
-    RemoteBuilder.readBuildSecrets(buildSecrets);
     core.info('Starting part 2/4 (build unity project)');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
@@ -163,7 +161,7 @@ class RemoteBuilder {
       `/${buildVolumeFolder}`,
       `/${this.projectPathFull}`,
       RemoteBuilder.readBuildEnvironmentVariables(),
-      buildSecrets,
+      this.defaultSecrets,
     );
   }
 
@@ -334,59 +332,6 @@ class RemoteBuilder {
         };
       }),
     );
-  }
-
-  private static readBuildSecrets(buildSecrets: any[]) {
-    buildSecrets.push(...this.defaultSecrets);
-
-    if (process.env.UNITY_LICENSE)
-      buildSecrets.push({
-        ParameterKey: 'UnityLicense',
-        EnvironmentVariable: 'UNITY_LICENSE',
-        ParameterValue: process.env.UNITY_LICENSE,
-      });
-
-    if (process.env.UNITY_EMAIL)
-      buildSecrets.push({
-        ParameterKey: 'UnityEmail',
-        EnvironmentVariable: 'UNITY_EMAIL',
-        ParameterValue: process.env.UNITY_EMAIL,
-      });
-
-    if (process.env.UNITY_PASSWORD)
-      buildSecrets.push({
-        ParameterKey: 'UnityPassword',
-        EnvironmentVariable: 'UNITY_PASSWORD',
-        ParameterValue: process.env.UNITY_PASSWORD,
-      });
-
-    if (process.env.UNITY_SERIAL)
-      buildSecrets.push({
-        ParameterKey: 'UnitySerial',
-        EnvironmentVariable: 'UNITY_SERIAL',
-        ParameterValue: process.env.UNITY_SERIAL,
-      });
-
-    if (this.buildParams.androidKeystoreBase64)
-      buildSecrets.push({
-        ParameterKey: 'AndroidKeystoreBase64',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_BASE64',
-        ParameterValue: this.buildParams.androidKeystoreBase64,
-      });
-
-    if (this.buildParams.androidKeystorePass)
-      buildSecrets.push({
-        ParameterKey: 'AndroidKeystorePass',
-        EnvironmentVariable: 'ANDROID_KEYSTORE_PASS',
-        ParameterValue: this.buildParams.androidKeystorePass,
-      });
-
-    if (this.buildParams.androidKeyaliasPass)
-      buildSecrets.push({
-        ParameterKey: 'AndroidKeyAliasPass',
-        EnvironmentVariable: 'AWS_ACCESS_KEY_ALIAS_PASS',
-        ParameterValue: this.buildParams.androidKeyaliasPass,
-      });
   }
 
   private static readUploadArtifactsSecrets() {
