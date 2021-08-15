@@ -201,7 +201,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           },
         ],
       }).promise();
-      core.info('Creating cleanup double checker cron job...');
+      // Side effect: core.info('Creating cleanup double checker cron job...');
 
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
