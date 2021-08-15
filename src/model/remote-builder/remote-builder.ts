@@ -111,23 +111,23 @@ class RemoteBuilder {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
-          export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
-          ${process.env.DEBUG ? '#' : ''}echo ' '
-          ${process.env.DEBUG ? '#' : ''}echo 'Large File before LFS caching and pull'
-          ${process.env.DEBUG ? '#' : ''}ls -alh "${lfsDirectory}"
-          ${process.env.DEBUG ? '#' : ''}echo ' '
           echo 'Source repository initialized'
+          export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-id)"
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+          ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}echo ' '
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
           ${handleCaching}
-          ${process.env.DEBUG ? '#' : ''}echo 'Caching complete'
-          ${process.env.DEBUG ? '#' : ''}echo ' '
-          ${process.env.DEBUG ? '#' : ''}echo 'Large File after LFS caching and pull'
-          ${process.env.DEBUG ? '#' : ''}ls -alh "${lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+          ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
           echo ' '
           #
-          ${process.env.DEBUG ? '#' : ''}tree -L 4 "${this.buildPathFull}"
-          ${process.env.DEBUG ? '#' : ''}ls -lh "${buildVolumeFolder}"
+          ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
+          ${process.env.DEBUG ? '' : '#'}ls -lh "${buildVolumeFolder}"
           echo ' '
           #
       `,
