@@ -37,8 +37,9 @@ class RemoteBuilder {
       buildParameters.platform,
     );
     RemoteBuilder.buildParams = buildParameters;
-    RemoteBuilder.readBranchName();
-    RemoteBuilder.readDefaultSecrets();
+    RemoteBuilder.setupBranchName();
+    RemoteBuilder.setupFolderVariables();
+    RemoteBuilder.setupDefaultSecrets();
     try {
       RemoteBuilder.setupBuildPlatform();
 
@@ -73,6 +74,15 @@ class RemoteBuilder {
       await RemoteBuilder.handleException(error);
       throw error;
     }
+  }
+
+  private static setupFolderVariables() {
+    this.buildPathFull = `/${buildVolumeFolder}/${this.buildId}`;
+    this.builderPathFull = `${this.buildPathFull}/builder`;
+    this.steamPathFull = `${this.buildPathFull}/steam`;
+    this.repoPathFull = `${this.buildPathFull}/${repositoryFolder}`;
+    this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
+    this.libraryFolderFull = `${this.projectPathFull}/Library`;
   }
 
   private static async SetupStep() {
@@ -270,7 +280,7 @@ class RemoteBuilder {
     return runNumber;
   }
 
-  private static readBranchName() {
+  private static setupBranchName() {
     const defaultBranchName =
       process.env.GITHUB_REF?.split('/')
         .filter((x) => {
@@ -282,7 +292,7 @@ class RemoteBuilder {
       process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
   }
 
-  private static readDefaultSecrets() {
+  private static setupDefaultSecrets() {
     this.defaultSecrets = [
       {
         ParameterKey: 'GithubToken',
