@@ -53,10 +53,10 @@ class RemoteBuilder {
       );
       await RemoteBuilder.SetupStep();
       const t2 = Date.now();
-      core.info(`Setup time: ${Math.floor((t2 - t) / 1000)}`);
+      core.info(`Setup time: ${Math.floor((t2 - t) / 1000)}s`);
       await RemoteBuilder.BuildStep(baseImage);
       const t3 = Date.now();
-      core.info(`Build time: ${Math.floor((t3 - t2) / 1000)}`);
+      core.info(`Build time: ${Math.floor((t3 - t2) / 1000)}s`);
       await RemoteBuilder.CompressionStep();
       core.info(`Post build steps ${this.buildParams.postBuildSteps}`);
       this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);

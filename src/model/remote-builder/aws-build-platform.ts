@@ -65,14 +65,14 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     let t2;
     try {
       const t1 = Date.now();
-      core.info(`Setup job time: ${Math.floor((t0 - t1) / 1000)}`);
+      core.info(`Setup job time: ${Math.floor((t1 - t0) / 1000)}s`);
       await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
       t2 = Date.now();
-      core.info(`Run job time: ${Math.floor((t1 - t2) / 1000)}`);
+      core.info(`Run job time: ${Math.floor((t2 - t1) / 1000)}s`);
     } finally {
       await this.cleanupResources(CF, taskDef);
       const t3 = Date.now();
-      if (t2 !== undefined) core.info(`Cleanup job time: ${Math.floor((t2 - t3) / 1000)}`);
+      if (t2 !== undefined) core.info(`Cleanup job time: ${Math.floor((t3 - t2) / 1000)}s`);
     }
   }
 
