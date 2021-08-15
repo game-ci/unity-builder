@@ -160,7 +160,7 @@ class RemoteBuilder {
           `,
       ],
       `/${buildVolumeFolder}`,
-      `/${this.repoPathFull}`,
+      `/${this.projectPathFull}`,
       RemoteBuilder.readBuildEnvironmentVariables(),
       buildSecrets,
     );
