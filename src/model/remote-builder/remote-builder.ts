@@ -119,7 +119,7 @@ class RemoteBuilder {
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
-          ${handleCaching} "$LFS_ASSETS_HASH"
+          ${handleCaching}
           ${process.env.DEBUG ? '#' : ''}echo 'Caching complete'
           ${process.env.DEBUG ? '#' : ''}echo ' '
           ${process.env.DEBUG ? '#' : ''}echo 'Large File after LFS caching and pull'

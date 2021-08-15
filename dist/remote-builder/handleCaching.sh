@@ -4,7 +4,6 @@ cacheFolderFull=$1
 libraryFolderFull=$2
 gitLFSDestinationFolder=$3
 purgeRemoteBuilderCache=$4
-LFS_ASSETS_HASH=$5
 
 cacheFolderWithBranch="$cacheFolderFull/$branch"
 lfsCacheFolder="$cacheFolderFull/$branch/lfs"
