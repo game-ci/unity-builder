@@ -80,12 +80,12 @@ class RemoteBuilder {
     const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
     const testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
 
-    const repo = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
-    const repo2 = `https://${this.buildParams.githubToken}@github.com/game-ci/steam-deploy.git`;
-    const repo3 = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    const unityBuilderRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
+    const steamDeployRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/steam-deploy.git`;
+    const targetBuildRepoUrl = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
-    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${repo3}" "${testLFSFile}"`;
+    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
     const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" ${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
@@ -103,10 +103,10 @@ class RemoteBuilder {
           #
           echo ' '
           echo 'Cloning utility repositories for remote builder'
-          git clone -q --branch "remote-builder/unified-providers" ${repo} ${this.builderPathFull}
-          echo 'Cloned ${repo}'
-          git clone -q ${repo2} ${this.steamPathFull}
-          echo 'Cloned ${repo2}'
+          git clone -q --branch "remote-builder/unified-providers" ${unityBuilderRepoUrl} ${this.builderPathFull}
+          echo 'Cloned ${unityBuilderRepoUrl}'
+          git clone -q ${steamDeployRepoUrl} ${this.steamPathFull}
+          echo 'Cloned ${steamDeployRepoUrl}'
           #
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
@@ -115,7 +115,7 @@ class RemoteBuilder {
           ${process.env.DEBUG ? '#' : ''}echo ' '
           ${process.env.DEBUG ? '#' : ''}echo 'Large File before LFS caching and pull'
           ${process.env.DEBUG ? '#' : ''}ls -alh "${lfsDirectory}"
-          echo ' '
+          ${process.env.DEBUG ? '#' : ''}echo ' '
           echo 'Source repository initialized'
           echo ' '
           echo 'Checking cache for the Unity project Library and git LFS files'
