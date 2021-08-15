@@ -316,11 +316,12 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
   ) {
     core.info(JSON.stringify(secrets, undefined, 4));
     core.info(taskDefCloudFormation);
+    core.error(error);
+    core.info('Getting events and resources for task stack');
     const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
     const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
     core.info(JSON.stringify(events, undefined, 4));
     core.info(JSON.stringify(resources, undefined, 4));
-    core.error(error);
   }
 
   readTaskCloudFormationTemplate(): string {
