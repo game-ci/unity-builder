@@ -86,7 +86,7 @@ class RemoteBuilder {
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
-    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" ${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
+    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
       'alpine/git',
