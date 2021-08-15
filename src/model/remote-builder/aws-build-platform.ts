@@ -184,7 +184,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
           ...mappedSecrets,
         ],
       }).promise();
-      core.info('Creating main job...');
+      core.info('Creating cloud runner job');
       await CF.createStack({
         StackName: cleanupTaskDefStackName,
         TemplateBody: cleanupCloudFormation,
