@@ -2,8 +2,9 @@
 
 repoPathFull=$1
 cloneUrl=$2
-githubSha=$3
-testLFSFile=$4
+testLFSFile=$3
+
+githubSha=$GITHUB_SHA
 
 cd $repoPathFull
 
