@@ -1,11 +1,10 @@
 #!/bin/sh
 
 cacheFolderFull=$1
-branch=$2
-libraryFolderFull=$3
-gitLFSDestinationFolder=$4
-purgeRemoteBuilderCache=$5
-LFS_ASSETS_HASH=$6
+libraryFolderFull=$2
+gitLFSDestinationFolder=$3
+purgeRemoteBuilderCache=$4
+LFS_ASSETS_HASH=$5
 
 cacheFolderWithBranch="$cacheFolderFull/$branch"
 lfsCacheFolder="$cacheFolderFull/$branch/lfs"
@@ -66,6 +65,7 @@ du -sch "$cacheFolderFull"
 echo ' '
 
 ls
+cd
 git lfs pull
 echo 'pulled latest LFS files'
 zip -q -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"

@@ -56,10 +56,10 @@ class RemoteBuilder {
       this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
       this.libraryFolderFull = `${this.projectPathFull}/Library`;
 
-      await RemoteBuilder.SetupStep(this.branchName);
+      await RemoteBuilder.SetupStep();
       await RemoteBuilder.BuildStep(baseImage);
       await RemoteBuilder.CompressionStep();
-      await RemoteBuilder.UploadArtifacts(this.branchName);
+      await RemoteBuilder.UploadArtifacts();
       if (this.SteamDeploy) {
         await RemoteBuilder.DeployToSteam();
       }
@@ -75,7 +75,7 @@ class RemoteBuilder {
     }
   }
 
-  private static async SetupStep(branchName: string | undefined) {
+  private static async SetupStep() {
     core.info('Starting step 1/4 clone and restore cache)');
 
     const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
@@ -87,7 +87,7 @@ class RemoteBuilder {
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${repo3}" "$GITHUB_SHA" "${testLFSFile}"`;
-    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" "${branchName}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
+    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${cacheFolderFull}" ${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
       'alpine/git',
@@ -156,6 +156,7 @@ class RemoteBuilder {
             chmod -R +x "/entrypoint.sh"
             chmod -R +x "/steps"
             /entrypoint.sh
+            ls -lh
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -177,7 +178,6 @@ class RemoteBuilder {
             apk add zip -q
             apk add tree -q
             cd "${this.libraryFolderFull}"
-            tree
             zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
             mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib"
             cd "${this.projectPathFull}"
@@ -199,7 +199,7 @@ class RemoteBuilder {
     core.info('compression step complete');
   }
 
-  private static async UploadArtifacts(branchName: string | undefined) {
+  private static async UploadArtifacts() {
     core.info('Starting step 4/4 upload build to s3');
     await this.RemoteBuilderProviderPlatform.runBuildTask(
       this.buildId,
@@ -208,7 +208,7 @@ class RemoteBuilder {
         `
             aws s3 cp ${this.buildId}/build-${this.buildId}.zip s3://game-ci-storage/
             # no need to upload Library cache for now
-            # aws s3 cp /${buildVolumeFolder}/${cacheFolder}/${branchName}/lib-${this.buildId}.zip s3://game-ci-storage/
+            # aws s3 cp "/${buildVolumeFolder}/${cacheFolder}/$branch/lib-${this.buildId}.zip" "s3://game-ci-storage/"
             ${this.SteamDeploy ? '#' : ''} rm -r ${this.buildId}
           `,
       ],
@@ -288,6 +288,11 @@ class RemoteBuilder {
         ParameterKey: 'GithubToken',
         EnvironmentVariable: 'GITHUB_TOKEN',
         ParameterValue: this.buildParams.githubToken,
+      },
+      {
+        ParameterKey: 'branch',
+        EnvironmentVariable: 'branch',
+        ParameterValue: this.branchName,
       },
     ];
   }
