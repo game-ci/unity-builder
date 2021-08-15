@@ -174,11 +174,13 @@ class RemoteBuilder {
         `
             apk update -q
             apk add zip -q
+            apk add tree -q
             cd "${this.libraryFolderFull}"
+            tree
             zip -r "lib-${this.buildId}.zip" "${this.libraryFolderFull}"
             mv "lib-${this.buildId}.zip" "${cacheFolderFull}/lib"
             cd "${this.projectPathFull}"
-            ls -lh "${this.buildPathFull}"
+            ls -lh "${this.projectPathFull}"
             zip -r "build-${this.buildId}.zip" "${this.projectPathFull}/${RemoteBuilder.buildParams.buildPath}"
             mv "build-${this.buildId}.zip" "/${buildVolumeFolder}/${this.buildId}/build-${this.buildId}.zip"
           `,
