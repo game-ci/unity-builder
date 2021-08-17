@@ -33,7 +33,7 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  remoteBuildCluster:
+  cloudRunnerCluster:
     default: 'local'
     required: false
     description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
@@ -49,11 +49,11 @@ inputs:
     default: ''
     required: false
     description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
-  remoteBuildMemory:
+  cloudRunnerMemory:
     default: '750M'
     required: false
     description: 'Amount of memory to assign the remote build container'
-  remoteBuildCpu:
+  cloudRunnerCpu:
     default: '1.0'
     required: false
     description: 'Amount of CPU time to assign the remote build container'
