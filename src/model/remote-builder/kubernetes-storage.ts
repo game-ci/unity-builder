@@ -26,6 +26,13 @@ class KubernetesStorage {
       pvcName = buildParameters.kubeVolume;
       return;
     }
+    const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
+      (x) => x.metadata?.name,
+    );
+    if (!pvcList.includes(pvcName)) {
+      core.setOutput('volume', pvcName);
+      return;
+    }
     const pvc = new k8s.V1PersistentVolumeClaim();
     pvc.apiVersion = 'v1';
     pvc.kind = 'PersistentVolumeClaim';
