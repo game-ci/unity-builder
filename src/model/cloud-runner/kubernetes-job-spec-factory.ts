@@ -1,5 +1,5 @@
 import BuildParameters from '../build-parameters';
-import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(
@@ -7,7 +7,7 @@ class KubernetesJobSpecFactory {
     image: string,
     mountdir: string,
     workingDirectory: string,
-    environment: RemoteBuilderEnvironmentVariable[],
+    environment: CloudRunnerEnvironmentVariable[],
     buildGuid: string,
     buildParameters: BuildParameters,
     secretName,
@@ -109,8 +109,8 @@ class KubernetesJobSpecFactory {
               workingDir: `/${workingDirectory}`,
               resources: {
                 requests: {
-                  memory: buildParameters.remoteBuildMemory,
-                  cpu: buildParameters.remoteBuildCpu,
+                  memory: buildParameters.cloudRunnerMemory,
+                  cpu: buildParameters.cloudRunnerCpu,
                 },
               },
               env: environment,

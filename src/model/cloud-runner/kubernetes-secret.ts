@@ -1,11 +1,11 @@
 import { CoreV1Api } from '@kubernetes/client-node';
-import RemoteBuilderSecret from './cloud-runner-secret';
+import CloudRunnerSecret from './cloud-runner-secret';
 import * as k8s from '@kubernetes/client-node';
 const base64 = require('base-64');
 
 class KubernetesSecret {
   static async createSecret(
-    secrets: RemoteBuilderSecret[],
+    secrets: CloudRunnerSecret[],
     secretName: string,
     namespace: string,
     kubeClient: CoreV1Api,

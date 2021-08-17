@@ -23,12 +23,12 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public customParameters!: string;
   public sshAgent!: string;
-  public remoteBuildCluster!: string;
+  public cloudRunnerCluster!: string;
   public awsBaseStackName!: string;
   public kubeConfig!: string;
   public githubToken!: string;
-  public remoteBuildMemory!: string;
-  public remoteBuildCpu!: string;
+  public cloudRunnerMemory!: string;
+  public cloudRunnerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public chownFilesTo!: string;
@@ -65,12 +65,12 @@ class BuildParameters {
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       chownFilesTo: Input.chownFilesTo,
-      remoteBuildCluster: Input.remoteBuildCluster,
+      cloudRunnerCluster: Input.cloudRunnerCluster,
       awsBaseStackName: Input.awsBaseStackName,
       kubeConfig: Input.kubeConfig,
       githubToken: Input.githubToken,
-      remoteBuildMemory: Input.remoteBuildMemory,
-      remoteBuildCpu: Input.remoteBuildCpu,
+      cloudRunnerMemory: Input.cloudRunnerMemory,
+      cloudRunnerCpu: Input.cloudRunnerCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
       postBuildSteps: Input.postBuildSteps,

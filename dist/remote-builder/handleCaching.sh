@@ -3,7 +3,7 @@
 cacheFolderFull=$1
 libraryFolderFull=$2
 gitLFSDestinationFolder=$3
-purgeRemoteBuilderCache=$4
+purgeCloudRunnerCache=$4
 
 cacheFolderWithBranch="$cacheFolderFull"
 lfsCacheFolder="$cacheFolderFull/lfs"
@@ -78,7 +78,7 @@ echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 echo ' '
 
 # purge cache
-if [ "$purgeRemoteBuilderCache" == "true" ]; then
+if [ "$purgeCloudRunnerCache" == "true" ]; then
   echo "purging the entire cache"
   rm -r "$cacheFolderFull"
   echo ' '

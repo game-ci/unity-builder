@@ -23,5 +23,5 @@ export {
   Project,
   Unity,
   Versioning,
-  CloudRunner as RemoteBuilder,
+  CloudRunner as CloudRunner,
 };

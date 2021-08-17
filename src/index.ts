@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Output, RemoteBuilder } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
 
 async function run() {
   try {
@@ -12,10 +12,10 @@ async function run() {
     const baseImage = new ImageTag(buildParameters);
     let builtImage;
 
-    switch (buildParameters.remoteBuildCluster) {
+    switch (buildParameters.cloudRunnerCluster) {
       case 'aws':
       case 'k8s':
-        await RemoteBuilder.build(buildParameters, baseImage);
+        await CloudRunner.build(buildParameters, baseImage);
         break;
 
       // default and local case

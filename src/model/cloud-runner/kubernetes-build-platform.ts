@@ -2,9 +2,9 @@ import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '..';
 import * as core from '@actions/core';
 import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
-import RemoteBuilderSecret from './cloud-runner-secret';
+import CloudRunnerSecret from './cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
-import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import KubernetesLogging from './kubernetes-logging';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
@@ -77,8 +77,8 @@ class Kubernetes implements CloudRunnerProviderInterface {
     commands: string[],
     mountdir: string,
     workingdir: string,
-    environment: RemoteBuilderEnvironmentVariable[],
-    secrets: RemoteBuilderSecret[],
+    environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
   ): Promise<void> {
     try {
       // setup

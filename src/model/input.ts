@@ -97,8 +97,8 @@ class Input {
     return core.getInput('postBuildSteps');
   }
 
-  static get remoteBuildCluster() {
-    return core.getInput('remoteBuildCluster') || '';
+  static get cloudRunnerCluster() {
+    return core.getInput('cloudRunnerCluster') || '';
   }
 
   static get awsBaseStackName() {
@@ -113,12 +113,12 @@ class Input {
     return core.getInput('githubToken') || '';
   }
 
-  static get remoteBuildMemory() {
-    return core.getInput('remoteBuildMemory') || '750M';
+  static get cloudRunnerMemory() {
+    return core.getInput('cloudRunnerMemory') || '750M';
   }
 
-  static get remoteBuildCpu() {
-    return core.getInput('remoteBuildCpu') || '1.0';
+  static get cloudRunnerCpu() {
+    return core.getInput('cloudRunnerCpu') || '1.0';
   }
 
   static get kubeVolumeSize() {

@@ -51,7 +51,7 @@ jobs:
         id: k8s-unity-build
         env:
           DEBUG: true
-          remoteBuilderBranch: remote-builder/unified-providers
+          cloudRunerBranch: remote-builder/unified-providers
         with:
           cloudRunnerCluster: k8s
           targetPlatform: ${{ matrix.targetPlatform }}

@@ -1,11 +1,11 @@
 import AWSBuildPlatform from './aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
-import RemoteBuilderNamespace from './cloud-runner-namespace';
-import RemoteBuilderSecret from './cloud-runner-secret';
+import CloudRunnerNamespace from './cloud-runner-namespace';
+import CloudRunnerSecret from './cloud-runner-secret';
 import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
 import Kubernetes from './kubernetes-build-platform';
-import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import ImageEnvironmentFactory from '../image-environment-factory';
 import YAML from 'yaml';
 const repositoryFolder = 'repo';
@@ -13,9 +13,9 @@ const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
 
 class CloudRunner {
-  static RemoteBuilderProviderPlatform: CloudRunnerProviderInterface;
+  static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
   private static buildParams: BuildParameters;
-  private static defaultSecrets: RemoteBuilderSecret[];
+  private static defaultSecrets: CloudRunnerSecret[];
   private static buildGuid: string;
   private static branchName: string;
   private static buildPathFull: string;
@@ -35,7 +35,7 @@ class CloudRunner {
 
   static async build(buildParameters: BuildParameters, baseImage) {
     const t = Date.now();
-    CloudRunner.buildGuid = RemoteBuilderNamespace.generateBuildName(
+    CloudRunner.buildGuid = CloudRunnerNamespace.generateBuildName(
       CloudRunner.readRunNumber(),
       buildParameters.platform,
     );
@@ -45,7 +45,7 @@ class CloudRunner {
     CloudRunner.setupDefaultSecrets();
     try {
       CloudRunner.setupBuildPlatform();
-      await this.RemoteBuilderProviderPlatform.setupSharedBuildResources(
+      await this.CloudRunnerProviderPlatform.setupSharedBuildResources(
         this.buildGuid,
         this.buildParams,
         this.branchName,
@@ -62,15 +62,15 @@ class CloudRunner {
       this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
       core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
       for (const step of this.buildParams.postBuildSteps) {
-        const stepSecrets: RemoteBuilderSecret[] = step.secrets.map((x) => {
-          const secret: RemoteBuilderSecret = {
+        const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
+          const secret: CloudRunnerSecret = {
             ParameterKey: x.name,
             EnvironmentVariable: x.name,
             ParameterValue: x.value,
           };
           return secret;
         });
-        await this.RemoteBuilderProviderPlatform.runBuildTask(
+        await this.CloudRunnerProviderPlatform.runBuildTask(
           this.buildGuid,
           step['image'],
           step['commands'],
@@ -85,7 +85,7 @@ class CloudRunner {
           [...this.defaultSecrets, ...stepSecrets],
         );
       }
-      await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
+      await this.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
         this.buildGuid,
         this.buildParams,
         this.branchName,
@@ -119,9 +119,9 @@ class CloudRunner {
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
     const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
-    const remoteBuilderBranch = process.env.remoteBuilderBranch ? `--branch "${process.env.remoteBuilderBranch}"` : '';
-    const cloneRemoteBuilder = `git clone -q ${remoteBuilderBranch} ${unityBuilderRepoUrl} ${this.builderPathFull}`;
-    await this.RemoteBuilderProviderPlatform.runBuildTask(
+    const CloudRunnerBranch = process.env.CloudRunnerBranch ? `--branch "${process.env.CloudRunnerBranch}"` : '';
+    const cloneCloudRunner = `git clone -q ${CloudRunnerBranch} ${unityBuilderRepoUrl} ${this.builderPathFull}`;
+    await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       'alpine/git',
       [
@@ -131,7 +131,7 @@ class CloudRunner {
           mkdir -p ${this.buildPathFull}
           mkdir -p ${this.builderPathFull}
           mkdir -p ${this.repoPathFull}
-          ${cloneRemoteBuilder}
+          ${cloneCloudRunner}
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
@@ -163,7 +163,7 @@ class CloudRunner {
 
   private static async BuildStep(baseImage: any) {
     core.info('Starting part 2/4 (build unity project)');
-    await this.RemoteBuilderProviderPlatform.runBuildTask(
+    await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       baseImage.toString(),
       [
@@ -190,7 +190,7 @@ class CloudRunner {
   private static async CompressionStep() {
     core.info('Starting step 3/4 build compression');
     // Cleanup
-    await this.RemoteBuilderProviderPlatform.runBuildTask(
+    await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       'alpine',
       [
@@ -225,15 +225,15 @@ class CloudRunner {
   }
 
   private static setupBuildPlatform() {
-    switch (this.buildParams.remoteBuildCluster) {
+    switch (this.buildParams.cloudRunnerCluster) {
       case 'aws':
         core.info('Building with AWS');
-        this.RemoteBuilderProviderPlatform = new AWSBuildPlatform(this.buildParams);
+        this.CloudRunnerProviderPlatform = new AWSBuildPlatform(this.buildParams);
         break;
       default:
       case 'k8s':
         core.info('Building with Kubernetes');
-        this.RemoteBuilderProviderPlatform = new Kubernetes(this.buildParams);
+        this.CloudRunnerProviderPlatform = new Kubernetes(this.buildParams);
         break;
     }
   }
@@ -312,15 +312,15 @@ class CloudRunner {
     );
   }
 
-  private static readBuildEnvironmentVariables(): RemoteBuilderEnvironmentVariable[] {
+  private static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
     return [
       {
         name: 'ContainerMemory',
-        value: this.buildParams.remoteBuildMemory,
+        value: this.buildParams.cloudRunnerMemory,
       },
       {
         name: 'ContainerCpu',
-        value: this.buildParams.remoteBuildCpu,
+        value: this.buildParams.cloudRunnerCpu,
       },
       {
         name: 'GITHUB_WORKSPACE',
@@ -385,7 +385,7 @@ class CloudRunner {
   private static async handleException(error: unknown) {
     core.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Remote Builder failed');
-    await this.RemoteBuilderProviderPlatform.cleanupSharedBuildResources(
+    await this.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
       this.buildGuid,
       this.buildParams,
       this.branchName,

@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerTaskDef from './cloud-runner-task-def';
 import * as zlib from 'zlib';
@@ -9,7 +9,7 @@ class AWSBuildRunner {
     taskDef: CloudRunnerTaskDef,
     ECS: AWS.ECS,
     CF: AWS.CloudFormation,
-    environment: RemoteBuilderEnvironmentVariable[],
+    environment: CloudRunnerEnvironmentVariable[],
     buildGuid: string,
     commands: string[],
   ) {

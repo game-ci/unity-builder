@@ -1,11 +1,11 @@
 import * as SDK from 'aws-sdk';
 import { customAlphabet } from 'nanoid';
-import RemoteBuilderSecret from './cloud-runner-secret';
-import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerSecret from './cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import * as fs from 'fs';
 import * as core from '@actions/core';
 import CloudRunnerTaskDef from './cloud-runner-task-def';
-import RemoteBuilderConstants from './cloud-runner-constants';
+import CloudRunnerConstants from './cloud-runner-constants';
 import AWSBuildRunner from './aws-build-runner';
 import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
 import BuildParameters from '../build-parameters';
@@ -44,8 +44,8 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     commands: string[],
     mountdir: string,
     workingdir: string,
-    environment: RemoteBuilderEnvironmentVariable[],
-    secrets: RemoteBuilderSecret[],
+    environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
   ): Promise<void> {
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
@@ -115,9 +115,9 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     commands: string[],
     mountdir: string,
     workingdir: string,
-    secrets: RemoteBuilderSecret[],
+    secrets: CloudRunnerSecret[],
   ): Promise<CloudRunnerTaskDef> {
-    const logGuid = customAlphabet(RemoteBuilderConstants.alphabet, 9)();
+    const logGuid = customAlphabet(CloudRunnerConstants.alphabet, 9)();
     commands[1] += `
       echo "${logGuid}"
     `;
@@ -323,7 +323,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     CF: SDK.CloudFormation,
     taskDefStackName: string,
     taskDefCloudFormation: string,
-    secrets: RemoteBuilderSecret[],
+    secrets: CloudRunnerSecret[],
   ) {
     core.info(JSON.stringify(secrets, undefined, 4));
     core.info(taskDefCloudFormation);
