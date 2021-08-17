@@ -196,10 +196,10 @@ class RemoteBuilder {
       [
         `
             printenv
+            apk update -q
+            apk add zip tree -q
             ${process.env.DEBUG ? '' : '#'}tree -L 4 "$projectPathFull"
             ${process.env.DEBUG ? '' : '#'}ls -lh "$projectPathFull"
-            apk update -q
-            apk add zip -q
             cd "$libraryFolderFull"
             zip -r "lib-$BUILDID.zip" "$libraryFolderFull"
             mv "lib-$BUILDID.zip" "$cacheFolderFull/lib"
