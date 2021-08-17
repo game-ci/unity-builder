@@ -33,7 +33,7 @@ class KubernetesStorage {
       name: pvcName,
     };
     pvc.spec = {
-      accessModes: ['ReadWriteOnce'],
+      accessModes: ['ReadWriteMany'],
       volumeMode: 'Filesystem',
       resources: {
         requests: {
