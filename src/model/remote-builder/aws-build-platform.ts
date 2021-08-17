@@ -1,17 +1,17 @@
 import * as SDK from 'aws-sdk';
 import { customAlphabet } from 'nanoid';
-import RemoteBuilderSecret from './remote-builder-secret';
-import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import RemoteBuilderSecret from './cloud-runner-secret';
+import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
 import * as fs from 'fs';
 import * as core from '@actions/core';
-import RemoteBuilderTaskDef from './remote-builder-task-def';
-import RemoteBuilderConstants from './remote-builder-constants';
+import CloudRunnerTaskDef from './cloud-runner-task-def';
+import RemoteBuilderConstants from './cloud-runner-constants';
 import AWSBuildRunner from './aws-build-runner';
-import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
+import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
 import BuildParameters from '../build-parameters';
 const crypto = require('crypto');
 
-class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
+class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   private baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
@@ -116,7 +116,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     mountdir: string,
     workingdir: string,
     secrets: RemoteBuilderSecret[],
-  ): Promise<RemoteBuilderTaskDef> {
+  ): Promise<CloudRunnerTaskDef> {
     const logGuid = customAlphabet(RemoteBuilderConstants.alphabet, 9)();
     commands[1] += `
       echo "${logGuid}"
@@ -339,7 +339,7 @@ class AWSBuildEnvironment implements RemoteBuilderProviderInterface {
     return fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
   }
 
-  async cleanupResources(CF: SDK.CloudFormation, taskDef: RemoteBuilderTaskDef) {
+  async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerTaskDef) {
     core.info('Cleanup starting');
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,

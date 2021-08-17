@@ -9,7 +9,7 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
-import RemoteBuilder from './remote-builder/remote-builder';
+import CloudRunner from './remote-builder/cloud-runner';
 
 export {
   Action,
@@ -23,5 +23,5 @@ export {
   Project,
   Unity,
   Versioning,
-  RemoteBuilder,
+  CloudRunner as RemoteBuilder,
 };

@@ -1,12 +1,12 @@
 import * as AWS from 'aws-sdk';
-import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
 import * as core from '@actions/core';
-import RemoteBuilderTaskDef from './remote-builder-task-def';
+import CloudRunnerTaskDef from './cloud-runner-task-def';
 import * as zlib from 'zlib';
 
 class AWSBuildRunner {
   static async runTask(
-    taskDef: RemoteBuilderTaskDef,
+    taskDef: CloudRunnerTaskDef,
     ECS: AWS.ECS,
     CF: AWS.CloudFormation,
     environment: RemoteBuilderEnvironmentVariable[],
@@ -92,7 +92,7 @@ class AWSBuildRunner {
   static async streamLogsUntilTaskStops(
     ECS: AWS.ECS,
     CF: AWS.CloudFormation,
-    taskDef: RemoteBuilderTaskDef,
+    taskDef: CloudRunnerTaskDef,
     clusterName: string,
     taskArn: string,
     kinesisStreamName: string,

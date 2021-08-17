@@ -1,10 +1,10 @@
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '..';
 import * as core from '@actions/core';
-import { RemoteBuilderProviderInterface } from './remote-builder-provider-interface';
-import RemoteBuilderSecret from './remote-builder-secret';
+import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
+import RemoteBuilderSecret from './cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
-import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
 import KubernetesLogging from './kubernetes-logging';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
@@ -13,7 +13,7 @@ import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesCleanupCronJob from './kubernetes-cleanup-cronjob';
 import KubernetesServiceAccount from './kubernetes-service-account';
 
-class Kubernetes implements RemoteBuilderProviderInterface {
+class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;

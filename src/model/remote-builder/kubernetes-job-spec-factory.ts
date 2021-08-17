@@ -1,5 +1,5 @@
 import BuildParameters from '../build-parameters';
-import RemoteBuilderEnvironmentVariable from './remote-builder-environment-variable';
+import RemoteBuilderEnvironmentVariable from './cloud-runner-environment-variable';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(

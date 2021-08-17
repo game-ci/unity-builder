@@ -1,5 +1,5 @@
 import { CoreV1Api } from '@kubernetes/client-node';
-import RemoteBuilderSecret from './remote-builder-secret';
+import RemoteBuilderSecret from './cloud-runner-secret';
 import * as k8s from '@kubernetes/client-node';
 const base64 = require('base-64');
 
