@@ -196,19 +196,19 @@ class RemoteBuilder {
       [
         `
             printenv
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$projectPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$projectPathFull"
             apk update -q
             apk add zip -q
             cd "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/$libraryFolderFull"
-            zip -r "lib-$buildGuid.zip" "$libraryFolderFull"
-            mv "lib-$buildGuid.zip" "$cacheFolderFull/lib"
+            zip -r "lib-$BUILDID.zip" "$libraryFolderFull"
+            mv "lib-$BUILDID.zip" "$cacheFolderFull/lib"
             cd "$projectPathFull"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/$libraryFolderFull"
             ls -lh "$projectPathFull"
-            zip -r "build-$buildGuid.zip" "$projectPathFull/${RemoteBuilder.buildParams.buildPath}"
-            mv "build-$buildGuid.zip" "/${buildVolumeFolder}/$buildGuid/build-$buildGuid.zip"
+            zip -r "build-$BUILDID.zip" "$projectPathFull/${RemoteBuilder.buildParams.buildPath}"
+            mv "build-$BUILDID.zip" "/${buildVolumeFolder}/$BUILDID/build-$BUILDID.zip"
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$projectPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$projectPathFull"
           `,
       ],
       `/${buildVolumeFolder}`,
