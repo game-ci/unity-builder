@@ -176,8 +176,7 @@ class RemoteBuilder {
             chmod -R +x "/entrypoint.sh"
             chmod -R +x "/steps"
             /entrypoint.sh
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
+            ls -lh
           `,
       ],
       `/${buildVolumeFolder}`,
@@ -199,13 +198,9 @@ class RemoteBuilder {
             apk update -q
             apk add zip -q
             cd "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/$libraryFolderFull"
             zip -r "lib-$buildGuid.zip" "$libraryFolderFull"
             mv "lib-$buildGuid.zip" "$cacheFolderFull/lib"
             cd "$projectPathFull"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$libraryFolderFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/$libraryFolderFull"
             ls -lh "$projectPathFull"
             zip -r "build-$buildGuid.zip" "$projectPathFull/${RemoteBuilder.buildParams.buildPath}"
             mv "build-$buildGuid.zip" "/${buildVolumeFolder}/$buildGuid/build-$buildGuid.zip"
