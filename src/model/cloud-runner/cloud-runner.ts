@@ -117,8 +117,8 @@ class CloudRunner {
     const targetBuildRepoUrl = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
     const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
-    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/remote-builder/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
-    const handleCaching = `${this.builderPathFull}/dist/remote-builder/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
+    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
+    const handleCaching = `${this.builderPathFull}/dist/cloud-runner/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
     const CloudRunnerBranch = process.env.CloudRunnerBranch ? `--branch "${process.env.CloudRunnerBranch}"` : '';
     const cloneCloudRunner = `git clone -q ${CloudRunnerBranch} ${unityBuilderRepoUrl} ${this.builderPathFull}`;
     await this.CloudRunnerProviderPlatform.runBuildTask(
