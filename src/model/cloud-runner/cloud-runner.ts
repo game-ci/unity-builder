@@ -135,7 +135,6 @@ class CloudRunner {
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${initializeSourceRepoForCaching}
-          export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-guid)"
           echo 'Source repository initialized'
           echo ' '
           ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
