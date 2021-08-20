@@ -25,7 +25,7 @@ ls -lh "$libraryCacheFolder"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 echo "Checking if $libraryCacheFolder/$latestLibraryCacheFile"
-if [ -z "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
+if [ -f "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
