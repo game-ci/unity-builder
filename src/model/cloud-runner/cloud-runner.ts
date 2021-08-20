@@ -219,6 +219,10 @@ class CloudRunner {
           name: 'GITHUB_SHA',
           value: process.env.GITHUB_SHA || '',
         },
+        {
+          name: 'cacheFolderFull',
+          value: this.cacheFolderFull,
+        },
       ],
       this.defaultSecrets,
     );

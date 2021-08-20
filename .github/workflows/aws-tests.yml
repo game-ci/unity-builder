@@ -1,4 +1,4 @@
-name: AWS
+name: AWS Fargate
 
 on:
   push: { branches: [main, aws, remote-builder/unified-providers] }
