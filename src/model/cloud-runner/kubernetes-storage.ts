@@ -29,7 +29,7 @@ class KubernetesStorage {
     const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
       (x) => x.metadata?.name,
     );
-    if (!pvcList.includes(pvcName)) {
+    if (pvcList.includes(pvcName)) {
       core.setOutput('volume', pvcName);
       return;
     }
