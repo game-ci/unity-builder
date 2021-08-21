@@ -29,7 +29,7 @@ if [ -f "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists $"
   mkdir -p "$libraryFolderFull"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull"
-  ls "$libraryFolderFull"
+  tree "$libraryFolderFull"
 fi
 
 echo ' '
@@ -72,13 +72,15 @@ echo ' '
 cd "$repoPathFull"
 git lfs pull
 echo 'pulled latest LFS files'
-zip -q -r "$LFS_ASSETS_HASH.zip" "$gitLFSDestinationFolder"
+
+cd "$gitLFSDestinationFolder/.."
+zip -q -r "$LFS_ASSETS_HASH.zip" "./lfs"
 cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
 echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
-echo ' '
 
 # purge cache
 if [ "$purgeCloudRunnerCache" == "true" ]; then
+  echo ' '
   echo "purging the entire cache"
   rm -r "$cacheFolderFull"
   echo ' '
