@@ -104,8 +104,6 @@ class Kubernetes implements CloudRunnerProviderInterface {
       core.info('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       core.info('Job created');
-      await KubernetesStorage.watchUntilPVCNotPending(this.kubeClient, this.pvcName, this.namespace);
-      core.info('PVC Bound');
       this.setPodNameAndContainerName(
         await KubernetesUtilities.findPodFromJob(this.kubeClient, this.jobName, this.namespace),
       );
