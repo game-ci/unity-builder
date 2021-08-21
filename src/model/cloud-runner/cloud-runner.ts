@@ -245,19 +245,6 @@ class CloudRunner {
     ];
   }
 
-  private static readUploadArtifactEnvironmentVariables() {
-    return [
-      {
-        name: 'GITHUB_SHA',
-        value: process.env.GITHUB_SHA || '',
-      },
-      {
-        name: 'AWS_DEFAULT_REGION',
-        value: process.env.AWS_DEFAULT_REGION || '',
-      },
-    ];
-  }
-
   private static async runMainJob(baseImage: any) {
     if (!this.buildParams.customBuildSteps) {
       core.info(`Cloud Runner is running in standard build automation mode`);
@@ -297,12 +284,7 @@ class CloudRunner {
         step['commands'],
         `/${buildVolumeFolder}`,
         `/${buildVolumeFolder}`,
-        [
-          {
-            name: 'GITHUB_SHA',
-            value: process.env.GITHUB_SHA || '',
-          },
-        ],
+        this.defaultGitShaEnvironmentVariable,
         [...this.defaultSecrets, ...stepSecrets],
       );
     }
@@ -404,14 +386,13 @@ class CloudRunner {
       `/${buildVolumeFolder}`,
       `/${buildVolumeFolder}`,
       [
-        {
-          name: 'GITHUB_SHA',
-          value: process.env.GITHUB_SHA || '',
-        },
-        {
-          name: 'cacheFolderFull',
-          value: this.cacheFolderFull,
-        },
+        ...CloudRunner.defaultGitShaEnvironmentVariable,
+        ...[
+          {
+            name: 'cacheFolderFull',
+            value: this.cacheFolderFull,
+          },
+        ],
       ],
       this.defaultSecrets,
     );
