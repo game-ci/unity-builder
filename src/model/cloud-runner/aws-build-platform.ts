@@ -253,16 +253,22 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   async setupBaseStack(CF: SDK.CloudFormation) {
     const baseStackName = this.baseStackName;
     const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
-    const hash = crypto.createHash('md5').update(baseStack).digest('hex');
 
     // Cloud Formation Input
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
       StackName: baseStackName,
     };
-    const parameters: SDK.CloudFormation.Parameter[] = [
+    const parametersWithoutHash: SDK.CloudFormation.Parameter[] = [
       { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
       { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
-      { ParameterKey: 'Version', ParameterValue: hash },
+    ];
+    const hash = crypto
+      .createHash('md5')
+      .update(baseStack + JSON.stringify(parametersWithoutHash))
+      .digest('hex');
+    const parameters: SDK.CloudFormation.Parameter[] = [
+      ...parametersWithoutHash,
+      ...[{ ParameterKey: 'Version', ParameterValue: hash }],
     ];
     const updateInput: SDK.CloudFormation.UpdateStackInput = {
       StackName: baseStackName,
