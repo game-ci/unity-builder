@@ -152,7 +152,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
           this.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
         );
       }
-      const mappedSecrets = secrets.map((x) => {
+      const secretsMappedToCloudFormationParameters = secrets.map((x) => {
         return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
       });
 
@@ -161,6 +161,10 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
         TemplateBody: taskDefCloudFormation,
         Capabilities: ['CAPABILITY_IAM'],
         Parameters: [
+          {
+            ParameterKey: 'Environment',
+            ParameterValue: this.baseStackName,
+          },
           {
             ParameterKey: 'ImageUrl',
             ParameterValue: image,
@@ -189,7 +193,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
             ParameterKey: 'BUILDID',
             ParameterValue: buildGuid,
           },
-          ...mappedSecrets,
+          ...secretsMappedToCloudFormationParameters,
         ],
       }).promise();
       core.info('Creating cloud runner job');
@@ -256,7 +260,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
       StackName: baseStackName,
     };
     const parameters: SDK.CloudFormation.Parameter[] = [
-      { ParameterKey: 'EnvironmentName', ParameterValue: 'development' },
+      { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
       { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
       { ParameterKey: 'Version', ParameterValue: hash },
     ];
