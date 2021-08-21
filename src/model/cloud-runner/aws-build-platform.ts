@@ -162,7 +162,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
         Capabilities: ['CAPABILITY_IAM'],
         Parameters: [
           {
-            ParameterKey: 'Environment',
+            ParameterKey: 'EnvironmentName',
             ParameterValue: this.baseStackName,
           },
           {
