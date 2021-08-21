@@ -2,7 +2,6 @@
 
 repoPathFull=$1
 cloneUrl=$2
-testLFSFile=$3
 
 githubSha=$GITHUB_SHA
 

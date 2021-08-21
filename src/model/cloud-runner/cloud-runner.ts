@@ -26,7 +26,6 @@ class CloudRunner {
   private static libraryFolderFull: string;
   private static cacheFolderFull: string;
   private static lfsDirectory: string;
-  private static testLFSFile: string;
   private static purgeRemoteCaching: boolean;
   private static CloudRunnerBranch: string;
   private static unityBuilderRepoUrl: string;
@@ -112,7 +111,6 @@ class CloudRunner {
     this.libraryFolderFull = `${this.projectPathFull}/Library`;
     this.cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}/${this.branchName}`;
     this.lfsDirectory = `${this.repoPathFull}/.git/lfs`;
-    this.testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
     this.purgeRemoteCaching = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
     this.CloudRunnerBranch = process.env.CloudRunnerBranch ? `--branch "${process.env.CloudRunnerBranch}"` : '';
     this.unityBuilderRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
@@ -124,7 +122,7 @@ class CloudRunner {
   }
 
   private static getCloneNoLFSCommand() {
-    return `${this.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${this.repoPathFull}" "${this.targetBuildRepoUrl}" "${this.testLFSFile}"`;
+    return `${this.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${this.repoPathFull}" "${this.targetBuildRepoUrl}"`;
   }
 
   private static getCloneBuilder() {
