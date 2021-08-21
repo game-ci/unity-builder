@@ -30,10 +30,14 @@ class KubernetesStorage {
     const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
       (x) => x.metadata?.name,
     );
+    core.info(`Current PVCs in namespace ${namespace}`);
+    core.info(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
+      core.info(`pvc ${pvcName} already exists`);
       core.setOutput('volume', pvcName);
       return;
     }
+    core.info(`Creating PVC ${pvcName} (does not exist)`);
     const pvc = new k8s.V1PersistentVolumeClaim();
     pvc.apiVersion = 'v1';
     pvc.kind = 'PersistentVolumeClaim';
@@ -50,8 +54,11 @@ class KubernetesStorage {
       },
     };
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
-    core.info(`Persistent Volume Claim ${result.body.metadata?.name} ${pvcName} created`);
-    await this.watchUntilPVCNotPending(kubeClient, pvcName, namespace);
+    const name = result.body.metadata?.name;
+    if (!name) throw new Error('failed to create PVC');
+    core.info(`PVC ${name} created`);
+    await this.watchUntilPVCNotPending(kubeClient, name, namespace);
+    core.info(`PVC ${name} is ready and not pending`);
     core.setOutput('volume', pvcName);
   }
 }
