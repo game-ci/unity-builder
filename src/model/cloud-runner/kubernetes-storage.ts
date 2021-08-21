@@ -56,6 +56,7 @@ class KubernetesStorage {
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     const name = result.body.metadata?.name;
     if (!name) throw new Error('failed to create PVC');
+    core.info(JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4));
     core.info(`PVC ${name} created`);
     await this.watchUntilPVCNotPending(kubeClient, name, namespace);
     core.info(`PVC ${name} is ready and not pending`);
