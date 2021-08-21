@@ -27,7 +27,7 @@ latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 echo "Checking if Library cache $libraryCacheFolder/$latestLibraryCacheFile exists"
 if [ -f "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
-  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull/.."
+  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$libraryFolderFull/../"
   tree "$libraryFolderFull"
 fi
 
@@ -48,7 +48,7 @@ fi
 if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branch"
   rm -r "$gitLFSDestinationFolder"
-  unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder/.."
+  unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$gitLFSDestinationFolder/../"
   echo "git LFS folder, (should not contain $latestLFSCacheFile)"
   ls -lh "$gitLFSDestinationFolder/"
 fi
