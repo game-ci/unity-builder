@@ -27,7 +27,7 @@ latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 echo "Checking if Library cache $libraryCacheFolder/$latestLibraryCacheFile exists"
 if [ -f "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
-  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$repoPathFull"
+  unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$projectPathFull"
   tree "$libraryFolderFull"
 fi
 
