@@ -97,6 +97,14 @@ class Input {
     return core.getInput('postBuildSteps');
   }
 
+  static get preBuildSteps() {
+    return core.getInput('postBuildSteps');
+  }
+
+  static get customBuildSteps() {
+    return core.getInput('postBuildSteps');
+  }
+
   static get cloudRunnerCluster() {
     return core.getInput('cloudRunnerCluster') || '';
   }

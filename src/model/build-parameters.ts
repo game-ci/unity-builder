@@ -34,6 +34,8 @@ class BuildParameters {
   public chownFilesTo!: string;
 
   public postBuildSteps;
+  public preBuildSteps;
+  public customBuildSteps;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -47,7 +49,6 @@ class BuildParameters {
     return {
       version: unityVersion,
       customImage: Input.customImage,
-
       runnerTempPath: process.env.RUNNER_TEMP,
       platform: Input.targetPlatform,
       projectPath: Input.projectPath,
@@ -74,6 +75,8 @@ class BuildParameters {
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
       postBuildSteps: Input.postBuildSteps,
+      preBuildSteps: Input.preBuildSteps,
+      customBuildSteps: Input.customBuildSteps,
     };
   }
 

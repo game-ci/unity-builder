@@ -8,6 +8,7 @@ import Kubernetes from './kubernetes-build-platform';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import ImageEnvironmentFactory from '../image-environment-factory';
 import YAML from 'yaml';
+import CloudRunnerTimerLogger from './cloud-runner-timer-logger';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
@@ -30,7 +31,6 @@ class CloudRunner {
   private static CloudRunnerBranch: string;
   private static unityBuilderRepoUrl: string;
   private static targetBuildRepoUrl: string;
-  private static SteamDeploy: boolean = process.env.STEAM_DEPLOY !== undefined || false;
   private static readonly defaultGitShaEnvironmentVariable = [
     {
       name: 'GITHUB_SHA',
@@ -38,8 +38,8 @@ class CloudRunner {
     },
   ];
 
-  static async build(buildParameters: BuildParameters, baseImage) {
-    const t = Date.now();
+  private static setup(buildParameters: BuildParameters) {
+    CloudRunnerTimerLogger.setup();
     CloudRunner.buildGuid = CloudRunnerNamespace.generateBuildName(
       CloudRunner.readRunNumber(),
       buildParameters.platform,
@@ -48,58 +48,7 @@ class CloudRunner {
     CloudRunner.setupBranchName();
     CloudRunner.setupFolderVariables();
     CloudRunner.setupDefaultSecrets();
-    try {
-      CloudRunner.setupBuildPlatform();
-      await this.CloudRunnerProviderPlatform.setupSharedBuildResources(
-        this.buildGuid,
-        this.buildParams,
-        this.branchName,
-        this.defaultSecrets,
-      );
-      await CloudRunner.SetupStep();
-      const t2 = Date.now();
-      core.info(`Setup time: ${Math.floor((t2 - t) / 1000)}s`);
-      await CloudRunner.BuildStep(baseImage);
-      const t3 = Date.now();
-      core.info(`Build time: ${Math.floor((t3 - t2) / 1000)}s`);
-      await CloudRunner.CompressionStep();
-      core.info(`Post build steps ${this.buildParams.postBuildSteps}`);
-      this.buildParams.postBuildSteps = YAML.parse(this.buildParams.postBuildSteps);
-      core.info(`Post build steps ${JSON.stringify(this.buildParams.postBuildSteps, undefined, 4)}`);
-      for (const step of this.buildParams.postBuildSteps) {
-        const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
-          const secret: CloudRunnerSecret = {
-            ParameterKey: x.name,
-            EnvironmentVariable: x.name,
-            ParameterValue: x.value,
-          };
-          return secret;
-        });
-        await this.CloudRunnerProviderPlatform.runBuildTask(
-          this.buildGuid,
-          step['image'],
-          step['commands'],
-          `/${buildVolumeFolder}`,
-          `/${buildVolumeFolder}`,
-          [
-            {
-              name: 'GITHUB_SHA',
-              value: process.env.GITHUB_SHA || '',
-            },
-          ],
-          [...this.defaultSecrets, ...stepSecrets],
-        );
-      }
-      await this.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
-        this.buildGuid,
-        this.buildParams,
-        this.branchName,
-        this.defaultSecrets,
-      );
-    } catch (error) {
-      await CloudRunner.handleException(error);
-      throw error;
-    }
+    CloudRunner.setupBuildPlatform();
   }
 
   private static setupFolderVariables() {
@@ -129,114 +78,26 @@ class CloudRunner {
     return `git clone -q ${this.CloudRunnerBranch} ${this.unityBuilderRepoUrl} ${this.builderPathFull}`;
   }
 
-  private static async SetupStep() {
-    core.info('Starting step 1/4 clone and restore cache)');
-    await this.CloudRunnerProviderPlatform.runBuildTask(
-      this.buildGuid,
-      'alpine/git',
-      [
-        ` printenv
-          apk update -q
-          apk add unzip zip git-lfs jq tree -q
-          mkdir -p ${this.buildPathFull}
-          mkdir -p ${this.builderPathFull}
-          mkdir -p ${this.repoPathFull}
-          ${this.getCloneBuilder()}
-          echo ' '
-          echo 'Initializing source repository for cloning with caching of LFS files'
-          ${this.getCloneNoLFSCommand()}
-          echo 'Source repository initialized'
-          echo ' '
-          ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
-          ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-          echo 'Starting checks of cache for the Unity project Library and git LFS files'
-          ${this.getHandleCachingCommand()}
-          ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-          ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-          ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
-          ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-      `,
-      ],
-      `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}/`,
-      CloudRunner.defaultGitShaEnvironmentVariable,
-      this.defaultSecrets,
-    );
+  static async run(buildParameters: BuildParameters, baseImage) {
+    CloudRunner.setup(buildParameters);
+    try {
+      await CloudRunner.setupSharedBuildResources();
+      await CloudRunner.setupStep();
+      await CloudRunner.runMainJob(baseImage);
+      await CloudRunner.cleanupSharedBuildResources();
+    } catch (error) {
+      await CloudRunner.handleException(error);
+      throw error;
+    }
   }
 
-  private static async BuildStep(baseImage: any) {
-    core.info('Starting part 2/4 (build unity project)');
-    await this.CloudRunnerProviderPlatform.runBuildTask(
+  private static async setupSharedBuildResources() {
+    await this.CloudRunnerProviderPlatform.setupSharedBuildResources(
       this.buildGuid,
-      baseImage.toString(),
-      [
-        `
-            printenv
-            export GITHUB_WORKSPACE="${this.repoPathFull}"
-            cp -r "${this.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
-            cp -r "${this.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
-            cp -r "${this.builderPathFull}/dist/steps/" "/steps"
-            chmod -R +x "/entrypoint.sh"
-            chmod -R +x "/steps"
-            /entrypoint.sh
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
-          `,
-      ],
-      `/${buildVolumeFolder}`,
-      `/${this.projectPathFull}`,
-      CloudRunner.readBuildEnvironmentVariables(),
+      this.buildParams,
+      this.branchName,
       this.defaultSecrets,
     );
-  }
-
-  private static async CompressionStep() {
-    core.info('Starting step 3/4 build compression');
-    // Cleanup
-    await this.CloudRunnerProviderPlatform.runBuildTask(
-      this.buildGuid,
-      'alpine',
-      [
-        `
-            printenv
-            apk update -q
-            apk add zip tree -q
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
-            cd "$libraryFolderFull/.."
-            zip -r "lib-$BUILDID.zip" "./Library"
-            mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
-            cd "$repoPathFull"
-            ls -lh "$repoPathFull"
-            zip -r "build-$BUILDID.zip" "./${CloudRunner.buildParams.buildPath}"
-            mv "build-$BUILDID.zip" "/$cacheFolderFull/build-$BUILDID.zip"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull"
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull/.."
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
-          `,
-      ],
-      `/${buildVolumeFolder}`,
-      `/${buildVolumeFolder}`,
-      [
-        {
-          name: 'GITHUB_SHA',
-          value: process.env.GITHUB_SHA || '',
-        },
-        {
-          name: 'cacheFolderFull',
-          value: this.cacheFolderFull,
-        },
-      ],
-      this.defaultSecrets,
-    );
-    core.info('compression step complete');
   }
 
   private static setupBuildPlatform() {
@@ -395,6 +256,175 @@ class CloudRunner {
         value: process.env.AWS_DEFAULT_REGION || '',
       },
     ];
+  }
+
+  private static async runMainJob(baseImage: any) {
+    if (!this.buildParams.customBuildSteps) {
+      core.info(`Cloud Runner is running in standard build automation mode`);
+      await CloudRunner.standardBuildAutomation(baseImage);
+    } else {
+      core.info(`Cloud Runner is running in custom job mode`);
+      await CloudRunner.runCustomJob(this.buildParams.customBuildSteps);
+    }
+  }
+
+  private static async standardBuildAutomation(baseImage: any) {
+    CloudRunnerTimerLogger.logWithTime('Pre build steps time');
+    await this.runCustomJob(this.buildParams.preBuildSteps);
+    CloudRunnerTimerLogger.logWithTime('Setup time');
+    await CloudRunner.BuildStep(baseImage);
+    CloudRunnerTimerLogger.logWithTime('Build time');
+    await CloudRunner.CompressionStep();
+    CloudRunnerTimerLogger.logWithTime('Compression time');
+    await this.runCustomJob(this.buildParams.postBuildSteps);
+    CloudRunnerTimerLogger.logWithTime('Post build steps time');
+  }
+
+  private static async runCustomJob(buildSteps) {
+    buildSteps = YAML.parse(buildSteps);
+    for (const step of buildSteps) {
+      const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
+        const secret: CloudRunnerSecret = {
+          ParameterKey: x.name,
+          EnvironmentVariable: x.name,
+          ParameterValue: x.value,
+        };
+        return secret;
+      });
+      await this.CloudRunnerProviderPlatform.runBuildTask(
+        this.buildGuid,
+        step['image'],
+        step['commands'],
+        `/${buildVolumeFolder}`,
+        `/${buildVolumeFolder}`,
+        [
+          {
+            name: 'GITHUB_SHA',
+            value: process.env.GITHUB_SHA || '',
+          },
+        ],
+        [...this.defaultSecrets, ...stepSecrets],
+      );
+    }
+  }
+
+  private static async setupStep() {
+    core.info('Starting step 1/4 clone and restore cache)');
+    await this.CloudRunnerProviderPlatform.runBuildTask(
+      this.buildGuid,
+      'alpine/git',
+      [
+        ` printenv
+          apk update -q
+          apk add unzip zip git-lfs jq tree -q
+          mkdir -p ${this.buildPathFull}
+          mkdir -p ${this.builderPathFull}
+          mkdir -p ${this.repoPathFull}
+          ${this.getCloneBuilder()}
+          echo ' '
+          echo 'Initializing source repository for cloning with caching of LFS files'
+          ${this.getCloneNoLFSCommand()}
+          echo 'Source repository initialized'
+          echo ' '
+          ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
+          ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+          echo 'Starting checks of cache for the Unity project Library and git LFS files'
+          ${this.getHandleCachingCommand()}
+          ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+          ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+          ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
+          ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
+          ${process.env.DEBUG ? '' : '#'}echo ' '
+      `,
+      ],
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}/`,
+      CloudRunner.defaultGitShaEnvironmentVariable,
+      this.defaultSecrets,
+    );
+  }
+
+  private static async BuildStep(baseImage: any) {
+    core.info('Starting part 2/4 (build unity project)');
+    await this.CloudRunnerProviderPlatform.runBuildTask(
+      this.buildGuid,
+      baseImage.toString(),
+      [
+        `
+            printenv
+            export GITHUB_WORKSPACE="${this.repoPathFull}"
+            cp -r "${this.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
+            cp -r "${this.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
+            cp -r "${this.builderPathFull}/dist/steps/" "/steps"
+            chmod -R +x "/entrypoint.sh"
+            chmod -R +x "/steps"
+            /entrypoint.sh
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
+          `,
+      ],
+      `/${buildVolumeFolder}`,
+      `/${this.projectPathFull}`,
+      CloudRunner.readBuildEnvironmentVariables(),
+      this.defaultSecrets,
+    );
+  }
+
+  private static async CompressionStep() {
+    core.info('Starting step 3/4 build compression');
+    // Cleanup
+    await this.CloudRunnerProviderPlatform.runBuildTask(
+      this.buildGuid,
+      'alpine',
+      [
+        `
+            printenv
+            apk update -q
+            apk add zip tree -q
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
+            cd "$libraryFolderFull/.."
+            zip -r "lib-$BUILDID.zip" "./Library"
+            mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
+            cd "$repoPathFull"
+            ls -lh "$repoPathFull"
+            zip -r "build-$BUILDID.zip" "./${CloudRunner.buildParams.buildPath}"
+            mv "build-$BUILDID.zip" "/$cacheFolderFull/build-$BUILDID.zip"
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull"
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull/.."
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
+          `,
+      ],
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}`,
+      [
+        {
+          name: 'GITHUB_SHA',
+          value: process.env.GITHUB_SHA || '',
+        },
+        {
+          name: 'cacheFolderFull',
+          value: this.cacheFolderFull,
+        },
+      ],
+      this.defaultSecrets,
+    );
+    core.info('compression step complete');
+  }
+
+  private static async cleanupSharedBuildResources() {
+    await this.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
+      this.buildGuid,
+      this.buildParams,
+      this.branchName,
+      this.defaultSecrets,
+    );
   }
 
   private static async handleException(error: unknown) {

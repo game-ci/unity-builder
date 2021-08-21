@@ -15,7 +15,7 @@ async function run() {
     switch (buildParameters.cloudRunnerCluster) {
       case 'aws':
       case 'k8s':
-        await CloudRunner.build(buildParameters, baseImage);
+        await CloudRunner.run(buildParameters, baseImage);
         break;
 
       // default and local case

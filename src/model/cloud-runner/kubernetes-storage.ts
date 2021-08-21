@@ -57,7 +57,7 @@ class KubernetesStorage {
     };
     pvc.spec = {
       accessModes: ['ReadWriteMany'],
-      storageClassName: 'fileserver',
+      storageClassName: process.env.K8s_STORAGE_CLASS || 'fileserver',
       resources: {
         requests: {
           storage: buildParameters.kubeVolumeSize,
