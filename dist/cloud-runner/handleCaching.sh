@@ -77,10 +77,10 @@ cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
 echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 
 # purge cache
-if [ "$purgeCloudRunnerCache" == "true" ]; then
+if [ -z "$purgeCloudRunnerCache"]; then
   echo ' '
-  echo "purging the entire cache"
-  rm -r "$cacheFolderFull"
+  echo "purging $purgeCloudRunnerCache"
+  rm -r "$purgeCloudRunnerCache"
   echo ' '
 fi
 

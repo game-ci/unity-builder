@@ -25,7 +25,13 @@ class CloudRunner {
   private static projectPathFull: string;
   private static libraryFolderFull: string;
   private static cacheFolderFull: string;
-  static SteamDeploy: boolean = process.env.STEAM_DEPLOY !== undefined || false;
+  private static lfsDirectory: string;
+  private static testLFSFile: string;
+  private static purgeRemoteCaching: boolean;
+  private static CloudRunnerBranch: string;
+  private static unityBuilderRepoUrl: string;
+  private static targetBuildRepoUrl: string;
+  private static SteamDeploy: boolean = process.env.STEAM_DEPLOY !== undefined || false;
   private static readonly defaultGitShaEnvironmentVariable = [
     {
       name: 'GITHUB_SHA',
@@ -105,22 +111,28 @@ class CloudRunner {
     this.projectPathFull = `${this.repoPathFull}/${this.buildParams.projectPath}`;
     this.libraryFolderFull = `${this.projectPathFull}/Library`;
     this.cacheFolderFull = `/${buildVolumeFolder}/${cacheFolder}/${this.branchName}`;
+    this.lfsDirectory = `${this.repoPathFull}/.git/lfs`;
+    this.testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
+    this.purgeRemoteCaching = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
+    this.CloudRunnerBranch = process.env.CloudRunnerBranch ? `--branch "${process.env.CloudRunnerBranch}"` : '';
+    this.unityBuilderRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
+    this.targetBuildRepoUrl = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+  }
+
+  private static getHandleCachingCommand() {
+    return `${this.builderPathFull}/dist/cloud-runner/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${this.lfsDirectory}" "${this.purgeRemoteCaching}"`;
+  }
+
+  private static getCloneNoLFSCommand() {
+    return `${this.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${this.repoPathFull}" "${this.targetBuildRepoUrl}" "${this.testLFSFile}"`;
+  }
+
+  private static getCloneBuilder() {
+    return `git clone -q ${this.CloudRunnerBranch} ${this.unityBuilderRepoUrl} ${this.builderPathFull}`;
   }
 
   private static async SetupStep() {
     core.info('Starting step 1/4 clone and restore cache)');
-
-    const lfsDirectory = `${this.repoPathFull}/.git/lfs`;
-    const testLFSFile = `${this.projectPathFull}/Assets/LFS_Test_File.jpg`;
-
-    const unityBuilderRepoUrl = `https://${this.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
-    const targetBuildRepoUrl = `https://${this.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
-
-    const purgeRemoteCache = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
-    const initializeSourceRepoForCaching = `${this.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${this.repoPathFull}" "${targetBuildRepoUrl}" "${testLFSFile}"`;
-    const handleCaching = `${this.builderPathFull}/dist/cloud-runner/handleCaching.sh "${this.cacheFolderFull}" "${this.libraryFolderFull}" "${lfsDirectory}" "${purgeRemoteCache}"`;
-    const CloudRunnerBranch = process.env.CloudRunnerBranch ? `--branch "${process.env.CloudRunnerBranch}"` : '';
-    const cloneCloudRunner = `git clone -q ${CloudRunnerBranch} ${unityBuilderRepoUrl} ${this.builderPathFull}`;
     await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       'alpine/git',
@@ -131,22 +143,22 @@ class CloudRunner {
           mkdir -p ${this.buildPathFull}
           mkdir -p ${this.builderPathFull}
           mkdir -p ${this.repoPathFull}
-          ${cloneCloudRunner}
+          ${this.getCloneBuilder()}
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
-          ${initializeSourceRepoForCaching}
+          ${this.getCloneNoLFSCommand()}
           echo 'Source repository initialized'
           echo ' '
           ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
           ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
           ${process.env.DEBUG ? '' : '#'}echo ' '
           echo 'Starting checks of cache for the Unity project Library and git LFS files'
-          ${handleCaching}
+          ${this.getHandleCachingCommand()}
           ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
           ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${lfsDirectory}"
+          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
           ${process.env.DEBUG ? '' : '#'}echo ' '
           ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
           ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
