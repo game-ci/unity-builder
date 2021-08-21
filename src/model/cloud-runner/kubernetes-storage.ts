@@ -9,6 +9,7 @@ class KubernetesStorage {
   }
   public static async watchUntilPVCNotPending(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
     core.info(`watch Until PVC Not Pending ${name} ${namespace}`);
+    core.info(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
     await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
       timeout: 500000,
       intervalBetweenAttempts: 15000,
