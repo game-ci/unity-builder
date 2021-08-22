@@ -290,42 +290,46 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     const describeStack = async () => {
       return await CF.describeStacks(describeStackInput).promise();
     };
-
-    if (!stackExists) {
-      core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
-      await CF.createStack(createStackInput).promise();
-      core.info(`created stack (version: ${hash})`);
-    }
-    const CFState = await describeStack();
-    let stack = CFState.Stacks?.[0];
-    if (!stack) {
-      throw new Error(`Base stack doesn't exist, even after creation, stackExists check: ${stackExists}`);
-    }
-    const stackVersion = stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue;
-
-    if (stack.StackStatus === 'CREATE_IN_PROGRESS') {
-      await CF.waitFor('stackCreateComplete', describeStackInput).promise();
-    }
-
-    if (stackExists) {
-      core.info(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
-      if (hash !== stackVersion) {
-        core.info(`Updating`);
-        await CF.updateStack(updateInput).promise();
-      } else {
-        core.info(`No update required`);
+    try {
+      if (!stackExists) {
+        core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
+        await CF.createStack(createStackInput).promise();
+        core.info(`created stack (version: ${hash})`);
       }
-      stack = (await describeStack()).Stacks?.[0];
+      const CFState = await describeStack();
+      let stack = CFState.Stacks?.[0];
       if (!stack) {
-        throw new Error(
-          `Base stack doesn't exist, even after updating and creation, stackExists check: ${stackExists}`,
-        );
+        throw new Error(`Base stack doesn't exist, even after creation, stackExists check: ${stackExists}`);
       }
-      if (stack.StackStatus === 'UPDATE_IN_PROGRESS') {
-        await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
+      const stackVersion = stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue;
+
+      if (stack.StackStatus === 'CREATE_IN_PROGRESS') {
+        await CF.waitFor('stackCreateComplete', describeStackInput).promise();
       }
+
+      if (stackExists) {
+        core.info(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
+        if (hash !== stackVersion) {
+          core.info(`Updating`);
+          await CF.updateStack(updateInput).promise();
+        } else {
+          core.info(`No update required`);
+        }
+        stack = (await describeStack()).Stacks?.[0];
+        if (!stack) {
+          throw new Error(
+            `Base stack doesn't exist, even after updating and creation, stackExists check: ${stackExists}`,
+          );
+        }
+        if (stack.StackStatus === 'UPDATE_IN_PROGRESS') {
+          await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
+        }
+      }
+      core.info('base stack is ready');
+    } catch (error) {
+      core.error(JSON.stringify(await describeStack(), undefined, 4));
+      throw error;
     }
-    core.info('base stack is ready');
   }
 
   async handleStackCreationFailure(
