@@ -265,7 +265,7 @@ export default class Versioning {
    * Get the tag if there is one pointing at HEAD
    */
   static async getTag() {
-    return this.git(['tag', '--points-at', 'HEAD']);
+    return (await this.git(['tag', '--points-at', 'HEAD'])).trim();
   }
 
   /**
