@@ -139,6 +139,12 @@ class KubernetesJobSpecFactory {
                 },
               },
             },
+            {
+              name: 'controller-cleanup',
+              image: 'alpine',
+              command: ['/bin/sh'],
+              args: ['-c', 'echo "test"'],
+            },
           ],
           restartPolicy: 'Never',
         },

@@ -29,7 +29,7 @@ async function run() {
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed((error as Error).message);
   }
 }
 

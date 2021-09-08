@@ -53,13 +53,15 @@ class AWSBuildRunner {
 
     try {
       await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
-    } catch (error) {
+    } catch (error_) {
+      const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
       const describeTasks = await ECS.describeTasks({
         tasks: [taskArn],
         cluster,
       }).promise();
       core.info(`Cloud runner job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
+
       core.setFailed(error);
       core.error(error);
     }

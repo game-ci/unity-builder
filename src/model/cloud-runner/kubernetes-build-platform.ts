@@ -10,7 +10,6 @@ import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
-import KubernetesCleanupCronJob from './kubernetes-cleanup-cronjob';
 import KubernetesServiceAccount from './kubernetes-service-account';
 
 class Kubernetes implements CloudRunnerProviderInterface {
@@ -60,12 +59,6 @@ class Kubernetes implements CloudRunnerProviderInterface {
       );
 
       await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
-      await KubernetesCleanupCronJob.createCleanupCronJob(
-        this.kubeClientBatchBeta,
-        this.cleanupCronJobName,
-        this.serviceAccountName,
-        this.namespace,
-      );
     } catch (error) {
       throw error;
     }
@@ -168,7 +161,6 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-    await KubernetesCleanupCronJob.cleanup(this.kubeClientBatchBeta, this.cleanupCronJobName, this.namespace);
   }
 }
 export default Kubernetes;
