@@ -49,7 +49,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.pvcName = `unity-builder-pvc`;
+      this.pvcName = `unity-builder-pvc-${buildGuid}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
       this.serviceAccountName = `service-account-${buildGuid}`;
       await KubernetesStorage.createPersistentVolumeClaim(

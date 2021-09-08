@@ -56,7 +56,7 @@ class KubernetesStorage {
       name: pvcName,
     };
     pvc.spec = {
-      accessModes: ['ReadWriteMany'],
+      accessModes: ['ReadWriteOnce'],
       storageClassName: process.env.K8s_STORAGE_CLASS || 'fileserver',
       resources: {
         requests: {
