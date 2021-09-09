@@ -56,31 +56,23 @@ class AWSBuildRunner {
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      const describeTasks = await ECS.describeTasks({
-        tasks: [taskArn],
-        cluster,
-      }).promise();
-      core.info(`Cloud runner job has ended ${describeTasks.tasks?.[0].containers?.[0].lastStatus}`);
+      core.info(
+        `Cloud runner job has ended ${
+          (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
+        }`,
+      );
 
       core.setFailed(error);
       core.error(error);
     }
     core.info(`Cloud runner job is running`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
-    await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
-    const exitCode = (
-      await ECS.describeTasks({
-        tasks: [taskArn],
-        cluster,
-      }).promise()
-    ).tasks?.[0].containers?.[0].exitCode;
+    const exitCode = (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
+    core.info(`Cloud runner job exit code ${exitCode}`);
     if (exitCode !== 0) {
       core.error(
         `job failed with exit code ${exitCode} ${JSON.stringify(
-          await ECS.describeTasks({
-            tasks: [taskArn],
-            cluster,
-          }).promise(),
+          await ECS.describeTasks({ tasks: [taskArn], cluster }).promise(),
           undefined,
           4,
         )}`,
@@ -88,6 +80,18 @@ class AWSBuildRunner {
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
       core.info(`Cloud runner job has finished successfully`);
+    }
+  }
+
+  static async describeTasks(ECS: AWS.ECS, clusterName: string, taskArn: string) {
+    const tasks = await ECS.describeTasks({
+      cluster: clusterName,
+      tasks: [taskArn],
+    }).promise();
+    if (tasks.tasks?.[0]) {
+      return tasks.tasks?.[0];
+    } else {
+      throw new Error('No task found');
     }
   }
 
@@ -101,14 +105,6 @@ class AWSBuildRunner {
   ) {
     // watching logs
     const kinesis = new AWS.Kinesis();
-
-    const getTaskData = async () => {
-      const tasks = await ECS.describeTasks({
-        cluster: clusterName,
-        tasks: [taskArn],
-      }).promise();
-      return tasks.tasks?.[0];
-    };
 
     const stream = await kinesis
       .describeStream({
@@ -127,27 +123,19 @@ class AWSBuildRunner {
           .promise()
       ).ShardIterator || '';
 
-    await CF.waitFor('stackCreateComplete', { StackName: taskDef.taskDefStackNameTTL }).promise();
-
-    core.info(`Cloud runner job status is ${(await getTaskData())?.lastStatus}`);
+    core.info(
+      `Cloud runner job status is ${(await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
+    );
 
     const logBaseUrl = `https://${AWS.config.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
-
     let readingLogs = true;
-    let timestamp: number = 0;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      const taskData = await getTaskData();
+      const taskData = await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn);
       if (taskData?.lastStatus !== 'RUNNING') {
-        if (timestamp === 0) {
-          core.info('Cloud runner job stopped, streaming end of logs');
-          timestamp = Date.now();
-        }
-        if (timestamp !== 0 && Date.now() - timestamp < 30000) {
-          core.info('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
-          readingLogs = false;
-        }
+        core.info('Task not runner, job ended');
+        readingLogs = false;
       }
       const records = await kinesis
         .getRecords({
