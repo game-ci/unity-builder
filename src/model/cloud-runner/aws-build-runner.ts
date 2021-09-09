@@ -53,6 +53,31 @@ class AWSBuildRunner {
 
     try {
       await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
+      core.info(`Cloud runner job is running`);
+      await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+      await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
+      const exitCode = (
+        await ECS.describeTasks({
+          tasks: [taskArn],
+          cluster,
+        }).promise()
+      ).tasks?.[0].containers?.[0].exitCode;
+      core.info(`Cloud runner job exit code ${exitCode}`);
+      if (exitCode !== 0) {
+        core.error(
+          `job failed with exit code ${exitCode} ${JSON.stringify(
+            await ECS.describeTasks({
+              tasks: [taskArn],
+              cluster,
+            }).promise(),
+            undefined,
+            4,
+          )}`,
+        );
+        throw new Error(`job failed with exit code ${exitCode}`);
+      } else {
+        core.info(`Cloud runner job has finished successfully`);
+      }
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -64,30 +89,6 @@ class AWSBuildRunner {
 
       core.setFailed(error);
       core.error(error);
-    }
-    core.info(`Cloud runner job is running`);
-    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
-    await ECS.waitFor('tasksStopped', { cluster, tasks: [taskArn] }).promise();
-    const exitCode = (
-      await ECS.describeTasks({
-        tasks: [taskArn],
-        cluster,
-      }).promise()
-    ).tasks?.[0].containers?.[0].exitCode;
-    if (exitCode !== 0) {
-      core.error(
-        `job failed with exit code ${exitCode} ${JSON.stringify(
-          await ECS.describeTasks({
-            tasks: [taskArn],
-            cluster,
-          }).promise(),
-          undefined,
-          4,
-        )}`,
-      );
-      throw new Error(`job failed with exit code ${exitCode}`);
-    } else {
-      core.info(`Cloud runner job has finished successfully`);
     }
   }
 
