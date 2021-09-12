@@ -44,10 +44,15 @@ class KubernetesStorage {
     try {
       core.info(`watch Until PVC Not Pending ${name} ${namespace}`);
       core.info(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
-      await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
-        timeout: 500000,
-        intervalBetweenAttempts: 15000,
-      });
+      await waitUntil(
+        async () => {
+          return (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending';
+        },
+        {
+          timeout: 500000,
+          intervalBetweenAttempts: 15000,
+        },
+      );
     } catch (error) {
       core.error('Failed to watch PVC');
       core.error(JSON.stringify(error, undefined, 4));
@@ -97,64 +102,3 @@ class KubernetesStorage {
 }
 
 export default KubernetesStorage;
-
-/*
-It's possible now with Cloud Filestore.
-
-First create a Filestore instance.
-
-gcloud filestore instances create nfs-server
-    --project=[PROJECT_ID]
-    --zone=us-central1-c
-    --tier=STANDARD
-    --file-share=name="vol1",capacity=1TB
-    --network=name="default",reserved-ip-range="10.0.0.0/29"
-Then create a persistent volume in GKE.
-
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: fileserver
-spec:
-  capacity:
-    storage: 1T
-  accessModes:
-  - ReadWriteMany
-  nfs:
-    path: /vol1
-    server: [IP_ADDRESS]
-[IP_ADDRESS] is available in filestore instance details.
-
-You can now request a persistent volume claim.
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: fileserver-claim
-spec:
-  accessModes:
-  - ReadWriteMany
-  storageClassName: "fileserver"
-  resources:
-    requests:
-      storage: 100G
-Finally, mount the volume in your pod.
-
-apiVersion: v1
-kind: Pod
-metadata:
-  name: my-pod
-spec:
-  containers:
-  - name: my container
-    image: nginx:latest
-    volumeMounts:
-    - mountPath: /workdir
-      name: mypvc
-  volumes:
-  - name: mypvc
-    persistentVolumeClaim:
-      claimName: fileserver-claim
-      readOnly: false
-Solution is detailed here : https://cloud.google.com/filestore/docs/accessing-fileshares
-*/
