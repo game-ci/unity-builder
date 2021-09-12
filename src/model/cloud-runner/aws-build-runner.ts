@@ -134,7 +134,7 @@ class AWSBuildRunner {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn);
       if (taskData?.lastStatus !== 'RUNNING') {
-        core.info('Task not runner, job ended');
+        core.info(`Status of job: ${taskData.lastStatus}`);
         readingLogs = false;
       }
       const records = await kinesis
