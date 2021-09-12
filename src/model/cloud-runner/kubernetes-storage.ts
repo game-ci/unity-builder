@@ -31,16 +31,28 @@ class KubernetesStorage {
   }
 
   public static async getPVCPhase(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
-    return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
+    try {
+      return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
+    } catch (error) {
+      core.error('Failed to get PVC phase');
+      core.error(JSON.stringify(error, undefined, 4));
+      throw error;
+    }
   }
 
   public static async watchUntilPVCNotPending(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
-    core.info(`watch Until PVC Not Pending ${name} ${namespace}`);
-    core.info(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
-    await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
-      timeout: 500000,
-      intervalBetweenAttempts: 15000,
-    });
+    try {
+      core.info(`watch Until PVC Not Pending ${name} ${namespace}`);
+      core.info(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
+      await waitUntil(async () => (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending', {
+        timeout: 500000,
+        intervalBetweenAttempts: 15000,
+      });
+    } catch (error) {
+      core.error('Failed to watch PVC');
+      core.error(JSON.stringify(error, undefined, 4));
+      throw error;
+    }
   }
 
   private static async createPVC(
