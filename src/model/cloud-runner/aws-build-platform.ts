@@ -358,7 +358,6 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
-
     await CF.deleteStack({
       StackName: taskDef.taskDefStackNameTTL,
     }).promise();
@@ -366,11 +365,13 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackName,
     }).promise();
-
-    // Currently too slow and causes too much waiting
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackNameTTL,
     }).promise();
+
+    const stacks = await CF.listStacks().promise();
+
+    core.info(`Stacks: ${JSON.stringify(stacks, undefined, 4)}`);
 
     core.info('Cleanup complete');
   }
