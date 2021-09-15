@@ -109,7 +109,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
         this.kubeClient,
         this.jobName,
         this.podName,
-        this.containerName,
+        'main',
         this.namespace,
         core.info,
       );
