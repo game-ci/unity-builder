@@ -308,20 +308,8 @@ class CloudRunner {
           ${this.getCloneNoLFSCommand()}
           echo 'Source repository initialized'
           echo ' '
-          ${process.env.DEBUG ? '' : '#'}echo $LFS_ASSETS_HASH
-          ${process.env.DEBUG ? '' : '#'}echo 'Large File before LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
           echo 'Starting checks of cache for the Unity project Library and git LFS files'
           ${this.getHandleCachingCommand()}
-          ${process.env.DEBUG ? '' : '#'}echo 'Caching complete'
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-          ${process.env.DEBUG ? '' : '#'}echo 'Large File after LFS caching and pull'
-          ${process.env.DEBUG ? '' : '#'}ls -alh "${this.lfsDirectory}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
-          ${process.env.DEBUG ? '' : '#'}tree -L 4 "${this.buildPathFull}"
-          ${process.env.DEBUG ? '' : '#'}ls -lh "/${buildVolumeFolder}"
-          ${process.env.DEBUG ? '' : '#'}echo ' '
       `,
       ],
       `/${buildVolumeFolder}`,

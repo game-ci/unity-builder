@@ -103,25 +103,9 @@ class AWSBuildRunner {
     taskArn: string,
     kinesisStreamName: string,
   ) {
-    // watching logs
     const kinesis = new AWS.Kinesis();
-
-    const stream = await kinesis
-      .describeStream({
-        StreamName: kinesisStreamName,
-      })
-      .promise();
-
-    let iterator =
-      (
-        await kinesis
-          .getShardIterator({
-            ShardIteratorType: 'TRIM_HORIZON',
-            StreamName: stream.StreamDescription.StreamName,
-            ShardId: stream.StreamDescription.Shards[0].ShardId,
-          })
-          .promise()
-      ).ShardIterator || '';
+    const stream = await AWSBuildRunner.getLogStream(kinesis, kinesisStreamName);
+    let iterator = await AWSBuildRunner.getLogIterator(kinesis, stream);
 
     core.info(
       `Cloud runner job status is ${(await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
@@ -130,41 +114,96 @@ class AWSBuildRunner {
     const logBaseUrl = `https://${AWS.config.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let readingLogs = true;
+    let timestamp: number = 0;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn);
-      if (taskData?.lastStatus !== 'RUNNING') {
-        core.info('Task not runner, job ended');
+      ({ timestamp, readingLogs } = AWSBuildRunner.checkStreamingShouldContinue(taskData, timestamp, readingLogs));
+      ({ iterator, readingLogs } = await AWSBuildRunner.handleLogStreamIteration(
+        kinesis,
+        iterator,
+        readingLogs,
+        taskDef,
+      ));
+    }
+  }
+
+  private static async handleLogStreamIteration(
+    kinesis: AWS.Kinesis,
+    iterator: string,
+    readingLogs: boolean,
+    taskDef: CloudRunnerTaskDef,
+  ) {
+    const records = await kinesis
+      .getRecords({
+        ShardIterator: iterator,
+      })
+      .promise();
+    iterator = records.NextShardIterator || '';
+    readingLogs = AWSBuildRunner.logRecords(records, iterator, taskDef, readingLogs);
+    return { iterator, readingLogs };
+  }
+
+  private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, readingLogs: boolean) {
+    if (taskData?.lastStatus !== 'RUNNING') {
+      if (timestamp === 0) {
+        core.info('Cloud runner job stopped, streaming end of logs');
+        timestamp = Date.now();
+      }
+      if (timestamp !== 0 && Date.now() - timestamp < 30000) {
+        core.info('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
         readingLogs = false;
       }
-      const records = await kinesis
-        .getRecords({
-          ShardIterator: iterator,
-        })
-        .promise();
-      iterator = records.NextShardIterator || '';
-      if (records.Records.length > 0 && iterator) {
-        for (let index = 0; index < records.Records.length; index++) {
-          const json = JSON.parse(
-            zlib.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
-          );
-          if (json.messageType === 'DATA_MESSAGE') {
-            for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
-              if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
-                core.info('End of cloud runner job logs');
-                readingLogs = false;
-              } else {
-                const message = json.logEvents[logEventsIndex].message;
-                if (message.includes('Rebuilding Library because the asset database could not be found!')) {
-                  core.warning('LIBRARY NOT FOUND!');
-                }
-                core.info(message);
+      core.info(`Status of job: ${taskData.lastStatus}`);
+    }
+    return { timestamp, readingLogs };
+  }
+
+  private static logRecords(records, iterator: string, taskDef: CloudRunnerTaskDef, readingLogs: boolean) {
+    if (records.Records.length > 0 && iterator) {
+      for (let index = 0; index < records.Records.length; index++) {
+        const json = JSON.parse(
+          zlib.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
+        );
+        if (json.messageType === 'DATA_MESSAGE') {
+          for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
+            if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
+              core.info('End of cloud runner job logs');
+              readingLogs = false;
+            } else {
+              const message = json.logEvents[logEventsIndex].message;
+              if (message.includes('Rebuilding Library because the asset database could not be found!')) {
+                core.warning('LIBRARY NOT FOUND!');
               }
+              core.info(message);
             }
           }
         }
       }
     }
+    return readingLogs;
+  }
+
+  private static async getLogStream(kinesis: AWS.Kinesis, kinesisStreamName: string) {
+    return await kinesis
+      .describeStream({
+        StreamName: kinesisStreamName,
+      })
+      .promise();
+  }
+
+  private static async getLogIterator(kinesis: AWS.Kinesis, stream) {
+    return (
+      (
+        await kinesis
+          .getShardIterator({
+            ShardIteratorType: 'TRIM_HORIZON',
+            StreamName: stream.StreamDescription.StreamName,
+            ShardId: stream.StreamDescription.Shards[0].ShardId,
+          })
+          .promise()
+      ).ShardIterator || ''
+    );
   }
 }
 export default AWSBuildRunner;
