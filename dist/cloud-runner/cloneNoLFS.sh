@@ -19,7 +19,7 @@ echo "Checked out $githubSha"
 
 git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
 md5sum .lfs-assets-guid > .lfs-assets-guid-sum
-export LFS_ASSETS_HASH="$(cat ${this.repoPathFull}/.lfs-assets-guid)"
+export LFS_ASSETS_HASH="$(cat ${repoPathFull}/.lfs-assets-guid)"
 
 echo ' '
 echo 'Contents of .lfs-assets-guid file:'

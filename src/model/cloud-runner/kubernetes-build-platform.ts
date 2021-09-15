@@ -78,6 +78,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${buildGuid}`;
       this.jobName = `unity-builder-job-${buildGuid}`;
+      this.containerName = 'main';
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       const jobSpec = KubernetesJobSpecFactory.getJobSpec(
         commands,

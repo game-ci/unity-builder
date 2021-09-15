@@ -218,6 +218,10 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
             ParameterKey: 'BUILDID',
             ParameterValue: buildGuid,
           },
+          {
+            ParameterKey: 'EnvironmentName',
+            ParameterValue: this.baseStackName,
+          },
         ],
       }).promise();
       // Side effect: core.info('Creating cleanup double checker cron job...');
