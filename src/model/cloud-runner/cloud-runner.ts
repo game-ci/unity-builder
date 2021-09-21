@@ -246,7 +246,7 @@ class CloudRunner {
   }
 
   private static async runMainJob(baseImage: any) {
-    if (!this.buildParams.customBuildSteps) {
+    if (this.buildParams.customBuildSteps !== '') {
       core.info(`Cloud Runner is running in standard build automation mode`);
       await CloudRunner.standardBuildAutomation(baseImage);
     } else {
