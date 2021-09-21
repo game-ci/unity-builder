@@ -303,8 +303,6 @@ class CloudRunner {
           mkdir -p ${this.builderPathFull}
           mkdir -p ${this.repoPathFull}
           ${this.getCloneBuilder()}
-          tree ${this.buildPathFull}
-          tree ${this.builderPathFull}
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${this.getCloneNoLFSCommand()}
