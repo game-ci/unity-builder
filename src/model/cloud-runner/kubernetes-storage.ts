@@ -2,6 +2,7 @@ import waitUntil from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../build-parameters';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -11,21 +12,21 @@ class KubernetesStorage {
     namespace: string,
   ) {
     if (buildParameters.kubeVolume) {
-      core.info(buildParameters.kubeVolume);
+      CloudRunnerLogger.log(buildParameters.kubeVolume);
       pvcName = buildParameters.kubeVolume;
       return;
     }
     const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
       (x) => x.metadata?.name,
     );
-    core.info(`Current PVCs in namespace ${namespace}`);
-    core.info(JSON.stringify(pvcList, undefined, 4));
+    CloudRunnerLogger.log(`Current PVCs in namespace ${namespace}`);
+    CloudRunnerLogger.log(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
-      core.info(`pvc ${pvcName} already exists`);
+      CloudRunnerLogger.log(`pvc ${pvcName} already exists`);
       core.setOutput('volume', pvcName);
       return;
     }
-    core.info(`Creating PVC ${pvcName} (does not exist)`);
+    CloudRunnerLogger.log(`Creating PVC ${pvcName} (does not exist)`);
     const result = await KubernetesStorage.createPVC(pvcName, buildParameters, kubeClient, namespace);
     await KubernetesStorage.handleResult(result, kubeClient, namespace, pvcName);
   }
@@ -42,8 +43,8 @@ class KubernetesStorage {
 
   public static async watchUntilPVCNotPending(kubeClient: k8s.CoreV1Api, name: string, namespace: string) {
     try {
-      core.info(`watch Until PVC Not Pending ${name} ${namespace}`);
-      core.info(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
+      CloudRunnerLogger.log(`watch Until PVC Not Pending ${name} ${namespace}`);
+      CloudRunnerLogger.log(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
       await waitUntil(
         async () => {
           return (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending';
@@ -101,10 +102,12 @@ class KubernetesStorage {
   ) {
     const name = result.body.metadata?.name;
     if (!name) throw new Error('failed to create PVC');
-    core.info(JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4));
-    core.info(`PVC ${name} created`);
+    CloudRunnerLogger.log(
+      JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4),
+    );
+    CloudRunnerLogger.log(`PVC ${name} created`);
     await this.watchUntilPVCNotPending(kubeClient, name, namespace);
-    core.info(`PVC ${name} is ready and not pending`);
+    CloudRunnerLogger.log(`PVC ${name} is ready and not pending`);
     core.setOutput('volume', pvcName);
   }
 }

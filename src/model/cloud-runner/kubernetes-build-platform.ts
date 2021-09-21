@@ -11,6 +11,7 @@ import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -34,7 +35,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
     this.kubeClientBatchBeta = this.kubeConfig.makeApiClient(k8s.BatchV1beta1Api);
-    core.info('Loaded default Kubernetes configuration for this environment');
+    CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
 
     this.namespace = 'default';
     this.buildParameters = buildParameters;
@@ -95,15 +96,15 @@ class Kubernetes implements CloudRunnerProviderInterface {
       );
 
       //run
-      core.info('Creating build job');
+      CloudRunnerLogger.log('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      core.info('Job created');
+      CloudRunnerLogger.log('Job created');
       this.setPodNameAndContainerName(
         await KubernetesUtilities.findPodFromJob(this.kubeClient, this.jobName, this.namespace),
       );
-      core.info('Watching pod until running');
+      CloudRunnerLogger.log('Watching pod until running');
       await KubernetesUtilities.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
-      core.info('Pod running, streaming logs');
+      CloudRunnerLogger.log('Pod running, streaming logs');
       await KubernetesLogging.streamLogs(
         this.kubeConfig,
         this.kubeClient,
@@ -111,11 +112,11 @@ class Kubernetes implements CloudRunnerProviderInterface {
         this.podName,
         'main',
         this.namespace,
-        core.info,
+        CloudRunnerLogger.log,
       );
       await this.cleanupTaskResources();
     } catch (error) {
-      core.info('Running job failed');
+      CloudRunnerLogger.log('Running job failed');
       core.error(JSON.stringify(error, undefined, 4));
       await this.cleanupTaskResources();
       throw error;
@@ -128,14 +129,14 @@ class Kubernetes implements CloudRunnerProviderInterface {
   }
 
   async cleanupTaskResources() {
-    core.info('cleaning up');
+    CloudRunnerLogger.log('cleaning up');
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
     } catch (error) {
-      core.info('Failed to cleanup, error:');
+      CloudRunnerLogger.log('Failed to cleanup, error:');
       core.error(JSON.stringify(error, undefined, 4));
-      core.info('Abandoning cleanup, build error:');
+      CloudRunnerLogger.log('Abandoning cleanup, build error:');
       throw error;
     }
     try {
@@ -147,7 +148,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
         },
       );
     } catch {
-      core.info('failed to read the state of the job while cleaning up?');
+      CloudRunnerLogger.log('failed to read the state of the job while cleaning up?');
     }
   }
 

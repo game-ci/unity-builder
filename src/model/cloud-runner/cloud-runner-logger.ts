@@ -1,12 +1,20 @@
 import * as core from '@actions/core';
 
-class CloudRunnerTimerLogger {
+class CloudRunnerLogger {
   private static timestamp: number;
   private static globalTimestamp: number;
 
   public static setup() {
     this.timestamp = this.createTimestamp();
     this.globalTimestamp = this.timestamp;
+  }
+
+  public static log(message: string) {
+    core.info(message);
+  }
+
+  public static error(message: string) {
+    core.error(message);
   }
 
   public static logWithTime(message: string) {
@@ -28,4 +36,4 @@ class CloudRunnerTimerLogger {
     return Date.now();
   }
 }
-export default CloudRunnerTimerLogger;
+export default CloudRunnerLogger;

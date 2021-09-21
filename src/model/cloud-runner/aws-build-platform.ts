@@ -9,6 +9,7 @@ import CloudRunnerConstants from './cloud-runner-constants';
 import AWSBuildRunner from './aws-build-runner';
 import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
 import BuildParameters from '../build-parameters';
+import CloudRunnerLogger from './cloud-runner-logger';
 const crypto = require('crypto');
 
 class AWSBuildEnvironment implements CloudRunnerProviderInterface {
@@ -65,14 +66,14 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     let t2;
     try {
       const t1 = Date.now();
-      core.info(`Setup job time: ${Math.floor((t1 - t0) / 1000)}s`);
+      CloudRunnerLogger.log(`Setup job time: ${Math.floor((t1 - t0) / 1000)}s`);
       await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
       t2 = Date.now();
-      core.info(`Run job time: ${Math.floor((t2 - t1) / 1000)}s`);
+      CloudRunnerLogger.log(`Run job time: ${Math.floor((t2 - t1) / 1000)}s`);
     } finally {
       await this.cleanupResources(CF, taskDef);
       const t3 = Date.now();
-      if (t2 !== undefined) core.info(`Cleanup job time: ${Math.floor((t3 - t2) / 1000)}s`);
+      if (t2 !== undefined) CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((t3 - t2) / 1000)}s`);
     }
   }
 
@@ -196,7 +197,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
           ...secretsMappedToCloudFormationParameters,
         ],
       }).promise();
-      core.info('Creating cloud runner job');
+      CloudRunnerLogger.log('Creating cloud runner job');
       await CF.createStack({
         StackName: cleanupTaskDefStackName,
         TemplateBody: cleanupCloudFormation,
@@ -224,7 +225,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
           },
         ],
       }).promise();
-      // Side effect: core.info('Creating cleanup double checker cron job...');
+      // Side effect: CloudRunnerLogger.log('Creating cleanup double checker cron job...');
 
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
@@ -296,9 +297,9 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     };
     try {
       if (!stackExists) {
-        core.info(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
+        CloudRunnerLogger.log(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
         await CF.createStack(createStackInput).promise();
-        core.info(`created stack (version: ${hash})`);
+        CloudRunnerLogger.log(`created stack (version: ${hash})`);
       }
       const CFState = await describeStack();
       let stack = CFState.Stacks?.[0];
@@ -312,12 +313,12 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
       }
 
       if (stackExists) {
-        core.info(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
+        CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
         if (hash !== stackVersion) {
-          core.info(`Updating`);
+          CloudRunnerLogger.log(`Updating`);
           await CF.updateStack(updateInput).promise();
         } else {
-          core.info(`No update required`);
+          CloudRunnerLogger.log(`No update required`);
         }
         stack = (await describeStack()).Stacks?.[0];
         if (!stack) {
@@ -329,7 +330,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
           await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
         }
       }
-      core.info('base stack is ready');
+      CloudRunnerLogger.log('base stack is ready');
     } catch (error) {
       core.error(JSON.stringify(await describeStack(), undefined, 4));
       throw error;
@@ -343,14 +344,14 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     taskDefCloudFormation: string,
     secrets: CloudRunnerSecret[],
   ) {
-    core.info(JSON.stringify(secrets, undefined, 4));
-    core.info(taskDefCloudFormation);
+    CloudRunnerLogger.log(JSON.stringify(secrets, undefined, 4));
+    CloudRunnerLogger.log(taskDefCloudFormation);
     core.error(error);
-    core.info('Getting events and resources for task stack');
+    CloudRunnerLogger.log('Getting events and resources for task stack');
     const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
     const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
-    core.info(JSON.stringify(events, undefined, 4));
-    core.info(JSON.stringify(resources, undefined, 4));
+    CloudRunnerLogger.log(JSON.stringify(events, undefined, 4));
+    CloudRunnerLogger.log(JSON.stringify(resources, undefined, 4));
   }
 
   readTaskCloudFormationTemplate(): string {
@@ -358,7 +359,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   }
 
   async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerTaskDef) {
-    core.info('Cleanup starting');
+    CloudRunnerLogger.log('Cleanup starting');
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
@@ -375,10 +376,10 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
 
     const stacks = (await CF.listStacks().promise()).StackSummaries?.filter((x) => x.StackStatus !== 'DELETE_COMPLETE');
 
-    core.info(`Deleted Stacks: ${taskDef.taskDefStackName}, ${taskDef.taskDefStackNameTTL}`);
-    core.info(`Stacks: ${JSON.stringify(stacks, undefined, 4)}`);
+    CloudRunnerLogger.log(`Deleted Stacks: ${taskDef.taskDefStackName}, ${taskDef.taskDefStackNameTTL}`);
+    CloudRunnerLogger.log(`Stacks: ${JSON.stringify(stacks, undefined, 4)}`);
 
-    core.info('Cleanup complete');
+    CloudRunnerLogger.log('Cleanup complete');
   }
 }
 export default AWSBuildEnvironment;

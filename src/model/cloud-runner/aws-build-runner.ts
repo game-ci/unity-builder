@@ -3,6 +3,7 @@ import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable'
 import * as core from '@actions/core';
 import CloudRunnerTaskDef from './cloud-runner-task-def';
 import * as zlib from 'zlib';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 class AWSBuildRunner {
   static async runTask(
@@ -48,7 +49,7 @@ class AWSBuildRunner {
       },
     }).promise();
 
-    core.info('Cloud runner job is starting');
+    CloudRunnerLogger.log('Cloud runner job is starting');
     const taskArn = task.tasks?.[0].taskArn || '';
 
     try {
@@ -56,7 +57,7 @@ class AWSBuildRunner {
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      core.info(
+      CloudRunnerLogger.log(
         `Cloud runner job has ended ${
           (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
         }`,
@@ -65,10 +66,10 @@ class AWSBuildRunner {
       core.setFailed(error);
       core.error(error);
     }
-    core.info(`Cloud runner job is running`);
+    CloudRunnerLogger.log(`Cloud runner job is running`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     const exitCode = (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
-    core.info(`Cloud runner job exit code ${exitCode}`);
+    CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
     if (exitCode !== 0) {
       core.error(
         `job failed with exit code ${exitCode} ${JSON.stringify(
@@ -79,7 +80,7 @@ class AWSBuildRunner {
       );
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
-      core.info(`Cloud runner job has finished successfully`);
+      CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
     }
   }
 
@@ -107,12 +108,12 @@ class AWSBuildRunner {
     const stream = await AWSBuildRunner.getLogStream(kinesis, kinesisStreamName);
     let iterator = await AWSBuildRunner.getLogIterator(kinesis, stream);
 
-    core.info(
+    CloudRunnerLogger.log(
       `Cloud runner job status is ${(await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
     );
 
     const logBaseUrl = `https://${AWS.config.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
-    core.info(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
+    CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let readingLogs = true;
     let timestamp: number = 0;
     while (readingLogs) {
@@ -147,14 +148,14 @@ class AWSBuildRunner {
   private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, readingLogs: boolean) {
     if (taskData?.lastStatus !== 'RUNNING') {
       if (timestamp === 0) {
-        core.info('Cloud runner job stopped, streaming end of logs');
+        CloudRunnerLogger.log('Cloud runner job stopped, streaming end of logs');
         timestamp = Date.now();
       }
       if (timestamp !== 0 && Date.now() - timestamp < 30000) {
-        core.info('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
+        CloudRunnerLogger.log('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
         readingLogs = false;
       }
-      core.info(`Status of job: ${taskData.lastStatus}`);
+      CloudRunnerLogger.log(`Status of job: ${taskData.lastStatus}`);
     }
     return { timestamp, readingLogs };
   }
@@ -168,14 +169,14 @@ class AWSBuildRunner {
         if (json.messageType === 'DATA_MESSAGE') {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
             if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
-              core.info('End of cloud runner job logs');
+              CloudRunnerLogger.log('End of cloud runner job logs');
               readingLogs = false;
             } else {
               const message = json.logEvents[logEventsIndex].message;
               if (message.includes('Rebuilding Library because the asset database could not be found!')) {
                 core.warning('LIBRARY NOT FOUND!');
               }
-              core.info(message);
+              CloudRunnerLogger.log(message);
             }
           }
         }

@@ -1,6 +1,6 @@
 import { CoreV1Api } from '@kubernetes/client-node';
 import waitUntil from 'async-wait-until';
-import * as core from '@actions/core';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 class KubernetesUtilities {
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
@@ -15,7 +15,7 @@ class KubernetesUtilities {
 
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
     let success: boolean = false;
-    core.info(`Watching ${podName} ${namespace}`);
+    CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
     await waitUntil(
       async () => {
         const phase = (await kubeClient.readNamespacedPodStatus(podName, namespace))?.body.status?.phase;

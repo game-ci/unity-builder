@@ -1,6 +1,6 @@
 import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
-import * as core from '@actions/core';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 class KubernetesLogging {
   static async streamLogs(
@@ -12,7 +12,7 @@ class KubernetesLogging {
     namespace: string,
     logCallback: any,
   ) {
-    core.info(`Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace}`);
+    CloudRunnerLogger.log(`Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace}`);
     const stream = new Writable();
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
@@ -57,7 +57,7 @@ class KubernetesLogging {
     } catch (error) {
       throw error;
     }
-    core.info('end of log stream');
+    CloudRunnerLogger.log('end of log stream');
   }
 }
 

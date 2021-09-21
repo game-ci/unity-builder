@@ -8,7 +8,7 @@ import Kubernetes from './kubernetes-build-platform';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import ImageEnvironmentFactory from '../image-environment-factory';
 import YAML from 'yaml';
-import CloudRunnerTimerLogger from './cloud-runner-timer-logger';
+import CloudRunnerLogger from './cloud-runner-logger';
 const repositoryFolder = 'repo';
 const buildVolumeFolder = 'data';
 const cacheFolder = 'cache';
@@ -39,7 +39,7 @@ class CloudRunner {
   ];
 
   private static setup(buildParameters: BuildParameters) {
-    CloudRunnerTimerLogger.setup();
+    CloudRunnerLogger.setup();
     CloudRunner.buildGuid = CloudRunnerNamespace.generateBuildName(
       CloudRunner.readRunNumber(),
       buildParameters.platform,
@@ -103,12 +103,12 @@ class CloudRunner {
   private static setupBuildPlatform() {
     switch (this.buildParams.cloudRunnerCluster) {
       case 'aws':
-        core.info('Building with AWS');
+        CloudRunnerLogger.log('Building with AWS');
         this.CloudRunnerProviderPlatform = new AWSBuildPlatform(this.buildParams);
         break;
       default:
       case 'k8s':
-        core.info('Building with Kubernetes');
+        CloudRunnerLogger.log('Building with Kubernetes');
         this.CloudRunnerProviderPlatform = new Kubernetes(this.buildParams);
         break;
     }
@@ -247,24 +247,24 @@ class CloudRunner {
 
   private static async runMainJob(baseImage: any) {
     if (this.buildParams.customBuildSteps !== '') {
-      core.info(`Cloud Runner is running in standard build automation mode`);
+      CloudRunnerLogger.log(`Cloud Runner is running in standard build automation mode`);
       await CloudRunner.standardBuildAutomation(baseImage);
     } else {
-      core.info(`Cloud Runner is running in custom job mode`);
+      CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       await CloudRunner.runCustomJob(this.buildParams.customBuildSteps);
     }
   }
 
   private static async standardBuildAutomation(baseImage: any) {
-    CloudRunnerTimerLogger.logWithTime('Pre build steps time');
+    CloudRunnerLogger.logWithTime('Pre build steps time');
     await this.runCustomJob(this.buildParams.preBuildSteps);
-    CloudRunnerTimerLogger.logWithTime('Setup time');
+    CloudRunnerLogger.logWithTime('Setup time');
     await CloudRunner.BuildStep(baseImage);
-    CloudRunnerTimerLogger.logWithTime('Build time');
+    CloudRunnerLogger.logWithTime('Build time');
     await CloudRunner.CompressionStep();
-    CloudRunnerTimerLogger.logWithTime('Compression time');
+    CloudRunnerLogger.logWithTime('Compression time');
     await this.runCustomJob(this.buildParams.postBuildSteps);
-    CloudRunnerTimerLogger.logWithTime('Post build steps time');
+    CloudRunnerLogger.logWithTime('Post build steps time');
   }
 
   private static async runCustomJob(buildSteps) {
@@ -291,7 +291,7 @@ class CloudRunner {
   }
 
   private static async setupStep() {
-    core.info('Starting step 1/4 clone and restore cache)');
+    CloudRunnerLogger.log('Starting step 1/4 clone and restore cache)');
     await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       'alpine/git',
@@ -320,7 +320,7 @@ class CloudRunner {
   }
 
   private static async BuildStep(baseImage: any) {
-    core.info('Starting part 2/4 (build unity project)');
+    CloudRunnerLogger.log('Starting part 2/4 (build unity project)');
     await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
       baseImage.toString(),
@@ -346,7 +346,7 @@ class CloudRunner {
   }
 
   private static async CompressionStep() {
-    core.info('Starting step 3/4 build compression');
+    CloudRunnerLogger.log('Starting step 3/4 build compression');
     // Cleanup
     await this.CloudRunnerProviderPlatform.runBuildTask(
       this.buildGuid,
@@ -384,7 +384,7 @@ class CloudRunner {
       ],
       this.defaultSecrets,
     );
-    core.info('compression step complete');
+    CloudRunnerLogger.log('compression step complete');
   }
 
   private static async cleanupSharedBuildResources() {
@@ -397,7 +397,7 @@ class CloudRunner {
   }
 
   private static async handleException(error: unknown) {
-    core.error(JSON.stringify(error, undefined, 4));
+    CloudRunnerLogger.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Remote Builder failed');
     await this.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
       this.buildGuid,
