@@ -59,6 +59,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: 2019.3.15f1
+          CloudRunnerBranch: remote-builder/unified-providers
 
       ###########################
       #          Upload         #
