@@ -22,7 +22,7 @@ class KubernetesLogging {
     };
     const logOptions = {
       follow: true,
-      pretty: true,
+      pretty: false,
       previous: false,
     };
     try {
