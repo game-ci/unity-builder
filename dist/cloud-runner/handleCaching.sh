@@ -25,7 +25,8 @@ ls -lh "$libraryCacheFolder"
 latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
 
 echo "Checking if Library cache $libraryCacheFolder/$latestLibraryCacheFile exists"
-if [ -f "$libraryCacheFolder/$latestLibraryCacheFile" ]; then
+cd $libraryCacheFolder
+if [ -f "$latestLibraryCacheFile" ]; then
   echo "Library cache exists"
   unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$projectPathFull"
   tree "$libraryFolderFull"
@@ -36,7 +37,8 @@ echo ' '
 echo 'Large File Caching'
 
 echo "Checking large file cache exists ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
-if [ -f "$lfsCacheFolder/$LFS_ASSETS_HASH.zip" ]; then
+cd $lfsCacheFolder
+if [ -f "$LFS_ASSETS_HASH.zip" ]; then
   echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
   latestLFSCacheFile="$LFS_ASSETS_HASH"
 else
@@ -44,8 +46,7 @@ else
   echo "Match not found: using latest large file cache $latestLFSCacheFile"
 fi
 
-
-if [ ! -f "$lfsCacheFolder/$latestLFSCacheFile" ]; then
+if [ ! -f "$latestLFSCacheFile" ]; then
   echo "LFS cache exists from build $latestLFSCacheFile from $branch"
   rm -r "$gitLFSDestinationFolder"
   unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$repoPathFull/.git"
@@ -77,7 +78,7 @@ cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
 echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
 
 # purge cache
-if [ -z "$purgeCloudRunnerCache"]; then
+if [ -z "$purgeCloudRunnerCache" ]; then
   echo ' '
   echo "purging $purgeCloudRunnerCache"
   rm -r "$purgeCloudRunnerCache"
