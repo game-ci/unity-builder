@@ -148,14 +148,14 @@ class AWSBuildRunner {
   private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, readingLogs: boolean) {
     if (taskData?.lastStatus !== 'RUNNING') {
       if (timestamp === 0) {
-        CloudRunnerLogger.log('Cloud runner job stopped, streaming end of logs');
+        CloudRunnerLogger.log('## Cloud runner job stopped, streaming end of logs');
         timestamp = Date.now();
       }
       if (timestamp !== 0 && Date.now() - timestamp < 30000) {
-        CloudRunnerLogger.log('Cloud runner status is not RUNNING for 30 seconds, last query for logs');
+        CloudRunnerLogger.log('## Cloud runner status is not RUNNING for 30 seconds, last query for logs');
         readingLogs = false;
       }
-      CloudRunnerLogger.log(`Status of job: ${taskData.lastStatus}`);
+      CloudRunnerLogger.log(`## Status of job: ${taskData.lastStatus}`);
     }
     return { timestamp, readingLogs };
   }
