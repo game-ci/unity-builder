@@ -1,4 +1,4 @@
-name: Remote Build Kubernetes GKE + Autopilot
+name: Cloud Runner - Kubernetes Build
 
 on:
   push: { branches: [remote-builder/k8s, remote-builder/unified-providers] }
@@ -16,7 +16,7 @@ env:
 
 jobs:
   k8sBuilds:
-    name: K8s build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

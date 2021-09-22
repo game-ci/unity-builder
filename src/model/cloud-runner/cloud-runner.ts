@@ -1,10 +1,10 @@
-import AWSBuildPlatform from './aws-build-platform';
+import AWSBuildPlatform from './aws/aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
 import CloudRunnerNamespace from './cloud-runner-namespace';
 import CloudRunnerSecret from './cloud-runner-secret';
 import { CloudRunnerProviderInterface } from './cloud-runner-provider-interface';
-import Kubernetes from './kubernetes-build-platform';
+import Kubernetes from './k8s/kubernetes-build-platform';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import ImageEnvironmentFactory from '../image-environment-factory';
 import YAML from 'yaml';

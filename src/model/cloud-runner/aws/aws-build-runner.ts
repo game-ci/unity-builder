@@ -1,9 +1,9 @@
 import * as AWS from 'aws-sdk';
-import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../cloud-runner-environment-variable';
 import * as core from '@actions/core';
-import CloudRunnerTaskDef from './cloud-runner-task-def';
+import CloudRunnerTaskDef from '../cloud-runner-task-def';
 import * as zlib from 'zlib';
-import CloudRunnerLogger from './cloud-runner-logger';
+import CloudRunnerLogger from '../cloud-runner-logger';
 
 class AWSBuildRunner {
   static async runTask(

@@ -1,4 +1,4 @@
-name: Remote Build AWS Fargate
+name: Cloud Runner - AWS Build
 
 on:
   push: { branches: [main, aws, remote-builder/unified-providers] }
