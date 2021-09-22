@@ -1,4 +1,4 @@
-name: Remote Build AWS Fargate GitHub Ephemeral Runner
+name: Remote Build AWS Fargate Custom (GitHub Self Hosted Ephemeral Runner)
 
 on:
   push: { branches: [main, aws, remote-builder/unified-providers] }
