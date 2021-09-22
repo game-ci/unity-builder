@@ -247,15 +247,16 @@ class CloudRunner {
 
   private static async runMainJob(baseImage: any) {
     if (this.buildParams.customBuildSteps === '') {
-      CloudRunnerLogger.log(`Cloud Runner is running in standard build automation mode`);
       await CloudRunner.standardBuildAutomation(baseImage);
+    } else if (this.buildParams.customBuildSteps === 'ephemeral') {
+      await CloudRunner.runJobAsEphemeralGitHubRunner(baseImage);
     } else {
-      CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       await CloudRunner.runCustomJob(this.buildParams.customBuildSteps);
     }
   }
 
   private static async standardBuildAutomation(baseImage: any) {
+    CloudRunnerLogger.log(`Cloud Runner is running in standard build automation mode`);
     CloudRunnerLogger.logWithTime('Pre build steps time');
     await this.runCustomJob(this.buildParams.preBuildSteps);
     CloudRunnerLogger.logWithTime('Setup time');
@@ -266,8 +267,22 @@ class CloudRunner {
     await this.runCustomJob(this.buildParams.postBuildSteps);
     CloudRunnerLogger.logWithTime('Post build steps time');
   }
-
+  private static async runJobAsEphemeralGitHubRunner(baseImage: any) {
+    CloudRunnerLogger.log(`Cloud Runner is running in ephemeral GitHub runner mode`);
+    const installAndStartRunner =
+      'mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz';
+    await this.CloudRunnerProviderPlatform.runBuildTask(
+      this.buildGuid,
+      baseImage,
+      [installAndStartRunner],
+      `/${buildVolumeFolder}`,
+      `/${buildVolumeFolder}`,
+      this.defaultGitShaEnvironmentVariable,
+      [...this.defaultSecrets],
+    );
+  }
   private static async runCustomJob(buildSteps) {
+    CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
     buildSteps = YAML.parse(buildSteps);
     for (const step of buildSteps) {
       const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
