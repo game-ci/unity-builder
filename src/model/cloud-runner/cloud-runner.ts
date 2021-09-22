@@ -246,7 +246,7 @@ class CloudRunner {
   }
 
   private static async runMainJob(baseImage: any) {
-    if (this.buildParams.customBuildSteps !== '') {
+    if (this.buildParams.customBuildSteps === '') {
       CloudRunnerLogger.log(`Cloud Runner is running in standard build automation mode`);
       await CloudRunner.standardBuildAutomation(baseImage);
     } else {
@@ -282,6 +282,31 @@ class CloudRunner {
         this.buildGuid,
         step['image'],
         step['commands'],
+        `/${buildVolumeFolder}`,
+        `/${buildVolumeFolder}`,
+        this.defaultGitShaEnvironmentVariable,
+        [...this.defaultSecrets, ...stepSecrets],
+      );
+    }
+  }
+
+  private static async runEphemeralRegistrationJob(buildSteps) {
+    buildSteps = YAML.parse(buildSteps);
+    for (const step of buildSteps) {
+      const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
+        const secret: CloudRunnerSecret = {
+          ParameterKey: x.name,
+          EnvironmentVariable: x.name,
+          ParameterValue: x.value,
+        };
+        return secret;
+      });
+      await this.CloudRunnerProviderPlatform.runBuildTask(
+        this.buildGuid,
+        step['image'],
+        [
+          'mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz && ls',
+        ],
         `/${buildVolumeFolder}`,
         `/${buildVolumeFolder}`,
         this.defaultGitShaEnvironmentVariable,
