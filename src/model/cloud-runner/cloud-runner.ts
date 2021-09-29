@@ -267,6 +267,7 @@ class CloudRunner {
     await this.runCustomJob(this.buildParams.postBuildSteps);
     CloudRunnerLogger.logWithTime('Post build steps time');
   }
+
   private static async runJobAsEphemeralGitHubRunner(baseImage: any) {
     CloudRunnerLogger.log(`Cloud Runner is running in ephemeral GitHub runner mode`);
     const installAndStartRunner =
@@ -281,6 +282,7 @@ class CloudRunner {
       [...this.defaultSecrets],
     );
   }
+
   private static async runCustomJob(buildSteps) {
     CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
     buildSteps = YAML.parse(buildSteps);
@@ -297,31 +299,6 @@ class CloudRunner {
         this.buildGuid,
         step['image'],
         step['commands'],
-        `/${buildVolumeFolder}`,
-        `/${buildVolumeFolder}`,
-        this.defaultGitShaEnvironmentVariable,
-        [...this.defaultSecrets, ...stepSecrets],
-      );
-    }
-  }
-
-  private static async runEphemeralRegistrationJob(buildSteps) {
-    buildSteps = YAML.parse(buildSteps);
-    for (const step of buildSteps) {
-      const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
-        const secret: CloudRunnerSecret = {
-          ParameterKey: x.name,
-          EnvironmentVariable: x.name,
-          ParameterValue: x.value,
-        };
-        return secret;
-      });
-      await this.CloudRunnerProviderPlatform.runBuildTask(
-        this.buildGuid,
-        step['image'],
-        [
-          'mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz && ls',
-        ],
         `/${buildVolumeFolder}`,
         `/${buildVolumeFolder}`,
         this.defaultGitShaEnvironmentVariable,

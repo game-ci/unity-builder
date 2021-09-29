@@ -25,6 +25,12 @@ inputs:
   postBuildSteps:
     required: false
     default: ''
+  preBuildSteps:
+    required: false
+    default: ''
+  customBuildSteps:
+    required: false
+    default: ''
   buildsPath:
     required: false
     default: ''
