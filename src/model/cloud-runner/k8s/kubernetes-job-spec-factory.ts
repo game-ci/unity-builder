@@ -1,5 +1,5 @@
 import BuildParameters from '../../build-parameters';
-import CloudRunnerEnvironmentVariable from '../cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(

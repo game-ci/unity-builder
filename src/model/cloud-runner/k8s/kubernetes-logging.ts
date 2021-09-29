@@ -1,6 +1,6 @@
 import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
-import CloudRunnerLogger from '../cloud-runner-logger';
+import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
 
 class KubernetesLogging {
   static async streamLogs(

@@ -1,4 +1,4 @@
-import BuildParameters from '../build-parameters';
+import BuildParameters from '../../build-parameters';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import CloudRunnerSecret from './cloud-runner-secret';
 
