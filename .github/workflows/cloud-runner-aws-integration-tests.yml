@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: 12.x
       - run: yarn install
-      - run: yarn test -- src/model/cloud-runner/cloud-runner.test.ts
+      - run: yarn test src/model/cloud-runner/cloud-runner.int.test.ts
         id: aws-fargate-unity-integration-tests
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
