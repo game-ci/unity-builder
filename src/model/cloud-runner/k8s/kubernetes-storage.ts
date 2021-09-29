@@ -2,7 +2,7 @@ import waitUntil from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../build-parameters';
-import CloudRunnerLogger from '../cloud-runner-logger';
+import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(

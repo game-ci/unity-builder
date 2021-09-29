@@ -1,17 +1,17 @@
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '../..';
 import * as core from '@actions/core';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
-import CloudRunnerSecret from '../cloud-runner-secret';
+import { CloudRunnerProviderInterface } from '../cloud-runner-services/cloud-runner-provider-interface';
+import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
-import CloudRunnerEnvironmentVariable from '../cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
 import KubernetesLogging from './kubernetes-logging';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
-import CloudRunnerLogger from '../cloud-runner-logger';
+import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
 
 class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;

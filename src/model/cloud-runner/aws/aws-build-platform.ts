@@ -1,15 +1,15 @@
 import * as SDK from 'aws-sdk';
 import { customAlphabet } from 'nanoid';
-import CloudRunnerSecret from '../cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../cloud-runner-environment-variable';
+import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
 import * as fs from 'fs';
 import * as core from '@actions/core';
-import CloudRunnerTaskDef from '../cloud-runner-task-def';
-import CloudRunnerConstants from '../cloud-runner-constants';
+import CloudRunnerTaskDef from '../cloud-runner-services/cloud-runner-task-def';
+import CloudRunnerConstants from '../cloud-runner-services/cloud-runner-constants';
 import AWSBuildRunner from './aws-build-runner';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
+import { CloudRunnerProviderInterface } from '../cloud-runner-services/cloud-runner-provider-interface';
 import BuildParameters from '../../build-parameters';
-import CloudRunnerLogger from '../cloud-runner-logger';
+import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
 const crypto = require('crypto');
 
 class AWSBuildEnvironment implements CloudRunnerProviderInterface {
