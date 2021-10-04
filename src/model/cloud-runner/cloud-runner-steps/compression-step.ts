@@ -1,0 +1,57 @@
+import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
+import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
+import { CloudRunnerState } from '../cloud-runner-state/cloud-runner-state';
+import { CloudRunnerStepState } from '../cloud-runner-state/cloud-runner-step-state';
+import { StandardStepInterface } from './standard-step-interface';
+
+export class CompressionStep implements StandardStepInterface {
+  async run(cloudRunnerStepState: CloudRunnerStepState) {
+    await CompressionStep.CompressionStep(cloudRunnerStepState.environment, cloudRunnerStepState.secrets);
+  }
+
+  private static async CompressionStep(
+    environmentVariables: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
+  ) {
+    CloudRunnerLogger.log('Starting step 3/4 build compression');
+    // Cleanup
+    await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+      CloudRunnerState.buildGuid,
+      'alpine',
+      [
+        `
+            printenv
+            apk update -q
+            apk add zip tree -q
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
+            cd "$libraryFolderFull/.."
+            zip -r "lib-$BUILDID.zip" "./Library"
+            mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
+            cd "$repoPathFull"
+            ls -lh "$repoPathFull"
+            zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
+            mv "build-$BUILDID.zip" "/$cacheFolderFull/build-$BUILDID.zip"
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull"
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "/$cacheFolderFull/.."
+            ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
+            ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
+          `,
+      ],
+      `/${CloudRunnerState.buildVolumeFolder}`,
+      `/${CloudRunnerState.buildVolumeFolder}`,
+      [
+        ...environmentVariables,
+        ...[
+          {
+            name: 'cacheFolderFull',
+            value: CloudRunnerState.cacheFolderFull,
+          },
+        ],
+      ],
+      secrets,
+    );
+    CloudRunnerLogger.log('compression step complete');
+  }
+}

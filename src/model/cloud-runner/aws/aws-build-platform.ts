@@ -242,7 +242,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
 
     const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
 
-    // TODO: offer a parameter to decide if you want the guarenteed shutdown or fastest startup time possible
+    // TODO: offer a parameter to decide if you want the guaranteed shutdown or fastest startup time possible
 
     return {
       taskDefStackName,
