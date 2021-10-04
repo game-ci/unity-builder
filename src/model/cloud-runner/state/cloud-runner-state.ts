@@ -1,8 +1,8 @@
 import { BuildParameters } from '../..';
-import { CloudRunnerProviderInterface } from '../cloud-runner-services/cloud-runner-provider-interface';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
 import ImageEnvironmentFactory from '../../image-environment-factory';
+import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
 
 export class CloudRunnerState {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;

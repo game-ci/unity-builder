@@ -1,5 +1,5 @@
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
 import * as SDK from 'aws-sdk';
 import * as core from '@actions/core';
 

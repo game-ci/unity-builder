@@ -1,16 +1,16 @@
 import AWSBuildPlatform from './aws/aws-build-platform';
 import * as core from '@actions/core';
 import { BuildParameters } from '..';
-import CloudRunnerNamespace from './cloud-runner-services/cloud-runner-namespace';
-import { CloudRunnerState } from './cloud-runner-state/cloud-runner-state';
+import CloudRunnerNamespace from './services/cloud-runner-namespace';
+import { CloudRunnerState } from './state/cloud-runner-state';
 import Kubernetes from './k8s/kubernetes-build-platform';
-import CloudRunnerLogger from './cloud-runner-services/cloud-runner-logger';
-import { BuildStep } from './cloud-runner-steps/build-step';
-import { CompressionStep } from './cloud-runner-steps/compression-step';
-import { DownloadRepositoryStep } from './cloud-runner-steps/download-repository-step';
-import { CustomStep } from './cloud-runner-steps/custom-step';
-import { EphemeralGitHubRunnerStep } from './cloud-runner-steps/ephemeral-github-runner-step';
-import { CloudRunnerStepState } from './cloud-runner-state/cloud-runner-step-state';
+import CloudRunnerLogger from './services/cloud-runner-logger';
+import { BuildStep } from './steps/build-step';
+import { CompressionStep } from './steps/compression-step';
+import { DownloadRepositoryStep } from './steps/download-repository-step';
+import { CustomStep } from './steps/custom-step';
+import { EphemeralGitHubRunnerStep } from './steps/ephemeral-github-runner-step';
+import { CloudRunnerStepState } from './state/cloud-runner-step-state';
 
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {

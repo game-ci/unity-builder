@@ -1,11 +1,11 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerTaskDef from '../cloud-runner-services/cloud-runner-task-def';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
-import CloudRunnerConstants from '../cloud-runner-services/cloud-runner-constants';
+import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
+import CloudRunnerConstants from '../services/cloud-runner-constants';
 import { customAlphabet } from 'nanoid';
 import { AWSBaseStack } from './aws-base-stack';
 import { AWSTemplates } from './aws-templates';
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 import * as fs from 'fs';
 import { AWSError } from './aws-error';
 

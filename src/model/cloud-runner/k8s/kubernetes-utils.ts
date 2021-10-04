@@ -1,6 +1,6 @@
 import { CoreV1Api } from '@kubernetes/client-node';
 import waitUntil from 'async-wait-until';
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 
 class KubernetesUtilities {
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {

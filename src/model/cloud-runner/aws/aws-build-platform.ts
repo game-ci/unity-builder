@@ -1,11 +1,11 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
-import CloudRunnerTaskDef from '../cloud-runner-services/cloud-runner-task-def';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
 import AWSBuildRunner from './aws-build-runner';
-import { CloudRunnerProviderInterface } from '../cloud-runner-services/cloud-runner-provider-interface';
+import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import BuildParameters from '../../build-parameters';
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { AWSJobStack } from './aws-job-stack';
 
 class AWSBuildEnvironment implements CloudRunnerProviderInterface {

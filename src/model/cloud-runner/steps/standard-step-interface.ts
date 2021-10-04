@@ -1,4 +1,4 @@
-import { CloudRunnerStepState } from '../cloud-runner-state/cloud-runner-step-state';
+import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 
 export interface StandardStepInterface {
   run(

@@ -1,8 +1,8 @@
-import CloudRunnerEnvironmentVariable from '../cloud-runner-services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
-import { CloudRunnerState } from '../cloud-runner-state/cloud-runner-state';
-import { CloudRunnerStepState } from '../cloud-runner-state/cloud-runner-step-state';
+import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
+import { CloudRunnerState } from '../state/cloud-runner-state';
+import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { StandardStepInterface } from './standard-step-interface';
 
 export class CompressionStep implements StandardStepInterface {

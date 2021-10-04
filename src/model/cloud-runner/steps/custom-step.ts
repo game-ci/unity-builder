@@ -1,6 +1,6 @@
-import CloudRunnerLogger from '../cloud-runner-services/cloud-runner-logger';
-import CloudRunnerSecret from '../cloud-runner-services/cloud-runner-secret';
-import { CloudRunnerState } from '../cloud-runner-state/cloud-runner-state';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
+import { CloudRunnerState } from '../state/cloud-runner-state';
 import YAML from 'yaml';
 
 export class CustomStep {
