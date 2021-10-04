@@ -49,7 +49,7 @@ class CloudRunner {
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
-      await CloudRunner.runJob(baseImage);
+      await CloudRunner.runJob(baseImage.toString());
       await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
         CloudRunnerState.buildGuid,
         CloudRunnerState.buildParams,
