@@ -128,74 +128,75 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
 
-    try {
-      for (const secret of secrets) {
-        if (typeof secret.ParameterValue == 'number') {
-          secret.ParameterValue = `${secret.ParameterValue}`;
-        }
-        if (!secret.ParameterValue || secret.ParameterValue === '') {
-          secrets = secrets.filter((x) => x !== secret);
-          continue;
-        }
-        taskDefCloudFormation = this.insertAtTemplate(
-          taskDefCloudFormation,
-          'p1 - input',
-          this.getParameterTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
-        );
-        taskDefCloudFormation = this.insertAtTemplate(
-          taskDefCloudFormation,
-          'p2 - secret',
-          this.getSecretTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
-        );
-        taskDefCloudFormation = this.insertAtTemplate(
-          taskDefCloudFormation,
-          'p3 - container def',
-          this.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
-        );
+    for (const secret of secrets) {
+      if (typeof secret.ParameterValue == 'number') {
+        secret.ParameterValue = `${secret.ParameterValue}`;
       }
-      const secretsMappedToCloudFormationParameters = secrets.map((x) => {
-        return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
-      });
+      if (!secret.ParameterValue || secret.ParameterValue === '') {
+        secrets = secrets.filter((x) => x !== secret);
+        continue;
+      }
+      taskDefCloudFormation = this.insertAtTemplate(
+        taskDefCloudFormation,
+        'p1 - input',
+        this.getParameterTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+      );
+      taskDefCloudFormation = this.insertAtTemplate(
+        taskDefCloudFormation,
+        'p2 - secret',
+        this.getSecretTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+      );
+      taskDefCloudFormation = this.insertAtTemplate(
+        taskDefCloudFormation,
+        'p3 - container def',
+        this.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+      );
+    }
+    const secretsMappedToCloudFormationParameters = secrets.map((x) => {
+      return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
+    });
+    const parameters = [
+      {
+        ParameterKey: 'EnvironmentName',
+        ParameterValue: this.baseStackName,
+      },
+      {
+        ParameterKey: 'ImageUrl',
+        ParameterValue: image,
+      },
+      {
+        ParameterKey: 'ServiceName',
+        ParameterValue: taskDefStackName,
+      },
+      {
+        ParameterKey: 'Command',
+        ParameterValue: 'echo "this template should be overwritten when running a task"',
+      },
+      {
+        ParameterKey: 'EntryPoint',
+        ParameterValue: entrypoint.join(','),
+      },
+      {
+        ParameterKey: 'WorkingDirectory',
+        ParameterValue: workingdir,
+      },
+      {
+        ParameterKey: 'EFSMountDirectory',
+        ParameterValue: mountdir,
+      },
+      {
+        ParameterKey: 'BUILDID',
+        ParameterValue: buildGuid,
+      },
+      ...secretsMappedToCloudFormationParameters,
+    ];
 
+    try {
       await CF.createStack({
         StackName: taskDefStackName,
         TemplateBody: taskDefCloudFormation,
         Capabilities: ['CAPABILITY_IAM'],
-        Parameters: [
-          {
-            ParameterKey: 'EnvironmentName',
-            ParameterValue: this.baseStackName,
-          },
-          {
-            ParameterKey: 'ImageUrl',
-            ParameterValue: image,
-          },
-          {
-            ParameterKey: 'ServiceName',
-            ParameterValue: taskDefStackName,
-          },
-          {
-            ParameterKey: 'Command',
-            ParameterValue: 'echo "this template should be overwritten when running a task"',
-          },
-          {
-            ParameterKey: 'EntryPoint',
-            ParameterValue: entrypoint.join(','),
-          },
-          {
-            ParameterKey: 'WorkingDirectory',
-            ParameterValue: workingdir,
-          },
-          {
-            ParameterKey: 'EFSMountDirectory',
-            ParameterValue: mountdir,
-          },
-          {
-            ParameterKey: 'BUILDID',
-            ParameterValue: buildGuid,
-          },
-          ...secretsMappedToCloudFormationParameters,
-        ],
+        Parameters: parameters,
       }).promise();
       CloudRunnerLogger.log('Creating cloud runner job');
       await CF.createStack({
@@ -225,12 +226,9 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
           },
         ],
       }).promise();
-      // Side effect: CloudRunnerLogger.log('Creating cleanup double checker cron job...');
-
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
-      await this.handleStackCreationFailure(error, CF, taskDefStackName, taskDefCloudFormation, secrets);
-
+      await this.handleStackCreationFailure(error, CF, taskDefStackName, taskDefCloudFormation, parameters, secrets);
       throw error;
     }
 
@@ -342,10 +340,19 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     CF: SDK.CloudFormation,
     taskDefStackName: string,
     taskDefCloudFormation: string,
+    parameters: any[],
     secrets: CloudRunnerSecret[],
   ) {
+    CloudRunnerLogger.log('aws stack parameters: ');
+    CloudRunnerLogger.log(JSON.stringify(parameters, undefined, 4));
+
+    CloudRunnerLogger.log('aws stack secrets: ');
     CloudRunnerLogger.log(JSON.stringify(secrets, undefined, 4));
+
+    CloudRunnerLogger.log('aws stack: ');
     CloudRunnerLogger.log(taskDefCloudFormation);
+
+    CloudRunnerLogger.log('aws error: ');
     core.error(error);
     CloudRunnerLogger.log('Getting events and resources for task stack');
     const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
