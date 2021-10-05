@@ -26,8 +26,8 @@ export class EphemeralGitHubRunnerStep implements StandardStepInterface {
       CloudRunnerState.buildGuid,
       image,
       [installAndStartRunner],
-      `/`,
-      `/`,
+      `/runner`,
+      `/runner`,
       environmentVariables,
       secrets,
     );
