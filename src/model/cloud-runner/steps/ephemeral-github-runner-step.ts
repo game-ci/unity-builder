@@ -21,7 +21,7 @@ export class EphemeralGitHubRunnerStep implements StandardStepInterface {
   ) {
     CloudRunnerLogger.log(`Cloud Runner is running in ephemeral GitHub runner mode`);
     const installAndStartRunner =
-      'mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz';
+      'ls && mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz';
     await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
       CloudRunnerState.buildGuid,
       image,
