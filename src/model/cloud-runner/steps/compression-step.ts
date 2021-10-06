@@ -3,9 +3,9 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
-import { StandardStepInterface } from './standard-step-interface';
+import { StepInterface } from './step-interface';
 
-export class CompressionStep implements StandardStepInterface {
+export class CompressionStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     await CompressionStep.CompressionStep(cloudRunnerStepState.environment, cloudRunnerStepState.secrets);
   }
