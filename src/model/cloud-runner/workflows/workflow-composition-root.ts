@@ -8,7 +8,7 @@ import * as core from '@actions/core';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
-    await WorkflowCompositionRoot.runJob(cloudRunnerStepState.image);
+    await WorkflowCompositionRoot.runJob(cloudRunnerStepState.image.toString());
   }
 
   private static async runJob(baseImage: any) {
