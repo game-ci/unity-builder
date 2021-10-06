@@ -8,8 +8,8 @@ import CloudRunnerLogger from './services/cloud-runner-logger';
 import { BuildStep } from './steps/build-step';
 import { CompressionStep } from './steps/compression-step';
 import { DownloadRepositoryStep } from './steps/download-repository-step';
-import { CustomStep } from './steps/custom-step';
-import { EphemeralGitHubRunnerStep } from './steps/ephemeral-github-runner-step';
+import { CustomStep } from './workflows/custom-step';
+import { EphemeralGitHubRunnerStep } from './workflows/ephemeral-github-runner-step';
 import { CloudRunnerStepState } from './state/cloud-runner-step-state';
 
 class CloudRunner {

@@ -3,7 +3,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
-import { StandardStepInterface } from './standard-step-interface';
+import { StandardStepInterface } from '../steps/standard-step-interface';
 
 export class EphemeralGitHubRunnerStep implements StandardStepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -26,8 +26,8 @@ export class EphemeralGitHubRunnerStep implements StandardStepInterface {
       CloudRunnerState.buildGuid,
       image,
       [installAndStartRunner],
-      `/runner`,
-      `/runner`,
+      `../runner`,
+      `../runner`,
       environmentVariables,
       secrets,
     );
