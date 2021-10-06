@@ -26,8 +26,8 @@ export class EphemeralGitHubRunnerWorkflow implements WorkflowInterface {
       CloudRunnerState.buildGuid,
       image,
       [installAndStartRunner],
-      `../runner`,
-      `../runner`,
+      `/../runner`,
+      `/../runner`,
       environmentVariables,
       secrets,
     );
