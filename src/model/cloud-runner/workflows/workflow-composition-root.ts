@@ -5,6 +5,7 @@ import { CustomWorkflow } from './custom-workflow';
 import { EphemeralGitHubRunnerWorkflow } from './ephemeral-github-runner-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
+import { BuildAutomationWorkflow } from './build-automation-workflow';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -14,7 +15,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
   private static async runJob(baseImage: any) {
     core.info(`Custom build steps: ${CloudRunnerState.buildParams.customBuildSteps}`);
     if (CloudRunnerState.buildParams.customBuildSteps === '') {
-      await new EphemeralGitHubRunnerWorkflow().run(
+      await new BuildAutomationWorkflow().run(
         new CloudRunnerStepState(
           baseImage,
           CloudRunnerState.readBuildEnvironmentVariables(),

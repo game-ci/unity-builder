@@ -61,4 +61,10 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           awsBaseStackName: game-ci-stack
-          customBuildSteps: ephemeral
+          customBuildSteps: >-
+            - name: 'step 1'
+              image: 'alpine'
+              commands: ['printenv']
+              secrets:
+                - name: 'testCustomSecret'
+                  value: 'VALUEXXX'
