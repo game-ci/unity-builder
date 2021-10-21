@@ -158,8 +158,8 @@ chmod -R a+r "$UNITY_PROJECT_PATH"
 
 # Add execute permissions to specific files
 if [[ "$BUILD_TARGET" == "StandaloneOSX" ]]; then
-  OSX_EXECUTABLE_PATH="$BUILD_PATH_FULL/StandaloneOSX.app/Contents/MacOS/*"
-  chmod +x "$OSX_EXECUTABLE_PATH"
+  OSX_EXECUTABLE_PATH="$BUILD_PATH_FULL/$BUILD_NAME.app/Contents/MacOS"
+  find "$OSX_EXECUTABLE_PATH" -type f -exec chmod +x {} \;
 fi
 
 #
