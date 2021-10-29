@@ -23,7 +23,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ),
     );
     CloudRunnerLogger.logWithTime('Download repository step time');
-    if (CloudRunnerState.buildParams.preBuildSteps === '') {
+    if (CloudRunnerState.buildParams.preBuildSteps !== '') {
       await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
     }
     CloudRunnerLogger.logWithTime('Pre build step(s) time');
@@ -46,7 +46,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
     CloudRunnerLogger.logWithTime('Compression time');
 
-    if (CloudRunnerState.buildParams.postBuildSteps === '') {
+    if (CloudRunnerState.buildParams.postBuildSteps !== '') {
       await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
     }
     CloudRunnerLogger.logWithTime('Post build step(s) time');
