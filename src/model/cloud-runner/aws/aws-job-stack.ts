@@ -101,6 +101,21 @@ export class AWSJobStack {
       ...secretsMappedToCloudFormationParameters,
     ];
 
+    let previousStackExists = true;
+    while (previousStackExists) {
+      previousStackExists = false;
+      const stacks = await CF.listStacks().promise();
+      if (!stacks.StackSummaries) {
+        throw new Error('Faild to get stacks');
+      }
+      for (let index = 0; index < stacks.StackSummaries.length; index++) {
+        const element = stacks.StackSummaries[index];
+        if (element.StackName === taskDefStackName) {
+          previousStackExists = true;
+        }
+      }
+    }
+
     try {
       await CF.createStack({
         StackName: taskDefStackName,

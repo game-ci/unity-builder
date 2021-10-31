@@ -12,6 +12,7 @@ export class AWSError {
     parameters: any[],
     secrets: CloudRunnerSecret[],
   ) {
+    CloudRunnerLogger.log(' \n ');
     CloudRunnerLogger.log('aws stack parameters: ');
     CloudRunnerLogger.log(JSON.stringify(parameters, undefined, 4));
 
