@@ -151,7 +151,7 @@ class AWSBuildRunner {
         CloudRunnerLogger.log('## Cloud runner job stopped, streaming end of logs');
         timestamp = Date.now();
       }
-      if (timestamp !== 0 && Date.now() - timestamp < 30000) {
+      if (timestamp !== 0 && Date.now() - timestamp > 30000) {
         CloudRunnerLogger.log('## Cloud runner status is not RUNNING for 30 seconds, last query for logs');
         readingLogs = false;
       }
