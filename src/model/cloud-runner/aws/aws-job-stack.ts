@@ -112,6 +112,7 @@ export class AWSJobStack {
         const element = stacks.StackSummaries[index];
         if (element.StackName === taskDefStackName) {
           previousStackExists = true;
+          CloudRunnerLogger.log(`Previous stack still exists: ${JSON.stringify(element)}`);
         }
       }
     }
