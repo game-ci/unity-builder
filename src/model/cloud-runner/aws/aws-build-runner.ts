@@ -168,16 +168,14 @@ class AWSBuildRunner {
         );
         if (json.messageType === 'DATA_MESSAGE') {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
+            const message = json.logEvents[logEventsIndex].message;
             if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
               CloudRunnerLogger.log('End of cloud runner job logs');
               readingLogs = false;
-            } else {
-              const message = json.logEvents[logEventsIndex].message;
-              if (message.includes('Rebuilding Library because the asset database could not be found!')) {
-                core.warning('LIBRARY NOT FOUND!');
-              }
-              CloudRunnerLogger.log(message);
+            } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
+              core.warning('LIBRARY NOT FOUND!');
             }
+            CloudRunnerLogger.log(message);
           }
         }
       }
