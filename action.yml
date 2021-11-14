@@ -110,6 +110,11 @@ inputs:
     required: false
     default: ''
     description: 'SSH Agent path to forward to the container'
+  gitPrivateToken:
+    required: false
+    default: ''
+    description: >
+      Github private token to pull from github
   chownFilesTo:
     required: false
     default: ''
