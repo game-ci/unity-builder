@@ -10,6 +10,11 @@ export default class AndroidVersioning {
   }
 
   static versionToVersionCode(version) {
+    if (version === 'none') {
+      core.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
+      return 0;
+    }
+
     const parsedVersion = semver.parse(version);
 
     if (!parsedVersion) {
@@ -21,7 +26,7 @@ export default class AndroidVersioning {
     // Allow for 3 patch digits, 3 minor digits and 3 major digits.
     const versionCode = parsedVersion.major * 1000000 + parsedVersion.minor * 1000 + parsedVersion.patch;
 
-    if (versionCode >= 1000000000) {
+    if (versionCode >= 2050000000) {
       throw new Error(
         `Generated versionCode ${versionCode} is dangerously close to the maximum allowed number 2100000000. Consider a different versioning scheme to be able to continue updating your application.`,
       );
