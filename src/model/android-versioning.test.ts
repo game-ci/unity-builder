@@ -34,7 +34,7 @@ describe('Android Versioning', () => {
       expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevelAuto')).toBe('');
     });
 
-    it('use specified api level', () => {
+    it('uses the specified api level', () => {
       expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevel30')).toBe('platforms;android-30');
     });
   });
