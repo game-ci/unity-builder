@@ -76,7 +76,7 @@ fi
 
 if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
   echo "Updating Android SDK with parameters: $ANDROID_SDK_MANAGER_PARAMETERS"
-  export JAVA_HOME="$UNITY_PATH/Editor/Data/PlaybackEngines/AndroidPlayer/Tools/OpenJDK/Linux"
+  export JAVA_HOME="$UNITY_PATH/Editor/Data/PlaybackEngines/AndroidPlayer/OpenJDK"
   /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/tools/bin/sdkmanager "$ANDROID_SDK_MANAGER_PARAMETERS"
   echo "Updated Android SDK."
 else
