@@ -228,7 +228,7 @@ describe('Input', () => {
 
   describe('androidTargetSdkVersion', () => {
     it('returns the default value', () => {
-      expect(Input.androidTargetSdkVersion).toStrictEqual('AndroidApiLevelAuto');
+      expect(Input.androidTargetSdkVersion).toStrictEqual('');
     });
 
     it('takes input from the users workflow', () => {

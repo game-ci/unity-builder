@@ -76,7 +76,7 @@ class Input {
   }
 
   static get androidTargetSdkVersion() {
-    return core.getInput('androidTargetSdkVersion') || 'AndroidApiLevelAuto';
+    return core.getInput('androidTargetSdkVersion') || '';
   }
 
   static get allowDirtyBuild() {

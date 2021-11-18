@@ -100,7 +100,7 @@ inputs:
     description: 'The android keyaliasPass'
   androidTargetSdkVersion:
     required: false
-    default: 'AndroidApiLevelAuto'
+    default: ''
     description: 'The android target API level.'
   customParameters:
     required: false
