@@ -21,6 +21,8 @@ class BuildParameters {
   public androidKeystorePass!: string;
   public androidKeyaliasName!: string;
   public androidKeyaliasPass!: string;
+  public androidTargetSdkVersion!: string;
+  public androidSdkManagerParameters!: string;
   public customParameters!: string;
   public sshAgent!: string;
   public gitPrivateToken!: string;
@@ -43,6 +45,8 @@ class BuildParameters {
 
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
+    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+
     return {
       version: unityVersion,
       customImage: Input.customImage,
@@ -61,6 +65,8 @@ class BuildParameters {
       androidKeystorePass: Input.androidKeystorePass,
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
+      androidTargetSdkVersion: Input.androidTargetSdkVersion,
+      androidSdkManagerParameters,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken,

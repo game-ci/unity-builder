@@ -75,6 +75,10 @@ class Input {
     return core.getInput('androidKeyaliasPass') || '';
   }
 
+  static get androidTargetSdkVersion() {
+    return core.getInput('androidTargetSdkVersion') || 'AndroidApiLevelAuto';
+  }
+
   static get allowDirtyBuild() {
     const input = core.getInput('allowDirtyBuild') || false;
 

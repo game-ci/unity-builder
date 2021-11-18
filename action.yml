@@ -98,6 +98,10 @@ inputs:
     required: false
     default: ''
     description: 'The android keyaliasPass'
+  androidTargetSdkVersion:
+    required: false
+    default: 'AndroidApiLevelAuto'
+    description: 'The android target API level.'
   customParameters:
     required: false
     default: ''

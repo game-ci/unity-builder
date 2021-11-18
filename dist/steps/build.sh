@@ -63,14 +63,23 @@ else
 fi
 
 #
-# Create Android keystore, if needed
+# Prepare Android keystore and SDK, if needed
 #
 
-if [[ -z $ANDROID_KEYSTORE_NAME || -z $ANDROID_KEYSTORE_BASE64 ]]; then
-  echo "Not creating Android keystore."
-else
+if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_KEYSTORE_NAME" && -n "$ANDROID_KEYSTORE_BASE64" ]]; then
+  echo "Creating Android keystore."
   echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$UNITY_PROJECT_PATH/$ANDROID_KEYSTORE_NAME"
   echo "Created Android keystore."
+else
+  echo "Not creating Android keystore."
+fi
+
+if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
+  echo "Updating Android SDK."
+  /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/tools/bin/sdkmanager "$ANDROID_SDK_MANAGER_PARAMETERS"
+  echo "Updated Android SDK."
+else
+  echo "Not updating Android SDK."
 fi
 
 #
@@ -130,6 +139,7 @@ unity-editor \
   -androidKeystorePass "$ANDROID_KEYSTORE_PASS" \
   -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
   -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
+  -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
   $CUSTOM_PARAMETERS
 
 # Catch exit code

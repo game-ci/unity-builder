@@ -35,6 +35,8 @@ class Docker {
       androidKeystorePass,
       androidKeyaliasName,
       androidKeyaliasPass,
+      androidTargetSdkVersion,
+      androidSdkManagerParameters,
       customParameters,
       sshAgent,
       gitPrivateToken,
@@ -64,6 +66,8 @@ class Docker {
         --env ANDROID_KEYSTORE_PASS="${androidKeystorePass}" \
         --env ANDROID_KEYALIAS_NAME="${androidKeyaliasName}" \
         --env ANDROID_KEYALIAS_PASS="${androidKeyaliasPass}" \
+        --env ANDROID_TARGET_SDK_VERSION="${androidTargetSdkVersion}" \
+        --env ANDROID_SDK_MANAGER_PARAMETERS="${androidSdkManagerParameters}" \
         --env CUSTOM_PARAMETERS="${customParameters}" \
         --env CHOWN_FILES_TO="${chownFilesTo}" \
         --env GITHUB_REF \
