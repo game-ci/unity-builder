@@ -5,26 +5,30 @@ import YAML from 'yaml';
 
 export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
-    CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
-    buildSteps = YAML.parse(buildSteps);
-    for (const step of buildSteps) {
-      const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
-        const secret: CloudRunnerSecret = {
-          ParameterKey: x.name,
-          EnvironmentVariable: x.name,
-          ParameterValue: x.value,
-        };
-        return secret;
-      });
-      await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
-        CloudRunnerState.buildGuid,
-        step['image'],
-        step['commands'],
-        `/${CloudRunnerState.buildVolumeFolder}`,
-        `/${CloudRunnerState.buildVolumeFolder}`,
-        CloudRunnerState.defaultGitShaEnvironmentVariable,
-        [...CloudRunnerState.defaultSecrets, ...stepSecrets],
-      );
+    try {
+      CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
+      buildSteps = YAML.parse(buildSteps);
+      for (const step of buildSteps) {
+        const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
+          const secret: CloudRunnerSecret = {
+            ParameterKey: x.name,
+            EnvironmentVariable: x.name,
+            ParameterValue: x.value,
+          };
+          return secret;
+        });
+        await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+          CloudRunnerState.buildGuid,
+          step['image'],
+          step['commands'],
+          `/${CloudRunnerState.buildVolumeFolder}`,
+          `/${CloudRunnerState.buildVolumeFolder}`,
+          CloudRunnerState.defaultGitShaEnvironmentVariable,
+          [...CloudRunnerState.defaultSecrets, ...stepSecrets],
+        );
+      }
+    } catch (error) {
+      throw error;
     }
   }
 }

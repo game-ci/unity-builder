@@ -14,13 +14,14 @@ export class CompressionStep implements StepInterface {
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
-    CloudRunnerLogger.log('Starting step 3/4 build compression');
-    // Cleanup
-    await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
-      CloudRunnerState.buildGuid,
-      'alpine',
-      [
-        `
+    try {
+      CloudRunnerLogger.log('Starting step 3/4 build compression');
+      // Cleanup
+      await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+        CloudRunnerState.buildGuid,
+        'alpine',
+        [
+          `
             printenv
             apk update -q
             apk add zip tree -q
@@ -38,20 +39,23 @@ export class CompressionStep implements StepInterface {
             ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"
             ${process.env.DEBUG ? '' : '#'}ls -lh "$repoPathFull"
           `,
-      ],
-      `/${CloudRunnerState.buildVolumeFolder}`,
-      `/${CloudRunnerState.buildVolumeFolder}`,
-      [
-        ...environmentVariables,
-        ...[
-          {
-            name: 'cacheFolderFull',
-            value: CloudRunnerState.cacheFolderFull,
-          },
         ],
-      ],
-      secrets,
-    );
-    CloudRunnerLogger.log('compression step complete');
+        `/${CloudRunnerState.buildVolumeFolder}`,
+        `/${CloudRunnerState.buildVolumeFolder}`,
+        [
+          ...environmentVariables,
+          ...[
+            {
+              name: 'cacheFolderFull',
+              value: CloudRunnerState.cacheFolderFull,
+            },
+          ],
+        ],
+        secrets,
+      );
+      CloudRunnerLogger.log('compression step complete');
+    } catch (error) {
+      throw error;
+    }
   }
 }

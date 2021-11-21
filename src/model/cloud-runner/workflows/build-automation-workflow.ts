@@ -9,48 +9,56 @@ import { WorkflowInterface } from './workflow-interface';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
-    await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image);
+    try {
+      await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image);
+    } catch (error) {
+      throw error;
+    }
   }
 
   private static async standardBuildAutomation(baseImage: any) {
-    CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
+    try {
+      CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
-    await new DownloadRepositoryStep().run(
-      new CloudRunnerStepState(
-        'alpine/git',
-        CloudRunnerState.readBuildEnvironmentVariables(),
-        CloudRunnerState.defaultSecrets,
-      ),
-    );
-    CloudRunnerLogger.logWithTime('Download repository step time');
-    if (CloudRunnerState.buildParams.preBuildSteps !== '') {
-      await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
+      await new DownloadRepositoryStep().run(
+        new CloudRunnerStepState(
+          'alpine/git',
+          CloudRunnerState.readBuildEnvironmentVariables(),
+          CloudRunnerState.defaultSecrets,
+        ),
+      );
+      CloudRunnerLogger.logWithTime('Download repository step time');
+      if (CloudRunnerState.buildParams.preBuildSteps !== '') {
+        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
+      }
+      CloudRunnerLogger.logWithTime('Pre build step(s) time');
+
+      new BuildStep().run(
+        new CloudRunnerStepState(
+          baseImage,
+          CloudRunnerState.readBuildEnvironmentVariables(),
+          CloudRunnerState.defaultSecrets,
+        ),
+      );
+      CloudRunnerLogger.logWithTime('Build time');
+
+      await new CompressionStep().run(
+        new CloudRunnerStepState(
+          'alpine',
+          CloudRunnerState.readBuildEnvironmentVariables(),
+          CloudRunnerState.defaultSecrets,
+        ),
+      );
+      CloudRunnerLogger.logWithTime('Compression time');
+
+      if (CloudRunnerState.buildParams.postBuildSteps !== '') {
+        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
+      }
+      CloudRunnerLogger.logWithTime('Post build step(s) time');
+
+      CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
+    } catch (error) {
+      throw error;
     }
-    CloudRunnerLogger.logWithTime('Pre build step(s) time');
-
-    new BuildStep().run(
-      new CloudRunnerStepState(
-        baseImage,
-        CloudRunnerState.readBuildEnvironmentVariables(),
-        CloudRunnerState.defaultSecrets,
-      ),
-    );
-    CloudRunnerLogger.logWithTime('Build time');
-
-    await new CompressionStep().run(
-      new CloudRunnerStepState(
-        'alpine',
-        CloudRunnerState.readBuildEnvironmentVariables(),
-        CloudRunnerState.defaultSecrets,
-      ),
-    );
-    CloudRunnerLogger.logWithTime('Compression time');
-
-    if (CloudRunnerState.buildParams.postBuildSteps !== '') {
-      await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
-    }
-    CloudRunnerLogger.logWithTime('Post build step(s) time');
-
-    CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
   }
 }

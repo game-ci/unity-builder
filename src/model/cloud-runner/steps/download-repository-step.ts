@@ -7,11 +7,15 @@ import { StepInterface } from './step-interface';
 
 export class DownloadRepositoryStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
-    await DownloadRepositoryStep.downloadRepositoryStep(
-      cloudRunnerStepState.image,
-      cloudRunnerStepState.environment,
-      cloudRunnerStepState.secrets,
-    );
+    try {
+      await DownloadRepositoryStep.downloadRepositoryStep(
+        cloudRunnerStepState.image,
+        cloudRunnerStepState.environment,
+        cloudRunnerStepState.secrets,
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
   private static async downloadRepositoryStep(
@@ -19,12 +23,13 @@ export class DownloadRepositoryStep implements StepInterface {
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
-    CloudRunnerLogger.log('Starting step 1/4 clone and restore cache');
-    await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
-      CloudRunnerState.buildGuid,
-      image,
-      [
-        ` printenv
+    try {
+      CloudRunnerLogger.log('Starting step 1/4 clone and restore cache');
+      await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+        CloudRunnerState.buildGuid,
+        image,
+        [
+          ` printenv
           apk update -q
           apk add unzip zip git-lfs jq tree -q
           mkdir -p ${CloudRunnerState.buildPathFull}
@@ -39,11 +44,14 @@ export class DownloadRepositoryStep implements StepInterface {
           echo 'Starting checks of cache for the Unity project Library and git LFS files'
           ${CloudRunnerState.getHandleCachingCommand()}
       `,
-      ],
-      `/${CloudRunnerState.buildVolumeFolder}`,
-      `/${CloudRunnerState.buildVolumeFolder}/`,
-      environmentVariables,
-      secrets,
-    );
+        ],
+        `/${CloudRunnerState.buildVolumeFolder}`,
+        `/${CloudRunnerState.buildVolumeFolder}/`,
+        environmentVariables,
+        secrets,
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 }
