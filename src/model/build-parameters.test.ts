@@ -1,5 +1,6 @@
 import Versioning from './versioning';
 import UnityVersioning from './unity-versioning';
+import AndroidVersioning from './android-versioning';
 import BuildParameters from './build-parameters';
 import Input from './input';
 import Platform from './platform';
@@ -9,6 +10,10 @@ const determineVersion = jest.spyOn(Versioning, 'determineVersion').mockImplemen
 const determineUnityVersion = jest
   .spyOn(UnityVersioning, 'determineUnityVersion')
   .mockImplementation(() => '2019.2.11f1');
+
+const determineSdkManagerParameters = jest
+  .spyOn(AndroidVersioning, 'determineSdkManagerParameters')
+  .mockImplementation(() => 'platforms;android-30');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -42,6 +47,11 @@ describe('BuildParameters', () => {
       const mockValue = '';
       jest.spyOn(Input, 'androidVersionCode', 'get').mockReturnValue(mockValue);
       await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ androidVersionCode: 1003037 }));
+    });
+
+    it('determines the android sdk manager parameters only once', async () => {
+      await BuildParameters.create();
+      expect(determineSdkManagerParameters).toHaveBeenCalledTimes(1);
     });
 
     it('returns the platform', async () => {
@@ -151,6 +161,14 @@ describe('BuildParameters', () => {
       jest.spyOn(Input, 'androidKeyaliasPass', 'get').mockReturnValue(mockValue);
       await expect(BuildParameters.create()).resolves.toEqual(
         expect.objectContaining({ androidKeyaliasPass: mockValue }),
+      );
+    });
+
+    it('returns the android target sdk version', async () => {
+      const mockValue = 'AndroidApiLevelAuto';
+      jest.spyOn(Input, 'androidTargetSdkVersion', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ androidTargetSdkVersion: mockValue }),
       );
     });
 

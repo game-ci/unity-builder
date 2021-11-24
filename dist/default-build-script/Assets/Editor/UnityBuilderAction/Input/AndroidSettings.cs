@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace UnityBuilderAction.Input
@@ -16,6 +17,8 @@ namespace UnityBuilderAction.Input
         PlayerSettings.Android.keyaliasName = keyaliasName;
       if (options.TryGetValue("androidKeyaliasPass", out string keyaliasPass) && !string.IsNullOrEmpty(keyaliasPass))
         PlayerSettings.Android.keyaliasPass = keyaliasPass;
+      if (options.TryGetValue("androidTargetSdkVersion", out string androidTargetSdkVersion) && !string.IsNullOrEmpty(androidTargetSdkVersion))
+        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions) Enum.Parse(typeof(AndroidSdkVersions), androidTargetSdkVersion);
     }
   }
 }

@@ -226,6 +226,19 @@ describe('Input', () => {
     });
   });
 
+  describe('androidTargetSdkVersion', () => {
+    it('returns the default value', () => {
+      expect(Input.androidTargetSdkVersion).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'secret';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.androidTargetSdkVersion).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('allowDirtyBuild', () => {
     it('returns the default value', () => {
       expect(Input.allowDirtyBuild).toStrictEqual(false);

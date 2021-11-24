@@ -28,4 +28,14 @@ describe('Android Versioning', () => {
       expect(AndroidVersioning.determineVersionCode('1.2.3', 2)).toBe(2);
     });
   });
+
+  describe('determineSdkManagerParameters', () => {
+    it('defaults to blank', () => {
+      expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevelAuto')).toBe('');
+    });
+
+    it('uses the specified api level', () => {
+      expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevel30')).toBe('platforms;android-30');
+    });
+  });
 });

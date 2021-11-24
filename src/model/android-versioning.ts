@@ -34,4 +34,9 @@ export default class AndroidVersioning {
     core.info(`Using android versionCode ${versionCode}`);
     return versionCode;
   }
+
+  static determineSdkManagerParameters(targetSdkVersion) {
+    const parsedVersion = Number.parseInt(targetSdkVersion.slice(-2), 10);
+    return Number.isNaN(parsedVersion) ? '' : `platforms;android-${parsedVersion}`;
+  }
 }
