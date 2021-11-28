@@ -82,7 +82,7 @@ else
   #
   echo "License activation strategy could not be determined."
   echo ""
-  echo "Visit https://github.com/webbertakken/unity-builder#usage for more"
+  echo "Visit https://game.ci/docs/github/getting-started for more"
   echo "details on how to set up one of the possible activation strategies."
 
   # Immediately exit as no UNITY_EXIT_CODE can be derrived.
