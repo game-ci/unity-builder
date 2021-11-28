@@ -33,7 +33,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       }
       CloudRunnerLogger.logWithTime('Pre build step(s) time');
 
-      new BuildStep().run(
+      await new BuildStep().run(
         new CloudRunnerStepState(
           baseImage,
           CloudRunnerState.readBuildEnvironmentVariables(),
