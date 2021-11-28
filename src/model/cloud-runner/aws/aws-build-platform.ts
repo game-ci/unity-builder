@@ -14,7 +14,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  cleanupSharedBuildResources(
+  async cleanupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -24,7 +24,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  setupSharedBuildResources(
+  async setupSharedBuildResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars

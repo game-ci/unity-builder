@@ -22,7 +22,7 @@ class CloudRunner {
     CloudRunner.setupBuildPlatform();
   }
 
-  public static setupBuildPlatform() {
+  private static setupBuildPlatform() {
     switch (CloudRunnerState.buildParams.cloudRunnerCluster) {
       case 'aws':
         CloudRunnerLogger.log('Building with AWS');
