@@ -102,7 +102,7 @@ export class CloudRunnerState {
   }
 
   public static readRunNumber() {
-    const runNumber = process.env.GITHUB_RUN_NUMBER;
+    const runNumber = CloudRunnerState.buildParams.runNumber;
     if (!runNumber || runNumber === '') {
       throw new Error('no run number found, exiting');
     }

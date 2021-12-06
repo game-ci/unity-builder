@@ -8,133 +8,149 @@ const core = require('@actions/core');
  * Note that input is always passed as a string, even booleans.
  */
 class Input {
+  public static githubEnabled = true;
+  public static cliOptions;
+
+  private static getInput(query) {
+    return Input.githubEnabled
+      ? core.getInput(query)
+      : Input.cliOptions !== undefined
+      ? Input.cliOptions[query]
+      : process.env[query] !== undefined
+      ? process.env[query]
+      : false;
+  }
+  static get runNumber() {
+    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+  }
+
   static get unityVersion() {
-    return core.getInput('unityVersion') || 'auto';
+    return Input.getInput('unityVersion') || 'auto';
   }
 
   static get customImage() {
-    return core.getInput('customImage');
+    return Input.getInput('customImage');
   }
 
   static get targetPlatform() {
-    return core.getInput('targetPlatform') || Platform.default;
+    return Input.getInput('targetPlatform') || Platform.default;
   }
 
   static get projectPath() {
-    const rawProjectPath = core.getInput('projectPath') || '.';
+    const rawProjectPath = Input.getInput('projectPath') || '.';
     return rawProjectPath.replace(/\/$/, '');
   }
 
   static get buildName() {
-    return core.getInput('buildName') || this.targetPlatform;
+    return Input.getInput('buildName') || this.targetPlatform;
   }
 
   static get buildsPath() {
-    return core.getInput('buildsPath') || 'build';
+    return Input.getInput('buildsPath') || 'build';
   }
 
   static get buildMethod() {
-    return core.getInput('buildMethod'); // processed in docker file
+    return Input.getInput('buildMethod'); // processed in docker file
   }
 
   static get versioningStrategy() {
-    return core.getInput('versioning') || 'Semantic';
+    return Input.getInput('versioning') || 'Semantic';
   }
 
   static get specifiedVersion() {
-    return core.getInput('version') || '';
+    return Input.getInput('version') || '';
   }
 
   static get androidVersionCode() {
-    return core.getInput('androidVersionCode');
+    return Input.getInput('androidVersionCode');
   }
 
   static get androidAppBundle() {
-    const input = core.getInput('androidAppBundle') || false;
+    const input = Input.getInput('androidAppBundle') || false;
 
     return input === 'true';
   }
 
   static get androidKeystoreName() {
-    return core.getInput('androidKeystoreName') || '';
+    return Input.getInput('androidKeystoreName') || '';
   }
 
   static get androidKeystoreBase64() {
-    return core.getInput('androidKeystoreBase64') || '';
+    return Input.getInput('androidKeystoreBase64') || '';
   }
 
   static get androidKeystorePass() {
-    return core.getInput('androidKeystorePass') || '';
+    return Input.getInput('androidKeystorePass') || '';
   }
 
   static get androidKeyaliasName() {
-    return core.getInput('androidKeyaliasName') || '';
+    return Input.getInput('androidKeyaliasName') || '';
   }
 
   static get androidKeyaliasPass() {
-    return core.getInput('androidKeyaliasPass') || '';
+    return Input.getInput('androidKeyaliasPass') || '';
   }
 
   static get allowDirtyBuild() {
-    const input = core.getInput('allowDirtyBuild') || false;
+    const input = Input.getInput('allowDirtyBuild') || false;
 
     return input === 'true';
   }
 
   static get customParameters() {
-    return core.getInput('customParameters') || '';
+    return Input.getInput('customParameters') || '';
   }
 
   static get sshAgent() {
-    return core.getInput('sshAgent') || '';
+    return Input.getInput('sshAgent') || '';
   }
 
   static get chownFilesTo() {
-    return core.getInput('chownFilesTo') || '';
+    return Input.getInput('chownFilesTo') || '';
   }
 
   static get postBuildSteps() {
-    return core.getInput('postBuildSteps');
+    return Input.getInput('postBuildSteps');
   }
 
   static get preBuildSteps() {
-    return core.getInput('preBuildSteps');
+    return Input.getInput('preBuildSteps');
   }
 
   static get customBuildSteps() {
-    return core.getInput('customBuildSteps');
+    return Input.getInput('customBuildSteps');
   }
 
   static get cloudRunnerCluster() {
-    return core.getInput('cloudRunnerCluster') || '';
+    return Input.getInput('cloudRunnerCluster') || '';
   }
 
   static get awsBaseStackName() {
-    return core.getInput('awsBaseStackName') || '';
+    return Input.getInput('awsBaseStackName') || '';
   }
 
   static get kubeConfig() {
-    return core.getInput('kubeConfig') || '';
+    return Input.getInput('kubeConfig') || '';
   }
 
   static get githubToken() {
-    return core.getInput('githubToken') || '';
+    return Input.getInput('githubToken') || '';
   }
 
   static get cloudRunnerMemory() {
-    return core.getInput('cloudRunnerMemory') || '750M';
+    return Input.getInput('cloudRunnerMemory') || '750M';
   }
 
   static get cloudRunnerCpu() {
-    return core.getInput('cloudRunnerCpu') || '1.0';
+    return Input.getInput('cloudRunnerCpu') || '1.0';
   }
 
   static get kubeVolumeSize() {
-    return core.getInput('kubeVolumeSize') || '5Gi';
+    return Input.getInput('kubeVolumeSize') || '5Gi';
   }
 
   static get kubeVolume() {
-    return core.getInput('kubeVolume') || '';
+    return Input.getInput('kubeVolume') || '';
   }
 }
 

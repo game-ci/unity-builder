@@ -36,6 +36,7 @@ class BuildParameters {
   public postBuildSteps;
   public preBuildSteps;
   public customBuildSteps;
+  public runNumber;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -77,6 +78,7 @@ class BuildParameters {
       postBuildSteps: Input.postBuildSteps,
       preBuildSteps: Input.preBuildSteps,
       customBuildSteps: Input.customBuildSteps,
+      runNumber: Input.runNumber,
     };
   }
 

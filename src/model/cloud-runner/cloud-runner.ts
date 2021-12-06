@@ -11,11 +11,11 @@ import { CloudRunnerError } from './error/cloud-runner-error';
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
+    CloudRunnerState.buildParams = buildParameters;
     CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
       CloudRunnerState.readRunNumber(),
       buildParameters.platform,
     );
-    CloudRunnerState.buildParams = buildParameters;
     CloudRunnerState.setupBranchName();
     CloudRunnerState.setupFolderVariables();
     CloudRunnerState.setupDefaultSecrets();
@@ -36,7 +36,7 @@ class CloudRunner {
     }
   }
 
-  static async run(buildParameters: BuildParameters, baseImage) {
+  static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
       await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedBuildResources(
