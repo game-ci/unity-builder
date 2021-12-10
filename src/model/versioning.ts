@@ -68,15 +68,15 @@ export default class Versioning {
    * Regex to parse version description into separate fields
    */
   static get descriptionRegex1() {
-    return /^v([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
+    return /^v?([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   static get descriptionRegex2() {
-    return /^v([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
+    return /^v?([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   static get descriptionRegex3() {
-    return /^v([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
+    return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   static async determineVersion(strategy: string, inputVersion: string) {

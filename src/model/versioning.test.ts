@@ -125,6 +125,7 @@ describe('Versioning', () => {
       'is happy with valid %s',
       (description) => {
         expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
+        expect(Versioning.descriptionRegex1.test(description?.slice(1))).toBeTruthy();
       },
     );
 
