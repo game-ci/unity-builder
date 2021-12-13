@@ -125,7 +125,13 @@ describe('Versioning', () => {
       'is happy with valid %s',
       (description) => {
         expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
-        expect(Versioning.descriptionRegex1.test(description?.slice(1))).toBeTruthy();
+      },
+    );
+
+    test.each(['1.1-1-g12345678', '0.1-2-g12345678', '0.0-500-gA9B6C3D0-dirty'])(
+      'accepts valid semantic versions without v-prefix %s',
+      (description) => {
+        expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
       },
     );
 
