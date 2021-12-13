@@ -1,4 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn build && git add dist/index.*
+npx lint-staged
+yarn build
+git add dist/index.*
