@@ -110,15 +110,15 @@ class Input {
   }
 
   static get postBuildSteps() {
-    return Input.getInput('postBuildSteps');
+    return Input.getInput('postBuildSteps') || '';
   }
 
   static get preBuildSteps() {
-    return Input.getInput('preBuildSteps');
+    return Input.getInput('preBuildSteps') || '';
   }
 
   static get customBuildSteps() {
-    return Input.getInput('customBuildSteps');
+    return Input.getInput('customBuildSteps') || '';
   }
 
   static get cloudRunnerCluster() {

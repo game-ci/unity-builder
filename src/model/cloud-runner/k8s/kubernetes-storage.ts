@@ -102,9 +102,10 @@ class KubernetesStorage {
   ) {
     const name = result.body.metadata?.name;
     if (!name) throw new Error('failed to create PVC');
-    CloudRunnerLogger.log(
-      JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4),
-    );
+    // don't always log the PVC...
+    // CloudRunnerLogger.log(
+    //   JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4),
+    // );
     CloudRunnerLogger.log(`PVC ${name} created`);
     await this.watchUntilPVCNotPending(kubeClient, name, namespace);
     CloudRunnerLogger.log(`PVC ${name} is ready and not pending`);

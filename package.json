@@ -12,7 +12,7 @@
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "test": "jest",
-    "cli": "npx ts-node src/cli.ts"
+    "cli": "npx ts-node src/index.ts"
   },
   "dependencies": {
     "@actions/core": "^1.2.6",

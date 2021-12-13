@@ -1,7 +1,8 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
-
-async function run() {
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner, Input } from './model';
+import { Command } from 'commander-ts';
+import { RemoteClientCli } from './model/cloud-runner/remote-client-cli.ts';
+async function runMain() {
   try {
     Action.checkCompatibility();
     Cache.verify();
@@ -32,7 +33,38 @@ async function run() {
     core.setFailed((error as Error).message);
   }
 }
+async function runCli() {
+  // eslint-disable-next-line no-console
+  console.log(`Created base image`);
+  options.projectPath = './test-project';
+  options.versioning = 'None';
+  Input.cliOptions = options;
+  const buildParameter = await BuildParameters.create();
+  await CloudRunner.run(buildParameter, ' ');
+}
+async function runRemoteCli(options) {
+  await RemoteClientCli.RunRemoteClient(options);
+}
 
+const program = new Command();
+program.version('0.0.1');
+program.option('-m, --mode <mode>', 'cli or default');
+program.parse(process.argv);
+
+const options = program.opts();
+
+Input.githubEnabled = false;
 // eslint-disable-next-line no-console
-console.log('test');
-run();
+console.log(`Created base image ${options.mode}`);
+
+switch (options.mode) {
+  case 'cli':
+    runCli();
+    break;
+  case 'remote-cli':
+    runRemoteCli(options);
+    break;
+  default:
+    runMain();
+    break;
+}

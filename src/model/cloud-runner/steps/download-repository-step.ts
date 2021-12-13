@@ -36,6 +36,7 @@ export class DownloadRepositoryStep implements StepInterface {
           mkdir -p ${CloudRunnerState.builderPathFull}
           mkdir -p ${CloudRunnerState.repoPathFull}
           ${CloudRunnerState.getCloneBuilder()}
+          ${CloudRunnerState.unityBuilderRepoUrl}/dist/index.js -- -m cli
           echo ' '
           echo 'Initializing source repository for cloning with caching of LFS files'
           ${CloudRunnerState.getCloneNoLFSCommand()}
