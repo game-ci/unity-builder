@@ -21,12 +21,12 @@
     "base-64": "^1.0.0",
     "kubernetes-client": "^9.0.0",
     "nanoid": "3.1.20",
-    "semver": "^7.3.2"
+    "semver": "^7.3.5"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
-    "@types/semver": "^7.3.4",
+    "@types/semver": "^7.3.5",
     "@typescript-eslint/parser": "^4.8.1",
     "@vercel/ncc": "^0.25.1",
     "eslint": "^7.17.0",
