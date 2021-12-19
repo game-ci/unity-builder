@@ -48,13 +48,13 @@ async function runRemoteCli(options) {
 const program = new Command();
 program.version('0.0.1');
 const properties = Object.getOwnPropertyNames(Input);
-core.info(`\n`);
+core.info(`\r\n`);
 core.info(`INPUT:`);
 for (const element of properties) {
   program.option(`--${element} <${element}>`, 'default description');
   if (Input[element] !== undefined && Input[element] !== '') core.info(element);
 }
-core.info(`\n`);
+core.info(`\r\n`);
 program.option('-m, --mode <mode>', 'cli or default');
 program.parse(process.argv);
 
