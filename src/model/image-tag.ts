@@ -35,6 +35,7 @@ class ImageTag {
       webgl: 'webgl',
       mac: 'mac-mono',
       windows: 'windows-mono',
+      windowsIl2cpp: 'windows-il2cpp',
       linux: 'base',
       linuxIl2cpp: 'linux-il2cpp',
       android: 'android',
@@ -44,7 +45,7 @@ class ImageTag {
   }
 
   static getTargetPlatformToImageSuffixMap(platform, version) {
-    const { generic, webgl, mac, windows, linux, linuxIl2cpp, android, ios, facebook } = ImageTag.imageSuffixes;
+    const { generic, webgl, mac, windows, windowsIl2cpp, linux, linuxIl2cpp, android, ios, facebook } = ImageTag.imageSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
@@ -52,8 +53,32 @@ class ImageTag {
       case Platform.types.StandaloneOSX:
         return mac;
       case Platform.types.StandaloneWindows:
+        // Unity versions before 2019.3 do not support il2cpp
+        // Can only build windows-il2cpp on a windows based system
+        if (process.platform == "win32")
+        {
+          if (major >= 2020 || (major === 2019 && minor >= 3)) {
+            return windowsIl2cpp;
+          } else
+          {
+            throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity. 
+                             If you are trying to build for windows-mono, please use a Linux based OS.`)
+          }
+        }
         return windows;
       case Platform.types.StandaloneWindows64:
+        // Unity versions before 2019.3 do not support il2cpp
+        // Can only build windows-il2cpp on a windows based system
+        if (process.platform == "win32")
+        {
+          if (major >= 2020 || (major === 2019 && minor >= 3)) {
+            return windowsIl2cpp;
+          } else
+          {
+            throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity. 
+                             If you are trying to build for windows-mono, please use a Linux based OS.`)
+          }
+        }
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
@@ -101,7 +126,15 @@ class ImageTag {
   }
 
   get tag() {
-    return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+    if (ImageTag.getTargetPlatformToImageSuffixMap(this.platform, this.version) === ImageTag.imageSuffixes.windowsIl2cpp)
+    {
+      //Windows based image tags are prefixed with windows-
+      return `windows-${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+    }
+    else
+    {
+      return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+    }
   }
 
   get image() {
