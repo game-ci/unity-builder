@@ -10,8 +10,6 @@ const core = require('@actions/core');
 class Input {
   public static githubEnabled = true;
   public static cliOptions;
-  static awsRegion: any;
-
   private static getInput(query) {
     return Input.githubEnabled
       ? core.getInput(query)
@@ -20,6 +18,12 @@ class Input {
       : process.env[query] !== undefined
       ? process.env[query]
       : false;
+  }
+  static get region(): string {
+    return Input.getInput('region') || 'no region set';
+  }
+  static get githubRepo(): string {
+    return Input.getInput('GITHUB_REPOSITORY') || 'game-ci/unity-builder';
   }
   static get branch() {
     if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {

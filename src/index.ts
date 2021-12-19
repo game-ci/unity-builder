@@ -47,10 +47,15 @@ async function runRemoteCli(options) {
 
 const program = new Command();
 program.version('0.0.1');
+const properties = Object.getOwnPropertyNames(Input);
+core.info(`\n`);
+core.info(`INPUT:`);
+for (const element of properties) {
+  program.option(`--${element} <${element}>`, 'default description');
+  core.info(element);
+}
+core.info(`\n`);
 program.option('-m, --mode <mode>', 'cli or default');
-program.option('-region, --region <region>', 'aws region');
-program.option('-b, --branch <branch>', 'unity builder branch to clone');
-program.option('-sN, --awsBaseStackName <awsBaseStackName>', 'aws stack name');
 program.parse(process.argv);
 
 const options = program.opts();

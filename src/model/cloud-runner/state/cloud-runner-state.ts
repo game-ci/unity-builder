@@ -55,7 +55,11 @@ export class CloudRunnerState {
     return `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
   }
   public static get targetBuildRepoUrl(): string {
-    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${CloudRunnerState.githubRepo}.git`;
+  }
+
+  public static get githubRepo(): string {
+    return `${CloudRunnerState.buildParams.githubRepo}`;
   }
   public static readonly defaultGitShaEnvironmentVariable = [
     {
