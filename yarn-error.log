@@ -1,8 +1,8 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js install
 
 PATH: 
-  C:\Users\Mark\AppData\Local\Temp\yarn--1631471515116-0.29510230599108156;C:\Users\Mark\Documents\GitHub\unity-builder\node_modules\.bin;C:\Users\Mark\AppData\Local\Yarn\Data\link\node_modules\.bin;C:\Program Files\libexec\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\lib\node_modules\npm\bin\node-gyp-bin;C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\Mark\AppData\Local\cloud-code\installer\google-cloud-sdk\bin;c:\Users\Mark\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git LFS;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\Mark\AppData\Local\Microsoft\PowerAppsCLI\;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm;C:\Program Files (x86)\GitHub CLI\
+  C:\Users\Mark\AppData\Local\cloud-code\installer\google-cloud-sdk\bin;c:\Users\Mark\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Git LFS;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\nodejs\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin;C:\Program Files\Git\cmd;C:\Users\Mark\scoop\shims;C:\Users\Mark\AppData\Local\Microsoft\PowerAppsCLI\;C:\Users\Mark\AppData\Local\Microsoft\WindowsApps;C:\Users\Mark\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mark\AppData\Local\GitHubDesktop\bin;C:\Users\Mark\.dotnet\tools;C:\Users\Mark\AppData\Local\Yarn\bin;C:\Users\Mark\AppData\Roaming\npm;C:\Program Files (x86)\GitHub CLI\
 
 Yarn version: 
   1.22.5
@@ -30,7 +30,8 @@ npm manifest:
       "build": "tsc && ncc build lib --source-map --license licenses.txt",
       "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
       "format": "prettier --write \"src/**/*.{js,ts}\"",
-      "test": "jest"
+      "test": "jest",
+      "cli": "npx ts-node src/index.ts"
     },
     "dependencies": {
       "@actions/core": "^1.2.6",
@@ -40,7 +41,11 @@ npm manifest:
       "async-wait-until": "^2.0.7",
       "aws-sdk": "^2.812.0",
       "base-64": "^1.0.0",
+      "commander": "^8.3.0",
+      "commander-ts": "^0.2.0",
       "nanoid": "3.1.20",
+      "reflect-metadata": "^0.1.13",
+      "rxjs": "^7.4.0",
       "semver": "^7.3.2",
       "yaml": "^1.10.2"
     },
@@ -1752,10 +1757,27 @@ Lockfile:
     dependencies:
       delayed-stream "~1.0.0"
   
+  commander-ts@^0.2.0:
+    version "0.2.0"
+    resolved "https://registry.yarnpkg.com/commander-ts/-/commander-ts-0.2.0.tgz#14391337c1c725399cdfca5717da8e4fd0688eda"
+    integrity sha512-9XaUF3/3nmVtkDmAkijjhgEcwrMwKewaAJtN+GyTJBG3CJ5DfGB/JsXCVZcBW6SZB+QqiJxbK3e2/62tweMO8g==
+    dependencies:
+      commander "^7.2.0"
+  
   commander@^6.2.0:
     version "6.2.1"
     resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
     integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
+  
+  commander@^7.2.0:
+    version "7.2.0"
+    resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
+    integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
+  
+  commander@^8.3.0:
+    version "8.3.0"
+    resolved "https://registry.yarnpkg.com/commander/-/commander-8.3.0.tgz#4837ea1b2da67b9c616a67afbb0fafee567bca66"
+    integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
   
   compare-versions@^3.6.0:
     version "3.6.0"
@@ -4704,6 +4726,11 @@ Lockfile:
     dependencies:
       resolve "^1.1.6"
   
+  reflect-metadata@^0.1.13:
+    version "0.1.13"
+    resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+    integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
+  
   regex-not@^1.0.0, regex-not@^1.0.2:
     version "1.0.2"
     resolved "https://registry.yarnpkg.com/regex-not/-/regex-not-1.0.2.tgz#1f4ece27e00b0b65e0247a6810e6a85d83a5752c"
@@ -4889,6 +4916,13 @@ Lockfile:
     integrity sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==
     dependencies:
       tslib "^1.9.0"
+  
+  rxjs@^7.4.0:
+    version "7.4.0"
+    resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.4.0.tgz#a12a44d7eebf016f5ff2441b87f28c9a51cebc68"
+    integrity sha512-7SQDi7xeTMCJpqViXh8gL/lebcwlp3d831F05+9B44A4B0WfsEwUQHR64gsH1kvJ+Ep/J9K2+n1hVl1CsGN23w==
+    dependencies:
+      tslib "~2.1.0"
   
   safe-buffer@^5.0.1, safe-buffer@^5.1.2:
     version "5.2.1"
@@ -5491,6 +5525,11 @@ Lockfile:
     version "1.14.1"
     resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
     integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+  
+  tslib@~2.1.0:
+    version "2.1.0"
+    resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
+    integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
   
   tsutils@^3.17.1:
     version "3.21.0"

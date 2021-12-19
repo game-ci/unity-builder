@@ -34,15 +34,11 @@ async function runMain() {
   }
 }
 async function runCli() {
-  options.projectPath = 'test-project';
   options.versioning = 'None';
   Input.cliOptions = options;
   const buildParameter = await BuildParameters.create();
   const baseImage = new ImageTag(buildParameter);
   await CloudRunner.run(buildParameter, baseImage.toString());
-}
-async function runRemoteCli(options) {
-  await RemoteClientCli.RunRemoteClient(options);
 }
 
 const program = new Command();
@@ -60,8 +56,6 @@ program.parse(process.argv);
 
 const options = program.opts();
 
-process.env.AWS_REGION = options.region;
-
 // eslint-disable-next-line no-console
 console.log(`Entrypoint: ${options.mode}`);
 Input.githubEnabled = false;
@@ -71,7 +65,7 @@ switch (options.mode) {
     runCli();
     break;
   case 'remote-cli':
-    runRemoteCli(options);
+    RemoteClientCli.RunRemoteClient(options);
     break;
   default:
     Input.githubEnabled = true;

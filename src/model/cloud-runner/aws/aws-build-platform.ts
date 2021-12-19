@@ -8,6 +8,7 @@ import BuildParameters from '../../build-parameters';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { AWSJobStack } from './aws-job-stack';
 import { AWSBaseStack } from './aws-base-stack';
+import { Input } from '../..';
 
 class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   private baseStackName: string;
@@ -45,9 +46,9 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ): Promise<void> {
+    process.env.AWS_REGION = Input.region;
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
-
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const t0 = Date.now();

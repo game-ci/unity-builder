@@ -7,31 +7,27 @@ export class DownloadRepository {
     await new Promise<void>((promise) => {
       exec(
         `
+      tree -f -L 2tree -f -L 2
       echo "test"
       mkdir -p ${CloudRunnerState.buildPathFull}
       mkdir -p ${CloudRunnerState.repoPathFull}
       echo ' '
       echo 'Initializing source repository for cloning with caching of LFS files'
       repoPathFull=${CloudRunnerState.repoPathFull}
-      cloneUrl=${CloudRunnerState.targetBuildRepoUrl}
-
       githubSha=$GITHUB_SHA
-
-      cd $repoPathFull
-
+      cd ${CloudRunnerState.repoPathFull}
       # stop annoying git detatched head info
       git config --global advice.detachedHead false
-
       echo ' '
       echo "Cloning the repository being built:"
       git lfs install --skip-smudge
-      git clone $cloneUrl $repoPathFull
+      echo "${CloudRunnerState.targetBuildRepoUrl}"
+      git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
       git checkout $githubSha
       echo "Checked out $githubSha"
-
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
-      export LFS_ASSETS_HASH="$(cat $repoPathFull/.lfs-assets-guid)"
+      export LFS_ASSETS_HASH="$(cat ${CloudRunnerState.repoPathFull}/.lfs-assets-guid)"
 
       echo ' '
       echo 'Contents of .lfs-assets-guid file:'

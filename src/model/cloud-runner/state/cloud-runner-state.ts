@@ -1,7 +1,6 @@
 import { BuildParameters } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerNamespace from '../services/cloud-runner-namespace';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -138,9 +137,7 @@ export class CloudRunnerState {
   }
 
   public static get cloneBuilderCommand() {
-    const cloneCommand = `git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
-    CloudRunnerLogger.log(cloneCommand);
-    return cloneCommand;
+    return `git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
   }
 
   public static get runNumber() {
