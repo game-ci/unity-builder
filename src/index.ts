@@ -52,7 +52,7 @@ core.info(`\n`);
 core.info(`INPUT:`);
 for (const element of properties) {
   program.option(`--${element} <${element}>`, 'default description');
-  core.info(element);
+  if (Input[element] !== undefined && Input[element] !== '') core.info(element);
 }
 core.info(`\n`);
 program.option('-m, --mode <mode>', 'cli or default');

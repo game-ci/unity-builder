@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
 import * as zlib from 'zlib';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
+import { Input } from '../..';
 
 class AWSBuildRunner {
   static async runTask(
@@ -112,7 +113,7 @@ class AWSBuildRunner {
       `Cloud runner job status is ${(await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
     );
 
-    const logBaseUrl = `https://${AWS.config.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
+    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let readingLogs = true;
     let timestamp: number = 0;

@@ -20,7 +20,7 @@ class Input {
       : false;
   }
   static get region(): string {
-    return Input.getInput('region') || 'no region set';
+    return Input.getInput('region') || 'eu-west-2';
   }
   static get githubRepo(): string {
     return Input.getInput('GITHUB_REPOSITORY') || 'game-ci/unity-builder';
@@ -39,7 +39,7 @@ class Input {
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
     } else {
-      return 'main';
+      return 'remote-builder/unified-providers';
     }
   }
   static get runNumber() {
@@ -148,7 +148,7 @@ class Input {
   }
 
   static get awsBaseStackName() {
-    return Input.getInput('awsBaseStackName') || '';
+    return Input.getInput('awsBaseStackName') || 'game-ci-3-test';
   }
 
   static get kubeConfig() {
