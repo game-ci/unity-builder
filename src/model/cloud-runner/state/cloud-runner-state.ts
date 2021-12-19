@@ -11,7 +11,7 @@ export class CloudRunnerState {
     CloudRunnerState.buildParams = buildParameters;
     if (CloudRunnerState.buildGuid === undefined) {
       CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
-        CloudRunnerState.readRunNumber(),
+        CloudRunnerState.runNumber,
         buildParameters.platform,
       );
     }
@@ -137,13 +137,13 @@ export class CloudRunnerState {
     return `${CloudRunnerState.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${CloudRunnerState.repoPathFull}" "${CloudRunnerState.targetBuildRepoUrl}"`;
   }
 
-  public static getCloneBuilder() {
+  public static get cloneBuilderCommand() {
     const cloneCommand = `git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
     CloudRunnerLogger.log(cloneCommand);
     return cloneCommand;
   }
 
-  public static readRunNumber() {
+  public static get runNumber() {
     const runNumber = CloudRunnerState.buildParams.runNumber;
     if (!runNumber || runNumber === '') {
       throw new Error('no run number found, exiting');

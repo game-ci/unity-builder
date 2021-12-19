@@ -1,3 +1,5 @@
+import { CloudRunnerState } from '../../state/cloud-runner-state';
+
 const { exec } = require('child_process');
 
 export class DownloadRepository {
@@ -8,6 +10,7 @@ export class DownloadRepository {
       echo "test"
       apk update -q
       apk add unzip zip git-lfs jq tree -q
+      ${CloudRunnerState.cloneBuilderCommand}
       `,
         (error, stdout, stderr) => {
           if (error) {

@@ -37,8 +37,8 @@ export class DownloadRepositoryStep implements StepInterface {
           # mkdir -p ${CloudRunnerState.buildPathFull}
           mkdir -p ${CloudRunnerState.builderPathFull}
           # mkdir -p ${CloudRunnerState.repoPathFull}
-          echo "${CloudRunnerState.getCloneBuilder()}"
-          ${CloudRunnerState.getCloneBuilder()}
+          echo "${CloudRunnerState.cloneBuilderCommand}"
+          ${CloudRunnerState.cloneBuilderCommand}
           chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
           node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
           # echo ' '
