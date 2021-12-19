@@ -19,6 +19,7 @@ describe('Cloud Runner', () => {
     Input.githubEnabled = false;
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
+
     await CloudRunner.run(buildParameter, baseImage.toString());
   }, 500000);
 });
