@@ -13,6 +13,10 @@ class CloudRunnerLogger {
     core.info(message);
   }
 
+  public static logLine(message: string) {
+    core.info(`${message}\n`);
+  }
+
   public static error(message: string) {
     core.error(message);
   }

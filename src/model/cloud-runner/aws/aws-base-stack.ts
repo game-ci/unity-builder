@@ -12,7 +12,7 @@ export class AWSBaseStack {
 
   async setupBaseStack(CF: SDK.CloudFormation) {
     const baseStackName = this.baseStackName;
-    const baseStack = fs.readFileSync(`${__dirname}/cloud-formations/base-setup.yml`, 'utf8');
+    const baseStack = fs.readFileSync(`${__dirname}\\cloud-formations\\base-setup.yml`, 'utf8');
 
     // Cloud Formation Input
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
@@ -44,7 +44,7 @@ export class AWSBaseStack {
     };
 
     const stacks = (
-      await CF.listStacks({ StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE'] }).promise()
+      await CF.listStacks({ StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE', 'ROLLBACK_COMPLETE'] }).promise()
     ).StackSummaries?.map((x) => x.StackName);
     const stackExists: Boolean = stacks?.includes(baseStackName) || false;
     const describeStack = async () => {

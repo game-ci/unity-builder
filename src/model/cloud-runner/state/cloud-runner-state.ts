@@ -1,10 +1,22 @@
 import { BuildParameters } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerNamespace from '../services/cloud-runner-namespace';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 
 export class CloudRunnerState {
+  static setup(buildParameters: BuildParameters) {
+    CloudRunnerState.buildParams = buildParameters;
+    CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
+      CloudRunnerState.readRunNumber(),
+      buildParameters.platform,
+    );
+    CloudRunnerState.setupBranchName();
+    CloudRunnerState.setupFolderVariables();
+    CloudRunnerState.setupDefaultSecrets();
+  }
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
   public static buildParams: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
@@ -19,7 +31,6 @@ export class CloudRunnerState {
   public static cacheFolderFull: string;
   public static lfsDirectory: string;
   public static purgeRemoteCaching: boolean;
-  public static CloudRunnerBranch: string;
   public static unityBuilderRepoUrl: string;
   public static targetBuildRepoUrl: string;
   public static readonly defaultGitShaEnvironmentVariable = [
@@ -31,6 +42,7 @@ export class CloudRunnerState {
   public static readonly repositoryFolder = 'repo';
   public static readonly buildVolumeFolder = 'data';
   public static readonly cacheFolder = 'cache';
+  public static cloudRunnerBranch: string;
 
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
     return [
@@ -86,6 +98,10 @@ export class CloudRunnerState {
         name: 'ANDROID_KEYALIAS_NAME',
         value: CloudRunnerState.buildParams.androidKeyaliasName,
       },
+      {
+        name: 'SERIALIZED_STATE',
+        value: JSON.stringify(CloudRunnerState),
+      },
     ];
   }
 
@@ -98,7 +114,9 @@ export class CloudRunnerState {
   }
 
   public static getCloneBuilder() {
-    return `git clone -q ${CloudRunnerState.CloudRunnerBranch} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
+    const cloneCommand = `git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
+    CloudRunnerLogger.log(cloneCommand);
+    return cloneCommand;
   }
 
   public static readRunNumber() {
@@ -119,23 +137,12 @@ export class CloudRunnerState {
     CloudRunnerState.cacheFolderFull = `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.cacheFolder}/${CloudRunnerState.branchName}`;
     CloudRunnerState.lfsDirectory = `${CloudRunnerState.repoPathFull}/.git/lfs`;
     CloudRunnerState.purgeRemoteCaching = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
-    CloudRunnerState.CloudRunnerBranch = process.env.CloudRunnerBranch
-      ? `--branch "${process.env.CloudRunnerBranch}"`
-      : '';
     CloudRunnerState.unityBuilderRepoUrl = `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
     CloudRunnerState.targetBuildRepoUrl = `https://${CloudRunnerState.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
   }
 
   public static setupBranchName() {
-    const defaultBranchName =
-      process.env.GITHUB_REF?.split('/')
-        .filter((x) => {
-          x = x[0].toUpperCase() + x.slice(1);
-          return x;
-        })
-        .join('') || '';
-    CloudRunnerState.branchName =
-      process.env.REMOTE_BUILDER_CACHE !== undefined ? process.env.REMOTE_BUILDER_CACHE : defaultBranchName;
+    CloudRunnerState.branchName = CloudRunnerState.buildParams.branch;
   }
 
   public static setupDefaultSecrets() {

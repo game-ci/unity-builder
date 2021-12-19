@@ -10,15 +10,33 @@ const core = require('@actions/core');
 class Input {
   public static githubEnabled = true;
   public static cliOptions;
+  static awsRegion: any;
 
   private static getInput(query) {
     return Input.githubEnabled
       ? core.getInput(query)
-      : Input.cliOptions !== undefined
+      : Input.cliOptions[query] !== undefined
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]
       : false;
+  }
+  static get branch() {
+    if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {
+      return Input.getInput(`REMOTE_BUILDER_CACHE`);
+    } else if (Input.getInput(`GITHUB_REF`)) {
+      return Input.getInput(`GITHUB_REF`)
+        .split('/')
+        .filter((x) => {
+          x = x[0].toUpperCase() + x.slice(1);
+          return x;
+        })
+        .join('');
+    } else if (Input.getInput('branch')) {
+      return Input.getInput('branch');
+    } else {
+      return 'main';
+    }
   }
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
@@ -50,7 +68,7 @@ class Input {
   }
 
   static get buildMethod() {
-    return Input.getInput('buildMethod'); // processed in docker file
+    return Input.getInput('buildMethod') || ''; // processed in docker file
   }
 
   static get versioningStrategy() {

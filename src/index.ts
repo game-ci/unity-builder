@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner, Input } from './model';
 import { Command } from 'commander-ts';
-import { RemoteClientCli } from './model/cloud-runner/remote-client-cli.ts';
+import { RemoteClientCli } from './model/cloud-runner/remote-client';
 async function runMain() {
   try {
     Action.checkCompatibility();
@@ -34,13 +34,12 @@ async function runMain() {
   }
 }
 async function runCli() {
-  // eslint-disable-next-line no-console
-  console.log(`Created base image`);
-  options.projectPath = './test-project';
+  options.projectPath = 'test-project';
   options.versioning = 'None';
   Input.cliOptions = options;
   const buildParameter = await BuildParameters.create();
-  await CloudRunner.run(buildParameter, ' ');
+  const baseImage = new ImageTag(buildParameter);
+  await CloudRunner.run(buildParameter, baseImage.toString());
 }
 async function runRemoteCli(options) {
   await RemoteClientCli.RunRemoteClient(options);
@@ -49,19 +48,25 @@ async function runRemoteCli(options) {
 const program = new Command();
 program.version('0.0.1');
 program.option('-m, --mode <mode>', 'cli or default');
+program.option('-region, --region <region>', 'aws region');
+program.option('-b, --branch <branch>', 'unity builder branch to clone');
+program.option('-sN, --awsBaseStackName <awsBaseStackName>', 'aws stack name');
 program.parse(process.argv);
 
 const options = program.opts();
 
-Input.githubEnabled = false;
+process.env.AWS_REGION = options.region;
+
 // eslint-disable-next-line no-console
-console.log(`Created base image ${options.mode}`);
+console.log(`Entrypoint: ${options.mode}`);
 
 switch (options.mode) {
   case 'cli':
+    Input.githubEnabled = false;
     runCli();
     break;
   case 'remote-cli':
+    Input.githubEnabled = false;
     runRemoteCli(options);
     break;
   default:

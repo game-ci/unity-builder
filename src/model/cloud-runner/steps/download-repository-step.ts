@@ -24,26 +24,31 @@ export class DownloadRepositoryStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.log('Starting step 1/4 clone and restore cache');
+      CloudRunnerLogger.logLine('Starting step 1/4 clone and restore cache');
       await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
         CloudRunnerState.buildGuid,
         image,
         [
           ` printenv
           apk update -q
-          apk add unzip zip git-lfs jq tree -q
-          mkdir -p ${CloudRunnerState.buildPathFull}
+          apk add unzip zip git-lfs jq tree nodejs -q
+
+          export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+          # mkdir -p ${CloudRunnerState.buildPathFull}
           mkdir -p ${CloudRunnerState.builderPathFull}
-          mkdir -p ${CloudRunnerState.repoPathFull}
+          # mkdir -p ${CloudRunnerState.repoPathFull}
+          echo "${CloudRunnerState.getCloneBuilder()}"
           ${CloudRunnerState.getCloneBuilder()}
-          ${CloudRunnerState.unityBuilderRepoUrl}/dist/index.js -- -m cli
-          echo ' '
-          echo 'Initializing source repository for cloning with caching of LFS files'
-          ${CloudRunnerState.getCloneNoLFSCommand()}
-          echo 'Source repository initialized'
-          echo ' '
-          echo 'Starting checks of cache for the Unity project Library and git LFS files'
-          ${CloudRunnerState.getHandleCachingCommand()}
+          chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
+          node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
+          # echo ' '
+          # echo 'Initializing source repository for cloning with caching of LFS files'
+          # ${CloudRunnerState.getCloneNoLFSCommand()}
+          # echo 'Source repository initialized'
+          # ls ${CloudRunnerState.projectPathFull}
+          # echo ' '
+          # echo 'Starting checks of cache for the Unity project Library and git LFS files'
+          # ${CloudRunnerState.getHandleCachingCommand()}
       `,
         ],
         `/${CloudRunnerState.buildVolumeFolder}`,
@@ -52,6 +57,7 @@ export class DownloadRepositoryStep implements StepInterface {
         secrets,
       );
     } catch (error) {
+      CloudRunnerLogger.logLine(`ENV VARS ${JSON.stringify(environmentVariables)} SECRETS ${JSON.stringify(secrets)}`);
       throw error;
     }
   }

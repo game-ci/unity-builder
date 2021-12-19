@@ -15,7 +15,7 @@ export class CompressionStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.log('Starting step 3/4 build compression');
+      CloudRunnerLogger.logLine('Starting step 3/4 build compression');
       // Cleanup
       await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
         CloudRunnerState.buildGuid,

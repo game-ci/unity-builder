@@ -1,6 +1,5 @@
 import AWSBuildPlatform from './aws/aws-build-platform';
 import { BuildParameters } from '..';
-import CloudRunnerNamespace from './services/cloud-runner-namespace';
 import { CloudRunnerState } from './state/cloud-runner-state';
 import Kubernetes from './k8s/kubernetes-build-platform';
 import CloudRunnerLogger from './services/cloud-runner-logger';
@@ -11,27 +10,20 @@ import { CloudRunnerError } from './error/cloud-runner-error';
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
-    CloudRunnerState.buildParams = buildParameters;
-    CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
-      CloudRunnerState.readRunNumber(),
-      buildParameters.platform,
-    );
-    CloudRunnerState.setupBranchName();
-    CloudRunnerState.setupFolderVariables();
-    CloudRunnerState.setupDefaultSecrets();
+    CloudRunnerState.setup(buildParameters);
     CloudRunner.setupBuildPlatform();
   }
 
   private static setupBuildPlatform() {
     switch (CloudRunnerState.buildParams.cloudRunnerCluster) {
-      case 'aws':
-        CloudRunnerLogger.log('Building with AWS');
-        CloudRunnerState.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunnerState.buildParams);
-        break;
-      default:
       case 'k8s':
         CloudRunnerLogger.log('Building with Kubernetes');
         CloudRunnerState.CloudRunnerProviderPlatform = new Kubernetes(CloudRunnerState.buildParams);
+        break;
+      default:
+      case 'aws':
+        CloudRunnerLogger.log('Building with AWS');
+        CloudRunnerState.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunnerState.buildParams);
         break;
     }
   }
