@@ -129,12 +129,8 @@ export class CloudRunnerState {
     ];
   }
 
-  public static getHandleCachingCommand() {
+  public static get getHandleCachingCommand() {
     return `${CloudRunnerState.builderPathFull}/dist/cloud-runner/handleCaching.sh "${CloudRunnerState.cacheFolderFull}" "${CloudRunnerState.libraryFolderFull}" "${CloudRunnerState.lfsDirectory}" "${CloudRunnerState.purgeRemoteCaching}"`;
-  }
-
-  public static getCloneNoLFSCommand() {
-    return `${CloudRunnerState.builderPathFull}/dist/cloud-runner/cloneNoLFS.sh "${CloudRunnerState.repoPathFull}" "${CloudRunnerState.targetBuildRepoUrl}"`;
   }
 
   public static get cloneBuilderCommand() {

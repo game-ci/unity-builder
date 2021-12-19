@@ -5,8 +5,6 @@ export class RemoteClientCli {
   static async RunRemoteClient(options) {
     const buff = Buffer.from(process.env.SERIALIZED_BUILD_PARAMS || '', 'base64');
     const text = buff.toString('ascii');
-    // eslint-disable-next-line no-console
-    console.log(text);
     CloudRunnerState.setup(JSON.parse(text));
     switch (options.remoteClientState) {
       default:

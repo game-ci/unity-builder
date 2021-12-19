@@ -32,23 +32,12 @@ export class DownloadRepositoryStep implements StepInterface {
           ` printenv
           apk update -q
           apk add unzip zip git-lfs jq tree nodejs -q
-
           export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-          # mkdir -p ${CloudRunnerState.buildPathFull}
           mkdir -p ${CloudRunnerState.builderPathFull}
-          # mkdir -p ${CloudRunnerState.repoPathFull}
           echo "${CloudRunnerState.cloneBuilderCommand}"
           ${CloudRunnerState.cloneBuilderCommand}
           chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
           node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
-          # echo ' '
-          # echo 'Initializing source repository for cloning with caching of LFS files'
-          # ${CloudRunnerState.getCloneNoLFSCommand()}
-          # echo 'Source repository initialized'
-          # ls ${CloudRunnerState.projectPathFull}
-          # echo ' '
-          # echo 'Starting checks of cache for the Unity project Library and git LFS files'
-          # ${CloudRunnerState.getHandleCachingCommand()}
       `,
         ],
         `/${CloudRunnerState.buildVolumeFolder}`,
