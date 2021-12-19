@@ -9,30 +9,54 @@ import CloudRunnerSecret from '../services/cloud-runner-secret';
 export class CloudRunnerState {
   static setup(buildParameters: BuildParameters) {
     CloudRunnerState.buildParams = buildParameters;
-    CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
-      CloudRunnerState.readRunNumber(),
-      buildParameters.platform,
-    );
-    CloudRunnerState.setupBranchName();
-    CloudRunnerState.setupFolderVariables();
+    if (CloudRunnerState.buildGuid === undefined) {
+      CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
+        CloudRunnerState.readRunNumber(),
+        buildParameters.platform,
+      );
+    }
     CloudRunnerState.setupDefaultSecrets();
   }
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
   public static buildParams: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
   public static buildGuid: string;
-  public static branchName: string;
-  public static buildPathFull: string;
-  public static builderPathFull: string;
-  public static steamPathFull: string;
-  public static repoPathFull: string;
-  public static projectPathFull: string;
-  public static libraryFolderFull: string;
-  public static cacheFolderFull: string;
-  public static lfsDirectory: string;
-  public static purgeRemoteCaching: boolean;
-  public static unityBuilderRepoUrl: string;
-  public static targetBuildRepoUrl: string;
+  public static get branchName(): string {
+    return CloudRunnerState.buildParams.branch;
+  }
+  public static get buildPathFull(): string {
+    return `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildGuid}`;
+  }
+  public static get builderPathFull(): string {
+    return `${CloudRunnerState.buildPathFull}/builder`;
+  }
+  public static get steamPathFull(): string {
+    return `${CloudRunnerState.buildPathFull}/steam`;
+  }
+  public static get repoPathFull(): string {
+    return `${CloudRunnerState.buildPathFull}/${CloudRunnerState.repositoryFolder}`;
+  }
+  public static get projectPathFull(): string {
+    return `${CloudRunnerState.repoPathFull}/${CloudRunnerState.buildParams.projectPath}`;
+  }
+  public static get libraryFolderFull(): string {
+    return `${CloudRunnerState.projectPathFull}/Library`;
+  }
+  public static get cacheFolderFull(): string {
+    return `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.cacheFolder}/${CloudRunnerState.branchName}`;
+  }
+  public static get lfsDirectory(): string {
+    return `${CloudRunnerState.repoPathFull}/.git/lfs`;
+  }
+  public static get purgeRemoteCaching(): boolean {
+    return process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
+  }
+  public static get unityBuilderRepoUrl(): string {
+    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
+  }
+  public static get targetBuildRepoUrl(): string {
+    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+  }
   public static readonly defaultGitShaEnvironmentVariable = [
     {
       name: 'GITHUB_SHA',
@@ -99,8 +123,8 @@ export class CloudRunnerState {
         value: CloudRunnerState.buildParams.androidKeyaliasName,
       },
       {
-        name: 'SERIALIZED_STATE',
-        value: JSON.stringify(CloudRunnerState),
+        name: 'SERIALIZED_BUILD_PARAMS',
+        value: Buffer.from(JSON.stringify(CloudRunnerState.buildParams)).toString('base64'),
       },
     ];
   }
@@ -125,24 +149,6 @@ export class CloudRunnerState {
       throw new Error('no run number found, exiting');
     }
     return runNumber;
-  }
-
-  public static setupFolderVariables() {
-    CloudRunnerState.buildPathFull = `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildGuid}`;
-    CloudRunnerState.builderPathFull = `${CloudRunnerState.buildPathFull}/builder`;
-    CloudRunnerState.steamPathFull = `${CloudRunnerState.buildPathFull}/steam`;
-    CloudRunnerState.repoPathFull = `${CloudRunnerState.buildPathFull}/${CloudRunnerState.repositoryFolder}`;
-    CloudRunnerState.projectPathFull = `${CloudRunnerState.repoPathFull}/${CloudRunnerState.buildParams.projectPath}`;
-    CloudRunnerState.libraryFolderFull = `${CloudRunnerState.projectPathFull}/Library`;
-    CloudRunnerState.cacheFolderFull = `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.cacheFolder}/${CloudRunnerState.branchName}`;
-    CloudRunnerState.lfsDirectory = `${CloudRunnerState.repoPathFull}/.git/lfs`;
-    CloudRunnerState.purgeRemoteCaching = process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
-    CloudRunnerState.unityBuilderRepoUrl = `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
-    CloudRunnerState.targetBuildRepoUrl = `https://${CloudRunnerState.buildParams.githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
-  }
-
-  public static setupBranchName() {
-    CloudRunnerState.branchName = CloudRunnerState.buildParams.branch;
   }
 
   public static setupDefaultSecrets() {

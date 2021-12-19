@@ -59,17 +59,17 @@ process.env.AWS_REGION = options.region;
 
 // eslint-disable-next-line no-console
 console.log(`Entrypoint: ${options.mode}`);
+Input.githubEnabled = false;
 
 switch (options.mode) {
   case 'cli':
-    Input.githubEnabled = false;
     runCli();
     break;
   case 'remote-cli':
-    Input.githubEnabled = false;
     runRemoteCli(options);
     break;
   default:
+    Input.githubEnabled = true;
     runMain();
     break;
 }
