@@ -156,9 +156,9 @@ export class AWSJobStack {
         error,
         CF,
         taskDefStackName,
-        taskDefCloudFormation,
-        parameters,
-        secrets,
+        //taskDefCloudFormation,
+        //parameters,
+        //secrets,
       );
       throw error;
     }

@@ -1,7 +1,7 @@
-import AWSBuildPlatform from './aws/aws-build-platform';
+import AWSBuildPlatform from './aws';
 import { BuildParameters } from '..';
 import { CloudRunnerState } from './state/cloud-runner-state';
-import Kubernetes from './k8s/kubernetes-build-platform';
+import Kubernetes from './k8s';
 import CloudRunnerLogger from './services/cloud-runner-logger';
 import { CloudRunnerStepState } from './state/cloud-runner-step-state';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
