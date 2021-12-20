@@ -24,13 +24,13 @@ export class AWSBaseStack {
       { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
       { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
     ];
-    const hash = crypto
+    const parametersHash = crypto
       .createHash('md5')
       .update(baseStack + JSON.stringify(parametersWithoutHash))
       .digest('hex');
     const parameters: SDK.CloudFormation.Parameter[] = [
       ...parametersWithoutHash,
-      ...[{ ParameterKey: 'Version', ParameterValue: hash }],
+      ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
     ];
     const updateInput: SDK.CloudFormation.UpdateStackInput = {
       StackName: baseStackName,
@@ -56,7 +56,7 @@ export class AWSBaseStack {
       if (!stackExists) {
         CloudRunnerLogger.log(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
         await CF.createStack(createStackInput).promise();
-        CloudRunnerLogger.log(`created stack (version: ${hash})`);
+        CloudRunnerLogger.log(`created stack (version: ${parametersHash})`);
       }
       const CFState = await describeStack();
       let stack = CFState.Stacks?.[0];
@@ -70,8 +70,8 @@ export class AWSBaseStack {
       }
 
       if (stackExists) {
-        CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${hash})`);
-        if (hash !== stackVersion) {
+        CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${parametersHash})`);
+        if (parametersHash !== stackVersion) {
           CloudRunnerLogger.log(`Updating`);
           await CF.updateStack(updateInput).promise();
         } else {

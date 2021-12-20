@@ -1,4 +1,4 @@
-import { BuildParameters } from '../..';
+import { BuildParameters, Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerNamespace from '../services/cloud-runner-namespace';
@@ -125,23 +125,23 @@ export class CloudRunnerState {
         name: 'ANDROID_KEYALIAS_NAME',
         value: CloudRunnerState.buildParams.androidKeyaliasName,
       },
-      ...CloudRunnerState.getEnvVars,
+      ...CloudRunnerState.serializeBuildParamsAndInput,
     ];
   }
-  private static get getEnvVars() {
+  private static get serializeBuildParamsAndInput() {
     const keys = Object.keys(CloudRunnerState.buildParams);
     const array = new Array();
-    for (const element in keys) {
+    for (const element of keys) {
       array.push({
         name: element,
-        value: CloudRunnerState.buildParams[element],
+        value: CloudRunnerState.buildParams[element]?.toString(),
       });
     }
-    const input = Object.getOwnPropertyNames(CloudRunnerState);
-    for (const element in input) {
+    const input = Object.getOwnPropertyNames(Input);
+    for (const element of input) {
       array.push({
         name: element,
-        value: CloudRunnerState.buildParams[element],
+        value: Input[element]?.toString(),
       });
     }
     return array;
