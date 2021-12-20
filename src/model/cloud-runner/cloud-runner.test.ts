@@ -1,6 +1,8 @@
 import { BuildParameters, ImageTag } from '..';
 import CloudRunner from './cloud-runner';
 import Input from '../input';
+import fs from 'fs';
+import { CloudRunnerState } from './state/cloud-runner-state';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});
@@ -25,6 +27,9 @@ describe('Cloud Runner', () => {
       buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);
       await CloudRunner.run(buildParameter, baseImage.toString());
+      const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`);
+      // eslint-disable-next-line no-console
+      console.log(file);
     }
   }, 500000);
 });
