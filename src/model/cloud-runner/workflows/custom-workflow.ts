@@ -24,7 +24,7 @@ export class CustomWorkflow {
             step['commands'],
             `/${CloudRunnerState.buildVolumeFolder}`,
             `/${CloudRunnerState.buildVolumeFolder}`,
-            CloudRunnerState.defaultGitShaEnvironmentVariable,
+            CloudRunnerState.readBuildEnvironmentVariables(),
             [...CloudRunnerState.defaultSecrets, ...stepSecrets],
           );
         }
