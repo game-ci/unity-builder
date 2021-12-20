@@ -63,4 +63,4 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          awsBaseStackName: game-ci-stack
+          awsBaseStackName: game-ci-stack-integration-tests
