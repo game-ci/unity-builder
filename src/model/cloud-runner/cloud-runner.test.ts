@@ -21,7 +21,7 @@ describe('Cloud Runner', () => {
     `,
   };
   Input.githubEnabled = false;
-  it('builds', async () => {
+  it('All build parameters sent to cloud runner as env vars', async () => {
     if (Input.remoteBuilderIntegrationTests) {
       const buildParameter = await BuildParameters.create();
       buildParameter.logToFile = true;
@@ -30,6 +30,10 @@ describe('Cloud Runner', () => {
       const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
       // eslint-disable-next-line no-console
       console.log(file);
+      const keys = Object.keys(buildParameter);
+      for (const element of keys) {
+        expect(file).toContain(`${element}=${buildParameter[element]}`);
+      }
     }
   }, 500000);
 });
