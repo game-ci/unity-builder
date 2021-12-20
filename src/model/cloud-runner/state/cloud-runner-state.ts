@@ -137,7 +137,7 @@ export class CloudRunnerState {
         value: CloudRunnerState.buildParams[element],
       });
     }
-    const input = Object.getOwnPropertyNames(CloudRunnerState.buildParams);
+    const input = Object.getOwnPropertyNames(CloudRunnerState);
     for (const element in input) {
       array.push({
         name: element,
