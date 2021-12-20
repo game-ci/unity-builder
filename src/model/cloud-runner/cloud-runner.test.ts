@@ -27,7 +27,7 @@ describe('Cloud Runner', () => {
       buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);
       await CloudRunner.run(buildParameter, baseImage.toString());
-      const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`);
+      const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
       // eslint-disable-next-line no-console
       console.log(file);
     }
