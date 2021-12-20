@@ -2,6 +2,9 @@ import { BuildParameters, ImageTag } from '..';
 import CloudRunner from './cloud-runner';
 import Input from '../input';
 
+describe('Cloud Runner', () => {
+  it('responds', () => {});
+});
 if (process.env.INCLUDE_CLOUD_RUNNER_TEST !== undefined) {
   describe('Cloud Runner', () => {
     it('builds', async () => {
