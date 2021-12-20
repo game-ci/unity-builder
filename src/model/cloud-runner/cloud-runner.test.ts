@@ -5,15 +5,7 @@ import Input from '../input';
 describe('Cloud Runner', () => {
   it('responds', () => {});
 });
-if (process.env.INCLUDE_CLOUD_RUNNER_TEST !== undefined) {
-  describe('Cloud Runner', () => {
-    it('builds', async () => {
-      await runTestBuild();
-    }, 500000);
-  });
-}
-
-async function runTestBuild() {
+describe('Cloud Runner', () => {
   Input.cliOptions = {
     versioning: 'None',
     projectPath: 'test-project',
@@ -27,8 +19,12 @@ async function runTestBuild() {
     `,
   };
   Input.githubEnabled = false;
-  const buildParameter = await BuildParameters.create();
-  const baseImage = new ImageTag(buildParameter);
-
-  await CloudRunner.run(buildParameter, baseImage.toString());
-}
+  it('builds', async () => {
+    if (Input.remoteBuilderIntegrationTests) {
+      const buildParameter = await BuildParameters.create();
+      buildParameter.logToFile = true;
+      const baseImage = new ImageTag(buildParameter);
+      await CloudRunner.run(buildParameter, baseImage.toString());
+    }
+  }, 500000);
+});

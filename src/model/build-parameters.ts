@@ -39,6 +39,7 @@ class BuildParameters {
   public runNumber;
   public branch;
   public githubRepo;
+  public logToFile;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -83,6 +84,7 @@ class BuildParameters {
       runNumber: Input.runNumber,
       branch: Input.branch,
       githubRepo: Input.githubRepo,
+      logToFile: false,
     };
   }
 

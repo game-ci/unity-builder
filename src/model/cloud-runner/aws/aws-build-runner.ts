@@ -5,6 +5,8 @@ import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
 import * as zlib from 'zlib';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { Input } from '../..';
+import fs from 'fs';
+import { CloudRunnerState } from '../state/cloud-runner-state';
 
 class AWSBuildRunner {
   static async runTask(
@@ -175,6 +177,9 @@ class AWSBuildRunner {
               readingLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
+            }
+            if (CloudRunnerState.buildParams.logToFile) {
+              fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\r\n`);
             }
             CloudRunnerLogger.log(message);
           }

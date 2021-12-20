@@ -57,4 +57,10 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
           CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
-          INCLUDE_CLOUD_RUNNER_TEST: true
+          remoteBuilderIntegrationTests: true
+          cloudRunnerCluster: aws
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          awsBaseStackName: game-ci-stack
