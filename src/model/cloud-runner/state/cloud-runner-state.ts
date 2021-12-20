@@ -125,11 +125,26 @@ export class CloudRunnerState {
         name: 'ANDROID_KEYALIAS_NAME',
         value: CloudRunnerState.buildParams.androidKeyaliasName,
       },
-      {
-        name: 'SERIALIZED_BUILD_PARAMS',
-        value: Buffer.from(JSON.stringify(CloudRunnerState.buildParams)).toString('base64'),
-      },
+      ...CloudRunnerState.getEnvVars,
     ];
+  }
+  private static get getEnvVars() {
+    const keys = Object.keys(CloudRunnerState.buildParams);
+    const array = new Array();
+    for (const element in keys) {
+      array.push({
+        name: element,
+        value: CloudRunnerState.buildParams[element],
+      });
+    }
+    const input = Object.getOwnPropertyNames(CloudRunnerState.buildParams);
+    for (const element in input) {
+      array.push({
+        name: element,
+        value: CloudRunnerState.buildParams[element],
+      });
+    }
+    return array;
   }
 
   public static get getHandleCachingCommand() {
