@@ -1,4 +1,4 @@
-name: Cloud Runner - AWS Integration Tests
+name: AWS Integration Tests (Cloud Runner)
 
 on:
   push: { branches: [main, aws, remote-builder/unified-providers] }
