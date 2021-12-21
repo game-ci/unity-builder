@@ -1,4 +1,4 @@
-name: K8s Integration Tests (Cloud Runner)
+name: Cloud Runner - K8s Tests
 
 on:
   push: { branches: [remote-builder/k8s, remote-builder/unified-providers] }
