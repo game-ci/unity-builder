@@ -44,7 +44,15 @@ jobs:
       - name: Get GKE cluster credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
 
-      - run: yarn test -i
+      ###########################
+      # Cloud Runner Test Suite #
+      ###########################
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - run: yarn
+      - name: Cloud Runner Test Suite
+        run: yarn test -i
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -61,9 +69,10 @@ jobs:
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
 
       ###########################
-      #          Build          #
+      # Cloud Runner Build Test #
       ###########################
-      - uses: ./
+      - name: Cloud Runner Build Test
+        uses: ./
         id: k8s-unity-build
         env:
           DEBUG: true
