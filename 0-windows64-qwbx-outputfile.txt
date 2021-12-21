@@ -1,0 +1,98 @@
+getInput=getInput(query) {
+        return Input.githubEnabled
+            ? core.getInput(query)
+            : Input.cliOptions[query] !== undefined
+                ? Input.cliOptions[query]
+                : process.env[query] !== undefined
+                    ? process.env[query]
+                    : false;
+    }
+androidKeystoreBase64=
+androidKeystorePass=
+ANDROID_VERSION_CODE=1
+kubeConfig=
+customImage=false
+HOSTNAME=ip-10-0-1-224.eu-west-2.compute.internal
+testCustomSecret=VALUEXXX
+androidKeyaliasPass=
+BUILDID=0-windows64-qwbx
+SHLVL=1
+githubRepo=game-ci/unity-builder
+branch=remote-builder/unified-providers
+HOME=/root
+cloudRunnerCpu=1.0
+platform=StandaloneWindows64
+versioningStrategy=None
+buildPathFull=/data/0-windows64-qwbx
+version=2019.2.11f1
+githubEnabled=false
+ANDROID_KEYSTORE_NAME=
+AWS_EXECUTION_ENV=AWS_ECS_FARGATE
+region=eu-west-2
+specifiedVersion=
+runNumber=0
+BUILD_FILE=StandaloneWindows64.exe
+chownFilesTo=
+BUILD_NAME=StandaloneWindows64
+buildMethod=
+ANDROID_KEYALIAS_NAME=
+VERSION=none
+logToFile=true
+AWS_DEFAULT_REGION=eu-west-2
+androidVersionCode=false
+runnerTempPath=undefined
+sshAgent=
+ECS_CONTAINER_METADATA_URI_V4=http://169.254.170.2/v4/a7cf38309de6450a9ad8717b181bc485-2780554367
+androidKeystoreName=
+BUILD_METHOD=
+ECS_CONTAINER_METADATA_URI=http://169.254.170.2/v3/a7cf38309de6450a9ad8717b181bc485-2780554367
+CUSTOM_PARAMETERS=
+kubeVolumeSize=5Gi
+customParameters=
+steamPathFull=/data/0-windows64-qwbx/steam
+repoPathFull=/data/0-windows64-qwbx/repo
+cloudRunnerCluster=
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+libraryFolderFull=/data/0-windows64-qwbx/repo/test-project/Library
+androidAppBundle=false
+androidKeyaliasName=
+preBuildSteps=
+ContainerMemory=750M
+projectPath=test-project
+buildFile=StandaloneWindows64.exe
+BUILD_TARGET=StandaloneWindows64
+buildName=StandaloneWindows64
+unityVersion=auto
+targetPlatform=StandaloneWindows64
+ALLOW_EMPTY_PASSWORD=yes
+BUILD_PATH=build/StandaloneWindows64
+PROJECT_PATH=test-project
+AWS_REGION=eu-west-2
+GITHUB_WORKSPACE=/github/workspace
+awsBaseStackName=game-ci-3-test
+buildVersion=none
+length=0
+builderPathFull=/data/0-windows64-qwbx/builder
+cliOptions=[object Object]
+cloudRunnerMemory=750M
+name=Input
+postBuildSteps=
+PWD=/data
+allowDirtyBuild=false
+buildsPath=build
+UNITY_VERSION=2019.2.11f1
+githubToken=
+buildPath=build/StandaloneWindows64
+projectPathFull=/data/0-windows64-qwbx/repo/test-project
+kubeVolume=
+prototype=[object Object]
+customBuildSteps=
+    - name: 'step 1'
+      image: 'alpine'
+      commands: ['printenv']
+      secrets:
+        - name: 'testCustomSecret'
+          value: 'VALUEXXX'
+    
+ContainerCpu=1.0
+remoteBuilderIntegrationTests=true

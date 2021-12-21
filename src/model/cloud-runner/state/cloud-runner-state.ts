@@ -134,14 +134,14 @@ export class CloudRunnerState {
     for (const element of keys) {
       array.push({
         name: element,
-        value: CloudRunnerState.buildParams[element]?.toString(),
+        value: `${CloudRunnerState.buildParams[element]}`,
       });
     }
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
       array.push({
         name: element,
-        value: Input[element]?.toString(),
+        value: `${Input[element]}`,
       });
     }
     return array;
