@@ -77,8 +77,10 @@ jobs:
         env:
           DEBUG: true
           CloudRunnerBranch: remote-builder/unified-providers
+          versioning: None
         with:
           cloudRunnerCluster: k8s
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           targetPlatform: ${{ matrix.targetPlatform }}
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
