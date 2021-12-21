@@ -1,12 +1,9 @@
 import { CloudRunnerState } from '../../state/cloud-runner-state';
-
-const { exec } = require('child_process');
+import { RunCli } from '../run-cli';
 
 export class DownloadRepository {
   public static async run() {
-    await new Promise<void>((promise) => {
-      exec(
-        `
+    await RunCli.RunCli(`
       tree -f -L 2tree -f -L 2
       echo "test"
       mkdir -p ${CloudRunnerState.buildPathFull}
@@ -15,6 +12,8 @@ export class DownloadRepository {
       echo 'Initializing source repository for cloning with caching of LFS files'
       repoPathFull=${CloudRunnerState.repoPathFull}
       githubSha=$GITHUB_SHA
+    `);
+    await RunCli.RunCli(`
       cd ${CloudRunnerState.repoPathFull}
       # stop annoying git detatched head info
       git config --global advice.detachedHead false
@@ -25,43 +24,29 @@ export class DownloadRepository {
       git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
       git checkout $githubSha
       echo "Checked out $githubSha"
+    `);
+    await RunCli.RunCli(`
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
+    `);
+    await RunCli.RunCli(`
       export LFS_ASSETS_HASH="$(cat ${CloudRunnerState.repoPathFull}/.lfs-assets-guid)"
-
+    `);
+    await RunCli.RunCli(`
       echo ' '
       echo 'Contents of .lfs-assets-guid file:'
       cat .lfs-assets-guid
-
       echo ' '
       echo 'Contents of .lfs-assets-guid-sum file:'
       cat .lfs-assets-guid-sum
-
       echo ' '
-      # echo 'Source repository initialized'
-      # ls ${CloudRunnerState.projectPathFull}
-      # echo ' '
-      # echo 'Starting checks of cache for the Unity project Library and git LFS files'
-      # ${CloudRunnerState.getHandleCachingCommand}
-      `,
-        (error, stdout, stderr) => {
-          if (error) {
-            // eslint-disable-next-line no-console
-            console.log(`error: ${error.message}`);
-            promise();
-            return;
-          }
-          if (stderr) {
-            // eslint-disable-next-line no-console
-            console.log(`stderr: ${stderr}`);
-            promise();
-            return;
-          }
-          // eslint-disable-next-line no-console
-          console.log(`stdout: ${stdout}`);
-          promise();
-        },
-      );
-    });
+      echo 'Source repository initialized'
+      ls ${CloudRunnerState.projectPathFull}
+      echo ' '
+    `);
+    await RunCli.RunCli(`
+      echo 'Starting checks of cache for the Unity project Library and git LFS files'
+      ${CloudRunnerState.getHandleCachingCommand}
+    `);
   }
 }
