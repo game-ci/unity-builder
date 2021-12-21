@@ -64,3 +64,19 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           awsBaseStackName: game-ci-stack-integration-tests
+      - uses: ./
+        id: aws-fargate-unity-build
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-2
+          CloudRunnerBranch: remote-builder/unified-providers
+          DEBUG: true
+        with:
+          cloudRunnerCluster: aws
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          awsBaseStackName: game-ci-stack-integration-tests

@@ -10,7 +10,6 @@ export class DownloadRepository {
       mkdir -p ${CloudRunnerState.repoPathFull}
       echo ' '
       echo 'Initializing source repository for cloning with caching of LFS files'
-      repoPathFull=${CloudRunnerState.repoPathFull}
       githubSha=$GITHUB_SHA
     `);
     await RunCli.RunCli(`
