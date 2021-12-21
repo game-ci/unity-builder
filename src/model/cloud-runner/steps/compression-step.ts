@@ -22,7 +22,6 @@ export class CompressionStep implements StepInterface {
         'alpine',
         [
           `
-            printenv
             apk update -q
             apk add zip tree -q
             ${process.env.DEBUG ? '' : '#'}tree -L 4 "$repoPathFull"

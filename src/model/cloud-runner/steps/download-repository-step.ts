@@ -29,7 +29,7 @@ export class DownloadRepositoryStep implements StepInterface {
         CloudRunnerState.buildGuid,
         image,
         [
-          ` printenv
+          `
           apk update -q
           apk add unzip zip git-lfs jq tree nodejs -q
           export GIT_DISCOVERY_ACROSS_FILESYSTEM=1

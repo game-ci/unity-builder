@@ -25,7 +25,6 @@ export class BuildStep implements StepInterface {
       image,
       [
         `
-            printenv
             export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
             cp -r "${CloudRunnerState.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
             cp -r "${CloudRunnerState.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
