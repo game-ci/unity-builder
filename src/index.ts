@@ -40,7 +40,7 @@ async function runCli() {
   const baseImage = new ImageTag(buildParameter);
   await CloudRunner.run(buildParameter, baseImage.toString());
 }
-
+Input.githubEnabled = false;
 const program = new Command();
 program.version('0.0.1');
 const properties = Object.getOwnPropertyNames(Input);
@@ -60,7 +60,6 @@ const options = program.opts();
 
 // eslint-disable-next-line no-console
 console.log(`Entrypoint: ${options.mode}`);
-Input.githubEnabled = false;
 
 switch (options.mode) {
   case 'cli':

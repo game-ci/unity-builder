@@ -32,8 +32,15 @@ export class BuildStep implements StepInterface {
             chmod -R +x "/entrypoint.sh"
             chmod -R +x "/steps"
             /entrypoint.sh
-            ${process.env.DEBUG ? '' : '#'}tree -L 4 "${CloudRunnerState.buildPathFull}"
-            ${process.env.DEBUG ? '' : '#'}ls -lh "/${CloudRunnerState.buildVolumeFolder}"
+            apk update -q
+            apk add zip tree -q
+            cd "$libraryFolderFull/.."
+            zip -r "lib-$BUILDID.zip" "./Library"
+            mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
+            cd "$repoPathFull"
+            ls -lh "$repoPathFull"
+            zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
+            mv "build-$BUILDID.zip" "/$cacheFolderFull/build-$BUILDID.zip"
           `,
       ],
       `/${CloudRunnerState.buildVolumeFolder}`,

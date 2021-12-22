@@ -2,7 +2,6 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { BuildStep } from '../steps/build-step';
-import { CompressionStep } from '../steps/compression-step';
 import { DownloadRepositoryStep } from '../steps/download-repository-step';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
@@ -41,15 +40,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         ),
       );
       CloudRunnerLogger.logWithTime('Build time');
-
-      await new CompressionStep().run(
-        new CloudRunnerStepState(
-          'alpine',
-          CloudRunnerState.readBuildEnvironmentVariables(),
-          CloudRunnerState.defaultSecrets,
-        ),
-      );
-      CloudRunnerLogger.logWithTime('Compression time');
 
       if (CloudRunnerState.buildParams.postBuildSteps !== '') {
         await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
