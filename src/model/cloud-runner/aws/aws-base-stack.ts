@@ -32,12 +32,12 @@ export class AWSBaseStack {
       ...parametersWithoutHash,
       ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
     ];
-    const updateInput: SDK.CloudFormation.UpdateStackInput = {
-      StackName: baseStackName,
-      TemplateBody: baseStack,
-      Parameters: parameters,
-      Capabilities: ['CAPABILITY_IAM'],
-    };
+    // const updateInput: SDK.CloudFormation.UpdateStackInput = {
+    //   StackName: baseStackName,
+    //   TemplateBody: baseStack,
+    //   Parameters: parameters,
+    //   Capabilities: ['CAPABILITY_IAM'],
+    // };
     const createStackInput: SDK.CloudFormation.CreateStackInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
@@ -72,8 +72,8 @@ export class AWSBaseStack {
       if (stackExists) {
         CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${parametersHash})`);
         if (parametersHash !== stackVersion) {
-          CloudRunnerLogger.log(`Updating`);
-          await CF.updateStack(updateInput).promise();
+          CloudRunnerLogger.log(`Skip Updating Disabled`);
+          //await CF.updateStack(updateInput).promise();
         } else {
           CloudRunnerLogger.log(`No update required`);
         }
