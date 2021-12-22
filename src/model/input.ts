@@ -11,12 +11,12 @@ class Input {
   public static githubEnabled = true;
   public static cliOptions;
   static get remoteBuilderIntegrationTests(): boolean {
-    return Input.getInput(`remoteBuilderIntegrationTests`);
+    return Input.getInput(`remoteBuilderIntegrationTests`) || Input.getInput(`remoteBuilderTests`);
   }
   private static getInput(query) {
     return Input.githubEnabled
       ? core.getInput(query)
-      : Input.cliOptions[query] !== undefined
+      : Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]

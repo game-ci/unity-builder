@@ -18,6 +18,13 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
 
   private static async runJob(baseImage: any) {
     try {
+      core.info(
+        `Remote envs ${JSON.stringify(
+          CloudRunnerState.readBuildEnvironmentVariables(),
+          undefined,
+          4,
+        )} Remote secrets ${JSON.stringify(CloudRunnerState.defaultSecrets, undefined, 4)}`,
+      );
       core.info(`Custom build steps: ${CloudRunnerState.buildParams.customBuildSteps}`);
       if (CloudRunnerState.buildParams.customBuildSteps === '') {
         await new BuildAutomationWorkflow().run(

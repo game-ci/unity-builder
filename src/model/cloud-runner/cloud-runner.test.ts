@@ -33,7 +33,7 @@ describe('Cloud Runner', () => {
       const keys = Object.keys(buildParameter);
       for (const element of keys) {
         if (buildParameter[element] !== undefined) {
-          expect(file).toContain(`${element}`);
+          expect(file).toContain(`${element}=`);
         }
       }
     }
