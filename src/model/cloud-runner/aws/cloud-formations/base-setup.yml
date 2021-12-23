@@ -7,10 +7,6 @@ Parameters:
     Type: String
     Default: development
     Description: 'Your deployment environment: DEV, QA , PROD'
-  Storage:
-    Type: String
-    Default: game-ci-storage
-    Description: 'Your s3 storage bucket'
   Version:
     Type: String
     Description: 'hash of template'
@@ -225,11 +221,6 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  # Allow upload to S3
-                  - 's3:GetObject'
-                  - 's3:GetObjectVersion'
-                  - 's3:PutObject'
-
                   # Allow the use of secret manager
                   - 'secretsmanager:GetSecretValue'
                   - 'kms:Decrypt'
@@ -339,12 +330,6 @@ Resources:
       SubnetId: !Ref PublicSubnetTwo
       SecurityGroups:
         - !Ref EFSServerSecurityGroup
-
-  S3Bucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Ref Storage
 
 Outputs:
   EfsFileStorageId:
