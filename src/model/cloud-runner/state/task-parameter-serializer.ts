@@ -73,10 +73,12 @@ export class TaskParameterSerializer {
     array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
-      array.push({
-        name: element,
-        value: `${Input[element]}`,
-      });
+      if (typeof Input[element] !== 'function') {
+        array.push({
+          name: element,
+          value: `${Input[element]}`,
+        });
+      }
     }
     return array;
   }
