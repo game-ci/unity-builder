@@ -28,16 +28,7 @@ describe('Cloud Runner', () => {
       const baseImage = new ImageTag(buildParameter);
       await CloudRunner.run(buildParameter, baseImage.toString());
       const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
-      const buildParameterKeys = Object.keys(buildParameter);
-      for (const element of buildParameterKeys) {
-        if (buildParameter[element] !== undefined) {
-          if (file.includes(`${element}":"${buildParameter[element]}`)) {
-            expect(file).toContain(`${element}":"${buildParameter[element]}`);
-          } else {
-            expect(file).toContain(`${element}":${buildParameter[element]}`);
-          }
-        }
-      }
+      expect(file).toContain(JSON.stringify(buildParameter));
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
         if (Input[element] !== undefined) {
