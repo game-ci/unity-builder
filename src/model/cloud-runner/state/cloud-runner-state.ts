@@ -137,6 +137,7 @@ export class CloudRunnerState {
         value: `${CloudRunnerState.buildParams[element]}`,
       });
     }
+    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
       array.push({
