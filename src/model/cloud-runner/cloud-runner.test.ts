@@ -27,14 +27,13 @@ describe('Cloud Runner', () => {
       buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);
       await CloudRunner.run(buildParameter, baseImage.toString());
-      const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
+      let file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
       expect(file).toContain(JSON.stringify(buildParameter));
+      file = file.replace(`\n`, ``).replace(` `, ``);
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] != 'function') {
-          expect(file.replace(`\n`, ``).replace(` `, ``)).toContain(
-            `${element}=${Input[element].toString().replace(`\n`, ``).replace(` `, ``)}`,
-          );
+          expect(file).toContain(`${element}=${Input[element].toString().replace(`\n`, ``).replace(` `, ``)}`);
         }
       }
     }
