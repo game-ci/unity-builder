@@ -44,6 +44,7 @@ export class DownloadRepository {
       echo ' '
     `);
     await RunCli.RunCli(`
+      tree ${CloudRunnerState.builderPathFull}
       echo 'Starting checks of cache for the Unity project Library and git LFS files'
       ${CloudRunnerState.getHandleCachingCommand}
     `);

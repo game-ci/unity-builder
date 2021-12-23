@@ -30,10 +30,16 @@ describe('Cloud Runner', () => {
       const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
       // eslint-disable-next-line no-console
       console.log(file);
-      const keys = Object.keys(buildParameter);
-      for (const element of keys) {
+      const buildParameterKeys = Object.keys(buildParameter);
+      for (const element of buildParameterKeys) {
         if (buildParameter[element] !== undefined) {
-          expect(file).toContain(`${element}=`);
+          expect(file).toContain(`${element}=${buildParameter[element]}`);
+        }
+      }
+      const inputKeys = Object.getOwnPropertyNames(Input);
+      for (const element of inputKeys) {
+        if (Input[element] !== undefined) {
+          expect(file).toContain(`${element}=${Input[element]}`);
         }
       }
     }
