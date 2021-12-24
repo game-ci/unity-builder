@@ -71,12 +71,12 @@ export class AWSBaseStack {
       if (stackExists) {
         CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${parametersHash})`);
         if (parametersHash !== stackVersion) {
-          CloudRunnerLogger.log(`Skip Updating Disabled`);
+          CloudRunnerLogger.log(`Attempting update of base stack`);
           try {
             await CF.updateStack(updateInput).promise();
           } catch (error) {
             CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
-            CloudRunnerLogger.log(`Update Failed, Stack name: ${baseStackName}`);
+            CloudRunnerLogger.log(`Update Failed, Stack name: ${baseStackName}, Continuing anyway`);
           }
         } else {
           CloudRunnerLogger.log(`No update required`);
