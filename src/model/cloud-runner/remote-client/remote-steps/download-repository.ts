@@ -1,17 +1,15 @@
 import { CloudRunnerState } from '../../state/cloud-runner-state';
 import { RunCli } from '../run-cli';
 
+import fs from 'fs';
+import CloudRunnerLogger from '../../services/cloud-runner-logger';
+
 export class DownloadRepository {
   public static async run() {
-    await RunCli.RunCli(`
-      tree -f -L 2tree -f -L 2
-      echo "test"
-      mkdir -p ${CloudRunnerState.buildPathFull}
-      mkdir -p ${CloudRunnerState.repoPathFull}
-      echo ' '
-      echo 'Initializing source repository for cloning with caching of LFS files'
-      githubSha=$GITHUB_SHA
-    `);
+    await RunCli.RunCli(`tree -f -L 2tree -f -L 2`);
+    fs.mkdirSync(CloudRunnerState.buildPathFull);
+    fs.mkdirSync(CloudRunnerState.repoPathFull);
+    CloudRunnerLogger.log(`Initializing source repository for cloning with caching of LFS files`);
     await RunCli.RunCli(`
       cd ${CloudRunnerState.repoPathFull}
       # stop annoying git detatched head info
@@ -21,16 +19,14 @@ export class DownloadRepository {
       git lfs install --skip-smudge
       echo "${CloudRunnerState.targetBuildRepoUrl}"
       git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
-      git checkout $githubSha
-      echo "Checked out $githubSha"
+      git checkout ${process.env.GITHUB_SHA}
+      echo "Checked out ${process.env.GITHUB_SHA}"
     `);
     await RunCli.RunCli(`
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
     `);
-    await RunCli.RunCli(`
-      export LFS_ASSETS_HASH="$(cat ${CloudRunnerState.repoPathFull}/.lfs-assets-guid)"
-    `);
+    const LFS_ASSETS_HASH = fs.readFileSync(`${CloudRunnerState.repoPathFull}/.lfs-assets-guid`, 'utf8');
     await RunCli.RunCli(`
       echo ' '
       echo 'Contents of .lfs-assets-guid file:'
@@ -45,40 +41,37 @@ export class DownloadRepository {
     `);
     const lfsCacheFolder = `${CloudRunnerState.cacheFolderFull}/lfs`;
     const libraryCacheFolder = `${CloudRunnerState.cacheFolderFull}/lib`;
-    await RunCli.RunCli(`
-      tree ${CloudRunnerState.builderPathFull}
-      echo 'Starting checks of cache for the Unity project Library and git LFS files'
-      mkdir -p "${lfsCacheFolder}"
-      mkdir -p "${libraryCacheFolder}"
-      echo 'Library Caching'
+    await RunCli.RunCli(`tree ${CloudRunnerState.builderPathFull}`);
+    CloudRunnerLogger.log(`Starting checks of cache for the Unity project Library and git LFS files`);
+    fs.mkdirSync(lfsCacheFolder);
+    fs.mkdirSync(libraryCacheFolder);
+    CloudRunnerLogger.log(`Library Caching`);
+    //if the unity git project has included the library delete it and echo a warning
+    if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
+      fs.rmdirSync(CloudRunnerState.libraryFolderFull, { recursive: true });
+      CloudRunnerLogger.log(
+        `!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)`,
+      );
+    }
+    //Restore library cache
+    const latestLibraryCacheFile = await RunCli.RunCli(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`);
+    await RunCli.RunCli(`ls -lh "${libraryCacheFolder}"`);
+    CloudRunnerLogger.log(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
+    if (fs.existsSync(latestLibraryCacheFile)) {
+      CloudRunnerLogger.log(`Library cache exists`);
+      await RunCli.RunCli(`
+          unzip -q "${libraryCacheFolder}/${latestLibraryCacheFile}" -d "$projectPathFull"
+          tree "${CloudRunnerState.libraryFolderFull}"
       `);
-    await RunCli.RunCli(`
-      # if the unity git project has included the library delete it and echo a warning
-      if [ -d "${CloudRunnerState.libraryFolderFull}" ]; then
-        rm -r "${CloudRunnerState.libraryFolderFull}"
-        echo "!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)"
-      fi
-      `);
-    await RunCli.RunCli(`
-      # Restore library cache
-      ls -lh "${libraryCacheFolder}"
-      latestLibraryCacheFile=$(ls -t "${libraryCacheFolder}" | grep .zip$ | head -1)
-      echo "Checking if Library cache ${libraryCacheFolder}/$latestLibraryCacheFile exists"
-      cd ${libraryCacheFolder}
-      if [ -f "$latestLibraryCacheFile" ]; then
-        echo "Library cache exists"
-        unzip -q "${libraryCacheFolder}/$latestLibraryCacheFile" -d "$projectPathFull"
-        tree "${CloudRunnerState.libraryFolderFull}"
-      fi
-      `);
+    }
     await RunCli.RunCli(`
       echo ' '
       echo 'Large File Caching'
-      echo "Checking large file cache exists (${lfsCacheFolder}/$LFS_ASSETS_HASH.zip)"
+      echo "Checking large file cache exists (${lfsCacheFolder}/${LFS_ASSETS_HASH}.zip)"
       cd ${lfsCacheFolder}
-      if [ -f "$LFS_ASSETS_HASH.zip" ]; then
-        echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
-        latestLFSCacheFile="$LFS_ASSETS_HASH"
+      if [ -f "${LFS_ASSETS_HASH}.zip" ]; then
+        echo "Match found: using large file hash match ${LFS_ASSETS_HASH}.zip"
+        latestLFSCacheFile="${LFS_ASSETS_HASH}"
       else
         latestLFSCacheFile=$(ls -t "${lfsCacheFolder}" | grep .zip$ | head -1)
         echo "Match not found: using latest large file cache $latestLFSCacheFile"
@@ -113,18 +106,13 @@ export class DownloadRepository {
       `);
     await RunCli.RunCli(`
       cd "${CloudRunnerState.lfsDirectory}/.."
-      zip -q -r "$LFS_ASSETS_HASH.zip" "./lfs"
-      cp "$LFS_ASSETS_HASH.zip" "${lfsCacheFolder}"
-      echo "copied $LFS_ASSETS_HASH to ${lfsCacheFolder}"
+      zip -q -r "${LFS_ASSETS_HASH}.zip" "./lfs"
+      cp "${LFS_ASSETS_HASH}.zip" "${lfsCacheFolder}"
+      echo "copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}"
       `);
-    await RunCli.RunCli(`
-      # purge cache
-      if [ -z "${CloudRunnerState.purgeRemoteCaching}" ]; then
-        echo ' '
-        echo "purging ${CloudRunnerState.purgeRemoteCaching}"
-        rm -r "${CloudRunnerState.purgeRemoteCaching}"
-        echo ' '
-      fi
-    `);
+    if (process.env.purgeRemoteCaching !== undefined) {
+      CloudRunnerLogger.log(`purging ${CloudRunnerState.purgeRemoteCaching}`);
+      fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
+    }
   }
 }

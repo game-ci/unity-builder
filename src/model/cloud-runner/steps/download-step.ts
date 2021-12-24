@@ -5,10 +5,10 @@ import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { StepInterface } from './step-interface';
 
-export class DownloadRepositoryStep implements StepInterface {
+export class DownloadStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await DownloadRepositoryStep.downloadRepositoryStep(
+      await DownloadStep.downloadRepository(
         cloudRunnerStepState.image,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
@@ -18,13 +18,13 @@ export class DownloadRepositoryStep implements StepInterface {
     }
   }
 
-  private static async downloadRepositoryStep(
+  private static async downloadRepository(
     image: string,
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.logLine('Starting step 1/4 clone and restore cache');
+      CloudRunnerLogger.logLine('Starting step 1/2 download game files from repository, try to use cache');
       await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
         CloudRunnerState.buildGuid,
         image,
