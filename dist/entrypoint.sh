@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
 
 #
-# Run steps
+# Create directory for license activation
 #
 
+ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license"
+mkdir -p "$ACTIVATE_LICENSE_PATH"
+
+#
+# Run steps
+#
+source /steps/set_gitcredential.sh
 source /steps/activate.sh
 source /steps/build.sh
 source /steps/return_license.sh
+
+#
+# Remove license activation directory
+#
+
+rm -r "$ACTIVATE_LICENSE_PATH"
 
 #
 # Instructions for debugging

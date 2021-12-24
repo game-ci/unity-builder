@@ -21,10 +21,15 @@ class BuildParameters {
   public androidKeystorePass!: string;
   public androidKeyaliasName!: string;
   public androidKeyaliasPass!: string;
+  public androidTargetSdkVersion!: string;
+  public androidSdkManagerParameters!: string;
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
   public awsBaseStackName!: string;
+  public gitPrivateToken!: string;
+  public remoteBuildCluster!: string;
+  public awsStackName!: string;
   public kubeConfig!: string;
   public githubToken!: string;
   public cloudRunnerMemory!: string;
@@ -50,6 +55,8 @@ class BuildParameters {
 
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
+    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+
     return {
       version: unityVersion,
       customImage: Input.customImage,
@@ -67,8 +74,11 @@ class BuildParameters {
       androidKeystorePass: Input.androidKeystorePass,
       androidKeyaliasName: Input.androidKeyaliasName,
       androidKeyaliasPass: Input.androidKeyaliasPass,
+      androidTargetSdkVersion: Input.androidTargetSdkVersion,
+      androidSdkManagerParameters,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
+      gitPrivateToken: Input.gitPrivateToken,
       chownFilesTo: Input.chownFilesTo,
       cloudRunnerCluster: Input.cloudRunnerCluster,
       awsBaseStackName: Input.awsBaseStackName,
@@ -85,6 +95,8 @@ class BuildParameters {
       branch: Input.branch,
       githubRepo: Input.githubRepo,
       logToFile: false,
+      remoteBuildCluster: Input.cloudRunnerCluster,
+      awsStackName: Input.awsBaseStackName,
     };
   }
 

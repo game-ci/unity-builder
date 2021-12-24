@@ -116,6 +116,10 @@ class Input {
     return Input.getInput('androidKeyaliasPass') || '';
   }
 
+  static get androidTargetSdkVersion() {
+    return core.getInput('androidTargetSdkVersion') || '';
+  }
+
   static get allowDirtyBuild() {
     const input = Input.getInput('allowDirtyBuild') || false;
 
@@ -128,6 +132,10 @@ class Input {
 
   static get sshAgent() {
     return Input.getInput('sshAgent') || '';
+  }
+
+  static get gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || '';
   }
 
   static get chownFilesTo() {

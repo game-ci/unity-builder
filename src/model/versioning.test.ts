@@ -128,6 +128,13 @@ describe('Versioning', () => {
       },
     );
 
+    test.each(['1.1-1-g12345678', '0.1-2-g12345678', '0.0-500-gA9B6C3D0-dirty'])(
+      'accepts valid semantic versions without v-prefix %s',
+      (description) => {
+        expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
+      },
+    );
+
     test.each(['v0', 'v0.1', 'v0.1.2', 'v0.1-2', 'v0.1-2-g'])('does not like %s', (description) => {
       expect(Versioning.descriptionRegex1.test(description)).toBeFalsy();
       // Also never expect without the v to work for any of these cases.

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Run in ACTIVATE_LICENSE_PATH directory
+echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
+pushd "$ACTIVATE_LICENSE_PATH"
+
 if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   #
   # PERSONAL LICENSE MODE
@@ -78,7 +82,7 @@ else
   #
   echo "License activation strategy could not be determined."
   echo ""
-  echo "Visit https://github.com/webbertakken/unity-builder#usage for more"
+  echo "Visit https://game.ci/docs/github/getting-started for more"
   echo "details on how to set up one of the possible activation strategies."
 
   # Immediately exit as no UNITY_EXIT_CODE can be derrived.
@@ -98,3 +102,6 @@ else
   echo "Exit code was: $UNITY_EXIT_CODE"
   exit $UNITY_EXIT_CODE
 fi
+
+# Return to previous working directory
+popd

@@ -107,6 +107,10 @@ inputs:
     required: false
     default: ''
     description: 'The android keyaliasPass'
+  androidTargetSdkVersion:
+    required: false
+    default: ''
+    description: 'The android target API level.'
   customParameters:
     required: false
     default: ''
@@ -119,6 +123,11 @@ inputs:
     required: false
     default: ''
     description: 'SSH Agent path to forward to the container'
+  gitPrivateToken:
+    required: false
+    default: ''
+    description: >
+      Github private token to pull from github
   chownFilesTo:
     required: false
     default: ''
