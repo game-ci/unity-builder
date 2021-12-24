@@ -13,6 +13,10 @@ class CloudRunnerLogger {
     core.info(message);
   }
 
+  public static logRemoteCli(message: string) {
+    CloudRunnerLogger.log(`[Remote-Cli] ${message}`);
+  }
+
   public static logLine(message: string) {
     core.info(`${message}\n`);
   }

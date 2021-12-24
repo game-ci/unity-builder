@@ -1,23 +1,21 @@
 import { exec } from 'child_process';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 
 export class RunCli {
   public static async RunCli(command: string) {
     return await new Promise<string>((promise) => {
       exec(command, (error, stdout, stderr) => {
         if (error) {
-          // eslint-disable-next-line no-console
-          console.log(`[Remote-CLI][ERROR] ${error.message}`);
+          CloudRunnerLogger.logRemoteCli(`[ERROR] ${error.message}`);
           promise(error.message);
           throw error;
         }
         if (stderr) {
-          // eslint-disable-next-line no-console
-          console.log(`[Remote-CLI][STD-ERROR] ${stderr}`);
+          CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr}`);
           promise(stderr);
           throw stderr;
         }
-        // eslint-disable-next-line no-console
-        console.log(`[Remote-CLI] ${stdout}`);
+        CloudRunnerLogger.logRemoteCli(`${stdout}`);
         promise(stdout);
       });
     });
