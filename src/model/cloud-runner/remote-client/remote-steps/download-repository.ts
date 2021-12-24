@@ -3,12 +3,11 @@ import { RunCli } from '../run-cli';
 
 import fs from 'fs';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { CloudRunner } from '../../..';
 import path from 'path';
 
 export class DownloadRepository {
   public static async run() {
-    await RunCli.RunCli(`tree -f -L 2tree -f -L 2`);
+    await RunCli.RunCli(`tree -f -L 2`);
     fs.mkdirSync(CloudRunnerState.buildPathFull);
     fs.mkdirSync(CloudRunnerState.repoPathFull);
     CloudRunnerLogger.log(`Initializing source repository for cloning with caching of LFS files`);
