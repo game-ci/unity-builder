@@ -32,8 +32,7 @@ describe('Cloud Runner', () => {
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] != 'function') {
-          expect(file).toContain(`${element}`);
-          expect(file).toContain(`${Input[element]}`);
+          expect(file.replace(/\s+/g, '')).toContain(`${element}=${Input[element].toString().replace(/\s+/g, '')}`);
         }
       }
     }
