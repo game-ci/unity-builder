@@ -7,7 +7,6 @@ import path from 'path';
 
 export class DownloadRepository {
   public static async run() {
-    await RunCli.RunCli(`tree -f -L 2`);
     fs.mkdirSync(CloudRunnerState.buildPathFull);
     fs.mkdirSync(CloudRunnerState.repoPathFull);
     CloudRunnerLogger.logRemoteCli(`Initializing source repository for cloning with caching of LFS files`);
