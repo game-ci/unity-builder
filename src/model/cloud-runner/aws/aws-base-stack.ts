@@ -22,7 +22,6 @@ export class AWSBaseStack {
     };
     const parametersWithoutHash: SDK.CloudFormation.Parameter[] = [
       { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
-      { ParameterKey: 'Storage', ParameterValue: `${baseStackName}-storage` },
     ];
     const parametersHash = crypto
       .createHash('md5')
@@ -32,12 +31,12 @@ export class AWSBaseStack {
       ...parametersWithoutHash,
       ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
     ];
-    // const updateInput: SDK.CloudFormation.UpdateStackInput = {
-    //   StackName: baseStackName,
-    //   TemplateBody: baseStack,
-    //   Parameters: parameters,
-    //   Capabilities: ['CAPABILITY_IAM'],
-    // };
+    const updateInput: SDK.CloudFormation.UpdateStackInput = {
+      StackName: baseStackName,
+      TemplateBody: baseStack,
+      Parameters: parameters,
+      Capabilities: ['CAPABILITY_IAM'],
+    };
     const createStackInput: SDK.CloudFormation.CreateStackInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
@@ -73,7 +72,12 @@ export class AWSBaseStack {
         CloudRunnerLogger.log(`Base stack exists (version: ${stackVersion}, local version: ${parametersHash})`);
         if (parametersHash !== stackVersion) {
           CloudRunnerLogger.log(`Skip Updating Disabled`);
-          //await CF.updateStack(updateInput).promise();
+          try {
+            await CF.updateStack(updateInput).promise();
+          } catch (error) {
+            CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
+            CloudRunnerLogger.log(`Update Failed, Stack name: ${baseStackName}`);
+          }
         } else {
           CloudRunnerLogger.log(`No update required`);
         }
