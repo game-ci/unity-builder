@@ -79,10 +79,10 @@ export class DownloadRepository {
       CloudRunnerLogger.log(`LFS cache exists`);
       fs.rmdirSync(CloudRunnerState.lfsDirectory, { recursive: true });
       CloudRunnerLogger.log(`LFS cache exists from build $latestLFSCacheFile from $branch`);
-      await RunCli.RunCli(`
-        unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${CloudRunnerState.repoPathFull}/.git"
-        ls -lh "${CloudRunnerState.lfsDirectory}"
-      `);
+      await RunCli.RunCli(
+        `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${CloudRunnerState.repoPathFull}/.git"`,
+      );
+      await RunCli.RunCli(`ls -lh "${CloudRunnerState.lfsDirectory}"`);
       CloudRunnerLogger.log(`git LFS folder, (should not contain $latestLFSCacheFile)`);
     }
     await RunCli.RunCli(`
@@ -100,17 +100,13 @@ export class DownloadRepository {
       du -sch "${CloudRunnerState.cacheFolderFull}/"
       echo ' '
       `);
-    await RunCli.RunCli(`
-      cd "${CloudRunnerState.repoPathFull}"
-      git lfs pull
-      echo 'pulled latest LFS files'
-      `);
-    await RunCli.RunCli(`
-      cd "${CloudRunnerState.lfsDirectory}/.."
-      zip -q -r "${LFS_ASSETS_HASH}.zip" "./lfs"
-      cp "${LFS_ASSETS_HASH}.zip" "${lfsCacheFolder}"
-      echo "copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}"
-      `);
+    process.chdir(CloudRunnerState.repoPathFull);
+    await RunCli.RunCli(`git lfs pull`);
+    CloudRunnerLogger.log(`pulled latest LFS files`);
+    process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
+    await RunCli.RunCli(`zip -q -r "${LFS_ASSETS_HASH}.zip" "./lfs"`);
+    fs.copyFileSync(`${LFS_ASSETS_HASH}.zip`, lfsCacheFolder);
+    CloudRunnerLogger.log(`copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
     if (process.env.purgeRemoteCaching !== undefined) {
       CloudRunnerLogger.log(`purging ${CloudRunnerState.purgeRemoteCaching}`);
       fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
