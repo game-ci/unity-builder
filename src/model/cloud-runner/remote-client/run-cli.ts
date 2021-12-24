@@ -8,12 +8,12 @@ export class RunCli {
         if (error) {
           CloudRunnerLogger.logRemoteCli(`[ERROR] ${error.message}`);
           promise(error.message);
-          throw error;
+          throw new Error(error.toString());
         }
         if (stderr) {
           CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr}`);
           promise(stderr);
-          throw stderr;
+          throw new Error(stderr.toString());
         }
         CloudRunnerLogger.logRemoteCli(`${stdout}`);
         promise(stdout);
