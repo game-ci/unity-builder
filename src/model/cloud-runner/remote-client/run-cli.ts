@@ -6,18 +6,18 @@ export class RunCli {
       exec(command, (error, stdout, stderr) => {
         if (error) {
           // eslint-disable-next-line no-console
-          console.log(`error: ${error.message}`);
+          console.log(`[Remote-CLI][ERROR] ${error.message}`);
           promise(error.message);
           return;
         }
         if (stderr) {
           // eslint-disable-next-line no-console
-          console.log(`stderr: ${stderr}`);
+          console.log(`[Remote-CLI][STD-ERROR] ${stderr}`);
           promise(stderr);
           return;
         }
         // eslint-disable-next-line no-console
-        console.log(`stdout: ${stdout}`);
+        console.log(`[Remote-CLI] ${stdout}`);
         promise(stdout);
       });
     });
