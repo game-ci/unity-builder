@@ -8,13 +8,13 @@ export class RunCli {
           // eslint-disable-next-line no-console
           console.log(`[Remote-CLI][ERROR] ${error.message}`);
           promise(error.message);
-          return;
+          throw error;
         }
         if (stderr) {
           // eslint-disable-next-line no-console
           console.log(`[Remote-CLI][STD-ERROR] ${stderr}`);
           promise(stderr);
-          return;
+          throw stderr;
         }
         // eslint-disable-next-line no-console
         console.log(`[Remote-CLI] ${stdout}`);

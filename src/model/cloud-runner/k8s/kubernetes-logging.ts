@@ -18,11 +18,12 @@ class KubernetesLogging {
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
-
+      let message = chunk.toString();
+      message = `[Cloud-Runner-Agent] ${message}`;
       if (CloudRunnerState.buildParams.logToFile) {
-        fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${chunk.toString()}\r\n`);
+        fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\r\n`);
       }
-      logCallback(chunk.toString());
+      logCallback(message);
       next();
     };
     const logOptions = {
