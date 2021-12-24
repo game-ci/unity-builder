@@ -64,26 +64,27 @@ export class DownloadRepository {
           tree "${CloudRunnerState.libraryFolderFull}"
       `);
     }
-    await RunCli.RunCli(`
-      echo ' '
-      echo 'Large File Caching'
-      echo "Checking large file cache exists (${lfsCacheFolder}/${LFS_ASSETS_HASH}.zip)"
-      cd ${lfsCacheFolder}
-      if [ -f "${LFS_ASSETS_HASH}.zip" ]; then
-        echo "Match found: using large file hash match ${LFS_ASSETS_HASH}.zip"
-        latestLFSCacheFile="${LFS_ASSETS_HASH}"
-      else
-        latestLFSCacheFile=$(ls -t "${lfsCacheFolder}" | grep .zip$ | head -1)
-        echo "Match not found: using latest large file cache $latestLFSCacheFile"
-      fi
-      if [ ! -f "$latestLFSCacheFile" ]; then
-        echo "LFS cache exists from build $latestLFSCacheFile from $branch"
-        rm -r "${CloudRunnerState.lfsDirectory}"
-        unzip -q "${lfsCacheFolder}/$latestLFSCacheFile" -d "$repoPathFull/.git"
-        echo "git LFS folder, (should not contain $latestLFSCacheFile)"
-        ls -lh "${CloudRunnerState.lfsDirectory}/"
-      fi
+    CloudRunnerLogger.log(` `);
+    CloudRunnerLogger.log(`LFS Caching`);
+    CloudRunnerLogger.log(`Checking largest LFS file exists (${lfsCacheFolder}/${LFS_ASSETS_HASH}.zip)`);
+    process.chdir(lfsCacheFolder);
+    let latestLFSCacheFile;
+    if (fs.existsSync(`${LFS_ASSETS_HASH}.zip`)) {
+      CloudRunnerLogger.log(`Match found: using large file hash match ${LFS_ASSETS_HASH}.zip`);
+      latestLFSCacheFile = `${LFS_ASSETS_HASH}.zip`;
+    } else {
+      latestLFSCacheFile = await RunCli.RunCli(`ls -t "${lfsCacheFolder}" | grep .zip$ | head -1`);
+    }
+    if (fs.existsSync(latestLFSCacheFile)) {
+      CloudRunnerLogger.log(`LFS cache exists`);
+      fs.rmdirSync(CloudRunnerState.lfsDirectory, { recursive: true });
+      CloudRunnerLogger.log(`LFS cache exists from build $latestLFSCacheFile from $branch`);
+      await RunCli.RunCli(`
+        unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${CloudRunnerState.repoPathFull}/.git"
+        ls -lh "${CloudRunnerState.lfsDirectory}"
       `);
+      CloudRunnerLogger.log(`git LFS folder, (should not contain $latestLFSCacheFile)`);
+    }
     await RunCli.RunCli(`
       echo ' '
       echo "LFS cache for $branch"
