@@ -8,6 +8,8 @@ describe('Cloud Runner', () => {
   it('responds', () => {});
 });
 describe('Cloud Runner', () => {
+  const testSecretName = 'testSecretName';
+  const testSecretValue = 'testSecretValue';
   Input.cliOptions = {
     versioning: 'None',
     projectPath: 'test-project',
@@ -16,8 +18,8 @@ describe('Cloud Runner', () => {
       image: 'alpine'
       commands: ['printenv']
       secrets:
-        - name: 'testCustomSecret'
-          value: 'VALUEXXX'
+        - name: '${testSecretName}'
+          value: '${testSecretValue}'
     `,
   };
   Input.githubEnabled = false;
@@ -29,6 +31,7 @@ describe('Cloud Runner', () => {
       await CloudRunner.run(buildParameter, baseImage.toString());
       const file = fs.readFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, 'utf-8').toString();
       expect(file).toContain(JSON.stringify(buildParameter));
+      expect(file).toContain(`${testSecretName}=${testSecretValue}`);
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] != 'function') {
