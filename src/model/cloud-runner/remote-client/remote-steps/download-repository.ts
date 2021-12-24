@@ -4,6 +4,7 @@ import { RunCli } from '../run-cli';
 import fs from 'fs';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { CloudRunner } from '../../..';
+import path from 'path';
 
 export class DownloadRepository {
   public static async run() {
@@ -26,7 +27,7 @@ export class DownloadRepository {
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
     `);
-    const LFS_ASSETS_HASH = fs.readFileSync(`${CloudRunnerState.repoPathFull}/.lfs-assets-guid`, 'utf8');
+    const LFS_ASSETS_HASH = fs.readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8');
     await RunCli.RunCli(`
       echo ' '
       echo 'Contents of .lfs-assets-guid file:'
@@ -39,12 +40,16 @@ export class DownloadRepository {
       ls ${CloudRunnerState.projectPathFull}
       echo ' '
     `);
-    const lfsCacheFolder = `${CloudRunnerState.cacheFolderFull}/lfs`;
-    const libraryCacheFolder = `${CloudRunnerState.cacheFolderFull}/lib`;
+    const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
+    const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
     await RunCli.RunCli(`tree ${CloudRunnerState.builderPathFull}`);
     CloudRunnerLogger.log(`Starting checks of cache for the Unity project Library and git LFS files`);
-    fs.mkdirSync(lfsCacheFolder);
-    fs.mkdirSync(libraryCacheFolder);
+    if (!fs.existsSync(lfsCacheFolder)) {
+      fs.mkdirSync(lfsCacheFolder);
+    }
+    if (!fs.existsSync(libraryCacheFolder)) {
+      fs.mkdirSync(libraryCacheFolder);
+    }
     CloudRunnerLogger.log(`Library Caching`);
     //if the unity git project has included the library delete it and echo a warning
     if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
@@ -60,13 +65,12 @@ export class DownloadRepository {
     if (fs.existsSync(latestLibraryCacheFile)) {
       CloudRunnerLogger.log(`Library cache exists`);
       await RunCli.RunCli(`
-          unzip -q "${libraryCacheFolder}/${latestLibraryCacheFile}" -d "$projectPathFull"
+          unzip -q "${path.join(libraryCacheFolder, latestLibraryCacheFile)}" -d "$projectPathFull"
           tree "${CloudRunnerState.libraryFolderFull}"
       `);
     }
     CloudRunnerLogger.log(` `);
     CloudRunnerLogger.log(`LFS Caching`);
-    CloudRunnerLogger.log(`Checking largest LFS file exists (${lfsCacheFolder}/${LFS_ASSETS_HASH}.zip)`);
     process.chdir(lfsCacheFolder);
     let latestLFSCacheFile;
     if (fs.existsSync(`${LFS_ASSETS_HASH}.zip`)) {
@@ -80,11 +84,12 @@ export class DownloadRepository {
       fs.rmdirSync(CloudRunnerState.lfsDirectory, { recursive: true });
       CloudRunnerLogger.log(`LFS cache exists from build $latestLFSCacheFile from $branch`);
       await RunCli.RunCli(
-        `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${CloudRunnerState.repoPathFull}/.git"`,
+        `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${path.join(CloudRunnerState.repoPathFull, `.git`)}"`,
       );
       await RunCli.RunCli(`ls -lh "${CloudRunnerState.lfsDirectory}"`);
       CloudRunnerLogger.log(`git LFS folder, (should not contain $latestLFSCacheFile)`);
     }
+
     await RunCli.RunCli(`
       echo ' '
       echo "LFS cache for $branch"
