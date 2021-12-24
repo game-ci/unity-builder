@@ -43,77 +43,86 @@ export class DownloadRepository {
       ls ${CloudRunnerState.projectPathFull}
       echo ' '
     `);
+    const lfsCacheFolder = `${CloudRunnerState.cacheFolderFull}/lfs`;
+    const libraryCacheFolder = `${CloudRunnerState.cacheFolderFull}/lib`;
     await RunCli.RunCli(`
       tree ${CloudRunnerState.builderPathFull}
       echo 'Starting checks of cache for the Unity project Library and git LFS files'
-      cacheFolderFull=${CloudRunnerState.cacheFolderFull}
-      libraryFolderFull=${CloudRunnerState.libraryFolderFull}
-      gitLFSDestinationFolder=${CloudRunnerState.lfsDirectory}
-      purgeCloudRunnerCache=${CloudRunnerState.purgeRemoteCaching}
-      cacheFolderWithBranch="$cacheFolderFull"
-      lfsCacheFolder="$cacheFolderFull/lfs"
-      libraryCacheFolder="$cacheFolderFull/lib"
-      mkdir -p "$lfsCacheFolder"
-      mkdir -p "$libraryCacheFolder"
+      mkdir -p "${lfsCacheFolder}"
+      mkdir -p "${libraryCacheFolder}"
       echo 'Library Caching'
+      `);
+    await RunCli.RunCli(`
       # if the unity git project has included the library delete it and echo a warning
-      if [ -d "$libraryFolderFull" ]; then
-        rm -r "$libraryFolderFull"
+      if [ -d "${CloudRunnerState.libraryFolderFull}" ]; then
+        rm -r "${CloudRunnerState.libraryFolderFull}"
         echo "!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)"
       fi
+      `);
+    await RunCli.RunCli(`
       # Restore library cache
-      ls -lh "$libraryCacheFolder"
-      latestLibraryCacheFile=$(ls -t "$libraryCacheFolder" | grep .zip$ | head -1)
-      echo "Checking if Library cache $libraryCacheFolder/$latestLibraryCacheFile exists"
-      cd $libraryCacheFolder
+      ls -lh "${libraryCacheFolder}"
+      latestLibraryCacheFile=$(ls -t "${libraryCacheFolder}" | grep .zip$ | head -1)
+      echo "Checking if Library cache ${libraryCacheFolder}/$latestLibraryCacheFile exists"
+      cd ${libraryCacheFolder}
       if [ -f "$latestLibraryCacheFile" ]; then
         echo "Library cache exists"
-        unzip -q "$libraryCacheFolder/$latestLibraryCacheFile" -d "$projectPathFull"
-        tree "$libraryFolderFull"
+        unzip -q "${libraryCacheFolder}/$latestLibraryCacheFile" -d "$projectPathFull"
+        tree "${CloudRunnerState.libraryFolderFull}"
       fi
+      `);
+    await RunCli.RunCli(`
       echo ' '
       echo 'Large File Caching'
-      echo "Checking large file cache exists ($lfsCacheFolder/$LFS_ASSETS_HASH.zip)"
-      cd $lfsCacheFolder
+      echo "Checking large file cache exists (${lfsCacheFolder}/$LFS_ASSETS_HASH.zip)"
+      cd ${lfsCacheFolder}
       if [ -f "$LFS_ASSETS_HASH.zip" ]; then
         echo "Match found: using large file hash match $LFS_ASSETS_HASH.zip"
         latestLFSCacheFile="$LFS_ASSETS_HASH"
       else
-        latestLFSCacheFile=$(ls -t "$lfsCacheFolder" | grep .zip$ | head -1)
+        latestLFSCacheFile=$(ls -t "${lfsCacheFolder}" | grep .zip$ | head -1)
         echo "Match not found: using latest large file cache $latestLFSCacheFile"
       fi
       if [ ! -f "$latestLFSCacheFile" ]; then
         echo "LFS cache exists from build $latestLFSCacheFile from $branch"
-        rm -r "$gitLFSDestinationFolder"
-        unzip -q "$lfsCacheFolder/$latestLFSCacheFile" -d "$repoPathFull/.git"
+        rm -r "${CloudRunnerState.lfsDirectory}"
+        unzip -q "${lfsCacheFolder}/$latestLFSCacheFile" -d "$repoPathFull/.git"
         echo "git LFS folder, (should not contain $latestLFSCacheFile)"
-        ls -lh "$gitLFSDestinationFolder/"
+        ls -lh "${CloudRunnerState.lfsDirectory}/"
       fi
+      `);
+    await RunCli.RunCli(`
       echo ' '
       echo "LFS cache for $branch"
-      du -sch "$lfsCacheFolder/"
+      du -sch "${lfsCacheFolder}/"
       echo '**'
       echo "Library cache for $branch"
-      du -sch "$libraryCacheFolder/"
+      du -sch "${libraryCacheFolder}/"
       echo '**'
       echo "Branch: $branch"
-      du -sch "$cacheFolderWithBranch/"
+      du -sch "${CloudRunnerState.cacheFolderFull}/"
       echo '**'
       echo 'Full cache'
-      du -sch "$cacheFolderFull/"
+      du -sch "${CloudRunnerState.cacheFolderFull}/"
       echo ' '
-      cd "$repoPathFull"
+      `);
+    await RunCli.RunCli(`
+      cd "${CloudRunnerState.repoPathFull}"
       git lfs pull
       echo 'pulled latest LFS files'
-      cd "$gitLFSDestinationFolder/.."
+      `);
+    await RunCli.RunCli(`
+      cd "${CloudRunnerState.lfsDirectory}/.."
       zip -q -r "$LFS_ASSETS_HASH.zip" "./lfs"
-      cp "$LFS_ASSETS_HASH.zip" "$lfsCacheFolder"
-      echo "copied $LFS_ASSETS_HASH to $lfsCacheFolder"
+      cp "$LFS_ASSETS_HASH.zip" "${lfsCacheFolder}"
+      echo "copied $LFS_ASSETS_HASH to ${lfsCacheFolder}"
+      `);
+    await RunCli.RunCli(`
       # purge cache
-      if [ -z "$purgeCloudRunnerCache" ]; then
+      if [ -z "${CloudRunnerState.purgeRemoteCaching}" ]; then
         echo ' '
-        echo "purging $purgeCloudRunnerCache"
-        rm -r "$purgeCloudRunnerCache"
+        echo "purging ${CloudRunnerState.purgeRemoteCaching}"
+        rm -r "${CloudRunnerState.purgeRemoteCaching}"
         echo ' '
       fi
     `);

@@ -178,7 +178,6 @@ class AWSBuildRunner {
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
             }
-            //message = `[AWS][${taskDef.taskDefStackName}] ${message}`;
             if (CloudRunnerState.buildParams.logToFile) {
               fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\r\n`);
             }
