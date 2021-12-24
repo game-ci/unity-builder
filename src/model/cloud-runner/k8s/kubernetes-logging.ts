@@ -1,7 +1,8 @@
 import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-
+import { CloudRunnerState } from '../state/cloud-runner-state';
+import fs from 'fs';
 class KubernetesLogging {
   static async streamLogs(
     kubeConfig: KubeConfig,
@@ -17,6 +18,10 @@ class KubernetesLogging {
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
+
+      if (CloudRunnerState.buildParams.logToFile) {
+        fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${chunk.toString()}\r\n`);
+      }
       logCallback(chunk.toString());
       next();
     };
