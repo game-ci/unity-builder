@@ -108,7 +108,7 @@ export class DownloadRepository {
     await RunCli.RunCli(`git lfs pull`);
     CloudRunnerLogger.log(`pulled latest LFS files`);
     process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
-    await RunCli.RunCli(`zip -q -r "${LFS_ASSETS_HASH}.zip" "./lfs"`);
+    await RunCli.RunCli(`zip -r "${LFS_ASSETS_HASH}.zip" "./lfs"`);
     fs.copyFileSync(`${LFS_ASSETS_HASH}.zip`, lfsCacheFolder);
     CloudRunnerLogger.log(`copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
     if (process.env.purgeRemoteCaching !== undefined) {
