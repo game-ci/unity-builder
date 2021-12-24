@@ -4,7 +4,7 @@
 # Create directory for license activation
 #
 
-ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license"
+ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license~"
 mkdir -p "$ACTIVATE_LICENSE_PATH"
 
 #
