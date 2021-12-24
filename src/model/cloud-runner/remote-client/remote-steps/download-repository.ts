@@ -3,6 +3,7 @@ import { RunCli } from '../run-cli';
 
 import fs from 'fs';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import { CloudRunner } from '../../..';
 
 export class DownloadRepository {
   public static async run() {
@@ -10,18 +11,17 @@ export class DownloadRepository {
     fs.mkdirSync(CloudRunnerState.buildPathFull);
     fs.mkdirSync(CloudRunnerState.repoPathFull);
     CloudRunnerLogger.log(`Initializing source repository for cloning with caching of LFS files`);
+    process.chdir(CloudRunnerState.repoPathFull);
+    // stop annoying git detatched head info
+    await RunCli.RunCli(`git config --global advice.detachedHead false`);
+    CloudRunnerLogger.log(`Cloning the repository being built:`);
+    await RunCli.RunCli(`git lfs install --skip-smudge`);
+    CloudRunnerLogger.log(CloudRunnerState.targetBuildRepoUrl);
     await RunCli.RunCli(`
-      cd ${CloudRunnerState.repoPathFull}
-      # stop annoying git detatched head info
-      git config --global advice.detachedHead false
-      echo ' '
-      echo "Cloning the repository being built:"
-      git lfs install --skip-smudge
-      echo "${CloudRunnerState.targetBuildRepoUrl}"
       git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
       git checkout ${process.env.GITHUB_SHA}
-      echo "Checked out ${process.env.GITHUB_SHA}"
     `);
+    CloudRunnerLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
     await RunCli.RunCli(`
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
