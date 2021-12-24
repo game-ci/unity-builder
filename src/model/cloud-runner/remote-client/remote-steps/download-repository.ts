@@ -19,11 +19,15 @@ export class DownloadRepository {
     CloudRunnerLogger.logRemoteCli(CloudRunnerState.targetBuildRepoUrl);
     await RunCli.RunCli(`
       git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
+    `);
+    await RunCli.RunCli(`
       git checkout ${process.env.GITHUB_SHA}
     `);
     CloudRunnerLogger.logRemoteCli(`Checked out ${process.env.GITHUB_SHA}`);
     await RunCli.RunCli(`
       git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
+    `);
+    await RunCli.RunCli(`
       md5sum .lfs-assets-guid > .lfs-assets-guid-sum
     `);
     const LFS_ASSETS_HASH = fs.readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8');

@@ -46,7 +46,7 @@ export class DownloadStep implements StepInterface {
         secrets,
       );
     } catch (error) {
-      CloudRunnerLogger.logLine(`ENV VARS ${JSON.stringify(environmentVariables)} SECRETS ${JSON.stringify(secrets)}`);
+      CloudRunnerLogger.logLine(`Failed download repository step 1/2`);
       throw error;
     }
   }
