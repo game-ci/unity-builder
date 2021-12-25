@@ -25,7 +25,7 @@ describe('Cloud Runner', () => {
   };
   Input.githubEnabled = false;
   it('All build parameters sent to cloud runner as env vars', async () => {
-    if (Input.remoteBuilderIntegrationTests) {
+    if (Input.cloudRunnerTests) {
       const buildParameter = await BuildParameters.create();
       buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);

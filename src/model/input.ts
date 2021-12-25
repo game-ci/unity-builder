@@ -10,8 +10,8 @@ const core = require('@actions/core');
 class Input {
   public static githubEnabled = true;
   public static cliOptions;
-  static get remoteBuilderIntegrationTests(): boolean {
-    return Input.getInput(`remoteBuilderIntegrationTests`) || Input.getInput(`remoteBuilderTests`);
+  static get cloudRunnerTests(): boolean {
+    return Input.getInput(`CloudRunnerTests`) || false;
   }
   private static getInput(query) {
     return Input.githubEnabled

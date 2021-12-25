@@ -60,7 +60,7 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
           CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
-          remoteBuilderIntegrationTests: true
+          CloudRunnerTests: true
           cloudRunnerCluster: k8s
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
