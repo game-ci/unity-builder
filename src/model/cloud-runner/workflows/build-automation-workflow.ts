@@ -2,7 +2,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { BuildStep } from '../steps/build-step';
-import { DownloadStep } from '../steps/download-step';
+import { SetupStep } from '../steps/setup-step';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 
@@ -19,7 +19,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
-      await new DownloadStep().run(
+      await new SetupStep().run(
         new CloudRunnerStepState(
           'alpine/git',
           CloudRunnerState.readBuildEnvironmentVariables(),

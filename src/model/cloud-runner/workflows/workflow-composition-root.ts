@@ -1,6 +1,6 @@
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
-import { DownloadStep } from '../steps/download-step';
+import { SetupStep } from '../steps/setup-step';
 import { CustomWorkflow } from './custom-workflow';
 import { EphemeralGitHubRunnerWorkflow } from './ephemeral-github-runner-workflow';
 import { WorkflowInterface } from './workflow-interface';
@@ -34,7 +34,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
           ),
         );
       } else if (CloudRunnerState.buildParams.customBuildSteps === 'download') {
-        await new DownloadStep().run(
+        await new SetupStep().run(
           new CloudRunnerStepState(
             'alpine/git',
             CloudRunnerState.readBuildEnvironmentVariables(),

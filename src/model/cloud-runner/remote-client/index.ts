@@ -1,5 +1,5 @@
 import { CloudRunnerState } from '../state/cloud-runner-state';
-import { DownloadRepository } from './remote-steps/download-repository';
+import { DownloadRepository } from './remote-steps/setup-repo';
 
 export class RemoteClientCli {
   static async RunRemoteClient(options) {

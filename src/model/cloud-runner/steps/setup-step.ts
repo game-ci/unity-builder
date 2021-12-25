@@ -5,10 +5,10 @@ import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { StepInterface } from './step-interface';
 
-export class DownloadStep implements StepInterface {
+export class SetupStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await DownloadStep.downloadRepository(
+      await SetupStep.downloadRepository(
         cloudRunnerStepState.image,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
