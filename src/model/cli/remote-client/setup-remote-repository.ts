@@ -141,6 +141,8 @@ export class SetupRemoteRepository {
     await RemoteClientSystem.Run(`git lfs install --skip-smudge`);
     CloudRunnerLogger.logRemoteCli(CloudRunnerState.targetBuildRepoUrl);
     await RemoteClientSystem.Run(`git clone --depth 1 ${CloudRunnerState.targetBuildRepoUrl}`);
+    await RemoteClientSystem.Run(`ls -lh`);
+    await RemoteClientSystem.Run(`tree`);
     await RemoteClientSystem.Run(`git checkout ${CloudRunnerState.buildParams.gitSha}`);
     CloudRunnerLogger.logRemoteCli(`Checked out ${process.env.GITHUB_SHA}`);
   }
