@@ -3,6 +3,7 @@ import { Writable } from 'stream';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import fs from 'fs';
+import { CloudRunnerClientStatics } from '../../cli/cloud-runner-client/cloud-runner-client-statics';
 class KubernetesLogging {
   static async streamLogs(
     kubeConfig: KubeConfig,
@@ -19,7 +20,7 @@ class KubernetesLogging {
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
       let message = chunk.toString();
-      message = `[Cloud-Runner-Agent] ${message}`;
+      message = `[${CloudRunnerClientStatics.logPrefix}] ${message}`;
       if (CloudRunnerState.buildParams.logToFile) {
         fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\r\n`);
       }

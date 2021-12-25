@@ -1,7 +1,7 @@
 import { Command } from 'commander-ts';
 import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
-import { RemoteClient } from './remote-client';
+import { RemoteClient } from './cloud-runner-client';
 
 export class CLI {
   static async RunCli(options: any) {

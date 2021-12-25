@@ -3,6 +3,7 @@ import CloudRunner from './cloud-runner';
 import Input from '../input';
 import fs from 'fs';
 import { CloudRunnerState } from './state/cloud-runner-state';
+import { CloudRunnerClientStatics } from '../cli/cloud-runner-client/cloud-runner-client-statics';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});
@@ -35,9 +36,9 @@ describe('Cloud Runner', () => {
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] != 'function') {
-          expect(file.replace(/\s+/g, '').replace(new RegExp('\\[Cloud-Runner-Agent\\]', 'g'), '')).toContain(
-            `${element}=${Input[element].toString().replace(/\s+/g, '')}`,
-          );
+          expect(
+            file.replace(/\s+/g, '').replace(new RegExp(`\\[${CloudRunnerClientStatics.logPrefix}\\]`, 'g'), ''),
+          ).toContain(`${element}=${Input[element].toString().replace(/\s+/g, '')}`);
         }
       }
     }
