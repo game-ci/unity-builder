@@ -10,11 +10,11 @@ export class RemoteClientSystem {
           throw new Error(error.toString());
         }
         if (stderr) {
-          CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr}`);
+          CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr.toString()}`);
           throw new Error(stderr.toString());
         }
-        CloudRunnerLogger.logRemoteCli(`${stdout}`);
-        promise(stdout);
+        CloudRunnerLogger.logRemoteCli(`${stdout.toString()}`);
+        promise(stdout.toString());
       });
     });
   }
