@@ -38,14 +38,14 @@ class BuildParameters {
   public kubeVolume!: string;
   public chownFilesTo!: string;
 
-  public postBuildSteps;
-  public preBuildSteps;
-  public customBuildSteps;
-  public runNumber;
-  public branch;
-  public githubRepo;
-  public logToFile;
-  public gitSha;
+  public postBuildSteps!: string;
+  public preBuildSteps!: string;
+  public customBuildSteps!: string;
+  public runNumber!: string;
+  public branch!: string;
+  public githubRepo!: string;
+  public logToFile!: boolean;
+  public gitSha!: string;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
