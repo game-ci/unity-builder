@@ -45,6 +45,7 @@ class BuildParameters {
   public branch;
   public githubRepo;
   public logToFile;
+  public gitSha;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -97,6 +98,7 @@ class BuildParameters {
       logToFile: false,
       remoteBuildCluster: Input.cloudRunnerCluster,
       awsStackName: Input.awsBaseStackName,
+      gitSha: Input.gitSha,
     };
   }
 

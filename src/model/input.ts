@@ -45,6 +45,15 @@ class Input {
       return 'remote-builder/unified-providers';
     }
   }
+
+  static get gitSha() {
+    if (Input.getInput(`GITHUB_SHA`)) {
+      return Input.getInput(`GITHUB_SHA`);
+    }
+    if (Input.getInput(`GitSHA`)) {
+      return Input.getInput(`GitSHA`);
+    }
+  }
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }

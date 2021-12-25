@@ -20,7 +20,7 @@ export class DownloadRepository {
       git clone --progress --verbose ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
     `);
     await RunCli.RunCli(`
-      git checkout ${process.env.GITHUB_SHA}
+      git checkout ${CloudRunnerState.buildParams.gitSha}
     `);
     CloudRunnerLogger.logRemoteCli(`Checked out ${process.env.GITHUB_SHA}`);
     await RunCli.RunCli(`
