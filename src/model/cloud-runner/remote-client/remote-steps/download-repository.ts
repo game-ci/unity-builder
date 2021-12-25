@@ -17,7 +17,7 @@ export class DownloadRepository {
     await RunCli.RunCli(`git lfs install --skip-smudge`);
     CloudRunnerLogger.logRemoteCli(CloudRunnerState.targetBuildRepoUrl);
     await RunCli.RunCli(`
-      git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
+      git clone --progress --verbose ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
     `);
     await RunCli.RunCli(`
       git checkout ${process.env.GITHUB_SHA}
