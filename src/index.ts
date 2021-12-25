@@ -28,10 +28,6 @@ async function runMain() {
 }
 
 const options = CLI.SetupCli();
-
-// eslint-disable-next-line no-console
-console.log(`Entrypoint: ${options.mode}`);
-
 if (CLI.isCliMode(options)) {
   CLI.RunCli(options);
 } else {

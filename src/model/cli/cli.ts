@@ -5,6 +5,9 @@ import { RemoteClient } from './remote-client';
 
 export class CLI {
   static async RunCli(options: any) {
+    // eslint-disable-next-line no-console
+    console.log(`Entrypoint: ${options.mode}`);
+
     if (options.mode === 'remote-cli') {
       await RemoteClient.Run(options);
     } else {
@@ -32,6 +35,7 @@ export class CLI {
     core.info(`\r\n`);
     core.info(`INPUT:`);
     for (const element of properties) {
+      // TODO pull description from action.yml
       program.option(`--${element} <${element}>`, 'default description');
       if (Input[element] !== undefined && Input[element] !== '') {
         core.info(`${element} ${Input[element]}`);
