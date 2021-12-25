@@ -1,5 +1,5 @@
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
-import { DownloadRepository } from './setup-repo';
+import { SetupRemoteRepository } from './setup-remote-repository';
 
 export class RemoteClient {
   static async Run(options) {
@@ -7,7 +7,7 @@ export class RemoteClient {
     CloudRunnerState.setup(buildParameter);
     switch (options.remoteClientState) {
       default:
-        await DownloadRepository.run();
+        await SetupRemoteRepository.run();
         break;
     }
   }
