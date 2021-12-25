@@ -9,7 +9,7 @@ import fs from 'fs';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 
-class AWSBuildRunner {
+class AWSTaskRunner {
   static async runTask(
     taskDef: CloudRunnerTaskDef,
     ECS: AWS.ECS,
@@ -63,7 +63,7 @@ class AWSBuildRunner {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       CloudRunnerLogger.log(
         `Cloud runner job has ended ${
-          (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
+          (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
         }`,
       );
 
@@ -72,7 +72,7 @@ class AWSBuildRunner {
     }
     CloudRunnerLogger.log(`Cloud runner job is running`);
     await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
-    const exitCode = (await AWSBuildRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
+    const exitCode = (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
     CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
     if (exitCode !== 0 && exitCode !== undefined) {
       core.error(
@@ -109,11 +109,11 @@ class AWSBuildRunner {
     kinesisStreamName: string,
   ) {
     const kinesis = new AWS.Kinesis();
-    const stream = await AWSBuildRunner.getLogStream(kinesis, kinesisStreamName);
-    let iterator = await AWSBuildRunner.getLogIterator(kinesis, stream);
+    const stream = await AWSTaskRunner.getLogStream(kinesis, kinesisStreamName);
+    let iterator = await AWSTaskRunner.getLogIterator(kinesis, stream);
 
     CloudRunnerLogger.log(
-      `Cloud runner job status is ${(await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
+      `Cloud runner job status is ${(await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
     );
 
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
@@ -122,9 +122,9 @@ class AWSBuildRunner {
     let timestamp: number = 0;
     while (readingLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      const taskData = await AWSBuildRunner.describeTasks(ECS, clusterName, taskArn);
-      ({ timestamp, readingLogs } = AWSBuildRunner.checkStreamingShouldContinue(taskData, timestamp, readingLogs));
-      ({ iterator, readingLogs } = await AWSBuildRunner.handleLogStreamIteration(
+      const taskData = await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn);
+      ({ timestamp, readingLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, readingLogs));
+      ({ iterator, readingLogs } = await AWSTaskRunner.handleLogStreamIteration(
         kinesis,
         iterator,
         readingLogs,
@@ -145,7 +145,7 @@ class AWSBuildRunner {
       })
       .promise();
     iterator = records.NextShardIterator || '';
-    readingLogs = AWSBuildRunner.logRecords(records, iterator, taskDef, readingLogs);
+    readingLogs = AWSTaskRunner.logRecords(records, iterator, taskDef, readingLogs);
     return { iterator, readingLogs };
   }
 
@@ -213,4 +213,4 @@ class AWSBuildRunner {
     );
   }
 }
-export default AWSBuildRunner;
+export default AWSTaskRunner;

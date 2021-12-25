@@ -31,7 +31,7 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedBuildResources(
+      await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
         CloudRunnerState.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,
@@ -44,7 +44,7 @@ class CloudRunner {
           CloudRunnerState.defaultSecrets,
         ),
       );
-      await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedBuildResources(
+      await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
         CloudRunnerState.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,

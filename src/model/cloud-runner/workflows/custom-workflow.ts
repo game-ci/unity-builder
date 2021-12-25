@@ -18,7 +18,7 @@ export class CustomWorkflow {
             };
             return secret;
           });
-          await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+          await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
             CloudRunnerState.buildGuid,
             step['image'],
             step['commands'],

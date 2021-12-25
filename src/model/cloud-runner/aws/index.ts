@@ -2,7 +2,7 @@ import * as SDK from 'aws-sdk';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
-import AWSBuildRunner from './aws-build-runner';
+import AWSTaskRunner from './aws-task-runner';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
@@ -16,7 +16,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  async cleanupSharedBuildResources(
+  async cleanupSharedResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -26,7 +26,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  async setupSharedBuildResources(
+  async setupSharedResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -37,7 +37,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
 
-  async runBuildTask(
+  async runTask(
     buildId: string,
     image: string,
     commands: string[],
@@ -69,7 +69,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     try {
       const t1 = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((t1 - t0) / 1000)}s`);
-      await AWSBuildRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
+      await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
       t2 = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((t2 - t1) / 1000)}s`);
     } finally {

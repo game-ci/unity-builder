@@ -3,7 +3,7 @@ import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable'
 import CloudRunnerSecret from './cloud-runner-secret';
 
 export interface CloudRunnerProviderInterface {
-  cleanupSharedBuildResources(
+  cleanupSharedResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -13,7 +13,7 @@ export interface CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
-  setupSharedBuildResources(
+  setupSharedResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -23,7 +23,7 @@ export interface CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
-  runBuildTask(
+  runTask(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars

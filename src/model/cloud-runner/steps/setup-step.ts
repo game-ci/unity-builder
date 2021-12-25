@@ -25,7 +25,7 @@ export class SetupStep implements StepInterface {
   ) {
     try {
       CloudRunnerLogger.logLine('Starting step 1/2 download game files from repository, try to use cache');
-      await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+      await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildGuid,
         image,
         [

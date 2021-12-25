@@ -20,7 +20,7 @@ export class BuildStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
-    await CloudRunnerState.CloudRunnerProviderPlatform.runBuildTask(
+    await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildGuid,
       image,
       [

@@ -40,7 +40,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
-  public async setupSharedBuildResources(
+  public async setupSharedResources(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -65,7 +65,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     }
   }
 
-  async runBuildTask(
+  async runTask(
     buildGuid: string,
     image: string,
     commands: string[],
@@ -152,7 +152,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     }
   }
 
-  async cleanupSharedBuildResources(
+  async cleanupSharedResources(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
