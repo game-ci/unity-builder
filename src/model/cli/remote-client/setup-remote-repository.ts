@@ -26,8 +26,8 @@ export class SetupRemoteRepository {
   }
 
   private static async printLFSHashState() {
-    await RemoteClientSystem.Run(`
-      echo ' '
+    await RemoteClientSystem.Run(
+      `echo ' '
       echo 'Contents of .lfs-assets-guid file:'
       cat .lfs-assets-guid
       echo ' '
@@ -36,13 +36,13 @@ export class SetupRemoteRepository {
       echo ' '
       echo 'Source repository initialized'
       ls ${CloudRunnerState.projectPathFull}
-      echo ' '
-    `);
+      echo ' '`,
+    );
   }
 
   private static async printCacheState(lfsCacheFolder: string, libraryCacheFolder: string) {
-    await RemoteClientSystem.Run(`
-      echo ' '
+    await RemoteClientSystem.Run(
+      `echo ' '
       echo "LFS cache for $branch"
       du -sch "${lfsCacheFolder}/"
       echo '**'
@@ -54,8 +54,8 @@ export class SetupRemoteRepository {
       echo '**'
       echo 'Full cache'
       du -sch "${CloudRunnerState.cacheFolderFull}/"
-      echo ' '
-      `);
+      echo ' '`,
+    );
   }
 
   private static handleCachePurging() {
@@ -123,36 +123,25 @@ export class SetupRemoteRepository {
     CloudRunnerLogger.logRemoteCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
     if (fs.existsSync(latestLibraryCacheFile)) {
       CloudRunnerLogger.logRemoteCli(`Library cache exists`);
-      await RemoteClientSystem.Run(`
-          unzip -q "${path.join(libraryCacheFolder, latestLibraryCacheFile)}" -d "$projectPathFull"
-          tree "${CloudRunnerState.libraryFolderFull}"
-      `);
+      const latestCacheFilePath = path.join(libraryCacheFolder, latestLibraryCacheFile);
+      await RemoteClientSystem.Run(`unzip -q "${latestCacheFilePath}" -d "$projectPathFull"`);
     }
   }
 
   private static async createLFSHashFiles() {
-    await RemoteClientSystem.Run(`
-      git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid
-    `);
-    await RemoteClientSystem.Run(`
-      md5sum .lfs-assets-guid > .lfs-assets-guid-sum
-    `);
+    await RemoteClientSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
+    await RemoteClientSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
   }
 
   private static async cloneRepoWithoutLFSFiles() {
     CloudRunnerLogger.logRemoteCli(`Initializing source repository for cloning with caching of LFS files`);
     process.chdir(CloudRunnerState.repoPathFull);
-    // stop annoying git detatched head info
     await RemoteClientSystem.Run(`git config --global advice.detachedHead false`);
     CloudRunnerLogger.logRemoteCli(`Cloning the repository being built:`);
     await RemoteClientSystem.Run(`git lfs install --skip-smudge`);
     CloudRunnerLogger.logRemoteCli(CloudRunnerState.targetBuildRepoUrl);
-    await RemoteClientSystem.Run(`
-      git clone --depth 1 ${CloudRunnerState.targetBuildRepoUrl}
-    `);
-    await RemoteClientSystem.Run(`
-      git checkout ${CloudRunnerState.buildParams.gitSha}
-    `);
+    await RemoteClientSystem.Run(`git clone --depth 1 ${CloudRunnerState.targetBuildRepoUrl}`);
+    await RemoteClientSystem.Run(`git checkout ${CloudRunnerState.buildParams.gitSha}`);
     CloudRunnerLogger.logRemoteCli(`Checked out ${process.env.GITHUB_SHA}`);
   }
 }
