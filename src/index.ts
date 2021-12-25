@@ -12,18 +12,12 @@ async function runMain() {
     const baseImage = new ImageTag(buildParameters);
     let builtImage;
 
-    switch (buildParameters.cloudRunnerCluster) {
-      case 'aws':
-      case 'k8s':
-        await CloudRunner.run(buildParameters, baseImage.toString());
-        break;
-
-      // default and local case
-      default:
-        core.info('Building locally');
-        builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-        await Docker.run(builtImage, { workspace, ...buildParameters });
-        break;
+    if (buildParameters.cloudRunnerCluster) {
+      await CloudRunner.run(buildParameters, baseImage.toString());
+    } else {
+      core.info('Building locally');
+      builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+      await Docker.run(builtImage, { workspace, ...buildParameters });
     }
 
     // Set output
