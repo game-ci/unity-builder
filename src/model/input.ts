@@ -27,6 +27,7 @@ class Input {
   }
   static get githubRepo(): string {
     return Input.getInput('GITHUB_REPOSITORY') || 'game-ci/unity-builder';
+    // TODO system get repo remote?
   }
   static get branch() {
     if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {
@@ -44,6 +45,7 @@ class Input {
     } else {
       return 'remote-builder/unified-providers';
     }
+    // TODO git get branch?
   }
 
   static get gitSha() {
@@ -53,6 +55,7 @@ class Input {
     if (Input.getInput(`GitSHA`)) {
       return Input.getInput(`GitSHA`);
     }
+    // TODO  git get sha?
   }
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
@@ -145,6 +148,7 @@ class Input {
 
   static get gitPrivateToken() {
     return core.getInput('gitPrivateToken') || '';
+    // TODO  get from git auth status -t
   }
 
   static get chownFilesTo() {

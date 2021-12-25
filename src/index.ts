@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner, Input } from './model';
-import { Command } from 'commander-ts';
-import { RemoteClientCli } from './model/cloud-runner/remote-client';
+import { CLI } from './model/cli/cli';
 async function runMain() {
   try {
     Action.checkCompatibility();
@@ -33,43 +32,15 @@ async function runMain() {
     core.setFailed((error as Error).message);
   }
 }
-async function runCli() {
-  options.versioning = 'None';
-  Input.cliOptions = options;
-  const buildParameter = await BuildParameters.create();
-  const baseImage = new ImageTag(buildParameter);
-  await CloudRunner.run(buildParameter, baseImage.toString());
-}
-Input.githubEnabled = false;
-const program = new Command();
-program.version('0.0.1');
-const properties = Object.getOwnPropertyNames(Input);
-core.info(`\r\n`);
-core.info(`INPUT:`);
-for (const element of properties) {
-  program.option(`--${element} <${element}>`, 'default description');
-  if (Input[element] !== undefined && Input[element] !== '') {
-    core.info(`${element} ${Input[element]}`);
-  }
-}
-core.info(`\r\n`);
-program.option('-m, --mode <mode>', 'cli or default');
-program.parse(process.argv);
 
-const options = program.opts();
+const options = CLI.SetupCli();
 
 // eslint-disable-next-line no-console
 console.log(`Entrypoint: ${options.mode}`);
 
-switch (options.mode) {
-  case 'cli':
-    runCli();
-    break;
-  case 'remote-cli':
-    RemoteClientCli.RunRemoteClient(options);
-    break;
-  default:
-    Input.githubEnabled = true;
-    runMain();
-    break;
+if (CLI.isCliMode(options)) {
+  CLI.RunCli(options);
+} else {
+  Input.githubEnabled = true;
+  runMain();
 }
