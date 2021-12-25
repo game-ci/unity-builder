@@ -148,7 +148,7 @@ export class SetupRemoteRepository {
     await RemoteClientSystem.Run(`git lfs install --skip-smudge`);
     CloudRunnerLogger.logRemoteCli(CloudRunnerState.targetBuildRepoUrl);
     await RemoteClientSystem.Run(`
-      git clone --depth 1 ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}
+      git clone --depth 1 ${CloudRunnerState.targetBuildRepoUrl}
     `);
     await RemoteClientSystem.Run(`
       git checkout ${CloudRunnerState.buildParams.gitSha}
