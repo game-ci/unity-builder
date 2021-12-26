@@ -19,10 +19,10 @@ export class RemoteClientSystem {
         output += outputChunk;
       });
       child.on('close', function (code) {
+        CloudRunnerLogger.logRemoteCli(`[exit ${code}]`);
         if (code !== 0) {
-          throw new Error(`[exit code ${code}] Output Ended`);
+          throw new Error(output);
         }
-        CloudRunnerLogger.logRemoteCli(`[exit code 0] Output Ended`);
         promise(output);
       });
     });
