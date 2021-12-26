@@ -14,7 +14,7 @@ class CloudRunnerLogger {
   }
 
   public static logRemoteCli(message: string) {
-    CloudRunnerLogger.log(`[Remote-Client] ${message}`);
+    CloudRunnerLogger.log(`[CLI] ${message}`);
   }
 
   public static logLine(message: string) {
