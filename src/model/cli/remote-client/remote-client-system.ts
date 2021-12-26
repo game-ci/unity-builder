@@ -5,21 +5,17 @@ export class RemoteClientSystem {
   public static async Run(command: string) {
     return await new Promise<string>((promise) => {
       let output = '';
-      const child = exec(command, (error, stdout, stderr) => {
-        if (error) {
-          CloudRunnerLogger.logRemoteCli(`[ERROR] ${error.message}`);
-          throw new Error(error.toString());
-        }
-        if (stderr) {
-          CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr.toString()}`);
-          throw new Error(stderr.toString());
-        }
-        const outputChunk = `${stdout.toString()}`;
+      const child = exec(command);
+      child.stdout?.on('data', function (data) {
+        const outputChunk = `${data}`;
         CloudRunnerLogger.logRemoteCli(outputChunk);
         output += outputChunk;
       });
+      child.stderr?.on('data', function (data) {
+        CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${data}`);
+      });
       child.on('close', function (code) {
-        CloudRunnerLogger.logRemoteCli(`${code}`);
+        CloudRunnerLogger.logRemoteCli(`${code} `);
         promise(output);
       });
     });
