@@ -75,7 +75,7 @@ export class AWSBaseStack {
           try {
             await CF.updateStack(updateInput).promise();
           } catch (error) {
-            CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
+            CloudRunnerLogger.log(error.message);
             CloudRunnerLogger.log(`Update Failed (Stack name: ${baseStackName})`);
             CloudRunnerLogger.log(`Continuing...`);
           }
