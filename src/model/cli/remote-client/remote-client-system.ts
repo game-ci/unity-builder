@@ -1,15 +1,21 @@
+import { exec } from 'child_process';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
-import System from '../../system';
 
 export class RemoteClientSystem {
   public static async Run(command: string) {
-    try {
-      const result = await System.run(command);
-      CloudRunnerLogger.logRemoteCli(`${result}`);
-      return result;
-    } catch (error) {
-      CloudRunnerLogger.logRemoteCli(`[ERROR] (${command}) ${error}`);
-      throw error;
-    }
+    return await new Promise<string>((promise) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          CloudRunnerLogger.logRemoteCli(`[ERROR] ${error.message}`);
+          throw new Error(error.toString());
+        }
+        if (stderr) {
+          CloudRunnerLogger.logRemoteCli(`[STD-ERROR] ${stderr.toString()}`);
+          throw new Error(stderr.toString());
+        }
+        CloudRunnerLogger.logRemoteCli(`${stdout.toString()}`);
+        promise(stdout.toString());
+      });
+    });
   }
 }
