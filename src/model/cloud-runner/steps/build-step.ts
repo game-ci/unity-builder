@@ -32,8 +32,8 @@ export class BuildStep implements StepInterface {
             chmod -R +x "/entrypoint.sh"
             chmod -R +x "/steps"
             /entrypoint.sh
-            apk update -q
-            apk add zip tree -q
+            apt-get update
+            apt-get install zip -q
             cd "$libraryFolderFull/.."
             zip -r "lib-$BUILDID.zip" "./Library"
             mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
