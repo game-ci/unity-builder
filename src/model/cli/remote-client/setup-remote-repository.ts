@@ -74,6 +74,7 @@ export class SetupRemoteRepository {
 
   private static async cacheLatestLFSFiles(LFS_ASSETS_HASH: string, lfsCacheFolder: string) {
     process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
+    CloudRunnerLogger.logRemoteCli(fs.existsSync(`${LFS_ASSETS_HASH}.zip`).toString());
     await RemoteClientSystem.Run(`zip -r "${LFS_ASSETS_HASH}.zip" "lfs"`);
     fs.copyFileSync(`${LFS_ASSETS_HASH}.zip`, lfsCacheFolder);
     CloudRunnerLogger.logRemoteCli(`copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
