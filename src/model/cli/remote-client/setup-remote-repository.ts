@@ -74,7 +74,12 @@ export class SetupRemoteRepository {
     await RemoteClientSystem.Run(`zip -r "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "lfs"`);
     CloudRunnerLogger.logRemoteCli(fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`).toString());
     await RemoteClientSystem.Run(`tree`);
-    fs.copyFileSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`, path.join(lfsCacheFolder, '/'));
+    await RemoteClientSystem.Run(
+      `cp "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "${path.join(
+        lfsCacheFolder,
+        `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
+      )}"`,
+    );
     CloudRunnerLogger.logRemoteCli(`copied ${SetupRemoteRepository.LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
   }
 
