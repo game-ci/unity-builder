@@ -11,14 +11,16 @@ export class RemoteClientSystem {
           throw new Error(error.toString());
         }
         if (stderr) {
-          CloudRunnerLogger.logRemoteCli(`[STD-E/DIAG] ${stderr.toString()}`);
+          CloudRunnerLogger.logRemoteCli(`[DIAGNOSTIC] ${stderr.toString()}`);
         }
         const outputChunk = `${stdout.toString()}`;
         CloudRunnerLogger.logRemoteCli(outputChunk);
         output += outputChunk;
       });
       child.on('close', function (code) {
-        CloudRunnerLogger.logRemoteCli(`${code}`);
+        if (code !== 0) {
+          throw new Error(output);
+        }
         promise(output);
       });
     });
