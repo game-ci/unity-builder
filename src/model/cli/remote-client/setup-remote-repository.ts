@@ -104,7 +104,9 @@ export class SetupRemoteRepository {
     if (fs.existsSync(latestLFSCacheFile)) {
       CloudRunnerLogger.logRemoteCli(`LFS cache exists`);
       fs.rmdirSync(CloudRunnerState.lfsDirectory, { recursive: true });
-      CloudRunnerLogger.logRemoteCli(`LFS cache exists from build $latestLFSCacheFile from $branch`);
+      CloudRunnerLogger.logRemoteCli(
+        `LFS cache exists from build ${latestLFSCacheFile} from ${CloudRunnerState.buildParams.branch}`,
+      );
       await RemoteClientSystem.Run(
         `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${path.join(CloudRunnerState.repoPathFull, `.git`)}"`,
       );
