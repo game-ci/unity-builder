@@ -15,11 +15,14 @@ export class RemoteClientSystem {
           return;
         }
         const outputChunk = `${stdout.toString()}`;
-        CloudRunnerLogger.logCli(outputChunk);
+        const outputLines = outputChunk.split(`\n`);
+        for (const element of outputLines) {
+          CloudRunnerLogger.logCli(element);
+        }
         output += outputChunk;
       });
       child.on('close', function (code) {
-        CloudRunnerLogger.logCli(`[exit ${code}]`);
+        CloudRunnerLogger.logCli(`[Exit code ${code}]`);
         if (code !== 0) {
           throw new Error(output);
         }
