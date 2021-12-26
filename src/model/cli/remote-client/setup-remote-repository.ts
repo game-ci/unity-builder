@@ -153,8 +153,8 @@ export class SetupRemoteRepository {
       );
       await RemoteClientSystem.Run(`ls -lh`);
       await RemoteClientSystem.Run(`tree`);
-      await RemoteClientSystem.Run(`${CloudRunnerState.buildParams.gitSha}`);
-      await RemoteClientSystem.Run(`git checkout ${CloudRunnerState.buildParams.gitSha}`);
+      CloudRunnerLogger.logRemoteCli(`${CloudRunnerState.buildParams.branch}`);
+      await RemoteClientSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
       CloudRunnerLogger.logRemoteCli(`Checked out ${process.env.GITHUB_SHA}`);
     } catch (error) {
       throw error;
