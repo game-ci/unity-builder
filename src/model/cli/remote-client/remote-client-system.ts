@@ -12,6 +12,7 @@ export class RemoteClientSystem {
         }
         if (stderr) {
           CloudRunnerLogger.logRemoteCli(`[DIAGNOSTIC] ${stderr.toString()}`);
+          return;
         }
         const outputChunk = `${stdout.toString()}`;
         CloudRunnerLogger.logRemoteCli(outputChunk);
@@ -19,8 +20,9 @@ export class RemoteClientSystem {
       });
       child.on('close', function (code) {
         if (code !== 0) {
-          throw new Error(`[FAIL][${code}] ${output}`);
+          throw new Error(`[exit code ${code}] Output Ended`);
         }
+        CloudRunnerLogger.logRemoteCli(`[exit code 0] Output Ended`);
         promise(output);
       });
     });
