@@ -19,7 +19,7 @@ export class RemoteClientSystem {
       });
       child.on('close', function (code) {
         if (code !== 0) {
-          throw new Error(output);
+          throw new Error(`[FAIL][${code}] ${output}`);
         }
         promise(output);
       });
