@@ -17,10 +17,10 @@ export class RemoteClientSystem {
         const outputChunk = `${stdout.toString()}`;
         CloudRunnerLogger.logRemoteCli(outputChunk);
         output += outputChunk;
-        child.on('close', function (code) {
-          CloudRunnerLogger.logRemoteCli(`${code}`);
-          promise(output);
-        });
+      });
+      child.on('close', function (code) {
+        CloudRunnerLogger.logRemoteCli(`${code}`);
+        promise(output);
       });
     });
   }
