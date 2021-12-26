@@ -108,7 +108,6 @@ export class SetupRemoteRepository {
       await RemoteClientSystem.Run(
         `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${path.join(CloudRunnerState.repoPathFull, `.git`)}"`,
       );
-      await RemoteClientSystem.Run(`ls -lh "${CloudRunnerState.lfsDirectory}"`);
       CloudRunnerLogger.logCli(`git LFS folder, (should not contain $latestLFSCacheFile)`);
     }
   }
