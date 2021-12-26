@@ -1,8 +1,9 @@
 # First we activate Unity
 & "c:\steps\activate.ps1"
 
-# Next we import the registry keys that point Unity to the win 10 sdk
-reg import c:\regkeys\winsdk.reg
+# Next we import any necessary registry keys, ie: location of windows 10 sdk
+# No guarantee that there will be any necessary registry keys, ie: tvOS
+Get-ChildItem -Path c:\regkeys -File | Foreach {reg import $_.fullname}
 
 # Now we register the visual studio installation so Unity can find it
 regsvr32 C:\ProgramData\Microsoft\VisualStudio\Setup\x64\Microsoft.VisualStudio.Setup.Configuration.Native.dll

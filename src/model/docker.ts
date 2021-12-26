@@ -1,5 +1,4 @@
 import { exec } from '@actions/exec';
-import { fstat } from 'fs';
 import ImageTag from './image-tag';
 const fs = require('fs');
 
@@ -45,9 +44,8 @@ class Docker {
       chownFilesTo,
     } = parameters;
 
-    switch(process.platform)
-    {
-      case "linux":
+    switch (process.platform) {
+      case 'linux': {
         const linuxRunCommand = `docker run \
         --workdir /github/workspace \
         --rm \
@@ -102,32 +100,29 @@ class Docker {
 
         await exec(linuxRunCommand, undefined, { silent });
         break;
-      case "win32":
-        var unitySerial = "";
-        if (!process.env.UNITY_SERIAL)
-        {
+      }
+      case 'win32': {
+        let unitySerial = '';
+        if (!process.env.UNITY_SERIAL) {
           //No serial was present so it is a personal license that we need to convert
-          if (!process.env.UNITY_LICENSE)
-          {
+          if (!process.env.UNITY_LICENSE) {
             throw new Error(`Missing Unity License File and no Serial was found. If this
                              is a personal license, make sure to follow the activation
                              steps and set the UNITY_LICENSE GitHub secret or enter a Unity
-                             serial number inside the UNITY_SERIAL GitHub secret.`)
+                             serial number inside the UNITY_SERIAL GitHub secret.`);
           }
           unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
-        } else
-        {
+        } else {
           unitySerial = process.env.UNITY_SERIAL!;
         }
 
-        if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD))
-        {
+        if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD)) {
           throw new Error(`Unity email and password must be set for windows based builds`);
         }
 
-        await this.setupWindowsRun();
+        await this.setupWindowsRun(platform);
 
-        this.validateWindowsPrereqs();
+        this.validateWindowsPrereqs(platform);
 
         const windowsRunCommand = `docker run \
         --workdir c:/github/workspace \
@@ -180,53 +175,95 @@ class Docker {
         --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
         --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
         ${image}`;
+        //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
 
         await exec(windowsRunCommand, undefined, { silent });
         break;
+      }
       default:
         throw new Error(`Can't run docker on unsupported host platform`);
     }
   }
 
-  //Setup prerequisite files for a windows-based docker run
-  static async setupWindowsRun(silent = false) {
-    //Need to export registry keys that point to the location of the windows 10 sdk
-    const makeRegKeyFolderCommand = "mkdir c:/regkeys";
-    await exec(makeRegKeyFolderCommand, undefined, {silent});
-    const exportRegKeysCommand = "echo Y| reg export \"HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0\" c:/regkeys/winsdk.reg";
-    await exec(exportRegKeysCommand, undefined, {silent});
+  //Setup prerequisite files/folders for a windows-based docker run
+  static async setupWindowsRun(platform, silent = false) {
+    const makeRegKeyFolderCommand = 'mkdir c:/regkeys';
+    await exec(makeRegKeyFolderCommand, undefined, { silent });
+    switch (platform) {
+      //These all need the Windows 10 SDK
+      case 'StandaloneWindows':
+        this.generateWinSDKRegKeys(silent);
+        break;
+      case 'StandaloneWindows64':
+        this.generateWinSDKRegKeys(silent);
+        break;
+      case 'WSAPlayer':
+        this.generateWinSDKRegKeys(silent);
+        break;
+    }
   }
 
-  static validateWindowsPrereqs() {
-    //Check for Visual Studio on runner
-    if (!(fs.existsSync("C:/Program Files (x86)/Microsoft Visual Studio") && fs.existsSync("C:/ProgramData/Microsoft/VisualStudio")))
-    {
-      throw new Error(`Visual Studio Installation not found at default location.
-                       Make sure the runner has Visual Studio installed in the
-                       default location`);
-    }
+  static async generateWinSDKRegKeys(silent = false) {
+    //Export registry keys that point to the location of the windows 10 sdk
+    const exportWinSDKRegKeysCommand =
+      'echo Y| reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg';
+    await exec(exportWinSDKRegKeysCommand, undefined, { silent });
+  }
 
+  static validateWindowsPrereqs(platform) {
+    //We run different checks for different platforms
+    switch (platform) {
+      case 'StandaloneWindows':
+        this.checkForVisualStudio();
+        this.checkForWin10SDK();
+        break;
+      case 'StandaloneWindows64':
+        this.checkForVisualStudio();
+        this.checkForWin10SDK();
+        break;
+      case 'WSAPlayer':
+        this.checkForVisualStudio();
+        this.checkForWin10SDK();
+        break;
+      case 'tvOS':
+        this.checkForVisualStudio();
+        break;
+    }
+  }
+
+  static checkForWin10SDK() {
     //Check for Windows 10 SDK on runner
-    if(!fs.existsSync("C:/Program Files (x86)/Windows Kits"))
-    {
+    if (!fs.existsSync('C:/Program Files (x86)/Windows Kits')) {
       throw new Error(`Windows 10 SDK not found in default location. Make sure
-                       the runner has a Windows 10 SDK installed in the default 
-                       location.`);
+                      the runner has a Windows 10 SDK installed in the default
+                      location.`);
     }
   }
 
-  static getSerialFromLicenseFile(license)
-  {
+  static checkForVisualStudio() {
+    //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
+    if (
+      !(
+        fs.existsSync('C:/Program Files (x86)/Microsoft Visual Studio') &&
+        fs.existsSync('C:/ProgramData/Microsoft/VisualStudio')
+      )
+    ) {
+      throw new Error(`Visual Studio Installation not found at default location.
+                      Make sure the runner has Visual Studio installed in the
+                      default location`);
+    }
+  }
+
+  static getSerialFromLicenseFile(license) {
     const startKey = `<DeveloperData Value="`;
     const endKey = `"/>`;
-    let startIndex = license.indexOf(startKey) + startKey.length;
-    if (startIndex < 0)
-    {
+    const startIndex = license.indexOf(startKey) + startKey.length;
+    if (startIndex < 0) {
       throw new Error(`License File was corrupted, unable to locate serial`);
     }
-    let endIndex = license.indexOf(endKey, startIndex);
-    //We substring off the first character as it is a garbage value
-    return atob(license.substring(startIndex, endIndex)).substring(1);
+    const endIndex = license.indexOf(endKey, startIndex);
+    //We slice off the first 4 characters as they are garbage values
+    return Buffer.from(license.slice(startIndex, endIndex), 'base64').toString('binary').slice(4);
   }
 }
 
