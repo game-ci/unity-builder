@@ -37,6 +37,7 @@ export class BuildStep implements StepInterface {
             cd "$libraryFolderFull/.."
             zip -r "lib-$BUILDID.zip" "./Library"
             mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
+            ls -lh "/$cacheFolderFull/lib"
             cd "$repoPathFull"
             ls -lh "$repoPathFull"
             zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
