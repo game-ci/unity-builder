@@ -7,19 +7,19 @@ export class RemoteClientSystem {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
         if (error) {
-          CloudRunnerLogger.logRemoteCli(`[ERROR] ${error.message}`);
+          CloudRunnerLogger.logCli(`[ERROR] ${error.message}`);
           throw new Error(error.toString());
         }
         if (stderr) {
-          CloudRunnerLogger.logRemoteCli(`[DIAGNOSTIC] ${stderr.toString()}`);
+          CloudRunnerLogger.logCli(`[DIAGNOSTIC] ${stderr.toString()}`);
           return;
         }
         const outputChunk = `${stdout.toString()}`;
-        CloudRunnerLogger.logRemoteCli(outputChunk);
+        CloudRunnerLogger.logCli(outputChunk);
         output += outputChunk;
       });
       child.on('close', function (code) {
-        CloudRunnerLogger.logRemoteCli(`[exit ${code}]`);
+        CloudRunnerLogger.logCli(`[exit ${code}]`);
         if (code !== 0) {
           throw new Error(output);
         }
