@@ -33,7 +33,7 @@ export class BuildStep implements StepInterface {
             chmod -R +x "/steps"
             /entrypoint.sh
             apt-get update
-            apt-get install zip -q
+            apt-get install -y -q zip
             cd "$libraryFolderFull/.."
             zip -r "lib-$BUILDID.zip" "./Library"
             mv "lib-$BUILDID.zip" "/$cacheFolderFull/lib"
