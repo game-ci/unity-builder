@@ -17,12 +17,12 @@ class CloudRunner {
   private static setupBuildPlatform() {
     switch (CloudRunnerState.buildParams.cloudRunnerCluster) {
       case 'k8s':
-        CloudRunnerLogger.log('Building with Kubernetes');
+        CloudRunnerLogger.log('Cloud Runner platform selected Kubernetes');
         CloudRunnerState.CloudRunnerProviderPlatform = new Kubernetes(CloudRunnerState.buildParams);
         break;
       default:
       case 'aws':
-        CloudRunnerLogger.log('Building with AWS');
+        CloudRunnerLogger.log('Cloud Runner platform selected AWS');
         CloudRunnerState.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunnerState.buildParams);
         break;
     }
