@@ -16,6 +16,7 @@ export class SetupRemoteRepository {
       await SetupRemoteRepository.printLFSHashState();
       const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
+      await RemoteClientSystem.Run(`tree ${libraryCacheFolder}`);
       await RemoteClientSystem.Run(`tree ${CloudRunnerState.builderPathFull}`);
       await SetupRemoteRepository.libraryCaching(lfsCacheFolder, libraryCacheFolder);
       await SetupRemoteRepository.lfsCaching(lfsCacheFolder);
