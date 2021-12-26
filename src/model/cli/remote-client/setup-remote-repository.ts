@@ -5,6 +5,7 @@ import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { RemoteClientSystem } from './remote-client-system';
 
 export class SetupRemoteRepository {
+  static LFS_ASSETS_HASH;
   public static async run() {
     try {
       fs.mkdirSync(CloudRunnerState.buildPathFull);
@@ -12,20 +13,16 @@ export class SetupRemoteRepository {
       await SetupRemoteRepository.cloneRepoWithoutLFSFiles();
 
       await SetupRemoteRepository.createLFSHashFiles();
-      const LFS_ASSETS_HASH = fs.readFileSync(
-        `${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`,
-        'utf8',
-      );
       await SetupRemoteRepository.printLFSHashState();
       const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
       await RemoteClientSystem.Run(`tree ${CloudRunnerState.builderPathFull}`);
       await SetupRemoteRepository.libraryCaching(lfsCacheFolder, libraryCacheFolder);
-      await SetupRemoteRepository.lfsCaching(lfsCacheFolder, LFS_ASSETS_HASH);
+      await SetupRemoteRepository.lfsCaching(lfsCacheFolder);
 
       await SetupRemoteRepository.printCacheState(lfsCacheFolder, libraryCacheFolder);
       await SetupRemoteRepository.pullLatestLFS();
-      await SetupRemoteRepository.cacheLatestLFSFiles(LFS_ASSETS_HASH, lfsCacheFolder);
+      await SetupRemoteRepository.cacheLatestLFSFiles(lfsCacheFolder);
       SetupRemoteRepository.handleCachePurging();
     } catch (error) {
       throw error;
@@ -72,13 +69,13 @@ export class SetupRemoteRepository {
     }
   }
 
-  private static async cacheLatestLFSFiles(LFS_ASSETS_HASH: string, lfsCacheFolder: string) {
+  private static async cacheLatestLFSFiles(lfsCacheFolder: string) {
     process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
-    await RemoteClientSystem.Run(`zip -r "${LFS_ASSETS_HASH}.zip" "lfs"`);
-    CloudRunnerLogger.logRemoteCli(fs.existsSync(`${LFS_ASSETS_HASH}.zip`).toString());
+    await RemoteClientSystem.Run(`zip -r "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "lfs"`);
+    CloudRunnerLogger.logRemoteCli(fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`).toString());
     await RemoteClientSystem.Run(`tree`);
-    fs.copyFileSync(`${LFS_ASSETS_HASH}.zip`, path.join(lfsCacheFolder, '/'));
-    CloudRunnerLogger.logRemoteCli(`copied ${LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
+    fs.copyFileSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`, path.join(lfsCacheFolder, '/'));
+    CloudRunnerLogger.logRemoteCli(`copied ${SetupRemoteRepository.LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
   }
 
   private static async pullLatestLFS() {
@@ -87,14 +84,16 @@ export class SetupRemoteRepository {
     CloudRunnerLogger.logRemoteCli(`pulled latest LFS files`);
   }
 
-  private static async lfsCaching(lfsCacheFolder: string, LFS_ASSETS_HASH: string) {
+  private static async lfsCaching(lfsCacheFolder: string) {
     CloudRunnerLogger.logRemoteCli(` `);
     CloudRunnerLogger.logRemoteCli(`LFS Caching`);
     process.chdir(lfsCacheFolder);
     let latestLFSCacheFile;
-    if (fs.existsSync(`${LFS_ASSETS_HASH}.zip`)) {
-      CloudRunnerLogger.logRemoteCli(`Match found: using large file hash match ${LFS_ASSETS_HASH}.zip`);
-      latestLFSCacheFile = `${LFS_ASSETS_HASH}.zip`;
+    if (fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`)) {
+      CloudRunnerLogger.logRemoteCli(
+        `Match found: using large file hash match ${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
+      );
+      latestLFSCacheFile = `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`;
     } else {
       latestLFSCacheFile = await RemoteClientSystem.Run(`ls -t "${lfsCacheFolder}" | grep .zip$ | head -1`);
     }
@@ -140,6 +139,11 @@ export class SetupRemoteRepository {
   private static async createLFSHashFiles() {
     await RemoteClientSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
     await RemoteClientSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
+    SetupRemoteRepository.LFS_ASSETS_HASH = fs.readFileSync(
+      `${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`,
+      'utf8',
+    );
+    CloudRunnerLogger.logRemoteCli(SetupRemoteRepository.LFS_ASSETS_HASH);
   }
 
   private static async cloneRepoWithoutLFSFiles() {
