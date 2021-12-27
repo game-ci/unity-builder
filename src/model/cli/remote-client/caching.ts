@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
-import { CloudRunnerAgentSystem } from './remote-client-system';
+import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, destinationFolder: string, artifactName: string) {

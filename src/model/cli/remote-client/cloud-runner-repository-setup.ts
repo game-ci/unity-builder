@@ -5,7 +5,7 @@ import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
-import { CloudRunnerAgentSystem } from './remote-client-system';
+import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 
 export class CloudRunnerRepositorySetup {
   static LFS_ASSETS_HASH;
