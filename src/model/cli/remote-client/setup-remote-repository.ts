@@ -90,7 +90,6 @@ export class SetupRemoteRepository {
   }
 
   private static async lfsCaching(lfsCacheFolder: string) {
-    CloudRunnerLogger.logCli(` `);
     CloudRunnerLogger.logCli(`LFS Caching`);
     if (!fs.existsSync(lfsCacheFolder)) {
       fs.mkdirSync(lfsCacheFolder);
@@ -117,7 +116,6 @@ export class SetupRemoteRepository {
   }
 
   private static async libraryCaching(libraryCacheFolder: string) {
-    CloudRunnerLogger.logCli(`Starting checks of cache for the Unity project Library and git LFS files`);
     CloudRunnerLogger.logCli(`Library Caching`);
     //if the unity git project has included the library delete it and echo a warning
     if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
@@ -133,7 +131,6 @@ export class SetupRemoteRepository {
     ).replace(`\n`, ``);
     CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
     process.chdir(libraryCacheFolder);
-    await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
     if (fs.existsSync(latestLibraryCacheFile)) {
       CloudRunnerLogger.logCli(`Library cache exists`);
       await RemoteClientSystem.Run(`unzip -q "${latestLibraryCacheFile}" -d "${CloudRunnerState.libraryFolderFull}"`);
