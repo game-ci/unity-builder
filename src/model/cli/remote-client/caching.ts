@@ -41,6 +41,7 @@ export class Caching {
         cacheSelection = latest;
       }
       if (fs.existsSync(cacheSelection)) {
+        await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         CloudRunnerLogger.logCli(`Library cache exists`);
         await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}"`);
         assert(fs.existsSync(destinationFolder));
