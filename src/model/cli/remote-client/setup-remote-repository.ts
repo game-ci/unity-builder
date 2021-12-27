@@ -3,6 +3,7 @@ import path from 'path';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
+import { LFSHashing } from './lfs-hashing';
 import { RemoteClientSystem } from './remote-client-system';
 
 export class SetupRemoteRepository {
@@ -14,65 +15,23 @@ export class SetupRemoteRepository {
       await SetupRemoteRepository.cloneRepoWithoutLFSFiles();
 
       await SetupRemoteRepository.createLFSHashFiles();
-      await SetupRemoteRepository.printLFSHashState();
+      await LFSHashing.printLFSHashState();
       const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
-      await RemoteClientSystem.Run(`tree ${libraryCacheFolder}`);
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.builderPathFull}`);
+      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
       await SetupRemoteRepository.libraryCaching(libraryCacheFolder);
       await SetupRemoteRepository.lfsCaching(lfsCacheFolder);
-
-      await SetupRemoteRepository.printCacheState(lfsCacheFolder, libraryCacheFolder);
+      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
+      await Caching.printCacheState(lfsCacheFolder, libraryCacheFolder);
       await SetupRemoteRepository.pullLatestLFS();
-      await SetupRemoteRepository.cacheLatestLFSFiles(lfsCacheFolder);
-      SetupRemoteRepository.handleCachePurging();
+      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
+      await RemoteClientSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
+      await Caching.PushToCache(lfsCacheFolder, CloudRunnerState.lfsDirectory, SetupRemoteRepository.LFS_ASSETS_HASH);
+      await RemoteClientSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
+      Caching.handleCachePurging();
     } catch (error) {
       throw error;
     }
-  }
-
-  private static async printLFSHashState() {
-    await RemoteClientSystem.Run(
-      `echo ' '
-      echo 'Contents of .lfs-assets-guid file:'
-      cat .lfs-assets-guid
-      echo ' '
-      echo 'Contents of .lfs-assets-guid-sum file:'
-      cat .lfs-assets-guid-sum
-      echo ' '
-      echo 'Source repository initialized'
-      ls ${CloudRunnerState.projectPathFull}
-      echo ' '`,
-    );
-  }
-
-  private static async printCacheState(lfsCacheFolder: string, libraryCacheFolder: string) {
-    await RemoteClientSystem.Run(
-      `echo ' '
-      echo "LFS cache for $branch"
-      du -sch "${lfsCacheFolder}/"
-      echo '**'
-      echo "Library cache for $branch"
-      du -sch "${libraryCacheFolder}/"
-      echo '**'
-      echo "Branch: $branch"
-      du -sch "${CloudRunnerState.cacheFolderFull}/"
-      echo '**'
-      echo 'Full cache'
-      du -sch "${CloudRunnerState.cacheFolderFull}/"
-      echo ' '`,
-    );
-  }
-
-  private static handleCachePurging() {
-    if (process.env.purgeRemoteCaching !== undefined) {
-      CloudRunnerLogger.logCli(`purging ${CloudRunnerState.purgeRemoteCaching}`);
-      fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
-    }
-  }
-
-  private static async cacheLatestLFSFiles(lfsCacheFolder: string) {
-    await Caching.PushToCache(lfsCacheFolder, CloudRunnerState.lfsDirectory, SetupRemoteRepository.LFS_ASSETS_HASH);
   }
 
   private static async pullLatestLFS() {
@@ -101,12 +60,7 @@ export class SetupRemoteRepository {
   }
 
   private static async createLFSHashFiles() {
-    await RemoteClientSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
-    await RemoteClientSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
-    SetupRemoteRepository.LFS_ASSETS_HASH = fs.readFileSync(
-      `${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`,
-      'utf8',
-    );
+    SetupRemoteRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
     CloudRunnerLogger.logCli(SetupRemoteRepository.LFS_ASSETS_HASH);
   }
 
