@@ -1,3 +1,4 @@
+import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
@@ -73,6 +74,7 @@ export class SetupRemoteRepository {
   private static async cacheLatestLFSFiles(lfsCacheFolder: string) {
     process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
     await RemoteClientSystem.Run(`zip -r "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "lfs"`);
+    assert();
     CloudRunnerLogger.logCli(fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`).toString());
     await RemoteClientSystem.Run(
       `cp "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "${path.join(
@@ -100,7 +102,9 @@ export class SetupRemoteRepository {
       CloudRunnerLogger.logCli(`Match found: using large file hash match ${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`);
       latestLFSCacheFile = `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`;
     } else {
-      latestLFSCacheFile = await RemoteClientSystem.Run(`ls -t "${lfsCacheFolder}" | grep .zip$ | head -1`);
+      latestLFSCacheFile = await (
+        await RemoteClientSystem.Run(`ls -t "${lfsCacheFolder}" | grep .zip$ | head -1`)
+      ).replace(`\n`, ``);
     }
     if (fs.existsSync(latestLFSCacheFile)) {
       CloudRunnerLogger.logCli(`LFS cache exists`);
