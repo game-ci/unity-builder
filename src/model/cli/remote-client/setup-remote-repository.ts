@@ -92,6 +92,9 @@ export class SetupRemoteRepository {
   private static async lfsCaching(lfsCacheFolder: string) {
     CloudRunnerLogger.logCli(` `);
     CloudRunnerLogger.logCli(`LFS Caching`);
+    if (!fs.existsSync(lfsCacheFolder)) {
+      fs.mkdirSync(lfsCacheFolder);
+    }
     process.chdir(lfsCacheFolder);
     let latestLFSCacheFile;
     if (fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`)) {
@@ -115,9 +118,6 @@ export class SetupRemoteRepository {
 
   private static async libraryCaching(lfsCacheFolder: string, libraryCacheFolder: string) {
     CloudRunnerLogger.logCli(`Starting checks of cache for the Unity project Library and git LFS files`);
-    if (!fs.existsSync(lfsCacheFolder)) {
-      fs.mkdirSync(lfsCacheFolder);
-    }
     if (!fs.existsSync(libraryCacheFolder)) {
       fs.mkdirSync(libraryCacheFolder);
     }
