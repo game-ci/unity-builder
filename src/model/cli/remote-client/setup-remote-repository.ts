@@ -128,7 +128,9 @@ export class SetupRemoteRepository {
       fs.mkdirSync(libraryCacheFolder);
     }
     //Restore library cache
-    const latestLibraryCacheFile = await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`);
+    const latestLibraryCacheFile = await (
+      await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`)
+    ).replace(`\n`, ``);
     CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
     process.chdir(libraryCacheFolder);
     await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
