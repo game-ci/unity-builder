@@ -132,7 +132,7 @@ export class SetupRemoteRepository {
     await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
     CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
     const latestCacheFilePath = path.join(libraryCacheFolder, latestLibraryCacheFile);
-    if (fs.existsSync(latestCacheFilePath)) {
+    if (await SetupRemoteRepository.checkFileExists(latestCacheFilePath)) {
       CloudRunnerLogger.logCli(`Library cache exists`);
       await RemoteClientSystem.Run(`unzip -q "${latestCacheFilePath}" -d "$projectPathFull"`);
     } else {
@@ -141,6 +141,13 @@ export class SetupRemoteRepository {
         throw new Error(`Failed to get library cache, but cache hit was found (${latestLibraryCacheFile})`);
       }
     }
+  }
+  static checkFileExists(filepath) {
+    return new Promise((resolve) => {
+      fs.access(filepath, fs.constants.F_OK, (error) => {
+        resolve(!error);
+      });
+    });
   }
 
   private static async createLFSHashFiles() {
