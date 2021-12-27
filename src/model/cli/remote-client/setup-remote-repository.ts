@@ -1,3 +1,4 @@
+import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
@@ -14,13 +15,24 @@ export class SetupRemoteRepository {
       fs.mkdirSync(CloudRunnerState.repoPathFull);
       await SetupRemoteRepository.cloneRepoWithoutLFSFiles();
 
-      await SetupRemoteRepository.createLFSHashFiles();
+      SetupRemoteRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
+      CloudRunnerLogger.logCli(SetupRemoteRepository.LFS_ASSETS_HASH);
       await LFSHashing.printLFSHashState();
       const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
       await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
-      await SetupRemoteRepository.libraryCaching(libraryCacheFolder);
-      await SetupRemoteRepository.lfsCaching(lfsCacheFolder);
+      CloudRunnerLogger.logCli(`Library Caching`);
+      assert(
+        fs.existsSync(CloudRunnerState.libraryFolderFull),
+        `!Warning!: The Unity library was included in the git repository`,
+      );
+      await Caching.PullFromCache(libraryCacheFolder, CloudRunnerState.libraryFolderFull);
+      CloudRunnerLogger.logCli(`LFS Caching`);
+      await Caching.PullFromCache(
+        lfsCacheFolder,
+        CloudRunnerState.lfsDirectory,
+        `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
+      );
       await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
       await Caching.printCacheState(lfsCacheFolder, libraryCacheFolder);
       await SetupRemoteRepository.pullLatestLFS();
@@ -32,36 +44,6 @@ export class SetupRemoteRepository {
     } catch (error) {
       throw error;
     }
-  }
-
-  private static async pullLatestLFS() {
-    process.chdir(CloudRunnerState.repoPathFull);
-    await RemoteClientSystem.Run(`git lfs pull`);
-    CloudRunnerLogger.logCli(`pulled latest LFS files`);
-  }
-
-  private static async lfsCaching(lfsCacheFolder: string) {
-    CloudRunnerLogger.logCli(`LFS Caching`);
-    await Caching.PullFromCache(
-      lfsCacheFolder,
-      CloudRunnerState.lfsDirectory,
-      `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
-    );
-  }
-
-  private static async libraryCaching(libraryCacheFolder: string) {
-    CloudRunnerLogger.logCli(`Library Caching`);
-    //if the unity git project has included the library delete it and echo a warning
-    if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
-      fs.rmdirSync(CloudRunnerState.libraryFolderFull, { recursive: true });
-      CloudRunnerLogger.logCli(`!Warning!: The Unity library was included in the git repository`);
-    }
-    await Caching.PullFromCache(libraryCacheFolder, CloudRunnerState.libraryFolderFull);
-  }
-
-  private static async createLFSHashFiles() {
-    SetupRemoteRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
-    CloudRunnerLogger.logCli(SetupRemoteRepository.LFS_ASSETS_HASH);
   }
 
   private static async cloneRepoWithoutLFSFiles() {
@@ -81,5 +63,11 @@ export class SetupRemoteRepository {
     } catch (error) {
       throw error;
     }
+  }
+
+  private static async pullLatestLFS() {
+    process.chdir(CloudRunnerState.repoPathFull);
+    await RemoteClientSystem.Run(`git lfs pull`);
+    CloudRunnerLogger.logCli(`pulled latest LFS files`);
   }
 }
