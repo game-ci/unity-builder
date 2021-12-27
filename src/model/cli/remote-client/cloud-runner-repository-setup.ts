@@ -19,7 +19,7 @@ export class CloudRunnerRepositorySetup {
       await LFSHashing.printLFSHashState();
       CloudRunnerLogger.logCli(`Library Caching`);
       assert(
-        fs.existsSync(CloudRunnerState.libraryFolderFull),
+        !fs.existsSync(CloudRunnerState.libraryFolderFull),
         `!Warning!: The Unity library was included in the git repository`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
