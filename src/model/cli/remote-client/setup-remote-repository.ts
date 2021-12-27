@@ -118,16 +118,14 @@ export class SetupRemoteRepository {
 
   private static async libraryCaching(libraryCacheFolder: string) {
     CloudRunnerLogger.logCli(`Starting checks of cache for the Unity project Library and git LFS files`);
-    if (!fs.existsSync(libraryCacheFolder)) {
-      fs.mkdirSync(libraryCacheFolder);
-    }
     CloudRunnerLogger.logCli(`Library Caching`);
     //if the unity git project has included the library delete it and echo a warning
     if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
       fs.rmdirSync(CloudRunnerState.libraryFolderFull, { recursive: true });
-      CloudRunnerLogger.logCli(
-        `!Warning!: The Unity library was included in the git repository (this isn't usually a good practice)`,
-      );
+      CloudRunnerLogger.logCli(`!Warning!: The Unity library was included in the git repository`);
+    }
+    if (!fs.existsSync(libraryCacheFolder)) {
+      fs.mkdirSync(libraryCacheFolder);
     }
     //Restore library cache
     const latestLibraryCacheFile = await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`);
@@ -137,6 +135,12 @@ export class SetupRemoteRepository {
     if (fs.existsSync(latestCacheFilePath)) {
       CloudRunnerLogger.logCli(`Library cache exists`);
       await RemoteClientSystem.Run(`unzip -q "${latestCacheFilePath}" -d "$projectPathFull"`);
+    } else {
+      CloudRunnerLogger.logCli(`Library cache doesn't exist`);
+      if (latestLibraryCacheFile !== ``) {
+        await RemoteClientSystem.Run(`tree`);
+        throw new Error(`Failed to get library cache, but cache hit was found (${latestLibraryCacheFile})`);
+      }
     }
   }
 
