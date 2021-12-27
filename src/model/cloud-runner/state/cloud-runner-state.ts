@@ -51,6 +51,12 @@ export class CloudRunnerState {
   public static get purgeRemoteCaching(): boolean {
     return process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
   }
+  public static get lfsCacheFolder() {
+    return path.join(CloudRunnerState.cacheFolderFull, `lfs`);
+  }
+  public static get libraryCacheFolder() {
+    return path.join(CloudRunnerState.cacheFolderFull, `lib`);
+  }
   public static get unityBuilderRepoUrl(): string {
     return `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
   }
