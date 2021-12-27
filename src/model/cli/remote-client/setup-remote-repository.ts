@@ -18,7 +18,7 @@ export class SetupRemoteRepository {
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
       await RemoteClientSystem.Run(`tree ${libraryCacheFolder}`);
       await RemoteClientSystem.Run(`tree ${CloudRunnerState.builderPathFull}`);
-      await SetupRemoteRepository.libraryCaching(lfsCacheFolder, libraryCacheFolder);
+      await SetupRemoteRepository.libraryCaching(libraryCacheFolder);
       await SetupRemoteRepository.lfsCaching(lfsCacheFolder);
 
       await SetupRemoteRepository.printCacheState(lfsCacheFolder, libraryCacheFolder);
@@ -116,7 +116,7 @@ export class SetupRemoteRepository {
     }
   }
 
-  private static async libraryCaching(lfsCacheFolder: string, libraryCacheFolder: string) {
+  private static async libraryCaching(libraryCacheFolder: string) {
     CloudRunnerLogger.logCli(`Starting checks of cache for the Unity project Library and git LFS files`);
     if (!fs.existsSync(libraryCacheFolder)) {
       fs.mkdirSync(libraryCacheFolder);
