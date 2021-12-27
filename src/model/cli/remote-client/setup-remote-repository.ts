@@ -133,7 +133,7 @@ export class SetupRemoteRepository {
     const latestLibraryCacheFile = await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`);
     await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
     CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
-    if (fs.existsSync(latestLibraryCacheFile)) {
+    if (fs.existsSync(path.join(libraryCacheFolder, latestLibraryCacheFile))) {
       CloudRunnerLogger.logCli(`Library cache exists`);
       const latestCacheFilePath = path.join(libraryCacheFolder, latestLibraryCacheFile);
       await RemoteClientSystem.Run(`unzip -q "${latestCacheFilePath}" -d "$projectPathFull"`);
