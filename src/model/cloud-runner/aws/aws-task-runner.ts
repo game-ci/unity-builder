@@ -174,7 +174,7 @@ class AWSTaskRunner {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
             let message = json.logEvents[logEventsIndex].message;
             if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
-              CloudRunnerLogger.log('End of cloud runner job logs');
+              CloudRunnerLogger.log('End of log transmission received');
               readingLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
