@@ -129,9 +129,9 @@ export class SetupRemoteRepository {
     }
     //Restore library cache
     const latestLibraryCacheFile = await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`);
-    await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
     CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
     process.chdir(libraryCacheFolder);
+    await RemoteClientSystem.Run(`ls -lh "${libraryCacheFolder}"`);
     if (latestLibraryCacheFile !== '') {
       CloudRunnerLogger.logCli(`Library cache exists`);
       await RemoteClientSystem.Run(`unzip -q "${latestLibraryCacheFile}" -d "${CloudRunnerState.libraryFolderFull}"`);
