@@ -34,8 +34,7 @@ export class SetupStep implements StepInterface {
           apk add unzip zip git-lfs jq tree nodejs -q
           export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
           mkdir -p ${CloudRunnerState.builderPathFull}
-          echo "${CloudRunnerState.cloneBuilderCommand}"
-          ${CloudRunnerState.cloneBuilderCommand}
+          git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}
           chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
           node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
       `,

@@ -1,3 +1,4 @@
+import path from 'path';
 import { BuildParameters } from '../..';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerNamespace from '../services/cloud-runner-namespace';
@@ -24,28 +25,28 @@ export class CloudRunnerState {
     return CloudRunnerState.buildParams.branch;
   }
   public static get buildPathFull(): string {
-    return `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildGuid}`;
+    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildGuid);
   }
   public static get builderPathFull(): string {
-    return `${CloudRunnerState.buildPathFull}/builder`;
+    return path.join(CloudRunnerState.buildPathFull, `builder`);
   }
   public static get steamPathFull(): string {
-    return `${CloudRunnerState.buildPathFull}/steam`;
+    return path.join(CloudRunnerState.buildPathFull, `steam`);
   }
   public static get repoPathFull(): string {
-    return `${CloudRunnerState.buildPathFull}/${CloudRunnerState.repositoryFolder}`;
+    return path.join(CloudRunnerState.buildPathFull, CloudRunnerState.repositoryFolder);
   }
   public static get projectPathFull(): string {
-    return `${CloudRunnerState.repoPathFull}/${CloudRunnerState.buildParams.projectPath}`;
+    return path.join(CloudRunnerState.repoPathFull, CloudRunnerState.buildParams.projectPath);
   }
   public static get libraryFolderFull(): string {
-    return `${CloudRunnerState.projectPathFull}/Library`;
+    return path.join(CloudRunnerState.projectPathFull, `Library`);
   }
   public static get cacheFolderFull(): string {
-    return `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.cacheFolder}/${CloudRunnerState.branchName}`;
+    return path.join(CloudRunnerState.buildVolumeFolder, CloudRunnerState.cacheFolder, CloudRunnerState.branchName);
   }
   public static get lfsDirectory(): string {
-    return `${CloudRunnerState.repoPathFull}/.git/lfs`;
+    return path.join(CloudRunnerState.repoPathFull, `.git`, `lfs`);
   }
   public static get purgeRemoteCaching(): boolean {
     return process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
@@ -73,14 +74,6 @@ export class CloudRunnerState {
 
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
     return TaskParameterSerializer.readBuildEnvironmentVariables();
-  }
-
-  public static get getHandleCachingCommand() {
-    return `${CloudRunnerState.builderPathFull}/dist/cloud-runner/handleCaching.sh "${CloudRunnerState.cacheFolderFull}" "${CloudRunnerState.libraryFolderFull}" "${CloudRunnerState.lfsDirectory}" "${CloudRunnerState.purgeRemoteCaching}"`;
-  }
-
-  public static get cloneBuilderCommand() {
-    return `git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}`;
   }
 
   public static get runNumber() {

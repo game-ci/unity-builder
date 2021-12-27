@@ -1,8 +1,8 @@
-import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
+import { Caching } from './caching';
 import { RemoteClientSystem } from './remote-client-system';
 
 export class SetupRemoteRepository {
@@ -72,17 +72,7 @@ export class SetupRemoteRepository {
   }
 
   private static async cacheLatestLFSFiles(lfsCacheFolder: string) {
-    process.chdir(`${CloudRunnerState.lfsDirectory}/..`);
-    await RemoteClientSystem.Run(`zip -r "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "lfs"`);
-    assert();
-    CloudRunnerLogger.logCli(fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`).toString());
-    await RemoteClientSystem.Run(
-      `cp "${SetupRemoteRepository.LFS_ASSETS_HASH}.zip" "${path.join(
-        lfsCacheFolder,
-        `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
-      )}"`,
-    );
-    CloudRunnerLogger.logCli(`copied ${SetupRemoteRepository.LFS_ASSETS_HASH} to ${lfsCacheFolder}`);
+    await Caching.PushToCache(lfsCacheFolder, CloudRunnerState.lfsDirectory, SetupRemoteRepository.LFS_ASSETS_HASH);
   }
 
   private static async pullLatestLFS() {
@@ -93,30 +83,11 @@ export class SetupRemoteRepository {
 
   private static async lfsCaching(lfsCacheFolder: string) {
     CloudRunnerLogger.logCli(`LFS Caching`);
-    if (!fs.existsSync(lfsCacheFolder)) {
-      fs.mkdirSync(lfsCacheFolder);
-    }
-    process.chdir(lfsCacheFolder);
-    let latestLFSCacheFile;
-    if (fs.existsSync(`${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`)) {
-      CloudRunnerLogger.logCli(`Match found: using large file hash match ${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`);
-      latestLFSCacheFile = `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`;
-    } else {
-      latestLFSCacheFile = await (
-        await RemoteClientSystem.Run(`ls -t "${lfsCacheFolder}" | grep .zip$ | head -1`)
-      ).replace(`\n`, ``);
-    }
-    if (fs.existsSync(latestLFSCacheFile)) {
-      CloudRunnerLogger.logCli(`LFS cache exists`);
-      fs.rmdirSync(CloudRunnerState.lfsDirectory, { recursive: true });
-      CloudRunnerLogger.logCli(
-        `LFS cache exists from build ${latestLFSCacheFile} from ${CloudRunnerState.buildParams.branch}`,
-      );
-      await RemoteClientSystem.Run(
-        `unzip -q "${lfsCacheFolder}/${latestLFSCacheFile}" -d "${path.join(CloudRunnerState.repoPathFull, `.git`)}"`,
-      );
-      CloudRunnerLogger.logCli(`git LFS folder, (should not contain $latestLFSCacheFile)`);
-    }
+    await Caching.PullFromCache(
+      lfsCacheFolder,
+      CloudRunnerState.lfsDirectory,
+      `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
+    );
   }
 
   private static async libraryCaching(libraryCacheFolder: string) {
@@ -126,31 +97,7 @@ export class SetupRemoteRepository {
       fs.rmdirSync(CloudRunnerState.libraryFolderFull, { recursive: true });
       CloudRunnerLogger.logCli(`!Warning!: The Unity library was included in the git repository`);
     }
-    if (!fs.existsSync(libraryCacheFolder)) {
-      fs.mkdirSync(libraryCacheFolder);
-    }
-    //Restore library cache
-    const latestLibraryCacheFile = await (
-      await RemoteClientSystem.Run(`ls -t "${libraryCacheFolder}" | grep .zip$ | head -1`)
-    ).replace(`\n`, ``);
-    CloudRunnerLogger.logCli(`Checking if Library cache ${libraryCacheFolder}/${latestLibraryCacheFile} exists`);
-    process.chdir(libraryCacheFolder);
-    if (fs.existsSync(latestLibraryCacheFile)) {
-      CloudRunnerLogger.logCli(`Library cache exists`);
-      await RemoteClientSystem.Run(`unzip "${latestLibraryCacheFile}" -d "${CloudRunnerState.libraryFolderFull}"`);
-    } else {
-      CloudRunnerLogger.logCli(`Library cache doesn't exist`);
-      if (latestLibraryCacheFile !== ``) {
-        throw new Error(`Failed to get library cache, but cache hit was found (${latestLibraryCacheFile})`);
-      }
-    }
-  }
-  static checkFileExists(filepath) {
-    return new Promise((resolve) => {
-      fs.access(filepath, fs.constants.F_OK, (error) => {
-        resolve(!error);
-      });
-    });
+    await Caching.PullFromCache(libraryCacheFolder, CloudRunnerState.libraryFolderFull);
   }
 
   private static async createLFSHashFiles() {
