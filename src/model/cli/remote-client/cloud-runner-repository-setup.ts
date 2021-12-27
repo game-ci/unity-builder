@@ -5,22 +5,22 @@ import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
-import { RemoteClientSystem } from './remote-client-system';
+import { CloudRunnerAgentSystem } from './remote-client-system';
 
-export class SetupRemoteRepository {
+export class CloudRunnerRepositorySetup {
   static LFS_ASSETS_HASH;
   public static async run() {
     try {
       fs.mkdirSync(CloudRunnerState.buildPathFull);
       fs.mkdirSync(CloudRunnerState.repoPathFull);
-      await SetupRemoteRepository.cloneRepoWithoutLFSFiles();
+      await CloudRunnerRepositorySetup.cloneRepoWithoutLFSFiles();
 
-      SetupRemoteRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
-      CloudRunnerLogger.logCli(SetupRemoteRepository.LFS_ASSETS_HASH);
+      CloudRunnerRepositorySetup.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
+      CloudRunnerLogger.logCli(CloudRunnerRepositorySetup.LFS_ASSETS_HASH);
       await LFSHashing.printLFSHashState();
       const lfsCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lfs`);
       const libraryCacheFolder = path.join(CloudRunnerState.cacheFolderFull, `lib`);
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
+      await CloudRunnerAgentSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
       CloudRunnerLogger.logCli(`Library Caching`);
       assert(
         fs.existsSync(CloudRunnerState.libraryFolderFull),
@@ -31,15 +31,19 @@ export class SetupRemoteRepository {
       await Caching.PullFromCache(
         lfsCacheFolder,
         CloudRunnerState.lfsDirectory,
-        `${SetupRemoteRepository.LFS_ASSETS_HASH}.zip`,
+        `${CloudRunnerRepositorySetup.LFS_ASSETS_HASH}.zip`,
       );
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
+      await CloudRunnerAgentSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
       await Caching.printCacheState(lfsCacheFolder, libraryCacheFolder);
-      await SetupRemoteRepository.pullLatestLFS();
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
-      await Caching.PushToCache(lfsCacheFolder, CloudRunnerState.lfsDirectory, SetupRemoteRepository.LFS_ASSETS_HASH);
-      await RemoteClientSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
+      await CloudRunnerRepositorySetup.pullLatestLFS();
+      await CloudRunnerAgentSystem.Run(`tree ${CloudRunnerState.repoPathFull}`);
+      await CloudRunnerAgentSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
+      await Caching.PushToCache(
+        lfsCacheFolder,
+        CloudRunnerState.lfsDirectory,
+        CloudRunnerRepositorySetup.LFS_ASSETS_HASH,
+      );
+      await CloudRunnerAgentSystem.Run(`tree ${CloudRunnerState.cacheFolderFull}`);
       Caching.handleCachePurging();
     } catch (error) {
       throw error;
@@ -50,15 +54,17 @@ export class SetupRemoteRepository {
     try {
       CloudRunnerLogger.logCli(`Initializing source repository for cloning with caching of LFS files`);
       process.chdir(CloudRunnerState.repoPathFull);
-      await RemoteClientSystem.Run(`git config --global advice.detachedHead false`);
+      await CloudRunnerAgentSystem.Run(`git config --global advice.detachedHead false`);
       CloudRunnerLogger.logCli(`Cloning the repository being built:`);
-      await RemoteClientSystem.Run(`git lfs install --skip-smudge`);
+      await CloudRunnerAgentSystem.Run(`git lfs install --skip-smudge`);
       CloudRunnerLogger.logCli(CloudRunnerState.targetBuildRepoUrl);
-      await RemoteClientSystem.Run(`git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}`);
-      await RemoteClientSystem.Run(`ls -lh`);
-      await RemoteClientSystem.Run(`tree`);
+      await CloudRunnerAgentSystem.Run(
+        `git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}`,
+      );
+      await CloudRunnerAgentSystem.Run(`ls -lh`);
+      await CloudRunnerAgentSystem.Run(`tree`);
       CloudRunnerLogger.logCli(`${CloudRunnerState.buildParams.branch}`);
-      await RemoteClientSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
+      await CloudRunnerAgentSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
       CloudRunnerLogger.logCli(`Checked out ${process.env.GITHUB_SHA}`);
     } catch (error) {
       throw error;
@@ -67,7 +73,7 @@ export class SetupRemoteRepository {
 
   private static async pullLatestLFS() {
     process.chdir(CloudRunnerState.repoPathFull);
-    await RemoteClientSystem.Run(`git lfs pull`);
+    await CloudRunnerAgentSystem.Run(`git lfs pull`);
     CloudRunnerLogger.logCli(`pulled latest LFS files`);
   }
 }

@@ -1,3 +1,3 @@
 export class CloudRunnerStatics {
-  public static readonly logPrefix = `Cloud-Runner-Agent`;
+  public static readonly logPrefix = `Cloud-Runner-System`;
 }
