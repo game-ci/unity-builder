@@ -138,7 +138,6 @@ export class SetupRemoteRepository {
     } else {
       CloudRunnerLogger.logCli(`Library cache doesn't exist`);
       if (latestLibraryCacheFile !== ``) {
-        await RemoteClientSystem.Run(`tree`);
         throw new Error(`Failed to get library cache, but cache hit was found (${latestLibraryCacheFile})`);
       }
     }
