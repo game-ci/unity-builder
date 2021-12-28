@@ -3,6 +3,7 @@ import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 
 export class CloudRunnerAgentSystem {
   public static async Run(command: string) {
+    CloudRunnerLogger.logCli(`${command}`);
     return await new Promise<string>((promise) => {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
