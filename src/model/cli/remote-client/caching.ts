@@ -40,13 +40,11 @@ export class Caching {
       } else {
         cacheSelection = latest;
       }
-      await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       if (fs.existsSync(cacheSelection)) {
         await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         CloudRunnerLogger.logCli(`cache item exists`);
-        await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);
         assert(fs.existsSync(destinationFolder));
-        await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
+        await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);
       } else {
         CloudRunnerLogger.logCli(`cache item doesn't exist`);
         if (cacheSelection !== ``) {

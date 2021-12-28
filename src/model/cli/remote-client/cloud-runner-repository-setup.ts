@@ -22,7 +22,6 @@ export class CloudRunnerRepositorySetup {
         !fs.existsSync(CloudRunnerState.libraryFolderFull),
         `!Warning!: The Unity library was included in the git repository`,
       );
-      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
       CloudRunnerLogger.logCli(`LFS Caching`);
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolder,
@@ -36,6 +35,7 @@ export class CloudRunnerRepositorySetup {
         CloudRunnerState.lfsDirectory,
         CloudRunnerRepositorySetup.LFS_ASSETS_HASH,
       );
+      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
       Caching.handleCachePurging();
     } catch (error) {
       throw error;
@@ -49,7 +49,6 @@ export class CloudRunnerRepositorySetup {
       await CloudRunnerAgentSystem.Run(`git config --global advice.detachedHead false`);
       CloudRunnerLogger.logCli(`Cloning the repository being built:`);
       await CloudRunnerAgentSystem.Run(`git lfs install --skip-smudge`);
-      CloudRunnerLogger.logCli(CloudRunnerState.targetBuildRepoUrl);
       await CloudRunnerAgentSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}`,
       );
