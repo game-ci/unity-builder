@@ -49,7 +49,7 @@ export class Caching {
       } else {
         CloudRunnerLogger.logCli(`cache item doesn't exist`);
         if (cacheSelection !== ``) {
-          throw new Error(`Failed to get library cache, but cache hit was found: ${cacheSelection}`);
+          throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
     } catch (error) {
