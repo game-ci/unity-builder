@@ -74,8 +74,12 @@ export class CloudRunnerState {
     },
   ];
   public static readonly repositoryFolder = 'repo';
-  public static readonly buildVolumeFolder = 'data';
-  public static readonly cacheFolder = 'cache';
+  public static get buildVolumeFolder() {
+    return path.join('/', 'data');
+  }
+  public static get cacheFolder() {
+    return 'cache';
+  }
   public static cloudRunnerBranch: string;
 
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
