@@ -42,12 +42,12 @@ export class Caching {
       }
       if (fs.existsSync(cacheSelection)) {
         await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
-        CloudRunnerLogger.logCli(`Library cache exists`);
+        CloudRunnerLogger.logCli(`cache item exists`);
         await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}"`);
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
       } else {
-        CloudRunnerLogger.logCli(`Library cache doesn't exist`);
+        CloudRunnerLogger.logCli(`cache item doesn't exist`);
         if (cacheSelection !== ``) {
           throw new Error(`Failed to get library cache, but cache hit was found: ${cacheSelection}`);
         }
