@@ -40,6 +40,7 @@ export class Caching {
       } else {
         cacheSelection = latest;
       }
+      await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       if (fs.existsSync(cacheSelection)) {
         await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         CloudRunnerLogger.logCli(`cache item exists`);
