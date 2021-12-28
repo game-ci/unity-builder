@@ -27,7 +27,6 @@
     "commander-ts": "^0.2.0",
     "nanoid": "3.1.20",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.4.0",
     "semver": "^7.3.5",
     "yaml": "^1.10.2",
     "@octokit/core": "^3.5.1",
