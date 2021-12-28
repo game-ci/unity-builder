@@ -22,7 +22,7 @@ export class CloudRunnerRepositorySetup {
         !fs.existsSync(CloudRunnerState.libraryFolderFull),
         `!Warning!: The Unity library was included in the git repository`,
       );
-      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
+      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.projectPathFull);
       CloudRunnerLogger.logCli(`LFS Caching`);
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolder,
