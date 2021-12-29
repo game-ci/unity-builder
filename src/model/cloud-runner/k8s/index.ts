@@ -87,6 +87,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
         mountdir,
         workingdir,
         environment,
+        secrets,
         this.buildGuid,
         this.buildParameters,
         this.secretName,

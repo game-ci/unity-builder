@@ -1,6 +1,8 @@
+import { V1SecretKeySelector } from '@kubernetes/client-node';
 import BuildParameters from '../../build-parameters';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 
 class KubernetesJobSpecFactory {
@@ -10,6 +12,7 @@ class KubernetesJobSpecFactory {
     mountdir: string,
     workingDirectory: string,
     environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
     buildGuid: string,
     buildParameters: BuildParameters,
     secretName,
@@ -115,7 +118,15 @@ class KubernetesJobSpecFactory {
                   cpu: buildParameters.cloudRunnerCpu,
                 },
               },
-              env: environment,
+              env: [
+                ...environment,
+                ...secrets.map((x) => {
+                  const secret = new V1SecretKeySelector();
+                  secret.key = x.ParameterKey;
+                  secret.name = secretName;
+                  return { name: x.EnvironmentVariable, valueFrom: secret };
+                }),
+              ],
               volumeMounts: [
                 {
                   name: 'build-mount',

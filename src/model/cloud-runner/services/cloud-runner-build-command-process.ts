@@ -11,7 +11,8 @@ export class CloudRunnerBuildCommandProcessor {
   }
   static GetSecrets(buildParameters: BuildParameters) {
     return buildParameters.cloudRunnerCluster === `k8s`
-      ? `for f in /credentials; do cat $f | base64 && echo $f; done`
+      ? `cd /credentials
+      for f in ; do cat $f | base echo $f; done`
       : ``;
   }
 }
