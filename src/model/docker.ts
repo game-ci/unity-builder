@@ -24,7 +24,7 @@ class Docker {
     const command = `docker run \
         --workdir /github/workspace \
         --rm \
-        ${ImageEnvironmentFactory.getEnvVarString(parameters)}
+        ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
         --volume "/var/run/docker.sock":"/var/run/docker.sock" \
         --volume "${runnerTempPath}/_github_home":"/root" \
         --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
