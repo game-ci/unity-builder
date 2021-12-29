@@ -35,7 +35,7 @@ export class CLI {
     core.info(`INPUT:`);
     for (const element of properties) {
       // TODO pull description from action.yml
-      program.option(`--${element} <${element}>`, 'default description');
+      program.option(`--${element} <${element}>`, ' ');
       if (Input[element] !== undefined && Input[element] !== '') {
         core.info(`${element} ${Input[element]}`);
       }
