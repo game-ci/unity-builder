@@ -88,7 +88,7 @@ Resources:
         - Fn::GetAZs: !Ref 'AWS::Region'
       VpcId: !Ref 'VPC'
       CidrBlock: !FindInMap ['SubnetConfig', 'PublicOne', 'CIDR']
-    #  MapPublicIpOnLaunch: true
+      #  MapPublicIpOnLaunch: true
 
   PublicSubnetTwo:
     Type: AWS::EC2::Subnet
