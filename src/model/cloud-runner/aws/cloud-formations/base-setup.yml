@@ -59,7 +59,7 @@ Resources:
           ToPort: 2049
           SourceSecurityGroupId: !Ref ContainerSecurityGroup
           #CidrIp: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
-    # A security group for the containers we will run in Fargate.
+  # A security group for the containers we will run in Fargate.
   # Rules are added to this security group based on what ingress you
   # add for the cluster.
   ContainerSecurityGroup:
