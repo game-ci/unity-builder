@@ -7,7 +7,7 @@ export class ActionYamlReader {
   public constructor() {
     let filename = `action.yml`;
     if (!fs.existsSync(filename)) {
-      filename = path.join(`..`, filename);
+      filename = path.join(__dirname, `..`, filename);
     }
     this.actionYamlParsed = YAML.parse(fs.readFileSync(filename).toString());
   }
