@@ -293,8 +293,8 @@ Resources:
                 Action:
                   - 'kinesis:PutRecord'
                 Resource: '*'
-  #####################EFS#####################
 
+  #####################EFS#####################
   EfsFileStorage:
     Type: 'AWS::EFS::FileSystem'
     Properties:
