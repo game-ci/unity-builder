@@ -5,8 +5,7 @@ import { RemoteClient } from './remote-client';
 
 export class CLI {
   static async RunCli(options: any) {
-    // eslint-disable-next-line no-console
-    console.log(`Entrypoint: ${options.mode}`);
+    core.info(`Entrypoint: ${options.mode}`);
 
     if (options.mode === 'remote-cli') {
       await RemoteClient.Run(options);
