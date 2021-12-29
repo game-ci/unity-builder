@@ -1,6 +1,7 @@
 import BuildParameters from '../../build-parameters';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import { CloudRunnerState } from '../state/cloud-runner-state';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(
@@ -105,7 +106,7 @@ class KubernetesJobSpecFactory {
               name: 'main',
               image,
               command: ['/bin/sh'],
-              args: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(command)],
+              args: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(command, CloudRunnerState.buildParams)],
 
               workingDir: `/${workingDirectory}`,
               resources: {

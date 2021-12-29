@@ -1,4 +1,6 @@
+import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
+import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -46,6 +48,7 @@ class BuildParameters {
   public githubRepo!: string;
   public logToFile!: boolean;
   public gitSha!: string;
+  public logId!: string;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -99,6 +102,7 @@ class BuildParameters {
       remoteBuildCluster: Input.cloudRunnerCluster,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
+      logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
     };
   }
 

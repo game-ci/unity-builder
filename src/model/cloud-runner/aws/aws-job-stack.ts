@@ -1,8 +1,6 @@
 import * as SDK from 'aws-sdk';
 import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
-import CloudRunnerConstants from '../services/cloud-runner-constants';
-import { customAlphabet } from 'nanoid';
 import { AWSTemplates } from './aws-templates';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import * as fs from 'fs';
@@ -24,10 +22,6 @@ export class AWSJobStack {
     workingdir: string,
     secrets: CloudRunnerSecret[],
   ): Promise<CloudRunnerTaskDef> {
-    const logGuid = customAlphabet(CloudRunnerConstants.alphabet, 9)();
-    commands += `
-      echo "${logGuid}"
-    `;
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSTemplates.readTaskCloudFormationTemplate();
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
@@ -171,7 +165,8 @@ export class AWSJobStack {
 
     const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
 
-    // TODO: offer a parameter to decide if you want the guaranteed shutdown or fastest startup time possible
+    // TODO add a log to identify the time taken awaiting cleanup then review solutions based on how long this takes.
+    // One option is to offer an option to not await cleanup
 
     return {
       taskDefStackName,
@@ -180,7 +175,6 @@ export class AWSJobStack {
       ttlCloudFormation: cleanupCloudFormation,
       taskDefResources,
       baseResources,
-      logid: logGuid,
     };
   }
 }

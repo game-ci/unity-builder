@@ -7,6 +7,5 @@ class CloudRunnerTaskDef {
   public ttlCloudFormation!: string;
   public taskDefResources: AWS.CloudFormation.StackResources | undefined;
   public baseResources: AWS.CloudFormation.StackResources | undefined;
-  public logid!: string;
 }
 export default CloudRunnerTaskDef;
