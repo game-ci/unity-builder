@@ -5,9 +5,10 @@ import { CloudRunnerState } from '../state/cloud-runner-state';
 import * as core from '@actions/core';
 import fs from 'fs';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
+import waitUntil from 'async-wait-until';
 
-class KubernetesLogging {
-  static async streamLogs(
+class KubernetesTaskRunner {
+  static async runTask(
     kubeConfig: KubeConfig,
     kubeClient: CoreV1Api,
     jobName: string,
@@ -69,6 +70,24 @@ class KubernetesLogging {
     }
     CloudRunnerLogger.log('end of log stream');
   }
+
+  static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
+    let success: boolean = false;
+    CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
+    await waitUntil(
+      async () => {
+        const phase = (await kubeClient.readNamespacedPodStatus(podName, namespace))?.body.status?.phase;
+        success = phase === 'Running';
+        if (success || phase !== 'Pending') return true;
+        return false;
+      },
+      {
+        timeout: 500000,
+        intervalBetweenAttempts: 15000,
+      },
+    );
+    return success;
+  }
 }
 
-export default KubernetesLogging;
+export default KubernetesTaskRunner;

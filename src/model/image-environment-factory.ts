@@ -11,8 +11,7 @@ class ImageEnvironmentFactory {
       if (p.value === '' || p.value === undefined) {
         continue;
       }
-      string += `--env ${p.name}="${p.value}" \
-      `;
+      string += `--env ${p.name}="${p.value}" `;
     }
     return string;
   }

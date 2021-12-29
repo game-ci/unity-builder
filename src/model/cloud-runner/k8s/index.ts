@@ -5,13 +5,13 @@ import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import KubernetesLogging from './kubernetes-logging';
+import KubernetesTaskRunner from './kubernetes-task-runner';
 import KubernetesSecret from './kubernetes-secret';
-import KubernetesUtilities from './kubernetes-utils';
 import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
+import { CoreV1Api } from '@kubernetes/client-node';
 
 class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -99,13 +99,11 @@ class Kubernetes implements CloudRunnerProviderInterface {
       CloudRunnerLogger.log('Creating build job');
       await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       CloudRunnerLogger.log('Job created');
-      this.setPodNameAndContainerName(
-        await KubernetesUtilities.findPodFromJob(this.kubeClient, this.jobName, this.namespace),
-      );
+      this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
       CloudRunnerLogger.log('Watching pod until running');
-      await KubernetesUtilities.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
+      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       CloudRunnerLogger.log('Pod running, streaming logs');
-      await KubernetesLogging.streamLogs(
+      await KubernetesTaskRunner.runTask(
         this.kubeConfig,
         this.kubeClient,
         this.jobName,
@@ -163,6 +161,14 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+  }
+  static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
+    const namespacedPods = await kubeClient.listNamespacedPod(namespace);
+    const pod = namespacedPods.body.items.find((x) => x.metadata?.labels?.['job-name'] === jobName);
+    if (pod === undefined) {
+      throw new Error("pod with job-name label doesn't exist");
+    }
+    return pod;
   }
 }
 export default Kubernetes;
