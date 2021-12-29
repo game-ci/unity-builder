@@ -28,17 +28,15 @@ export class SetupStep implements StepInterface {
       await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildGuid,
         image,
-        [
-          `
-          apk update -q
-          apk add unzip zip git-lfs jq tree nodejs -q
-          export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-          mkdir -p ${CloudRunnerState.builderPathFull}
-          git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}
-          chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
-          node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
-      `,
-        ],
+        `
+        apk update -q
+        apk add unzip zip git-lfs jq tree nodejs -q
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+        mkdir -p ${CloudRunnerState.builderPathFull}
+        git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}
+        chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
+        node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
+        `,
         `/${CloudRunnerState.buildVolumeFolder}`,
         `/${CloudRunnerState.buildVolumeFolder}/`,
         environmentVariables,

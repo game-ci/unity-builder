@@ -68,7 +68,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
   async runTask(
     buildGuid: string,
     image: string,
-    commands: string[],
+    commands: string,
     mountdir: string,
     workingdir: string,
     environment: CloudRunnerEnvironmentVariable[],

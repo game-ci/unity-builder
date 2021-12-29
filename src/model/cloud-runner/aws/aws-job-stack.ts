@@ -19,13 +19,13 @@ export class AWSJobStack {
     buildGuid: string,
     image: string,
     entrypoint: string[],
-    commands: string[],
+    commands: string,
     mountdir: string,
     workingdir: string,
     secrets: CloudRunnerSecret[],
   ): Promise<CloudRunnerTaskDef> {
     const logGuid = customAlphabet(CloudRunnerConstants.alphabet, 9)();
-    commands[1] += `
+    commands += `
       echo "${logGuid}"
     `;
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;

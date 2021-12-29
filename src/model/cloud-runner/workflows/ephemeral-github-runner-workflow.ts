@@ -30,7 +30,7 @@ export class EphemeralGitHubRunnerWorkflow implements WorkflowInterface {
       await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildGuid,
         image,
-        [installAndStartRunner],
+        installAndStartRunner,
         `/runner`,
         `/runner`,
         environmentVariables,

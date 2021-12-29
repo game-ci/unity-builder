@@ -40,7 +40,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   async runTask(
     buildId: string,
     image: string,
-    commands: string[],
+    commands: string,
     mountdir: string,
     workingdir: string,
     environment: CloudRunnerEnvironmentVariable[],

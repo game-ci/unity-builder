@@ -1,9 +1,10 @@
 import BuildParameters from '../../build-parameters';
+import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(
-    command: string[],
+    command: string,
     image: string,
     mountdir: string,
     workingDirectory: string,
@@ -104,7 +105,7 @@ class KubernetesJobSpecFactory {
               name: 'main',
               image,
               command: ['/bin/sh'],
-              args: ['-c', ...command],
+              args: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(command)],
 
               workingDir: `/${workingDirectory}`,
               resources: {

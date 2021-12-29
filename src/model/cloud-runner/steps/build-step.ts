@@ -23,30 +23,28 @@ export class BuildStep implements StepInterface {
     await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildGuid,
       image,
-      [
-        `
-            export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
-            cp -r "${CloudRunnerState.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
-            cp -r "${CloudRunnerState.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
-            cp -r "${CloudRunnerState.builderPathFull}/dist/steps/" "/steps"
-            chmod -R +x "/entrypoint.sh"
-            chmod -R +x "/steps"
-            /entrypoint.sh
-            apt-get update
-            apt-get install -y -q zip
-            cd "${CloudRunnerState.libraryFolderFull}/.."
-            zip -r "lib-$BUILDID.zip" "./Library"
-            mv "lib-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/lib"
-            ls -lh "${CloudRunnerState.cacheFolderFull}/lib"
-            cd "${CloudRunnerState.repoPathFull}"
-            ls -lh "${CloudRunnerState.repoPathFull}"
-            zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
-            mv "build-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/build-$BUILDID.zip"
-            ls ${CloudRunnerState.cacheFolderFull}/lib
-            echo " "
-            ls
-          `,
-      ],
+      `
+        export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
+        cp -r "${CloudRunnerState.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
+        cp -r "${CloudRunnerState.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
+        cp -r "${CloudRunnerState.builderPathFull}/dist/steps/" "/steps"
+        chmod -R +x "/entrypoint.sh"
+        chmod -R +x "/steps"
+        /entrypoint.sh
+        apt-get update
+        apt-get install -y -q zip
+        cd "${CloudRunnerState.libraryFolderFull}/.."
+        zip -r "lib-$BUILDID.zip" "./Library"
+        mv "lib-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/lib"
+        ls -lh "${CloudRunnerState.cacheFolderFull}/lib"
+        cd "${CloudRunnerState.repoPathFull}"
+        ls -lh "${CloudRunnerState.repoPathFull}"
+        zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
+        mv "build-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/build-$BUILDID.zip"
+        ls ${CloudRunnerState.cacheFolderFull}/lib
+        echo " "
+        ls
+      `,
       `/${CloudRunnerState.buildVolumeFolder}`,
       `/${CloudRunnerState.projectPathFull}`,
       environmentVariables,

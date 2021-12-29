@@ -8,6 +8,7 @@ import { Input } from '../..';
 import fs from 'fs';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
+import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 
 class AWSTaskRunner {
   static async runTask(
@@ -16,7 +17,7 @@ class AWSTaskRunner {
     CF: AWS.CloudFormation,
     environment: CloudRunnerEnvironmentVariable[],
     buildGuid: string,
-    commands: string[],
+    commands: string,
   ) {
     const cluster = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
     const taskDefinition =
@@ -39,7 +40,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment: [...environment, { name: 'BUILDID', value: buildGuid }],
-            command: ['-c', ...commands],
+            command: ['-c', ...CloudRunnerBuildCommandProcessor.ProcessCommands(commands)],
           },
         ],
       },

@@ -29,7 +29,7 @@ export interface CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     image: string,
     // eslint-disable-next-line no-unused-vars
-    commands: string[],
+    commands: string,
     // eslint-disable-next-line no-unused-vars
     mountdir: string,
     // eslint-disable-next-line no-unused-vars
