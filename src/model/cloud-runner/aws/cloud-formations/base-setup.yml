@@ -98,7 +98,7 @@ Resources:
         - Fn::GetAZs: !Ref 'AWS::Region'
       VpcId: !Ref 'VPC'
       CidrBlock: !FindInMap ['SubnetConfig', 'PublicTwo', 'CIDR']
-    #  MapPublicIpOnLaunch: true
+      #  MapPublicIpOnLaunch: true
 
   # Setup networking resources for the public subnets. Containers
   # in the public subnets have public IP addresses and the routing table
