@@ -54,6 +54,9 @@
     "typescript": "^4.1.3",
     "ts-node": "^10.4.0"
   },
+  "hooks": {
+    "pre-commit": "lint-staged && yarn build && git add dist/index.*"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
@@ -67,7 +70,6 @@
     ],
     "*.sh": [
       "git update-index --chmod=+x"
-    ],
-    "*.js": "eslint --cache --fix"
+    ]
   }
 }

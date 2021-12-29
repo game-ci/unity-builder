@@ -2,6 +2,7 @@ import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerState } from '../state/cloud-runner-state';
+import * as core from '@actions/core';
 import fs from 'fs';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 
@@ -41,10 +42,10 @@ class KubernetesLogging {
         throw resultError;
       }
       if (!didStreamAnyLogs) {
-        throw new Error(
+        core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
+        core.error(
           JSON.stringify(
             {
-              message: 'Failed to stream any logs, listing namespace events, check for an error with the container',
               events: (await kubeClient.listNamespacedEvent(namespace)).body.items
                 .filter((x) => {
                   return x.involvedObject.name === podName || x.involvedObject.name === jobName;
@@ -61,6 +62,7 @@ class KubernetesLogging {
             4,
           ),
         );
+        throw new Error(`No logs streamed from k8s`);
       }
     } catch (error) {
       throw error;

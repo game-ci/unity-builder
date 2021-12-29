@@ -34,11 +34,13 @@ describe('Cloud Runner', () => {
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${testSecretName}=${testSecretValue}`);
       const inputKeys = Object.getOwnPropertyNames(Input);
+      const newLinePurgedFile = file
+        .replace(/\s+/g, '')
+        .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] !== 'function') {
-          expect(
-            file.replace(/\s+/g, '').replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), ''),
-          ).toContain(`${element}=${Input[element].toString().replace(/\s+/g, '')}`);
+          const newLinePurgedValue = Input[element].toString().replace(/\s+/g, '');
+          expect(newLinePurgedFile).toContain(`${element}=${newLinePurgedValue}`);
         }
       }
     }

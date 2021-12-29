@@ -4,9 +4,8 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 
 class KubernetesUtilities {
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
-    const pod = (await kubeClient.listNamespacedPod(namespace)).body.items.find(
-      (x) => x.metadata?.labels?.['job-name'] === jobName,
-    );
+    const namespacedPods = await kubeClient.listNamespacedPod(namespace);
+    const pod = namespacedPods.body.items.find((x) => x.metadata?.labels?.['job-name'] === jobName);
     if (pod === undefined) {
       throw new Error("pod with job-name label doesn't exist");
     }
