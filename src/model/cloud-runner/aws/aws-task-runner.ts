@@ -40,7 +40,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment: [...environment, { name: 'BUILDID', value: buildGuid }],
-            command: ['-c', ...CloudRunnerBuildCommandProcessor.ProcessCommands(commands)],
+            command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands)],
           },
         ],
       },
