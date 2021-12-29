@@ -5,6 +5,7 @@ import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
+import path from 'path';
 
 export class CloudRunnerRepositorySetup {
   static LFS_ASSETS_HASH;
@@ -23,11 +24,13 @@ export class CloudRunnerRepositorySetup {
         `!Warning!: The Unity library was included in the git repository`,
       );
       CloudRunnerLogger.logCli(`LFS Caching`);
+      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolder,
         CloudRunnerState.lfsDirectory,
         `${CloudRunnerRepositorySetup.LFS_ASSETS_HASH}.zip`,
       );
+      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
       await Caching.printCacheState(CloudRunnerState.lfsCacheFolder, CloudRunnerState.libraryCacheFolder);
       await CloudRunnerRepositorySetup.pullLatestLFS();
       await Caching.PushToCache(
@@ -35,7 +38,10 @@ export class CloudRunnerRepositorySetup {
         CloudRunnerState.lfsDirectory,
         CloudRunnerRepositorySetup.LFS_ASSETS_HASH,
       );
+      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
+      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
+
       Caching.handleCachePurging();
     } catch (error) {
       throw error;
