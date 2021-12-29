@@ -1,5 +1,5 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { AWSTemplates } from './aws-templates';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
@@ -21,7 +21,7 @@ export class AWSJobStack {
     mountdir: string,
     workingdir: string,
     secrets: CloudRunnerSecret[],
-  ): Promise<CloudRunnerTaskDef> {
+  ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSTemplates.readTaskCloudFormationTemplate();
     const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;

@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import * as core from '@actions/core';
-import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import * as zlib from 'zlib';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { Input } from '../..';
@@ -12,7 +12,7 @@ import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build
 
 class AWSTaskRunner {
   static async runTask(
-    taskDef: CloudRunnerTaskDef,
+    taskDef: CloudRunnerAWSTaskDef,
     ECS: AWS.ECS,
     CF: AWS.CloudFormation,
     environment: CloudRunnerEnvironmentVariable[],
@@ -104,7 +104,7 @@ class AWSTaskRunner {
   static async streamLogsUntilTaskStops(
     ECS: AWS.ECS,
     CF: AWS.CloudFormation,
-    taskDef: CloudRunnerTaskDef,
+    taskDef: CloudRunnerAWSTaskDef,
     clusterName: string,
     taskArn: string,
     kinesisStreamName: string,
@@ -138,7 +138,7 @@ class AWSTaskRunner {
     kinesis: AWS.Kinesis,
     iterator: string,
     shouldReadLogs: boolean,
-    taskDef: CloudRunnerTaskDef,
+    taskDef: CloudRunnerAWSTaskDef,
   ) {
     const records = await kinesis
       .getRecords({
@@ -165,7 +165,7 @@ class AWSTaskRunner {
     return { timestamp, shouldReadLogs };
   }
 
-  private static logRecords(records, iterator: string, taskDef: CloudRunnerTaskDef, shouldReadLogs: boolean) {
+  private static logRecords(records, iterator: string, taskDef: CloudRunnerAWSTaskDef, shouldReadLogs: boolean) {
     if (records.Records.length > 0 && iterator) {
       for (let index = 0; index < records.Records.length; index++) {
         const json = JSON.parse(

@@ -1,7 +1,7 @@
 import * as SDK from 'aws-sdk';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import CloudRunnerTaskDef from '../services/cloud-runner-task-def';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import AWSTaskRunner from './aws-task-runner';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import BuildParameters from '../../build-parameters';
@@ -80,7 +80,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     }
   }
 
-  async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerTaskDef) {
+  async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
     CloudRunnerLogger.log('Cleanup starting');
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,

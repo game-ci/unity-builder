@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 
-class CloudRunnerTaskDef {
+class CloudRunnerAWSTaskDef {
   public taskDefStackName!: string;
   public taskDefCloudFormation!: string;
   public taskDefStackNameTTL!: string;
@@ -8,4 +8,4 @@ class CloudRunnerTaskDef {
   public taskDefResources: AWS.CloudFormation.StackResources | undefined;
   public baseResources: AWS.CloudFormation.StackResources | undefined;
 }
-export default CloudRunnerTaskDef;
+export default CloudRunnerAWSTaskDef;

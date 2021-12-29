@@ -4,7 +4,7 @@ import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment
 import CloudRunnerNamespace from '../services/cloud-runner-namespace';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { TaskParameterSerializer } from './task-parameter-serializer';
+import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 
 export class CloudRunnerState {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
