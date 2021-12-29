@@ -35,7 +35,7 @@ class Input {
     } else if (Input.getInput(`GITHUB_REF`)) {
       return Input.getInput(`GITHUB_REF`)
         .split('/')
-        .filter((x) => {
+        .map((x) => {
           x = x[0].toUpperCase() + x.slice(1);
           return x;
         })
