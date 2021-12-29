@@ -28,7 +28,7 @@ export class Caching {
       }
 
       const latest = await (await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`)).replace(
-        `\n`,
+        /\n/g,
         ``,
       );
 

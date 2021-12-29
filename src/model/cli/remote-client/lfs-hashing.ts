@@ -23,9 +23,7 @@ export class LFSHashing {
     try {
       await CloudRunnerAgentSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
       await CloudRunnerAgentSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
-      return fs
-        .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8')
-        .replace('\n', '');
+      return fs.readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8');
     } catch (error) {
       throw error;
     }
