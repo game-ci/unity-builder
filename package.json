@@ -23,6 +23,7 @@
     "@octokit/core": "^3.5.1",
     "async-wait-until": "^2.0.7",
     "aws-sdk": "^2.812.0",
+    "base-64": "^1.0.0",
     "commander": "^8.3.0",
     "commander-ts": "^0.2.0",
     "kubernetes-client": "^9.0.0",
