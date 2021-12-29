@@ -32,7 +32,7 @@ export class CLI {
     const program = new Command();
     program.version('0.0.1');
     const properties = Object.getOwnPropertyNames(Input);
-    core.info(`\r\n`);
+    core.info(`\n`);
     core.info(`INPUT:`);
     for (const element of properties) {
       // TODO pull description from action.yml
@@ -41,7 +41,7 @@ export class CLI {
         core.info(`${element} ${Input[element]}`);
       }
     }
-    core.info(`\r\n`);
+    core.info(`\n`);
     program.option('-m, --mode <mode>', 'cli or default');
     program.parse(process.argv);
 

@@ -8,11 +8,11 @@ export class CloudRunnerAgentSystem {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
         if (error) {
-          CloudRunnerLogger.logCli(`[ERROR] ${error.message}`);
+          CloudRunnerLogger.logCliError(`${error.message}`);
           throw new Error(error.toString());
         }
         if (stderr) {
-          CloudRunnerLogger.logCli(`[DIAGNOSTIC] ${stderr.toString()}`);
+          CloudRunnerLogger.logCliDiagnostic(`${stderr.toString()}`);
           return;
         }
         const outputChunk = `${stdout}`;

@@ -181,7 +181,7 @@ class AWSTaskRunner {
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
             if (CloudRunnerState.buildParams.logToFile) {
-              fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\r\n`);
+              fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\n`);
             }
             CloudRunnerLogger.log(message);
           }
