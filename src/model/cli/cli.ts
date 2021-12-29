@@ -34,8 +34,9 @@ export class CLI {
     const properties = Object.getOwnPropertyNames(Input);
     core.info(`\n`);
     core.info(`INPUT:`);
+    const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
-      program.option(`--${element} <${element}>`, ActionYamlReader.Instance.GetActionYamlValue(element));
+      program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
       if (Input[element] !== undefined && Input[element] !== '') {
         core.info(`${element} ${Input[element]}`);
       }
