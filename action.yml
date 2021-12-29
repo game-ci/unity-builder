@@ -24,13 +24,13 @@ inputs:
     description: 'Name of the build.'
   postBuildSteps:
     required: false
-    default: ''
+    default: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
   preBuildSteps:
     required: false
-    default: ''
+    default: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
   customBuildSteps:
     required: false
-    default: ''
+    default: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
   buildsPath:
     required: false
     default: ''
