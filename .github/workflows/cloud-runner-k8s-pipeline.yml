@@ -55,11 +55,8 @@ jobs:
         run: yarn test -i
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-west-2
-          CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
+        with:
           CloudRunnerTests: true
           cloudRunnerCluster: k8s
           projectPath: ${{ matrix.projectPath }}
@@ -67,6 +64,7 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+          CloudRunnerBranch: remote-builder/unified-providers
 
       ###########################
       # Cloud Runner Build Test #
@@ -75,8 +73,8 @@ jobs:
         uses: ./
         id: k8s-unity-build
         env:
-          DEBUG: true
           CloudRunnerBranch: remote-builder/unified-providers
+          DEBUG: true
         with:
           cloudRunnerCluster: k8s
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -90,13 +88,9 @@ jobs:
       ###########################
       #          Upload         #
       ###########################
-      # - uses: frostebite/K8s-Download-Volume@master
-      #   with:
-      #     kubeConfig: ${{ steps.read-base64.outputs.base64 }}
-      #     volume: ${{ steps.k8s-unity-build.outputs.volume }}
-      #     sourcePath: repo/build/
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: Kubernetes Build (${{ matrix.targetPlatform }})
-      #     path: k8s-volume-download
-      #     retention-days: 14
+      # download from cloud storage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Kubernetes Build (${{ matrix.targetPlatform }})
+          path: k8s-volume-download
+          retention-days: 14

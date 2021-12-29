@@ -55,8 +55,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
-          CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
+        with:
+          CloudRunnerBranch: remote-builder/unified-providers
           CloudRunnerTests: true
           cloudRunnerCluster: aws
           projectPath: ${{ matrix.projectPath }}
@@ -71,13 +72,13 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
-          CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
         with:
           cloudRunnerCluster: aws
+          versioning: None
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           awsBaseStackName: game-ci-stack-integration-tests
-          versioning: None
+          CloudRunnerBranch: remote-builder/unified-providers
