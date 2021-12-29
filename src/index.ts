@@ -12,7 +12,7 @@ async function runMain() {
     const baseImage = new ImageTag(buildParameters);
     let builtImage;
 
-    if (buildParameters.cloudRunnerCluster) {
+    if (buildParameters.cloudRunnerCluster !== '') {
       await CloudRunner.run(buildParameters, baseImage.toString());
     } else {
       core.info('Building locally');
