@@ -2,6 +2,7 @@ import { Command } from 'commander-ts';
 import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { RemoteClient } from './remote-client';
+import { ActionYamlReader } from '../input-readers/action-yaml';
 
 export class CLI {
   static async RunCli(options: any) {
@@ -35,7 +36,7 @@ export class CLI {
     core.info(`INPUT:`);
     for (const element of properties) {
       // TODO pull description from action.yml
-      program.option(`--${element} <${element}>`, ' ');
+      program.option(`--${element} <${element}>`, ActionYamlReader.Instance.GetActionYamlValue(element));
       if (Input[element] !== undefined && Input[element] !== '') {
         core.info(`${element} ${Input[element]}`);
       }

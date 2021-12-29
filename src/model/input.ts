@@ -1,3 +1,5 @@
+import { GitRepoReader } from './input-readers/git-repo';
+import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
 
 const core = require('@actions/core');
@@ -26,8 +28,7 @@ class Input {
     return Input.getInput('region') || 'eu-west-2';
   }
   static get githubRepo(): string {
-    return Input.getInput('GITHUB_REPOSITORY') || 'game-ci/unity-builder';
-    // TODO system get repo remote?
+    return Input.getInput('GITHUB_REPOSITORY') || GitRepoReader.GetRemote() || 'game-ci/unity-builder';
   }
   static get branch() {
     if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {
@@ -42,20 +43,22 @@ class Input {
         .join('');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
+    } else if (GithubCliReader.GetGitHubAuthToken()) {
+      return GithubCliReader.GetGitHubAuthToken();
     } else {
       return 'remote-builder/unified-providers';
     }
-    // TODO git get branch?
+    //
   }
 
   static get gitSha() {
     if (Input.getInput(`GITHUB_SHA`)) {
       return Input.getInput(`GITHUB_SHA`);
-    }
-    if (Input.getInput(`GitSHA`)) {
+    } else if (Input.getInput(`GitSHA`)) {
       return Input.getInput(`GitSHA`);
+    } else if (GitRepoReader.GetSha()) {
+      return GitRepoReader.GetSha();
     }
-    // TODO  git get sha?
   }
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
@@ -147,8 +150,7 @@ class Input {
   }
 
   static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || '';
-    // TODO  get from git auth status -t
+    return core.getInput('gitPrivateToken') || GithubCliReader.GetGitHubAuthToken() || '';
   }
 
   static get chownFilesTo() {
