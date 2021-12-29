@@ -22,6 +22,18 @@ class Input {
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]
+      : process.env[
+          query
+            .replace(/([A-Z])/g, ' $1')
+            .trim()
+            .toUpperCase()
+        ] !== undefined
+      ? process.env[
+          query
+            .replace(/([A-Z])/g, ' $1')
+            .trim()
+            .toUpperCase()
+        ]
       : false;
   }
   static get region(): string {
