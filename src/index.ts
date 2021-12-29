@@ -10,13 +10,12 @@ async function runMain() {
 
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
-    let builtImage;
 
-    if (buildParameters.cloudRunnerCluster !== '') {
+    if (buildParameters.cloudRunnerCluster !== '' && buildParameters.cloudRunnerCluster !== undefined) {
       await CloudRunner.run(buildParameters, baseImage.toString());
     } else {
       core.info('Building locally');
-      builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+      const builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
       await Docker.run(builtImage, { workspace, ...buildParameters });
     }
 
