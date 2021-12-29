@@ -97,12 +97,6 @@ class KubernetesJobSpecFactory {
                 claimName: pvcName,
               },
             },
-            {
-              name: 'credentials',
-              secret: {
-                secretName,
-              },
-            },
           ],
           containers: [
             {
@@ -131,11 +125,6 @@ class KubernetesJobSpecFactory {
                 {
                   name: 'build-mount',
                   mountPath: `/${mountdir}`,
-                },
-                {
-                  name: 'credentials',
-                  mountPath: '/credentials',
-                  readOnly: true,
                 },
               ],
               lifecycle: {
