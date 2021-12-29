@@ -7,6 +7,6 @@ export class ActionYamlReader {
     this.actionYamlParsed = YAML.parse(fs.readFileSync(`action.yml`).toString());
   }
   public GetActionYamlValue(key: string) {
-    return this.actionYamlParsed.inputs[key];
+    return this.actionYamlParsed.inputs[key]?.description || 'No description found in action.yml';
   }
 }

@@ -44,7 +44,7 @@ class Input {
   static get githubRepo(): string {
     return Input.getInput('GITHUB_REPOSITORY') || GitRepoReader.GetRemote() || 'game-ci/unity-builder';
   }
-  static get branch() {
+  static async branch() {
     if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {
       return Input.getInput(`REMOTE_BUILDER_CACHE`);
     } else if (Input.getInput(`GITHUB_REF`)) {
@@ -57,8 +57,8 @@ class Input {
         .join('');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
-    } else if (GithubCliReader.GetGitHubAuthToken()) {
-      return GithubCliReader.GetGitHubAuthToken();
+    } else if (await GitRepoReader.GetBranch()) {
+      return await GitRepoReader.GetBranch();
     } else {
       return 'remote-builder/unified-providers';
     }
@@ -163,8 +163,12 @@ class Input {
     return Input.getInput('sshAgent') || '';
   }
 
-  static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || GithubCliReader.GetGitHubAuthToken() || '';
+  static async githubToken() {
+    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+  }
+
+  static async gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 
   static get chownFilesTo() {
@@ -193,10 +197,6 @@ class Input {
 
   static get kubeConfig() {
     return Input.getInput('kubeConfig') || '';
-  }
-
-  static get githubToken() {
-    return Input.getInput('githubToken') || '';
   }
 
   static get cloudRunnerMemory() {
