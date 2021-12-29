@@ -165,9 +165,6 @@ export class AWSJobStack {
 
     const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
 
-    // TODO add a log to identify the time taken awaiting cleanup then review solutions based on how long this takes.
-    // One option is to offer an option to not await cleanup
-
     return {
       taskDefStackName,
       taskDefCloudFormation,
