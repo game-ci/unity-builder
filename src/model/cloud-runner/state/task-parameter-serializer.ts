@@ -62,8 +62,14 @@ export class TaskParameterSerializer {
     ];
   }
   private static get serializeBuildParamsAndInput() {
+    let array = new Array();
+    array = TaskParameterSerializer.readBuildParameters(array);
+    TaskParameterSerializer.readInput(array);
+    return array;
+  }
+
+  private static readBuildParameters(array: any[]) {
     const keys = Object.keys(CloudRunnerState.buildParams);
-    const array = new Array();
     for (const element of keys) {
       array.push({
         name: element,
@@ -71,9 +77,13 @@ export class TaskParameterSerializer {
       });
     }
     array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
+    return array;
+  }
+
+  private static readInput(array: any[]) {
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
-      if (typeof Input[element] != 'function') {
+      if (typeof Input[element] !== 'function') {
         array.push({
           name: element,
           value: `${Input[element]}`,
