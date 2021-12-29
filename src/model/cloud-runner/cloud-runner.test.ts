@@ -35,7 +35,7 @@ describe('Cloud Runner', () => {
       expect(file).toContain(`${testSecretName}=${testSecretValue}`);
       const inputKeys = Object.getOwnPropertyNames(Input);
       for (const element of inputKeys) {
-        if (Input[element] !== undefined && typeof Input[element] != 'function') {
+        if (Input[element] !== undefined && typeof Input[element] !== 'function') {
           expect(
             file.replace(/\s+/g, '').replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), ''),
           ).toContain(`${element}=${Input[element].toString().replace(/\s+/g, '')}`);
