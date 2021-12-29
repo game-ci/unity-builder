@@ -44,16 +44,17 @@ export class AWSBaseStack {
       Capabilities: ['CAPABILITY_IAM'],
     };
 
-    const stacks = (
-      await CF.listStacks({ StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE', 'ROLLBACK_COMPLETE'] }).promise()
-    ).StackSummaries?.map((x) => x.StackName);
-    const stackExists: Boolean = stacks?.includes(baseStackName) || false;
+    const stacks = await CF.listStacks({
+      StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE', 'ROLLBACK_COMPLETE'],
+    }).promise();
+    const stackNames = stacks.StackSummaries?.map((x) => x.StackName) || [];
+    const stackExists: Boolean = stackNames.includes(baseStackName) || false;
     const describeStack = async () => {
       return await CF.describeStacks(describeStackInput).promise();
     };
     try {
       if (!stackExists) {
-        CloudRunnerLogger.log(`${baseStackName} stack does not exist (${JSON.stringify(stacks)})`);
+        CloudRunnerLogger.log(`${baseStackName} stack does not exist (${JSON.stringify(stackNames)})`);
         await CF.createStack(createStackInput).promise();
         CloudRunnerLogger.log(`created stack (version: ${parametersHash})`);
       }
