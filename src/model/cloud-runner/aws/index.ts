@@ -51,7 +51,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     const CF = new SDK.CloudFormation();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
-    const t0 = Date.now();
+    const startTimeMs = Date.now();
 
     await new AWSBaseStack(this.baseStackName).setupBaseStack(CF);
     const taskDef = await new AWSJobStack(this.baseStackName).setupCloudFormations(
@@ -65,17 +65,18 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
       secrets,
     );
 
-    let t2;
+    let postRunTaskTimeMs;
     try {
-      const t1 = Date.now();
-      CloudRunnerLogger.log(`Setup job time: ${Math.floor((t1 - t0) / 1000)}s`);
+      const postSetupStacksTimeMs = Date.now();
+      CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
       await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
-      t2 = Date.now();
-      CloudRunnerLogger.log(`Run job time: ${Math.floor((t2 - t1) / 1000)}s`);
+      postRunTaskTimeMs = Date.now();
+      CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
     } finally {
       await this.cleanupResources(CF, taskDef);
-      const t3 = Date.now();
-      if (t2 !== undefined) CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((t3 - t2) / 1000)}s`);
+      const postCleanupTimeMs = Date.now();
+      if (postRunTaskTimeMs !== undefined)
+        CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((postCleanupTimeMs - postRunTaskTimeMs) / 1000)}s`);
     }
   }
 
