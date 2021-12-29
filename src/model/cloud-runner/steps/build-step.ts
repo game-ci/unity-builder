@@ -34,13 +34,13 @@ export class BuildStep implements StepInterface {
         apt-get update
         apt-get install -y -q zip
         cd "${CloudRunnerState.libraryFolderFull}/.."
-        zip -r "lib-$BUILDID.zip" "./Library"
-        mv "lib-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/lib"
+        zip -r "lib-$buildGuid.zip" "./Library"
+        mv "lib-$buildGuid.zip" "${CloudRunnerState.cacheFolderFull}/lib"
         ls -lh "${CloudRunnerState.cacheFolderFull}/lib"
         cd "${CloudRunnerState.repoPathFull}"
         ls -lh "${CloudRunnerState.repoPathFull}"
-        zip -r "build-$BUILDID.zip" "./${CloudRunnerState.buildParams.buildPath}"
-        mv "build-$BUILDID.zip" "${CloudRunnerState.cacheFolderFull}/build-$BUILDID.zip"
+        zip -r "build-$buildGuid.zip" "./${CloudRunnerState.buildParams.buildPath}"
+        mv "build-$buildGuid.zip" "${CloudRunnerState.cacheFolderFull}/build-$buildGuid.zip"
         ls ${CloudRunnerState.cacheFolderFull}/lib
         echo " "
         ls

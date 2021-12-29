@@ -86,10 +86,6 @@ export class AWSJobStack {
         ParameterKey: 'EFSMountDirectory',
         ParameterValue: mountdir,
       },
-      {
-        ParameterKey: 'BUILDID',
-        ParameterValue: buildGuid,
-      },
       ...secretsMappedToCloudFormationParameters,
     ];
 
@@ -133,10 +129,6 @@ export class AWSJobStack {
           {
             ParameterKey: 'TTL',
             ParameterValue: '100',
-          },
-          {
-            ParameterKey: 'BUILDID',
-            ParameterValue: buildGuid,
           },
           {
             ParameterKey: 'EnvironmentName',

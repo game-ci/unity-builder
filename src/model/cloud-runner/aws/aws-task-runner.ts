@@ -39,7 +39,7 @@ class AWSTaskRunner {
         containerOverrides: [
           {
             name: taskDef.taskDefStackName,
-            environment: [...environment, { name: 'BUILDID', value: buildGuid }],
+            environment,
             command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands, CloudRunnerState.buildParams)],
           },
         ],
