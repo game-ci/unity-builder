@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
 class System {
-  static async run(command, arguments_: any = [], options = {}) {
+  static async run(command, arguments_: any = [], options = {}, shouldDebug = true) {
     let result = '';
     let error = '';
     let debug = '';
@@ -20,7 +20,7 @@ class System {
     };
 
     const showOutput = () => {
-      if (debug !== '') {
+      if (debug !== '' && shouldDebug) {
         core.debug(debug);
       }
 
