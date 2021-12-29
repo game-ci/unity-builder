@@ -7,7 +7,7 @@ export class GithubCliReader {
       assert(await System.run(`gh -v`));
       return await System.run(`gh auth status -t`);
     } catch {
-      return false;
+      return '';
     }
   }
 }
