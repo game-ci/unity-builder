@@ -92,7 +92,7 @@ export class AWSBaseStack {
           await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
         }
       }
-      CloudRunnerLogger.log('base stack is ready');
+      CloudRunnerLogger.log('base stack is now ready');
     } catch (error) {
       core.error(JSON.stringify(await describeStack(), undefined, 4));
       throw error;
