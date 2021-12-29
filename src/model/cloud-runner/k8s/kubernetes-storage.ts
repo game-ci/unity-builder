@@ -56,7 +56,6 @@ class KubernetesStorage {
       );
     } catch (error) {
       core.error('Failed to watch PVC');
-      core.error(error);
       core.error(JSON.stringify(error, undefined, 4));
       core.error(
         `PVC Body: ${JSON.stringify(
@@ -100,12 +99,7 @@ class KubernetesStorage {
     namespace: string,
     pvcName: string,
   ) {
-    const name = result.body.metadata?.name;
-    if (!name) throw new Error('failed to create PVC');
-    // don't always log the PVC...
-    // CloudRunnerLogger.log(
-    //   JSON.stringify(await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace), undefined, 4),
-    // );
+    const name = result.body.metadata?.name || '';
     CloudRunnerLogger.log(`PVC ${name} created`);
     await this.watchUntilPVCNotPending(kubeClient, name, namespace);
     CloudRunnerLogger.log(`PVC ${name} is ready and not pending`);
