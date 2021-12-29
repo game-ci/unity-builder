@@ -1,7 +1,6 @@
 import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import * as k8s from '@kubernetes/client-node';
-const base64 = require('base-64');
 
 class KubernetesSecret {
   static async createSecret(
@@ -19,8 +18,7 @@ class KubernetesSecret {
     };
     secret.data = {};
     for (const buildSecret of secrets) {
-      secret.data[buildSecret.EnvironmentVariable] = base64.encode(buildSecret.ParameterValue);
-      secret.data[`${buildSecret.EnvironmentVariable}_NAME`] = base64.encode(buildSecret.ParameterKey);
+      secret.data[buildSecret.ParameterKey] = buildSecret.ParameterValue;
     }
     try {
       await kubeClient.createNamespacedSecret(namespace, secret);
