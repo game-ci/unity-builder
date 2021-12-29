@@ -118,16 +118,16 @@ class AWSTaskRunner {
 
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
-    let readingLogs = true;
+    let shouldReadLogs = true;
     let timestamp: number = 0;
-    while (readingLogs) {
+    while (shouldReadLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn);
-      ({ timestamp, readingLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, readingLogs));
-      ({ iterator, readingLogs } = await AWSTaskRunner.handleLogStreamIteration(
+      ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
+      ({ iterator, shouldReadLogs } = await AWSTaskRunner.handleLogStreamIteration(
         kinesis,
         iterator,
-        readingLogs,
+        shouldReadLogs,
         taskDef,
       ));
     }
@@ -136,7 +136,7 @@ class AWSTaskRunner {
   private static async handleLogStreamIteration(
     kinesis: AWS.Kinesis,
     iterator: string,
-    readingLogs: boolean,
+    shouldReadLogs: boolean,
     taskDef: CloudRunnerTaskDef,
   ) {
     const records = await kinesis
@@ -145,11 +145,11 @@ class AWSTaskRunner {
       })
       .promise();
     iterator = records.NextShardIterator || '';
-    readingLogs = AWSTaskRunner.logRecords(records, iterator, taskDef, readingLogs);
-    return { iterator, readingLogs };
+    shouldReadLogs = AWSTaskRunner.logRecords(records, iterator, taskDef, shouldReadLogs);
+    return { iterator, shouldReadLogs };
   }
 
-  private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, readingLogs: boolean) {
+  private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, shouldReadLogs: boolean) {
     if (taskData?.lastStatus !== 'RUNNING') {
       if (timestamp === 0) {
         CloudRunnerLogger.log('## Cloud runner job stopped, streaming end of logs');
@@ -157,14 +157,14 @@ class AWSTaskRunner {
       }
       if (timestamp !== 0 && Date.now() - timestamp > 30000) {
         CloudRunnerLogger.log('## Cloud runner status is not RUNNING for 30 seconds, last query for logs');
-        readingLogs = false;
+        shouldReadLogs = false;
       }
       CloudRunnerLogger.log(`## Status of job: ${taskData.lastStatus}`);
     }
-    return { timestamp, readingLogs };
+    return { timestamp, shouldReadLogs };
   }
 
-  private static logRecords(records, iterator: string, taskDef: CloudRunnerTaskDef, readingLogs: boolean) {
+  private static logRecords(records, iterator: string, taskDef: CloudRunnerTaskDef, shouldReadLogs: boolean) {
     if (records.Records.length > 0 && iterator) {
       for (let index = 0; index < records.Records.length; index++) {
         const json = JSON.parse(
@@ -175,7 +175,7 @@ class AWSTaskRunner {
             let message = json.logEvents[logEventsIndex].message;
             if (json.logEvents[logEventsIndex].message.includes(taskDef.logid)) {
               CloudRunnerLogger.log('End of log transmission received');
-              readingLogs = false;
+              shouldReadLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
             }
@@ -188,7 +188,7 @@ class AWSTaskRunner {
         }
       }
     }
-    return readingLogs;
+    return shouldReadLogs;
   }
 
   private static async getLogStream(kinesis: AWS.Kinesis, kinesisStreamName: string) {
