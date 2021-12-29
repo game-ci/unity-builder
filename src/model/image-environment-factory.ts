@@ -8,6 +8,9 @@ class ImageEnvironmentFactory {
     const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters);
     let string = '';
     for (const p of environmentVariables) {
+      if (p.value === '' || p.value === undefined) {
+        continue;
+      }
       string += `--env ${p.name}="${p.value}" \
       `;
     }
