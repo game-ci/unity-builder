@@ -27,12 +27,14 @@ class Input {
             .replace(/([A-Z])/g, ' $1')
             .trim()
             .toUpperCase()
+            .replace(/ /g, '_')
         ] !== undefined
       ? process.env[
           query
             .replace(/([A-Z])/g, ' $1')
             .trim()
             .toUpperCase()
+            .replace(/ /g, '_')
         ]
       : false;
   }
