@@ -26,7 +26,6 @@ describe('Cloud Runner', () => {
   it('All build parameters sent to cloud runner as env vars', async () => {
     if (Input.cloudRunnerTests) {
       const buildParameter = await BuildParameters.create();
-      buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
       expect(file).toContain(JSON.stringify(buildParameter));
