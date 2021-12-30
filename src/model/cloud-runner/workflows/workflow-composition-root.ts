@@ -6,6 +6,7 @@ import { EphemeralGitHubRunnerWorkflow } from './ephemeral-github-runner-workflo
 import { WorkflowInterface } from './workflow-interface';
 import { BuildAutomationWorkflow } from './build-automation-workflow';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
+import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -23,7 +24,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
         await new BuildAutomationWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
-            CloudRunnerState.readBuildEnvironmentVariables(),
+            TaskParameterSerializer.readBuildEnvironmentVariables(),
             CloudRunnerState.defaultSecrets,
           ),
         );
@@ -31,7 +32,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
         await new EphemeralGitHubRunnerWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
-            CloudRunnerState.readBuildEnvironmentVariables(),
+            TaskParameterSerializer.readBuildEnvironmentVariables(),
             CloudRunnerState.defaultSecrets,
           ),
         );
@@ -39,7 +40,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
         await new SetupStep().run(
           new CloudRunnerStepState(
             'alpine/git',
-            CloudRunnerState.readBuildEnvironmentVariables(),
+            TaskParameterSerializer.readBuildEnvironmentVariables(),
             CloudRunnerState.defaultSecrets,
           ),
         );

@@ -1,26 +1,16 @@
 import path from 'path';
 import { BuildParameters } from '../..';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import CloudRunnerNamespace from '../services/cloud-runner-namespace';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 
 export class CloudRunnerState {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
   public static buildParams: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
-  public static buildGuid: string;
   public static readonly repositoryFolder = 'repo';
 
   static setup(buildParameters: BuildParameters) {
     CloudRunnerState.buildParams = buildParameters;
-    if (CloudRunnerState.buildGuid === undefined) {
-      CloudRunnerState.buildGuid = CloudRunnerNamespace.generateBuildName(
-        CloudRunnerState.runNumber,
-        buildParameters.platform,
-      );
-    }
   }
 
   public static get branchName(): string {
@@ -28,7 +18,7 @@ export class CloudRunnerState {
   }
 
   public static get buildPathFull(): string {
-    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildGuid);
+    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
   }
 
   public static get builderPathFull(): string {
@@ -89,17 +79,5 @@ export class CloudRunnerState {
 
   public static get cacheFolder() {
     return 'cache';
-  }
-
-  public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
-    return TaskParameterSerializer.readBuildEnvironmentVariables();
-  }
-
-  public static get runNumber() {
-    const runNumber = CloudRunnerState.buildParams.runNumber;
-    if (!runNumber || runNumber === '') {
-      throw new Error('no run number found, exiting');
-    }
-    return runNumber;
   }
 }

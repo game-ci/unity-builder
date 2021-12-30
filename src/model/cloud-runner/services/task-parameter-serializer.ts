@@ -17,7 +17,7 @@ export class TaskParameterSerializer {
       },
       {
         name: 'GITHUB_WORKSPACE',
-        value: `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildGuid}/${CloudRunnerState.repositoryFolder}/`,
+        value: `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildParams.buildGuid}/${CloudRunnerState.repositoryFolder}/`,
       },
       {
         name: 'BUILD_TARGET',
@@ -55,8 +55,8 @@ export class TaskParameterSerializer {
     array.push(
       { name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) },
       {
-        name: Object.keys(CloudRunnerState.buildGuid)[0],
-        value: CloudRunnerState.buildGuid,
+        name: `buildGuid`,
+        value: CloudRunnerState.buildParams.buildGuid,
       },
     );
     return array;

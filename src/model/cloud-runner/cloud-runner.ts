@@ -6,6 +6,7 @@ import CloudRunnerLogger from './services/cloud-runner-logger';
 import { CloudRunnerStepState } from './state/cloud-runner-step-state';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
 import { CloudRunnerError } from './error/cloud-runner-error';
+import { TaskParameterSerializer } from './services/task-parameter-serializer';
 
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {
@@ -32,7 +33,7 @@ class CloudRunner {
     CloudRunner.setup(buildParameters);
     try {
       await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
-        CloudRunnerState.buildGuid,
+        CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
@@ -40,12 +41,12 @@ class CloudRunner {
       await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(
           baseImage,
-          CloudRunnerState.readBuildEnvironmentVariables(),
+          TaskParameterSerializer.readBuildEnvironmentVariables(),
           CloudRunnerState.defaultSecrets,
         ),
       );
       await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
-        CloudRunnerState.buildGuid,
+        CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,

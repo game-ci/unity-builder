@@ -21,7 +21,7 @@ export class BuildStep implements StepInterface {
   ) {
     CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
     await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
-      CloudRunnerState.buildGuid,
+      CloudRunnerState.buildParams.buildGuid,
       image,
       `
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
@@ -34,13 +34,13 @@ export class BuildStep implements StepInterface {
         apt-get update
         apt-get install -y -q zip
         cd "${CloudRunnerState.libraryFolderFull}/.."
-        zip -r "lib-$buildGuid.zip" "./Library"
-        mv "lib-$buildGuid.zip" "${CloudRunnerState.cacheFolderFull}/lib"
+        zip -r "lib-$BUILD_GUID.zip" "./Library"
+        mv "lib-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull}/lib"
         ls -lh "${CloudRunnerState.cacheFolderFull}/lib"
         cd "${CloudRunnerState.repoPathFull}"
         ls -lh "${CloudRunnerState.repoPathFull}"
-        zip -r "build-$buildGuid.zip" "./${CloudRunnerState.buildParams.buildPath}"
-        mv "build-$buildGuid.zip" "${CloudRunnerState.cacheFolderFull}/build-$buildGuid.zip"
+        zip -r "build-$BUILD_GUID.zip" "./${CloudRunnerState.buildParams.buildPath}"
+        mv "build-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull}/build-$BUILD_GUID.zip"
         ls ${CloudRunnerState.cacheFolderFull}/lib
         echo " "
         ls

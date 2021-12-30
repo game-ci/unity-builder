@@ -25,7 +25,7 @@ class KubernetesTaskRunner {
       let message = chunk.toString();
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
       if (CloudRunnerState.buildParams.logToFile) {
-        fs.appendFileSync(`${CloudRunnerState.buildGuid}-outputfile.txt`, `${message}\n`);
+        fs.appendFileSync(`${CloudRunnerState.buildParams.buildGuid}-outputfile.txt`, `${message}\n`);
       }
       logCallback(message);
       next();

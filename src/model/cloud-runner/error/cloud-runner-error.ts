@@ -7,7 +7,7 @@ export class CloudRunnerError {
     CloudRunnerLogger.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Cloud Runner failed');
     await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
-      CloudRunnerState.buildGuid,
+      CloudRunnerState.buildParams.buildGuid,
       CloudRunnerState.buildParams,
       CloudRunnerState.branchName,
       CloudRunnerState.defaultSecrets,

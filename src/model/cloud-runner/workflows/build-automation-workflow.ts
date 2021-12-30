@@ -1,4 +1,5 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger';
+import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { BuildStep } from '../steps/build-step';
@@ -22,7 +23,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       await new SetupStep().run(
         new CloudRunnerStepState(
           'alpine/git',
-          CloudRunnerState.readBuildEnvironmentVariables(),
+          TaskParameterSerializer.readBuildEnvironmentVariables(),
           CloudRunnerState.defaultSecrets,
         ),
       );
@@ -35,7 +36,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       await new BuildStep().run(
         new CloudRunnerStepState(
           baseImage,
-          CloudRunnerState.readBuildEnvironmentVariables(),
+          TaskParameterSerializer.readBuildEnvironmentVariables(),
           CloudRunnerState.defaultSecrets,
         ),
       );

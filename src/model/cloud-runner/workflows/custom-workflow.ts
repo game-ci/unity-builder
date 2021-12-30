@@ -3,6 +3,7 @@ import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import YAML from 'yaml';
 import { Input } from '../..';
+import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 
 export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
@@ -20,12 +21,12 @@ export class CustomWorkflow {
             return secret;
           });
           await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
-            CloudRunnerState.buildGuid,
+            CloudRunnerState.buildParams.buildGuid,
             step['image'],
             step['commands'],
             `/${CloudRunnerState.buildVolumeFolder}`,
             `/${CloudRunnerState.buildVolumeFolder}`,
-            CloudRunnerState.readBuildEnvironmentVariables(),
+            TaskParameterSerializer.readBuildEnvironmentVariables(),
             [...CloudRunnerState.defaultSecrets, ...stepSecrets],
           );
         }
