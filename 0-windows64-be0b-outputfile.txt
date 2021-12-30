@@ -8,3 +8,225 @@
 
 [Cloud-Runner-System] warning: redirecting to https://github.com/game-ci/unity-builder.git/
 
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] INPUT:
+
+[Cloud-Runner-System] length 0
+
+[Cloud-Runner-System] prototype [object Object]
+
+[Cloud-Runner-System] cloudRunnerTests false
+
+[Cloud-Runner-System] region eu-west-2
+
+[Cloud-Runner-System] githubRepo undefined
+
+[Cloud-Runner-System] gitSha undefined
+
+[Cloud-Runner-System] runNumber 0
+
+[Cloud-Runner-System] unityVersion auto
+
+[Cloud-Runner-System] customImage false
+
+[Cloud-Runner-System] targetPlatform StandaloneWindows64
+
+[Cloud-Runner-System] projectPath test-project
+
+[Cloud-Runner-System] buildName StandaloneWindows64
+
+[Cloud-Runner-System] buildsPath build
+
+[Cloud-Runner-System] versioningStrategy Semantic
+
+[Cloud-Runner-System] specifiedVersion 2019.2.11f1
+
+[Cloud-Runner-System] androidVersionCode false
+
+[Cloud-Runner-System] androidAppBundle false
+
+[Cloud-Runner-System] allowDirtyBuild false
+
+[Cloud-Runner-System] cloudRunnerCluster k8s
+
+[Cloud-Runner-System] awsBaseStackName game-ci-3-test
+
+[Cloud-Runner-System] cloudRunnerMemory 750M
+
+[Cloud-Runner-System] cloudRunnerCpu 1.0
+
+[Cloud-Runner-System] kubeVolumeSize 5Gi
+
+[Cloud-Runner-System] name Input
+
+[Cloud-Runner-System] githubEnabled false
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] Entrypoint: remote-cli
+
+[Cloud-Runner-System] (node:71) UnhandledPromiseRejectionWarning: Error: ENOENT: no such file or directory, mkdir '/data/0-windows64-qdse'
+
+[Cloud-Runner-System]     at Object.mkdirSync (fs.js:1013:3)
+
+[Cloud-Runner-System]     at Function.<anonymous> (/\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-repository-setup.js:28:1)
+
+[Cloud-Runner-System]     at Generator.next (<anonymous>)
+
+[Cloud-Runner-System]     at /\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-repository-setup.js:8:1
+
+[Cloud-Runner-System]     at new Promise (<anonymous>)
+
+[Cloud-Runner-System]     at module.exports.__webpack_modules__.21811.__awaiter (/\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-repository-setup.js:4:1)
+
+[Cloud-Runner-System]     at Function.run (/\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-repository-setup.js:26:1)
+
+[Cloud-Runner-System]     at Function.<anonymous> (/\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/index.js:20:1)
+
+[Cloud-Runner-System]     at Generator.next (<anonymous>)
+
+[Cloud-Runner-System]     at /\data/data0-windows64-be0bbuilder/webpack:/unity-builder/lib/model/cli/remote-client/index.js:8:1
+
+[Cloud-Runner-System] (Use `node --trace-warnings ...` to show where the warning was created)
+
+[Cloud-Runner-System] (node:71) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 2)
+
+[Cloud-Runner-System] (node:71) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+
+[Cloud-Runner-System] end--fb5hv6p0r
+
+[Cloud-Runner-System] cp: cannot stat '\data\0-windows64-be0b\builder/dist/default-build-script/': No such file or directory
+
+[Cloud-Runner-System] cp: cannot stat '\data\0-windows64-be0b\builder/dist/entrypoint.sh': No such file or directory
+
+[Cloud-Runner-System] cp: cannot stat '\data\0-windows64-be0b\builder/dist/steps/': No such file or directory
+
+[Cloud-Runner-System] ---
+
+[Cloud-Runner-System] start
+
+[Cloud-Runner-System] chmod: cannot access '/entrypoint.sh': No such file or directory
+
+[Cloud-Runner-System] chmod: cannot access '/steps': No such file or directory
+
+[Cloud-Runner-System] /bin/sh: 10: /entrypoint.sh: not found
+
+[Cloud-Runner-System] Get:1 http://security.ubuntu.com/ubuntu bionic-security InRelease [88.7 kB]
+
+[Cloud-Runner-System] Get:2 http://archive.ubuntu.com/ubuntu bionic InRelease [242 kB]
+
+[Cloud-Runner-System] Get:3 http://security.ubuntu.com/ubuntu bionic-security/restricted amd64 Packages [691 kB]
+
+[Cloud-Runner-System] Get:4 http://security.ubuntu.com/ubuntu bionic-security/multiverse amd64 Packages [26.8 kB]
+
+[Cloud-Runner-System] Get:5 http://security.ubuntu.com/ubuntu bionic-security/main amd64 Packages [2461 kB]
+
+[Cloud-Runner-System] Get:6 http://security.ubuntu.com/ubuntu bionic-security/universe amd64 Packages [1452 kB]
+
+[Cloud-Runner-System] Get:7 http://archive.ubuntu.com/ubuntu bionic-updates InRelease [88.7 kB]
+
+[Cloud-Runner-System] Get:8 http://archive.ubuntu.com/ubuntu bionic-backports InRelease [74.6 kB]
+
+[Cloud-Runner-System] Get:9 http://archive.ubuntu.com/ubuntu bionic/main amd64 Packages [1344 kB]
+
+[Cloud-Runner-System] Get:10 http://archive.ubuntu.com/ubuntu bionic/restricted amd64 Packages [13.5 kB]
+
+[Cloud-Runner-System] Get:11 http://archive.ubuntu.com/ubuntu bionic/multiverse amd64 Packages [186 kB]
+
+[Cloud-Runner-System] Get:12 http://archive.ubuntu.com/ubuntu bionic/universe amd64 Packages [11.3 MB]
+
+[Cloud-Runner-System] Get:13 http://archive.ubuntu.com/ubuntu bionic-updates/restricted amd64 Packages [725 kB]
+
+[Cloud-Runner-System] Get:14 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 Packages [2898 kB]
+
+[Cloud-Runner-System] Get:15 http://archive.ubuntu.com/ubuntu bionic-updates/multiverse amd64 Packages [34.4 kB]
+
+[Cloud-Runner-System] Get:16 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 Packages [2230 kB]
+
+[Cloud-Runner-System] Get:17 http://archive.ubuntu.com/ubuntu bionic-backports/universe amd64 Packages [12.6 kB]
+
+[Cloud-Runner-System] Get:18 http://archive.ubuntu.com/ubuntu bionic-backports/main amd64 Packages [11.6 kB]
+
+[Cloud-Runner-System] Fetched 23.9 MB in 4s (6370 kB/s)
+
+[Cloud-Runner-System] Reading package lists...
+
+[Cloud-Runner-System] Reading package lists...
+
+[Cloud-Runner-System] Building dependency tree...
+
+[Cloud-Runner-System] Reading state information...
+
+[Cloud-Runner-System] The following additional packages will be installed:
+
+[Cloud-Runner-System]   unzip
+
+[Cloud-Runner-System] The following NEW packages will be installed:
+
+[Cloud-Runner-System]   unzip zip
+
+[Cloud-Runner-System] 0 upgraded, 2 newly installed, 0 to remove and 29 not upgraded.
+
+[Cloud-Runner-System] Need to get 335 kB of archives.
+
+[Cloud-Runner-System] After this operation, 1205 kB of additional disk space will be used.
+
+[Cloud-Runner-System] Get:1 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 unzip amd64 6.0-21ubuntu1.1 [168 kB]
+
+[Cloud-Runner-System] Get:2 http://archive.ubuntu.com/ubuntu bionic/main amd64 zip amd64 3.0-11build1 [167 kB]
+
+[Cloud-Runner-System] Fetched 335 kB in 1s (447 kB/s)
+
+[Cloud-Runner-System] Selecting previously unselected package unzip.
+
+[Cloud-Runner-System] (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25137 files and directories currently installed.)
+
+[Cloud-Runner-System] Preparing to unpack .../unzip_6.0-21ubuntu1.1_amd64.deb ...
+
+[Cloud-Runner-System] Unpacking unzip (6.0-21ubuntu1.1) ...
+
+[Cloud-Runner-System] Selecting previously unselected package zip.
+
+[Cloud-Runner-System] Preparing to unpack .../zip_3.0-11build1_amd64.deb ...
+
+[Cloud-Runner-System] Unpacking zip (3.0-11build1) ...
+
+[Cloud-Runner-System] Setting up unzip (6.0-21ubuntu1.1) ...
+
+[Cloud-Runner-System] Setting up zip (3.0-11build1) ...
+
+[Cloud-Runner-System] Processing triggers for mime-support (3.60ubuntu1) ...
+
+[Cloud-Runner-System] 	zip warning: name not matched: ./Library
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] zip error: Nothing to do! (try: zip -r lib-.zip . -i ./Library)
+
+[Cloud-Runner-System] mv: cannot stat 'lib-.zip': No such file or directory
+
+[Cloud-Runner-System] ls: cannot access '\data\cache\remote-builder\unified-providers/lib': No such file or directory
+
+[Cloud-Runner-System] /bin/sh: 17: cd: can't cd to \data\0-windows64-be0b\repo
+
+[Cloud-Runner-System] ls: cannot access '\data\0-windows64-be0b\repo': No such file or directory
+
+[Cloud-Runner-System] 	zip warning: name not matched: ./build/StandaloneWindows64
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] zip error: Nothing to do! (try: zip -r build-.zip . -i ./build/StandaloneWindows64)
+
+[Cloud-Runner-System] mv: cannot stat 'build-.zip': No such file or directory
+
+[Cloud-Runner-System] ls: cannot access 'datacacheremote-builderunified-providers/lib': No such file or directory
+
+[Cloud-Runner-System]  
+
+[Cloud-Runner-System] end--fb5hv6p0r
+

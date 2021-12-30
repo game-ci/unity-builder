@@ -11,8 +11,8 @@ export class CloudRunnerRepositorySetup {
   static LFS_ASSETS_HASH;
   public static async run() {
     try {
-      fs.mkdirSync(CloudRunnerState.buildPathFull);
-      fs.mkdirSync(CloudRunnerState.repoPathFull);
+      await CloudRunnerAgentSystem.Run(`mkdir -r ${CloudRunnerState.buildPathFull}`);
+      await CloudRunnerAgentSystem.Run(`mkdir -r ${CloudRunnerState.repoPathFull}`);
       await CloudRunnerRepositorySetup.cloneRepoWithoutLFSFiles();
 
       CloudRunnerRepositorySetup.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
