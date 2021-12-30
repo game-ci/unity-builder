@@ -47,7 +47,6 @@ class BuildParameters {
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
-  public logToFile!: boolean;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
@@ -100,7 +99,6 @@ class BuildParameters {
       runNumber: Input.runNumber,
       branch: await Input.branch(),
       githubRepo: Input.githubRepo,
-      logToFile: false,
       remoteBuildCluster: Input.cloudRunnerCluster,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
