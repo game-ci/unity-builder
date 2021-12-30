@@ -22,7 +22,7 @@ class KubernetesTaskRunner {
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
-      let message = chunk.toString().trim(`\n`);
+      let message = chunk.toString().trimRight(`\n`);
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
       if (Input.cloudRunnerTests) {
         output += message;
