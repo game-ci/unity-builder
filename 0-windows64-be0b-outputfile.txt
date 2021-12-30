@@ -1,0 +1,10 @@
+[Cloud-Runner-System] ---
+
+[Cloud-Runner-System] start
+
+[Cloud-Runner-System] Git LFS initialized.
+
+[Cloud-Runner-System] Cloning into 'data0-windows64-be0bbuilder'...
+
+[Cloud-Runner-System] warning: redirecting to https://github.com/game-ci/unity-builder.git/
+
