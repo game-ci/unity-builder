@@ -24,7 +24,8 @@ inputs:
     description: 'Name of the build.'
   postBuildSteps:
     required: false
-    default: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
+    default: ''
+    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
   preBuildSteps:
     required: false
     default: ''
