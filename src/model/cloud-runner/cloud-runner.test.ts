@@ -36,8 +36,6 @@ describe('Cloud Runner', () => {
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(environmentVariables, undefined, 4));
       for (const element of environmentVariables) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           if (typeof element.value === `string`) {
