@@ -1,11 +1,10 @@
 import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerState } from '../state/cloud-runner-state';
 import * as core from '@actions/core';
-import fs from 'fs';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 import waitUntil from 'async-wait-until';
+import { Input } from '../..';
 
 class KubernetesTaskRunner {
   static async runTask(
@@ -19,13 +18,14 @@ class KubernetesTaskRunner {
   ) {
     CloudRunnerLogger.log(`Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace}`);
     const stream = new Writable();
+    let output = '';
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
       let message = chunk.toString();
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-      if (CloudRunnerState.buildParams.logToFile) {
-        fs.appendFileSync(`${CloudRunnerState.buildParams.buildGuid}-outputfile.txt`, `${message}\n`);
+      if (Input.cloudRunnerTests) {
+        output += message;
       }
       logCallback(message);
       next();
@@ -69,6 +69,7 @@ class KubernetesTaskRunner {
       throw error;
     }
     CloudRunnerLogger.log('end of log stream');
+    return output;
   }
 
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
