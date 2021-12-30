@@ -3,6 +3,7 @@ import CloudRunner from './cloud-runner';
 import Input from '../input';
 import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
+import UnityVersioning from '../unity-versioning';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});
@@ -13,6 +14,7 @@ describe('Cloud Runner', () => {
   Input.cliOptions = {
     versioning: 'None',
     projectPath: 'test-project',
+    unityVersion: UnityVersioning.read('test-project'),
     customJob: `
     - name: 'step 1'
       image: 'alpine'
