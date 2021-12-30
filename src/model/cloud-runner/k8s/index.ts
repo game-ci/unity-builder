@@ -101,17 +101,30 @@ class Kubernetes implements CloudRunnerProviderInterface {
       CloudRunnerLogger.log('Job created');
       this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
       CloudRunnerLogger.log('Watching pod until running');
-      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
-      CloudRunnerLogger.log('Pod running, streaming logs');
-      const output = await KubernetesTaskRunner.runTask(
-        this.kubeConfig,
-        this.kubeClient,
-        this.jobName,
-        this.podName,
-        'main',
-        this.namespace,
-        CloudRunnerLogger.log,
-      );
+      let output = '';
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        try {
+          await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
+          CloudRunnerLogger.log('Pod running, streaming logs');
+          output = await KubernetesTaskRunner.runTask(
+            this.kubeConfig,
+            this.kubeClient,
+            this.jobName,
+            this.podName,
+            'main',
+            this.namespace,
+            CloudRunnerLogger.log,
+          );
+          break;
+        } catch (error: any) {
+          if (error.message.includes(`HTTP`)) {
+            continue;
+          } else {
+            throw error;
+          }
+        }
+      }
       await this.cleanupTaskResources();
       return output;
     } catch (error) {
