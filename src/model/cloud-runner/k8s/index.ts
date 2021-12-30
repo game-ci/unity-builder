@@ -27,14 +27,12 @@ class Kubernetes implements CloudRunnerProviderInterface {
   private containerName: string = '';
   private cleanupCronJobName: string = '';
   private serviceAccountName: string = '';
-  private kubeClientBatchBeta: k8s.BatchV1beta1Api;
 
   constructor(buildParameters: BuildParameters) {
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
-    this.kubeClientBatchBeta = this.kubeConfig.makeApiClient(k8s.BatchV1beta1Api);
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
 
     this.namespace = 'default';
