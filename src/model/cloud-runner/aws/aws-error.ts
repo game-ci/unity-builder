@@ -7,7 +7,11 @@ export class AWSError {
     CloudRunnerLogger.log('aws error: ');
     core.error(JSON.stringify(error, undefined, 4));
     CloudRunnerLogger.log('Getting events and resources for task stack');
-    const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
+    const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents?.filter(
+      (x) => {
+        x.ResourceStatus === `CREATE_FAILED`;
+      },
+    );
     const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
     CloudRunnerLogger.log(JSON.stringify(events, undefined, 4));
     CloudRunnerLogger.log(JSON.stringify(resources, undefined, 4));
