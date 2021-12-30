@@ -29,7 +29,7 @@ export class TaskParameterSerializer {
     array = array.filter((x) => x.value !== undefined && x.name !== '0' && x.value !== '');
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
-      x.value = `${x.value}`;
+      x.value = x.value.toString();
       return x;
     });
     return array;
