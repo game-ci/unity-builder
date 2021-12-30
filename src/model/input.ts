@@ -45,8 +45,8 @@ class Input {
     return Input.getInput('GITHUB_REPOSITORY') || GitRepoReader.GetRemote() || 'game-ci/unity-builder';
   }
   static async branch() {
-    if (Input.getInput(`REMOTE_BUILDER_CACHE`)) {
-      return Input.getInput(`REMOTE_BUILDER_CACHE`);
+    if (await GitRepoReader.GetBranch()) {
+      return await GitRepoReader.GetBranch();
     } else if (Input.getInput(`GITHUB_REF`)) {
       return Input.getInput(`GITHUB_REF`)
         .split('/')
@@ -57,8 +57,6 @@ class Input {
         .join('');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
-    } else if (await GitRepoReader.GetBranch()) {
-      return await GitRepoReader.GetBranch();
     } else {
       return 'remote-builder/unified-providers';
     }
