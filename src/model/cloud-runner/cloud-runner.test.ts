@@ -43,7 +43,7 @@ describe('Cloud Runner', () => {
       for (const element of environmentVariables) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           const newLinePurgedValue = element.value.toString().replace(/\s+/g, '');
-          expect(newLinePurgedFile).toContain(`${Input.ToEnvVarFormat(element.name)}=${newLinePurgedValue}`);
+          expect(newLinePurgedFile).toContain(`${element.name}=${newLinePurgedValue}`);
         }
       }
     }
