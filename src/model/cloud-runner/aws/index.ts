@@ -38,7 +38,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
   ) {}
 
   async runTask(
-    buildId: string,
+    buildGuid: string,
     image: string,
     commands: string,
     mountdir: string,
@@ -56,7 +56,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     await new AWSBaseStack(this.baseStackName).setupBaseStack(CF);
     const taskDef = await new AWSJobStack(this.baseStackName).setupCloudFormations(
       CF,
-      buildId,
+      buildGuid,
       image,
       entrypoint,
       commands,
@@ -69,7 +69,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildId, commands);
+      await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
     } finally {

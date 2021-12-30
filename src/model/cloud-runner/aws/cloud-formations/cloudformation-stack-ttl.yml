@@ -18,7 +18,7 @@ Parameters:
     Type: String
     Default: development
     Description: 'Your deployment environment: DEV, QA , PROD'
-  BUILDID:
+  buildGuid:
     Type: String
     Default: ''
   StackName:
@@ -34,7 +34,7 @@ Resources:
   DeleteCFNLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref BUILDID]]
+      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref buildGuid]]
       Code:
         ZipFile: |
           import boto3
@@ -51,7 +51,7 @@ Resources:
                   stack.delete()
                   return "SUCCESS"
               except:
-                  return "ERROR" 
+                  return "ERROR"
 
           def handler(event, context):
               print("Received event:")
@@ -74,7 +74,7 @@ Resources:
       - GenerateCronExpression
     Type: 'AWS::Events::Rule'
     Properties:
-      Name: !Join ['', ['DeleteStackEventRule', !Ref BUILDID]]
+      Name: !Join ['', ['DeleteStackEventRule', !Ref buildGuid]]
       Description: Delete stack event
       ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
       State: 'ENABLED'
@@ -86,14 +86,14 @@ Resources:
     DependsOn:
       - DeleteStackEventRule
     Properties:
-      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref BUILDID]]
+      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref buildGuid]]
       Action: 'lambda:InvokeFunction'
       Principal: 'events.amazonaws.com'
       SourceArn: !GetAtt DeleteStackEventRule.Arn
   GenerateCronExpLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: !Join ['', ['GenerateCronExpressionLambda', !Ref BUILDID]]
+      FunctionName: !Join ['', ['GenerateCronExpressionLambda', !Ref buildGuid]]
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
@@ -137,6 +137,6 @@ Resources:
     Type: 'Custom::GenerateCronExpression'
     Version: '1.0'
     Properties:
-      Name: !Join ['', ['GenerateCronExpression', !Ref BUILDID]]
+      Name: !Join ['', ['GenerateCronExpression', !Ref buildGuid]]
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
