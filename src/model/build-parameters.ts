@@ -42,7 +42,7 @@ class BuildParameters {
 
   public postBuildSteps!: string;
   public preBuildSteps!: string;
-  public customBuildSteps!: string;
+  public customJob!: string;
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
@@ -94,7 +94,7 @@ class BuildParameters {
       kubeVolume: Input.kubeVolume,
       postBuildSteps: Input.postBuildSteps,
       preBuildSteps: Input.preBuildSteps,
-      customBuildSteps: Input.customBuildSteps,
+      customJob: Input.customJob,
       runNumber: Input.runNumber,
       branch: await Input.branch(),
       githubRepo: Input.githubRepo,

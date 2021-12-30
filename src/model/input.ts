@@ -183,8 +183,8 @@ class Input {
     return Input.getInput('preBuildSteps') || '';
   }
 
-  static get customBuildSteps() {
-    return Input.getInput('customBuildSteps') || '';
+  static get customJob() {
+    return Input.getInput('customJobs') || '';
   }
 
   static get cloudRunnerCluster() {

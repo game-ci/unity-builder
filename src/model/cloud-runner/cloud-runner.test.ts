@@ -14,7 +14,7 @@ describe('Cloud Runner', () => {
   Input.cliOptions = {
     versioning: 'None',
     projectPath: 'test-project',
-    customBuildSteps: `
+    customJob: `
     - name: 'step 1'
       image: 'alpine'
       commands: ['printenv']

@@ -17,7 +17,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
 
   private static async runJob(baseImage: any) {
     try {
-      if (CloudRunnerState.buildParams.customBuildSteps === '') {
+      if (CloudRunnerState.buildParams.customJob === '') {
         await new BuildAutomationWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
@@ -25,7 +25,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
             CloudRunnerState.defaultSecrets,
           ),
         );
-      } else if (CloudRunnerState.buildParams.customBuildSteps === 'ephemeral') {
+      } else if (CloudRunnerState.buildParams.customJob === 'ephemeral') {
         await new EphemeralGitHubRunnerWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
@@ -33,7 +33,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
             CloudRunnerState.defaultSecrets,
           ),
         );
-      } else if (CloudRunnerState.buildParams.customBuildSteps === 'download') {
+      } else if (CloudRunnerState.buildParams.customJob === 'download') {
         await new SetupStep().run(
           new CloudRunnerStepState(
             'alpine/git',
@@ -42,7 +42,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
           ),
         );
       } else {
-        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customBuildSteps);
+        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customJob);
       }
     } catch (error) {
       throw error;

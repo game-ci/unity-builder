@@ -29,7 +29,7 @@ inputs:
     required: false
     default: ''
     description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
-  customBuildSteps:
+  customJob:
     required: false
     default: ''
     description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
