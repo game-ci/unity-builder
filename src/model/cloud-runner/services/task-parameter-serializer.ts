@@ -37,10 +37,10 @@ export class TaskParameterSerializer {
     const keys = Object.keys(CloudRunnerState.buildParams);
     for (const element of keys) {
       array.push(
-        {
-          name: element,
-          value: `${CloudRunnerState.buildParams[element]}`,
-        },
+        //{
+        //  name: element,
+        //  value: `${CloudRunnerState.buildParams[element]}`,
+        //},
         {
           name: element
             .replace(/([A-Z])/g, ' $1')
@@ -66,10 +66,10 @@ export class TaskParameterSerializer {
     for (const element of input) {
       if (typeof Input[element] !== 'function') {
         array.push(
-          {
-            name: element,
-            value: `${Input[element]}`,
-          },
+          //{
+          //  name: element,
+          //  value: `${Input[element]}`,
+          //},
           {
             name: element
               .replace(/([A-Z])/g, ' $1')
