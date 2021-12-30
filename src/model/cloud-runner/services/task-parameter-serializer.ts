@@ -19,44 +19,8 @@ export class TaskParameterSerializer {
         value: `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildGuid}/${CloudRunnerState.repositoryFolder}/`,
       },
       {
-        name: 'PROJECT_PATH',
-        value: CloudRunnerState.buildParams.projectPath,
-      },
-      {
-        name: 'BUILD_PATH',
-        value: CloudRunnerState.buildParams.buildPath,
-      },
-      {
-        name: 'BUILD_FILE',
-        value: CloudRunnerState.buildParams.buildFile,
-      },
-      {
-        name: 'BUILD_NAME',
-        value: CloudRunnerState.buildParams.buildName,
-      },
-      {
-        name: 'BUILD_METHOD',
-        value: CloudRunnerState.buildParams.buildMethod,
-      },
-      {
-        name: 'CUSTOM_PARAMETERS',
-        value: CloudRunnerState.buildParams.customParameters,
-      },
-      {
         name: 'BUILD_TARGET',
         value: CloudRunnerState.buildParams.platform,
-      },
-      {
-        name: 'ANDROID_VERSION_CODE',
-        value: CloudRunnerState.buildParams.androidVersionCode.toString(),
-      },
-      {
-        name: 'ANDROID_KEYSTORE_NAME',
-        value: CloudRunnerState.buildParams.androidKeystoreName,
-      },
-      {
-        name: 'ANDROID_KEYALIAS_NAME',
-        value: CloudRunnerState.buildParams.androidKeyaliasName,
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
@@ -72,10 +36,20 @@ export class TaskParameterSerializer {
   private static readBuildParameters(array: any[]) {
     const keys = Object.keys(CloudRunnerState.buildParams);
     for (const element of keys) {
-      array.push({
-        name: element,
-        value: `${CloudRunnerState.buildParams[element]}`,
-      });
+      array.push(
+        {
+          name: element,
+          value: `${CloudRunnerState.buildParams[element]}`,
+        },
+        {
+          name: element
+            .replace(/([A-Z])/g, ' $1')
+            .trim()
+            .toUpperCase()
+            .replace(/ /g, '_'),
+          value: `${CloudRunnerState.buildParams[element]}`,
+        },
+      );
     }
     array.push(
       { name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) },
@@ -91,10 +65,20 @@ export class TaskParameterSerializer {
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
       if (typeof Input[element] !== 'function') {
-        array.push({
-          name: element,
-          value: `${Input[element]}`,
-        });
+        array.push(
+          {
+            name: element,
+            value: `${Input[element]}`,
+          },
+          {
+            name: element
+              .replace(/([A-Z])/g, ' $1')
+              .trim()
+              .toUpperCase()
+              .replace(/ /g, '_'),
+            value: `${Input[element]}`,
+          },
+        );
       }
     }
     return array;
