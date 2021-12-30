@@ -43,7 +43,7 @@ export class TaskParameterSerializer {
         //},
         {
           name: Input.ToEnvVarFormat(element),
-          value: `${CloudRunnerState.buildParams[element]}`,
+          value: CloudRunnerState.buildParams[element].toString(),
         },
       );
     }
@@ -68,7 +68,7 @@ export class TaskParameterSerializer {
           //},
           {
             name: Input.ToEnvVarFormat(element),
-            value: `${Input[element]}`,
+            value: Input[element].toString(),
           },
         );
       }
