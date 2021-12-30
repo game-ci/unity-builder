@@ -37,7 +37,7 @@ describe('Cloud Runner', () => {
       for (const element of environmentVariables) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           if (typeof element.value === `string`) {
-            element.value = element.value.toString().replace(/\s+/g, '');
+            element.value = element.value.replace(/\s+/g, '');
           }
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
