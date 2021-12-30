@@ -22,7 +22,7 @@ class KubernetesTaskRunner {
     let didStreamAnyLogs: boolean = false;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
-      let message = chunk.toString();
+      let message = chunk.toString().trim(`\n`);
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
       if (Input.cloudRunnerTests) {
         output += message;
@@ -80,7 +80,7 @@ class KubernetesTaskRunner {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
-        CloudRunnerLogger.log(`${status.body.status?.phase} ${status.body.status?.conditions?.[0].message}`);
+        CloudRunnerLogger.log(`${status.body.status?.phase} ${status.body.status?.conditions?.[0].message || ''}`);
         if (success || phase !== 'Pending') return true;
         return false;
       },
