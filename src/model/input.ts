@@ -178,7 +178,7 @@ class Input {
   }
 
   static get awsBaseStackName() {
-    return Input.getInput('awsBaseStackName') || 'game-ci-3-test';
+    return Input.getInput('awsBaseStackName') || 'game-ci';
   }
 
   static get kubeConfig() {
