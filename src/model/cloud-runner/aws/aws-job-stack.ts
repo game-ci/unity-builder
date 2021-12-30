@@ -28,6 +28,10 @@ export class AWSJobStack {
     const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
     CloudRunnerLogger.log(JSON.stringify(secrets, undefined, 4));
     for (const secret of secrets) {
+      secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
+        /[^\dA-Za-z]/g,
+        '',
+      )}`;
       if (typeof secret.ParameterValue == 'number') {
         secret.ParameterValue = `${secret.ParameterValue}`;
       }
@@ -38,20 +42,17 @@ export class AWSJobStack {
       taskDefCloudFormation = AWSTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p1 - input',
-        AWSTemplates.getParameterTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+        AWSTemplates.getParameterTemplate(secret.ParameterKey),
       );
       taskDefCloudFormation = AWSTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p2 - secret',
-        AWSTemplates.getSecretTemplate(secret.ParameterKey.replace(/[^\dA-Za-z]/g, '')),
+        AWSTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
       taskDefCloudFormation = AWSTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p3 - container def',
-        AWSTemplates.getSecretDefinitionTemplate(
-          secret.EnvironmentVariable,
-          secret.ParameterKey.replace(/[^\dA-Za-z]/g, ''),
-        ),
+        AWSTemplates.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey),
       );
     }
     const secretsMappedToCloudFormationParameters = secrets.map((x) => {
