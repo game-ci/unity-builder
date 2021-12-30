@@ -12,7 +12,6 @@
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "prepare": "husky install",
-    "git-add": "git add . && git commit -m $1 && git push",
     "cli": "yarn ts-node src/index.ts -m cli",
     "test-cli": "yarn ts-node src/index.ts -m cli --projectPath test-project",
     "test": "jest",
