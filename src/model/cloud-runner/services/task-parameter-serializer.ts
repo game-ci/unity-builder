@@ -6,7 +6,7 @@ import { CloudRunnerState } from '../state/cloud-runner-state';
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
     TaskParameterSerializer.setupDefaultSecrets();
-    let array = [
+    return [
       {
         name: 'ContainerMemory',
         value: CloudRunnerState.buildParams.cloudRunnerMemory,
@@ -21,6 +21,11 @@ export class TaskParameterSerializer {
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
+  }
+  private static get serializeBuildParamsAndInput() {
+    let array = new Array();
+    array = TaskParameterSerializer.readBuildParameters(array);
+    array = TaskParameterSerializer.readInput(array);
 
     array = array.filter((x) => x.value !== undefined && x.name !== '0' && x.value !== '');
     array = array.map((x) => {
@@ -28,12 +33,6 @@ export class TaskParameterSerializer {
       x.value = `${x.value}`;
       return x;
     });
-    return array;
-  }
-  private static get serializeBuildParamsAndInput() {
-    let array = new Array();
-    array = TaskParameterSerializer.readBuildParameters(array);
-    array = TaskParameterSerializer.readInput(array);
     return array;
   }
 
