@@ -34,7 +34,7 @@ describe('Cloud Runner', () => {
       expect(fs.existsSync(testOutput)).toBeTruthy();
       const file = fs.readFileSync(testOutput, 'utf-8').toString();
       expect(file).toContain(JSON.stringify(buildParameter));
-      expect(file).toContain(`${testSecretName}=${testSecretValue}`);
+      expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const inputKeys = Object.getOwnPropertyNames(Input);
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
@@ -42,7 +42,7 @@ describe('Cloud Runner', () => {
       for (const element of inputKeys) {
         if (Input[element] !== undefined && typeof Input[element] !== 'function') {
           const newLinePurgedValue = Input[element].toString().replace(/\s+/g, '');
-          expect(newLinePurgedFile).toContain(`${element}=${newLinePurgedValue}`);
+          expect(newLinePurgedFile).toContain(`${Input.ToEnvVarFormat(element)}=${newLinePurgedValue}`);
         }
       }
     }
