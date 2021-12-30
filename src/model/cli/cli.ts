@@ -3,13 +3,12 @@ import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { RemoteClient } from './remote-client';
 import { ActionYamlReader } from '../input-readers/action-yaml';
-
 export class CLI {
-  static async RunCli(options: any) {
+  static async RunCli(options: any): Promise<void> {
     core.info(`Entrypoint: ${options.mode}`);
 
     if (options.mode === 'remote-cli') {
-      await RemoteClient.Run(options);
+      await RemoteClient.Run();
     } else {
       options.versioning = 'None';
       Input.cliOptions = options;

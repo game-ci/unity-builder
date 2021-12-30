@@ -76,8 +76,10 @@ class KubernetesTaskRunner {
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
     await waitUntil(
       async () => {
-        const phase = (await kubeClient.readNamespacedPodStatus(podName, namespace))?.body.status?.phase;
+        const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
+        const phase = status?.body.status?.phase;
         success = phase === 'Running';
+        CloudRunnerLogger.log(`${JSON.stringify(status.body.status, undefined, 4)}`);
         if (success || phase !== 'Pending') return true;
         return false;
       },
