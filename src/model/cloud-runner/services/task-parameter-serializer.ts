@@ -16,10 +16,6 @@ export class TaskParameterSerializer {
         value: CloudRunnerState.buildParams.cloudRunnerCpu,
       },
       {
-        name: 'GITHUB_WORKSPACE',
-        value: `/${CloudRunnerState.buildVolumeFolder}/${CloudRunnerState.buildParams.buildGuid}/${CloudRunnerState.repositoryFolder}/`,
-      },
-      {
         name: 'BUILD_TARGET',
         value: CloudRunnerState.buildParams.platform,
       },
