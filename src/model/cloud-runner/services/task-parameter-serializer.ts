@@ -44,13 +44,7 @@ export class TaskParameterSerializer {
         value: CloudRunnerState.buildParams[element],
       });
     }
-    array.push(
-      { name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) },
-      {
-        name: `buildGuid`,
-        value: CloudRunnerState.buildParams.buildGuid,
-      },
-    );
+    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
     return array;
   }
 
