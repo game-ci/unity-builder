@@ -5,6 +5,7 @@ import { CloudRunnerState } from '../state/cloud-runner-state';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
+    TaskParameterSerializer.setupDefaultSecrets();
     return [
       {
         name: 'ContainerMemory',
@@ -29,7 +30,7 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
-    array = array.filter((x) => x.value !== undefined && x.name !== '0');
+    array = array.filter((x) => x.value !== undefined && x.name !== '0' && x.value !== '');
     return array;
   }
 
@@ -43,7 +44,7 @@ export class TaskParameterSerializer {
         //},
         {
           name: Input.ToEnvVarFormat(element),
-          value: CloudRunnerState.buildParams[element].toString(),
+          value: CloudRunnerState.buildParams[element],
         },
       );
     }
@@ -76,57 +77,16 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  public static setupDefaultSecrets() {
-    CloudRunnerState.defaultSecrets = [
-      {
-        ParameterKey: 'GithubToken',
-        EnvironmentVariable: 'GITHUB_TOKEN',
-        ParameterValue: CloudRunnerState.buildParams.githubToken,
-      },
-      {
-        ParameterKey: 'branch',
-        EnvironmentVariable: 'branch',
-        ParameterValue: CloudRunnerState.branchName,
-      },
-      {
-        ParameterKey: 'buildPathFull',
-        EnvironmentVariable: 'buildPathFull',
-        ParameterValue: CloudRunnerState.buildPathFull,
-      },
-      {
-        ParameterKey: 'projectPathFull',
-        EnvironmentVariable: 'projectPathFull',
-        ParameterValue: CloudRunnerState.projectPathFull,
-      },
-      {
-        ParameterKey: 'libraryFolderFull',
-        EnvironmentVariable: 'libraryFolderFull',
-        ParameterValue: CloudRunnerState.libraryFolderFull,
-      },
-      {
-        ParameterKey: 'builderPathFull',
-        EnvironmentVariable: 'builderPathFull',
-        ParameterValue: CloudRunnerState.builderPathFull,
-      },
-      {
-        ParameterKey: 'repoPathFull',
-        EnvironmentVariable: 'repoPathFull',
-        ParameterValue: CloudRunnerState.repoPathFull,
-      },
-      {
-        ParameterKey: 'steamPathFull',
-        EnvironmentVariable: 'steamPathFull',
-        ParameterValue: CloudRunnerState.steamPathFull,
-      },
-    ];
-    CloudRunnerState.defaultSecrets.push(
-      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunnerState.buildParams).map((x) => {
+  private static setupDefaultSecrets() {
+    if (CloudRunnerState.defaultSecrets === undefined)
+      CloudRunnerState.defaultSecrets = ImageEnvironmentFactory.getEnvironmentVariables(
+        CloudRunnerState.buildParams,
+      ).map((x) => {
         return {
           ParameterKey: x.name,
           EnvironmentVariable: x.name,
           ParameterValue: x.value,
         };
-      }),
-    );
+      });
   }
 }

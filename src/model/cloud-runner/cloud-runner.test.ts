@@ -4,6 +4,7 @@ import Input from '../input';
 import fs from 'fs';
 import { CloudRunnerState } from './state/cloud-runner-state';
 import { CloudRunnerStatics } from './cloud-runner-statics';
+import { TaskParameterSerializer } from './services/task-parameter-serializer';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});
@@ -35,14 +36,14 @@ describe('Cloud Runner', () => {
       const file = fs.readFileSync(testOutput, 'utf-8').toString();
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
-      const inputKeys = Object.getOwnPropertyNames(Input);
+      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
-      for (const element of inputKeys) {
-        if (Input[element] !== undefined && typeof Input[element] !== 'function') {
-          const newLinePurgedValue = Input[element].toString().replace(/\s+/g, '');
-          expect(newLinePurgedFile).toContain(`${Input.ToEnvVarFormat(element)}=${newLinePurgedValue}`);
+      for (const element of environmentVariables) {
+        if (element.value !== undefined && typeof element.value !== 'function') {
+          const newLinePurgedValue = element.value.toString().replace(/\s+/g, '');
+          expect(newLinePurgedFile).toContain(`${Input.ToEnvVarFormat(element.name)}=${newLinePurgedValue}`);
         }
       }
     }

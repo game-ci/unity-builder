@@ -21,7 +21,6 @@ export class CloudRunnerState {
         buildParameters.platform,
       );
     }
-    TaskParameterSerializer.setupDefaultSecrets();
   }
 
   public static get branchName(): string {
