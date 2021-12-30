@@ -30,7 +30,7 @@ Parameters:
     Type: Number
     Default: 2048
     Description: How much memory in megabytes to give the container
-  buildGuid:
+  BUILD_GUID:
     Type: String
     Default: ''
   Command:

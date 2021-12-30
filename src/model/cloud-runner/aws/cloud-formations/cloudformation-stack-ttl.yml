@@ -18,7 +18,7 @@ Parameters:
     Type: String
     Default: development
     Description: 'Your deployment environment: DEV, QA , PROD'
-  buildGuid:
+  BUILD_GUID:
     Type: String
     Default: ''
   StackName:
@@ -34,7 +34,7 @@ Resources:
   DeleteCFNLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref buildGuid]]
+      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref BUILD_GUID]]
       Code:
         ZipFile: |
           import boto3
@@ -74,7 +74,7 @@ Resources:
       - GenerateCronExpression
     Type: 'AWS::Events::Rule'
     Properties:
-      Name: !Join ['', ['DeleteStackEventRule', !Ref buildGuid]]
+      Name: !Join ['', ['DeleteStackEventRule', !Ref BUILD_GUID]]
       Description: Delete stack event
       ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
       State: 'ENABLED'
@@ -86,14 +86,14 @@ Resources:
     DependsOn:
       - DeleteStackEventRule
     Properties:
-      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref buildGuid]]
+      FunctionName: !Join ['', ['DeleteCFNLambda', !Ref BUILD_GUID]]
       Action: 'lambda:InvokeFunction'
       Principal: 'events.amazonaws.com'
       SourceArn: !GetAtt DeleteStackEventRule.Arn
   GenerateCronExpLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: !Join ['', ['GenerateCronExpressionLambda', !Ref buildGuid]]
+      FunctionName: !Join ['', ['GenerateCronExpressionLambda', !Ref BUILD_GUID]]
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
@@ -137,6 +137,6 @@ Resources:
     Type: 'Custom::GenerateCronExpression'
     Version: '1.0'
     Properties:
-      Name: !Join ['', ['GenerateCronExpression', !Ref buildGuid]]
+      Name: !Join ['', ['GenerateCronExpression', !Ref BUILD_GUID]]
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'

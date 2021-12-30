@@ -14,7 +14,7 @@ export class AWSTemplates {
   ${p1}Secret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Join [ "", [ '${p1}', !Ref buildGuid ] ]
+      Name: !Join [ "", [ '${p1}', !Ref BUILD_GUID ] ]
       SecretString: !Ref ${p1}
 `;
   }
