@@ -49,7 +49,8 @@ jobs:
         with:
           node-version: 12.x
       - run: yarn
-      - run: yarn test -i
+      - run: yarn run cli --help
+      - run: yarn test -i-aws
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -57,8 +58,6 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
           CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
-          CLOUD_RUNNER_TESTS: true
-          CLOUD_RUNNER_CLUSTER: aws
           PROJECT_PATH: ${{ matrix.projectPath }}
           UNITY_VERSION: ${{ matrix.unityVersion }}
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}

@@ -51,13 +51,12 @@ jobs:
         with:
           node-version: 12.x
       - run: yarn
+      - run: yarn run cli --help
       - name: Cloud Runner Test Suite
-        run: yarn test -i
+        run: yarn test -i-k8s
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           DEBUG: true
-          CLOUD_RUNNER_TESTS: true
-          CLOUD_RUNNER_CLUSTER: k8s
           PROJECT_PATH: ${{ matrix.projectPath }}
           UNITY_VERSION: ${{ matrix.unityVersion }}
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
