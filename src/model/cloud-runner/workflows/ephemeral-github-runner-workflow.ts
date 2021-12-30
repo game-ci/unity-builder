@@ -8,7 +8,7 @@ import { WorkflowInterface } from './workflow-interface';
 export class EphemeralGitHubRunnerWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await EphemeralGitHubRunnerWorkflow.runJobAsEphemeralGitHubRunner(
+      return await EphemeralGitHubRunnerWorkflow.runJobAsEphemeralGitHubRunner(
         cloudRunnerStepState.image,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
@@ -27,7 +27,7 @@ export class EphemeralGitHubRunnerWorkflow implements WorkflowInterface {
       CloudRunnerLogger.log(`Cloud Runner is running in ephemeral GitHub runner mode`);
       const installAndStartRunner =
         ' cd ../.. && ls && mkdir actions-runner && cd actions-runner && curl -O -L https://github.com/actions/runner/releases/download/v2.283.1/actions-runner-linux-x64-2.283.1.tar.gz && tar xzf ./actions-runner-linux-x64-2.283.1.tar.gz';
-      await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
+      return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
         image,
         installAndStartRunner,

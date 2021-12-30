@@ -73,7 +73,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     workingdir: string,
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
-  ): Promise<void> {
+  ): Promise<string> {
     try {
       // setup
       this.buildGuid = buildGuid;
@@ -105,7 +105,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
       CloudRunnerLogger.log('Watching pod until running');
       await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       CloudRunnerLogger.log('Pod running, streaming logs');
-      await KubernetesTaskRunner.runTask(
+      const output = await KubernetesTaskRunner.runTask(
         this.kubeConfig,
         this.kubeClient,
         this.jobName,
@@ -115,6 +115,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
         CloudRunnerLogger.log,
       );
       await this.cleanupTaskResources();
+      return output;
     } catch (error) {
       CloudRunnerLogger.log('Running job failed');
       core.error(JSON.stringify(error, undefined, 4));

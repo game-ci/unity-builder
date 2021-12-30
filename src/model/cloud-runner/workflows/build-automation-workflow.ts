@@ -10,7 +10,7 @@ import { WorkflowInterface } from './workflow-interface';
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image);
+      return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image);
     } catch (error) {
       throw error;
     }
@@ -19,8 +19,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   private static async standardBuildAutomation(baseImage: any) {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
-
-      await new SetupStep().run(
+      let output = '';
+      output += await new SetupStep().run(
         new CloudRunnerStepState(
           'alpine/git',
           TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -29,11 +29,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       );
       CloudRunnerLogger.logWithTime('Download repository step time');
       if (CloudRunnerState.buildParams.preBuildSteps !== '') {
-        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
+        output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
       }
       CloudRunnerLogger.logWithTime('Pre build step(s) time');
 
-      await new BuildStep().run(
+      output += await new BuildStep().run(
         new CloudRunnerStepState(
           baseImage,
           TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -43,11 +43,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.logWithTime('Build time');
 
       if (CloudRunnerState.buildParams.postBuildSteps !== '') {
-        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
+        output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
       }
       CloudRunnerLogger.logWithTime('Post build step(s) time');
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
+
+      return output;
     } catch (error) {
       throw error;
     }

@@ -5,7 +5,6 @@ import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import * as zlib from 'zlib';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { Input } from '../..';
-import fs from 'fs';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
@@ -72,7 +71,8 @@ class AWSTaskRunner {
       core.error(error);
     }
     CloudRunnerLogger.log(`Cloud runner job is running`);
-    await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+
+    const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     const exitCode = (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
     CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
     if (exitCode !== 0 && exitCode !== undefined) {
@@ -86,6 +86,7 @@ class AWSTaskRunner {
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
+      return output;
     }
   }
 
@@ -121,17 +122,20 @@ class AWSTaskRunner {
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let shouldReadLogs = true;
     let timestamp: number = 0;
+    let output = '';
     while (shouldReadLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn);
       ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
-      ({ iterator, shouldReadLogs } = await AWSTaskRunner.handleLogStreamIteration(
+      ({ iterator, shouldReadLogs, output } = await AWSTaskRunner.handleLogStreamIteration(
         kinesis,
         iterator,
         shouldReadLogs,
         taskDef,
+        output,
       ));
     }
+    return output;
   }
 
   private static async handleLogStreamIteration(
@@ -139,6 +143,7 @@ class AWSTaskRunner {
     iterator: string,
     shouldReadLogs: boolean,
     taskDef: CloudRunnerAWSTaskDef,
+    output: string,
   ) {
     const records = await kinesis
       .getRecords({
@@ -146,8 +151,8 @@ class AWSTaskRunner {
       })
       .promise();
     iterator = records.NextShardIterator || '';
-    shouldReadLogs = AWSTaskRunner.logRecords(records, iterator, taskDef, shouldReadLogs);
-    return { iterator, shouldReadLogs };
+    ({ shouldReadLogs, output } = AWSTaskRunner.logRecords(records, iterator, taskDef, shouldReadLogs, output));
+    return { iterator, shouldReadLogs, output };
   }
 
   private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, shouldReadLogs: boolean) {
@@ -165,7 +170,13 @@ class AWSTaskRunner {
     return { timestamp, shouldReadLogs };
   }
 
-  private static logRecords(records, iterator: string, taskDef: CloudRunnerAWSTaskDef, shouldReadLogs: boolean) {
+  private static logRecords(
+    records,
+    iterator: string,
+    taskDef: CloudRunnerAWSTaskDef,
+    shouldReadLogs: boolean,
+    output: string,
+  ) {
     if (records.Records.length > 0 && iterator) {
       for (let index = 0; index < records.Records.length; index++) {
         const json = JSON.parse(
@@ -181,15 +192,15 @@ class AWSTaskRunner {
               core.warning('LIBRARY NOT FOUND!');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-            if (CloudRunnerState.buildParams.logToFile) {
-              fs.appendFileSync(`${CloudRunnerState.buildParams.buildGuid}-outputfile.txt`, `${message}\n`);
+            if (Input.cloudRunnerTests) {
+              output += message;
             }
             CloudRunnerLogger.log(message);
           }
         }
       }
     }
-    return shouldReadLogs;
+    return { shouldReadLogs, output };
   }
 
   private static async getLogStream(kinesis: AWS.Kinesis, kinesisStreamName: string) {

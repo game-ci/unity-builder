@@ -38,5 +38,5 @@ export interface CloudRunnerProviderInterface {
     environment: CloudRunnerEnvironmentVariable[],
     // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
-  ): Promise<void>;
+  ): Promise<string>;
 }

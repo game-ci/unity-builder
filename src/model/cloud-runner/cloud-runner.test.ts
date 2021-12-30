@@ -1,8 +1,6 @@
 import { BuildParameters, ImageTag } from '..';
 import CloudRunner from './cloud-runner';
 import Input from '../input';
-import fs from 'fs';
-import { CloudRunnerState } from './state/cloud-runner-state';
 import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 
@@ -30,9 +28,7 @@ describe('Cloud Runner', () => {
       const buildParameter = await BuildParameters.create();
       buildParameter.logToFile = true;
       const baseImage = new ImageTag(buildParameter);
-      await CloudRunner.run(buildParameter, baseImage.toString());
-      const testOutput = `${CloudRunnerState.buildParams.buildGuid}-outputfile.txt`;
-      const file = fs.readFileSync(testOutput, 'utf-8').toString();
+      const file = await CloudRunner.run(buildParameter, baseImage.toString());
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
@@ -41,8 +37,10 @@ describe('Cloud Runner', () => {
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
       for (const element of environmentVariables) {
         if (element.value !== undefined && typeof element.value !== 'function') {
-          const newLinePurgedValue = element.value.toString().replace(/\s+/g, '');
-          expect(newLinePurgedFile).toContain(`${element.name}=${newLinePurgedValue}`);
+          if (typeof element.value === `string`) {
+            element.value = element.value.toString().replace(/\s+/g, '');
+          }
+          expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
     }

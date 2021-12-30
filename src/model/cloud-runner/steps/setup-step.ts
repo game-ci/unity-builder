@@ -8,7 +8,7 @@ import { StepInterface } from './step-interface';
 export class SetupStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await SetupStep.downloadRepository(
+      return await SetupStep.downloadRepository(
         cloudRunnerStepState.image,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
@@ -25,7 +25,7 @@ export class SetupStep implements StepInterface {
   ) {
     try {
       CloudRunnerLogger.logLine('Starting step 1/2 download game files from repository, try to use cache');
-      await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
+      return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
         image,
         `

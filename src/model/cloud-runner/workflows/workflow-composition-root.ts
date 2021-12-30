@@ -11,7 +11,7 @@ import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      await WorkflowCompositionRoot.runJob(cloudRunnerStepState.image.toString());
+      return await WorkflowCompositionRoot.runJob(cloudRunnerStepState.image.toString());
     } catch (error) {
       throw error;
     }
@@ -21,7 +21,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Workflow specified: ${CloudRunnerState.buildParams.customJob}`);
       if (CloudRunnerState.buildParams.customJob === '') {
-        await new BuildAutomationWorkflow().run(
+        return await new BuildAutomationWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
             TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -29,7 +29,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
           ),
         );
       } else if (CloudRunnerState.buildParams.customJob === 'ephemeral') {
-        await new EphemeralGitHubRunnerWorkflow().run(
+        return await new EphemeralGitHubRunnerWorkflow().run(
           new CloudRunnerStepState(
             baseImage,
             TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -37,7 +37,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
           ),
         );
       } else if (CloudRunnerState.buildParams.customJob === 'download') {
-        await new SetupStep().run(
+        return await new SetupStep().run(
           new CloudRunnerStepState(
             'alpine/git',
             TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -45,7 +45,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
           ),
         );
       } else {
-        await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customJob);
+        return await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customJob);
       }
     } catch (error) {
       throw error;

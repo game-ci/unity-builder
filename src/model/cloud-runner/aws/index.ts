@@ -45,7 +45,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     workingdir: string,
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
-  ): Promise<void> {
+  ): Promise<string> {
     process.env.AWS_REGION = Input.region;
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
@@ -66,10 +66,11 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     );
 
     let postRunTaskTimeMs;
+    let output = '';
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
+      output = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
     } finally {
@@ -78,6 +79,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
       if (postRunTaskTimeMs !== undefined)
         CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((postCleanupTimeMs - postRunTaskTimeMs) / 1000)}s`);
     }
+    return output;
   }
 
   async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {

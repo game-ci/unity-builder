@@ -7,7 +7,7 @@ import { StepInterface } from './step-interface';
 
 export class BuildStep implements StepInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
-    await BuildStep.BuildStep(
+    return await BuildStep.BuildStep(
       cloudRunnerStepState.image,
       cloudRunnerStepState.environment,
       cloudRunnerStepState.secrets,
@@ -20,7 +20,7 @@ export class BuildStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
-    await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
+    return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,
       image,
       `

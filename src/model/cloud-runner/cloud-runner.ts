@@ -38,7 +38,7 @@ class CloudRunner {
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
-      await new WorkflowCompositionRoot().run(
+      const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(
           baseImage,
           TaskParameterSerializer.readBuildEnvironmentVariables(),
@@ -51,6 +51,7 @@ class CloudRunner {
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
+      return output;
     } catch (error) {
       await CloudRunnerError.handleException(error);
       throw error;

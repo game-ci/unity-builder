@@ -11,6 +11,7 @@ export class CustomWorkflow {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       try {
         buildSteps = YAML.parse(buildSteps);
+        let output = '';
         for (const step of buildSteps) {
           const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
             const secret: CloudRunnerSecret = {
@@ -20,7 +21,7 @@ export class CustomWorkflow {
             };
             return secret;
           });
-          await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
+          output += await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
             CloudRunnerState.buildParams.buildGuid,
             step['image'],
             step['commands'],
@@ -30,6 +31,7 @@ export class CustomWorkflow {
             [...CloudRunnerState.defaultSecrets, ...stepSecrets],
           );
         }
+        return output;
       } catch (error) {
         CloudRunnerLogger.log(`failed to parse a custom job "${buildSteps}"`);
         throw error;
