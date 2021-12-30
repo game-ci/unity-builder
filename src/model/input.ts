@@ -22,20 +22,8 @@ class Input {
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]
-      : process.env[
-          query
-            .replace(/([A-Z])/g, ' $1')
-            .trim()
-            .toUpperCase()
-            .replace(/ /g, '_')
-        ] !== undefined
-      ? process.env[
-          query
-            .replace(/([A-Z])/g, ' $1')
-            .trim()
-            .toUpperCase()
-            .replace(/ /g, '_')
-        ]
+      : process.env[Input.ToEnvVarFormat(query)]
+      ? process.env[Input.ToEnvVarFormat(query)]
       : false;
   }
   static get region(): string {
@@ -211,6 +199,14 @@ class Input {
 
   static get kubeVolume() {
     return Input.getInput('kubeVolume') || '';
+  }
+
+  public static ToEnvVarFormat(input: string) {
+    return input
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .toUpperCase()
+      .replace(/ /g, '_');
   }
 }
 

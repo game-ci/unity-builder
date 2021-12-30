@@ -42,11 +42,7 @@ export class TaskParameterSerializer {
         //  value: `${CloudRunnerState.buildParams[element]}`,
         //},
         {
-          name: element
-            .replace(/([A-Z])/g, ' $1')
-            .trim()
-            .toUpperCase()
-            .replace(/ /g, '_'),
+          name: Input.ToEnvVarFormat(element),
           value: `${CloudRunnerState.buildParams[element]}`,
         },
       );
@@ -71,11 +67,7 @@ export class TaskParameterSerializer {
           //  value: `${Input[element]}`,
           //},
           {
-            name: element
-              .replace(/([A-Z])/g, ' $1')
-              .trim()
-              .toUpperCase()
-              .replace(/ /g, '_'),
+            name: Input.ToEnvVarFormat(element),
             value: `${Input[element]}`,
           },
         );
