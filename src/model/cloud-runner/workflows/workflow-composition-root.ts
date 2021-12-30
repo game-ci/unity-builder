@@ -18,7 +18,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
 
   private static async runJob(baseImage: any) {
     try {
-      CloudRunnerLogger.log(`Custom job input: ${CloudRunnerState.buildParams.customJob}`);
+      CloudRunnerLogger.log(`Workflow specified: ${CloudRunnerState.buildParams.customJob}`);
       if (CloudRunnerState.buildParams.customJob === '') {
         await new BuildAutomationWorkflow().run(
           new CloudRunnerStepState(
