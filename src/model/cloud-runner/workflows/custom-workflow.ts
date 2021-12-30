@@ -2,6 +2,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import YAML from 'yaml';
+import { Input } from '../..';
 
 export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
@@ -13,7 +14,7 @@ export class CustomWorkflow {
           const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
             const secret: CloudRunnerSecret = {
               ParameterKey: x.name,
-              EnvironmentVariable: x.name,
+              EnvironmentVariable: Input.ToEnvVarFormat(x.name),
               ParameterValue: x.value,
             };
             return secret;
