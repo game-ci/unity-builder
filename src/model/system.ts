@@ -24,11 +24,11 @@ class System {
         core.debug(debug);
       }
 
-      if (result !== '') {
+      if (result !== '' && shouldDebug) {
         core.info(result);
       }
 
-      if (error !== '') {
+      if (error !== '' && shouldDebug) {
         core.warning(error);
       }
     };

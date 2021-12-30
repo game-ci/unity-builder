@@ -37,7 +37,7 @@ export class CLI {
     const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
       program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
-      if (Input[element] !== undefined && Input[element] !== '') {
+      if (Input[element] !== undefined && Input[element] !== '' && typeof Input[element] !== `function`) {
         core.info(`${element} ${Input[element]}`);
       }
     }
