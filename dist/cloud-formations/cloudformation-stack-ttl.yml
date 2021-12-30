@@ -18,7 +18,7 @@ Parameters:
     Type: String
     Default: development
     Description: 'Your deployment environment: DEV, QA , PROD'
-  BUILDID:
+  buildGuid:
     Type: String
     Default: ''
   StackName:
@@ -34,16 +34,16 @@ Resources:
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: !Join [ "", [ 'DeleteCFNLambda', !Ref BUILDID ] ]
+      FunctionName: !Join [ "", [ 'DeleteCFNLambda', !Ref buildGuid ] ]
       Code:
         ZipFile: |
           import boto3
           import os
           import json
-          
+
           stack_name = os.environ['stackName']
           delete_stack_name = os.environ['deleteStackName']
-          
+
           def delete_cfn(stack_name):
               try:
                   cfn = boto3.resource('cloudformation')
@@ -51,8 +51,8 @@ Resources:
                   stack.delete()
                   return "SUCCESS"
               except:
-                  return "ERROR" 
-          
+                  return "ERROR"
+
           def handler(event, context):
               print("Received event:")
               print(json.dumps(event))
@@ -66,7 +66,7 @@ Resources:
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
-      Role: 
+      Role:
        'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   DeleteStackEventRule:
      DependsOn:
@@ -74,27 +74,27 @@ Resources:
        - GenerateCronExpression
      Type: "AWS::Events::Rule"
      Properties:
-       Name: !Join [ "", [ 'DeleteStackEventRule', !Ref BUILDID ] ]
+       Name: !Join [ "", [ 'DeleteStackEventRule', !Ref buildGuid ] ]
        Description: Delete stack event
        ScheduleExpression: !GetAtt GenerateCronExpression.cron_exp
        State: "ENABLED"
-       Targets: 
-          - 
+       Targets:
+          -
             Arn: !GetAtt DeleteCFNLambda.Arn
-            Id: 'DeleteCFNLambda' 
-  PermissionForDeleteCFNLambda: 
+            Id: 'DeleteCFNLambda'
+  PermissionForDeleteCFNLambda:
     Type: "AWS::Lambda::Permission"
     DependsOn:
       - DeleteStackEventRule
-    Properties: 
-      FunctionName: !Join [ "", [ 'DeleteCFNLambda', !Ref BUILDID ] ]
+    Properties:
+      FunctionName: !Join [ "", [ 'DeleteCFNLambda', !Ref buildGuid ] ]
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: !GetAtt DeleteStackEventRule.Arn
   GenerateCronExpLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: !Join [ "", [ 'GenerateCronExpressionLambda', !Ref BUILDID ] ]
+      FunctionName: !Join [ "", [ 'GenerateCronExpressionLambda', !Ref buildGuid ] ]
       Code:
         ZipFile: |
           from datetime import datetime, timedelta
@@ -102,7 +102,7 @@ Resources:
           import logging
           import json
           import cfnresponse
-          
+
           def deletion_time(ttl):
               delete_at_time = datetime.now() + timedelta(minutes=int(ttl))
               hh = delete_at_time.hour
@@ -113,7 +113,7 @@ Resources:
               # minutes hours day month day-of-week year
               cron_exp = "cron({} {} {} {} ? {})".format(mm, hh, dd, month, yyyy)
               return cron_exp
-          
+
           def handler(event, context):
             print('Received event: %s' % json.dumps(event))
             status = cfnresponse.SUCCESS
@@ -132,12 +132,12 @@ Resources:
       Handler: "index.handler"
       Runtime: "python3.6"
       Timeout: "5"
-      Role: 
+      Role:
        'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
     Properties:
-      Name: !Join [ "", [ 'GenerateCronExpression', !Ref BUILDID ] ]
+      Name: !Join [ "", [ 'GenerateCronExpression', !Ref buildGuid ] ]
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
