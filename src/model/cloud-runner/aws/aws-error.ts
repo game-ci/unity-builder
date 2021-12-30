@@ -12,8 +12,6 @@ export class AWSError {
         x.ResourceStatus === `CREATE_FAILED`;
       },
     );
-    const resources = (await CF.describeStackResources({ StackName: taskDefStackName }).promise()).StackResources;
     CloudRunnerLogger.log(JSON.stringify(events, undefined, 4));
-    CloudRunnerLogger.log(JSON.stringify(resources, undefined, 4));
   }
 }
