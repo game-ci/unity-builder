@@ -13,7 +13,7 @@ class Input {
   public static githubEnabled = true;
   public static cliOptions;
   static get cloudRunnerTests(): boolean {
-    return Input.getInput(`CloudRunnerTests`) || false;
+    return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
   private static getInput(query) {
     return Input.githubEnabled
