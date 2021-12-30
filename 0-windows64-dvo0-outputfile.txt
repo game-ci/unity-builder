@@ -1,0 +1,656 @@
+[Cloud-Runner-System] ---
+
+[Cloud-Runner-System] start
+
+[Cloud-Runner-System] Git LFS initialized.
+
+[Cloud-Runner-System] Cloning into 'data0-windows64-dvo0builder'...
+
+[Cloud-Runner-System] warning: redirecting to https://github.com/game-ci/unity-builder.git/
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] INPUT:
+
+[Cloud-Runner-System] length 0
+
+[Cloud-Runner-System] prototype [object Object]
+
+[Cloud-Runner-System] cloudRunnerTests true
+
+[Cloud-Runner-System] region eu-west-2
+
+[Cloud-Runner-System] githubRepo undefined
+
+[Cloud-Runner-System] gitSha undefined
+
+[Cloud-Runner-System] runNumber 0
+
+[Cloud-Runner-System] unityVersion 2019.2.11f1
+
+[Cloud-Runner-System] customImage false
+
+[Cloud-Runner-System] targetPlatform StandaloneWindows64
+
+[Cloud-Runner-System] projectPath test-project
+
+[Cloud-Runner-System] buildName StandaloneWindows64
+
+[Cloud-Runner-System] buildsPath build
+
+[Cloud-Runner-System] versioningStrategy Semantic
+
+[Cloud-Runner-System] specifiedVersion none
+
+[Cloud-Runner-System] androidVersionCode 0
+
+[Cloud-Runner-System] androidAppBundle false
+
+[Cloud-Runner-System] allowDirtyBuild false
+
+[Cloud-Runner-System] cloudRunnerCluster k8s
+
+[Cloud-Runner-System] awsBaseStackName game-ci-3-test
+
+[Cloud-Runner-System] cloudRunnerMemory 750M
+
+[Cloud-Runner-System] cloudRunnerCpu 1.0
+
+[Cloud-Runner-System] kubeVolumeSize 5Gi
+
+[Cloud-Runner-System] name Input
+
+[Cloud-Runner-System] githubEnabled false
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] Entrypoint: remote-cli
+
+[Cloud-Runner-System] [Client] mkdir -p /data/0-windows64-z4b3
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] mkdir -p /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] Initializing source repository for cloning with caching of LFS files
+
+[Cloud-Runner-System] [Client] git config --global advice.detachedHead false
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] Cloning the repository being built:
+
+[Cloud-Runner-System] [Client] git lfs install --skip-smudge
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] Git LFS initialized.
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] [Client][Error] Command failed: git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] fatal: Too many arguments.
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] usage: git clone [<options>] [--] <repo> [<dir>]
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     -v, --verbose         be more verbose
+
+[Cloud-Runner-System]     -q, --quiet           be more quiet
+
+[Cloud-Runner-System]     --progress            force progress reporting
+
+[Cloud-Runner-System]     --reject-shallow      don't clone shallow repository
+
+[Cloud-Runner-System]     -n, --no-checkout     don't create a checkout
+
+[Cloud-Runner-System]     --bare                create a bare repository
+
+[Cloud-Runner-System]     --mirror              create a mirror repository (implies bare)
+
+[Cloud-Runner-System]     -l, --local           to clone from a local repository
+
+[Cloud-Runner-System]     --no-hardlinks        don't use local hardlinks, always copy
+
+[Cloud-Runner-System]     -s, --shared          setup as shared repository
+
+[Cloud-Runner-System]     --recurse-submodules[=<pathspec>]
+
+[Cloud-Runner-System]                           initialize submodules in the clone
+
+[Cloud-Runner-System]     --recursive ...       alias of --recurse-submodules
+
+[Cloud-Runner-System]     -j, --jobs <n>        number of submodules cloned in parallel
+
+[Cloud-Runner-System]     --template <template-directory>
+
+[Cloud-Runner-System]                           directory from which templates will be used
+
+[Cloud-Runner-System]     --reference <repo>    reference repository
+
+[Cloud-Runner-System]     --reference-if-able <repo>
+
+[Cloud-Runner-System]                           reference repository
+
+[Cloud-Runner-System]     --dissociate          use --reference only while cloning
+
+[Cloud-Runner-System]     -o, --origin <name>   use <name> instead of 'origin' to track upstream
+
+[Cloud-Runner-System]     -b, --branch <branch>
+
+[Cloud-Runner-System]                           checkout <branch> instead of the remote's HEAD
+
+[Cloud-Runner-System]     -u, --upload-pack <path>
+
+[Cloud-Runner-System]                           path to git-upload-pack on the remote
+
+[Cloud-Runner-System]     --depth <depth>       create a shallow clone of that depth
+
+[Cloud-Runner-System]     --shallow-since <time>
+
+[Cloud-Runner-System]                           create a shallow clone since a specific time
+
+[Cloud-Runner-System]     --shallow-exclude <revision>
+
+[Cloud-Runner-System]                           deepen history of shallow clone, excluding rev
+
+[Cloud-Runner-System]     --single-branch       clone only one branch, HEAD or --branch
+
+[Cloud-Runner-System]     --no-tags             don't clone any tags, and make later fetches not to follow them
+
+[Cloud-Runner-System]     --shallow-submodules  any cloned submodules will be shallow
+
+[Cloud-Runner-System]     --separate-git-dir <gitdir>
+
+[Cloud-Runner-System]                           separate git dir from working tree
+
+[Cloud-Runner-System]     -c, --config <key=value>
+
+[Cloud-Runner-System]                           set config inside the new repository
+
+[Cloud-Runner-System]     --server-option <server-specific>
+
+[Cloud-Runner-System]                           option to transmit
+
+[Cloud-Runner-System]     -4, --ipv4            use IPv4 addresses only
+
+[Cloud-Runner-System]     -6, --ipv6            use IPv6 addresses only
+
+[Cloud-Runner-System]     --filter <args>       object filtering
+
+[Cloud-Runner-System]     --remote-submodules   any cloned submodules will use their remote-tracking branch
+
+[Cloud-Runner-System]     --sparse              initialize sparse-checkout file to include only files at root
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] Error: Error: Command failed: git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] fatal: Too many arguments.
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] usage: git clone [<options>] [--] <repo> [<dir>]
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     -v, --verbose         be more verbose
+
+[Cloud-Runner-System]     -q, --quiet           be more quiet
+
+[Cloud-Runner-System]     --progress            force progress reporting
+
+[Cloud-Runner-System]     --reject-shallow      don't clone shallow repository
+
+[Cloud-Runner-System]     -n, --no-checkout     don't create a checkout
+
+[Cloud-Runner-System]     --bare                create a bare repository
+
+[Cloud-Runner-System]     --mirror              create a mirror repository (implies bare)
+
+[Cloud-Runner-System]     -l, --local           to clone from a local repository
+
+[Cloud-Runner-System]     --no-hardlinks        don't use local hardlinks, always copy
+
+[Cloud-Runner-System]     -s, --shared          setup as shared repository
+
+[Cloud-Runner-System]     --recurse-submodules[=<pathspec>]
+
+[Cloud-Runner-System]                           initialize submodules in the clone
+
+[Cloud-Runner-System]     --recursive ...       alias of --recurse-submodules
+
+[Cloud-Runner-System]     -j, --jobs <n>        number of submodules cloned in parallel
+
+[Cloud-Runner-System]     --template <template-directory>
+
+[Cloud-Runner-System]                           directory from which templates will be used
+
+[Cloud-Runner-System]     --reference <repo>    reference repository
+
+[Cloud-Runner-System]     --reference-if-able <repo>
+
+[Cloud-Runner-System]                           reference repository
+
+[Cloud-Runner-System]     --dissociate          use --reference only while cloning
+
+[Cloud-Runner-System]     -o, --origin <name>   use <name> instead of 'origin' to track upstream
+
+[Cloud-Runner-System]     -b, --branch <branch>
+
+[Cloud-Runner-System]                           checkout <branch> instead of the remote's HEAD
+
+[Cloud-Runner-System]     -u, --upload-pack <path>
+
+[Cloud-Runner-System]                           path to git-upload-pack on the remote
+
+[Cloud-Runner-System]     --depth <depth>       create a shallow clone of that depth
+
+[Cloud-Runner-System]     --shallow-since <time>
+
+[Cloud-Runner-System]                           create a shallow clone since a specific time
+
+[Cloud-Runner-System]     --shallow-exclude <revision>
+
+[Cloud-Runner-System]                           deepen history of shallow clone, excluding rev
+
+[Cloud-Runner-System]     --single-branch       clone only one branch, HEAD or --branch
+
+[Cloud-Runner-System]     --no-tags             don't clone any tags, and make later fetches not to follow them
+
+[Cloud-Runner-System]     --shallow-submodules  any cloned submodules will be shallow
+
+[Cloud-Runner-System]     --separate-git-dir <gitdir>
+
+[Cloud-Runner-System]                           separate git dir from working tree
+
+[Cloud-Runner-System]     -c, --config <key=value>
+
+[Cloud-Runner-System]                           set config inside the new repository
+
+[Cloud-Runner-System]     --server-option <server-specific>
+
+[Cloud-Runner-System]                           option to transmit
+
+[Cloud-Runner-System]     -4, --ipv4            use IPv4 addresses only
+
+[Cloud-Runner-System]     -6, --ipv6            use IPv6 addresses only
+
+[Cloud-Runner-System]     --filter <args>       object filtering
+
+[Cloud-Runner-System]     --remote-submodules   any cloned submodules will use their remote-tracking branch
+
+[Cloud-Runner-System]     --sparse              initialize sparse-checkout file to include only files at root
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     at /\data/data0-windows64-dvo0builder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-agent-system.js:27:1
+
+[Cloud-Runner-System]     at ChildProcess.exithandler (child_process.js:390:5)
+
+[Cloud-Runner-System]     at ChildProcess.emit (events.js:412:35)
+
+[Cloud-Runner-System]     at ChildProcess.emit (domain.js:475:12)
+
+[Cloud-Runner-System]     at maybeClose (internal/child_process.js:1058:16)
+
+[Cloud-Runner-System]     at Socket.<anonymous> (internal/child_process.js:443:11)
+
+[Cloud-Runner-System]     at Socket.emit (events.js:400:28)
+
+[Cloud-Runner-System]     at Socket.emit (domain.js:475:12)
+
+[Cloud-Runner-System]     at Pipe.<anonymous> (net.js:686:12)
+
+[Cloud-Runner-System] end--d4thogakt
+
+[Cloud-Runner-System] ---
+
+[Cloud-Runner-System] start
+
+[Cloud-Runner-System] Git LFS initialized.
+
+[Cloud-Runner-System] Cloning into 'data0-windows64-dvo0builder'...
+
+[Cloud-Runner-System] warning: redirecting to https://github.com/game-ci/unity-builder.git/
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] INPUT:
+
+[Cloud-Runner-System] length 0
+
+[Cloud-Runner-System] prototype [object Object]
+
+[Cloud-Runner-System] cloudRunnerTests true
+
+[Cloud-Runner-System] region eu-west-2
+
+[Cloud-Runner-System] githubRepo undefined
+
+[Cloud-Runner-System] gitSha undefined
+
+[Cloud-Runner-System] runNumber 0
+
+[Cloud-Runner-System] unityVersion 2019.2.11f1
+
+[Cloud-Runner-System] customImage false
+
+[Cloud-Runner-System] targetPlatform StandaloneWindows64
+
+[Cloud-Runner-System] projectPath test-project
+
+[Cloud-Runner-System] buildName StandaloneWindows64
+
+[Cloud-Runner-System] buildsPath build
+
+[Cloud-Runner-System] versioningStrategy Semantic
+
+[Cloud-Runner-System] specifiedVersion none
+
+[Cloud-Runner-System] androidVersionCode 0
+
+[Cloud-Runner-System] androidAppBundle false
+
+[Cloud-Runner-System] allowDirtyBuild false
+
+[Cloud-Runner-System] cloudRunnerCluster k8s
+
+[Cloud-Runner-System] awsBaseStackName game-ci-3-test
+
+[Cloud-Runner-System] cloudRunnerMemory 750M
+
+[Cloud-Runner-System] cloudRunnerCpu 1.0
+
+[Cloud-Runner-System] kubeVolumeSize 5Gi
+
+[Cloud-Runner-System] name Input
+
+[Cloud-Runner-System] githubEnabled false
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] Entrypoint: remote-cli
+
+[Cloud-Runner-System] [Client] mkdir -p /data/0-windows64-z4b3
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] mkdir -p /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] Initializing source repository for cloning with caching of LFS files
+
+[Cloud-Runner-System] [Client] git config --global advice.detachedHead false
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] Cloning the repository being built:
+
+[Cloud-Runner-System] [Client] git lfs install --skip-smudge
+
+[Cloud-Runner-System] [Client] [Exit code 0]
+
+[Cloud-Runner-System] [Client] Git LFS initialized.
+
+[Cloud-Runner-System] [Client] 
+
+[Cloud-Runner-System] [Client] git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] [Client][Error] Command failed: git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] fatal: Too many arguments.
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] usage: git clone [<options>] [--] <repo> [<dir>]
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     -v, --verbose         be more verbose
+
+[Cloud-Runner-System]     -q, --quiet           be more quiet
+
+[Cloud-Runner-System]     --progress            force progress reporting
+
+[Cloud-Runner-System]     --reject-shallow      don't clone shallow repository
+
+[Cloud-Runner-System]     -n, --no-checkout     don't create a checkout
+
+[Cloud-Runner-System]     --bare                create a bare repository
+
+[Cloud-Runner-System]     --mirror              create a mirror repository (implies bare)
+
+[Cloud-Runner-System]     -l, --local           to clone from a local repository
+
+[Cloud-Runner-System]     --no-hardlinks        don't use local hardlinks, always copy
+
+[Cloud-Runner-System]     -s, --shared          setup as shared repository
+
+[Cloud-Runner-System]     --recurse-submodules[=<pathspec>]
+
+[Cloud-Runner-System]                           initialize submodules in the clone
+
+[Cloud-Runner-System]     --recursive ...       alias of --recurse-submodules
+
+[Cloud-Runner-System]     -j, --jobs <n>        number of submodules cloned in parallel
+
+[Cloud-Runner-System]     --template <template-directory>
+
+[Cloud-Runner-System]                           directory from which templates will be used
+
+[Cloud-Runner-System]     --reference <repo>    reference repository
+
+[Cloud-Runner-System]     --reference-if-able <repo>
+
+[Cloud-Runner-System]                           reference repository
+
+[Cloud-Runner-System]     --dissociate          use --reference only while cloning
+
+[Cloud-Runner-System]     -o, --origin <name>   use <name> instead of 'origin' to track upstream
+
+[Cloud-Runner-System]     -b, --branch <branch>
+
+[Cloud-Runner-System]                           checkout <branch> instead of the remote's HEAD
+
+[Cloud-Runner-System]     -u, --upload-pack <path>
+
+[Cloud-Runner-System]                           path to git-upload-pack on the remote
+
+[Cloud-Runner-System]     --depth <depth>       create a shallow clone of that depth
+
+[Cloud-Runner-System]     --shallow-since <time>
+
+[Cloud-Runner-System]                           create a shallow clone since a specific time
+
+[Cloud-Runner-System]     --shallow-exclude <revision>
+
+[Cloud-Runner-System]                           deepen history of shallow clone, excluding rev
+
+[Cloud-Runner-System]     --single-branch       clone only one branch, HEAD or --branch
+
+[Cloud-Runner-System]     --no-tags             don't clone any tags, and make later fetches not to follow them
+
+[Cloud-Runner-System]     --shallow-submodules  any cloned submodules will be shallow
+
+[Cloud-Runner-System]     --separate-git-dir <gitdir>
+
+[Cloud-Runner-System]                           separate git dir from working tree
+
+[Cloud-Runner-System]     -c, --config <key=value>
+
+[Cloud-Runner-System]                           set config inside the new repository
+
+[Cloud-Runner-System]     --server-option <server-specific>
+
+[Cloud-Runner-System]                           option to transmit
+
+[Cloud-Runner-System]     -4, --ipv4            use IPv4 addresses only
+
+[Cloud-Runner-System]     -6, --ipv6            use IPv6 addresses only
+
+[Cloud-Runner-System]     --filter <args>       object filtering
+
+[Cloud-Runner-System]     --remote-submodules   any cloned submodules will use their remote-tracking branch
+
+[Cloud-Runner-System]     --sparse              initialize sparse-checkout file to include only files at root
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] Error: Error: Command failed: git clone https://@github.com/[object Object].git /data/0-windows64-z4b3/repo
+
+[Cloud-Runner-System] fatal: Too many arguments.
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] usage: git clone [<options>] [--] <repo> [<dir>]
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     -v, --verbose         be more verbose
+
+[Cloud-Runner-System]     -q, --quiet           be more quiet
+
+[Cloud-Runner-System]     --progress            force progress reporting
+
+[Cloud-Runner-System]     --reject-shallow      don't clone shallow repository
+
+[Cloud-Runner-System]     -n, --no-checkout     don't create a checkout
+
+[Cloud-Runner-System]     --bare                create a bare repository
+
+[Cloud-Runner-System]     --mirror              create a mirror repository (implies bare)
+
+[Cloud-Runner-System]     -l, --local           to clone from a local repository
+
+[Cloud-Runner-System]     --no-hardlinks        don't use local hardlinks, always copy
+
+[Cloud-Runner-System]     -s, --shared          setup as shared repository
+
+[Cloud-Runner-System]     --recurse-submodules[=<pathspec>]
+
+[Cloud-Runner-System]                           initialize submodules in the clone
+
+[Cloud-Runner-System]     --recursive ...       alias of --recurse-submodules
+
+[Cloud-Runner-System]     -j, --jobs <n>        number of submodules cloned in parallel
+
+[Cloud-Runner-System]     --template <template-directory>
+
+[Cloud-Runner-System]                           directory from which templates will be used
+
+[Cloud-Runner-System]     --reference <repo>    reference repository
+
+[Cloud-Runner-System]     --reference-if-able <repo>
+
+[Cloud-Runner-System]                           reference repository
+
+[Cloud-Runner-System]     --dissociate          use --reference only while cloning
+
+[Cloud-Runner-System]     -o, --origin <name>   use <name> instead of 'origin' to track upstream
+
+[Cloud-Runner-System]     -b, --branch <branch>
+
+[Cloud-Runner-System]                           checkout <branch> instead of the remote's HEAD
+
+[Cloud-Runner-System]     -u, --upload-pack <path>
+
+[Cloud-Runner-System]                           path to git-upload-pack on the remote
+
+[Cloud-Runner-System]     --depth <depth>       create a shallow clone of that depth
+
+[Cloud-Runner-System]     --shallow-since <time>
+
+[Cloud-Runner-System]                           create a shallow clone since a specific time
+
+[Cloud-Runner-System]     --shallow-exclude <revision>
+
+[Cloud-Runner-System]                           deepen history of shallow clone, excluding rev
+
+[Cloud-Runner-System]     --single-branch       clone only one branch, HEAD or --branch
+
+[Cloud-Runner-System]     --no-tags             don't clone any tags, and make later fetches not to follow them
+
+[Cloud-Runner-System]     --shallow-submodules  any cloned submodules will be shallow
+
+[Cloud-Runner-System]     --separate-git-dir <gitdir>
+
+[Cloud-Runner-System]                           separate git dir from working tree
+
+[Cloud-Runner-System]     -c, --config <key=value>
+
+[Cloud-Runner-System]                           set config inside the new repository
+
+[Cloud-Runner-System]     --server-option <server-specific>
+
+[Cloud-Runner-System]                           option to transmit
+
+[Cloud-Runner-System]     -4, --ipv4            use IPv4 addresses only
+
+[Cloud-Runner-System]     -6, --ipv6            use IPv6 addresses only
+
+[Cloud-Runner-System]     --filter <args>       object filtering
+
+[Cloud-Runner-System]     --remote-submodules   any cloned submodules will use their remote-tracking branch
+
+[Cloud-Runner-System]     --sparse              initialize sparse-checkout file to include only files at root
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System] 
+
+[Cloud-Runner-System]     at /\data/data0-windows64-dvo0builder/webpack:/unity-builder/lib/model/cli/remote-client/cloud-runner-agent-system.js:27:1
+
+[Cloud-Runner-System]     at ChildProcess.exithandler (child_process.js:390:5)
+
+[Cloud-Runner-System]     at ChildProcess.emit (events.js:412:35)
+
+[Cloud-Runner-System]     at ChildProcess.emit (domain.js:475:12)
+
+[Cloud-Runner-System]     at maybeClose (internal/child_process.js:1058:16)
+
+[Cloud-Runner-System]     at Socket.<anonymous> (internal/child_process.js:443:11)
+
+[Cloud-Runner-System]     at Socket.emit (events.js:400:28)
+
+[Cloud-Runner-System]     at Socket.emit (domain.js:475:12)
+
+[Cloud-Runner-System]     at Pipe.<anonymous> (net.js:686:12)
+
+[Cloud-Runner-System] end--d4thogakt
+

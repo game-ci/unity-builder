@@ -182,7 +182,7 @@ class Input {
   }
 
   static get customJob() {
-    return Input.getInput('customJobs') || '';
+    return Input.getInput('customJob') || '';
   }
 
   static get cloudRunnerCluster() {
