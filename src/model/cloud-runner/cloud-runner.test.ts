@@ -32,7 +32,6 @@ describe('Cloud Runner', () => {
       const baseImage = new ImageTag(buildParameter);
       await CloudRunner.run(buildParameter, baseImage.toString());
       const testOutput = `${CloudRunnerState.buildParams.buildGuid}-outputfile.txt`;
-      expect(fs.existsSync(testOutput)).toBeTruthy();
       const file = fs.readFileSync(testOutput, 'utf-8').toString();
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
