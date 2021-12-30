@@ -2,7 +2,6 @@ import { Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerState } from '../state/cloud-runner-state';
-import CloudRunnerLogger from './cloud-runner-logger';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
@@ -90,16 +89,6 @@ export class TaskParameterSerializer {
   private static readInput(array: any[]) {
     const input = Object.getOwnPropertyNames(Input);
     for (const element of input) {
-      CloudRunnerLogger.log(
-        JSON.stringify(
-          {
-            type: `${typeof Input[element]}`,
-            name: Input[element],
-          },
-          undefined,
-          4,
-        ),
-      );
       if (typeof Input[element] !== 'function') {
         array.push({
           name: element,
