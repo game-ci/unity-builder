@@ -31,6 +31,10 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
     array = array.filter((x) => x.value !== undefined && x.name !== '0' && x.value !== '');
+    array = array.map((x) => {
+      x.value = `${x.value}`;
+      return x;
+    });
     return array;
   }
 
