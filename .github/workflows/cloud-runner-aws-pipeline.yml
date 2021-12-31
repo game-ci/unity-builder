@@ -59,8 +59,6 @@ jobs:
           DEBUG: true
           CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
           PROJECT_PATH: ${{ matrix.projectPath }}
-          UNITY_VERSION: ${{ matrix.unityVersion }}
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
       - uses: ./
