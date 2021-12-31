@@ -80,10 +80,11 @@ class KubernetesTaskRunner {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
-        CloudRunnerLogger.log(`${status.body.status?.phase} ${status.body.status?.conditions?.[0].message || ''}`);
-        if (Input.cloudRunnerTests) {
-          CloudRunnerLogger.log(`${JSON.stringify(status, undefined, 4)}`);
-        }
+        CloudRunnerLogger.log(
+          `${status.body.status?.phase} ${status.body.status?.conditions?.[0].reason || ''} ${
+            status.body.status?.conditions?.[0].message || ''
+          }`,
+        );
         if (success || phase !== 'Pending') return true;
         return false;
       },
