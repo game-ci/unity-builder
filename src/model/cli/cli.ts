@@ -29,7 +29,7 @@ export class CLI {
       throw new Error('no CLI mode found');
     }
 
-    CloudRunnerLogger.log(`Entrypoint: ${results[0].name}`);
+    CloudRunnerLogger.log(`Entrypoint: ${results[0].key}`);
 
     return await results[0].asyncFunc();
   }
