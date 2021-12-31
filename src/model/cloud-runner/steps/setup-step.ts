@@ -35,7 +35,7 @@ export class SetupStep implements StepInterface {
         apk update -q
         apk add unzip zip git-lfs jq tree nodejs -q
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-        mkdir -p ${CloudRunnerState.builderPathFull}
+        mkdir -p ${CloudRunnerState.builderPathFull.replace(/\//g, `\\`)}
         git clone -b ${CloudRunnerState.branchName} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(/\//g, `\\`)}"
