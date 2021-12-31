@@ -1,3 +1,5 @@
+import { ReadLicense } from './input-readers/test-license-reader';
+
 class Parameter {
   public name;
   public value;
@@ -41,7 +43,7 @@ class ImageEnvironmentFactory {
     } = parameters;
 
     const environmentVariables: Parameter[] = [
-      { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE },
+      { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: process.env.UNITY_LICENSE_FILE },
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
       { name: 'UNITY_PASSWORD', value: process.env.UNITY_PASSWORD },
