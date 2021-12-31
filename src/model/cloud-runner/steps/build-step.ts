@@ -1,3 +1,4 @@
+import path from 'path';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -26,23 +27,27 @@ export class BuildStep implements StepInterface {
       image,
       `
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
-        cp -r "${CloudRunnerState.builderPathFull}/dist/default-build-script/" "/UnityBuilderAction"
-        cp -r "${CloudRunnerState.builderPathFull}/dist/entrypoint.sh" "/entrypoint.sh"
-        cp -r "${CloudRunnerState.builderPathFull}/dist/steps/" "/steps"
+        cp -r "${path
+          .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
+          .replace(/\\/g, `/`)}" "/UnityBuilderAction"
+        cp -r "${path
+          .join(CloudRunnerState.builderPathFull, 'dist', 'entrypoint.sh')
+          .replace(/\\/g, `/`)}" "/entrypoint.sh"
+        cp -r "${path.join(CloudRunnerState.builderPathFull, 'dist', '').replace(/\\/g, `/`)}/dist/steps/" "/steps"
         chmod -R +x "/entrypoint.sh"
         chmod -R +x "/steps"
         /entrypoint.sh
         apt-get update
         apt-get install -y -q zip
-        cd "${CloudRunnerState.libraryFolderFull}/.."
+        cd "${CloudRunnerState.libraryFolderFull.replace(/\\/g, `/`)}/.."
         zip -r "lib-$BUILD_GUID.zip" "./Library"
-        mv "lib-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull}/lib"
-        ls -lh "${CloudRunnerState.cacheFolderFull}/lib"
-        cd "${CloudRunnerState.repoPathFull}"
-        ls -lh "${CloudRunnerState.repoPathFull}"
-        zip -r "build-$BUILD_GUID.zip" "./${CloudRunnerState.buildParams.buildPath}"
-        mv "build-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull}/build-$BUILD_GUID.zip"
-        ls ${CloudRunnerState.cacheFolderFull}/lib
+        mv "lib-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib"
+        ls -lh "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib"
+        cd "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}"
+        ls -lh "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}"
+        zip -r "build-$BUILD_GUID.zip" "./${CloudRunnerState.buildParams.buildPath.replace(/\\/g, `/`)}"
+        mv "build-$BUILD_GUID.zip" "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/build-$BUILD_GUID.zip"
+        ls ${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib
         echo " "
         ls
       `,
