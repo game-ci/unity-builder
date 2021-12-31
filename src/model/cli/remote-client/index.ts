@@ -4,7 +4,7 @@ import { SetupCloudRunnerRepository } from './setup-cloud-runner-repository';
 
 export class RemoteClient {
   static async Run() {
-    const buildParameter = JSON.parse(process.env.buildParameters || '{}');
+    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
