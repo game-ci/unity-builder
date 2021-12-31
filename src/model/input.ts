@@ -18,7 +18,7 @@ class Input {
   }
   private static getInput(query) {
     const coreInput = core.getInput(query);
-    return coreInput
+    return coreInput && coreInput !== ''
       ? coreInput
       : Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
       ? Input.cliOptions[query]
