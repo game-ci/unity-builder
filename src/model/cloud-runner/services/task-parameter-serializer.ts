@@ -27,7 +27,9 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
 
-    array = array.filter((x) => x.value !== undefined && x.name !== '0' && x.value !== '');
+    array = array.filter(
+      (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',
+    );
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;

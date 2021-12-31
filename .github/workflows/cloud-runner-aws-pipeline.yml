@@ -80,3 +80,14 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           awsBaseStackName: game-ci-stack-integration-tests
           CloudRunnerBranch: remote-builder/unified-providers
+          postBuildSteps: |
+            name: upload
+            image: amazon/aws-cli
+            commands: ['aws s3 list-buckets']
+            secrets:
+            - name: AWS_ACCESS_KEY_ID
+              value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            - name: AWS_DEFAULT_REGION
+              value: eu-west-2

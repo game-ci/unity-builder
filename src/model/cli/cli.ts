@@ -6,8 +6,6 @@ import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 export class CLI {
   static async RunCli(options: any): Promise<void> {
-    core.info(`Entrypoint: ${options.mode}`);
-
     const container = new Array();
     container.push(
       {
@@ -31,7 +29,7 @@ export class CLI {
       throw new Error('no CLI mode found');
     }
 
-    CloudRunnerLogger.log(results[0].key);
+    CloudRunnerLogger.log(`Entrypoint: ${results[0]}`);
 
     return await results[0].asyncFunc();
   }

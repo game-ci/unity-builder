@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
@@ -36,19 +38,12 @@ class Input {
     if (await GitRepoReader.GetBranch()) {
       return await GitRepoReader.GetBranch();
     } else if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`)
-        .split('/')
-        .map((x) => {
-          x = x[0].toUpperCase() + x.slice(1);
-          return x;
-        })
-        .join('');
+      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
     } else {
-      return 'remote-builder/unified-providers';
+      return 'main';
     }
-    //
   }
 
   static get gitSha() {
@@ -77,7 +72,13 @@ class Input {
   }
 
   static get projectPath() {
-    const rawProjectPath = Input.getInput('projectPath') || '.';
+    const input = Input.getInput('projectPath');
+    const rawProjectPath = input
+      ? input
+      : fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
+        !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
+      ? 'test-project'
+      : '.';
     return rawProjectPath.replace(/\/$/, '');
   }
 
