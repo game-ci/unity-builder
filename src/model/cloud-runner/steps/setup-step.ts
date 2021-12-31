@@ -26,6 +26,11 @@ export class SetupStep implements StepInterface {
     try {
       CloudRunnerLogger.log(` `);
       CloudRunnerLogger.logLine('Starting step 1/2 (setup game files from repository)');
+      CloudRunnerLogger.log(
+        `git clone -b ${CloudRunnerState.branchName} ${
+          CloudRunnerState.unityBuilderRepoUrl
+        } ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}`,
+      );
 
       return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
@@ -38,11 +43,11 @@ export class SetupStep implements StepInterface {
         git clone -b ${CloudRunnerState.branchName} ${
           CloudRunnerState.unityBuilderRepoUrl
         } ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}
-        chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
-        node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
+        chmod +x ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js
+        node ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js -m remote-cli
         `,
-        `/${CloudRunnerState.buildVolumeFolder}`,
-        `/${CloudRunnerState.buildVolumeFolder}/`,
+        `/${CloudRunnerState.buildVolumeFolder.replace(`/`, `\\`)}`,
+        `/${CloudRunnerState.buildVolumeFolder.replace(`/`, `\\`)}/`,
         environmentVariables,
         secrets,
       );
