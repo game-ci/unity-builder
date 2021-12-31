@@ -12,21 +12,21 @@ const core = require('@actions/core');
  * Note that input is always passed as a string, even booleans.
  */
 class Input {
-  public static githubEnabled = true;
   public static cliOptions;
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
   private static getInput(query) {
-    return Input.githubEnabled
-      ? core.getInput(query)
+    const coreInput = core.getInput(query);
+    return coreInput
+      ? coreInput
       : Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]
       : process.env[Input.ToEnvVarFormat(query)]
       ? process.env[Input.ToEnvVarFormat(query)]
-      : false;
+      : '';
   }
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';

@@ -38,7 +38,6 @@ export class CLI {
   }
 
   public static SetupCli() {
-    Input.githubEnabled = false;
     const program = new Command();
     program.version('0.0.1');
     const properties = Object.getOwnPropertyNames(Input);

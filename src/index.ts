@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner, Input } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
 import { CLI } from './model/cli/cli';
 async function runMain() {
   try {
@@ -33,6 +33,5 @@ const options = CLI.SetupCli();
 if (CLI.isCliMode(options)) {
   CLI.RunCli(options);
 } else {
-  Input.githubEnabled = true;
   runMain();
 }
