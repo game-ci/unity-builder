@@ -39,8 +39,8 @@ export class SetupStep implements StepInterface {
         git clone -b ${CloudRunnerState.branchName} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(/\//g, `\\`)}"
-        chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\//g, '')}
-        node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\//g, '')} -m remote-cli
+        chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\//g, '\\')}
+        node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\//g, '\\')} -m remote-cli
         `,
         `/${CloudRunnerState.buildVolumeFolder}`,
         `/${CloudRunnerState.buildVolumeFolder}/`,
