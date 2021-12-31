@@ -24,8 +24,9 @@ export class SetupStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.logLine(` `);
+      CloudRunnerLogger.log(` `);
       CloudRunnerLogger.logLine('Starting step 1/2 (setup game files from repository)');
+
       return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
         image,
@@ -34,7 +35,9 @@ export class SetupStep implements StepInterface {
         apk add unzip zip git-lfs jq tree nodejs -q
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         mkdir -p ${CloudRunnerState.builderPathFull}
-        git clone -b ${CloudRunnerState.branchName} ${CloudRunnerState.unityBuilderRepoUrl} ${CloudRunnerState.builderPathFull}
+        git clone -b ${CloudRunnerState.branchName} ${
+          CloudRunnerState.unityBuilderRepoUrl
+        } ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}
         chmod +x ${CloudRunnerState.builderPathFull}/dist/index.js
         node ${CloudRunnerState.builderPathFull}/dist/index.js -m remote-cli
         `,
