@@ -85,7 +85,7 @@ class KubernetesTaskRunner {
         return false;
       },
       {
-        timeout: 500000,
+        timeout: 2000000,
         intervalBetweenAttempts: 15000,
       },
     );
