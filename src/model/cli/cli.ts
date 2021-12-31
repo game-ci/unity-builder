@@ -7,25 +7,35 @@ export class CLI {
   static async RunCli(options: any): Promise<void> {
     core.info(`Entrypoint: ${options.mode}`);
 
-    if (options.mode === 'remote-cli') {
-      await RemoteClient.Run();
-    } else {
-      options.versioning = 'None';
-      Input.cliOptions = options;
-      const buildParameter = await BuildParameters.create();
-      const baseImage = new ImageTag(buildParameter);
-      await CloudRunner.run(buildParameter, baseImage.toString());
+    const container = new Array();
+    container.push(
+      {
+        key: `remote-cli`,
+        asyncFunc: RemoteClient.Run,
+      },
+      {
+        key: `cli`,
+        asyncFunc: async () => {
+          options.versioning = 'None';
+          Input.cliOptions = options;
+          const buildParameter = await BuildParameters.create();
+          const baseImage = new ImageTag(buildParameter);
+          return await CloudRunner.run(buildParameter, baseImage.toString());
+        },
+      },
+    );
+    const results = container.filter((x) => x.key === options.mode);
+
+    if (results.length === 0) {
+      throw new Error('no CLI mode found');
     }
+
+    return await results[0].asyncFunc();
   }
   static isCliMode(options: any) {
-    switch (options.mode) {
-      case 'cli':
-      case 'remote-cli':
-        return true;
-      default:
-        return false;
-    }
+    return options.mode !== undefined && options.mode === '';
   }
+
   public static SetupCli() {
     Input.githubEnabled = false;
     const program = new Command();

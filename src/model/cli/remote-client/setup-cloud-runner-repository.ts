@@ -7,16 +7,16 @@ import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 import path from 'path';
 
-export class CloudRunnerRepositorySetup {
+export class SetupCloudRunnerRepository {
   static LFS_ASSETS_HASH;
   public static async run() {
     try {
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.buildPathFull}`);
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.repoPathFull}`);
-      await CloudRunnerRepositorySetup.cloneRepoWithoutLFSFiles();
+      await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
 
-      CloudRunnerRepositorySetup.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
-      CloudRunnerLogger.logCli(CloudRunnerRepositorySetup.LFS_ASSETS_HASH);
+      SetupCloudRunnerRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
+      CloudRunnerLogger.logCli(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
       await LFSHashing.printLFSHashState();
       CloudRunnerLogger.logCli(`Library Caching`);
       assert(
@@ -28,15 +28,15 @@ export class CloudRunnerRepositorySetup {
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolder,
         CloudRunnerState.lfsDirectory,
-        `${CloudRunnerRepositorySetup.LFS_ASSETS_HASH}.zip`,
+        `${SetupCloudRunnerRepository.LFS_ASSETS_HASH}.zip`,
       );
       await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
       await Caching.printCacheState(CloudRunnerState.lfsCacheFolder, CloudRunnerState.libraryCacheFolder);
-      await CloudRunnerRepositorySetup.pullLatestLFS();
+      await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
         CloudRunnerState.lfsCacheFolder,
         CloudRunnerState.lfsDirectory,
-        CloudRunnerRepositorySetup.LFS_ASSETS_HASH,
+        SetupCloudRunnerRepository.LFS_ASSETS_HASH,
       );
       await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
