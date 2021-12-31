@@ -1,3 +1,4 @@
+import path from 'path';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -38,8 +39,8 @@ export class SetupStep implements StepInterface {
         git clone -b ${CloudRunnerState.branchName} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}"
-        chmod +x ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js
-        node ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js -m remote-cli
+        chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(`/`, `\\`)}
+        node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(`/`, `\\`)} -m remote-cli
         `,
         `/${CloudRunnerState.buildVolumeFolder}`,
         `/${CloudRunnerState.buildVolumeFolder}/`,
