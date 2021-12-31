@@ -75,7 +75,7 @@ class AWSTaskRunner {
     const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     const exitCode = (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
     CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
-    if (exitCode !== 0 && exitCode !== undefined) {
+    if (exitCode !== 0) {
       core.error(
         `job failed with exit code ${exitCode} ${JSON.stringify(
           await ECS.describeTasks({ tasks: [taskArn], cluster }).promise(),
@@ -118,7 +118,7 @@ class AWSTaskRunner {
       `Cloud runner job status is ${(await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
     );
 
-    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${AWS.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
+    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${CF.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let shouldReadLogs = true;
     let timestamp: number = 0;
