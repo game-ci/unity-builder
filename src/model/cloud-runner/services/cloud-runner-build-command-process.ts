@@ -5,7 +5,7 @@ export class CloudRunnerBuildCommandProcessor {
     return `echo "---"
       echo "start"
       ${commands}
-      echo "end--${buildParameters.logId}"
+      echo "end---${buildParameters.logId}"
     `;
   }
 }

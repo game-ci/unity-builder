@@ -3,6 +3,7 @@ import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { RemoteClient } from './remote-client';
 import { ActionYamlReader } from '../input-readers/action-yaml';
+import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 export class CLI {
   static async RunCli(options: any): Promise<void> {
     core.info(`Entrypoint: ${options.mode}`);
@@ -30,10 +31,12 @@ export class CLI {
       throw new Error('no CLI mode found');
     }
 
+    CloudRunnerLogger.log(results[0].key);
+
     return await results[0].asyncFunc();
   }
   static isCliMode(options: any) {
-    return options.mode !== undefined && options.mode === '';
+    return options.mode !== undefined && options.mode !== '';
   }
 
   public static SetupCli() {
