@@ -18,15 +18,11 @@ export class CloudRunnerState {
   }
 
   public static get buildPathFull(): string {
-    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
+    return path.join(CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
   }
 
   public static get builderPathFull(): string {
     return path.join(CloudRunnerState.buildPathFull, `builder`);
-  }
-
-  public static get steamPathFull(): string {
-    return path.join(CloudRunnerState.buildPathFull, `steam`);
   }
 
   public static get repoPathFull(): string {
@@ -74,7 +70,7 @@ export class CloudRunnerState {
   }
 
   public static get buildVolumeFolder() {
-    return path.join('/', 'data');
+    return 'data';
   }
 
   public static get cacheFolder() {
