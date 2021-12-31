@@ -81,6 +81,9 @@ class KubernetesTaskRunner {
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
         CloudRunnerLogger.log(`${status.body.status?.phase} ${status.body.status?.conditions?.[0].message || ''}`);
+        if (Input.cloudRunnerTests) {
+          CloudRunnerLogger.log(`${JSON.stringify(status, undefined, 4)}`);
+        }
         if (success || phase !== 'Pending') return true;
         return false;
       },
