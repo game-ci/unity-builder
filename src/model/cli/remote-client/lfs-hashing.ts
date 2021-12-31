@@ -14,8 +14,12 @@ export class LFSHashing {
       assert(fs.existsSync(`.lfs-assets-guid-sum`));
       assert(fs.existsSync(`.lfs-assets-guid`));
       const lfsHashes = {
-        lfsGuid: fs.readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8'),
-        lfsGuidSum: fs.readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8'),
+        lfsGuid: fs
+          .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8')
+          .replace(/\n/g, ``),
+        lfsGuidSum: fs
+          .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
+          .replace(/\n/g, ``),
       };
       if (Input.cloudRunnerTests) {
         RemoteClientLogger.log(lfsHashes.lfsGuid);
