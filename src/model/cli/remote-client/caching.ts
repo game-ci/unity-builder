@@ -2,9 +2,9 @@ import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
 import { Input } from '../..';
-import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
+import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, destinationFolder: string, artifactName: string) {
@@ -13,7 +13,7 @@ export class Caching {
       await CloudRunnerAgentSystem.Run(`zip -r "${artifactName}.zip" "${path.dirname(destinationFolder)}"`);
       assert(fs.existsSync(`${artifactName}.zip`));
       await CloudRunnerAgentSystem.Run(`cp "${artifactName}.zip" "${path.join(cacheFolder, `${artifactName}.zip`)}"`);
-      CloudRunnerLogger.logCli(`copied ${artifactName} to ${cacheFolder}`);
+      RemoteClientLogger.log(`copied ${artifactName} to ${cacheFolder}`);
     } catch (error) {
       throw error;
     }
@@ -45,11 +45,11 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         }
-        CloudRunnerLogger.logCli(`cache item exists`);
+        RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);
       } else {
-        CloudRunnerLogger.logCli(`cache item doesn't exist`);
+        RemoteClientLogger.logWarning(`cache item ${specificHashMatch} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
@@ -61,7 +61,7 @@ export class Caching {
 
   public static handleCachePurging() {
     if (process.env.purgeRemoteCaching !== undefined) {
-      CloudRunnerLogger.logCli(`purging ${CloudRunnerState.purgeRemoteCaching}`);
+      RemoteClientLogger.log(`purging ${CloudRunnerState.purgeRemoteCaching}`);
       fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
     }
   }

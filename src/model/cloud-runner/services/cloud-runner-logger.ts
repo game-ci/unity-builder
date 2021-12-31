@@ -13,16 +13,8 @@ class CloudRunnerLogger {
     core.info(message);
   }
 
-  public static logCli(message: string) {
-    CloudRunnerLogger.log(`[Client] ${message}`);
-  }
-
-  public static logCliError(message: string) {
-    CloudRunnerLogger.log(`[Client][Error] ${message}`);
-  }
-
-  public static logCliDiagnostic(message: string) {
-    CloudRunnerLogger.log(`[Client][Diagnostic] ${message}`);
+  public static logWarning(message: string) {
+    core.warning(message);
   }
 
   public static logLine(message: string) {

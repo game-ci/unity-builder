@@ -1,12 +1,11 @@
-import { assert } from 'console';
 import fs from 'fs';
-import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 import path from 'path';
 import { Input } from '../..';
+import { RemoteClientLogger } from './remote-client-logger';
 
 export class SetupCloudRunnerRepository {
   static LFS_ASSETS_HASH;
@@ -19,15 +18,14 @@ export class SetupCloudRunnerRepository {
       SetupCloudRunnerRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
 
       if (Input.cloudRunnerTests) {
-        CloudRunnerLogger.logCli(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
+        RemoteClientLogger.log(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
       }
       await LFSHashing.printLFSHashState();
-      CloudRunnerLogger.logCli(`Library Caching`);
-      assert(
-        !fs.existsSync(CloudRunnerState.libraryFolderFull),
-        `!Warning!: The Unity library was included in the git repository`,
-      );
-      CloudRunnerLogger.logCli(`LFS Caching`);
+      RemoteClientLogger.log(`Library Caching`);
+      if (!fs.existsSync(CloudRunnerState.libraryFolderFull)) {
+        RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
+      }
+      RemoteClientLogger.log(`LFS Caching`);
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
@@ -65,10 +63,10 @@ export class SetupCloudRunnerRepository {
 
   private static async cloneRepoWithoutLFSFiles() {
     try {
-      CloudRunnerLogger.logCli(`Initializing source repository for cloning with caching of LFS files`);
+      RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       process.chdir(CloudRunnerState.repoPathFull);
       await CloudRunnerAgentSystem.Run(`git config --global advice.detachedHead false`);
-      CloudRunnerLogger.logCli(`Cloning the repository being built:`);
+      RemoteClientLogger.log(`Cloning the repository being built:`);
       await CloudRunnerAgentSystem.Run(`git lfs install --skip-smudge`);
       await CloudRunnerAgentSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}`,
@@ -77,9 +75,9 @@ export class SetupCloudRunnerRepository {
         await CloudRunnerAgentSystem.Run(`ls -lh`);
         await CloudRunnerAgentSystem.Run(`tree`);
       }
-      CloudRunnerLogger.logCli(`${CloudRunnerState.buildParams.branch}`);
+      RemoteClientLogger.log(`${CloudRunnerState.buildParams.branch}`);
       await CloudRunnerAgentSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
-      CloudRunnerLogger.logCli(`Checked out ${process.env.GITHUB_SHA}`);
+      RemoteClientLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
     } catch (error) {
       throw error;
     }
@@ -88,6 +86,6 @@ export class SetupCloudRunnerRepository {
   private static async pullLatestLFS() {
     process.chdir(CloudRunnerState.repoPathFull);
     await CloudRunnerAgentSystem.Run(`git lfs pull`);
-    CloudRunnerLogger.logCli(`pulled latest LFS files`);
+    RemoteClientLogger.log(`pulled latest LFS files`);
   }
 }
