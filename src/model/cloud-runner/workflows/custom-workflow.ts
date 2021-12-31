@@ -9,6 +9,9 @@ export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
+      if (Input.cloudRunnerTests) {
+        CloudRunnerLogger.log(`Parsing build steps: ${buildSteps}`);
+      }
       try {
         buildSteps = YAML.parse(buildSteps);
         let output = '';
