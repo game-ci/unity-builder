@@ -78,6 +78,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           awsBaseStackName: game-ci-stack-integration-tests
           CloudRunnerBranch: remote-builder/unified-providers
+          cloudRunnerTests: true
           postBuildSteps: |
             name: upload
             image: amazon/aws-cli

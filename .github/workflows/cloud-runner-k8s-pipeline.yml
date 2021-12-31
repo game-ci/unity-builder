@@ -82,6 +82,7 @@ jobs:
           projectPath: test-project
           unityVersion: 2019.3.15f1
           versioning: None
+          cloudRunnerTests: true
 
       ###########################
       #          Upload         #

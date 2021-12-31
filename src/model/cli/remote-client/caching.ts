@@ -1,6 +1,7 @@
 import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
+import { Input } from '../..';
 import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
@@ -41,7 +42,9 @@ export class Caching {
         cacheSelection = latest;
       }
       if (fs.existsSync(cacheSelection)) {
-        await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
+        if (Input.cloudRunnerTests) {
+          await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
+        }
         CloudRunnerLogger.logCli(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);

@@ -6,6 +6,7 @@ import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 import path from 'path';
+import { Input } from '../..';
 
 export class SetupCloudRunnerRepository {
   static LFS_ASSETS_HASH;
@@ -16,7 +17,10 @@ export class SetupCloudRunnerRepository {
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
 
       SetupCloudRunnerRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
-      CloudRunnerLogger.logCli(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
+
+      if (Input.cloudRunnerTests) {
+        CloudRunnerLogger.logCli(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
+      }
       await LFSHashing.printLFSHashState();
       CloudRunnerLogger.logCli(`Library Caching`);
       assert(
@@ -24,13 +28,18 @@ export class SetupCloudRunnerRepository {
         `!Warning!: The Unity library was included in the git repository`,
       );
       CloudRunnerLogger.logCli(`LFS Caching`);
-      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
+      }
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolder,
         CloudRunnerState.lfsDirectory,
         `${SetupCloudRunnerRepository.LFS_ASSETS_HASH}.zip`,
       );
-      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
+      }
       await Caching.printCacheState(CloudRunnerState.lfsCacheFolder, CloudRunnerState.libraryCacheFolder);
       await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
@@ -38,9 +47,15 @@ export class SetupCloudRunnerRepository {
         CloudRunnerState.lfsDirectory,
         SetupCloudRunnerRepository.LFS_ASSETS_HASH,
       );
-      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
+      }
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
-      await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
+      }
 
       Caching.handleCachePurging();
     } catch (error) {
@@ -58,8 +73,10 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerAgentSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${CloudRunnerState.repoPathFull}`,
       );
-      await CloudRunnerAgentSystem.Run(`ls -lh`);
-      await CloudRunnerAgentSystem.Run(`tree`);
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`ls -lh`);
+        await CloudRunnerAgentSystem.Run(`tree`);
+      }
       CloudRunnerLogger.logCli(`${CloudRunnerState.buildParams.branch}`);
       await CloudRunnerAgentSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
       CloudRunnerLogger.logCli(`Checked out ${process.env.GITHUB_SHA}`);
