@@ -13,14 +13,18 @@ const core = require('@actions/core');
  */
 class Input {
   public static cliOptions;
+  public static githubInputEnabled: boolean = true;
+
+  // also enabled debug logging for cloud runner
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
   private static getInput(query) {
-    const coreInput = core.getInput(query);
-    return coreInput && coreInput !== ''
-      ? coreInput
-      : Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
+    if (Input.githubInputEnabled) {
+      return core.getInput(query) || '';
+    }
+
+    return Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
       ? Input.cliOptions[query]
       : process.env[query] !== undefined
       ? process.env[query]

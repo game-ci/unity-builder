@@ -33,7 +33,7 @@ export class BuildStep implements StepInterface {
         cp -r "${path
           .join(CloudRunnerState.builderPathFull, 'dist', 'entrypoint.sh')
           .replace(/\\/g, `/`)}" "/entrypoint.sh"
-        cp -r "${path.join(CloudRunnerState.builderPathFull, 'dist', '').replace(/\\/g, `/`)}/dist/steps/" "/steps"
+        cp -r "${path.join(CloudRunnerState.builderPathFull, 'dist', 'steps').replace(/\\/g, `/`)}" "/steps"
         chmod -R +x "/entrypoint.sh"
         chmod -R +x "/steps"
         /entrypoint.sh

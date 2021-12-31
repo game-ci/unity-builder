@@ -9,6 +9,21 @@ export class CloudRunnerState {
   public static defaultSecrets: CloudRunnerSecret[];
   public static readonly repositoryFolder = 'repo';
 
+  // only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
+
+  public static get buildPathFull(): string {
+    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
+  }
+
+  public static get cacheFolderFull(): string {
+    return path.join(
+      '/',
+      CloudRunnerState.buildVolumeFolder,
+      CloudRunnerState.cacheFolder,
+      CloudRunnerState.branchName,
+    );
+  }
+
   static setup(buildParameters: BuildParameters) {
     CloudRunnerState.buildParams = buildParameters;
   }
@@ -16,11 +31,6 @@ export class CloudRunnerState {
   public static get branchName(): string {
     return CloudRunnerState.buildParams.branch;
   }
-
-  public static get buildPathFull(): string {
-    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
-  }
-
   public static get builderPathFull(): string {
     return path.join(CloudRunnerState.buildPathFull, `builder`);
   }
@@ -35,15 +45,6 @@ export class CloudRunnerState {
 
   public static get libraryFolderFull(): string {
     return path.join(CloudRunnerState.projectPathFull, `Library`);
-  }
-
-  public static get cacheFolderFull(): string {
-    return path.join(
-      '/',
-      CloudRunnerState.buildVolumeFolder,
-      CloudRunnerState.cacheFolder,
-      CloudRunnerState.branchName,
-    );
   }
 
   public static get lfsDirectory(): string {

@@ -6,6 +6,7 @@ import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 export class CLI {
   static async RunCli(options: any): Promise<void> {
+    Input.githubInputEnabled = false;
     const container = new Array();
     container.push(
       {
