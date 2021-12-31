@@ -55,11 +55,11 @@ export class CloudRunnerState {
     return process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
   }
 
-  public static get lfsCacheFolder() {
+  public static get lfsCacheFolderFull() {
     return path.join(CloudRunnerState.cacheFolderFull, `lfs`);
   }
 
-  public static get libraryCacheFolder() {
+  public static get libraryCacheFolderFull() {
     return path.join(CloudRunnerState.cacheFolderFull, `lib`);
   }
 

@@ -3,7 +3,6 @@ import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './caching';
 import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
-import path from 'path';
 import { Input } from '../..';
 import { RemoteClientLogger } from './remote-client-logger';
 
@@ -14,46 +13,18 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.buildPathFull}`);
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.repoPathFull}`);
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
-
-      SetupCloudRunnerRepository.LFS_ASSETS_HASH = await LFSHashing.createLFSHashFiles();
-
-      if (Input.cloudRunnerTests) {
-        RemoteClientLogger.log(SetupCloudRunnerRepository.LFS_ASSETS_HASH);
-      }
-      await LFSHashing.printLFSHashState();
-      RemoteClientLogger.log(`Library Caching`);
+      const lfsHashes = await LFSHashing.createLFSHashFiles();
       if (!fs.existsSync(CloudRunnerState.libraryFolderFull)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
       }
-      RemoteClientLogger.log(`LFS Caching`);
-
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
-      }
       await Caching.PullFromCache(
-        CloudRunnerState.lfsCacheFolder,
+        CloudRunnerState.lfsCacheFolderFull,
         CloudRunnerState.lfsDirectory,
-        `${SetupCloudRunnerRepository.LFS_ASSETS_HASH}.zip`,
+        `${lfsHashes.lfsGuid}.zip`,
       );
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.lfsDirectory, '..')}`);
-      }
-      await Caching.printCacheState(CloudRunnerState.lfsCacheFolder, CloudRunnerState.libraryCacheFolder);
       await SetupCloudRunnerRepository.pullLatestLFS();
-      await Caching.PushToCache(
-        CloudRunnerState.lfsCacheFolder,
-        CloudRunnerState.lfsDirectory,
-        SetupCloudRunnerRepository.LFS_ASSETS_HASH,
-      );
-
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
-      }
-      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolder, CloudRunnerState.libraryFolderFull);
-
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${path.join(CloudRunnerState.libraryCacheFolder, '..')}`);
-      }
+      await Caching.PushToCache(CloudRunnerState.lfsCacheFolderFull, CloudRunnerState.lfsDirectory, lfsHashes.lfsGuid);
+      await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
 
       Caching.handleCachePurging();
     } catch (error) {

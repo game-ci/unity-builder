@@ -7,18 +7,34 @@ import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
-  public static async PushToCache(cacheFolder: string, destinationFolder: string, artifactName: string) {
+  public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
     try {
-      process.chdir(`${destinationFolder}/..`);
-      await CloudRunnerAgentSystem.Run(`zip -r "${artifactName}.zip" "${path.dirname(destinationFolder)}"`);
-      assert(fs.existsSync(`${artifactName}.zip`));
-      await CloudRunnerAgentSystem.Run(`cp "${artifactName}.zip" "${path.join(cacheFolder, `${artifactName}.zip`)}"`);
-      RemoteClientLogger.log(`copied ${artifactName} to ${cacheFolder}`);
+      if (Input.cloudRunnerTests) {
+        await Caching.printFullCacheHierarchySize();
+      }
+      process.chdir(`${sourceFolder}/..`);
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
+        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
+      }
+      await CloudRunnerAgentSystem.Run(`zip -r "${cacheKey}.zip" "${path.dirname(sourceFolder)}"`);
+      assert(fs.existsSync(`${cacheKey}.zip`));
+      await CloudRunnerAgentSystem.Run(`cp "${cacheKey}.zip" "${path.join(cacheFolder, `${cacheKey}.zip`)}"`);
+      RemoteClientLogger.log(`copied ${cacheKey} to ${cacheFolder}`);
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
+      }
+      if (Input.cloudRunnerTests) {
+        await Caching.printFullCacheHierarchySize();
+      }
     } catch (error) {
       throw error;
     }
   }
-  public static async PullFromCache(cacheFolder: string, destinationFolder: string, specificHashMatch: string = ``) {
+  public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheKey: string = ``) {
+    RemoteClientLogger.log(`Caching for ${path.dirname(destinationFolder)}`);
     try {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerAgentSystem.Run(`mkdir -p ${cacheFolder}`);
@@ -36,8 +52,12 @@ export class Caching {
       process.chdir(cacheFolder);
       let cacheSelection;
 
-      if (specificHashMatch !== ``) {
-        cacheSelection = fs.existsSync(specificHashMatch) ? specificHashMatch : latest;
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
+      }
+
+      if (cacheKey !== ``) {
+        cacheSelection = fs.existsSync(cacheKey) ? cacheKey : latest;
       } else {
         cacheSelection = latest;
       }
@@ -48,8 +68,11 @@ export class Caching {
         RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);
+        if (Input.cloudRunnerTests) {
+          await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
+        }
       } else {
-        RemoteClientLogger.logWarning(`cache item ${specificHashMatch} doesn't exist ${destinationFolder}`);
+        RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
@@ -66,20 +89,20 @@ export class Caching {
     }
   }
 
-  public static async printCacheState(lfsCacheFolder: string, libraryCacheFolder: string) {
+  public static async printFullCacheHierarchySize() {
     await CloudRunnerAgentSystem.Run(
       `echo ' '
       echo "LFS cache for $branch"
-      du -sch "${lfsCacheFolder}/"
+      du -sch "${CloudRunnerState.lfsCacheFolderFull}/"
       echo '**'
       echo "Library cache for $branch"
-      du -sch "${libraryCacheFolder}/"
+      du -sch "${CloudRunnerState.libraryCacheFolderFull}/"
       echo '**'
       echo "Branch: $branch"
       du -sch "${CloudRunnerState.cacheFolderFull}/"
       echo '**'
       echo 'Full cache'
-      du -sch "${CloudRunnerState.cacheFolderFull}/"
+      du -sch "${CloudRunnerState.cacheFolderFull}/.."
       echo ' '`,
     );
   }
