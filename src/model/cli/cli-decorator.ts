@@ -14,5 +14,10 @@ export function GetCliFunctions(key) {
   return targets.find((x) => x.key === key);
 }
 export function GetAllCliModes() {
-  return targets.map((x) => x.key);
+  return targets.map((x) => {
+    return {
+      key: x.key,
+      description: x.description,
+    };
+  });
 }
