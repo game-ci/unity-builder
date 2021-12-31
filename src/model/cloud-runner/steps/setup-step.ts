@@ -41,8 +41,8 @@ export class SetupStep implements StepInterface {
         chmod +x ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js
         node ${CloudRunnerState.builderPathFull.replace(`/`, `\\`)}/dist/index.js -m remote-cli
         `,
-        `/${CloudRunnerState.buildVolumeFolder.replace(`/`, `\\`)}`,
-        `/${CloudRunnerState.buildVolumeFolder.replace(`/`, `\\`)}/`,
+        `/${CloudRunnerState.buildVolumeFolder}`,
+        `/${CloudRunnerState.buildVolumeFolder}/`,
         environmentVariables,
         secrets,
       );
