@@ -185,7 +185,7 @@ class AWSTaskRunner {
         if (json.messageType === 'DATA_MESSAGE') {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
             let message = json.logEvents[logEventsIndex].message;
-            if (json.logEvents[logEventsIndex].message.includes(CloudRunnerState.buildParams.logId)) {
+            if (json.logEvents[logEventsIndex].message.includes(`---${CloudRunnerState.buildParams.logId}`)) {
               CloudRunnerLogger.log('End of log transmission received');
               shouldReadLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
