@@ -82,11 +82,11 @@ jobs:
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
-              commands: ['aws s3 list-buckets']
+              commands: 'aws s3 list-buckets'
               secrets:
-              - name: AWS_ACCESS_KEY_ID
+              - name: awsAccesKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              - name: AWS_SECRET_ACCESS_KEY
+              - name: awsSecretAccessKey
                 value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              - name: AWS_DEFAULT_REGION
+              - name: awsDefaultRegion
                 value: eu-west-2

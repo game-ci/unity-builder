@@ -18,7 +18,7 @@ describe('Cloud Runner', () => {
     customJob: `
     - name: 'step 1'
       image: 'alpine'
-      commands: ['printenv']
+      commands: 'printenv'
       secrets:
         - name: '${testSecretName}'
           value: '${testSecretValue}'
