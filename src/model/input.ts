@@ -32,7 +32,12 @@ class Input {
     return Input.getInput('region') || 'eu-west-2';
   }
   static async githubRepo() {
-    return Input.getInput('GITHUB_REPOSITORY') || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder';
+    return (
+      Input.getInput('GITHUB_REPOSITORY') ||
+      Input.getInput('GITHUB_REPO') ||
+      (await GitRepoReader.GetRemote()) ||
+      'game-ci/unity-builder'
+    );
   }
   static async branch() {
     if (await GitRepoReader.GetBranch()) {
