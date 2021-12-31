@@ -7,7 +7,6 @@ import { Input } from '../..';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class SetupCloudRunnerRepository {
-  static LFS_ASSETS_HASH;
   public static async run() {
     try {
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.buildPathFull}`);
