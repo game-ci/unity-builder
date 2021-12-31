@@ -82,7 +82,7 @@ jobs:
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
-              commands: 'aws s3 ls && aws s3 ls game-ci-test-storage && aws s3 copy $BUILD_FILE game-ci-test-storage'
+              commands: 'aws s3 ls && aws s3 ls game-ci-test-storage && aws s3 copy $BUILD_PATH/$BUILD_FILE game-ci-test-storage'
               secrets:
               - name: awsAccesKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
