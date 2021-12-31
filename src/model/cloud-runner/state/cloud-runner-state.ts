@@ -18,7 +18,7 @@ export class CloudRunnerState {
   }
 
   public static get buildPathFull(): string {
-    return path.join(CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
+    return path.join(`/`, CloudRunnerState.buildVolumeFolder, CloudRunnerState.buildParams.buildGuid);
   }
 
   public static get builderPathFull(): string {
@@ -38,7 +38,12 @@ export class CloudRunnerState {
   }
 
   public static get cacheFolderFull(): string {
-    return path.join(CloudRunnerState.buildVolumeFolder, CloudRunnerState.cacheFolder, CloudRunnerState.branchName);
+    return path.join(
+      '/',
+      CloudRunnerState.buildVolumeFolder,
+      CloudRunnerState.cacheFolder,
+      CloudRunnerState.branchName,
+    );
   }
 
   public static get lfsDirectory(): string {
