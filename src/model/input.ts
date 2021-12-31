@@ -31,8 +31,8 @@ class Input {
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
-  static get githubRepo(): string {
-    return Input.getInput('GITHUB_REPOSITORY') || GitRepoReader.GetRemote() || 'game-ci/unity-builder';
+  static async githubRepo() {
+    return Input.getInput('GITHUB_REPOSITORY') || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder';
   }
   static async branch() {
     if (await GitRepoReader.GetBranch()) {

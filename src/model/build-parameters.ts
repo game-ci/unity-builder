@@ -98,7 +98,7 @@ class BuildParameters {
       customJob: Input.customJob,
       runNumber: Input.runNumber,
       branch: await Input.branch(),
-      githubRepo: Input.githubRepo,
+      githubRepo: await Input.githubRepo(),
       remoteBuildCluster: Input.cloudRunnerCluster,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
