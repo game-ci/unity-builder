@@ -3,7 +3,9 @@ import { RemoteClientLogger } from './remote-client-logger';
 
 export class CloudRunnerAgentSystem {
   public static async Run(command: string) {
-    RemoteClientLogger.log(`${command}`);
+    for (const element of command.split(`\n`)) {
+      RemoteClientLogger.log(element);
+    }
     return await new Promise<string>((promise) => {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
