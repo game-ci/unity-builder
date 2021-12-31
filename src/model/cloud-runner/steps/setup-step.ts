@@ -26,11 +26,6 @@ export class SetupStep implements StepInterface {
     try {
       CloudRunnerLogger.log(` `);
       CloudRunnerLogger.logLine('Starting step 1/2 (setup game files from repository)');
-      CloudRunnerLogger.log(
-        `git clone -b ${CloudRunnerState.branchName} ${
-          CloudRunnerState.unityBuilderRepoUrl
-        } ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}`,
-      );
 
       return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
