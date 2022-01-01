@@ -83,9 +83,12 @@ jobs:
             - name: upload
               image: amazon/aws-cli
               commands: |
-                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                aws configure set region $AWS_DEFAULT_REGION
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile main
+                echo "t1"
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile main
+                echo "t3"
+                aws configure set region $AWS_DEFAULT_REGION --profile main
+                echo "t2"
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
                 aws s3 copy $BUILD_PATH/$BUILD_FILE game-ci-test-storage
