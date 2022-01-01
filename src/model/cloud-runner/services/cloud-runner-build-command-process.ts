@@ -37,7 +37,7 @@ export class CloudRunnerBuildCommandProcessor {
 }
 export class Hook {
   public commands;
-  public secrets: CloudRunnerSecret[] = [];
+  public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
   public name;
   public hook!: string[];
   public step!: string[];
