@@ -18,8 +18,8 @@ export class CloudRunnerState {
   public static get cacheFolderFull(): string {
     return path.join(
       '/',
-      CloudRunnerState.cacheFolder,
       CloudRunnerState.buildVolumeFolder,
+      CloudRunnerState.cacheFolder,
       CloudRunnerState.branchName,
     );
   }
