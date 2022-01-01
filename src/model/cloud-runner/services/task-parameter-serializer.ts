@@ -2,6 +2,7 @@ import { Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerState } from '../state/cloud-runner-state';
+import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
@@ -26,6 +27,14 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
+    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks()
+      .map((x) => x.secrets)
+      // eslint-disable-next-line unicorn/no-array-reduce
+      .reduce((x, y) =>
+        // eslint-disable-next-line unicorn/prefer-spread
+        x.concat(y),
+      );
+    array.push(configurableHooks);
 
     array = array.filter(
       (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',

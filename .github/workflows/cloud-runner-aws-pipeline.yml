@@ -45,6 +45,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
+      ## we will auth to google as well for log aggregation
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '288.0.0'
+          service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x
@@ -69,25 +75,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          EXPERIMENTAL_HOOK: |
-            - name: FUSE filesystem to s3 for global scale caching
-              image: amazon/aws-cli
-              commands: |
-                sudo amazon-linux-extras install epel
-                sudo yum install s3fs-fuse
-                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-                aws configure set region $AWS_DEFAULT_REGION --profile default
-                echo ACCESS_KEY_ID:SECRET_ACCESS_KEY > ${HOME}/.passwd-s3fs
-                chmod 600 ${HOME}/.passwd-s3fs
-                s3fs game-ci-test-storage /data/cache -o passwd_file=${HOME}/.passwd-s3fs
-              secrets:
-              - name: awsAccessKeyId
-                value: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              - name: awsSecretAccessKey
-                value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              - name: awsDefaultRegion
-                value: eu-west-2
         with:
           cloudRunnerCluster: aws
           versioning: None
