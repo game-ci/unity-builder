@@ -11,22 +11,22 @@ class CloudRunnerLogger {
   }
 
   public static log(message: string) {
-    this.logToGoogle(message);
+    CloudRunnerLogger.logToGoogle(message);
     core.info(message);
   }
 
   public static logWarning(message: string) {
-    this.logToGoogle(message);
+    CloudRunnerLogger.logToGoogle(message);
     core.warning(message);
   }
 
   public static logLine(message: string) {
-    this.logToGoogle(message);
+    CloudRunnerLogger.logToGoogle(message);
     core.info(`${message}\n`);
   }
 
   public static error(message: string) {
-    this.logToGoogle(message);
+    CloudRunnerLogger.logToGoogle(message);
     core.error(message);
   }
 
