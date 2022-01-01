@@ -47,24 +47,23 @@ export class Caching {
         await CloudRunnerAgentSystem.Run(`mkdir -p ${destinationFolder}`);
       }
 
-      const latest = await (await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`)).replace(
-        /\n/g,
-        ``,
-      );
+      const latestInBranch = await (
+        await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`)
+      ).replace(/\n/g, ``);
 
       process.chdir(cacheFolder);
-      let cacheSelection;
 
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(await LFSHashing.hashAllFiles(destinationFolder));
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
 
-      if (cacheKey !== ``) {
-        cacheSelection = fs.existsSync(cacheKey) ? cacheKey : latest;
-      } else {
-        cacheSelection = latest;
+      const cacheSelection = cacheKey !== `` && fs.existsSync(cacheKey) ? cacheKey : latestInBranch;
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerAgentSystem.Run(`cache key ${cacheKey} selection ${cacheSelection}`);
       }
+
       if (fs.existsSync(cacheSelection)) {
         if (Input.cloudRunnerTests) {
           await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
