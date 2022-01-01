@@ -20,6 +20,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
       let output = '';
+      if (CloudRunnerState.buildParams.preBuildSteps !== '') {
+        output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
+      }
+      CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
       output += await new SetupStep().run(
         new CloudRunnerStepState(
           'alpine/git',
@@ -28,10 +32,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         ),
       );
       CloudRunnerLogger.logWithTime('Download repository step time');
-      if (CloudRunnerState.buildParams.preBuildSteps !== '') {
-        output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
-      }
-      CloudRunnerLogger.logWithTime('Pre build step(s) time');
 
       output += await new BuildStep().run(
         new CloudRunnerStepState(
@@ -45,7 +45,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (CloudRunnerState.buildParams.postBuildSteps !== '') {
         output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
       }
-      CloudRunnerLogger.logWithTime('Post build step(s) time');
+      CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
 

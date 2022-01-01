@@ -69,6 +69,25 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
+          EXPERIMENTAL_HOOK: |
+            - name: FUSE filesystem to s3 for global scale caching
+              image: amazon/aws-cli
+              commands: |
+                sudo amazon-linux-extras install epel
+                sudo yum install s3fs-fuse
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+                aws configure set region $AWS_DEFAULT_REGION --profile default
+                echo ACCESS_KEY_ID:SECRET_ACCESS_KEY > ${HOME}/.passwd-s3fs
+                chmod 600 ${HOME}/.passwd-s3fs
+                s3fs game-ci-test-storage /data/cache -o passwd_file=${HOME}/.passwd-s3fs
+              secrets:
+              - name: awsAccessKeyId
+                value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              - name: awsSecretAccessKey
+                value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              - name: awsDefaultRegion
+                value: eu-west-2
         with:
           cloudRunnerCluster: aws
           versioning: None
