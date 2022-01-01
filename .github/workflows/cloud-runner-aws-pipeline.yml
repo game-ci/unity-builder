@@ -79,10 +79,16 @@ jobs:
           awsBaseStackName: game-ci-stack-integration-tests
           CloudRunnerBranch: remote-builder/unified-providers
           cloudRunnerTests: true
-          postBuildSteps: |
+          preBuildSteps: |
             - name: upload
               image: amazon/aws-cli
-              commands: 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID && aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY && aws configure set region $AWS_DEFAULT_REGION && aws s3 ls && aws s3 ls game-ci-test-storage && aws s3 copy $BUILD_PATH/$BUILD_FILE game-ci-test-storage'
+              commands: ' |
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                aws configure set region $AWS_DEFAULT_REGION
+                aws s3 ls
+                aws s3 ls game-ci-test-storage
+                aws s3 copy $BUILD_PATH/$BUILD_FILE game-ci-test-storage'
               secrets:
               - name: awsAccesKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
