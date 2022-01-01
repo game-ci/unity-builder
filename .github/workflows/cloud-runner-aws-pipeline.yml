@@ -88,9 +88,9 @@ jobs:
                 aws configure set region $AWS_DEFAULT_REGION --profile default
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
-                ls $PROJECT_PATH/$BUILD_PATH
+                ls /data/$BUILD_GUID/repo/$PROJECT_PATH/$BUILD_PATH/$BUILD_FILE
                 echo "$PROJECT_PATH/$BUILD_PATH/$BUILD_FILE s3://game-ci-test-storage/$BUILD_PATH/$BUILD_FILE"
-                aws s3 cp $PROJECT_PATH/$BUILD_PATH/$BUILD_FILE s3://game-ci-test-storage/$BUILD_PATH/$BUILD_FILE
+                aws s3 cp /data/$BUILD_GUID/repo/$PROJECT_PATH/$BUILD_PATH/$BUILD_FILE s3://game-ci-test-storage/$BUILD_PATH/$BUILD_FILE
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
