@@ -38,22 +38,23 @@ export class BuildStep implements StepInterface {
         chmod -R +x "/steps"
         /entrypoint.sh
         apt-get update
-        apt-get install -y -q zip
+        apt-get install -y -q zip tree
         cd "${CloudRunnerState.libraryFolderFull.replace(/\\/g, `/`)}/.."
         zip -r "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "Library"
         mv "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
         /\\/g,
         `/`,
       )}/lib"
-        ls -lh "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib"
-        cd "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}"
-        ls -lh "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}"
+        tree -lh "${CloudRunnerState.repoPathFull}"
         zip -r "build-${CloudRunnerState.buildParams.buildGuid}.zip" "build"
+        tree -lh "${CloudRunnerState.repoPathFull}"
+
+        tree -lh "${CloudRunnerState.cacheFolderFull}"
         mv "build-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
         /\\/g,
         `/`,
       )}"
-        ls ${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib
+        tree -lh "${CloudRunnerState.cacheFolderFull}"
         echo " "
         ls
       `,
