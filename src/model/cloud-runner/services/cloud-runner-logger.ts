@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
-import { Input } from '../..';
-const { Logging } = Input.cloudRunnerTests ? require('@google-cloud/logging') : Input.cloudRunnerTests;
+const { Logging } = process.env.GCP_LOGGING ? require('@google-cloud/logging') : { Logging: process.env.GCP_LOGGING };
 
 class CloudRunnerLogger {
   private static timestamp: number;
@@ -54,7 +53,7 @@ class CloudRunnerLogger {
     const projectId = process.env.GCP_PROJECT;
     const logName = process.env.GCP_LOG_NAME;
     // GCP only setup as dev dependency
-    if (!Input.cloudRunnerTests) {
+    if (!process.env.GCP_LOGGING) {
       return;
     }
 

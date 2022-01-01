@@ -63,6 +63,9 @@ jobs:
           GITHUUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
           CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
+          GCP_LOGGING: true
+          GCP_PROJECT: unitykubernetesbuilder
+          GCP_LOG_NAME: game-ci
           # Use FUSE to mount a storage bucket to a cache folder
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3 for global scale caching
