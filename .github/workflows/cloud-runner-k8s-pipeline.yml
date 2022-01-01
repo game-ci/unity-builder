@@ -67,6 +67,7 @@ jobs:
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3 for global scale caching
               hook: before
+              step: [ setup ]
               commands: |
                 sudo amazon-linux-extras install epel
                 sudo yum install s3fs-fuse
