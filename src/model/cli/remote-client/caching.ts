@@ -61,7 +61,7 @@ export class Caching {
       const cacheSelection = cacheKey !== `` && fs.existsSync(cacheKey) ? cacheKey : latestInBranch;
 
       if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`cache key ${cacheKey} selection ${cacheSelection}`);
+        await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
       }
 
       if (fs.existsSync(cacheSelection)) {
