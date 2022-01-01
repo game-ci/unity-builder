@@ -17,7 +17,7 @@ export class Caching {
       process.chdir(`${sourceFolder}/..`);
 
       if (Input.cloudRunnerTests) {
-        CloudRunnerLogger.log(await LFSHashing.hashAllFiles(sourceFolder));
+        CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
         await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
