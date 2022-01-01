@@ -30,6 +30,7 @@ export class TaskParameterSerializer {
     const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks();
     const secrets = configurableHooks
       .map((x) => x.secrets)
+      .filter((x) => x !== undefined && x.length > 0)
       // eslint-disable-next-line unicorn/no-array-reduce
       .reduce((x, y) => [...x, ...y]);
     array.push(secrets);
