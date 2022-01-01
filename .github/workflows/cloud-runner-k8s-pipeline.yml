@@ -66,6 +66,7 @@ jobs:
           GCP_LOGGING: true
           GCP_PROJECT: unitykubernetesbuilder
           GCP_LOG_NAME: game-ci
+          CLOUD_RUNNER_TESTS: true
           # Use FUSE to mount a storage bucket to a cache folder
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3 for global scale caching
