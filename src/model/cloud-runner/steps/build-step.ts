@@ -52,7 +52,7 @@ export class BuildStep implements StepInterface {
         mv "build-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
         /\\/g,
         `/`,
-      )}/build-${CloudRunnerState.buildParams.buildGuid}.zip"
+      )}"
         ls ${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/lib
         echo " "
         ls
