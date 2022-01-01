@@ -1,4 +1,5 @@
 import path from 'path';
+import { Input } from '../..';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -45,18 +46,16 @@ export class BuildStep implements StepInterface {
         /\\/g,
         `/`,
       )}/lib"
-        tree -lh "${CloudRunnerState.repoPathFull}"
+        cd "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}/.."
+        ${Input.cloudRunnerTests ? '' : '#'} tree -lh
         zip -r "build-${CloudRunnerState.buildParams.buildGuid}.zip" "build"
-        tree -lh "${CloudRunnerState.repoPathFull}"
-
-        tree -lh "${CloudRunnerState.cacheFolderFull}"
+        ${Input.cloudRunnerTests ? '' : '#'} tree -lh
+        ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull}"
         mv "build-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
         /\\/g,
         `/`,
       )}"
-        tree -lh "${CloudRunnerState.cacheFolderFull}"
-        echo " "
-        ls
+        ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull}"
       `,
       `/${CloudRunnerState.buildVolumeFolder}`,
       `/${CloudRunnerState.projectPathFull}`,
