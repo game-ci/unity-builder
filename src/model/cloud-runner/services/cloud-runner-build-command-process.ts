@@ -37,7 +37,7 @@ export class CloudRunnerBuildCommandProcessor {
 
   public static getHooks(): Hook[] {
     const experimentHooks = process.env.EXPERIMENTAL_HOOKS;
-    let output = new Hook[0]();
+    let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
       try {
         output = YAML.parse(experimentHooks);
