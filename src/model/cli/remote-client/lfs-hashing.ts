@@ -30,4 +30,8 @@ export class LFSHashing {
       throw error;
     }
   }
+  public static async hashAllFiles(folder: string) {
+    process.chdir(`${folder}`);
+    return await CloudRunnerAgentSystem.Run(`find -type f -exec md5sum "{}" + | sort`);
+  }
 }

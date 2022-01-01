@@ -2,8 +2,10 @@ import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
 import { Input } from '../..';
+import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
+import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
@@ -15,6 +17,7 @@ export class Caching {
       process.chdir(`${sourceFolder}/..`);
 
       if (Input.cloudRunnerTests) {
+        CloudRunnerLogger.log(await LFSHashing.hashAllFiles(sourceFolder));
         await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
@@ -53,6 +56,7 @@ export class Caching {
       let cacheSelection;
 
       if (Input.cloudRunnerTests) {
+        CloudRunnerLogger.log(await LFSHashing.hashAllFiles(destinationFolder));
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
 
