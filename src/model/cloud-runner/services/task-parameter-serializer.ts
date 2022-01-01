@@ -27,14 +27,20 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks()
+    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks();
+    const secrets = configurableHooks
       .map((x) => x.secrets)
+      .map((z) =>
+        z.length > 1
+          ? z
+              .map((x) => [x])
+              // eslint-disable-next-line unicorn/no-array-reduce
+              .reduce((x, y) => [...x, ...y])
+          : z,
+      )
       // eslint-disable-next-line unicorn/no-array-reduce
-      .reduce((x, y) =>
-        // eslint-disable-next-line unicorn/prefer-spread
-        x.concat(y),
-      );
-    array.push(configurableHooks);
+      .reduce((x, y) => [...x, ...y]);
+    array.push(secrets);
 
     array = array.filter(
       (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',
