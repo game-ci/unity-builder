@@ -1,5 +1,6 @@
 import path from 'path';
 import { Input } from '../..';
+import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -28,11 +29,12 @@ export class SetupStep implements StepInterface {
     try {
       CloudRunnerLogger.log(` `);
       CloudRunnerLogger.logLine('Starting step 1/2 (setup game files from repository)');
-
+      const hooks = CloudRunnerBuildCommandProcessor.getHooks().filter((x) => x.step.includes(`setup`));
       return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
         image,
         `
+        ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         apk update -q
         apk add unzip zip git-lfs jq tree nodejs -q
         ${Input.cloudRunnerTests ? '' : '#'} apk add tree -q
@@ -44,6 +46,7 @@ export class SetupStep implements StepInterface {
         ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
         chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
         node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli
+        ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
         `,
         `/${CloudRunnerState.buildVolumeFolder}`,
         `/${CloudRunnerState.buildVolumeFolder}/`,

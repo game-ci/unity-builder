@@ -1,5 +1,6 @@
 import path from 'path';
 import { Input } from '../..';
+import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -23,10 +24,12 @@ export class BuildStep implements StepInterface {
   ) {
     CloudRunnerLogger.logLine(` `);
     CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
+    const hooks = CloudRunnerBuildCommandProcessor.getHooks().filter((x) => x.step.includes(`setup`));
     return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,
       image,
       `
+        ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
         cp -r "${path
           .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
@@ -56,6 +59,7 @@ export class BuildStep implements StepInterface {
         `/`,
       )}"
         ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull}"
+        ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       `,
       `/${CloudRunnerState.buildVolumeFolder}`,
       `/${CloudRunnerState.projectPathFull}`,
