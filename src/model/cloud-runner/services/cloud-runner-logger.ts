@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import { exec } from 'child_process';
 import { Input } from '../..';
+import fs from 'fs';
 
 class CloudRunnerLogger {
   private static timestamp: number;
@@ -13,18 +14,22 @@ class CloudRunnerLogger {
 
   public static log(message: string) {
     core.info(message);
+    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
   }
 
   public static logWarning(message: string) {
     core.warning(message);
+    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
   }
 
   public static logLine(message: string) {
     core.info(`${message}\n`);
+    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
   }
 
   public static error(message: string) {
     core.error(message);
+    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
   }
 
   public static logWithTime(message: string) {
