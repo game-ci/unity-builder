@@ -51,7 +51,7 @@ class CloudRunnerLogger {
       return;
     }
     CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
-    exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
+    const child = exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
       if (error) {
         CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${JSON.stringify(error)}`);
         return;
@@ -61,6 +61,12 @@ class CloudRunnerLogger {
         return;
       }
       CloudRunnerLogger.log(`[GCP-LOGGER]${stdout}`);
+    });
+    child.on('close', function (code) {
+      CloudRunnerLogger.log(`[GCP-LOGGER][Exit code ${code}]`);
+      if (code !== 0) {
+        throw new Error(`${code}`);
+      }
     });
   }
 }
