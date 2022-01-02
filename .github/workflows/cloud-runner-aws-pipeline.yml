@@ -66,7 +66,8 @@ jobs:
           CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
           PROJECT_PATH: ${{ matrix.projectPath }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
+          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
+          AWS_BASE_STACK_NAME: game-ci-github-automation
           CLOUD_RUNNER_TESTS: true
       - uses: ./
         id: aws-fargate-unity-build
@@ -76,7 +77,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          INIT_HOOK: touch cloud-runner-logs && tail -f cloud-runner-logs | xargs -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: touch /cloud-runner-logs && tail -f /cloud-runner-logs | xargs -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: aws
           versioning: None
@@ -84,7 +85,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          awsBaseStackName: game-ci-stack-integration-tests
+          awsBaseStackName: game-ci-github-automation
           CloudRunnerBranch: remote-builder/unified-providers
           cloudRunnerTests: true
           postBuildSteps: |

@@ -98,7 +98,7 @@ jobs:
         env:
           CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
-          INIT_HOOK: touch /var/log/cloud-runner-logs && tail -f /var/log/cloud-runner-logs | xargs -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: touch /cloud-runner-logs && tail -f /cloud-runner-logs | xargs -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: k8s
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -106,7 +106,7 @@ jobs:
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
-          unityVersion: 2019.3.15f1
+          unityVersion: ${{ matrix.targetPlatform }}
           versioning: None
           cloudRunnerTests: true
           postBuildSteps: |
