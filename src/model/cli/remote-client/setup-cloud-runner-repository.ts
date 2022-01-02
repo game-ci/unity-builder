@@ -19,13 +19,13 @@ export class SetupCloudRunnerRepository {
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolderFull,
         CloudRunnerState.lfsDirectory,
-        `${lfsHashes.lfsGuid}.zip`,
+        `${lfsHashes.lfsGuid}`,
       );
       await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
         CloudRunnerState.lfsCacheFolderFull,
         CloudRunnerState.lfsDirectory,
-        `${lfsHashes.lfsGuid}.zip`,
+        `${lfsHashes.lfsGuid}`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
 
