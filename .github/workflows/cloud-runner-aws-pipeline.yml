@@ -68,7 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
           CLOUD_RUNNER_TESTS: true
-          INIT_HOOK: tail -f /var/log/syslog | xargs -d '\n' -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: tail -f /var/log/syslog | xargs -I{} gcloud logging write game-ci "{}"
       - uses: ./
         id: aws-fargate-unity-build
         env:
@@ -77,7 +77,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          INIT_HOOK: tail -f /var/log/syslog | xargs -d '\n' -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: tail -f /var/log/syslog | xargs -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: aws
           versioning: None
