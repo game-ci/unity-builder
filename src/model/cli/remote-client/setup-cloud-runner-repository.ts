@@ -13,7 +13,7 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerAgentSystem.Run(`mkdir -p ${CloudRunnerState.repoPathFull}`);
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
       const lfsHashes = await LFSHashing.createLFSHashFiles();
-      if (!fs.existsSync(CloudRunnerState.libraryFolderFull)) {
+      if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
       }
       await Caching.PullFromCache(
