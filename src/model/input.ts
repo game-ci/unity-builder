@@ -8,16 +8,16 @@ const core = require('@actions/core');
  * Note that input is always passed as a string, even booleans.
  */
 class Input {
+  static get targetPlatform() {
+    return core.getInput('targetPlatform') || Platform.default;
+  }
+
   static get unityVersion() {
     return core.getInput('unityVersion') || 'auto';
   }
 
   static get customImage() {
     return core.getInput('customImage');
-  }
-
-  static get targetPlatform() {
-    return core.getInput('targetPlatform') || Platform.default;
   }
 
   static get projectPath() {
@@ -35,6 +35,10 @@ class Input {
 
   static get buildMethod() {
     return core.getInput('buildMethod'); // processed in docker file
+  }
+
+  static get customParameters() {
+    return core.getInput('customParameters') || '';
   }
 
   static get versioningStrategy() {
@@ -79,16 +83,6 @@ class Input {
     return core.getInput('androidTargetSdkVersion') || '';
   }
 
-  static get allowDirtyBuild() {
-    const input = core.getInput('allowDirtyBuild') || false;
-
-    return input === 'true';
-  }
-
-  static get customParameters() {
-    return core.getInput('customParameters') || '';
-  }
-
   static get sshAgent() {
     return core.getInput('sshAgent') || '';
   }
@@ -101,36 +95,42 @@ class Input {
     return core.getInput('chownFilesTo') || '';
   }
 
-  static get remoteBuildCluster() {
-    return core.getInput('remoteBuildCluster') || '';
+  static get allowDirtyBuild() {
+    const input = core.getInput('allowDirtyBuild') || false;
+
+    return input === 'true';
   }
 
   static get awsStackName() {
-    return core.getInput('awsStackName') || '';
-  }
-
-  static get kubeConfig() {
-    return core.getInput('kubeConfig') || '';
+    return core.getInput('awsStackName') || 'game-ci';
   }
 
   static get githubToken() {
     return core.getInput('githubToken') || '';
   }
 
-  static get remoteBuildMemory() {
-    return core.getInput('remoteBuildMemory') || '800M';
+  static get kubeConfig() {
+    return core.getInput('kubeConfig') || '';
   }
 
-  static get remoteBuildCpu() {
-    return core.getInput('remoteBuildCpu') || '0.25';
+  static get kubeVolume() {
+    return core.getInput('kubeVolume') || '';
   }
 
   static get kubeVolumeSize() {
     return core.getInput('kubeVolumeSize') || '5Gi';
   }
 
-  static get kubeVolume() {
-    return core.getInput('kubeVolume') || '';
+  static get remoteBuildCluster() {
+    return core.getInput('remoteBuildCluster') || 'local';
+  }
+
+  static get remoteBuildCpu() {
+    return core.getInput('remoteBuildCpu') || '0.25';
+  }
+
+  static get remoteBuildMemory() {
+    return core.getInput('remoteBuildMemory') || '800M';
   }
 }
 

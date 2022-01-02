@@ -2,6 +2,10 @@ name: 'Unity - Builder'
 author: Webber Takken <webber@takken.io>
 description: 'Build Unity projects for different platforms.'
 inputs:
+  targetPlatform:
+    required: true
+    default: ''
+    description: 'Platform that the build should target.'
   unityVersion:
     required: false
     default: 'auto'
@@ -10,10 +14,6 @@ inputs:
     required: false
     default: ''
     description: 'Specific docker image that should be used for building the project'
-  targetPlatform:
-    required: false
-    default: ''
-    description: 'Platform that the build should target.'
   projectPath:
     required: false
     default: ''
@@ -30,38 +30,10 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  remoteBuildCluster:
-    default: 'local'
+  customParameters:
     required: false
-    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
-  awsStackName:
-    default: 'game-ci'
-    required: false
-    description: 'The Cloud Formation stack name that must be setup before using this option.'
-  kubeConfig:
     default: ''
-    required: false
-    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
-  kubeVolume:
-    default: ''
-    required: false
-    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
-  remoteBuildMemory:
-    default: '800M'
-    required: false
-    description: 'Amount of memory to assign the remote build container'
-  remoteBuildCpu:
-    default: '0.25'
-    required: false
-    description: 'Amount of CPU time to assign the remote build container'
-  kubeVolumeSize:
-    default: '5Gi'
-    required: false
-    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
-  githubToken:
-    default: ''
-    required: false
-    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+    description: 'Custom parameters to configure the build.'
   versioning:
     required: false
     default: 'Semantic'
@@ -102,14 +74,6 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
-  customParameters:
-    required: false
-    default: ''
-    description: >
-      Custom parameters to configure the build.
-
-      Parameters must start with a hyphen (-) and may be followed by a value (without hyphen).
-      Parameters without a value will be considered booleans (with a value of true).
   sshAgent:
     required: false
     default: ''
@@ -117,8 +81,7 @@ inputs:
   gitPrivateToken:
     required: false
     default: ''
-    description: >
-      Github private token to pull from github
+    description: 'Github private token to pull from github'
   chownFilesTo:
     required: false
     default: ''
@@ -126,12 +89,39 @@ inputs:
   allowDirtyBuild:
     required: false
     default: ''
-    description: >
-      Allows the branch of the build to be dirty, and still generate the build.
-
-      Note that it is generally bad practice to modify your branch
-      in a CI Pipeline. However there are exceptions where this might
-      be needed. (use with care).
+    description: 'Allows the branch of the build to be dirty, and still generate the build.'
+  awsStackName:
+    default: 'game-ci'
+    required: false
+    description: 'The Cloud Formation stack name that must be setup before using this option.'
+  githubToken:
+    default: ''
+    required: false
+    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+  kubeConfig:
+    default: ''
+    required: false
+    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+  kubeVolume:
+    default: ''
+    required: false
+    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
+  kubeVolumeSize:
+    default: '5Gi'
+    required: false
+    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
+  remoteBuildCluster:
+    default: 'local'
+    required: false
+    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+  remoteBuildCpu:
+    default: '0.25'
+    required: false
+    description: 'Amount of CPU time to assign the remote build container'
+  remoteBuildMemory:
+    default: '800M'
+    required: false
+    description: 'Amount of memory to assign the remote build container'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'
