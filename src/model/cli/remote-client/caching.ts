@@ -20,8 +20,10 @@ export class Caching {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
       }
 
-      await CloudRunnerAgentSystem.Run(`zip -q -r ${cacheKey}.zip ${path.basename(sourceFolder)}`);
-      assert(fs.existsSync(`${cacheKey}`));
+      await CloudRunnerAgentSystem.Run(
+        `zip ${Input.cloudRunnerTests ? '' : '-q'} -r ${cacheKey} ${path.basename(sourceFolder)}`,
+      );
+      assert(fs.existsSync(`${cacheKey}.zip`));
       assert(fs.existsSync(`${cacheFolder}`));
       assert(fs.existsSync(`${sourceFolder}`));
       assert(fs.existsSync(`${path.basename(sourceFolder)}`));
@@ -53,16 +55,16 @@ export class Caching {
 
       process.chdir(cacheFolder);
 
-      const cacheSelection = cacheKey !== `` && fs.existsSync(cacheKey) ? cacheKey : latestInBranch;
+      const cacheSelection = cacheKey !== `` && fs.existsSync(`${cacheKey}.zip`) ? cacheKey : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
 
-      if (fs.existsSync(cacheSelection)) {
+      if (fs.existsSync(`${cacheSelection}.zip`)) {
         if (Input.cloudRunnerTests) {
           await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         }
         RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
-        await CloudRunnerAgentSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`);
+        await CloudRunnerAgentSystem.Run(`unzip -q ${cacheSelection} -d ${path.basename(destinationFolder)}`);
         await CloudRunnerAgentSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
         assert(fs.existsSync(`${path.join(destinationFolder, `${cacheSelection}.zip`)}`));
       } else {
