@@ -26,6 +26,7 @@ describe('Cloud Runner', () => {
   };
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
+      Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
       const baseImage = new ImageTag(buildParameter);
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
@@ -43,6 +44,7 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
+      Input.githubInputEnabled = true;
     }, 1000000);
   }
 });

@@ -68,7 +68,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
           CLOUD_RUNNER_TESTS: true
-      - run: aws s3 ls
       - uses: ./
         id: aws-fargate-unity-build
         env:

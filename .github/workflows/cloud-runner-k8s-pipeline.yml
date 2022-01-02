@@ -109,3 +109,34 @@ jobs:
           unityVersion: 2019.3.15f1
           versioning: None
           cloudRunnerTests: true
+          postBuildSteps: |
+            - name: upload
+              image: amazon/aws-cli
+              commands: |
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+                aws configure set region $AWS_DEFAULT_REGION --profile default
+                aws s3 ls
+                aws s3 ls game-ci-test-storage
+                ls /data/cache/$BRANCH
+                echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE"
+                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/build-$BUILD_GUID.zip
+              secrets:
+              - name: awsAccessKeyId
+                value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              - name: awsSecretAccessKey
+                value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              - name: awsDefaultRegion
+                value: eu-west-2
+      - run: |
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.BRANCH }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip
+          ls
+      ###########################
+      #          Upload         #
+      ###########################
+      # download from cloud storage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: K8s Build (${{ matrix.targetPlatform }})
+          path: build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip
+          retention-days: 14
