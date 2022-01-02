@@ -21,9 +21,9 @@ export class Caching {
         await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
-      await CloudRunnerAgentSystem.Run(`zip -r "${cacheKey}.zip" "${path.basename(sourceFolder)}"`);
-      assert(fs.existsSync(`${cacheKey}.zip`));
-      await CloudRunnerAgentSystem.Run(`cp "${cacheKey}.zip" "${path.join(cacheFolder, `${cacheKey}.zip`)}"`);
+      await CloudRunnerAgentSystem.Run(`zip -r "${cacheKey}" "${path.basename(sourceFolder)}"`);
+      assert(fs.existsSync(`${cacheKey}`));
+      await CloudRunnerAgentSystem.Run(`cp "${cacheKey}" "${path.join(cacheFolder, `${cacheKey}`)}"`);
       RemoteClientLogger.log(`copied ${cacheKey} to ${cacheFolder}`);
 
       if (Input.cloudRunnerTests) {
