@@ -20,8 +20,9 @@ class Input {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
   private static getInput(query) {
-    if (Input.githubInputEnabled) {
-      return core.getInput(query) || '';
+    const coreInput = core.getInput(query);
+    if (Input.githubInputEnabled && coreInput && coreInput !== '') {
+      return coreInput;
     }
 
     return Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
