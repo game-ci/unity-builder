@@ -21,10 +21,10 @@ export class Caching {
         await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
-      await CloudRunnerAgentSystem.Run(`zip -r "${cacheKey}" "${path.basename(sourceFolder)}"`);
+      await CloudRunnerAgentSystem.Run(`zip -r ${cacheKey} ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}`));
-      await CloudRunnerAgentSystem.Run(`cp "${cacheKey}" "${path.join(cacheFolder, `${cacheKey}`)}"`);
-      RemoteClientLogger.log(`copied ${cacheKey} to ${cacheFolder}`);
+      await CloudRunnerAgentSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
+      RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
@@ -47,9 +47,9 @@ export class Caching {
         await CloudRunnerAgentSystem.Run(`mkdir -p ${destinationFolder}`);
       }
 
-      const latestInBranch = await (
-        await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`)
-      ).replace(/\n/g, ``);
+      const latestInBranch = await (await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
+        .replace(/\n/g, ``)
+        .replace('.zip', '');
 
       process.chdir(cacheFolder);
 
@@ -69,8 +69,8 @@ export class Caching {
         }
         RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
-        await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${path.basename(destinationFolder)}"`);
-        await CloudRunnerAgentSystem.Run(`cp -r "${cacheSelection}" "${destinationFolder}/..""`);
+        await CloudRunnerAgentSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`);
+        await CloudRunnerAgentSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         }

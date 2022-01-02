@@ -1,7 +1,6 @@
 import { BuildParameters, Input } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
-import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerBuildCommandProcessor {
   public static ProcessCommands(commands: string, buildParameters: BuildParameters): string {
@@ -28,9 +27,6 @@ export class CloudRunnerBuildCommandProcessor {
       } catch (error) {
         throw error;
       }
-    }
-    if (Input.cloudRunnerTests) {
-      CloudRunnerLogger.log(`Getting hooks: ${JSON.stringify(output, undefined, 4)}`);
     }
     return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
   }
