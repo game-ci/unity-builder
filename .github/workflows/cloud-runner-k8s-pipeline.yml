@@ -71,7 +71,7 @@ jobs:
           # Use FUSE to mount a storage bucket to a cache folder
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3 for global scale caching
-              hook: before
+              hook: [ before ]
               step: [ setup ]
               commands: |
                 sudo amazon-linux-extras install epel
@@ -109,13 +109,3 @@ jobs:
           unityVersion: 2019.3.15f1
           versioning: None
           cloudRunnerTests: true
-
-      ###########################
-      #          Upload         #
-      ###########################
-      # download from cloud storage
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Kubernetes Build (${{ matrix.targetPlatform }})
-          path: k8s-volume-download
-          retention-days: 14

@@ -68,6 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
           CLOUD_RUNNER_TESTS: true
+      - run: aws s3 ls
       - uses: ./
         id: aws-fargate-unity-build
         env:
@@ -96,8 +97,8 @@ jobs:
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$BRANCH
-                echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BUILD_PATH/$BUILD_FILE"
-                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BUILD_PATH/$BUILD_FILE
+                echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE"
+                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -105,3 +106,15 @@ jobs:
                 value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               - name: awsDefaultRegion
                 value: eu-west-2
+      - run: |
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.BRANCH }}/${{ steps.aws-fargate-unity-build.outputs.BUILD_FILE }} .
+          ls
+      ###########################
+      #          Upload         #
+      ###########################
+      # download from cloud storage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: AWS Build (${{ matrix.targetPlatform }})
+          path: ${{ matrix.targetPlatform }}.zip
+          retention-days: 14

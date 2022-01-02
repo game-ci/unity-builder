@@ -3,6 +3,7 @@ import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
+const core = require('@actions/core');
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
@@ -40,6 +41,7 @@ export class TaskParameterSerializer {
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;
+      core.setOutput(x.name, x.value);
       return x;
     });
     return array;
