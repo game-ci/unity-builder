@@ -58,7 +58,7 @@ class CloudRunnerLogger {
     CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
     const child = exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
       if (error) {
-        CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${JSON.stringify(error)}`);
+        CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${error}`);
         return;
       }
       if (stderr) {
