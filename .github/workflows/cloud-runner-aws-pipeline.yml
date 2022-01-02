@@ -99,7 +99,7 @@ jobs:
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$BRANCH
                 echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE"
-                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE
+                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/build-$BUILD_GUID.zip
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -108,7 +108,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.BRANCH }}/${{ steps.aws-fargate-unity-build.outputs.BUILD_FILE }} .
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.BRANCH }}/${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip .
           ls
       ###########################
       #          Upload         #
