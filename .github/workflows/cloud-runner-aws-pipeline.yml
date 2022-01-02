@@ -68,6 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_BASE_STACK_NAME: game-ci-stack-integration-tests
           CLOUD_RUNNER_TESTS: true
+          INIT_HOOK: tail -f /var/log/syslog | xargs -d '\n' -I{} gcloud logging write game-ci "{}"
       - uses: ./
         id: aws-fargate-unity-build
         env:
