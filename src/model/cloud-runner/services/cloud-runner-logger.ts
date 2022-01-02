@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
-const { Logging } = process.env.GCP_LOGGING ? require('@google-cloud/logging') : { Logging: process.env.GCP_LOGGING };
+import { exec } from 'child_process';
+import { Input } from '../..';
 
 class CloudRunnerLogger {
   private static timestamp: number;
@@ -11,22 +12,18 @@ class CloudRunnerLogger {
   }
 
   public static log(message: string) {
-    CloudRunnerLogger.logToGoogle(message);
     core.info(message);
   }
 
   public static logWarning(message: string) {
-    CloudRunnerLogger.logToGoogle(message);
     core.warning(message);
   }
 
   public static logLine(message: string) {
-    CloudRunnerLogger.logToGoogle(message);
     core.info(`${message}\n`);
   }
 
   public static error(message: string) {
-    CloudRunnerLogger.logToGoogle(message);
     core.error(message);
   }
 
@@ -49,38 +46,21 @@ class CloudRunnerLogger {
     return Date.now();
   }
 
-  private static logToGoogle(message: string) {
-    const projectId = process.env.GCP_PROJECT;
-    const logName = process.env.GCP_LOG_NAME;
-    // GCP only setup as dev dependency
-    if (!process.env.GCP_LOGGING) {
+  public static InitHook() {
+    if (process.env.INIT_HOOK === undefined || !Input.cloudRunnerTests) {
       return;
     }
-
-    // Creates a client
-    const logging = new Logging({ projectId });
-
-    // Selects the log to write to
-    const log = logging.log(logName);
-
-    // The data to write to the log
-    const text = message;
-
-    // The metadata associated with the entry
-    const metadata = {
-      resource: { type: 'global' },
-      // See: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
-      severity: 'INFO',
-    };
-
-    // Prepares a log entry
-    const entry = log.entry(metadata, text);
-
-    async function writeLog() {
-      // Writes the log entry
-      await log.write(entry);
-    }
-    writeLog();
+    exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
+      if (error) {
+        CloudRunnerLogger.error(JSON.stringify(error));
+        return;
+      }
+      if (stderr) {
+        CloudRunnerLogger.logWarning(`[GCP-LOGGER]${stderr}`);
+        return;
+      }
+      CloudRunnerLogger.log(stdout);
+    });
   }
 }
 export default CloudRunnerLogger;
