@@ -54,7 +54,6 @@ export class Caching {
       process.chdir(cacheFolder);
 
       if (Input.cloudRunnerTests) {
-        CloudRunnerLogger.log(await LFSHashing.hashAllFiles(destinationFolder));
         await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
 
@@ -70,7 +69,8 @@ export class Caching {
         }
         RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
-        await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${destinationFolder}/.."`);
+        await CloudRunnerAgentSystem.Run(`unzip "${cacheSelection}" -d "${path.dirname(destinationFolder)}"`);
+        await CloudRunnerAgentSystem.Run(`cp -r "${cacheSelection}" "${destinationFolder}/..""`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
         }
