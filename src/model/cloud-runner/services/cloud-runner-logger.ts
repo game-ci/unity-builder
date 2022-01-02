@@ -2,12 +2,11 @@ import * as core from '@actions/core';
 import { ChildProcess, exec } from 'child_process';
 import { Input } from '../..';
 import fs from 'fs';
-import path from 'path';
 
 class CloudRunnerLogger {
   private static timestamp: number;
   private static globalTimestamp: number;
-  private static readonly logsFile: string = path.join('/', 'cloud-runner-logs');
+  private static readonly logsFile: string = process.env.GCP_LOG_FILE || '';
 
   public static setup() {
     this.timestamp = this.createTimestamp();

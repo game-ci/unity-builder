@@ -98,7 +98,7 @@ jobs:
         env:
           CloudRunnerBranch: remote-builder/unified-providers
           DEBUG: true
-          GCP_LOG_FILE: $HOME/cloud-runner-logs
+          GCP_LOG_FILE: $GITHUB_WORKSPACE/cloud-runner-logs
           INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: k8s
