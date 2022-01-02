@@ -22,11 +22,12 @@ export class Caching {
 
       await CloudRunnerAgentSystem.Run(`zip -q -r ${cacheKey} ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}`));
-      assert(cacheFolder);
-      assert(sourceFolder);
+      assert(fs.existsSync(`${cacheFolder}`));
+      assert(fs.existsSync(`${sourceFolder}`));
+      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
       await CloudRunnerAgentSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
-      assert(path.join(cacheFolder, `${cacheKey}.zip`));
+      assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`));
 
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
@@ -63,7 +64,7 @@ export class Caching {
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`);
         await CloudRunnerAgentSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
-        assert(path.join(destinationFolder, `${cacheSelection}.zip`));
+        assert(fs.existsSync(`${path.join(destinationFolder, `${cacheSelection}.zip`)}`));
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
