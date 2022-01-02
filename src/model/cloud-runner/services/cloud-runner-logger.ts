@@ -50,6 +50,7 @@ class CloudRunnerLogger {
     if (process.env.INIT_HOOK === undefined || !Input.cloudRunnerTests) {
       return;
     }
+    CloudRunnerLogger.log(process.env.INIT_HOOK);
     exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
       if (error) {
         CloudRunnerLogger.error(JSON.stringify(error));
