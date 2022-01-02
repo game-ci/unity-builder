@@ -27,6 +27,7 @@ async function runMain() {
 
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
+    CloudRunnerLogger.Shutdown();
   } catch (error) {
     core.setFailed((error as Error).message);
   }

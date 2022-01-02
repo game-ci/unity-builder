@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { exec } from 'child_process';
+import { ChildProcess, exec } from 'child_process';
 import { Input } from '../..';
 import fs from 'fs';
 
@@ -56,7 +56,7 @@ class CloudRunnerLogger {
       return;
     }
     CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
-    const child = exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
+    CloudRunnerLogger.child = exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
       if (error) {
         CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${error}`);
         return;
@@ -67,12 +67,16 @@ class CloudRunnerLogger {
       }
       CloudRunnerLogger.log(`[GCP-LOGGER]${stdout}`);
     });
-    child.on('close', function (code) {
+    CloudRunnerLogger.child.on('close', function (code) {
       CloudRunnerLogger.log(`[GCP-LOGGER][Exit code ${code}]`);
       if (code !== 0) {
         throw new Error(`${code}`);
       }
     });
   }
+  public static Shutdown() {
+    CloudRunnerLogger.child.kill(0);
+  }
+  private static child: ChildProcess;
 }
 export default CloudRunnerLogger;
