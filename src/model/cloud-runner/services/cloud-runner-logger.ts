@@ -50,17 +50,17 @@ class CloudRunnerLogger {
     if (process.env.INIT_HOOK === undefined || !Input.cloudRunnerTests) {
       return;
     }
-    CloudRunnerLogger.log(process.env.INIT_HOOK);
+    CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
     exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
       if (error) {
-        CloudRunnerLogger.error(JSON.stringify(error));
+        CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${JSON.stringify(error)}`);
         return;
       }
       if (stderr) {
-        CloudRunnerLogger.logWarning(`[GCP-LOGGER]${stderr}`);
+        CloudRunnerLogger.logWarning(`[GCP-LOGGER][DIAGNOSTIC]${stderr}`);
         return;
       }
-      CloudRunnerLogger.log(stdout);
+      CloudRunnerLogger.log(`[GCP-LOGGER]${stdout}`);
     });
   }
 }
