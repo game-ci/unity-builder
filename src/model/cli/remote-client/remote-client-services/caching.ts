@@ -21,7 +21,7 @@ export class Caching {
       }
 
       await CloudRunnerSystem.Run(
-        `zip ${Input.cloudRunnerTests ? '' : '-q'} -r ${cacheKey} ${path.basename(sourceFolder)}`,
+        `zip${Input.cloudRunnerTests ? '' : ' -q'} -r ${cacheKey} ${path.basename(sourceFolder)}`,
       );
       assert(fs.existsSync(`${cacheKey}.zip`));
       assert(fs.existsSync(`${cacheFolder}`));

@@ -7,9 +7,14 @@ import { CloudRunnerStepState } from './state/cloud-runner-step-state';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
 import { CloudRunnerError } from './error/cloud-runner-error';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
+import * as core from '@actions/core';
 
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {
+    const parameters = TaskParameterSerializer.readBuildEnvironmentVariables();
+    for (const element of parameters) {
+      core.setOutput(element.name, element.value);
+    }
     CloudRunnerLogger.setup();
     CloudRunnerState.setup(buildParameters);
     CloudRunner.setupBuildPlatform();
