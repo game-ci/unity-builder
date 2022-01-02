@@ -77,7 +77,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          INIT_HOOK: touch /cloud-runner-logs && tail -f /cloud-runner-logs | xargs -I{} gcloud logging write game-ci "{}"
+          GCP_LOG_FILE: $HOME/cloud-runner-logs
+          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: aws
           versioning: None
