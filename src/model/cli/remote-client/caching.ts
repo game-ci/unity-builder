@@ -18,17 +18,16 @@ export class Caching {
 
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
-        await CloudRunnerAgentSystem.Run(`tree ${sourceFolder}`);
-        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
       }
+
       await CloudRunnerAgentSystem.Run(`zip -q -r ${cacheKey} ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}`));
+      assert(cacheFolder);
+      assert(sourceFolder);
       await CloudRunnerAgentSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
+      assert(path.join(cacheFolder, `${cacheKey}.zip`));
 
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
-      }
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
@@ -53,15 +52,8 @@ export class Caching {
 
       process.chdir(cacheFolder);
 
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerAgentSystem.Run(`tree ${cacheFolder}`);
-      }
-
       const cacheSelection = cacheKey !== `` && fs.existsSync(cacheKey) ? cacheKey : latestInBranch;
-
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
-      }
+      await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
 
       if (fs.existsSync(cacheSelection)) {
         if (Input.cloudRunnerTests) {
@@ -71,9 +63,7 @@ export class Caching {
         assert(fs.existsSync(destinationFolder));
         await CloudRunnerAgentSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`);
         await CloudRunnerAgentSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
-        if (Input.cloudRunnerTests) {
-          await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
-        }
+        assert(path.join(destinationFolder, `${cacheSelection}.zip`));
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
