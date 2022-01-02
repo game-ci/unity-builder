@@ -14,22 +14,22 @@ class CloudRunnerLogger {
 
   public static log(message: string) {
     core.info(message);
-    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
+    fs.appendFile('cloud-runner-logs', message, () => {});
   }
 
   public static logWarning(message: string) {
     core.warning(message);
-    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
+    fs.appendFile('cloud-runner-logs', message, () => {});
   }
 
   public static logLine(message: string) {
     core.info(`${message}\n`);
-    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
+    fs.appendFile('cloud-runner-logs', message, () => {});
   }
 
   public static error(message: string) {
     core.error(message);
-    fs.appendFile('/var/log/cloud-runner-logs', message, () => {});
+    fs.appendFile('cloud-runner-logs', message, () => {});
   }
 
   public static logWithTime(message: string) {
