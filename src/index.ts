@@ -4,6 +4,8 @@ import { CLI } from './model/cli/cli';
 import CloudRunnerLogger from './model/cloud-runner/services/cloud-runner-logger';
 async function runMain() {
   try {
+    CloudRunnerLogger.InitHook();
+
     Action.checkCompatibility();
     Cache.verify();
 
@@ -29,7 +31,6 @@ async function runMain() {
     core.setFailed((error as Error).message);
   }
 }
-CloudRunnerLogger.InitHook();
 const options = CLI.SetupCli();
 if (CLI.isCliMode(options)) {
   CLI.RunCli(options);
