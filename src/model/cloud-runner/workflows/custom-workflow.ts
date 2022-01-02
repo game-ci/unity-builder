@@ -29,7 +29,7 @@ export class CustomWorkflow {
             step['image'],
             step['commands'],
             `/${CloudRunnerState.buildVolumeFolder}`,
-            `/${CloudRunnerState.buildVolumeFolder}`,
+            `/${CloudRunnerState.buildVolumeFolder}/`,
             TaskParameterSerializer.readBuildEnvironmentVariables(),
             [...CloudRunnerState.defaultSecrets, ...stepSecrets],
           );
