@@ -40,7 +40,7 @@ export class SetupStep implements StepInterface {
         ${Input.cloudRunnerTests ? '' : '#'} apk add tree -q
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
-        git clone -b ${CloudRunnerState.branchName} ${
+        git clone -q -b ${CloudRunnerState.branchName} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
         ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
