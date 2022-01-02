@@ -76,7 +76,9 @@ class CloudRunnerLogger {
     });
   }
   public static Shutdown() {
-    CloudRunnerLogger.child.kill(0);
+    if (CloudRunnerLogger.child) {
+      CloudRunnerLogger.child.kill(0);
+    }
   }
   private static child: ChildProcess;
 }

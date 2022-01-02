@@ -5,8 +5,6 @@ import { LFSHashing } from './lfs-hashing';
 import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
 import { Input } from '../..';
 import { RemoteClientLogger } from './remote-client-logger';
-import { assert } from 'console';
-import path from 'path';
 
 export class SetupCloudRunnerRepository {
   public static async run() {
@@ -40,14 +38,11 @@ export class SetupCloudRunnerRepository {
   private static async cloneRepoWithoutLFSFiles() {
     try {
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
-      process.chdir(path.join(CloudRunnerState.repoPathFull, `..`));
+      process.chdir(CloudRunnerState.repoPathFull);
       await CloudRunnerAgentSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
       await CloudRunnerAgentSystem.Run(`git lfs install --skip-smudge`);
-      assert(!fs.existsSync(CloudRunnerState.repoPathFull));
-      await CloudRunnerAgentSystem.Run(
-        `git clone ${CloudRunnerState.targetBuildRepoUrl} ${path.basename(CloudRunnerState.repoPathFull)}`,
-      );
+      await CloudRunnerAgentSystem.Run(`git clone ${CloudRunnerState.targetBuildRepoUrl}`);
       if (Input.cloudRunnerTests) {
         await CloudRunnerAgentSystem.Run(`ls -lh`);
         await CloudRunnerAgentSystem.Run(`tree`);
