@@ -6,6 +6,7 @@ import { CloudRunnerSystem } from './remote-client-services/cloud-runner-system'
 import { Input } from '../..';
 import { RemoteClientLogger } from './remote-client-services/remote-client-logger';
 import path from 'path';
+import { assert } from 'console';
 
 export class SetupCloudRunnerRepository {
   public static async run() {
@@ -47,6 +48,7 @@ export class SetupCloudRunnerRepository {
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${path.basename(CloudRunnerState.repoPathFull)}`,
       );
       process.chdir(`${CloudRunnerState.repoPathFull}`);
+      assert(fs.existsSync(`.git`));
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls -lh`);
         await CloudRunnerSystem.Run(`tree`);
