@@ -1,16 +1,16 @@
 import path from 'path';
-import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
-import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
+import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state';
+import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';
-import { Input } from '../..';
+import { Input } from '../../..';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class LFSHashing {
   public static async createLFSHashFiles() {
     try {
-      await CloudRunnerAgentSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
-      await CloudRunnerAgentSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
+      await CloudRunnerSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
+      await CloudRunnerSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
       assert(fs.existsSync(`.lfs-assets-guid-sum`));
       assert(fs.existsSync(`.lfs-assets-guid`));
       const lfsHashes = {
@@ -32,7 +32,7 @@ export class LFSHashing {
   }
   public static async hashAllFiles(folder: string) {
     process.chdir(`${folder}`);
-    return await (await CloudRunnerAgentSystem.Run(`find -type f -exec md5sum "{}" + | sort | md5sum`))
+    return await (await CloudRunnerSystem.Run(`find -type f -exec md5sum "{}" + | sort | md5sum`))
       .replace(/\n/g, '')
       .split(` `)[0];
   }

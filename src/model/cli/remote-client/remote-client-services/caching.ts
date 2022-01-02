@@ -1,10 +1,10 @@
 import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
-import { Input } from '../..';
-import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
-import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
-import { CloudRunnerAgentSystem } from './cloud-runner-agent-system';
+import { Input } from '../../..';
+import CloudRunnerLogger from '../../../cloud-runner/services/cloud-runner-logger';
+import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state';
+import { CloudRunnerSystem } from './cloud-runner-system';
 import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 
@@ -20,14 +20,14 @@ export class Caching {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
       }
 
-      await CloudRunnerAgentSystem.Run(
+      await CloudRunnerSystem.Run(
         `zip ${Input.cloudRunnerTests ? '' : '-q'} -r ${cacheKey} ${path.basename(sourceFolder)}`,
       );
       assert(fs.existsSync(`${cacheKey}.zip`));
       assert(fs.existsSync(`${cacheFolder}`));
       assert(fs.existsSync(`${sourceFolder}`));
       assert(fs.existsSync(`${path.basename(sourceFolder)}`));
-      await CloudRunnerAgentSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`));
 
@@ -42,14 +42,14 @@ export class Caching {
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
       if (!fs.existsSync(cacheFolder)) {
-        await CloudRunnerAgentSystem.Run(`mkdir -p ${cacheFolder}`);
+        await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
 
       if (!fs.existsSync(destinationFolder)) {
-        await CloudRunnerAgentSystem.Run(`mkdir -p ${destinationFolder}`);
+        await CloudRunnerSystem.Run(`mkdir -p ${destinationFolder}`);
       }
 
-      const latestInBranch = await (await CloudRunnerAgentSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
+      const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
         .replace(/\n/g, ``)
         .replace('.zip', '');
 
@@ -60,12 +60,12 @@ export class Caching {
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
         if (Input.cloudRunnerTests) {
-          await CloudRunnerAgentSystem.Run(`tree ${destinationFolder}`);
+          await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
         }
         RemoteClientLogger.log(`cache item exists`);
         assert(fs.existsSync(destinationFolder));
-        await CloudRunnerAgentSystem.Run(`unzip -q ${cacheSelection} -d ${path.basename(destinationFolder)}`);
-        await CloudRunnerAgentSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
+        await CloudRunnerSystem.Run(`unzip -q ${cacheSelection} -d ${path.basename(destinationFolder)}`);
+        await CloudRunnerSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
         assert(fs.existsSync(`${path.join(destinationFolder, `${cacheSelection}.zip`)}`));
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
@@ -86,7 +86,7 @@ export class Caching {
   }
 
   public static async printFullCacheHierarchySize() {
-    await CloudRunnerAgentSystem.Run(
+    await CloudRunnerSystem.Run(
       `echo ' '
       echo "LFS cache for $branch"
       du -sch "${CloudRunnerState.lfsCacheFolderFull}/"

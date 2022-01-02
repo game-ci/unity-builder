@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { RemoteClientLogger } from './remote-client-logger';
 
-export class CloudRunnerAgentSystem {
+export class CloudRunnerSystem {
   public static async Run(command: string) {
     for (const element of command.split(`\n`)) {
       RemoteClientLogger.log(element);

@@ -41,6 +41,7 @@ export class TaskParameterSerializer {
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;
+      core.getOutput(x);
       core.setOutput(x.name, x.value);
       return x;
     });

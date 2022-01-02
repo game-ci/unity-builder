@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
-import { RemoteClientLogger } from './remote-client/remote-client-logger';
+import { RemoteClientLogger } from './remote-client/remote-client-services/remote-client-logger';
 import { CloudRunnerState } from '../cloud-runner/state/cloud-runner-state';
 import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
 export class CLI {
