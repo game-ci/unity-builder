@@ -11,13 +11,13 @@ import * as core from '@actions/core';
 
 class CloudRunner {
   private static setup(buildParameters: BuildParameters) {
+    CloudRunnerLogger.setup();
+    CloudRunnerState.setup(buildParameters);
+    CloudRunner.setupBuildPlatform();
     const parameters = TaskParameterSerializer.readBuildEnvironmentVariables();
     for (const element of parameters) {
       core.setOutput(element.name, element.value);
     }
-    CloudRunnerLogger.setup();
-    CloudRunnerState.setup(buildParameters);
-    CloudRunner.setupBuildPlatform();
   }
 
   private static setupBuildPlatform() {
