@@ -22,7 +22,11 @@ export class SetupCloudRunnerRepository {
         `${lfsHashes.lfsGuid}.zip`,
       );
       await SetupCloudRunnerRepository.pullLatestLFS();
-      await Caching.PushToCache(CloudRunnerState.lfsCacheFolderFull, CloudRunnerState.lfsDirectory, lfsHashes.lfsGuid);
+      await Caching.PushToCache(
+        CloudRunnerState.lfsCacheFolderFull,
+        CloudRunnerState.lfsDirectory,
+        `${lfsHashes.lfsGuid}.zip`,
+      );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
 
       Caching.handleCachePurging();
