@@ -67,7 +67,7 @@ jobs:
           GCP_PROJECT: unitykubernetesbuilder
           GCP_LOG_NAME: game-ci
           CLOUD_RUNNER_TESTS: true
-          INIT_HOOK: tail -f /var/log/messages | xargs -d '\n' -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: tail -f /var/log/syslog | xargs -d '\n' -I{} gcloud logging write game-ci "{}"
           # Use FUSE to mount a storage bucket to a cache folder
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3 for global scale caching
