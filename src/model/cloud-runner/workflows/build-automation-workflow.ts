@@ -6,6 +6,7 @@ import { BuildStep } from '../steps/build-step';
 import { SetupStep } from '../steps/setup-step';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
+import * as core from '@actions/core';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -24,6 +25,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
       }
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
+
+      core.startGroup('setup');
       output += await new SetupStep().run(
         new CloudRunnerStepState(
           'alpine/git',
@@ -33,6 +36,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       );
       CloudRunnerLogger.logWithTime('Download repository step time');
 
+      core.startGroup('build');
       output += await new BuildStep().run(
         new CloudRunnerStepState(
           baseImage,

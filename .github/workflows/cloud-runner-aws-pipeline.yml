@@ -73,7 +73,6 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
       - uses: ./
         id: aws-fargate-unity-build
-        env:
         with:
           cloudRunnerCluster: aws
           versioning: None
