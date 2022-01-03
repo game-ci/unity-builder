@@ -78,7 +78,7 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
           GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs
-          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -I{} gcloud logging write game-ci "{}"
+          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d "\n" -I{} gcloud logging write game-ci "{}"
         with:
           cloudRunnerCluster: aws
           versioning: None
