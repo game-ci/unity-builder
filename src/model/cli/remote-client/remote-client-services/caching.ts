@@ -19,7 +19,11 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
       }
-      assert(fs.existsSync(`${sourceFolder}`));
+      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls`);
+      }
 
       await CloudRunnerSystem.Run(
         `zip${Input.cloudRunnerTests ? '' : ' -q'} -r ${cacheKey}.zip ${path.basename(sourceFolder)}`,
