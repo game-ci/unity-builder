@@ -78,7 +78,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
           DEBUG: true
-          GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs
+          GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
         with:
           cloudRunnerCluster: aws
           versioning: None
