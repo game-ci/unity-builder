@@ -47,7 +47,7 @@ export class CloudRunnerState {
     return path.join(CloudRunnerState.projectPathFull, `Library`);
   }
 
-  public static get lfsDirectory(): string {
+  public static get lfsDirectoryFull(): string {
     return path.join(CloudRunnerState.repoPathFull, `.git`, `lfs`);
   }
 
@@ -68,11 +68,7 @@ export class CloudRunnerState {
   }
 
   public static get targetBuildRepoUrl(): string {
-    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${CloudRunnerState.githubRepo}.git`;
-  }
-
-  public static get githubRepo(): string {
-    return `${CloudRunnerState.buildParams.githubRepo}`;
+    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${CloudRunnerState.buildParams.githubRepo}.git`;
   }
 
   public static get buildVolumeFolder() {

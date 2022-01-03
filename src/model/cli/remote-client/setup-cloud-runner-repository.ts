@@ -20,13 +20,13 @@ export class SetupCloudRunnerRepository {
       }
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolderFull,
-        CloudRunnerState.lfsDirectory,
+        CloudRunnerState.lfsDirectoryFull,
         `${lfsHashes.lfsGuid}`,
       );
       await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
         CloudRunnerState.lfsCacheFolderFull,
-        CloudRunnerState.lfsDirectory,
+        CloudRunnerState.lfsDirectoryFull,
         `${lfsHashes.lfsGuid}`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
@@ -65,5 +65,6 @@ export class SetupCloudRunnerRepository {
     process.chdir(CloudRunnerState.repoPathFull);
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
+    assert(fs.existsSync(CloudRunnerState.lfsDirectoryFull));
   }
 }
