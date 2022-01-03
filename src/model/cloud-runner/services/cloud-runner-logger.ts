@@ -15,22 +15,30 @@ class CloudRunnerLogger {
 
   public static log(message: string) {
     core.info(message);
-    fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    if (process.env.GCP_LOGGING) {
+      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    }
   }
 
   public static logWarning(message: string) {
     core.warning(message);
-    fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    if (process.env.GCP_LOGGING) {
+      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    }
   }
 
   public static logLine(message: string) {
     core.info(`${message}\n`);
-    fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    if (process.env.GCP_LOGGING) {
+      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    }
   }
 
   public static error(message: string) {
     core.error(message);
-    fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    if (process.env.GCP_LOGGING) {
+      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+    }
   }
 
   public static logWithTime(message: string) {
