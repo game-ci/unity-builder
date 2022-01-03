@@ -11,6 +11,10 @@ import { RemoteClientLogger } from './remote-client-logger';
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
     try {
+      if (!fs.existsSync(cacheFolder)) {
+        await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
+      }
+
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
@@ -74,6 +78,10 @@ export class Caching {
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
+          if (Input.cloudRunnerTests) {
+            await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
+          }
+          RemoteClientLogger.logWarning(`cache item ${cacheKey}.zip doesn't exist ${destinationFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
