@@ -69,7 +69,9 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x
-      - run: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
+      - run: |
+          touch $GCP_LOG_FILE
+          tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test-i-aws
