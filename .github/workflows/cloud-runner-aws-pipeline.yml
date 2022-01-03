@@ -69,9 +69,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x
-      - run: |
-          touch $GCP_LOG_FILE
-          tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test-i-aws
@@ -89,6 +86,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
