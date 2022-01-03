@@ -34,6 +34,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerState.defaultSecrets,
         ),
       );
+      core.endGroup();
       CloudRunnerLogger.logWithTime('Download repository step time');
 
       core.startGroup('build');
@@ -44,6 +45,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerState.defaultSecrets,
         ),
       );
+      core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
       if (CloudRunnerState.buildParams.postBuildSteps !== '') {
