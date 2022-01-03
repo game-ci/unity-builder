@@ -73,9 +73,24 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           GITHUUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
-          # Use FUSE to mount a storage bucket to a cache folder
+
+      ###########################
+      # Cloud Runner Build Test #
+      ###########################
+      - name: Cloud Runner Build Test
+        uses: ./
+        id: k8s-unity-build
+        with:
+          cloudRunnerCluster: k8s
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectPath: test-project
+          unityVersion: ${{ matrix.targetPlatform }}
+          versioning: None
           EXPERIMENTAL_HOOK: |
-            - name: FUSE filesystem to s3 for global scale caching
+            - name: FUSE filesystem to s3
               hook: [ before ]
               step: [ setup ]
               commands: |
@@ -94,22 +109,6 @@ jobs:
                 value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               - name: awsDefaultRegion
                 value: eu-west-2
-
-      ###########################
-      # Cloud Runner Build Test #
-      ###########################
-      - name: Cloud Runner Build Test
-        uses: ./
-        id: k8s-unity-build
-        with:
-          cloudRunnerCluster: k8s
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          projectPath: test-project
-          unityVersion: ${{ matrix.targetPlatform }}
-          versioning: None
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
