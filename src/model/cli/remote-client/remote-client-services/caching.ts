@@ -18,7 +18,7 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
-      process.chdir(`${path.dirname(sourceFolder)}`);
+      process.chdir(`${sourceFolder}/../`);
 
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
