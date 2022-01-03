@@ -11,7 +11,7 @@ export class CloudRunnerSystem {
       const child = exec(command, (error, stdout, stderr) => {
         if (error) {
           RemoteClientLogger.logCliError(`${error.message}`);
-          throw new Error(error.toString());
+          throw error;
         }
         if (stderr) {
           RemoteClientLogger.logCliDiagnostic(`${stderr.toString()}`);
