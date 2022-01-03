@@ -4,7 +4,15 @@ on:
   push: { branches: [main, aws, remote-builder/unified-providers] }
 
 env:
-  AWS_REGION: 'eu-west-1'
+  AWS_REGION: eu-west-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-west-2
+  GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
+  AWS_BASE_STACK_NAME: game-ci-github-automation
+  CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
+  CLOUD_RUNNER_TESTS: true
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
   buildForAllPlatforms:
@@ -60,25 +68,12 @@ jobs:
       - run: yarn run test-i-aws
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-west-2
-          DEBUG: true
-          CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
           PROJECT_PATH: ${{ matrix.projectPath }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          AWS_BASE_STACK_NAME: game-ci-github-automation
-          CLOUD_RUNNER_TESTS: true
       - uses: ./
         id: aws-fargate-unity-build
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-west-2
-          DEBUG: true
-          GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
         with:
           cloudRunnerCluster: aws
           versioning: None
@@ -86,9 +81,6 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          awsBaseStackName: game-ci-github-automation
-          CloudRunnerBranch: remote-builder/unified-providers
-          cloudRunnerTests: true
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
