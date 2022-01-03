@@ -66,5 +66,6 @@ export class SetupCloudRunnerRepository {
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
     assert(fs.existsSync(CloudRunnerState.lfsDirectoryFull));
+    await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
   }
 }

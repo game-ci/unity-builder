@@ -23,7 +23,7 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
       }
-      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
+      assert(fs.existsSync(`${sourceFolder}`));
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
