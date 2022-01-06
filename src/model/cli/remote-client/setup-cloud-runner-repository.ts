@@ -39,6 +39,7 @@ export class SetupCloudRunnerRepository {
 
   private static async cloneRepoWithoutLFSFiles() {
     try {
+      process.chdir(`${CloudRunnerState.repoPathFull}`);
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
@@ -46,7 +47,6 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ./../${path.basename(CloudRunnerState.repoPathFull)}`,
       );
-      process.chdir(`${CloudRunnerState.repoPathFull}`);
       assert(fs.existsSync(`.git`));
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls -lh`);
