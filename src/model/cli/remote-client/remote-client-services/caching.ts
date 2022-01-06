@@ -18,23 +18,27 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
-      process.chdir(sourceFolder);
+      process.chdir(`${sourceFolder}`);
 
       if (Input.cloudRunnerTests) {
-        CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)} ${sourceFolder}`);
+        CloudRunnerLogger.log(
+          `Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
+            sourceFolder,
+          )}`,
+        );
       }
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
       }
-      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
+      assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
 
       await CloudRunnerSystem.Run(
         `zip${Input.cloudRunnerTests ? '' : ' -q'} -r ${cacheKey}.zip ./../${path.basename(sourceFolder)}`,
       );
       assert(fs.existsSync(`${cacheKey}.zip`));
       assert(fs.existsSync(`${cacheFolder}`));
-      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
+      assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`));
@@ -71,7 +75,7 @@ export class Caching {
           await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
         }
         RemoteClientLogger.log(`cache item exists`);
-        assert(fs.existsSync(destinationFolder));
+        assert(`${fs.existsSync(destinationFolder)}`);
         await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`);
         await CloudRunnerSystem.Run(`mv ${path.basename(destinationFolder)}/* ${destinationFolder}`);
         assert(fs.existsSync(`${path.join(destinationFolder, `${cacheSelection}.zip`)}`));
