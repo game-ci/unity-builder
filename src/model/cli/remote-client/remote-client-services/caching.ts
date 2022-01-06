@@ -18,16 +18,17 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
-      process.chdir(path.join(sourceFolder, `/`, `..`));
+      process.chdir(path.join(sourceFolder));
+      process.chdir(`..`);
 
       if (Input.cloudRunnerTests) {
-        CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
+        CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)} ${sourceFolder}`);
       }
-      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
       }
+      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
 
       await CloudRunnerSystem.Run(
         `zip${Input.cloudRunnerTests ? '' : ' -q'} -r ${cacheKey}.zip ${path.basename(sourceFolder)}`,
