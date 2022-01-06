@@ -35,6 +35,7 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
+    core.startGroup('Setup remote runner');
     CloudRunner.setup(buildParameters);
     try {
       await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
@@ -43,6 +44,7 @@ class CloudRunner {
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
+      core.endGroup();
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(
           baseImage,
@@ -50,12 +52,14 @@ class CloudRunner {
           CloudRunnerState.defaultSecrets,
         ),
       );
+      core.startGroup('Cleanup');
       await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
         CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
+      core.endGroup();
       return output;
     } catch (error) {
       await CloudRunnerError.handleException(error);
