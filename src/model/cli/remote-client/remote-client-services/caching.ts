@@ -18,12 +18,12 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await Caching.printFullCacheHierarchySize();
       }
-      process.chdir(path.join(sourceFolder, `..`));
+      process.chdir(path.join(sourceFolder, `..`, `..`));
 
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(`Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)}`);
       }
-      assert(fs.existsSync(`${sourceFolder}`));
+      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
 
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
