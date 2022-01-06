@@ -10,6 +10,7 @@ import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
+    const startPath = process.cwd();
     try {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
@@ -47,10 +48,13 @@ export class Caching {
         await Caching.printFullCacheHierarchySize();
       }
     } catch (error) {
+      process.chdir(`${startPath}`);
       throw error;
     }
+    process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheKey: string = ``) {
+    const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
       if (!fs.existsSync(cacheFolder)) {
@@ -90,8 +94,10 @@ export class Caching {
         }
       }
     } catch (error) {
+      process.chdir(`${startPath}`);
       throw error;
     }
+    process.chdir(`${startPath}`);
   }
 
   public static handleCachePurging() {

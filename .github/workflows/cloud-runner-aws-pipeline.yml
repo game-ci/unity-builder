@@ -79,6 +79,8 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
       - uses: ./
         id: aws-fargate-unity-build
+        env:
+          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
         with:
           cloudRunnerCluster: aws
           versioning: None
@@ -86,7 +88,6 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
