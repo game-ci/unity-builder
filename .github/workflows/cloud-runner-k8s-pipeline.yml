@@ -32,6 +32,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        unityVersion:
+          #  - 2019.2.11f1
+          - 2019.3.15f1
         targetPlatform:
           - StandaloneLinux64
     steps:

@@ -1,11 +1,8 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
 import { CLI } from './model/cli/cli';
-import CloudRunnerLogger from './model/cloud-runner/services/cloud-runner-logger';
 async function runMain() {
   try {
-    CloudRunnerLogger.InitHook();
-
     Action.checkCompatibility();
     Cache.verify();
 
@@ -27,7 +24,6 @@ async function runMain() {
 
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
-    CloudRunnerLogger.Shutdown();
   } catch (error) {
     core.setFailed((error as Error).message);
   }

@@ -10,7 +10,6 @@ env:
   GKE_CLUSTER: 'unity-builder-cluster'
   GCP_LOGGING: true
   GCP_PROJECT: unitykubernetesbuilder
-  GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
   AWS_REGION: eu-west-2
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -79,8 +78,6 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
       - uses: ./
         id: aws-fargate-unity-build
-        env:
-          INIT_HOOK: touch $GCP_LOG_FILE && tail -f $GCP_LOG_FILE | xargs -d '\n' -I{} gcloud logging write game-ci "{}" &
         with:
           cloudRunnerCluster: aws
           versioning: None

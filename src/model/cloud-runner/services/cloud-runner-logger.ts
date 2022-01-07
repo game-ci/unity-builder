@@ -1,12 +1,10 @@
 import * as core from '@actions/core';
-import { ChildProcess, spawn } from 'child_process';
-import { Input } from '../..';
-import fs from 'fs';
 
 class CloudRunnerLogger {
   private static timestamp: number;
   private static globalTimestamp: number;
   private static readonly logsFile: string = process.env.GCP_LOG_FILE || '';
+  static logger: any;
 
   public static setup() {
     this.timestamp = this.createTimestamp();
@@ -16,28 +14,28 @@ class CloudRunnerLogger {
   public static log(message: string) {
     core.info(message);
     if (process.env.GCP_LOGGING) {
-      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+      CloudRunnerLogger.writeGCPLog(`${message}\n`);
     }
   }
 
   public static logWarning(message: string) {
     core.warning(message);
     if (process.env.GCP_LOGGING) {
-      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+      CloudRunnerLogger.writeGCPLog(`${message}\n`);
     }
   }
 
   public static logLine(message: string) {
     core.info(`${message}\n`);
     if (process.env.GCP_LOGGING) {
-      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+      CloudRunnerLogger.writeGCPLog(`${message}\n`);
     }
   }
 
   public static error(message: string) {
     core.error(message);
     if (process.env.GCP_LOGGING) {
-      fs.appendFile(CloudRunnerLogger.logsFile, `${message}\n`, () => {});
+      CloudRunnerLogger.writeGCPLog(`${message}\n`);
     }
   }
 
@@ -60,37 +58,25 @@ class CloudRunnerLogger {
     return Date.now();
   }
 
-  public static InitHook() {
-    if (process.env.INIT_HOOK === undefined || !Input.cloudRunnerTests) {
-      return;
+  public static async writeGCPLog(text) {
+    if (!CloudRunnerLogger.logger) {
+      this.SetupGoogleLogs();
     }
-    CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
-    CloudRunnerLogger.child = spawn(process.env.INIT_HOOK);
-
-    CloudRunnerLogger.child?.stdout?.on('data', (data) => {
-      CloudRunnerLogger.log(`[GCP-LOGGER]${data}`);
-    });
-
-    CloudRunnerLogger.child?.stderr?.on('data', (data) => {
-      CloudRunnerLogger.logWarning(`[GCP-LOGGER][DIAGNOSTIC]${data}`);
-    });
-
-    CloudRunnerLogger.child?.on('error', (data) => {
-      CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${data}`);
-    });
-
-    CloudRunnerLogger.child.on('close', function (code) {
-      CloudRunnerLogger.log(`[GCP-LOGGER][Exit code ${code}]`);
-      if (code !== 0) {
-        throw new Error(`${code}`);
-      }
-    });
+    const metadata = {
+      resource: { type: 'global' },
+      severity: 'INFO',
+    };
+    const entry = CloudRunnerLogger.logger.entry(metadata, text);
+    await CloudRunnerLogger.logger.write(entry);
   }
-  public static Shutdown() {
-    if (CloudRunnerLogger.child) {
-      CloudRunnerLogger.child.kill(0);
-    }
+
+  private static SetupGoogleLogs() {
+    const logging = new Logging({ projectId: process.env.GCP_PROJECT });
+    CloudRunnerLogger.logger = logging.log('game-ci');
   }
-  private static child: ChildProcess;
+}
+let Logging;
+if (process.env.GCP_LOGGING) {
+  Logging = require('@google-cloud/logging');
 }
 export default CloudRunnerLogger;
