@@ -34,7 +34,6 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneLinux64
-          - StandaloneWindows64
     steps:
       ###########################
       #         Checkout        #

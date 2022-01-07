@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { ChildProcess, exec } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { Input } from '../..';
 import fs from 'fs';
 
@@ -65,17 +65,20 @@ class CloudRunnerLogger {
       return;
     }
     CloudRunnerLogger.log(`STARTING INIT HOOK ${process.env.INIT_HOOK}`);
-    CloudRunnerLogger.child = exec(process.env.INIT_HOOK, (error: any, stdout: string, stderr: any) => {
-      if (error) {
-        CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${error}`);
-        return;
-      }
-      if (stderr) {
-        CloudRunnerLogger.logWarning(`[GCP-LOGGER][DIAGNOSTIC]${stderr}`);
-        return;
-      }
-      CloudRunnerLogger.log(`[GCP-LOGGER]${stdout}`);
+    CloudRunnerLogger.child = spawn(process.env.INIT_HOOK);
+
+    CloudRunnerLogger.child?.stdout?.on('data', (data) => {
+      CloudRunnerLogger.log(`[GCP-LOGGER]${data}`);
     });
+
+    CloudRunnerLogger.child?.stderr?.on('data', (data) => {
+      CloudRunnerLogger.logWarning(`[GCP-LOGGER][DIAGNOSTIC]${data}`);
+    });
+
+    CloudRunnerLogger.child?.on('error', (data) => {
+      CloudRunnerLogger.error(`[GCP-LOGGER][ERROR]${data}`);
+    });
+
     CloudRunnerLogger.child.on('close', function (code) {
       CloudRunnerLogger.log(`[GCP-LOGGER][Exit code ${code}]`);
       if (code !== 0) {
