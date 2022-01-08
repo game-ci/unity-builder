@@ -71,9 +71,8 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
-          UNITY_VERSION: ${{ matrix.unityVersion }}
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          GITHUUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
 
       ###########################
