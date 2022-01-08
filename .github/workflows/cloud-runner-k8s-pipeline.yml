@@ -36,6 +36,7 @@ jobs:
           #  - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
+          - StandaloneWindows64
           - StandaloneLinux64
     steps:
       ###########################

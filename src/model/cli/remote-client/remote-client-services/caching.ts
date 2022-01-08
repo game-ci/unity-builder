@@ -101,27 +101,16 @@ export class Caching {
   }
 
   public static handleCachePurging() {
-    if (process.env.purgeRemoteCaching !== undefined) {
+    if (process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined) {
       RemoteClientLogger.log(`purging ${CloudRunnerState.purgeRemoteCaching}`);
       fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
     }
   }
 
   public static async printFullCacheHierarchySize() {
-    await CloudRunnerSystem.Run(
-      `echo ' '
-      echo "LFS cache for $branch"
-      du -sch "${CloudRunnerState.lfsCacheFolderFull}/"
-      echo '**'
-      echo "Library cache for $branch"
-      du -sch "${CloudRunnerState.libraryCacheFolderFull}/"
-      echo '**'
-      echo "Branch: $branch"
-      du -sch "${CloudRunnerState.cacheFolderFull}/"
-      echo '**'
-      echo 'Full cache'
-      du -sch "${CloudRunnerState.cacheFolderFull}/../"
-      echo ' '`,
-    );
+    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.lfsCacheFolderFull}/"`);
+    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.libraryCacheFolderFull}/"`);
+    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.cacheFolderFull}/"`);
+    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.cacheFolderFull}/../"`);
   }
 }
