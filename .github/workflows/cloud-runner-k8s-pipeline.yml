@@ -67,7 +67,7 @@ jobs:
       - run: yarn
       - run: yarn run cli --help
       - name: Cloud Runner Test Suite
-        run: yarn run test-i-k8s
+        run: yarn run test-i-k8s --detectOpenHandles
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
