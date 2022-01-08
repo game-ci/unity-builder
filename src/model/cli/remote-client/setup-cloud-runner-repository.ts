@@ -13,7 +13,15 @@ export class SetupCloudRunnerRepository {
     try {
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.buildPathFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.repoPathFull}`);
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls -lh`);
+        await CloudRunnerSystem.Run(`tree`);
+      }
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls -lh`);
+        await CloudRunnerSystem.Run(`tree`);
+      }
       const lfsHashes = await LFSHashing.createLFSHashFiles();
       if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
@@ -23,6 +31,10 @@ export class SetupCloudRunnerRepository {
         CloudRunnerState.lfsDirectoryFull,
         `${lfsHashes.lfsGuid}`,
       );
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls -lh`);
+        await CloudRunnerSystem.Run(`tree`);
+      }
       await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
         CloudRunnerState.lfsCacheFolderFull,
@@ -30,6 +42,10 @@ export class SetupCloudRunnerRepository {
         `${lfsHashes.lfsGuid}`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls -lh`);
+        await CloudRunnerSystem.Run(`tree`);
+      }
 
       Caching.handleCachePurging();
     } catch (error) {
@@ -48,10 +64,6 @@ export class SetupCloudRunnerRepository {
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ./../${path.basename(CloudRunnerState.repoPathFull)}`,
       );
       assert(fs.existsSync(`.git`));
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerSystem.Run(`ls -lh`);
-        await CloudRunnerSystem.Run(`tree`);
-      }
       RemoteClientLogger.log(`${CloudRunnerState.buildParams.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
       RemoteClientLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
