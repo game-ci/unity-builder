@@ -74,6 +74,7 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
+          unityVersion: ${{ matrix.unityVersion }}
 
       ###########################
       # Cloud Runner Build Test #
@@ -88,7 +89,7 @@ jobs:
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
-          unityVersion: ${{ matrix.targetPlatform }}
+          unityVersion: ${{ matrix.unityVersion }}
           versioning: None
           EXPERIMENTAL_HOOK: |
             - name: FUSE filesystem to s3
