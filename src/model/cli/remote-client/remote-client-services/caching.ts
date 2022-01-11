@@ -15,10 +15,6 @@ export class Caching {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
-
-      if (Input.cloudRunnerTests) {
-        await Caching.printFullCacheHierarchySize();
-      }
       process.chdir(`${sourceFolder}`);
 
       if (Input.cloudRunnerTests) {
@@ -43,10 +39,6 @@ export class Caching {
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`));
-
-      if (Input.cloudRunnerTests) {
-        await Caching.printFullCacheHierarchySize();
-      }
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;

@@ -68,6 +68,9 @@ export class SetupCloudRunnerRepository {
       RemoteClientLogger.log(`${CloudRunnerState.buildParams.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
       RemoteClientLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
+      if (Input.cloudRunnerTests) {
+        await Caching.printFullCacheHierarchySize();
+      }
     } catch (error) {
       throw error;
     }
