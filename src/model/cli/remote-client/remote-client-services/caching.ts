@@ -100,11 +100,4 @@ export class Caching {
       fs.rmdirSync(CloudRunnerState.cacheFolder, { recursive: true });
     }
   }
-
-  public static async printFullCacheHierarchySize() {
-    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.lfsCacheFolderFull}/"`);
-    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.libraryCacheFolderFull}/"`);
-    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.cacheFolderFull}/"`);
-    await CloudRunnerSystem.Run(`du -sch "${CloudRunnerState.cacheFolderFull}/../"`);
-  }
 }
