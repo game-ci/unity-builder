@@ -7,6 +7,8 @@ import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
+import archiver from 'archiver';
+import extract from 'extract-zip';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
@@ -29,10 +31,31 @@ export class Caching {
         await CloudRunnerSystem.Run(`ls`);
       }
       assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
-
-      await CloudRunnerSystem.Run(
-        `zip${Input.cloudRunnerTests ? '' : ' -q'} -r ${cacheKey}.zip ./../${path.basename(sourceFolder)}`,
-      );
+      const output = fs.createWriteStream(`${cacheKey}.zip`);
+      const archive = archiver('zip', {
+        zlib: { level: 9 }, // Sets the compression level.
+      });
+      output.on('close', function () {
+        CloudRunnerLogger.log(`${archive.pointer()} total bytes`);
+        CloudRunnerLogger.log('archiver has been finalized and the output file descriptor has closed.');
+      });
+      output.on('end', function () {
+        CloudRunnerLogger.log('Data has been drained');
+      });
+      archive.on('warning', function (error) {
+        if (error.code === 'ENOENT') {
+          // log warning
+          CloudRunnerLogger.logWarning(error);
+        } else {
+          throw error;
+        }
+      });
+      archive.on('error', function (error) {
+        throw error;
+      });
+      archive.pipe(output);
+      archive.directory(`./../${path.basename(sourceFolder)}/`, false);
+      archive.finalize();
       assert(fs.existsSync(`${cacheKey}.zip`));
       assert(fs.existsSync(`${cacheFolder}`));
       assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
@@ -72,9 +95,7 @@ export class Caching {
         }
         RemoteClientLogger.log(`cache item exists`);
         assert(`${fs.existsSync(destinationFolder)}`);
-        await CloudRunnerSystem.Run(
-          `unzip${Input.cloudRunnerTests ? '' : ' -q'} ${cacheSelection}.zip -d ${path.basename(destinationFolder)}`,
-        );
+        await extract(cacheSelection, { dir: path.basename(destinationFolder) });
         process.chdir(path.basename(destinationFolder));
         await CloudRunnerSystem.Run(`mv "${path.basename(destinationFolder)}/*" "${destinationFolder}/.."`);
       } else {
