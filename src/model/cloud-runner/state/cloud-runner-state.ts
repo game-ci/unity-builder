@@ -60,7 +60,7 @@ export class CloudRunnerState {
   }
 
   public static get libraryCacheFolderFull() {
-    return path.join(CloudRunnerState.cacheFolderFull, `lib`);
+    return path.join(CloudRunnerState.cacheFolderFull, `Library`);
   }
 
   public static get unityBuilderRepoUrl(): string {
