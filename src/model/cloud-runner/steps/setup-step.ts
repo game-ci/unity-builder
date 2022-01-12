@@ -33,8 +33,7 @@ export class SetupStep implements StepInterface {
       return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
         CloudRunnerState.buildParams.buildGuid,
         image,
-        `
-        apk update -q
+        `apk update -q
         apk add git-lfs jq tree nodejs -q
         ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1

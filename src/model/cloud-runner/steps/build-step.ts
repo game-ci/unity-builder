@@ -28,8 +28,7 @@ export class BuildStep implements StepInterface {
     return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,
       image,
-      `
-        ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      `${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
         cp -r "${path
           .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
