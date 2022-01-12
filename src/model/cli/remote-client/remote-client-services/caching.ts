@@ -56,12 +56,12 @@ export class Caching {
           throw error;
         });
         archive.pipe(output);
-        archive.directory(path.resolve(`./../${path.basename(sourceFolder)}`), false);
+        archive.directory(path.resolve(`..`, path.basename(sourceFolder)), false);
         archive.finalize();
       });
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
       assert(fs.existsSync(`${cacheFolder}`), 'cache folder');
-      assert(fs.existsSync(path.resolve(`./../${path.basename(sourceFolder)}`)), 'source folder exists');
+      assert(fs.existsSync(path.resolve(`..`, `${path.basename(sourceFolder)}`)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
@@ -101,7 +101,7 @@ export class Caching {
         await extract(`${cacheSelection}.zip`, { dir: `${destinationFolder}` });
         process.chdir(path.basename(destinationFolder));
         await CloudRunnerSystem.Run(
-          `mv "${path.basename(destinationFolder)}/*" "${path.resolve(`${destinationFolder}/..`)}"`,
+          `mv "${path.basename(destinationFolder)}/*" "${path.resolve(`..`, `${destinationFolder}/`)}"`,
         );
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);

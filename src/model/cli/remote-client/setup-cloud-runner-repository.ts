@@ -63,7 +63,8 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(`git lfs install --skip-smudge`);
       await CloudRunnerSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${path.resolve(
-          `./../${path.basename(CloudRunnerState.repoPathFull)}`,
+          `..`,
+          path.basename(CloudRunnerState.repoPathFull),
         )}`,
       );
       assert(fs.existsSync(`.git`));
