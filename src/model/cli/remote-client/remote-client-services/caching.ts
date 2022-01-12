@@ -56,7 +56,7 @@ export class Caching {
           throw error;
         });
         archive.pipe(output);
-        archive.directory(path.resolve(`..`, path.basename(sourceFolder)), false);
+        archive.directory(sourceFolder, false);
         archive.finalize();
       });
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
@@ -99,10 +99,6 @@ export class Caching {
         RemoteClientLogger.log(`cache item exists`);
         assert(`${fs.existsSync(destinationFolder)}`);
         await extract(`${cacheSelection}.zip`, { dir: `${destinationFolder}` });
-        process.chdir(path.basename(destinationFolder));
-        await CloudRunnerSystem.Run(
-          `mv "${path.basename(destinationFolder)}/*" "${path.resolve(`..`, `${destinationFolder}/`)}"`,
-        );
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
