@@ -94,7 +94,7 @@ Resources:
     Type: 'AWS::Kinesis::Stream'
     Properties:
       Name: !Ref ServiceName
-      ShardCount: 1
+      StreamModeDetails: ON_DEMAND
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
