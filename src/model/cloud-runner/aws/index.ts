@@ -87,17 +87,11 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
-    await CF.deleteStack({
-      StackName: taskDef.taskDefStackNameTTL,
-    }).promise();
 
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackName,
     }).promise();
-    await CF.waitFor('stackDeleteComplete', {
-      StackName: taskDef.taskDefStackNameTTL,
-    }).promise();
-    CloudRunnerLogger.log(`Deleted Stacks: ${taskDef.taskDefStackName}, ${taskDef.taskDefStackNameTTL}`);
+    CloudRunnerLogger.log(`Deleted Stack: ${taskDef.taskDefStackName}`);
     CloudRunnerLogger.log('Cleanup complete');
   }
 }

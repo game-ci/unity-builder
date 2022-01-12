@@ -3,7 +3,6 @@ import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { AWSTemplates } from './aws-templates';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import * as fs from 'fs';
 import { AWSError } from './aws-error';
 
 export class AWSJobStack {
@@ -24,8 +23,6 @@ export class AWSJobStack {
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSTemplates.readTaskCloudFormationTemplate();
-    const cleanupTaskDefStackName = `${taskDefStackName}-cleanup`;
-    const cleanupCloudFormation = fs.readFileSync(`${__dirname}/cloud-formations/cloudformation-stack-ttl.yml`, 'utf8');
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -113,29 +110,6 @@ export class AWSJobStack {
         Parameters: parameters,
       }).promise();
       CloudRunnerLogger.log('Creating cloud runner job');
-      await CF.createStack({
-        StackName: cleanupTaskDefStackName,
-        TemplateBody: cleanupCloudFormation,
-        Capabilities: ['CAPABILITY_IAM'],
-        Parameters: [
-          {
-            ParameterKey: 'StackName',
-            ParameterValue: taskDefStackName,
-          },
-          {
-            ParameterKey: 'DeleteStackName',
-            ParameterValue: cleanupTaskDefStackName,
-          },
-          {
-            ParameterKey: 'TTL',
-            ParameterValue: '100',
-          },
-          {
-            ParameterKey: 'EnvironmentName',
-            ParameterValue: this.baseStackName,
-          },
-        ],
-      }).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
       await AWSError.handleStackCreationFailure(
@@ -160,8 +134,6 @@ export class AWSJobStack {
     return {
       taskDefStackName,
       taskDefCloudFormation,
-      taskDefStackNameTTL: cleanupTaskDefStackName,
-      ttlCloudFormation: cleanupCloudFormation,
       taskDefResources,
       baseResources,
     };
