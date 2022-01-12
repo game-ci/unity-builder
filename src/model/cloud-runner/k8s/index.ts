@@ -159,9 +159,8 @@ class Kubernetes implements CloudRunnerProviderInterface {
           intervalBetweenAttempts: 15000,
         },
       );
-    } catch {
-      CloudRunnerLogger.log('failed to read the state of the job while cleaning up?');
-    }
+      // eslint-disable-next-line no-empty
+    } catch {}
   }
 
   async cleanupSharedResources(
