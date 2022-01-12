@@ -30,38 +30,41 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
       }
-      assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
-      const output = fs.createWriteStream(`${cacheKey}.zip`);
-      const archive = archiver('zip', {
-        zlib: { level: 9 }, // Sets the compression level.
-      });
-      output.on('close', function () {
-        CloudRunnerLogger.log(`${archive.pointer()} total bytes`);
-        CloudRunnerLogger.log('archiver has been finalized and the output file descriptor has closed.');
-      });
-      output.on('end', function () {
-        CloudRunnerLogger.log('Data has been drained');
-      });
-      archive.on('warning', function (error) {
-        if (error.code === 'ENOENT') {
-          // log warning
-          CloudRunnerLogger.logWarning(error);
-        } else {
+      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
+      await new Promise<void>((resolve) => {
+        const output = fs.createWriteStream(`${cacheKey}.zip`);
+        const archive = archiver('zip', {
+          zlib: { level: 9 }, // Sets the compression level.
+        });
+        output.on('close', function () {
+          CloudRunnerLogger.log(`${archive.pointer()} total bytes`);
+          CloudRunnerLogger.log('archiver has been finalized and the output file descriptor has closed.');
+          resolve();
+        });
+        output.on('end', function () {
+          CloudRunnerLogger.log('Data has been drained');
+        });
+        archive.on('warning', function (error) {
+          if (error.code === 'ENOENT') {
+            // log warning
+            CloudRunnerLogger.logWarning(error);
+          } else {
+            throw error;
+          }
+        });
+        archive.on('error', function (error) {
           throw error;
-        }
+        });
+        archive.pipe(output);
+        archive.directory(path.resolve(`./../${path.basename(sourceFolder)}`), false);
+        archive.finalize();
       });
-      archive.on('error', function (error) {
-        throw error;
-      });
-      archive.pipe(output);
-      archive.directory(`./../${path.basename(sourceFolder)}/`, false);
-      archive.finalize();
-      assert(fs.existsSync(`${cacheKey}.zip`));
-      assert(fs.existsSync(`${cacheFolder}`));
-      assert(fs.existsSync(`./../${path.basename(sourceFolder)}`));
+      assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
+      assert(fs.existsSync(`${cacheFolder}`), 'cache folder');
+      assert(fs.existsSync(path.resolve(`./../${path.basename(sourceFolder)}`)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
-      assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`));
+      assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;
@@ -97,7 +100,9 @@ export class Caching {
         assert(`${fs.existsSync(destinationFolder)}`);
         await extract(cacheSelection, { dir: `${path.basename(destinationFolder)}/` });
         process.chdir(path.basename(destinationFolder));
-        await CloudRunnerSystem.Run(`mv "${path.basename(destinationFolder)}/*" "${destinationFolder}/.."`);
+        await CloudRunnerSystem.Run(
+          `mv "${path.basename(destinationFolder)}/*" "${path.resolve(`${destinationFolder}/..`)}"`,
+        );
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
