@@ -100,7 +100,7 @@ export class Caching {
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
-        const fullDestination = path.join(process.cwd(), path.basename(destinationFolder), `results`);
+        const fullDestination = path.join(destinationFolder, `results`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
