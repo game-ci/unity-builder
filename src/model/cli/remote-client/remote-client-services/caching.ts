@@ -103,7 +103,7 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        await extract(`${cacheSelection}.zip`, { dir: fullDestination });
+        await extract(`${cacheSelection}.zip`, { dir: 'test' });
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${fullDestination}`);
         }
