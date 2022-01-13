@@ -70,6 +70,7 @@ export class SetupCloudRunnerRepository {
       assert(fs.existsSync(`.git`));
       RemoteClientLogger.log(`${CloudRunnerState.buildParams.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunnerState.buildParams.branch}`);
+      assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
       RemoteClientLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
     } catch (error) {
       throw error;
