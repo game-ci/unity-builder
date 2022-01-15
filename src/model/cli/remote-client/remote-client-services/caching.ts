@@ -93,19 +93,20 @@ export class Caching {
       await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
-        await CloudRunnerSystem.Run(`mkdir -p results`);
+        const resultsDirectory = `results`;
+        await CloudRunnerSystem.Run(`mkdir -p ${resultsDirectory}`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
         }
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
-        const fullDestination = path.join(destinationFolder, `results`);
+        const fullDestination = path.join(cacheFolder, resultsDirectory);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
         fs.createReadStream(`${path.join(cacheFolder, cacheSelection)}.zip`).pipe(
-          unzipper.Extract({ path: fullDestination }),
+          unzipper.Extract({ path: resultsDirectory }),
         );
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${fullDestination}`);
