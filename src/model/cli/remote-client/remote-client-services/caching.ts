@@ -7,8 +7,8 @@ import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
+import unzipper from 'unzipper';
 import archiver from 'archiver';
-import extract from 'extract-zip';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
@@ -104,7 +104,9 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        await extract(`${cacheSelection}.zip`, { dir: fullDestination });
+        fs.createReadStream(`${path.join(cacheFolder, cacheSelection)}.zip`).pipe(
+          unzipper.Extract({ path: fullDestination }),
+        );
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${fullDestination}`);
         }

@@ -34,11 +34,11 @@
     "base-64": "^1.0.0",
     "commander": "^8.3.0",
     "commander-ts": "^0.2.0",
-    "extract-zip": "^2.0.1",
     "kubernetes-client": "^9.0.0",
     "nanoid": "3.1.20",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.3.5",
+    "unzipper": "^0.10.11",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
