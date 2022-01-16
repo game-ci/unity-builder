@@ -110,7 +110,7 @@ export class Caching {
         );
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
-        await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}"`);
+        await CloudRunnerSystem.Run(`mv -v "${fullDestination}/*" "${destinationFolder}"`);
         fs.rmdirSync(fullDestination);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
