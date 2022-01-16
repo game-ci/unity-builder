@@ -105,9 +105,7 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        fs.createReadStream(`${path.join(resultsDirectory, cacheSelection)}.zip`).pipe(
-          unzipper.Extract({ path: resultsDirectory }),
-        );
+        fs.createReadStream(`${cacheSelection}.zip`).pipe(unzipper.Extract({ path: resultsDirectory }));
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
         await CloudRunnerSystem.Run(`mv -v "${fullDestination}/*" "${destinationFolder}"`);
