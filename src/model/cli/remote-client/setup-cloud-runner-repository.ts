@@ -34,6 +34,7 @@ export class SetupCloudRunnerRepository {
         CloudRunnerState.lfsDirectoryFull,
         `${lfsHashes.lfsGuid}`,
       );
+      process.chdir(CloudRunnerState.repoPathFull);
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls -lh`);
         await CloudRunnerSystem.Run(`tree`);
@@ -45,6 +46,7 @@ export class SetupCloudRunnerRepository {
         `${lfsHashes.lfsGuid}`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
+      process.chdir(CloudRunnerState.repoPathFull);
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls -lh`);
         await CloudRunnerSystem.Run(`tree`);
