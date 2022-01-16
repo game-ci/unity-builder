@@ -13,6 +13,8 @@ export class SetupCloudRunnerRepository {
     try {
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.buildPathFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.repoPathFull}`);
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.cacheFolderFull}`);
+
       process.chdir(CloudRunnerState.repoPathFull);
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls -lh`);

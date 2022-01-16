@@ -57,6 +57,12 @@ export class BuildStep implements StepInterface {
         /\\/g,
         `/`,
       )}"
+        chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
+        node ${path
+          .join(CloudRunnerState.builderPathFull, 'dist', `index.js`)
+          .replace(/\\/g, `/`)} -m cache-push "Library" "lib-${
+        CloudRunnerState.buildParams.buildGuid
+      }.zip" "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/Library"
         ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull}"
         ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       `,

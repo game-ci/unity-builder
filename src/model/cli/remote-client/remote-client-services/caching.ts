@@ -76,11 +76,11 @@ export class Caching {
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
       if (!fs.existsSync(cacheFolder)) {
-        await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
+        fs.mkdirSync(cacheFolder);
       }
 
       if (!fs.existsSync(destinationFolder)) {
-        await CloudRunnerSystem.Run(`mkdir -p ${destinationFolder}`);
+        fs.mkdirSync(destinationFolder);
       }
 
       const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
@@ -93,7 +93,7 @@ export class Caching {
       await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
-        const resultsDirectory = `results`;
+        const resultsDirectory = `results${CloudRunnerState.buildParams.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsDirectory}`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
@@ -114,6 +114,7 @@ export class Caching {
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
         await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}"`);
+        fs.rmdirSync(fullDestination);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {

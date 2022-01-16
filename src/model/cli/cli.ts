@@ -68,4 +68,10 @@ export class CLI {
     CloudRunnerState.setup(buildParameter);
     await SetupCloudRunnerRepository.run();
   }
+
+  @CliFunction(`cach-push`, `push to cache`)
+  static async cachePush() {}
+
+  @CliFunction(`cach-pull`, `pull from cache`)
+  static async cachePull() {}
 }
