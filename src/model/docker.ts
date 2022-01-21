@@ -204,7 +204,7 @@ class Docker {
   }
 
   static async generateWinSDKRegKeys(silent = false) {
-    //Export registry keys that point to the location of the windows 10 sdk
+    // Export registry keys that point to the location of the windows 10 sdk
     const exportWinSDKRegKeysCommand =
       'echo Y| reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg';
     await exec(exportWinSDKRegKeysCommand, undefined, { silent });
