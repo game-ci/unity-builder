@@ -262,7 +262,7 @@ class Docker {
       throw new Error(`License File was corrupted, unable to locate serial`);
     }
     const endIndex = license.indexOf(endKey, startIndex);
-    //We slice off the first 4 characters as they are garbage values
+    // Slice off the first 4 characters as they are garbage values
     return Buffer.from(license.slice(startIndex, endIndex), 'base64').toString('binary').slice(4);
   }
 }
