@@ -248,7 +248,7 @@ class Docker {
         fs.existsSync('C:/ProgramData/Microsoft/VisualStudio')
       )
     ) {
-      throw new Error(`Visual Studio Installation not found at default location.
+      throw new Error(`Visual Studio not found at the default location.
                       Make sure the runner has Visual Studio installed in the
                       default location`);
     }
