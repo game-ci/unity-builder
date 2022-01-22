@@ -6,8 +6,8 @@ LABEL "com.github.actions.description"="Build Unity projects for different platf
 LABEL "com.github.actions.icon"="box"
 LABEL "com.github.actions.color"="gray-dark"
 
-LABEL "repository"="http://github.com/webbertakken/unity-actions"
-LABEL "homepage"="http://github.com/webbertakken/unity-actions"
+LABEL "repository"="http://github.com/game-ci/unity-actions"
+LABEL "homepage"="http://github.com/game-ci/unity-actions"
 LABEL "maintainer"="Webber Takken <webber@takken.io>"
 
 ADD default-build-script /UnityBuilderAction
