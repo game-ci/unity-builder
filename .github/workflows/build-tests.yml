@@ -79,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - test-project-windows
+          - test-project
         unityVersion:
           - 2020.3.24f1
         targetPlatform:
@@ -107,6 +107,13 @@ jobs:
             Library-
 
       ###########################
+      #  Set Scripting Backend  #
+      ###########################
+      - name: Set Scripting Backend To il2cpp
+      - run: |
+          move /y ./test-project/ProjectSettings/ProjectSettingsWindows.asset ./test-project/ProjectSettings/ProjectSettings.asset
+
+      ###########################
       #          Build          #
       ###########################
       - uses: ./
@@ -115,6 +122,8 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          allowDirtyBuild: true
+      # We use dirty build because we are replacing the default project settings file above
 
       ###########################
       #          Upload         #
