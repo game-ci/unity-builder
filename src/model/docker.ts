@@ -122,7 +122,7 @@ class Docker {
 
         await this.setupWindowsRun(platform);
 
-        this.validateWindowsPrereqs(platform);
+        this.validateWindowsPlatformRequirements(platform);
 
         const windowsRunCommand = `docker run \
         --workdir c:/github/workspace \
@@ -210,8 +210,8 @@ class Docker {
     await exec(exportWinSDKRegKeysCommand, undefined, { silent });
   }
 
-  static validateWindowsPrereqs(platform) {
-    //We run different checks for different platforms
+  static validateWindowsPlatformRequirements(platform) {
+    //We run different checks for different target platforms
     switch (platform) {
       case 'StandaloneWindows':
         this.checkForVisualStudio();
