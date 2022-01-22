@@ -10,5 +10,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: Actions-R-Us/actions-tagger@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
