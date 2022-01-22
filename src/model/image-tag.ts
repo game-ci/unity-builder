@@ -36,7 +36,7 @@ class ImageTag {
       mac: 'mac-mono',
       windows: 'windows-mono',
       windowsIl2cpp: 'windows-il2cpp',
-      wsaplayer: 'universal-windows-platform',
+      wsaPlayer: 'universal-windows-platform',
       linux: 'base',
       linuxIl2cpp: 'linux-il2cpp',
       android: 'android',
@@ -53,7 +53,7 @@ class ImageTag {
       mac,
       windows,
       windowsIl2cpp,
-      wsaplayer,
+      wsaPlayer,
       linux,
       linuxIl2cpp,
       android,
@@ -108,7 +108,7 @@ class ImageTag {
         if (process.platform !== 'win32') {
           throw new Error(`WSAPlayer can only be built on a windows base OS`);
         }
-        return wsaplayer;
+        return wsaPlayer;
       case Platform.types.PS4:
         return windows;
       case Platform.types.XboxOne:
