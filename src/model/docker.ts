@@ -211,7 +211,6 @@ class Docker {
   }
 
   static validateWindowsPlatformRequirements(platform) {
-    //We run different checks for different target platforms
     switch (platform) {
       case 'StandaloneWindows':
         this.checkForVisualStudio();
