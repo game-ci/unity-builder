@@ -14,7 +14,9 @@ export class CloudRunnerSystem {
           throw error;
         }
         if (stderr) {
-          RemoteClientLogger.logCliDiagnostic(`${stderr.toString()}`);
+          const diagnosticOutput = `${stderr.toString()}`;
+          RemoteClientLogger.logCliDiagnostic(diagnosticOutput);
+          output += diagnosticOutput;
           return;
         }
         const outputChunk = `${stdout}`;
