@@ -32,9 +32,9 @@ class Action {
   static get dockerfile() {
     const currentPlatform = process.platform;
     switch (currentPlatform) {
-      case "linux":
+      case 'linux':
         return `${Action.actionFolder}/platforms/ubuntu/Dockerfile`;
-      case "win32":
+      case 'win32':
         return `${Action.actionFolder}/platforms/windows/Dockerfile`;
       default:
         throw new Error(`No Dockerfile for currently unsupported platform: ${currentPlatform}`);
