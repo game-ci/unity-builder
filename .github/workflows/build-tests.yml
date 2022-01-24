@@ -111,7 +111,7 @@ jobs:
       #  Set Scripting Backend  #
       ###########################
       - name: Set Scripting Backend To il2cpp
-      - run: |
+        run: |
           move /y ./test-project/ProjectSettings/ProjectSettingsWindows.asset ./test-project/ProjectSettings/ProjectSettings.asset
 
       ###########################
