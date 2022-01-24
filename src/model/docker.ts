@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
 const fs = require('fs');
@@ -102,6 +103,7 @@ class Docker {
         break;
       }
       case 'win32': {
+        let unitySerial = '';
         if (!process.env.UNITY_SERIAL) {
           //No serial was present so it is a personal license that we need to convert
           if (!process.env.UNITY_LICENSE) {
@@ -110,8 +112,11 @@ class Docker {
                              steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                              serial number inside the UNITY_SERIAL GitHub secret.`);
           }
-          process.env.UNITY_SERIAL = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+          unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+        } else {
+          unitySerial = process.env.UNITY_SERIAL!;
         }
+        core.setSecret(unitySerial);
 
         if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD)) {
           throw new Error(`Unity email and password must be set for Windows based builds to
@@ -130,7 +135,7 @@ class Docker {
         --env UNITY_LICENSE_FILE \
         --env UNITY_EMAIL \
         --env UNITY_PASSWORD \
-        --env UNITY_SERIAL \
+        --env UNITY_SERIAL="${unitySerial}" \
         --env UNITY_VERSION="${version}" \
         --env USYM_UPLOAD_AUTH_TOKEN \
         --env PROJECT_PATH="${projectPath}" \

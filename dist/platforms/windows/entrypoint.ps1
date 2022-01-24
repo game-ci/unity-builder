@@ -1,13 +1,3 @@
-Get-ChildItem -Path "c:/regkeys"
-
-Get-ChildItem -Path "c:/Program Files (x86)/Microsoft Visual Studio"
-
-Get-ChildItem -Path "c:/Program Files (x86)/Windows Kits"
-
-Get-ChildItem -Path "c:/ProgramData/Microsoft/VisualStudio"
-
-Get-ChildItem -Path "c:/"
-
 # Activate Unity
 & "c:\steps\activate.ps1"
 
