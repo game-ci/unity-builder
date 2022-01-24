@@ -15,7 +15,7 @@ export class Caching {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
-      process.chdir(`${sourceFolder}`);
+      process.chdir(path.resolve(sourceFolder, '..'));
 
       if (Input.cloudRunnerTests) {
         CloudRunnerLogger.log(
@@ -26,11 +26,11 @@ export class Caching {
       }
 
       if (Input.cloudRunnerTests) {
-        await CloudRunnerSystem.Run(`ls`);
+        await CloudRunnerSystem.Run(`ls ${path.basename(sourceFolder)}`);
       }
-      await CloudRunnerSystem.Run(`zip ${cacheKey}.zip *`);
+      await CloudRunnerSystem.Run(`zip ${cacheKey}.zip ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
-      assert(fs.existsSync(path.resolve(`..`, `${path.basename(sourceFolder)}`)), 'source folder exists');
+      assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheKey} ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
