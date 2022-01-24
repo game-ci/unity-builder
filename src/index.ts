@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, RemoteBuilder } from './model';
+import PlatformSetup from './model/platform-setup';
 
 async function run() {
   try {
@@ -26,6 +27,7 @@ async function run() {
       // default and local case
       default:
         core.info('Building locally');
+        PlatformSetup.setup(buildParameters);
         builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
         await Docker.run(builtImage, { workspace, ...buildParameters });
         break;
