@@ -79,7 +79,7 @@ export class Caching {
         assert(`${fs.existsSync(fullDestination)}`);
         await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}/.."`);
         if (fs.existsSync(destinationFolder)) {
-          fs.rmdirSync(destinationFolder);
+          fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
         fs.renameSync(`${destinationFolder}/../${resultsDirectory}`, destinationFolder);
       } else {
