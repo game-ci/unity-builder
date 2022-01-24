@@ -117,7 +117,8 @@ class Docker {
         }
 
         if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD)) {
-          throw new Error(`Unity email and password must be set for windows based builds`);
+          throw new Error(`Unity email and password must be set for Windows based builds. Make
+                           sure to set them inside UNITY_EMAIL and UNITY_PASSWORD in Github Secrets.`);
         }
 
         await this.setupWindowsRun(platform);
