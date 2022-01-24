@@ -44,7 +44,13 @@ class Docker {
       chownFilesTo,
     } = parameters;
 
-    const baseOSSpecificArgs = this.getBaseOSSpecificArgs(process.platform, parameters);
+    const baseOsSpecificArguments = this.getBaseOsSpecificArguments(
+      process.platform,
+      workspace,
+      unitySerial,
+      runnerTempPath,
+      sshAgent,
+    );
 
     const runCommand = `docker run \
     --workdir /github/workspace \
@@ -88,40 +94,23 @@ class Docker {
     --env RUNNER_TEMP \
     --env RUNNER_WORKSPACE \
     --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
-    ${baseOSSpecificArgs} \
+    ${baseOsSpecificArguments} \
     ${image}`;
 
     await exec(runCommand, undefined, { silent });
   }
 
-  static getBaseOSSpecificArgs(baseOS: NodeJS.Platform, parameters): string {
-    const {
-      version,
-      workspace,
-      unitySerial,
-      runnerTempPath,
-      platform,
-      projectPath,
-      buildName,
-      buildPath,
-      buildFile,
-      buildMethod,
-      buildVersion,
-      androidVersionCode,
-      androidKeystoreName,
-      androidKeystoreBase64,
-      androidKeystorePass,
-      androidKeyaliasName,
-      androidKeyaliasPass,
-      androidTargetSdkVersion,
-      androidSdkManagerParameters,
-      customParameters,
-      sshAgent,
-      gitPrivateToken,
-      chownFilesTo,
-    } = parameters;
-
-    switch(baseOS) {
+  static getBaseOsSpecificArguments(baseOs, workspace, unitySerial, runnerTemporaryPath, sshAgent): string {
+    switch (baseOs) {
+      case 'linux':
+        return `--env UNITY_SERIAL
+                ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
+                --volume "/var/run/docker.sock":"/var/run/docker.sock" \
+                --volume "${runnerTemporaryPath}/_github_home":"/root" \
+                --volume "${runnerTemporaryPath}/_github_workflow":"/github/workflow" \
+                --volume "${workspace}":"/github/workspace" \
+                ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
+                ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
       case 'win32':
         return `--env UNITY_SERIAL="${unitySerial} \
                 --volume "${workspace}":"c:/github/workspace" \
@@ -129,16 +118,7 @@ class Docker {
                 --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
                 --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
                 --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio"`;
-                //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
-      case 'linux':
-        return `--env UNITY_SERIAL
-                ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
-                --volume "/var/run/docker.sock":"/var/run/docker.sock" \
-                --volume "${runnerTempPath}/_github_home":"/root" \
-                --volume "${runnerTempPath}/_github_workflow":"/github/workflow" \
-                --volume "${workspace}":"/github/workspace" \
-                ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
-                ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
+      //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
     }
     return '';
   }
