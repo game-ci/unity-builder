@@ -131,7 +131,7 @@ class Docker {
         --rm \
         --env UNITY_LICENSE \
         --env UNITY_LICENSE_FILE \
-        --env UNITY_EMAIL \
+        --env UNITY_EMAIL="${process.env.UNITY_EMAIL}" \
         --env UNITY_PASSWORD \
         --env UNITY_SERIAL="${unitySerial}" \
         --env UNITY_VERSION="${version}" \
