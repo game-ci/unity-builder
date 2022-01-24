@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
-const fs = require('fs');
+import fs from 'fs';
 
 class Docker {
   static async build(buildParameters, silent = false) {
