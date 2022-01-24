@@ -117,8 +117,9 @@ class Docker {
         }
 
         if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD)) {
-          throw new Error(`Unity email and password must be set for Windows based builds. Make
-                           sure to set them inside UNITY_EMAIL and UNITY_PASSWORD in Github Secrets.`);
+          throw new Error(`Unity email and password must be set for Windows based builds to
+                           authenticate the license. Make sure to set them inside UNITY_EMAIL
+                           and UNITY_PASSWORD in Github Secrets and pass them into the environment.`);
         }
 
         await this.setupWindowsRun(platform);
@@ -168,8 +169,6 @@ class Docker {
         --env RUNNER_TEMP \
         --env RUNNER_WORKSPACE \
         --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
-        --volume "${runnerTempPath}/_github_home":"c:/root" \
-        --volume "${runnerTempPath}/_github_workflow":"c:/github/workflow" \
         --volume "${workspace}":"c:/github/workspace" \
         --volume "c:/regkeys":"c:/regkeys" \
         --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
