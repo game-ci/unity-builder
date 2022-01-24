@@ -74,7 +74,7 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip ${path.basename(resultsDirectory)}`);
+        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsDirectory)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
         await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}"`);
