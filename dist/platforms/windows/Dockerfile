@@ -13,6 +13,6 @@ LABEL "maintainer"="Webber Takken <webber@takken.io>"
 COPY default-build-script c:/UnityBuilderAction
 COPY platforms/windows/steps c:/steps
 COPY platforms/windows/entrypoint.ps1 c:/entrypoint.ps1
-RUN ls
+RUN dir
 
 ENTRYPOINT ["powershell", "c:/entrypoint.ps1"]

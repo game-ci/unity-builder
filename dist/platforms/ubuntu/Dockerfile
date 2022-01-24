@@ -10,10 +10,10 @@ LABEL "repository"="http://github.com/game-ci/unity-actions"
 LABEL "homepage"="http://github.com/game-ci/unity-actions"
 LABEL "maintainer"="Webber Takken <webber@takken.io>"
 
-ADD default-build-script /UnityBuilderAction
-ADD platforms/ubuntu/steps /steps
+COPY default-build-script /UnityBuilderAction
+COPY platforms/ubuntu/steps /steps
 RUN chmod -R +x /steps
-ADD platforms/ubuntu/entrypoint.sh /entrypoint.sh
+COPY platforms/ubuntu/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN ls
 
