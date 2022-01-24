@@ -77,7 +77,7 @@ export class Caching {
         await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsDirectory)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
-        await CloudRunnerSystem.Run(`mv "${fullDestination}/{,.[^.]}*" "${destinationFolder}"`);
+        await CloudRunnerSystem.Run(`mv "${fullDestination}/*" "${destinationFolder}"`);
         fs.rmdirSync(fullDestination);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
