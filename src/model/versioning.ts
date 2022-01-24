@@ -274,6 +274,7 @@ export default class Versioning {
   static async hasAnyVersionTags() {
     const numberOfCommitsAsString = await System.run('sh', undefined, {
       input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
+      cwd: this.projectPath,
       silent: false,
     });
 
