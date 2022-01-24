@@ -68,17 +68,6 @@ class ImageTag {
       case Platform.types.StandaloneOSX:
         return mac;
       case Platform.types.StandaloneWindows:
-        // Can only build windows-il2cpp on a windows based system
-        if (process.platform === 'win32') {
-          // Unity versions before 2019.3 do not support il2cpp
-          if (major >= 2020 || (major === 2019 && minor >= 3)) {
-            return windowsIl2cpp;
-          } else {
-            throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity.
-                             If you are trying to build for windows-mono, please use a Linux based OS.`);
-          }
-        }
-        return windows;
       case Platform.types.StandaloneWindows64:
         // Can only build windows-il2cpp on a windows based system
         if (process.platform === 'win32') {

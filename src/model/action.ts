@@ -31,8 +31,7 @@ class Action {
 
   static get dockerfile() {
     const currentPlatform = process.platform;
-    switch(currentPlatform)
-    {
+    switch (currentPlatform) {
       case "linux":
         return `${Action.actionFolder}/platforms/ubuntu/Dockerfile`;
       case "win32":
