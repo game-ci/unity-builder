@@ -184,8 +184,9 @@ class Docker {
 
   //Setup prerequisite files/folders for a windows-based docker run
   static async setupWindowsRun(platform, silent = false) {
-    const makeRegKeyFolderCommand = 'mkdir c:/regkeys';
-    await exec(makeRegKeyFolderCommand, undefined, { silent });
+    if (!fs.existsSync('c:/regkeys')) {
+      fs.mkdirSync('c:/regkeys');
+    }
     switch (platform) {
       //These all need the Windows 10 SDK
       case 'StandaloneWindows':
@@ -203,7 +204,7 @@ class Docker {
   static async generateWinSDKRegKeys(silent = false) {
     // Export registry keys that point to the location of the windows 10 sdk
     const exportWinSDKRegKeysCommand =
-      'echo Y| reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg';
+      'reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg /y';
     await exec(exportWinSDKRegKeysCommand, undefined, { silent });
   }
 
