@@ -1,4 +1,4 @@
-Get-ChildItem -Path c:\regkeys
+Get-ChildItem -Path "c:/regkeys"
 
 Get-ChildItem -Path "c:/Program Files (x86)/Microsoft Visual Studio"
 
