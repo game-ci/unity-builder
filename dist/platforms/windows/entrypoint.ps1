@@ -1,13 +1,15 @@
-# Activate Unity
-& "c:\steps\activate.ps1"
-
 Get-ChildItem -Path c:\regkeys
 
-Get-ChildItem -Path "C:/Program Files (x86)/Microsoft Visual Studio"
+Get-ChildItem -Path "c:/Program Files (x86)/Microsoft Visual Studio"
 
-Get-ChildItem -Path "C:/Program Files (x86)/Windows Kits"
+Get-ChildItem -Path "c:/Program Files (x86)/Windows Kits"
 
-Get-ChildItem -Path "C:/ProgramData/Microsoft/VisualStudio"
+Get-ChildItem -Path "c:/ProgramData/Microsoft/VisualStudio"
+
+Get-ChildItem -Path "c:/"
+
+# Activate Unity
+& "c:\steps\activate.ps1"
 
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
