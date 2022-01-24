@@ -34,7 +34,7 @@ export class SetupStep implements StepInterface {
         CloudRunnerState.buildParams.buildGuid,
         image,
         `apk update -q
-        apk add git-lfs jq tree nodejs -q
+        apk add git-lfs jq tree zip unzip nodejs -q
         ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}

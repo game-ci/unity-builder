@@ -7,8 +7,6 @@ import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
-import unzipper from 'unzipper';
-import archiver from 'archiver';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
@@ -30,37 +28,8 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls`);
       }
-      assert(fs.existsSync(`${path.basename(sourceFolder)}`));
-      await new Promise<void>((resolve) => {
-        const output = fs.createWriteStream(`${cacheKey}.zip`);
-        const archive = archiver('zip', {
-          zlib: { level: 9 }, // Sets the compression level.
-        });
-        output.on('close', function () {
-          CloudRunnerLogger.log(`${archive.pointer()} total bytes`);
-          CloudRunnerLogger.log('archiver has been finalized and the output file descriptor has closed.');
-          resolve();
-        });
-        output.on('end', function () {
-          CloudRunnerLogger.log('Data has been drained');
-        });
-        archive.on('warning', function (error) {
-          if (error.code === 'ENOENT') {
-            // log warning
-            CloudRunnerLogger.logWarning(error);
-          } else {
-            throw error;
-          }
-        });
-        archive.on('error', function (error) {
-          throw error;
-        });
-        archive.pipe(output);
-        archive.directory(sourceFolder, false);
-        archive.finalize();
-      });
+      await CloudRunnerSystem.Run(`zip ${cacheKey}.zip *`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
-      assert(fs.existsSync(`${cacheFolder}`), 'cache folder');
       assert(fs.existsSync(path.resolve(`..`, `${path.basename(sourceFolder)}`)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
@@ -105,7 +74,7 @@ export class Caching {
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        fs.createReadStream(`${cacheSelection}.zip`).pipe(unzipper.Extract({ path: resultsDirectory }));
+        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip ${path.basename(resultsDirectory)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
         await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}"`);
