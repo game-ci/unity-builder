@@ -62,26 +62,27 @@ export class Caching {
       await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
-        const resultsDirectory = `results${CloudRunnerState.buildParams.buildGuid}`;
-        await CloudRunnerSystem.Run(`mkdir -p ${resultsDirectory}`);
+        const resultsFolder = `results${CloudRunnerState.buildParams.buildGuid}`;
+        await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
         }
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
-        const fullDestination = path.join(cacheFolder, resultsDirectory);
+        const fullDestination = path.join(cacheFolder, resultsFolder);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
-        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsDirectory)}`);
+        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
-        await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationFolder}/.."`);
+        const destinationParentFolder = path.resolve(destinationFolder, '..');
+        await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationParentFolder}"`);
         if (fs.existsSync(destinationFolder)) {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
-        fs.renameSync(`${destinationFolder}/../${resultsDirectory}`, destinationFolder);
+        fs.renameSync(path.resolve(destinationParentFolder, resultsFolder), destinationFolder);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
