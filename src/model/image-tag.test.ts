@@ -48,8 +48,14 @@ describe('ImageTag', () => {
   describe('toString', () => {
     it('returns the correct version', () => {
       const image = new ImageTag({ version: '2099.1.1111', platform: some.platform });
-
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2099.1.1111-0`);
+      switch (process.platform) {
+        case 'win32':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2099.1.1111-0`);
+          break;
+        case 'linux':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:2099.1.1111-0`);
+          break;
+      }
     });
     it('returns customImage if given', () => {
       const image = new ImageTag({
@@ -64,13 +70,27 @@ describe('ImageTag', () => {
     it('returns the specific build platform', () => {
       const image = new ImageTag({ version: '2019.2.11f1', platform: 'WebGL' });
 
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-webgl-0`);
+      switch (process.platform) {
+        case 'win32':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-webgl-0`);
+          break;
+        case 'linux':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-webgl-0`);
+          break;
+      }
     });
 
     it('returns no specific build platform for generic targetPlatforms', () => {
       const image = new ImageTag({ platform: 'NoTarget' });
 
-      expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-0`);
+      switch (process.platform) {
+        case 'win32':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-0`);
+          break;
+        case 'linux':
+          expect(image.toString()).toStrictEqual(`${defaults.image}:2019.2.11f1-0`);
+          break;
+      }
     });
   });
 });

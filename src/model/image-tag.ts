@@ -35,16 +35,32 @@ class ImageTag {
       webgl: 'webgl',
       mac: 'mac-mono',
       windows: 'windows-mono',
+      windowsIl2cpp: 'windows-il2cpp',
+      wsaPlayer: 'universal-windows-platform',
       linux: 'base',
       linuxIl2cpp: 'linux-il2cpp',
       android: 'android',
       ios: 'ios',
+      tvos: 'appletv',
       facebook: 'facebook',
     };
   }
 
   static getTargetPlatformToImageSuffixMap(platform, version) {
-    const { generic, webgl, mac, windows, linux, linuxIl2cpp, android, ios, facebook } = ImageTag.imageSuffixes;
+    const {
+      generic,
+      webgl,
+      mac,
+      windows,
+      windowsIl2cpp,
+      wsaPlayer,
+      linux,
+      linuxIl2cpp,
+      android,
+      ios,
+      tvos,
+      facebook,
+    } = ImageTag.imageSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
@@ -52,8 +68,17 @@ class ImageTag {
       case Platform.types.StandaloneOSX:
         return mac;
       case Platform.types.StandaloneWindows:
-        return windows;
       case Platform.types.StandaloneWindows64:
+        // Can only build windows-il2cpp on a windows based system
+        if (process.platform === 'win32') {
+          // Unity versions before 2019.3 do not support il2cpp
+          if (major >= 2020 || (major === 2019 && minor >= 3)) {
+            return windowsIl2cpp;
+          } else {
+            throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity.
+                             If you are trying to build for windows-mono, please use a Linux based OS.`);
+          }
+        }
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
@@ -69,13 +94,19 @@ class ImageTag {
       case Platform.types.WebGL:
         return webgl;
       case Platform.types.WSAPlayer:
-        return windows;
+        if (process.platform !== 'win32') {
+          throw new Error(`WSAPlayer can only be built on a windows base OS`);
+        }
+        return wsaPlayer;
       case Platform.types.PS4:
         return windows;
       case Platform.types.XboxOne:
         return windows;
       case Platform.types.tvOS:
-        return windows;
+        if (process.platform !== 'win32') {
+          throw new Error(`tvOS can only be built on a windows base OS`);
+        }
+        return tvos;
       case Platform.types.Switch:
         return windows;
       // Unsupported
@@ -101,7 +132,15 @@ class ImageTag {
   }
 
   get tag() {
-    return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+    //We check the host os so we know what type of the images we need to pull
+    switch (process.platform) {
+      case 'win32':
+        return `windows-${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+      case 'linux':
+        return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+      default:
+        break;
+    }
   }
 
   get image() {
