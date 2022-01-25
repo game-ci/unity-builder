@@ -165,7 +165,7 @@ class Input {
   }
 
   static async gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+    return core.getInput('gitPrivateToken') || (await Input.githubToken());
   }
 
   static get chownFilesTo() {

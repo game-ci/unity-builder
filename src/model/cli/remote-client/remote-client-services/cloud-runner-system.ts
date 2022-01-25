@@ -10,7 +10,6 @@ export class CloudRunnerSystem {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
         if (error) {
-          RemoteClientLogger.logCliError(`${error.message}`);
           throw error;
         }
         if (stderr) {
