@@ -103,7 +103,7 @@ class Docker {
   static getBaseOsSpecificArguments(baseOs, workspace, unitySerial, runnerTemporaryPath, sshAgent): string {
     switch (baseOs) {
       case 'linux':
-        return `--env UNITY_SERIAL
+        return `--env UNITY_SERIAL \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
                 --volume "/var/run/docker.sock":"/var/run/docker.sock" \
                 --volume "${runnerTemporaryPath}/_github_home":"/root" \
@@ -112,7 +112,7 @@ class Docker {
                 ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
                 ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
       case 'win32':
-        return `--env UNITY_SERIAL="${unitySerial} \
+        return `--env UNITY_SERIAL="${unitySerial}" \
                 --volume "${workspace}":"c:/github/workspace" \
                 --volume "c:/regkeys":"c:/regkeys" \
                 --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
