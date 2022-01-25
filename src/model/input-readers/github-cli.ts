@@ -10,6 +10,7 @@ export class GithubCliReader {
         .replace(/\n/g, '');
     } catch (error: any) {
       core.info(error || 'Failed to get github auth token from gh cli');
+      return '';
     }
   }
 }
