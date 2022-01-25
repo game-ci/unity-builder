@@ -82,7 +82,9 @@ export class Caching {
         RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
         assert(`${fs.existsSync(fullDestination)}`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
-        await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationParentFolder}"`);
+        await CloudRunnerSystem.Run(
+          `mv "${path.join(fullDestination, path.basename(destinationFolder))}" "${destinationParentFolder}"`,
+        );
         if (fs.existsSync(destinationFolder)) {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
