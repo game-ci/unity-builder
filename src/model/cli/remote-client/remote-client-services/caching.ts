@@ -34,6 +34,10 @@ export class Caching {
       await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
+
+      if (Input.cloudRunnerTests) {
+        await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      }
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;
