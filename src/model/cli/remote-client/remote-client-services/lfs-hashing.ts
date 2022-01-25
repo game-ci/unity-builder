@@ -31,9 +31,12 @@ export class LFSHashing {
     }
   }
   public static async hashAllFiles(folder: string) {
-    process.chdir(`${folder}`);
-    return await (await CloudRunnerSystem.Run(`find -type f -exec md5sum "{}" + | sort | md5sum`))
+    const startPath = process.cwd();
+    process.chdir(folder);
+    const result = await (await CloudRunnerSystem.Run(`find -type f -exec md5sum "{}" + | sort | md5sum`))
       .replace(/\n/g, '')
       .split(` `)[0];
+    process.chdir(startPath);
+    return result;
   }
 }
