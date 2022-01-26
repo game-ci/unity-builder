@@ -6,12 +6,16 @@ class SetupMac {
   //static unityHubPath = `/Applications/Unity\\\\ Hub.app/Contents/MacOS/Unity\\\\ Hub`;
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
-    const [, changeset] = await getUnityChangeset(buildParameters.version);
-    console.log(changeset);
+    const unityChangeset = await getUnityChangeset(buildParameters.version);
+    console.log('changeset object: ');
+    console.log(unityChangeset);
+    console.log('changeset');
+    console.log(unityChangeset.changeset);
+    console.log('Got here');
     //Since we are using shell scripts on the host, we need to set the environment variables from here
     process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac/`;
     process.env.UNITY_VERSION = buildParameters.version;
-    process.env.UNITY_CHANGESET = changeset;
+    process.env.UNITY_CHANGESET = unityChangeset.changeset;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
     process.env.PROJECT_PATH = buildParameters.projectPath;
     process.env.BUILD_TARGET = buildParameters.platform;
