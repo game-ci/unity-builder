@@ -3,10 +3,10 @@
 #
 # Run steps
 #
-source $SCRIPT_DIRECTORY/steps/setup.sh
-source $SCRIPT_DIRECTORY/steps/activate.sh
-source $SCRIPT_DIRECTORY/steps/build.sh
-source $SCRIPT_DIRECTORY/steps/return_license.sh
+source $GITHUB_ACTION_PATH/platforms/mac/steps/setup.sh
+source $GITHUB_ACTION_PATH/platforms/mac/steps/activate.sh
+source $GITHUB_ACTION_PATH/platforms/mac/steps/build.sh
+source $GITHUB_ACTION_PATH/platforms/mac/steps/return_license.sh
 
 #
 # Instructions for debugging
