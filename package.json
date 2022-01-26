@@ -23,7 +23,8 @@
     "base-64": "^1.0.0",
     "kubernetes-client": "^9.0.0",
     "nanoid": "^3.1.31",
-    "semver": "^7.3.5"
+    "semver": "^7.3.5",
+    "unity-changeset": "^1.6.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",

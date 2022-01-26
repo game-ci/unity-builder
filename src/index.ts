@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, RemoteBuilder } from './model';
+import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 
 async function run() {
@@ -28,8 +29,12 @@ async function run() {
       default:
         core.info('Building locally');
         PlatformSetup.setup(buildParameters);
-        builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-        await Docker.run(builtImage, { workspace, ...buildParameters });
+        if (process.platform === 'darwin') {
+          MacBuilder.run(actionFolder, workspace, buildParameters);
+        } else {
+          builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+          await Docker.run(builtImage, { workspace, ...buildParameters });
+        }
         break;
     }
 

@@ -1,5 +1,5 @@
 import { BuildParameters } from '.';
-import SetupWindows from './platform-setup/setup-windows';
+import { SetupWindows, SetupMac } from './platform-setup/';
 import ValidateWindows from './platform-validation/validate-windows';
 
 class PlatformSetup {
@@ -8,6 +8,9 @@ class PlatformSetup {
       case 'win32':
         ValidateWindows.validate(buildParameters);
         SetupWindows.setup(buildParameters);
+        break;
+      case 'darwin':
+        SetupMac.setup(buildParameters);
         break;
       //Add other baseOS's here
     }

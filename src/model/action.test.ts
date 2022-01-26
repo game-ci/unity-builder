@@ -4,11 +4,15 @@ import Action from './action';
 
 describe('Action', () => {
   describe('compatibility check', () => {
-    it('throws for anything other than linux or windows', () => {
-      if (process.platform !== 'linux' && process.platform !== 'win32') {
-        expect(() => Action.checkCompatibility()).toThrow();
-      } else {
-        expect(() => Action.checkCompatibility()).not.toThrow();
+    it('throws for anything other than linux, windows, or mac', () => {
+      switch (process.platform) {
+        case 'linux':
+        case 'win32':
+        case 'darwin':
+          expect(() => Action.checkCompatibility()).not.toThrow();
+          break;
+        default:
+          expect(() => Action.checkCompatibility()).toThrow();
       }
     });
   });
