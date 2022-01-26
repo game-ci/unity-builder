@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 import { BuildParameters } from '..';
 import { getUnityChangeset } from 'unity-changeset';
 import fs from 'fs';
@@ -30,7 +31,12 @@ class SetupMac {
     CUSTOM_PARAMETERS=${buildParameters.customParameters}
     CHOWN_FILES_TO=${buildParameters.chownFilesTo}`;
     //Since we are using shell scripts on the host, we need to set the environment variables from here
-    fs.writeFileSync(`${process.env.RUNNER_TEMP}/build.env`, environmentContent);
+    try {
+      console.log(`${process.env.RUNNER_TEMP}/build.env`);
+      fs.writeFileSync(`${process.env.RUNNER_TEMP}/build.env`, environmentContent);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
