@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 import { BuildParameters } from '..';
 import { getUnityChangeset } from 'unity-changeset';
 
@@ -6,6 +7,7 @@ class SetupMac {
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const [, changeset] = await getUnityChangeset(buildParameters.version);
+    console.log(changeset);
     //Since we are using shell scripts on the host, we need to set the environment variables from here
     process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac/`;
     process.env.UNITY_VERSION = buildParameters.version;
