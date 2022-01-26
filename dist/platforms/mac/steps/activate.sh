@@ -2,6 +2,9 @@
 
 echo "Requesting activation"
 
+# Make directory for license
+mkdir /Library/Application\ Support/Unity
+
 # Activate license
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile /dev/stdout \
