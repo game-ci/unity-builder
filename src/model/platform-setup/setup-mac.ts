@@ -5,13 +5,13 @@ import fs from 'fs';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
-  public static async setup(buildParameters: BuildParameters, actionFolder: string) {
+  public static async setup(buildParameters: BuildParameters) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
     if (!fs.existsSync(unityEditorPath)) {
       await SetupMac.installUnityHub();
       await SetupMac.installUnity(buildParameters);
     }
-    await SetupMac.setEnvironmentVariables(buildParameters, actionFolder);
+    await SetupMac.setEnvironmentVariables(buildParameters);
   }
 
   private static async installUnityHub(silent = false) {
@@ -22,23 +22,19 @@ class SetupMac {
   }
 
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
-    const changeset = await getUnityChangeset(buildParameters.version).changeset;
+    const unityChangeset = await getUnityChangeset(buildParameters.version);
     const command = `${this.unityHubPath} -- --headless install \
                                           --version ${buildParameters.version} \
-                                          --changeset ${changeset} \
+                                          --changeset ${unityChangeset.changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
     await exec(command, undefined, { silent });
   }
 
-  private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
-    const unityChangeset = await getUnityChangeset(buildParameters.version);
-
+  private static async setEnvironmentVariables(buildParameters: BuildParameters) {
     //Need to set environment variables from here because we execute
     //the scripts on the host for mac
-    process.env.ACTION_FOLDER = actionFolder;
     process.env.UNITY_VERSION = buildParameters.version;
-    process.env.UNITY_CHANGESET = unityChangeset.changeset;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
     process.env.PROJECT_PATH = buildParameters.projectPath;
     process.env.BUILD_TARGET = buildParameters.platform;
