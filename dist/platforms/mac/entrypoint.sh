@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-printenv
+
 #
 # Run steps
 #
 source $SCRIPT_DIRECTORY/steps/setup.sh
-source $SCRIPT_DIRECTORY/platforms/mac/steps/activate.sh
-source $SCRIPT_DIRECTORY/platforms/mac/steps/build.sh
-source $SCRIPT_DIRECTORY/platforms/mac/steps/return_license.sh
+source $SCRIPT_DIRECTORY/steps/activate.sh
+source $SCRIPT_DIRECTORY/steps/build.sh
+source $SCRIPT_DIRECTORY/steps/return_license.sh
 
 #
 # Instructions for debugging
