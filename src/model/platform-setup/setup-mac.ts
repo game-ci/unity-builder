@@ -4,9 +4,10 @@ import { getUnityChangeset } from 'unity-changeset';
 class SetupMac {
   //static unityHubPath = `/Applications/Unity\\\\ Hub.app/Contents/MacOS/Unity\\\\ Hub`;
 
-  public static async setup(buildParameters: BuildParameters) {
+  public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const changeset = await getUnityChangeset(buildParameters.version).changeset;
     //Since we are using shell scripts on the host, we need to set the environment variables from here
+    process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac/`;
     process.env.UNITY_VERSION = buildParameters.version;
     process.env.UNITY_CHANGESET = changeset;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;

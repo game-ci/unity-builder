@@ -3,10 +3,10 @@
 #
 # Run steps
 #
-source /steps/setup.sh
-source /steps/activate.sh
-source /steps/build.sh
-source /steps/return_license.sh
+source $SCRIPT_DIRECTORY/steps/setup.sh
+source $SCRIPT_DIRECTORY/steps/activate.sh
+source $SCRIPT_DIRECTORY/steps/build.sh
+source $SCRIPT_DIRECTORY/steps/return_license.sh
 
 #
 # Instructions for debugging
