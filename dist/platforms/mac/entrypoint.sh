@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
 
 #
+# Create directory for license activation
+#
+
+# Make directory for license
+sudo mkdir /Library/Application\ Support/Unity
+sudo chmod -R 777 /Library/Application\ Support/Unity
+
+#
 # Run steps
 #
-source $ACTION_FOLDER/platforms/mac/steps/setup.sh
-source $ACTION_FOLDER/platforms/mac/steps/activate.sh
-source $ACTION_FOLDER/platforms/mac/steps/build.sh
-source $ACTION_FOLDER/platforms/mac/steps/return_license.sh
+source /steps/activate.sh
+source /steps/build.sh
+source /steps/return_license.sh
+
+#
+# Remove license activation directory
+#
+
+sudo rm -r /Library/Application\ Support/Unity
 
 #
 # Instructions for debugging

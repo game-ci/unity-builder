@@ -3,8 +3,10 @@ import { BuildParameters } from '.';
 
 class MacBuilder {
   public static async run(actionFolder, workspace, buildParameters: BuildParameters, silent = false) {
-    const command = `bash`;
-    await exec(command, [`-x`, `${actionFolder}/platforms/mac/entrypoint.sh`], { silent });
+    await exec('bash', [`${actionFolder}/platforms/mac/entrypoint.sh`], {
+      silent,
+      cwd: `${actionFolder}/platforms/mac`,
+    });
   }
 }
 
