@@ -1,4 +1,3 @@
-/* eslint no-console: "off" */
 import { BuildParameters } from '..';
 import { getUnityChangeset } from 'unity-changeset';
 
@@ -7,11 +6,7 @@ class SetupMac {
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityChangeset = await getUnityChangeset(buildParameters.version);
-    console.log('changeset object: ');
-    console.log(unityChangeset);
-    console.log('changeset');
-    console.log(unityChangeset.changeset);
-    console.log('Got here');
+
     //Since we are using shell scripts on the host, we need to set the environment variables from here
     process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac/`;
     process.env.UNITY_VERSION = buildParameters.version;
@@ -34,29 +29,7 @@ class SetupMac {
     process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
     process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
-    // const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
-    // if (!fs.existsSync(unityEditorPath)) {
-    //   await SetupMac.installUnityHub();
-    //   await SetupMac.installUnity(buildParameters);
-    // }
   }
-
-  // private static async installUnityHub(silent = false) {
-  //   const command = 'brew install unity-hub';
-  //   if (!fs.existsSync(this.unityHubPath)) {
-  //     await exec(command, undefined, { silent });
-  //   }
-  // }
-
-  // private static async installUnity(buildParameters: BuildParameters, silent = false) {
-
-  //   const command = `${this.unityHubPath} -- --headless install
-  //                                         --version ${buildParameters.version}
-  //                                         --changeset ${changeset}
-  //                                         --module mac-il2cpp
-  //                                         --childModules`;
-  //   await exec(command, undefined, { silent });
-  // }
 }
 
 export default SetupMac;
