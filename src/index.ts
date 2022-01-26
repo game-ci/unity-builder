@@ -28,7 +28,7 @@ async function run() {
       // default and local case
       default:
         core.info('Building locally');
-        PlatformSetup.setup(buildParameters, actionFolder);
+        await PlatformSetup.setup(buildParameters, actionFolder);
         if (process.platform === 'darwin') {
           MacBuilder.run(actionFolder, workspace, buildParameters);
         } else {

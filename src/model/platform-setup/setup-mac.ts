@@ -30,8 +30,11 @@ class SetupMac {
     ANDROID_SDK_MANAGER_PARAMETERS=${buildParameters.androidSdkManagerParameters}
     CUSTOM_PARAMETERS=${buildParameters.customParameters}
     CHOWN_FILES_TO=${buildParameters.chownFilesTo}`;
+    process.env.RANDOM_VARIABLE = 'Hi there';
+
     //Since we are using shell scripts on the host, we need to set the environment variables from here
     try {
+      console.log(environmentContent);
       console.log(`${process.env.RUNNER_TEMP}/build.env`);
       fs.writeFileSync(`${process.env.RUNNER_TEMP}/build.env`, environmentContent);
       console.log('Wrote file');

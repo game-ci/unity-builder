@@ -10,7 +10,7 @@ class PlatformSetup {
         SetupWindows.setup(buildParameters);
         break;
       case 'darwin':
-        SetupMac.setup(buildParameters, actionFolder);
+        await SetupMac.setup(buildParameters, actionFolder);
         break;
       //Add other baseOS's here
     }
