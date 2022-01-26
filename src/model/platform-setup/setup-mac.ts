@@ -4,7 +4,7 @@ import { exec } from '@actions/exec';
 import fs from 'fs';
 
 class SetupMac {
-  static unityHubPath = '/Applications/Unity\\ Hub.app/Contents/MacOS/Unity\\ Hub';
+  static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
     if (!fs.existsSync(unityEditorPath)) {
@@ -41,7 +41,7 @@ class SetupMac {
   private static async installUnityHub(silent = false) {
     const command = 'brew install unity-hub';
     if (!fs.existsSync(this.unityHubPath)) {
-      await exec(command, [], { silent });
+      await exec(command, undefined, { silent });
     }
   }
 
@@ -52,7 +52,7 @@ class SetupMac {
                                           --changeset ${changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
-    await exec(command, [], { silent });
+    await exec(command, undefined, { silent });
   }
 }
 
