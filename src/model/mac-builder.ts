@@ -6,6 +6,7 @@ class MacBuilder {
     await exec('bash', [`${actionFolder}/platforms/mac/entrypoint.sh`], {
       silent,
       cwd: `${actionFolder}/platforms/mac`,
+      ignoreReturnCode: true,
     });
   }
 }

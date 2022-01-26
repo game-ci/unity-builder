@@ -17,7 +17,7 @@ class SetupMac {
   private static async installUnityHub(silent = false) {
     const command = 'brew install unity-hub';
     if (!fs.existsSync(this.unityHubPath)) {
-      await exec(command, undefined, { silent });
+      await exec(command, undefined, { silent, ignoreReturnCode: true });
     }
   }
 
@@ -28,7 +28,10 @@ class SetupMac {
                                           --changeset ${unityChangeset.changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
-    await exec(command, undefined, { silent });
+    const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
+    if (errorCode) {
+      throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+    }
   }
 
   private static async setEnvironmentVariables(buildParameters: BuildParameters) {
