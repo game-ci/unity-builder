@@ -34,6 +34,8 @@ class SetupMac {
     try {
       console.log(`${process.env.RUNNER_TEMP}/build.env`);
       fs.writeFileSync(`${process.env.RUNNER_TEMP}/build.env`, environmentContent);
+      console.log('Wrote file');
+      console.log(fs.readFileSync(`${process.env.RUNNER_TEMP}/build.env`));
     } catch (error) {
       console.log(error);
     }
