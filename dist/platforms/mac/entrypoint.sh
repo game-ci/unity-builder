@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-# Set environment variables for the build
-set -o allexport; source $RUNNER_TEMP/build.env; set +o allexport;
 printenv
 #
 # Run steps

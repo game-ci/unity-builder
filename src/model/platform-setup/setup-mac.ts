@@ -1,47 +1,33 @@
-/* eslint no-console: "off" */
 import { BuildParameters } from '..';
 import { getUnityChangeset } from 'unity-changeset';
-import fs from 'fs';
 
 class SetupMac {
-  //static unityHubPath = `/Applications/Unity\\\\ Hub.app/Contents/MacOS/Unity\\\\ Hub`;
-
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityChangeset = await getUnityChangeset(buildParameters.version);
 
-    const environmentContent = `SCRIPT_DIRECTORY=${actionFolder}/platforms/mac/
-    UNITY_VERSION=${buildParameters.version}
-    UNITY_CHANGESET=${unityChangeset.changeset}
-    UNITY_SERIAL=${buildParameters.unitySerial}
-    PROJECT_PATH=${buildParameters.projectPath}
-    BUILD_TARGET=${buildParameters.platform}
-    BUILD_NAME=${buildParameters.buildName}
-    BUILD_PATH=${buildParameters.buildPath}
-    BUILD_FILE=${buildParameters.buildFile}
-    BUILD_METHOD=${buildParameters.buildMethod}
-    VERSION=${buildParameters.buildVersion}
-    ANDROID_VERSION_CODE=${buildParameters.androidVersionCode}
-    ANDROID_KEYSTORE_NAME=${buildParameters.androidKeystoreName}
-    ANDROID_KEYSTORE_BASE64=${buildParameters.androidKeystoreBase64}
-    ANDROID_KEYSTORE_PASS=${buildParameters.androidKeystorePass}
-    ANDROID_KEYALIAS_NAME=${buildParameters.androidKeyaliasName}
-    ANDROID_KEYALIAS_PASS=${buildParameters.androidKeyaliasPass}
-    ANDROID_TARGET_SDK_VERSION=${buildParameters.androidTargetSdkVersion}
-    ANDROID_SDK_MANAGER_PARAMETERS=${buildParameters.androidSdkManagerParameters}
-    CUSTOM_PARAMETERS=${buildParameters.customParameters}
-    CHOWN_FILES_TO=${buildParameters.chownFilesTo}`;
-    process.env.RANDOM_VARIABLE = 'Hi there';
-
-    //Since we are using shell scripts on the host, we need to set the environment variables from here
-    try {
-      console.log(environmentContent);
-      console.log(`${process.env.RUNNER_TEMP}/build.env`);
-      fs.writeFileSync(`${process.env.RUNNER_TEMP}/build.env`, environmentContent);
-      console.log('Wrote file');
-      console.log(fs.readFileSync(`${process.env.RUNNER_TEMP}/build.env`));
-    } catch (error) {
-      console.log(error);
-    }
+    //Need to set environment variables from here because we execute
+    //the scripts on the host for mac
+    process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac/`;
+    process.env.UNITY_VERSION = buildParameters.version;
+    process.env.UNITY_CHANGESET = unityChangeset.changeset;
+    process.env.UNITY_SERIAL = buildParameters.unitySerial;
+    process.env.PROJECT_PATH = buildParameters.projectPath;
+    process.env.BUILD_TARGET = buildParameters.platform;
+    process.env.BUILD_NAME = buildParameters.buildName;
+    process.env.BUILD_PATH = buildParameters.buildPath;
+    process.env.BUILD_FILE = buildParameters.buildFile;
+    process.env.BUILD_METHOD = buildParameters.buildMethod;
+    process.env.VERSION = buildParameters.buildVersion;
+    process.env.ANDROID_VERSION_CODE = buildParameters.androidVersionCode;
+    process.env.ANDROID_KEYSTORE_NAME = buildParameters.androidKeystoreName;
+    process.env.ANDROID_KEYSTORE_BASE64 = buildParameters.androidKeystoreBase64;
+    process.env.ANDROID_KEYSTORE_PASS = buildParameters.androidKeystorePass;
+    process.env.ANDROID_KEYALIAS_NAME = buildParameters.androidKeyaliasName;
+    process.env.ANDROID_KEYALIAS_PASS = buildParameters.androidKeyaliasPass;
+    process.env.ANDROID_TARGET_SDK_VERSION = buildParameters.androidTargetSdkVersion;
+    process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
+    process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
+    process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
   }
 }
 
