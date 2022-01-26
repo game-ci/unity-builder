@@ -1,4 +1,4 @@
-name: Windows Builds
+name: Mac Builds
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
 jobs:
   buildForAllPlatformsWindows:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
-    runs-on: windows-2019
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -20,10 +20,7 @@ jobs:
         unityVersion:
           - 2020.3.24f1
         targetPlatform:
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneWindows # Build a Windows 32-bit standalone.
-          - WSAPlayer # Build a UWP App
-          - tvOS # Build an Apple TV XCode project
+          - StandaloneOSX # Build a MacOS executable
 
     steps:
       ###########################
