@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-pwd
-
 #
 # Create directory for license activation
 #
@@ -12,9 +10,9 @@ sudo chmod -R 777 /Library/Application\ Support/Unity
 #
 # Run steps
 #
-source /steps/activate.sh
-source /steps/build.sh
-source /steps/return_license.sh
+source ./steps/activate.sh
+source ./steps/build.sh
+source ./steps/return_license.sh
 
 #
 # Remove license activation directory
