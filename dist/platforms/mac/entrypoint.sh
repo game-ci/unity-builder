@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
+pwd
+
 #
 # Create directory for license activation
 #
 
-# Make directory for license
 sudo mkdir /Library/Application\ Support/Unity
 sudo chmod -R 777 /Library/Application\ Support/Unity
 
