@@ -4,7 +4,7 @@ import { BuildParameters } from '..';
 import { getUnityChangeset } from 'unity-changeset';
 
 class SetupMac {
-  static unityHubPath = `/Applications/Unity\\ Hub.app/Contents/MacOS/Unity\\ Hub`;
+  static unityHubPath = `/Applications/Unity\\\\ Hub.app/Contents/MacOS/Unity\\\\ Hub`;
 
   public static async setup(buildParameters: BuildParameters) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
