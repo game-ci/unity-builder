@@ -3,10 +3,10 @@
 #
 # Run steps
 #
-source $SCRIPT_DIRECTORY/steps/setup.sh
-source $SCRIPT_DIRECTORY/steps/activate.sh
-source $SCRIPT_DIRECTORY/steps/build.sh
-source $SCRIPT_DIRECTORY/steps/return_license.sh
+source $ACTION_FOLDER/platforms/mac/steps/setup.sh
+source $ACTION_FOLDER/platforms/mac/steps/activate.sh
+source $ACTION_FOLDER/platforms/mac/steps/build.sh
+source $ACTION_FOLDER/platforms/mac/steps/return_license.sh
 
 #
 # Instructions for debugging

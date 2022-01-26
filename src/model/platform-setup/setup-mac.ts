@@ -7,7 +7,7 @@ class SetupMac {
 
     //Need to set environment variables from here because we execute
     //the scripts on the host for mac
-    process.env.SCRIPT_DIRECTORY = `${actionFolder}/platforms/mac`;
+    process.env.ACTION_FOLDER = actionFolder;
     process.env.UNITY_VERSION = buildParameters.version;
     process.env.UNITY_CHANGESET = unityChangeset.changeset;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;

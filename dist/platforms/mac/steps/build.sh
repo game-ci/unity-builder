@@ -48,7 +48,7 @@ if [ -z "$BUILD_METHOD" ]; then
   # Create Editor directory if it does not exist
   mkdir -p "$UNITY_PROJECT_PATH/Assets/Editor/"
   # Copy the build script of Unity Builder action
-  cp -R "/UnityBuilderAction/Assets/Editor/" "$UNITY_PROJECT_PATH/Assets/Editor/"
+  cp -R "$ACTION_FOLDER/default-build-script/Assets/Editor/" "$UNITY_PROJECT_PATH/Assets/Editor/"
   # Set the Build method to that of UnityBuilder Action
   BUILD_METHOD="UnityBuilderAction.Builder.BuildProject"
   # Verify recursive paths
