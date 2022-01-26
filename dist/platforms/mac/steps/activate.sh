@@ -5,6 +5,8 @@ echo "Requesting activation"
 # Activate license
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile /dev/stdout \
+  -batchmode \
+  -nographics \
   -quit \
   -serial "$UNITY_SERIAL" \
   -username "$UNITY_EMAIL" \

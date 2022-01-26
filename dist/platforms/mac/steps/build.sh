@@ -128,6 +128,8 @@ echo ""
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logfile /dev/stdout \
   -quit \
+  -batchmode \
+  -nographics \
   -customBuildName "$BUILD_NAME" \
   -projectPath "$UNITY_PROJECT_PATH" \
   -buildTarget "$BUILD_TARGET" \

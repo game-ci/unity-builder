@@ -2,5 +2,7 @@
 
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile /dev/stdout \
+  -batchmode \
+  -nographics \
   -quit \
   -returnlicense
