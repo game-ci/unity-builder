@@ -1,3 +1,10 @@
+#
+# Create directory for license activation
+#
+
+ACTIVATE_LICENSE_PATH="$($Env:GITHUB_WORKSPACE)/_activate-license"
+mkdir $ACTIVATE_LICENSE_PATH
+
 # Activate Unity
 & "c:\steps\activate.ps1"
 
@@ -13,3 +20,9 @@ regsvr32 C:\ProgramData\Microsoft\VisualStudio\Setup\x64\Microsoft.VisualStudio.
 
 # Free the seat for the activated license
 & "c:\steps\return_license.ps1"
+
+#
+# Remove license activation directory
+#
+
+Remove-Item -Path $ACTIVATE_LICENSE_PATH -Recurse
