@@ -7,6 +7,7 @@ class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
   public static async setup(buildParameters: BuildParameters) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
+    await exec('pwd');
     if (!fs.existsSync(unityEditorPath)) {
       await SetupMac.installUnityHub();
       await SetupMac.installUnity(buildParameters);
