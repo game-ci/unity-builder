@@ -7,7 +7,7 @@
 sudo mkdir /Library/Application\ Support/Unity
 sudo chmod -R 777 /Library/Application\ Support/Unity
 
-ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license"
+ACTIVATE_LICENSE_PATH="$ACTION_FOLDER/BlankProject"
 mkdir -p "$ACTIVATE_LICENSE_PATH"
 
 #
