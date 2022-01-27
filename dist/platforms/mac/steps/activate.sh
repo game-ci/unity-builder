@@ -14,7 +14,8 @@ echo "Requesting activation"
   -quit \
   -serial "$UNITY_SERIAL" \
   -username "$UNITY_EMAIL" \
-  -password "$UNITY_PASSWORD"
+  -password "$UNITY_PASSWORD" \
+  -projectPath "$ACTIVATE_LICENSE_PATH"
 
 # Store the exit code from the verify command
 UNITY_EXIT_CODE=$?

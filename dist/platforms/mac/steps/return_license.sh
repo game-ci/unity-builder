@@ -9,7 +9,8 @@ pushd "$ACTIVATE_LICENSE_PATH"
   -batchmode \
   -nographics \
   -quit \
-  -returnlicense
+  -returnlicense \
+  -projectPath "$ACTIVATE_LICENSE_PATH"
 
 # Return to previous working directory
 popd
