@@ -86,7 +86,6 @@ class Docker {
     --env GITHUB_HEAD_REF \
     --env GITHUB_BASE_REF \
     --env GITHUB_EVENT_NAME \
-    --env GITHUB_WORKSPACE=/github/workspace \
     --env GITHUB_ACTION \
     --env GITHUB_EVENT_PATH \
     --env RUNNER_OS \
@@ -104,6 +103,7 @@ class Docker {
     switch (baseOs) {
       case 'linux':
         return `--env UNITY_SERIAL \
+                --env GITHUB_WORKSPACE=/github/workspace \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
                 --volume "/var/run/docker.sock":"/var/run/docker.sock" \
                 --volume "${runnerTemporaryPath}/_github_home":"/root" \
@@ -113,6 +113,7 @@ class Docker {
                 ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
       case 'win32':
         return `--env UNITY_SERIAL="${unitySerial}" \
+                --env GITHUB_WORKSPACE=c:/github/workspace \
                 --volume "${workspace}":"c:/github/workspace" \
                 --volume "c:/regkeys":"c:/regkeys" \
                 --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
