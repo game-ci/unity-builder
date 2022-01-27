@@ -2,9 +2,6 @@
 
 echo "Requesting activation"
 
-# Need this because it tries to initialize the library when activating
-UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
-
 # Activate license
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile /dev/stdout \
@@ -13,8 +10,7 @@ UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
   -quit \
   -serial "$UNITY_SERIAL" \
   -username "$UNITY_EMAIL" \
-  -password "$UNITY_PASSWORD" \
-  -projectPath "$UNITY_PROJECT_PATH"
+  -password "$UNITY_PASSWORD"
 
 # Store the exit code from the verify command
 UNITY_EXIT_CODE=$?

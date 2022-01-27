@@ -8,5 +8,4 @@ UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
   -batchmode \
   -nographics \
   -quit \
-  -returnlicense \
-  -projectPath "$UNITY_PROJECT_PATH"
+  -returnlicense
