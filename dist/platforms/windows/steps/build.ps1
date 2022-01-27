@@ -34,13 +34,13 @@ $Env:CUSTOM_BUILD_PATH="$Env:BUILD_PATH_FULL\$Env:BUILD_FILE"
 #
 # The method must be declared static and placed in project/Assets/Editor
 #
-if ($Env:BUILD_METHOD) 
+if ($Env:BUILD_METHOD)
 {
     # User has provided their own build method.
     # Assume they also bring their own script.
     Write-Output "$('Using build method "')$($Env:BUILD_METHOD)$('".')"
-} 
-else 
+}
+else
 {
     # User has not provided their own build command.
     #
@@ -63,7 +63,7 @@ else
     $Env:BUILD_METHOD="UnityBuilderAction.Builder.BuildProject"
 
     # Verify recursive paths
-    Get-ChildItem -Path $UNITY_PROJECT_PATH\Assets\Editor -Recurse
+    Get-ChildItem -Path $Env:UNITY_PROJECT_PATH\Assets\Editor -Recurse
 }
 
 #
@@ -85,7 +85,7 @@ Write-Output "###########################"
 Write-Output ""
 
 Write-Output "$('Creating "')$($Env:BUILD_PATH_FULL)$('" if it does not exist.')"
-if (-Not (Test-Path -Path $Env:BUILD_PATH_FULL)) 
+if (-Not (Test-Path -Path $Env:BUILD_PATH_FULL))
 {
     mkdir "$Env:BUILD_PATH_FULL"
 }
@@ -123,10 +123,10 @@ Write-Output ""
 $Env:BUILD_EXIT_CODE=$?
 
 # Display results
-if ($Env:BUILD_EXIT_CODE -eq 0) 
+if ($Env:BUILD_EXIT_CODE -eq 0)
 {
     Write-Output "Build Succeeded!"
-} else 
+} else
 {
     Write-Output "$('Build failed, with exit code ')$($Env:BUILD_EXIT_CODE)$('"')"
 }
