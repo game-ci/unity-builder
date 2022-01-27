@@ -46,7 +46,7 @@ jobs:
       ###########################
       - name: Set Scripting Backend To il2cpp
         run: |
-          Move-Item -Path "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" -Destination "./test-project/ProjectSettings/ProjectSettings.asset" -Force
+          mv -f "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" "./test-project/ProjectSettings/ProjectSettings.asset"
 
       ###########################
       #          Build          #
