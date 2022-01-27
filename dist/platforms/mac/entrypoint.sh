@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
 
 #
-# Create directory for license activation
+# Create directories for license activation
 #
 
 sudo mkdir /Library/Application\ Support/Unity
 sudo chmod -R 777 /Library/Application\ Support/Unity
 
+ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license"
+mkdir -p "$ACTIVATE_LICENSE_PATH"
+
 #
 # Run steps
 #
-source ./steps/activate.sh
-source ./steps/build.sh
-source ./steps/return_license.sh
+source $ACTION_FOLDER/platforms/mac/steps/activate.sh
+source $ACTION_FOLDER/platforms/mac/steps/build.sh
+source $ACTION_FOLDER/platforms/mac/steps/return_license.sh
 
 #
 # Remove license activation directory
 #
 
 sudo rm -r /Library/Application\ Support/Unity
+rm -r "$ACTIVATE_LICENSE_PATH"
 
 #
 # Instructions for debugging

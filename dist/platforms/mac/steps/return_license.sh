@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Need this because it tries to initialize the library when deactivating
-UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
+# Run in ACTIVATE_LICENSE_PATH directory
+echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
+pushd "$ACTIVATE_LICENSE_PATH"
 
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile /dev/stdout \
@@ -9,3 +10,6 @@ UNITY_PROJECT_PATH="$GITHUB_WORKSPACE/$PROJECT_PATH"
   -nographics \
   -quit \
   -returnlicense
+
+# Return to previous working directory
+popd

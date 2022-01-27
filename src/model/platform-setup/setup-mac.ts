@@ -5,20 +5,28 @@ import fs from 'fs';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
-  public static async setup(buildParameters: BuildParameters) {
+
+  public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
-    await exec('pwd');
+
+    // Only install unity if the editor doesn't already exist
     if (!fs.existsSync(unityEditorPath)) {
       await SetupMac.installUnityHub();
       await SetupMac.installUnity(buildParameters);
     }
-    await SetupMac.setEnvironmentVariables(buildParameters);
+
+    await SetupMac.setEnvironmentVariables(buildParameters, actionFolder);
   }
 
   private static async installUnityHub(silent = false) {
     const command = 'brew install unity-hub';
     if (!fs.existsSync(this.unityHubPath)) {
-      await exec(command, undefined, { silent, ignoreReturnCode: true });
+      //Ignoring return code because the log seems to overflow the internal buffer which triggers
+      //a false error
+      const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
+      if (errorCode) {
+        throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+      }
     }
   }
 
@@ -29,15 +37,19 @@ class SetupMac {
                                           --changeset ${unityChangeset.changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
+
+    //Ignoring return code because the log seems to overflow the internal buffer which triggers
+    //a false error
     const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }
   }
 
-  private static async setEnvironmentVariables(buildParameters: BuildParameters) {
+  private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
     //Need to set environment variables from here because we execute
     //the scripts on the host for mac
+    process.env.ACTION_FOLDER = actionFolder;
     process.env.UNITY_VERSION = buildParameters.version;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
     process.env.PROJECT_PATH = buildParameters.projectPath;

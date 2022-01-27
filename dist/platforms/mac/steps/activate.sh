@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Run in ACTIVATE_LICENSE_PATH directory
+echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
+pushd "$ACTIVATE_LICENSE_PATH"
+
 echo "Requesting activation"
 
 # Activate license
