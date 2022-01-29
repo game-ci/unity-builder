@@ -39,12 +39,14 @@ namespace UnityBuilderAction
 
       // Set version for this build
       VersionApplicator.SetVersion(options["buildVersion"]);
-      VersionApplicator.SetAndroidVersionCode(options["androidVersionCode"]);
       
       // Apply Android settings
       if (buildPlayerOptions.target == BuildTarget.Android)
+      {
+        VersionApplicator.SetAndroidVersionCode(options["androidVersionCode"]);
         AndroidSettings.Apply(options);
-
+      }
+      
       // Execute default AddressableAsset content build, if the package is installed.
       // Version defines would be the best solution here, but Unity 2018 doesn't support that,
       // so we fall back to using reflection instead.

@@ -2,7 +2,7 @@ import path from 'path';
 
 class Action {
   static get supportedPlatforms() {
-    return ['linux'];
+    return ['linux', 'win32'];
   }
 
   static get isRunningLocally() {
@@ -30,7 +30,15 @@ class Action {
   }
 
   static get dockerfile() {
-    return `${Action.actionFolder}/Dockerfile`;
+    const currentPlatform = process.platform;
+    switch (currentPlatform) {
+      case 'linux':
+        return `${Action.actionFolder}/platforms/ubuntu/Dockerfile`;
+      case 'win32':
+        return `${Action.actionFolder}/platforms/windows/Dockerfile`;
+      default:
+        throw new Error(`No Dockerfile for currently unsupported platform: ${currentPlatform}`);
+    }
   }
 
   static get workspace() {
