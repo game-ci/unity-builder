@@ -7,6 +7,8 @@ import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
 import { RemoteClientLogger } from './remote-client/remote-client-services/remote-client-logger';
 import { CloudRunnerState } from '../cloud-runner/state/cloud-runner-state';
 import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
+import * as SDK from 'aws-sdk';
+
 export class CLI {
   static async RunCli(options: any): Promise<void> {
     Input.githubInputEnabled = false;
@@ -74,4 +76,13 @@ export class CLI {
 
   @CliFunction(`cach-pull`, `pull from cache`)
   static async cachePull() {}
+
+  @CliFunction(`garbage-collect-aws`, `garbage collect aws`)
+  static async garbageCollectAws() {
+    process.env.AWS_REGION = Input.region;
+    const CF = new SDK.CloudFormation();
+
+    const stacks = await CF.listStacks().promise();
+    CloudRunnerLogger.log(JSON.stringify(stacks, undefined, 4));
+  }
 }

@@ -87,6 +87,9 @@ export class Caching {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
         fs.renameSync(path.resolve(destinationParentFolder, resultsFolder), destinationFolder);
+        if (Input.cloudRunnerTests) {
+          await CloudRunnerSystem.Run(`tree ${destinationParentFolder}`);
+        }
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
