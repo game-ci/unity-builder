@@ -74,19 +74,20 @@ export class Caching {
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
-        const fullDestination = path.join(cacheFolder, resultsFolder);
+        const fullResultsFolder = path.join(cacheFolder, resultsFolder);
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
         }
         await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
-        RemoteClientLogger.log(`cache item extracted to ${fullDestination}`);
-        assert(`${fs.existsSync(fullDestination)}`);
+        RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
+        assert(`${fs.existsSync(fullResultsFolder)}`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
-        await CloudRunnerSystem.Run(`mv "${fullDestination}" "${destinationParentFolder}"`);
         if (fs.existsSync(destinationFolder)) {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
-        fs.renameSync(path.resolve(destinationParentFolder, resultsFolder), destinationFolder);
+        await CloudRunnerSystem.Run(
+          `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
+        );
         if (Input.cloudRunnerTests) {
           await CloudRunnerSystem.Run(`tree ${destinationParentFolder}`);
         }
