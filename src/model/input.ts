@@ -161,11 +161,7 @@ class Input {
   }
 
   static async githubToken() {
-    return (
-      Input.getInput('githubToken') ||
-      (Input.cloudRunnerCluster !== '' ? await GithubCliReader.GetGitHubAuthToken() : '') ||
-      ''
-    );
+    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 
   static async gitPrivateToken() {

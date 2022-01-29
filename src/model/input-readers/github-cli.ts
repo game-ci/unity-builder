@@ -4,8 +4,11 @@ import * as core from '@actions/core';
 export class GithubCliReader {
   static async GetGitHubAuthToken() {
     try {
-      // eslint-disable-next-line github/no-then
-      return ((await CloudRunnerSystem.Run(`gh auth status -t`).catch(() => {})) || '')
+      const authStatus = await CloudRunnerSystem.Run(`gh auth status`, true);
+      if (authStatus.includes('You are not logged') || authStatus === '') {
+        return '';
+      }
+      return (await CloudRunnerSystem.Run(`gh auth status -t`))
         .split(`Token: `)[1]
         .replace(/ /g, '')
         .replace(/\n/g, '');

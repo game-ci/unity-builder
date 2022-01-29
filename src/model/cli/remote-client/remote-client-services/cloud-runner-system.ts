@@ -2,14 +2,14 @@ import { exec } from 'child_process';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class CloudRunnerSystem {
-  public static async Run(command: string) {
+  public static async Run(command: string, suppressError = false) {
     for (const element of command.split(`\n`)) {
       RemoteClientLogger.log(element);
     }
     return await new Promise<string>((promise) => {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {
-        if (error) {
+        if (error && !suppressError) {
           throw error;
         }
         if (stderr) {
@@ -23,7 +23,7 @@ export class CloudRunnerSystem {
       });
       child.on('close', function (code) {
         RemoteClientLogger.log(`[Exit code ${code}]`);
-        if (code !== 0) {
+        if (code !== 0 && !suppressError) {
           throw new Error(output);
         }
         const outputLines = output.split(`\n`);
