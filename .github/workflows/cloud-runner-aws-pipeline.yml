@@ -88,6 +88,7 @@ jobs:
                 ls /data/cache/$BRANCH
                 echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE"
                 aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/build-$BUILD_GUID.zip
+                aws s3 cp /data/cache/$BRANCH s3://game-ci-test-storage/$BRANCH/$BUILD_GUID
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
