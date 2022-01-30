@@ -180,15 +180,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     CloudRunnerLogger.log(`deleting PVC`);
-    const deletePvcPromise = this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-    const awaitTimeout = (delay, reason) =>
-      new Promise<void>((resolve, reject) =>
-        setTimeout(() => (reason === undefined ? resolve() : reject(reason)), delay),
-      );
-
-    const wrapPromise = (promise, delay, reason) => Promise.race([promise, awaitTimeout(delay, reason)]);
-    // eslint-disable-next-line unicorn/no-useless-undefined
-    await wrapPromise(deletePvcPromise, 15000, undefined);
+    this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
   }
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
     const namespacedPods = await kubeClient.listNamespacedPod(namespace);
