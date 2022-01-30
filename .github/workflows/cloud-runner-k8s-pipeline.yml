@@ -82,6 +82,7 @@ jobs:
       - name: Cloud Runner Build Test
         uses: ./
         id: k8s-unity-build
+        timeout-minutes: 30
         with:
           cloudRunnerCluster: k8s
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
