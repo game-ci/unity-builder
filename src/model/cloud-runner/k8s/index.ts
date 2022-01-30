@@ -95,9 +95,8 @@ class Kubernetes implements CloudRunnerProviderInterface {
       );
 
       //run
-      CloudRunnerLogger.log('Creating build job');
-      this.jobName =
-        (await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec)).body.metadata?.name || this.jobName;
+      const jobResult = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+      CloudRunnerLogger.log(`Creating build job ${JSON.stringify(jobResult, undefined, 4)}`);
 
       await new Promise((promise) => setTimeout(promise, 5000));
       CloudRunnerLogger.log('Job created');
@@ -145,19 +144,21 @@ class Kubernetes implements CloudRunnerProviderInterface {
   async cleanupTaskResources() {
     CloudRunnerLogger.log('cleaning up');
     try {
+      await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
+      await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
+      await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    } catch (error) {
+      CloudRunnerLogger.log('Failed to cleanup, error:');
+      core.error(JSON.stringify(error, undefined, 4));
+      CloudRunnerLogger.log('Abandoning cleanup, build error:');
+      throw error;
+    }
+    try {
       await waitUntil(
         async () => {
-          try {
-            await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
-            await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-          } catch (error) {
-            CloudRunnerLogger.log('Failed to cleanup, error:');
-            core.error(JSON.stringify(error, undefined, 4));
-            CloudRunnerLogger.log('Abandoning cleanup, build error:');
-            throw error;
-          }
           const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
-          return jobBody === null || jobBody.status?.active === 0;
+          const podname = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+          return (jobBody === null || jobBody.status?.active === 0) && podname === null;
         },
         {
           timeout: 500000,
