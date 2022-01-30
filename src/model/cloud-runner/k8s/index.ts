@@ -147,6 +147,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+      await new Promise((promise) => setTimeout(promise, 5000));
     } catch (error) {
       CloudRunnerLogger.log('Failed to cleanup, error:');
       core.error(JSON.stringify(error, undefined, 4));
