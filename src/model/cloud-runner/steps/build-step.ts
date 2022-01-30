@@ -34,9 +34,11 @@ export class BuildStep implements StepInterface {
           .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
           .replace(/\\/g, `/`)}" "/UnityBuilderAction"
         cp -r "${path
-          .join(CloudRunnerState.builderPathFull, 'dist', 'entrypoint.sh')
+          .join(CloudRunnerState.builderPathFull, 'dist', 'platforms', 'ubuntu', 'entrypoint.sh')
           .replace(/\\/g, `/`)}" "/entrypoint.sh"
-        cp -r "${path.join(CloudRunnerState.builderPathFull, 'dist', 'steps').replace(/\\/g, `/`)}" "/steps"
+        cp -r "${path
+          .join(CloudRunnerState.builderPathFull, 'dist', 'platforms', 'ubuntu', 'steps')
+          .replace(/\\/g, `/`)}" "/steps"
         chmod -R +x "/entrypoint.sh"
         chmod -R +x "/steps"
         /entrypoint.sh
