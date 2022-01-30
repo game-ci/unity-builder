@@ -59,6 +59,7 @@ class CloudRunner {
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
+      CloudRunnerLogger.log(`Cleanup complete`);
       core.endGroup();
       return output;
     } catch (error) {
