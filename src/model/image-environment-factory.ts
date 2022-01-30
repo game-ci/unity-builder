@@ -1,3 +1,4 @@
+import BuildParameters from './build-parameters';
 import { ReadLicense } from './input-readers/test-license-reader';
 
 class Parameter {
@@ -21,50 +22,30 @@ class ImageEnvironmentFactory {
     }
     return string;
   }
-  public static getEnvironmentVariables(parameters) {
-    const {
-      version,
-      platform,
-      projectPath,
-      buildName,
-      buildPath,
-      buildFile,
-      buildMethod,
-      buildVersion,
-      androidVersionCode,
-      androidKeystoreName,
-      androidKeystoreBase64,
-      androidKeystorePass,
-      androidKeyaliasName,
-      androidKeyaliasPass,
-      customParameters,
-      sshAgent,
-      chownFilesTo,
-    } = parameters;
-
+  public static getEnvironmentVariables(parameters: BuildParameters) {
     const environmentVariables: Parameter[] = [
       { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: process.env.UNITY_LICENSE_FILE },
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
       { name: 'UNITY_PASSWORD', value: process.env.UNITY_PASSWORD },
-      { name: 'UNITY_SERIAL', value: process.env.UNITY_SERIAL },
-      { name: 'UNITY_VERSION', value: version },
+      { name: 'UNITY_SERIAL', value: parameters.unitySerial },
+      { name: 'UNITY_VERSION', value: parameters.version },
       { name: 'USYM_UPLOAD_AUTH_TOKEN', value: process.env.USYM_UPLOAD_AUTH_TOKEN },
-      { name: 'PROJECT_PATH', value: projectPath },
-      { name: 'BUILD_TARGET', value: platform },
-      { name: 'BUILD_NAME', value: buildName },
-      { name: 'BUILD_PATH', value: buildPath },
-      { name: 'BUILD_FILE', value: buildFile },
-      { name: 'BUILD_METHOD', value: buildMethod },
-      { name: 'VERSION', value: buildVersion },
-      { name: 'ANDROID_VERSION_CODE', value: androidVersionCode },
-      { name: 'ANDROID_KEYSTORE_NAME', value: androidKeystoreName },
-      { name: 'ANDROID_KEYSTORE_BASE64', value: androidKeystoreBase64 },
-      { name: 'ANDROID_KEYSTORE_PASS', value: androidKeystorePass },
-      { name: 'ANDROID_KEYALIAS_NAME', value: androidKeyaliasName },
-      { name: 'ANDROID_KEYALIAS_PASS', value: androidKeyaliasPass },
-      { name: 'CUSTOM_PARAMETERS', value: customParameters },
-      { name: 'CHOWN_FILES_TO', value: chownFilesTo },
+      { name: 'PROJECT_PATH', value: parameters.projectPath },
+      { name: 'BUILD_TARGET', value: parameters.platform },
+      { name: 'BUILD_NAME', value: parameters.buildName },
+      { name: 'BUILD_PATH', value: parameters.buildPath },
+      { name: 'BUILD_FILE', value: parameters.buildFile },
+      { name: 'BUILD_METHOD', value: parameters.buildMethod },
+      { name: 'VERSION', value: parameters.buildVersion },
+      { name: 'ANDROID_VERSION_CODE', value: parameters.androidVersionCode },
+      { name: 'ANDROID_KEYSTORE_NAME', value: parameters.androidKeystoreName },
+      { name: 'ANDROID_KEYSTORE_BASE64', value: parameters.androidKeystoreBase64 },
+      { name: 'ANDROID_KEYSTORE_PASS', value: parameters.androidKeystorePass },
+      { name: 'ANDROID_KEYALIAS_NAME', value: parameters.androidKeyaliasName },
+      { name: 'ANDROID_KEYALIAS_PASS', value: parameters.androidKeyaliasPass },
+      { name: 'CUSTOM_PARAMETERS', value: parameters.customParameters },
+      { name: 'CHOWN_FILES_TO', value: parameters.chownFilesTo },
       { name: 'GITHUB_REF', value: process.env.GITHUB_REF },
       { name: 'GITHUB_SHA', value: process.env.GITHUB_SHA },
       { name: 'GITHUB_REPOSITORY', value: process.env.GITHUB_REPOSITORY },
@@ -81,7 +62,7 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
-    if (sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
+    if (parameters.sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
     return environmentVariables;
   }
 }
