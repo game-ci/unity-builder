@@ -143,17 +143,20 @@ class Kubernetes implements CloudRunnerProviderInterface {
   async cleanupTaskResources() {
     CloudRunnerLogger.log('cleaning up');
     try {
-      await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
-      await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-    } catch (error) {
-      CloudRunnerLogger.log('Failed to cleanup, error:');
-      core.error(JSON.stringify(error, undefined, 4));
-      CloudRunnerLogger.log('Abandoning cleanup, build error:');
-      throw error;
-    }
-    try {
       await waitUntil(
-        async () => (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body === null,
+        async () => {
+          try {
+            await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
+            await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+          } catch (error) {
+            CloudRunnerLogger.log('Failed to cleanup, error:');
+            core.error(JSON.stringify(error, undefined, 4));
+            CloudRunnerLogger.log('Abandoning cleanup, build error:');
+            throw error;
+          }
+          const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
+          return jobBody === null || jobBody.status?.active === 0;
+        },
         {
           timeout: 500000,
           intervalBetweenAttempts: 15000,
