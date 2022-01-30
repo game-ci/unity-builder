@@ -62,9 +62,6 @@
     "ts-node": "^10.4.0",
     "typescript": "^4.1.3"
   },
-  "hooks": {
-    "pre-commit": "lint-staged && yarn build && git add dist/index.*"
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
