@@ -181,6 +181,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
   ) {
     CloudRunnerLogger.log(`deleting PVC`);
     this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    CloudRunnerLogger.log(`deleted PVC`);
   }
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
     const namespacedPods = await kubeClient.listNamespacedPod(namespace);
