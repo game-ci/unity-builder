@@ -96,7 +96,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
 
       //run
       const jobResult = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      CloudRunnerLogger.log(`Creating build job ${JSON.stringify(jobResult, undefined, 4)}`);
+      CloudRunnerLogger.log(`Creating build job ${JSON.stringify(jobResult.body.metadata, undefined, 4)}`);
 
       await new Promise((promise) => setTimeout(promise, 5000));
       CloudRunnerLogger.log('Job created');
