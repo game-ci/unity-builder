@@ -105,7 +105,7 @@ class KubernetesJobSpecFactory {
               command: ['/bin/sh'],
               args: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(command, CloudRunnerState.buildParams)],
 
-              workingDir: `/${workingDirectory}`,
+              workingDir: `${workingDirectory}`,
               resources: {
                 requests: {
                   memory: buildParameters.cloudRunnerMemory,
