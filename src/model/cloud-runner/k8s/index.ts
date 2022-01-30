@@ -157,8 +157,8 @@ class Kubernetes implements CloudRunnerProviderInterface {
       await waitUntil(
         async () => {
           const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
-          const podname = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
-          return (jobBody === null || jobBody.status?.active === 0) && podname === null;
+          const podBody = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+          return (jobBody === null || jobBody.status?.active === 0) && podBody === null;
         },
         {
           timeout: 500000,
@@ -179,7 +179,16 @@ class Kubernetes implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    CloudRunnerLogger.log(`deleting PVC`);
+    const deletePvcPromise = this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    const awaitTimeout = (delay, reason) =>
+      new Promise<void>((resolve, reject) =>
+        setTimeout(() => (reason === undefined ? resolve() : reject(reason)), delay),
+      );
+
+    const wrapPromise = (promise, delay, reason) => Promise.race([promise, awaitTimeout(delay, reason)]);
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    await wrapPromise(deletePvcPromise, 15000, undefined);
   }
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
     const namespacedPods = await kubeClient.listNamespacedPod(namespace);
