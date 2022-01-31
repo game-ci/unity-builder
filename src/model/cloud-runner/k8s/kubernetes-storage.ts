@@ -3,7 +3,6 @@ import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import YAML from 'yaml';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -55,9 +54,9 @@ class KubernetesStorage {
           intervalBetweenAttempts: 15000,
         },
       );
-    } catch (error: any) {
+    } catch (error) {
       core.error('Failed to watch PVC');
-      core.error(error.toString());
+      core.error(error);
       core.error(
         `PVC Body: ${JSON.stringify(
           (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body,
@@ -83,15 +82,13 @@ class KubernetesStorage {
     };
     pvc.spec = {
       accessModes: ['ReadWriteOnce'],
+      storageClassName: process.env.K8s_STORAGE_CLASS || 'standard',
       resources: {
         requests: {
           storage: buildParameters.kubeVolumeSize,
         },
       },
     };
-    if (process.env.K8S_PVC_SPEC) {
-      pvc.spec = YAML.parse(process.env.K8S_PVC_SPEC);
-    }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     return result;
   }
