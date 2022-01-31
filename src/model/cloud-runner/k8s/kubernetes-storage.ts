@@ -83,14 +83,15 @@ class KubernetesStorage {
     };
     pvc.spec = {
       accessModes: ['ReadWriteOnce'],
+      storageClassName: process.env.K8s_STORAGE_CLASS || 'standard',
       resources: {
         requests: {
           storage: buildParameters.kubeVolumeSize,
         },
       },
     };
-    if (process.env.K8S_PVC_SPEC) {
-      pvc.spec = YAML.parse(process.env.K8S_PVC_SPEC);
+    if (process.env.K8s_STORAGE_PVC_SPEC) {
+      YAML.parse(process.env.K8s_STORAGE_PVC_SPEC);
     }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
     return result;
