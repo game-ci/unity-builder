@@ -35,9 +35,9 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
-    core.startGroup('Setup remote runner');
     CloudRunner.setup(buildParameters);
     try {
+      core.startGroup('Setup remote runner');
       await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
         CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
@@ -63,6 +63,7 @@ class CloudRunner {
       core.endGroup();
       return output;
     } catch (error) {
+      core.endGroup();
       await CloudRunnerError.handleException(error);
       throw error;
     }
