@@ -39,6 +39,7 @@ class KubernetesTaskRunner {
       const resultError = await new Promise(async (resolve) =>
         new Log(kubeConfig).log(namespace, podName, containerName, stream, resolve, logOptions),
       );
+      stream.destroy();
       if (resultError) {
         throw resultError;
       }
