@@ -36,11 +36,9 @@ class KubernetesTaskRunner {
       previous: false,
     };
     try {
-      const resultError = await new Promise(
-        async (resolve) =>
-          await new Log(kubeConfig).log(namespace, podName, containerName, stream, resolve, logOptions),
+      const resultError = await new Promise((resolve) =>
+        new Log(kubeConfig).log(namespace, podName, containerName, stream, resolve, logOptions),
       );
-      stream.removeAllListeners();
       stream.destroy();
       if (resultError) {
         throw resultError;
@@ -69,6 +67,9 @@ class KubernetesTaskRunner {
         throw new Error(`No logs streamed from k8s`);
       }
     } catch (error) {
+      if (stream) {
+        stream.destroy();
+      }
       throw error;
     }
     CloudRunnerLogger.log('end of log stream');

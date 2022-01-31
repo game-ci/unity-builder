@@ -181,8 +181,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     CloudRunnerLogger.log(`deleting PVC`);
-    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-    CloudRunnerLogger.log(`deleted PVC`);
+    return this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
