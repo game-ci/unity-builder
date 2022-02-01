@@ -1,0 +1,5 @@
+kubectl delete job $(kubectl get jobs -o custom-columns=:.metadata.name)
+kubectl delete cronjob $(kubectl get cronjobs -o custom-columns=:.metadata.name)
+kubectl delete pod $(kubectl get pods -o custom-columns=:.metadata.name)
+kubectl delete pvc $(kubectl get pvc -o custom-columns=:.metadata.name)
+kubectl delete secret $(kubectl get secrets -o custom-columns=:.metadata.name)

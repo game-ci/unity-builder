@@ -48,7 +48,7 @@ describe('Input', () => {
 
   describe('projectPath', () => {
     it('returns the default value', () => {
-      expect(Input.projectPath).toStrictEqual('.');
+      expect(Input.projectPath).toStrictEqual('test-project');
     });
 
     it('takes input from the users workflow', () => {
