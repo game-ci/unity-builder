@@ -1,5 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
-import { BuildParameters } from '../..';
+import { BuildParameters, Output } from '../..';
 import * as core from '@actions/core';
 import { CloudRunnerProviderInterface } from '../services/cloud-runner-provider-interface';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
@@ -171,9 +171,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
   }
 
   async cleanupSharedResources(
-    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
@@ -181,7 +179,10 @@ class Kubernetes implements CloudRunnerProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     CloudRunnerLogger.log(`deleting PVC`);
-    return this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    await Output.setBuildVersion(buildParameters.buildVersion);
+    // eslint-disable-next-line unicorn/no-process-exit
+    process.exit();
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {

@@ -10,11 +10,7 @@ class KubernetesServiceAccount {
       name: serviceAccountName,
     };
     serviceAccount.automountServiceAccountToken = false;
-    try {
-      await kubeClient.createNamespacedServiceAccount(namespace, serviceAccount);
-    } catch (error) {
-      throw error;
-    }
+    return kubeClient.createNamespacedServiceAccount(namespace, serviceAccount);
   }
 }
 

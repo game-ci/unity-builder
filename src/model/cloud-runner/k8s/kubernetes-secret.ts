@@ -21,11 +21,7 @@ class KubernetesSecret {
     for (const buildSecret of secrets) {
       secret.data[buildSecret.ParameterKey] = base64.encode(buildSecret.ParameterValue);
     }
-    try {
-      await kubeClient.createNamespacedSecret(namespace, secret);
-    } catch (error) {
-      throw error;
-    }
+    return kubeClient.createNamespacedSecret(namespace, secret);
   }
 }
 
