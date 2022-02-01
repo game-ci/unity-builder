@@ -44,13 +44,14 @@ class Input {
       'game-ci/unity-builder'
     );
   }
+
   static async branch() {
-    if (await GitRepoReader.GetBranch()) {
+    if (Input.getInput('branch')) {
+      return Input.getInput('branch');
+    } else if (await GitRepoReader.GetBranch()) {
       return await GitRepoReader.GetBranch();
     } else if (Input.getInput(`GITHUB_REF`)) {
       return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
-    } else if (Input.getInput('branch')) {
-      return Input.getInput('branch');
     } else {
       return 'main';
     }
