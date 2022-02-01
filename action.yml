@@ -67,7 +67,7 @@ inputs:
     required: false
     description: 'Amount of CPU time to assign the remote build container'
   kubeVolumeSize:
-    default: '5Gi'
+    default: '10Gi'
     required: false
     description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
   githubToken:
