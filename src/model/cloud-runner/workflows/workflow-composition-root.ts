@@ -4,7 +4,6 @@ import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import { BuildAutomationWorkflow } from './build-automation-workflow';
 import { TaskParameterSerializer } from '../services/task-parameter-serializer';
-import { SetupStep } from '../steps/setup-step';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -17,15 +16,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
 
   private static async runJob(baseImage: any) {
     try {
-      if (CloudRunnerState.buildParams.customJob === `setup`) {
-        return await new SetupStep().run(
-          new CloudRunnerStepState(
-            baseImage,
-            TaskParameterSerializer.readBuildEnvironmentVariables(),
-            CloudRunnerState.defaultSecrets,
-          ),
-        );
-      } else if (CloudRunnerState.buildParams.customJob !== '') {
+      if (CloudRunnerState.buildParams.customJob !== '') {
         return await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customJob);
       }
       return await new BuildAutomationWorkflow().run(

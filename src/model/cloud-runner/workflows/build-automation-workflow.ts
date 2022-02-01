@@ -3,7 +3,6 @@ import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { BuildStep } from '../steps/build-step';
-import { SetupStep } from '../steps/setup-step';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
@@ -28,17 +27,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       }
       core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
-
-      core.startGroup('setup');
-      output += await new SetupStep().run(
-        new CloudRunnerStepState(
-          'alpine/git',
-          TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunnerState.defaultSecrets,
-        ),
-      );
-      core.endGroup();
-      CloudRunnerLogger.logWithTime('Download repository step time');
 
       core.startGroup('build');
       output += await new BuildStep().run(

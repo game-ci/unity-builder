@@ -28,7 +28,17 @@ export class BuildStep implements StepInterface {
     return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,
       image,
-      `${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      `apt-get update
+      apt-get install -y -q git-lfs jq tree zip unzip nodejs -q
+      ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+      mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
+      git clone -q -b ${CloudRunnerState.branchName} ${
+        CloudRunnerState.unityBuilderRepoUrl
+      } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
+      ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
+      chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
+      node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
         cp -r "${path
           .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
@@ -42,8 +52,6 @@ export class BuildStep implements StepInterface {
         chmod -R +x "/entrypoint.sh"
         chmod -R +x "/steps"
         /entrypoint.sh
-        apt-get update
-        apt-get install -y -q zip tree
         cd "${CloudRunnerState.libraryFolderFull.replace(/\\/g, `/`)}/.."
         zip -r "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "Library"
         mv "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
