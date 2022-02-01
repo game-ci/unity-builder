@@ -112,7 +112,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.BRANCH }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip
+          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.BRANCH }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip
           ls
       ###########################
       #          Upload         #
