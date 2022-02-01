@@ -30,7 +30,7 @@ Parameters:
     Type: Number
     Default: 2048
     Description: How much memory in megabytes to give the container
-  BUILDID:
+  BUILDGUID:
     Type: String
     Default: ''
   Command:
@@ -47,7 +47,7 @@ Parameters:
     Default: ''
     Description: >-
       (Optional) An IAM role to give the service's containers if the code within
-      needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
+      needs to access other AWS resources
   EFSMountDirectory:
     Type: String
     Default: '/efsdata'
@@ -98,7 +98,7 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
-  
+
   # template secrets p2 - secret
 
   TaskDefinition:

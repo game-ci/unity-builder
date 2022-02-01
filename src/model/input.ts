@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+import { GitRepoReader } from './input-readers/git-repo';
+import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
 
 const core = require('@actions/core');
@@ -8,71 +12,134 @@ const core = require('@actions/core');
  * Note that input is always passed as a string, even booleans.
  */
 class Input {
+  public static cliOptions;
+  public static githubInputEnabled: boolean = true;
+
+  // also enabled debug logging for cloud runner
+  static get cloudRunnerTests(): boolean {
+    return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
+  }
+  private static getInput(query) {
+    const coreInput = core.getInput(query);
+    if (Input.githubInputEnabled && coreInput && coreInput !== '') {
+      return coreInput;
+    }
+
+    return Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
+      ? Input.cliOptions[query]
+      : process.env[query] !== undefined
+      ? process.env[query]
+      : process.env[Input.ToEnvVarFormat(query)]
+      ? process.env[Input.ToEnvVarFormat(query)]
+      : '';
+  }
+  static get region(): string {
+    return Input.getInput('region') || 'eu-west-2';
+  }
+  static async githubRepo() {
+    return (
+      Input.getInput('GITHUB_REPOSITORY') ||
+      Input.getInput('GITHUB_REPO') ||
+      (await GitRepoReader.GetRemote()) ||
+      'game-ci/unity-builder'
+    );
+  }
+  static async branch() {
+    if (await GitRepoReader.GetBranch()) {
+      return await GitRepoReader.GetBranch();
+    } else if (Input.getInput(`GITHUB_REF`)) {
+      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
+    } else if (Input.getInput('branch')) {
+      return Input.getInput('branch');
+    } else {
+      return 'main';
+    }
+  }
+
+  static get gitSha() {
+    if (Input.getInput(`GITHUB_SHA`)) {
+      return Input.getInput(`GITHUB_SHA`);
+    } else if (Input.getInput(`GitSHA`)) {
+      return Input.getInput(`GitSHA`);
+    } else if (GitRepoReader.GetSha()) {
+      return GitRepoReader.GetSha();
+    }
+  }
+  static get runNumber() {
+    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+  }
+
   static get unityVersion() {
-    return core.getInput('unityVersion') || 'auto';
+    return Input.getInput('unityVersion') || 'auto';
   }
 
   static get customImage() {
-    return core.getInput('customImage');
+    return Input.getInput('customImage');
   }
 
   static get targetPlatform() {
-    return core.getInput('targetPlatform') || Platform.default;
+    return Input.getInput('targetPlatform') || Platform.default;
   }
 
   static get projectPath() {
-    const rawProjectPath = core.getInput('projectPath') || '.';
+    const input = Input.getInput('projectPath');
+    const rawProjectPath = input
+      ? input
+      : fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
+        !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
+      ? 'test-project'
+      : '.';
     return rawProjectPath.replace(/\/$/, '');
   }
 
   static get buildName() {
-    return core.getInput('buildName') || this.targetPlatform;
+    return Input.getInput('buildName') || this.targetPlatform;
   }
 
   static get buildsPath() {
-    return core.getInput('buildsPath') || 'build';
+    return Input.getInput('buildsPath') || 'build';
   }
 
   static get buildMethod() {
-    return core.getInput('buildMethod'); // processed in docker file
+    return Input.getInput('buildMethod') || ''; // processed in docker file
   }
 
   static get versioningStrategy() {
-    return core.getInput('versioning') || 'Semantic';
+    return Input.getInput('versioning') || 'Semantic';
   }
 
   static get specifiedVersion() {
-    return core.getInput('version') || '';
+    return Input.getInput('version') || '';
   }
 
   static get androidVersionCode() {
-    return core.getInput('androidVersionCode');
+    return Input.getInput('androidVersionCode');
   }
 
   static get androidAppBundle() {
-    const input = core.getInput('androidAppBundle') || false;
+    const input = Input.getInput('androidAppBundle') || false;
 
     return input === 'true';
   }
 
   static get androidKeystoreName() {
-    return core.getInput('androidKeystoreName') || '';
+    return Input.getInput('androidKeystoreName') || '';
   }
 
   static get androidKeystoreBase64() {
-    return core.getInput('androidKeystoreBase64') || '';
+    return Input.getInput('androidKeystoreBase64') || '';
   }
 
   static get androidKeystorePass() {
-    return core.getInput('androidKeystorePass') || '';
+    return Input.getInput('androidKeystorePass') || '';
   }
 
   static get androidKeyaliasName() {
-    return core.getInput('androidKeyaliasName') || '';
+    return Input.getInput('androidKeyaliasName') || '';
   }
 
   static get androidKeyaliasPass() {
-    return core.getInput('androidKeyaliasPass') || '';
+    return Input.getInput('androidKeyaliasPass') || '';
   }
 
   static get androidTargetSdkVersion() {
@@ -80,57 +147,77 @@ class Input {
   }
 
   static get allowDirtyBuild() {
-    const input = core.getInput('allowDirtyBuild') || false;
+    const input = Input.getInput('allowDirtyBuild') || false;
 
     return input === 'true';
   }
 
   static get customParameters() {
-    return core.getInput('customParameters') || '';
+    return Input.getInput('customParameters') || '';
   }
 
   static get sshAgent() {
-    return core.getInput('sshAgent') || '';
+    return Input.getInput('sshAgent') || '';
   }
 
-  static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || '';
+  static async githubToken() {
+    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+  }
+
+  static async gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || (await Input.githubToken());
   }
 
   static get chownFilesTo() {
-    return core.getInput('chownFilesTo') || '';
+    return Input.getInput('chownFilesTo') || '';
   }
 
-  static get remoteBuildCluster() {
-    return core.getInput('remoteBuildCluster') || '';
+  static get postBuildSteps() {
+    return Input.getInput('postBuildSteps') || '';
   }
 
-  static get awsStackName() {
-    return core.getInput('awsStackName') || '';
+  static get preBuildSteps() {
+    return Input.getInput('preBuildSteps') || '';
+  }
+
+  static get customJob() {
+    return Input.getInput('customJob') || '';
+  }
+
+  static get cloudRunnerCluster() {
+    return Input.getInput('cloudRunnerCluster') || '';
+  }
+
+  static get awsBaseStackName() {
+    return Input.getInput('awsBaseStackName') || 'game-ci';
   }
 
   static get kubeConfig() {
-    return core.getInput('kubeConfig') || '';
+    return Input.getInput('kubeConfig') || '';
   }
 
-  static get githubToken() {
-    return core.getInput('githubToken') || '';
+  static get cloudRunnerMemory() {
+    return Input.getInput('cloudRunnerMemory') || '750M';
   }
 
-  static get remoteBuildMemory() {
-    return core.getInput('remoteBuildMemory') || '800M';
-  }
-
-  static get remoteBuildCpu() {
-    return core.getInput('remoteBuildCpu') || '0.25';
+  static get cloudRunnerCpu() {
+    return Input.getInput('cloudRunnerCpu') || '1.0';
   }
 
   static get kubeVolumeSize() {
-    return core.getInput('kubeVolumeSize') || '5Gi';
+    return Input.getInput('kubeVolumeSize') || '5Gi';
   }
 
   static get kubeVolume() {
-    return core.getInput('kubeVolume') || '';
+    return Input.getInput('kubeVolume') || '';
+  }
+
+  public static ToEnvVarFormat(input: string) {
+    return input
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .toUpperCase()
+      .replace(/ /g, '_');
   }
 }
 

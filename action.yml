@@ -22,6 +22,18 @@ inputs:
     required: false
     default: ''
     description: 'Name of the build.'
+  postBuildSteps:
+    required: false
+    default: ''
+    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
+  preBuildSteps:
+    required: false
+    default: ''
+    description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+  customJob:
+    required: false
+    default: ''
+    description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
   buildsPath:
     required: false
     default: ''
@@ -30,7 +42,7 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  remoteBuildCluster:
+  cloudRunnerCluster:
     default: 'local'
     required: false
     description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
@@ -46,12 +58,12 @@ inputs:
     default: ''
     required: false
     description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
-  remoteBuildMemory:
-    default: '800M'
+  cloudRunnerMemory:
+    default: '750M'
     required: false
     description: 'Amount of memory to assign the remote build container'
-  remoteBuildCpu:
-    default: '0.25'
+  cloudRunnerCpu:
+    default: '1.0'
     required: false
     description: 'Amount of CPU time to assign the remote build container'
   kubeVolumeSize:

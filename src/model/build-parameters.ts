@@ -1,5 +1,8 @@
+import { customAlphabet } from 'nanoid';
 import * as core from '@actions/core';
 import AndroidVersioning from './android-versioning';
+import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
+import CloudRunnerNamespace from './cloud-runner/services/cloud-runner-namespace';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -27,16 +30,28 @@ class BuildParameters {
   public androidSdkManagerParameters!: string;
   public customParameters!: string;
   public sshAgent!: string;
+  public cloudRunnerCluster!: string;
+  public awsBaseStackName!: string;
   public gitPrivateToken!: string;
   public remoteBuildCluster!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
   public githubToken!: string;
-  public remoteBuildMemory!: string;
-  public remoteBuildCpu!: string;
+  public cloudRunnerMemory!: string;
+  public cloudRunnerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public chownFilesTo!: string;
+
+  public postBuildSteps!: string;
+  public preBuildSteps!: string;
+  public customJob!: string;
+  public runNumber!: string;
+  public branch!: string;
+  public githubRepo!: string;
+  public gitSha!: string;
+  public logId!: string;
+  public buildGuid!: string;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -87,16 +102,27 @@ class BuildParameters {
       androidSdkManagerParameters,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
-      gitPrivateToken: Input.gitPrivateToken,
+      gitPrivateToken: await Input.gitPrivateToken(),
       chownFilesTo: Input.chownFilesTo,
-      remoteBuildCluster: Input.remoteBuildCluster,
-      awsStackName: Input.awsStackName,
+      cloudRunnerCluster: Input.cloudRunnerCluster,
+      awsBaseStackName: Input.awsBaseStackName,
       kubeConfig: Input.kubeConfig,
-      githubToken: Input.githubToken,
-      remoteBuildMemory: Input.remoteBuildMemory,
-      remoteBuildCpu: Input.remoteBuildCpu,
+      githubToken: await Input.githubToken(),
+      cloudRunnerMemory: Input.cloudRunnerMemory,
+      cloudRunnerCpu: Input.cloudRunnerCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
       kubeVolume: Input.kubeVolume,
+      postBuildSteps: Input.postBuildSteps,
+      preBuildSteps: Input.preBuildSteps,
+      customJob: Input.customJob,
+      runNumber: Input.runNumber,
+      branch: await Input.branch(),
+      githubRepo: await Input.githubRepo(),
+      remoteBuildCluster: Input.cloudRunnerCluster,
+      awsStackName: Input.awsBaseStackName,
+      gitSha: Input.gitSha,
+      logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
+      buildGuid: CloudRunnerNamespace.generateBuildName(Input.runNumber, Input.targetPlatform),
     };
   }
 

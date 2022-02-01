@@ -9,8 +9,7 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
-import Kubernetes from './kubernetes';
-import RemoteBuilder from './remote-builder/remote-builder';
+import CloudRunner from './cloud-runner/cloud-runner';
 
 export {
   Action,
@@ -24,6 +23,5 @@ export {
   Project,
   Unity,
   Versioning,
-  Kubernetes,
-  RemoteBuilder,
+  CloudRunner as CloudRunner,
 };

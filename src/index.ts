@@ -1,9 +1,9 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Kubernetes, Output, RemoteBuilder } from './model';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
+import { CLI } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
-
-async function run() {
+async function runMain() {
   try {
     Action.checkCompatibility();
     Cache.verify();
@@ -12,22 +12,17 @@ async function run() {
 
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
+
     let builtImage;
 
-    switch (buildParameters.remoteBuildCluster) {
-      case 'k8s':
-        core.info('Building with Kubernetes');
-        await Kubernetes.runBuildJob(buildParameters, baseImage);
-        break;
-
-      case 'aws':
-        core.info('Building with AWS');
-        await RemoteBuilder.build(buildParameters, baseImage);
-        break;
-
-      // default and local case
-      default:
-        core.info('Building locally');
+    if (
+      buildParameters.cloudRunnerCluster &&
+      buildParameters.cloudRunnerCluster !== '' &&
+      buildParameters.cloudRunnerCluster !== 'local'
+    ) {
+      await CloudRunner.run(buildParameters, baseImage.toString());
+    } else {
+      core.info('Building locally');
         await PlatformSetup.setup(buildParameters, actionFolder);
         if (process.platform === 'darwin') {
           MacBuilder.run(actionFolder, workspace, buildParameters);
@@ -35,14 +30,17 @@ async function run() {
           builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
           await Docker.run(builtImage, { workspace, ...buildParameters });
         }
-        break;
     }
 
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed((error as Error).message);
   }
 }
-
-run();
+const options = CLI.SetupCli();
+if (CLI.isCliMode(options)) {
+  CLI.RunCli(options);
+} else {
+  runMain();
+}
