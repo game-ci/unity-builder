@@ -36,9 +36,9 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-windows-${{ matrix.targetPlatform }}
+          key: Library-${{ matrix.projectPath }}-macos-${{ matrix.targetPlatform }}
           restore-keys: |
-            Library-${{ matrix.projectPath }}-windows-
+            Library-${{ matrix.projectPath }}-macos-
             Library-
 
       ###########################
