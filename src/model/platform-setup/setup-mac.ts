@@ -21,8 +21,8 @@ class SetupMac {
   private static async installUnityHub(silent = false) {
     const command = 'brew install unity-hub';
     if (!fs.existsSync(this.unityHubPath)) {
-      //Ignoring return code because the log seems to overflow the internal buffer which triggers
-      //a false error
+      // Ignoring return code because the log seems to overflow the internal buffer which triggers
+      // a false error
       const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
       if (errorCode) {
         throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
