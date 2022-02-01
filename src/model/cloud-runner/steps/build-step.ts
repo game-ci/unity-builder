@@ -33,7 +33,7 @@ export class BuildStep implements StepInterface {
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
       mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
-      git clone -q -b ${process.env.CLOUD_RUNNER_BRANCH} ${
+      git clone -q ${process.env.CLOUD_RUNNER_BRANCH ? `-b ${process.env.CLOUD_RUNNER_BRANCH}` : ''} ${
         CloudRunnerState.unityBuilderRepoUrl
       } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
       ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
