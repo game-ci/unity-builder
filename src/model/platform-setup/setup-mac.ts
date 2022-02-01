@@ -38,8 +38,8 @@ class SetupMac {
                                           --module mac-il2cpp \
                                           --childModules`;
 
-    //Ignoring return code because the log seems to overflow the internal buffer which triggers
-    //a false error
+    // Ignoring return code because the log seems to overflow the internal buffer which triggers
+    // a false error
     const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
@@ -47,8 +47,8 @@ class SetupMac {
   }
 
   private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
-    //Need to set environment variables from here because we execute
-    //the scripts on the host for mac
+    // Need to set environment variables from here because we execute
+    // the scripts on the host for mac
     process.env.ACTION_FOLDER = actionFolder;
     process.env.UNITY_VERSION = buildParameters.version;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
