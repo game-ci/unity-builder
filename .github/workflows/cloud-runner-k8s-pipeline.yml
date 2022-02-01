@@ -1,7 +1,7 @@
 name: Cloud Runner - K8s Tests
 
 on:
-  push: { branches: [remote-builder/k8s, remote-builder/unified-providers] }
+  push: { branches: [remote-builder/k8s, cloud-runner/unified-build-and-setup] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
@@ -21,7 +21,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: eu-west-2
   AWS_BASE_STACK_NAME: game-ci-github-pipelines
-  CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
+  CLOUD_RUNNER_BRANCH: cloud-runner/unified-build-and-setup
   CLOUD_RUNNER_TESTS: true
   DEBUG: true
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}

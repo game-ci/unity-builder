@@ -23,7 +23,7 @@ export class BuildStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     CloudRunnerLogger.logLine(` `);
-    CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
+    CloudRunnerLogger.logLine('Starting build job');
     const hooks = CloudRunnerBuildCommandProcessor.getHooks().filter((x) => x.step.includes(`setup`));
     return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,

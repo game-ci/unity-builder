@@ -1,7 +1,7 @@
 name: Cloud Runner - AWS Tests
 
 on:
-  push: { branches: [main, aws, remote-builder/unified-providers] }
+  push: { branches: [main, aws, cloud-runner/unified-build-and-setup] }
 
 env:
   GKE_ZONE: 'us-central1'
@@ -15,10 +15,8 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: eu-west-2
   AWS_BASE_STACK_NAME: game-ci-github-pipelines
-  CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
-  CLOUD_RUNNER_TESTS: true
-  DEBUG: true
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  CLOUD_RUNNER_BRANCH: cloud-runner/unified-build-and-setup
+  LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
   buildForAllPlatforms:
