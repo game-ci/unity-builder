@@ -12,7 +12,7 @@ env:
   GKE_REGION: 'us-central1'
   GKE_PROJECT: 'unitykubernetesbuilder'
   GKE_CLUSTER: 'game-ci-github-pipelines'
-  K8s_STORAGE_CLASS: 'standard-rwo'
+  K8s_STORAGE_CLASS: 'standard'
   GCP_LOGGING: true
   GCP_PROJECT: unitykubernetesbuilder
   GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
