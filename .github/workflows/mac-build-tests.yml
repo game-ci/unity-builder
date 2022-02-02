@@ -69,6 +69,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v2
         with:
-          name: Build Windows (${{ matrix.unityVersion }})
+          name: Build MacOS (${{ matrix.unityVersion }})
           path: build
           retention-days: 14
