@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/prevent-abbreviations */
+/* eslint unicorn/prevent-abbreviations: "off" */
 
 // Import these named export into your test file:
 export const mockProjectPath = jest.fn().mockResolvedValue('mockProjectPath');

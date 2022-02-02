@@ -1635,6 +1635,11 @@ buffer@4.9.2:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
+cac@^6.6.1:
+  version "6.7.12"
+  resolved "https://registry.yarnpkg.com/cac/-/cac-6.7.12.tgz#6fb5ea2ff50bd01490dbda497f4ae75a99415193"
+  integrity sha512-rM7E2ygtMkJqD9c7WnFU6fruFcN3xe4FM5yUmgxhZzIKJk4uHl9U/fhwdajGFQbQuv43FAUo1Fe8gX/oIKDeSA==
+
 byline@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
@@ -5968,6 +5973,15 @@ union-value@^1.0.0:
     get-value "^2.0.6"
     is-extendable "^0.1.1"
     set-value "^2.0.1"
+
+unity-changeset@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/unity-changeset/-/unity-changeset-1.6.0.tgz#b2a3cab1350b10669cb53341ce562f3b93f38ddf"
+  integrity sha512-ke90Zhr2C5q2SPvinDKTr1dwgAPI0R6kxcO7gHPgQXntbx/Ag8hR0xLwd9K6UR2ykGFmDnUVjdbWfYlkhX8tFQ==
+  dependencies:
+    cac "^6.6.1"
+    jsdom "^16.4.0"
+    node-fetch "^2.6.1"
 
 universal-user-agent@^4.0.0:
   version "4.0.1"

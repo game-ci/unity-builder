@@ -2,7 +2,7 @@ import path from 'path';
 
 class Action {
   static get supportedPlatforms() {
-    return ['linux', 'win32'];
+    return ['linux', 'win32', 'darwin'];
   }
 
   static get isRunningLocally() {
@@ -36,6 +36,8 @@ class Action {
         return `${Action.actionFolder}/platforms/ubuntu/Dockerfile`;
       case 'win32':
         return `${Action.actionFolder}/platforms/windows/Dockerfile`;
+      case 'darwin':
+        return 'unused'; //Mac doesn't use a container
       default:
         throw new Error(`No Dockerfile for currently unsupported platform: ${currentPlatform}`);
     }
