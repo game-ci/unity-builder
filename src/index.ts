@@ -23,13 +23,13 @@ async function runMain() {
       await CloudRunner.run(buildParameters, baseImage.toString());
     } else {
       core.info('Building locally');
-        await PlatformSetup.setup(buildParameters, actionFolder);
-        if (process.platform === 'darwin') {
-          MacBuilder.run(actionFolder, workspace, buildParameters);
-        } else {
-          builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-          await Docker.run(builtImage, { workspace, ...buildParameters });
-        }
+      await PlatformSetup.setup(buildParameters, actionFolder);
+      if (process.platform === 'darwin') {
+        MacBuilder.run(actionFolder, workspace, buildParameters);
+      } else {
+        builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+        await Docker.run(builtImage, { workspace, ...buildParameters });
+      }
     }
 
     // Set output
