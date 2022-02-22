@@ -2,6 +2,10 @@ name: 'Unity - Builder'
 author: Webber Takken <webber@takken.io>
 description: 'Build Unity projects for different platforms.'
 inputs:
+  targetPlatform:
+    required: true
+    default: ''
+    description: 'Platform that the build should target.'
   unityVersion:
     required: false
     default: 'auto'
@@ -10,10 +14,6 @@ inputs:
     required: false
     default: ''
     description: 'Specific docker image that should be used for building the project'
-  targetPlatform:
-    required: false
-    default: ''
-    description: 'Platform that the build should target.'
   projectPath:
     required: false
     default: ''
@@ -22,18 +22,6 @@ inputs:
     required: false
     default: ''
     description: 'Name of the build.'
-  postBuildSteps:
-    required: false
-    default: ''
-    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
-  preBuildSteps:
-    required: false
-    default: ''
-    description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
-  customJob:
-    required: false
-    default: ''
-    description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
   buildsPath:
     required: false
     default: ''
@@ -42,38 +30,10 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
-  cloudRunnerCluster:
-    default: 'local'
+  customParameters:
     required: false
-    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
-  awsStackName:
-    default: 'game-ci'
-    required: false
-    description: 'The Cloud Formation stack name that must be setup before using this option.'
-  kubeConfig:
     default: ''
-    required: false
-    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
-  kubeVolume:
-    default: ''
-    required: false
-    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
-  cloudRunnerMemory:
-    default: '750M'
-    required: false
-    description: 'Amount of memory to assign the remote build container'
-  cloudRunnerCpu:
-    default: '1.0'
-    required: false
-    description: 'Amount of CPU time to assign the remote build container'
-  kubeVolumeSize:
-    default: '5Gi'
-    required: false
-    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
-  githubToken:
-    default: ''
-    required: false
-    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+    description: 'Custom parameters to configure the build.'
   versioning:
     required: false
     default: 'Semantic'
@@ -114,14 +74,6 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
-  customParameters:
-    required: false
-    default: ''
-    description: >
-      Custom parameters to configure the build.
-
-      Parameters must start with a hyphen (-) and may be followed by a value (without hyphen).
-      Parameters without a value will be considered booleans (with a value of true).
   sshAgent:
     required: false
     default: ''
@@ -129,8 +81,7 @@ inputs:
   gitPrivateToken:
     required: false
     default: ''
-    description: >
-      Github private token to pull from github
+    description: 'Github private token to pull from github'
   chownFilesTo:
     required: false
     default: ''
@@ -138,12 +89,51 @@ inputs:
   allowDirtyBuild:
     required: false
     default: ''
-    description: >
-      Allows the branch of the build to be dirty, and still generate the build.
-
-      Note that it is generally bad practice to modify your branch
-      in a CI Pipeline. However there are exceptions where this might
-      be needed. (use with care).
+    description: 'Allows the branch of the build to be dirty, and still generate the build.'
+  postBuildSteps:
+    required: false
+    default: ''
+    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
+  preBuildSteps:
+    required: false
+    default: ''
+    description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+  customJob:
+    required: false
+    default: ''
+    description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
+  awsBaseStackName:
+    default: 'game-ci'
+    required: false
+    description: 'The Cloud Formation stack name that must be setup before using this option.'
+  cloudRunnerCluster:
+    default: 'local'
+    required: false
+    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+  cloudRunnerCpu:
+    default: '1.0'
+    required: false
+    description: 'Amount of CPU time to assign the remote build container'
+  cloudRunnerMemory:
+    default: '750M'
+    required: false
+    description: 'Amount of memory to assign the remote build container'
+  githubToken:
+    default: ''
+    required: false
+    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+  kubeConfig:
+    default: ''
+    required: false
+    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+  kubeVolume:
+    default: ''
+    required: false
+    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
+  kubeVolumeSize:
+    default: '5Gi'
+    required: false
+    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

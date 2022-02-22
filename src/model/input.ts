@@ -69,16 +69,16 @@ class Input {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }
 
+  static get targetPlatform() {
+    return Input.getInput('targetPlatform') || Platform.default;
+  }
+
   static get unityVersion() {
     return Input.getInput('unityVersion') || 'auto';
   }
 
   static get customImage() {
     return Input.getInput('customImage');
-  }
-
-  static get targetPlatform() {
-    return Input.getInput('targetPlatform') || Platform.default;
   }
 
   static get projectPath() {
@@ -102,6 +102,10 @@ class Input {
 
   static get buildMethod() {
     return Input.getInput('buildMethod') || ''; // processed in docker file
+  }
+
+  static get customParameters() {
+    return Input.getInput('customParameters') || '';
   }
 
   static get versioningStrategy() {
@@ -146,22 +150,8 @@ class Input {
     return core.getInput('androidTargetSdkVersion') || '';
   }
 
-  static get allowDirtyBuild() {
-    const input = Input.getInput('allowDirtyBuild') || false;
-
-    return input === 'true';
-  }
-
-  static get customParameters() {
-    return Input.getInput('customParameters') || '';
-  }
-
   static get sshAgent() {
     return Input.getInput('sshAgent') || '';
-  }
-
-  static async githubToken() {
-    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 
   static async gitPrivateToken() {
@@ -170,6 +160,12 @@ class Input {
 
   static get chownFilesTo() {
     return Input.getInput('chownFilesTo') || '';
+  }
+
+  static get allowDirtyBuild() {
+    const input = Input.getInput('allowDirtyBuild') || false;
+
+    return input === 'true';
   }
 
   static get postBuildSteps() {
@@ -184,32 +180,36 @@ class Input {
     return Input.getInput('customJob') || '';
   }
 
-  static get cloudRunnerCluster() {
-    return Input.getInput('cloudRunnerCluster') || '';
-  }
-
   static get awsBaseStackName() {
     return Input.getInput('awsBaseStackName') || 'game-ci';
   }
 
-  static get kubeConfig() {
-    return Input.getInput('kubeConfig') || '';
-  }
-
-  static get cloudRunnerMemory() {
-    return Input.getInput('cloudRunnerMemory') || '750M';
+  static get cloudRunnerCluster() {
+    return Input.getInput('cloudRunnerCluster') || 'local';
   }
 
   static get cloudRunnerCpu() {
     return Input.getInput('cloudRunnerCpu') || '1.0';
   }
 
-  static get kubeVolumeSize() {
-    return Input.getInput('kubeVolumeSize') || '5Gi';
+  static get cloudRunnerMemory() {
+    return Input.getInput('cloudRunnerMemory') || '750M';
+  }
+
+  static async githubToken() {
+    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+  }
+
+  static get kubeConfig() {
+    return Input.getInput('kubeConfig') || '';
   }
 
   static get kubeVolume() {
     return Input.getInput('kubeVolume') || '';
+  }
+
+  static get kubeVolumeSize() {
+    return Input.getInput('kubeVolumeSize') || '5Gi';
   }
 
   public static ToEnvVarFormat(input: string) {
