@@ -14,6 +14,10 @@ class ImageEnvironmentFactory {
       if (p.value === '' || p.value === undefined) {
         continue;
       }
+      if (p.name !== 'ANDROID_KEYSTORE_BASE64' && p.value.toString().includes(`\n`)) {
+        string += `--env ${p.name} `;
+        continue;
+      }
 
       string += `--env ${p.name}="${p.value}" `;
     }
