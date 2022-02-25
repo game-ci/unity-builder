@@ -34,11 +34,11 @@
     "commander": "^8.3.0",
     "commander-ts": "^0.2.0",
     "kubernetes-client": "^9.0.0",
-    "unity-changeset": "^1.6.0",
+    "nanoid": "^3.1.31",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.3.5",
-    "yaml": "^1.10.2",
-    "nanoid": "^3.1.31"
+    "unity-changeset": "^1.6.0",
+    "yaml": "^1.10.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
