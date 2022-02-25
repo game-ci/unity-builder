@@ -1,7 +1,10 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npx lint-staged
+if [ -t 1 ]; then
+  exec < /dev/tty
+fi
+
+yarn lint-staged
 yarn test
 yarn build
-git add dist/index.*

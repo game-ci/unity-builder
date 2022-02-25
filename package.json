@@ -67,16 +67,13 @@
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
       "eslint",
-      "git add",
       "jest --findRelatedTests"
     ],
     "*.{json,md,yaml,yml}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*.sh": [
       "git update-index --chmod=+x"
-    ],
-    "*.js": "eslint --cache --fix"
+    ]
   }
 }
