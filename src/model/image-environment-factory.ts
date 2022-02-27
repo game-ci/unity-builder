@@ -45,6 +45,7 @@ class ImageEnvironmentFactory {
       { name: 'ANDROID_KEYSTORE_PASS', value: parameters.androidKeystorePass },
       { name: 'ANDROID_KEYALIAS_NAME', value: parameters.androidKeyaliasName },
       { name: 'ANDROID_KEYALIAS_PASS', value: parameters.androidKeyaliasPass },
+      { name: 'ANDROID_SDK_MANAGER_PARAMETERS', value: parameters.androidSdkManagerParameters },
       { name: 'CUSTOM_PARAMETERS', value: parameters.customParameters },
       { name: 'CHOWN_FILES_TO', value: parameters.chownFilesTo },
       { name: 'GITHUB_REF', value: process.env.GITHUB_REF },
