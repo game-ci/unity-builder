@@ -14,6 +14,7 @@
   "rules": {
     "prettier/prettier": "error",
     "import/no-extraneous-dependencies": 0,
-    "import/no-namespace": "off"
+    "import/no-namespace": "off",
+    "no-undef": "off" // TODO: REMOVE THIS LINE WHEN UPDATING ESLINT RULES
   }
 }

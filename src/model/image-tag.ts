@@ -47,20 +47,8 @@ class ImageTag {
   }
 
   static getTargetPlatformToImageSuffixMap(platform, version) {
-    const {
-      generic,
-      webgl,
-      mac,
-      windows,
-      windowsIl2cpp,
-      wsaPlayer,
-      linux,
-      linuxIl2cpp,
-      android,
-      ios,
-      tvos,
-      facebook,
-    } = ImageTag.imageSuffixes;
+    const { generic, webgl, mac, windows, windowsIl2cpp, wsaPlayer, linux, linuxIl2cpp, android, ios, tvos, facebook } =
+      ImageTag.imageSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
