@@ -20,7 +20,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: eu-west-2
   AWS_BASE_STACK_NAME: game-ci-github-pipelines
-  CLOUD_RUNNER_BRANCH: remote-builder/unified-providers
+  CLOUD_RUNNER_BRANCH: ${{ env.GITHUB_REF }}
   CLOUD_RUNNER_TESTS: true
   DEBUG: true
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
