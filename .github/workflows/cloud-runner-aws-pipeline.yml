@@ -1,7 +1,7 @@
 name: Cloud Runner - AWS Tests
 
 on:
-  push: { branches: [main, aws, remote-builder/unified-providers] }
+  push: { branches: [main, cloud-runner-develop] }
 
 env:
   GKE_ZONE: 'us-central1'
