@@ -21,6 +21,12 @@ export class SetupStep implements StepInterface {
     }
   }
 
+  private static getCloudRunnerBranch() {
+    return process.env.CLOUD_RUNNER_BRANCH?.includes('/')
+      ? process.env.CLOUD_RUNNER_BRANCH.split('/').reverse()[0]
+      : process.env.CLOUD_RUNNER_BRANCH;
+  }
+
   private static async downloadRepository(
     image: string,
     environmentVariables: CloudRunnerEnvironmentVariable[],
@@ -38,7 +44,7 @@ export class SetupStep implements StepInterface {
         ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
-        git clone -q -b ${process.env.CLOUD_RUNNER_BRANCH} ${
+        git clone -q -b ${SetupStep.getCloudRunnerBranch()} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
         ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
