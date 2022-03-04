@@ -75,14 +75,15 @@ class AWSTaskRunner {
     const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
     const exitCode = (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
     CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
+    CloudRunnerLogger.log(
+      `job failed with exit code ${exitCode} ${JSON.stringify(
+        await ECS.describeTasks({ tasks: [taskArn], cluster }).promise(),
+        undefined,
+        4,
+      )}`,
+    );
     if (exitCode !== 0 && exitCode !== undefined) {
-      core.error(
-        `job failed with exit code ${exitCode} ${JSON.stringify(
-          await ECS.describeTasks({ tasks: [taskArn], cluster }).promise(),
-          undefined,
-          4,
-        )}`,
-      );
+      core.error(`job failed with exit code ${exitCode} "exitCode !== 0 && exitCode !== undefined"`);
       throw new Error(`job failed with exit code ${exitCode}`);
     } else {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
