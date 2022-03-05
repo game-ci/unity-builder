@@ -16,15 +16,7 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerState.cacheFolderFull}`);
 
       process.chdir(CloudRunnerState.repoPathFull);
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerSystem.Run(`ls -lh`);
-        await CloudRunnerSystem.Run(`tree`);
-      }
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
-      if (Input.cloudRunnerTests) {
-        await CloudRunnerSystem.Run(`ls -lh`);
-        await CloudRunnerSystem.Run(`tree`);
-      }
       const lfsHashes = await LFSHashing.createLFSHashFiles();
       if (fs.existsSync(CloudRunnerState.libraryFolderFull)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
@@ -71,11 +63,16 @@ export class SetupCloudRunnerRepository {
   }
 
   private static async pullLatestLFS() {
-    await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
+    if (Input.cloudRunnerTests) {
+      await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
+    }
     process.chdir(CloudRunnerState.repoPathFull);
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
     assert(fs.existsSync(CloudRunnerState.lfsDirectoryFull));
-    await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
+
+    if (Input.cloudRunnerTests) {
+      await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
+    }
   }
 }

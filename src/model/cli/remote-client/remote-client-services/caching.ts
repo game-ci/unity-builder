@@ -68,16 +68,10 @@ export class Caching {
       if (fs.existsSync(`${cacheSelection}.zip`)) {
         const resultsFolder = `results${CloudRunnerState.buildParams.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
-        if (Input.cloudRunnerTests) {
-          await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
-        }
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        if (Input.cloudRunnerTests) {
-          await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
-        }
         await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         assert(`${fs.existsSync(fullResultsFolder)}`);
@@ -88,15 +82,9 @@ export class Caching {
         await CloudRunnerSystem.Run(
           `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
         );
-        if (Input.cloudRunnerTests) {
-          await CloudRunnerSystem.Run(`tree ${destinationParentFolder}`);
-        }
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
-          if (Input.cloudRunnerTests) {
-            await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
-          }
           RemoteClientLogger.logWarning(`cache item ${cacheKey}.zip doesn't exist ${destinationFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
