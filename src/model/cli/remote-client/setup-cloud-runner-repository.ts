@@ -24,13 +24,13 @@ export class SetupCloudRunnerRepository {
       await Caching.PullFromCache(
         CloudRunnerState.lfsCacheFolderFull,
         CloudRunnerState.lfsDirectoryFull,
-        `${lfsHashes.lfsGuid}`,
+        `${lfsHashes.lfsGuidSum}`,
       );
       await SetupCloudRunnerRepository.pullLatestLFS();
       await Caching.PushToCache(
         CloudRunnerState.lfsCacheFolderFull,
         CloudRunnerState.lfsDirectoryFull,
-        `${lfsHashes.lfsGuid}`,
+        `${lfsHashes.lfsGuidSum}`,
       );
       await Caching.PullFromCache(CloudRunnerState.libraryCacheFolderFull, CloudRunnerState.libraryFolderFull);
       Caching.handleCachePurging();

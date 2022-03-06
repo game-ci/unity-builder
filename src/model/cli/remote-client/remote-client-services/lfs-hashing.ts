@@ -3,8 +3,6 @@ import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';
-import { Input } from '../../..';
-import { RemoteClientLogger } from './remote-client-logger';
 
 export class LFSHashing {
   public static async createLFSHashFiles() {
@@ -21,10 +19,6 @@ export class LFSHashing {
           .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
           .replace(/\n/g, ``),
       };
-      if (Input.cloudRunnerTests) {
-        RemoteClientLogger.log(lfsHashes.lfsGuid);
-        RemoteClientLogger.log(lfsHashes.lfsGuidSum);
-      }
       return lfsHashes;
     } catch (error) {
       throw error;
