@@ -51,10 +51,7 @@ export class BuildStep implements StepInterface {
         `/`,
       )}/Library"
         cd "${CloudRunnerState.repoPathFull.replace(/\\/g, `/`)}"
-        ${Input.cloudRunnerTests ? '' : '#'} tree -lh
         zip -r "build-${CloudRunnerState.buildParams.buildGuid}.zip" "build"
-        ${Input.cloudRunnerTests ? '' : '#'} tree -lh
-        ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}"
         mv "build-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
         /\\/g,
         `/`,
