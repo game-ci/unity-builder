@@ -30,7 +30,7 @@ export class Caching {
       }
       // eslint-disable-next-line func-style
       const formatFunction = function (format: string) {
-        const arguments_ = Array.prototype.slice.call([path.resolve(sourceFolder, '..'), cacheFolder], 1);
+        const arguments_ = Array.prototype.slice.call([path.resolve(sourceFolder, '..'), cacheFolder, cacheKey], 1);
         return format.replace(/{(\d+)}/g, function (match, number) {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
@@ -38,9 +38,10 @@ export class Caching {
       await CloudRunnerSystem.Run(`zip ${cacheKey}.zip ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
-      await (process.env.CLOUD_RUNNER_OVERRIDE_CACHE_PUSH
-        ? CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_OVERRIDE_CACHE_PUSH))
-        : CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`));
+      if (process.env.CLOUD_RUNNER_PRE_CACHE_PUSH) {
+        CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_PRE_CACHE_PUSH));
+      }
+      CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
 
@@ -73,6 +74,21 @@ export class Caching {
 
       const cacheSelection = cacheKey !== `` && fs.existsSync(`${cacheKey}.zip`) ? cacheKey : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
+
+      // eslint-disable-next-line func-style
+      const formatFunction = function (format: string) {
+        const arguments_ = Array.prototype.slice.call(
+          [path.resolve(destinationFolder, '..'), cacheFolder, cacheKey],
+          1,
+        );
+        return format.replace(/{(\d+)}/g, function (match, number) {
+          return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
+        });
+      };
+
+      if (process.env.CLOUD_RUNNER_PRE_CACHE_PULL) {
+        CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_PRE_CACHE_PULL));
+      }
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
         const resultsFolder = `results${CloudRunnerState.buildParams.buildGuid}`;
