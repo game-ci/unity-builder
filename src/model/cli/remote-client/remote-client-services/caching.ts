@@ -28,10 +28,19 @@ export class Caching {
       if (Input.cloudRunnerTests) {
         await CloudRunnerSystem.Run(`ls ${path.basename(sourceFolder)}`);
       }
+      // eslint-disable-next-line func-style
+      const formatFunction = function (format: string) {
+        const arguments_ = Array.prototype.slice.call([path.resolve(sourceFolder, '..'), cacheFolder], 1);
+        return format.replace(/{(\d+)}/g, function (match, number) {
+          return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
+        });
+      };
       await CloudRunnerSystem.Run(`zip ${cacheKey}.zip ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
-      await CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
+      await (process.env.CLOUD_RUNNER_OVERRIDE_CACHE_PUSH
+        ? CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_OVERRIDE_CACHE_PUSH))
+        : CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`));
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
 
