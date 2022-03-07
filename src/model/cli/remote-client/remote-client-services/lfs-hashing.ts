@@ -17,6 +17,7 @@ export class LFSHashing {
           .replace(/\n/g, ``),
         lfsGuidSum: fs
           .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
+          .replace('  .lfs-assets-guid', '')
           .replace(/\n/g, ``),
       };
       return lfsHashes;
