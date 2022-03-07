@@ -51,7 +51,7 @@ class KubernetesStorage {
           return (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending';
         },
         {
-          timeout: 500000,
+          timeout: 750000,
           intervalBetweenAttempts: 15000,
         },
       );
