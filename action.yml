@@ -122,6 +122,22 @@ inputs:
     default: ''
     required: false
     description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+  cachePushOverrideCommand:
+    default: ''
+    required: false
+    description: 'A command run every time a file is pushed to cache, formatted with input file path and remote cache path'
+  cachePullOverrideCommand:
+    default: ''
+    required: false
+    description: 'A command run every time before a file is being pulled from cache, formatted with request cache file and destination path'
+  readInputFromOverrideList:
+    default: ''
+    required: false
+    description: 'Comma separated list of input value names to read from "input override command"'
+  readInputOverrideCommand:
+    default: ''
+    required: false
+    description: 'Extend game ci by specifying a command to execute to pull input from external source e.g cloud provider secret managers'
   kubeConfig:
     default: ''
     required: false
