@@ -98,6 +98,10 @@ inputs:
     required: false
     default: ''
     description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+  customJobHooks:
+    required: false
+    default: ''
+    description: 'Specify custom commands and trigger hooks (injects commands into jobs)'
   customJob:
     required: false
     default: ''
@@ -118,10 +122,6 @@ inputs:
     default: '750M'
     required: false
     description: 'Amount of memory to assign the remote build container'
-  githubToken:
-    default: ''
-    required: false
-    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
   cachePushOverrideCommand:
     default: ''
     required: false
