@@ -64,11 +64,11 @@ export class CloudRunnerState {
   }
 
   public static get unityBuilderRepoUrl(): string {
-    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/game-ci/unity-builder.git`;
+    return `https://${CloudRunnerState.buildParams.gitPrivateToken}@github.com/game-ci/unity-builder.git`;
   }
 
   public static get targetBuildRepoUrl(): string {
-    return `https://${CloudRunnerState.buildParams.githubToken}@github.com/${CloudRunnerState.buildParams.githubRepo}.git`;
+    return `https://${CloudRunnerState.buildParams.gitPrivateToken}@github.com/${CloudRunnerState.buildParams.githubRepo}.git`;
   }
 
   public static get buildVolumeFolder() {

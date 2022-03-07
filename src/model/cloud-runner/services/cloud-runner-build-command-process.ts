@@ -4,7 +4,9 @@ import CloudRunnerSecret from './cloud-runner-secret';
 
 export class CloudRunnerBuildCommandProcessor {
   public static ProcessCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerBuildCommandProcessor.getHooks().filter((x) => x.step.includes(`all`));
+    const hooks = CloudRunnerBuildCommandProcessor.getHooks(buildParameters.customJobHooks).filter((x) =>
+      x.step.includes(`all`),
+    );
 
     return `echo "---"
       echo "start cloud runner init"
@@ -18,8 +20,8 @@ export class CloudRunnerBuildCommandProcessor {
     `;
   }
 
-  public static getHooks(): Hook[] {
-    const experimentHooks = process.env.EXPERIMENTAL_HOOKS;
+  public static getHooks(customJobHooks): Hook[] {
+    const experimentHooks = customJobHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
       try {

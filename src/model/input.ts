@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { GenericInputReader } from './input-readers/generic-input-reader';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
@@ -13,25 +14,70 @@ const core = require('@actions/core');
  */
 class Input {
   public static cliOptions;
+  public static queryOverrides;
   public static githubInputEnabled: boolean = true;
 
   // also enabled debug logging for cloud runner
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
+  private static shouldUseOverride(query) {
+    if (Input.readInputOverrideCommand() !== '') {
+      if (Input.readInputFromOverrideList() !== '') {
+        return Input.readInputFromOverrideList().split(', ').includes(query) ? true : false;
+      } else {
+        return true;
+      }
+    }
+  }
+
+  private static async queryOverride(query) {
+    if (!this.shouldUseOverride(query)) {
+      throw new Error(`Should not be trying to run override query on ${query}`);
+    }
+    // eslint-disable-next-line func-style
+    const formatFunction = function (format: string) {
+      const arguments_ = Array.prototype.slice.call([query], 1);
+      return format.replace(/{(\d+)}/g, function (match, number) {
+        return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
+      });
+    };
+    return await GenericInputReader.Run(formatFunction(Input.readInputOverrideCommand()));
+  }
+
+  public static async PopulateQueryOverrideInput() {
+    const queries = Input.readInputFromOverrideList().split(', ');
+    Input.queryOverrides = new Array();
+    for (const element of queries) {
+      if (Input.shouldUseOverride(element)) {
+        Input.queryOverrides.Push(await Input.queryOverride(element));
+      }
+    }
+  }
+
   private static getInput(query) {
     const coreInput = core.getInput(query);
     if (Input.githubInputEnabled && coreInput && coreInput !== '') {
       return coreInput;
     }
 
-    return Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
-      ? Input.cliOptions[query]
-      : process.env[query] !== undefined
-      ? process.env[query]
-      : process.env[Input.ToEnvVarFormat(query)]
-      ? process.env[Input.ToEnvVarFormat(query)]
-      : '';
+    if (Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined) {
+      return Input.cliOptions[query];
+    }
+
+    if (Input.queryOverrides !== undefined && Input.queryOverrides[query] !== undefined) {
+      return Input.queryOverrides[query];
+    }
+
+    if (process.env[query] !== undefined) {
+      return process.env[query];
+    }
+
+    if (process.env[Input.ToEnvVarFormat(query)] !== undefined) {
+      return process.env[Input.ToEnvVarFormat(query)];
+    }
+
+    return '';
   }
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
@@ -155,7 +201,31 @@ class Input {
   }
 
   static async gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || (await Input.githubToken());
+    return core.getInput('gitPrivateToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+  }
+
+  static get customJob() {
+    return Input.getInput('customJob') || '';
+  }
+
+  static customJobHooks() {
+    return Input.getInput('customJobHooks') || '';
+  }
+
+  static cachePushOverrideCommand() {
+    return Input.getInput('cachePushOverrideCommand') || '';
+  }
+
+  static cachePullOverrideCommand() {
+    return Input.getInput('cachePullOverrideCommand') || '';
+  }
+
+  static readInputFromOverrideList() {
+    return Input.getInput('readInputFromOverrideList') || '';
+  }
+
+  static readInputOverrideCommand() {
+    return Input.getInput('readInputOverrideCommand') || '';
   }
 
   static get chownFilesTo() {
@@ -176,10 +246,6 @@ class Input {
     return Input.getInput('preBuildSteps') || '';
   }
 
-  static get customJob() {
-    return Input.getInput('customJob') || '';
-  }
-
   static get awsBaseStackName() {
     return Input.getInput('awsBaseStackName') || 'game-ci';
   }
@@ -194,10 +260,6 @@ class Input {
 
   static get cloudRunnerMemory() {
     return Input.getInput('cloudRunnerMemory') || '750M';
-  }
-
-  static async githubToken() {
-    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 
   static get kubeConfig() {

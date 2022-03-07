@@ -38,8 +38,8 @@ export class Caching {
       await CloudRunnerSystem.Run(`zip ${cacheKey}.zip ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
-      if (process.env.CLOUD_RUNNER_PRE_CACHE_PUSH) {
-        CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_PRE_CACHE_PUSH));
+      if (CloudRunnerState.buildParams.cachePushOverrideCommand) {
+        CloudRunnerSystem.Run(formatFunction(CloudRunnerState.buildParams.cachePushOverrideCommand));
       }
       CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
@@ -86,8 +86,8 @@ export class Caching {
         });
       };
 
-      if (process.env.CLOUD_RUNNER_PRE_CACHE_PULL) {
-        CloudRunnerSystem.Run(formatFunction(process.env.CLOUD_RUNNER_PRE_CACHE_PULL));
+      if (CloudRunnerState.buildParams.cachePullOverrideCommand) {
+        CloudRunnerSystem.Run(formatFunction(CloudRunnerState.buildParams.cachePullOverrideCommand));
       }
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {

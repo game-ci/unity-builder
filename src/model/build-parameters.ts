@@ -36,12 +36,16 @@ class BuildParameters {
   public remoteBuildCluster!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public githubToken!: string;
   public cloudRunnerMemory!: string;
   public cloudRunnerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public chownFilesTo!: string;
+  public customJobHooks!: string;
+  public cachePushOverrideCommand!: string;
+  public cachePullOverrideCommand!: string;
+  public readInputFromOverrideList!: string;
+  public readInputOverrideCommand!: string;
 
   public postBuildSteps!: string;
   public preBuildSteps!: string;
@@ -63,6 +67,8 @@ class BuildParameters {
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+
+    await Input.PopulateQueryOverrideInput();
 
     let unitySerial = '';
     if (!process.env.UNITY_SERIAL) {
@@ -107,7 +113,6 @@ class BuildParameters {
       cloudRunnerCluster: Input.cloudRunnerCluster,
       awsBaseStackName: Input.awsBaseStackName,
       kubeConfig: Input.kubeConfig,
-      githubToken: await Input.githubToken(),
       cloudRunnerMemory: Input.cloudRunnerMemory,
       cloudRunnerCpu: Input.cloudRunnerCpu,
       kubeVolumeSize: Input.kubeVolumeSize,
@@ -123,6 +128,11 @@ class BuildParameters {
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerNamespace.generateBuildName(Input.runNumber, Input.targetPlatform),
+      customJobHooks: Input.customJobHooks(),
+      cachePullOverrideCommand: Input.cachePullOverrideCommand(),
+      cachePushOverrideCommand: Input.cachePushOverrideCommand(),
+      readInputOverrideCommand: Input.readInputOverrideCommand(),
+      readInputFromOverrideList: Input.readInputFromOverrideList(),
     };
   }
 
