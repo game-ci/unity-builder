@@ -10,6 +10,7 @@ import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
+    cacheKey = cacheKey.replace(' ', '');
     const startPath = process.cwd();
     try {
       if (!fs.existsSync(cacheFolder)) {
@@ -55,6 +56,7 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheKey: string = ``) {
+    cacheKey = cacheKey.replace(' ', '');
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
