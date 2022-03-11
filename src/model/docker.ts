@@ -1,6 +1,8 @@
 import { exec } from '@actions/exec';
 import ImageTag from './image-tag';
 import ImageEnvironmentFactory from './image-environment-factory';
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 class Docker {
   static async build(buildParameters, silent = false) {
@@ -42,12 +44,17 @@ class Docker {
   static getBaseOsSpecificArguments(baseOs, workspace, unitySerial, runnerTemporaryPath, sshAgent): string {
     switch (baseOs) {
       case 'linux':
+        const github_home = join(runnerTemporaryPath, "_github_home");
+        existsSync(github_home) || mkdirSync(github_home);
+        const github_workflow = join(runnerTemporaryPath, "_github_workflow");
+        existsSync(github_workflow) || mkdirSync(github_workflow);
+
         return `--env UNITY_SERIAL \
                 --env GITHUB_WORKSPACE=/github/workspace \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
                 --volume "/var/run/docker.sock":"/var/run/docker.sock:z" \
-                --volume "${runnerTemporaryPath}/_github_home":"/root:z" \
-                --volume "${runnerTemporaryPath}/_github_workflow":"/github/workflow:z" \
+                --volume "${github_home}":"/root:z" \
+                --volume "${github_workflow}":"/github/workflow:z" \
                 --volume "${workspace}":"/github/workspace:z" \
                 ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
                 ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
