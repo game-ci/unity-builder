@@ -45,10 +45,10 @@ class Docker {
         return `--env UNITY_SERIAL \
                 --env GITHUB_WORKSPACE=/github/workspace \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
-                --volume "/var/run/docker.sock":"/var/run/docker.sock" \
-                --volume "${runnerTemporaryPath}/_github_home":"/root" \
-                --volume "${runnerTemporaryPath}/_github_workflow":"/github/workflow" \
-                --volume "${workspace}":"/github/workspace" \
+                --volume "/var/run/docker.sock":"/var/run/docker.sock:z" \
+                --volume "${runnerTemporaryPath}/_github_home":"/root:z" \
+                --volume "${runnerTemporaryPath}/_github_workflow":"/github/workflow:z" \
+                --volume "${workspace}":"/github/workspace:z" \
                 ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
                 ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
       case 'win32':
