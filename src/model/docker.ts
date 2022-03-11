@@ -45,11 +45,9 @@ class Docker {
     switch (baseOs) {
       case 'linux':
         const github_home = join(runnerTemporaryPath, "_github_home");
-        if (!existsSync(github_home))
-          mkdirSync(github_home);
+        if (!existsSync(github_home)) mkdirSync(github_home);
         const github_workflow = join(runnerTemporaryPath, "_github_workflow");
-        if (!existsSync(github_workflow))
-          mkdirSync(github_workflow);
+        if (!existsSync(github_workflow)) mkdirSync(github_workflow);
 
         return `--env UNITY_SERIAL \
                 --env GITHUB_WORKSPACE=/github/workspace \
