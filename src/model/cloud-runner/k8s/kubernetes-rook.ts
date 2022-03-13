@@ -11,8 +11,8 @@ class KubernetesRook {
       await CloudRunnerSystem.Run(`
         git clone --single-branch --branch v1.8.6 https://github.com/rook/rook.git
         cd rook/deploy/examples
-        kubectl create -f crds.yaml -f common.yaml -f operator.yaml
-        kubectl create -f cluster.yaml
+        kubectl apply -f crds.yaml -f common.yaml -f operator.yaml
+        kubectl apply -f cluster.yaml
       `);
       fs.writeFileSync(
         'filesystem.yaml',
@@ -69,7 +69,7 @@ class KubernetesRook {
       `,
       );
       await CloudRunnerSystem.Run(`
-        kubectl create -f storageclass.yaml -f filesystem.yaml
+        kubectl apply -f storageclass.yaml -f filesystem.yaml
       `);
     } else {
       CloudRunnerLogger.log(`Using kubeStorageClass ${storageName}`);
