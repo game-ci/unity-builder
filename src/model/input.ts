@@ -82,6 +82,7 @@ class Input {
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
+
   static async githubRepo() {
     return (
       Input.getInput('GITHUB_REPOSITORY') ||
@@ -272,6 +273,10 @@ class Input {
 
   static get kubeVolumeSize() {
     return Input.getInput('kubeVolumeSize') || '5Gi';
+  }
+
+  static get kubeStorageClass(): string {
+    return Input.getInput('kubeStorageClass') || '';
   }
 
   public static ToEnvVarFormat(input: string) {

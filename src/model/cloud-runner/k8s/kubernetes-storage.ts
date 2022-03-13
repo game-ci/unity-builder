@@ -4,6 +4,7 @@ import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import YAML from 'yaml';
+import KubernetesRook from './kubernetes-rook';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -83,7 +84,8 @@ class KubernetesStorage {
     };
     pvc.spec = {
       accessModes: ['ReadWriteOnce'],
-      storageClassName: process.env.K8s_STORAGE_CLASS || 'standard',
+      storageClassName:
+        buildParameters.kubeStorageClass === '' ? KubernetesRook.rookStorageName : buildParameters.kubeStorageClass,
       resources: {
         requests: {
           storage: buildParameters.kubeVolumeSize,

@@ -40,6 +40,7 @@ class BuildParameters {
   public cloudRunnerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
+  public kubeStorageClass!: string;
   public chownFilesTo!: string;
   public customJobHooks!: string;
   public cachePushOverrideCommand!: string;
@@ -133,6 +134,7 @@ class BuildParameters {
       cachePushOverrideCommand: Input.cachePushOverrideCommand(),
       readInputOverrideCommand: Input.readInputOverrideCommand(),
       readInputFromOverrideList: Input.readInputFromOverrideList(),
+      kubeStorageClass: Input.kubeStorageClass,
     };
   }
 

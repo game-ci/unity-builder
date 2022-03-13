@@ -12,7 +12,7 @@ import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
-import { CloudRunnerSystem } from '../../cli/remote-client/remote-client-services/cloud-runner-system';
+import KubernetesRook from './kubernetes-rook';
 
 class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -51,14 +51,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
       this.pvcName = `unity-builder-pvc-${buildGuid}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
       this.serviceAccountName = `service-account-${buildGuid}`;
-      if (await CloudRunnerSystem.Run(`kubectl`)) {
-        await CloudRunnerSystem.Run(`
-          git clone --single-branch --branch v1.8.6 https://github.com/rook/rook.git
-          cd rook/deploy/examples
-          kubectl create -f crds.yaml -f common.yaml -f operator.yaml
-          kubectl create -f cluster.yaml
-        `);
-      }
+      await KubernetesRook.InitRook(buildParameters.kubeStorageClass);
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,
