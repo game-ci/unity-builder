@@ -67,7 +67,7 @@
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
       "eslint",
-      "jest --findRelatedTests"
+      "jest --findRelatedTests --passWithNoTests"
     ],
     "*.{json,md,yaml,yml}": [
       "prettier --write"
