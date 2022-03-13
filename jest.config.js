@@ -8,4 +8,5 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest',
   },
   verbose: true,
+  modulePathIgnorePatterns: ['<rootDir>/lib/', '<rootDir>/dist/'],
 };
