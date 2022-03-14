@@ -60,9 +60,10 @@ describe('Cloud Runner', () => {
       const buildParameter = await BuildParameters.create();
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
-      expect(results).toContain('library not included');
+      const libraryString = 'Rebuilding Library because the asset database could not be found!';
+      expect(results).toContain(libraryString);
       const results2 = await CloudRunner.run(buildParameter, baseImage.toString());
-      expect(results2).toContain('library included');
+      expect(results2).toEqual(expect.not.stringContaining(libraryString));
       Input.githubInputEnabled = true;
     }, 1000000);
   }

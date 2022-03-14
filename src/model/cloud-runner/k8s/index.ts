@@ -13,6 +13,7 @@ import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 import KubernetesRook from './kubernetes-rook';
+import DependencyOverrideService from '../services/depdency-override-service';
 
 class Kubernetes implements CloudRunnerProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -52,6 +53,9 @@ class Kubernetes implements CloudRunnerProviderInterface {
       this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
       this.serviceAccountName = `service-account-${buildGuid}`;
       await KubernetesRook.InitRook(buildParameters.kubeStorageClass);
+      if (await DependencyOverrideService.CheckHealth()) {
+        await DependencyOverrideService.TryStartDependencies();
+      }
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,

@@ -279,6 +279,14 @@ class Input {
     return Input.getInput('kubeStorageClass') || '';
   }
 
+  static get checkDependencyHealthOverride(): string {
+    return Input.getInput('checkDependencyHealthOverride') || '';
+  }
+
+  static get startDependenciesOverride(): string {
+    return Input.getInput('startDependenciesOverride') || '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     return input
       .replace(/([A-Z])/g, ' $1')
