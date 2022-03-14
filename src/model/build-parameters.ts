@@ -47,6 +47,9 @@ class BuildParameters {
   public cachePullOverrideCommand!: string;
   public readInputFromOverrideList!: string;
   public readInputOverrideCommand!: string;
+  public checkDependencyHealthOverride!: string;
+  public startDependenciesOverride!: string;
+  public cacheKey!: string;
 
   public postBuildSteps!: string;
   public preBuildSteps!: string;
@@ -135,6 +138,9 @@ class BuildParameters {
       readInputOverrideCommand: Input.readInputOverrideCommand(),
       readInputFromOverrideList: Input.readInputFromOverrideList(),
       kubeStorageClass: Input.kubeStorageClass,
+      checkDependencyHealthOverride: Input.checkDependencyHealthOverride,
+      startDependenciesOverride: Input.startDependenciesOverride,
+      cacheKey: Input.cacheKey,
     };
   }
 

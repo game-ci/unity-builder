@@ -287,6 +287,10 @@ class Input {
     return Input.getInput('startDependenciesOverride') || '';
   }
 
+  static get cacheKey(): string {
+    return Input.getInput('cacheKey') || '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     return input
       .replace(/([A-Z])/g, ' $1')

@@ -5,6 +5,14 @@ import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import UnityVersioning from '../unity-versioning';
 
+function guid() {
+  return Math.trunc((1 + Math.random()) * 0x10000)
+    .toString(16)
+    .slice(1);
+}
+function guidGenerator() {
+  return `${guid() + guid()}-${guid()}-${guid()}-${guid()}-${guid()}${guid()}${guid()}`;
+}
 describe('Cloud Runner', () => {
   it('responds', () => {});
 });
@@ -55,6 +63,7 @@ describe('Cloud Runner', () => {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
+        cacheKey: `test-case-${guidGenerator()}`,
       };
       Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();

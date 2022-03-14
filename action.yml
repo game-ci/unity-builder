@@ -154,15 +154,18 @@ inputs:
     default: '5Gi'
     required: false
     description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
-  # To Do - enables resilience
-  # checkDependencyHealthOverride:
-  #   default: ''
-  #   required: false
-  #   description: 'Use to specify a way to check depdency services health to enable resilient self-starting jobs'
-  # startDependenciesOverride:
-  #   default: ''
-  #   required: false
-  #   description: 'Use to specify a way to start depdency services health to enable resilient self-starting jobs'
+  cacheKey:
+    default: 'branch'
+    required: false
+    description: 'Cache key to indicate bucket for cache'
+  checkDependencyHealthOverride:
+    default: ''
+    required: false
+    description: 'Use to specify a way to check depdency services health to enable resilient self-starting jobs'
+  startDependenciesOverride:
+    default: ''
+    required: false
+    description: 'Use to specify a way to start depdency services health to enable resilient self-starting jobs'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

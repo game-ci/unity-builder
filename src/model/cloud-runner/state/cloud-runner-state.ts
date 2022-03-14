@@ -16,12 +16,7 @@ export class CloudRunnerState {
   }
 
   public static get cacheFolderFull(): string {
-    return path.join(
-      '/',
-      CloudRunnerState.buildVolumeFolder,
-      CloudRunnerState.cacheFolder,
-      CloudRunnerState.branchName,
-    );
+    return path.join('/', CloudRunnerState.buildVolumeFolder, CloudRunnerState.cacheFolder, CloudRunnerState.cacheKey);
   }
 
   static setup(buildParameters: BuildParameters) {
@@ -30,6 +25,10 @@ export class CloudRunnerState {
 
   public static get branchName(): string {
     return CloudRunnerState.buildParams.branch;
+  }
+
+  public static get cacheKey(): string {
+    return CloudRunnerState.buildParams.cacheKey || CloudRunnerState.buildParams.branch;
   }
   public static get builderPathFull(): string {
     return path.join(CloudRunnerState.buildPathFull, `builder`);
