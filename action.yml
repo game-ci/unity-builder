@@ -149,7 +149,7 @@ inputs:
   kubeStorageClass:
     default: ''
     required: false
-    description: '' # Storage class to use for cloud runner jobs, default is empty which will install a ceph based Rook storage and use that. Standard is a very common alternative to use a cloud provider's built in storage
+    description: 'Kubernetes storage class to use for cloud runner jobs, leave empty to install rook cluster.'
   kubeVolumeSize:
     default: '5Gi'
     required: false

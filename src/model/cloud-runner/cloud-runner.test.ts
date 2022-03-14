@@ -13,6 +13,7 @@ describe('Cloud Runner', () => {
   const testSecretValue = 'testSecretValue';
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
+      // build parameters
       Input.cliOptions = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -27,9 +28,12 @@ describe('Cloud Runner', () => {
         `,
       };
       Input.githubInputEnabled = false;
+      // setup parameters
       const buildParameter = await BuildParameters.create();
       const baseImage = new ImageTag(buildParameter);
+      // run the job
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
+      // assert results
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
@@ -44,6 +48,21 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
+      Input.githubInputEnabled = true;
+    }, 1000000);
+    it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
+      Input.cliOptions = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.read('test-project'),
+      };
+      Input.githubInputEnabled = false;
+      const buildParameter = await BuildParameters.create();
+      const baseImage = new ImageTag(buildParameter);
+      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      expect(results).toContain('library not included');
+      const results2 = await CloudRunner.run(buildParameter, baseImage.toString());
+      expect(results2).toContain('library included');
       Input.githubInputEnabled = true;
     }, 1000000);
   }
