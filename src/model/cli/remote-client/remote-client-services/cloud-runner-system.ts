@@ -2,9 +2,11 @@ import { exec } from 'child_process';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class CloudRunnerSystem {
-  public static async Run(command: string, suppressError = false) {
+  public static async Run(command: string, suppressError = false, suppressLogs = false) {
     for (const element of command.split(`\n`)) {
-      RemoteClientLogger.log(element);
+      if (!suppressLogs) {
+        RemoteClientLogger.log(element);
+      }
     }
     return await new Promise<string>((promise) => {
       let output = '';
@@ -14,7 +16,9 @@ export class CloudRunnerSystem {
         }
         if (stderr) {
           const diagnosticOutput = `${stderr.toString()}`;
-          RemoteClientLogger.logCliDiagnostic(diagnosticOutput);
+          if (!suppressLogs) {
+            RemoteClientLogger.logCliDiagnostic(diagnosticOutput);
+          }
           output += diagnosticOutput;
           return;
         }
@@ -28,7 +32,9 @@ export class CloudRunnerSystem {
         }
         const outputLines = output.split(`\n`);
         for (const element of outputLines) {
-          RemoteClientLogger.log(element);
+          if (!suppressLogs) {
+            RemoteClientLogger.log(element);
+          }
         }
         promise(output);
       });

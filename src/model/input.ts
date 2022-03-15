@@ -5,6 +5,14 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
 
+const formatFunction = (value, arguments_) => {
+  let formatted = value;
+  for (const argument in arguments_) {
+    formatted = formatted.replace(`{${arguments_[argument].key}}`, arguments_[argument].value);
+  }
+  return formatted;
+};
+
 const core = require('@actions/core');
 
 /**
@@ -24,7 +32,7 @@ class Input {
   private static shouldUseOverride(query) {
     if (Input.readInputOverrideCommand() !== '') {
       if (Input.readInputFromOverrideList() !== '') {
-        return Input.readInputFromOverrideList().split(', ').includes(query) ? true : false;
+        return Input.readInputFromOverrideList().split(',').includes(query) ? true : false;
       } else {
         return true;
       }
@@ -35,22 +43,16 @@ class Input {
     if (!this.shouldUseOverride(query)) {
       throw new Error(`Should not be trying to run override query on ${query}`);
     }
-    // eslint-disable-next-line func-style
-    const formatFunction = function (format: string) {
-      const arguments_ = Array.prototype.slice.call([query], 1);
-      return format.replace(/{(\d+)}/g, function (match, number) {
-        return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
-      });
-    };
-    return await GenericInputReader.Run(formatFunction(Input.readInputOverrideCommand()));
+
+    return await GenericInputReader.Run(formatFunction(Input.readInputOverrideCommand(), [{ key: 0, value: query }]));
   }
 
   public static async PopulateQueryOverrideInput() {
-    const queries = Input.readInputFromOverrideList().split(', ');
+    const queries = Input.readInputFromOverrideList().split(',');
     Input.queryOverrides = new Array();
     for (const element of queries) {
       if (Input.shouldUseOverride(element)) {
-        Input.queryOverrides.Push(await Input.queryOverride(element));
+        Input.queryOverrides.push(await Input.queryOverride(element));
       }
     }
   }
