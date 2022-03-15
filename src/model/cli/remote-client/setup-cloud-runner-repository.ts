@@ -45,7 +45,9 @@ export class SetupCloudRunnerRepository {
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
-      await CloudRunnerSystem.Run(`git lfs install --skip-smudge`);
+      await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
+      await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
+      await CloudRunnerSystem.Run(`git lfs install`);
       await CloudRunnerSystem.Run(
         `git clone ${CloudRunnerState.targetBuildRepoUrl} ${path.resolve(
           `..`,
@@ -67,6 +69,8 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
     }
     process.chdir(CloudRunnerState.repoPathFull);
+    await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
+    await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
     assert(fs.existsSync(CloudRunnerState.lfsDirectoryFull));
