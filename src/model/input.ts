@@ -32,7 +32,10 @@ class Input {
   private static shouldUseOverride(query) {
     if (Input.readInputOverrideCommand() !== '') {
       if (Input.readInputFromOverrideList() !== '') {
-        return Input.readInputFromOverrideList().split(',').includes(query) ? true : false;
+        const doesInclude =
+          Input.readInputFromOverrideList().split(',').includes(query) ||
+          Input.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
+        return doesInclude ? true : false;
       } else {
         return true;
       }
@@ -52,12 +55,12 @@ class Input {
     Input.queryOverrides = new Array();
     for (const element of queries) {
       if (Input.shouldUseOverride(element)) {
-        Input.queryOverrides.push(await Input.queryOverride(element));
+        Input.queryOverrides[element] = await Input.queryOverride(element);
       }
     }
   }
 
-  private static getInput(query) {
+  public static getInput(query) {
     const coreInput = core.getInput(query);
     if (Input.githubInputEnabled && coreInput && coreInput !== '') {
       return coreInput;
@@ -67,8 +70,14 @@ class Input {
       return Input.cliOptions[query];
     }
 
-    if (Input.queryOverrides !== undefined && Input.queryOverrides[query] !== undefined) {
-      return Input.queryOverrides[query];
+    if (Input.queryOverrides !== undefined) {
+      if (Input.queryOverrides[query] !== null) {
+        return Input.queryOverrides[query];
+      }
+
+      if (Input.queryOverrides[Input.ToEnvVarFormat(query)] !== null) {
+        return Input.queryOverrides[Input.ToEnvVarFormat(query)];
+      }
     }
 
     if (process.env[query] !== undefined) {

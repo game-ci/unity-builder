@@ -155,7 +155,7 @@ inputs:
     required: false
     description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
   cacheKey:
-    default: 'branch'
+    default: ''
     required: false
     description: 'Cache key to indicate bucket for cache'
   checkDependencyHealthOverride:

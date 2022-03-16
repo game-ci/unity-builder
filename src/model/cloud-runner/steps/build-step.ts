@@ -45,7 +45,7 @@ export class BuildStep implements StepInterface {
         chmod -R +x "/steps"
         /entrypoint.sh
         apt-get update
-        apt-get install -y -q zip tree
+        apt-get install -y -q zip tree nodejs
         cd "${CloudRunnerState.libraryFolderFull.replace(/\\/g, `/`)}/.."
         zip -r "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "Library"
         mv "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
