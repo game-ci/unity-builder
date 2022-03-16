@@ -75,7 +75,7 @@ class BuildParameters {
     await Input.PopulateQueryOverrideInput();
 
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL) {
+    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && Input.cliOptions === undefined) {
       //No serial was present so it is a personal license that we need to convert
       if (!process.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
