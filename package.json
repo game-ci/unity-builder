@@ -66,7 +66,8 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "eslint"
+      "eslint",
+      "jest --findRelatedTests"
     ],
     "*.{json,md,yaml,yml}": [
       "prettier --write"
