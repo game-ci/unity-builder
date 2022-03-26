@@ -1,6 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn lint-staged --verbose
-yarn build
-git add dist
+# Check changed files
+yarn lint-staged
+
+# Compile the action
+yarn build ; git add dist

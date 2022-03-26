@@ -7,11 +7,11 @@
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
   "scripts": {
+    "prepare": "husky install",
     "prebuild": "yarn",
     "build": "tsc && ncc build lib --source-map --license licenses.txt",
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
-    "prepare": "husky install",
     "cli": "yarn ts-node src/index.ts -m cli",
     "cli-aws": "cross-env cloudRunnerCluster=aws yarn run test-cli",
     "cli-k8s": "cross-env cloudRunnerCluster=k8s yarn run test-cli",
@@ -66,8 +66,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "eslint",
-      "jest --findRelatedTests --passWithNoTests"
+      "eslint"
     ],
     "*.{json,md,yaml,yml}": [
       "prettier --write"
