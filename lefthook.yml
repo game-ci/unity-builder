@@ -2,33 +2,37 @@
 # Refer for explanation to following link:
 # https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
 #
-# pre-push:
-#   commands:
-#     packages-audit:
-#       tags: frontend security
-#       run: yarn audit
-#     gems-audit:
-#       tags: backend security
-#       run: bundle audit
-#
-# pre-commit:
-#   parallel: true
-#   commands:
-#     eslint:
-#       glob: "*.{js,ts}"
-#       run: yarn eslint {staged_files}
-#     rubocop:
-#       tags: backend style
-#       glob: "*.rb"
-#       exclude: "application.rb|routes.rb"
-#       run: bundle exec rubocop --force-exclusion {all_files}
-#     govet:
-#       tags: backend style
-#       files: git ls-files -m
-#       glob: "*.go"
-#       run: go vet {files}
-#   scripts:
-#     "hello.js":
-#       runner: node
-#     "any.go":
-#       runner: go run
+
+color: true
+extends: {}
+
+pre-push:
+  parallel: true
+  commands:
+    packages-audit:
+      tags: security
+      run: yarn audit
+
+pre-commit:
+  parallel: true
+  commands:
+    format documents:
+      glob: '*.{md,mdx}'
+      run: yarn prettier --write {staged_files}
+    format configs:
+      glob: '*.{json,yml,yaml}'
+      run: yarn prettier --write {staged_files}
+    format code:
+      glob: '*.{js,jsx,ts,tsx}'
+      exclude: 'dist/'
+      run: yarn prettier --write {staged_files} && yarn eslint {staged_files} && git add {staged_files}
+    run tests:
+      glob: '*.{js,jsx,ts,tsx}'
+      exclude: 'dist/'
+      run: yarn jest --passWithNoTests --findRelatedTests {staged_files}
+    build distributables:
+      skip: ['merge', 'rebase']
+      run: yarn build && git add dist
+    make shell script executable:
+      glob: '*.sh'
+      run: git update-index --chmod=+x
