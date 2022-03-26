@@ -2,7 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # Enable colors in Powershell (has scrolling issue?)
-# export FORCE_COLOR=1
+#export FORCE_COLOR=1
 
 # Check changed files
 yarn lint-staged
