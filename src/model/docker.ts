@@ -52,7 +52,6 @@ class Docker {
         return `--env UNITY_SERIAL \
                 --env GITHUB_WORKSPACE=/github/workspace \
                 ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
-                --volume "/var/run/docker.sock":"/var/run/docker.sock" \
                 --volume "${githubHome}":"/root:z" \
                 --volume "${githubWorkflow}":"/github/workflow:z" \
                 --volume "${workspace}":"/github/workspace:z" \
