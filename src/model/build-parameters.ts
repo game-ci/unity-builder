@@ -55,15 +55,13 @@ class BuildParameters {
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
-
     const unityVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
-
     const buildVersion = await Versioning.determineVersion(Input.versioningStrategy, Input.specifiedVersion);
-
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
-
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
 
+    // Todo - Don't use process.env directly, that's what the input model class is for.
+    // ---
     let unitySerial = '';
     if (!process.env.UNITY_SERIAL) {
       //No serial was present so it is a personal license that we need to convert
@@ -78,6 +76,7 @@ class BuildParameters {
       unitySerial = process.env.UNITY_SERIAL!;
     }
     core.setSecret(unitySerial);
+    // ---
 
     return {
       version: unityVersion,

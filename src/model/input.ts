@@ -147,7 +147,7 @@ class Input {
   }
 
   static get androidTargetSdkVersion() {
-    return core.getInput('androidTargetSdkVersion') || '';
+    return Input.getInput('androidTargetSdkVersion') || '';
   }
 
   static get sshAgent() {
@@ -155,7 +155,7 @@ class Input {
   }
 
   static async gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || (await Input.githubToken());
+    return Input.getInput('gitPrivateToken') || (await Input.githubToken());
   }
 
   static get chownFilesTo() {
