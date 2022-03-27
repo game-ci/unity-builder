@@ -8,11 +8,11 @@ jest.spyOn(core, 'warning').mockImplementation(() => {});
 jest.spyOn(core, 'error').mockImplementation(() => {});
 const execSpy = jest.spyOn(exec, 'exec').mockImplementation(async () => 0);
 
+afterEach(() => jest.clearAllMocks());
+
 describe('System', () => {
   describe('run', () => {
     describe('units', () => {
-      beforeEach(() => jest.clearAllMocks());
-
       it('passes the command to command line', async () => {
         await expect(System.run('echo test')).resolves.not.toBeNull();
         await expect(execSpy).toHaveBeenLastCalledWith('echo test', expect.anything(), expect.anything());
