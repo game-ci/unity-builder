@@ -55,6 +55,7 @@
     "eslint-plugin-unicorn": "28.0.2",
     "jest": "^27.5.1",
     "jest-circus": "^27.5.1",
+    "jest-fail-on-console": "^2.3.0",
     "js-yaml": "^4.1.0",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
