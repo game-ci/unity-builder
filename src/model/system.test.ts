@@ -11,7 +11,7 @@ const execSpy = jest.spyOn(exec, 'exec').mockImplementation(async () => 0);
 describe('System', () => {
   describe('run', () => {
     describe('units', () => {
-      afterEach(() => jest.clearAllMocks());
+      beforeEach(() => jest.clearAllMocks());
 
       it('passes the command to command line', async () => {
         await expect(System.run('echo test')).resolves.not.toBeNull();
