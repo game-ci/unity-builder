@@ -13,8 +13,6 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    let builtImage;
-
     if (
       buildParameters.cloudRunnerCluster &&
       buildParameters.cloudRunnerCluster !== '' &&
@@ -27,7 +25,6 @@ async function runMain() {
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder, workspace, buildParameters);
       } else {
-        //builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
         await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
       }
     }
