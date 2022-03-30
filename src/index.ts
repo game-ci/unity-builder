@@ -8,7 +8,7 @@ async function runMain() {
     Action.checkCompatibility();
     Cache.verify();
 
-    const { dockerfile, workspace, actionFolder } = Action;
+    const { workspace, actionFolder } = Action;
 
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
