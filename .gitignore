@@ -4,3 +4,4 @@ coverage/
 lib/
 .vsconfig
 yarn-error.log
+.orig
