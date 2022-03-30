@@ -5,21 +5,6 @@ import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async build(buildParameters, silent = false) {
-    const { path: buildPath, dockerfile, baseImage } = buildParameters;
-    const { version, platform } = baseImage;
-
-    const tag = new ImageTag({ repository: '', name: 'unity-builder', version, platform });
-    const command = `docker build ${buildPath} \
-      --file ${dockerfile} \
-      --build-arg IMAGE=${baseImage} \
-      --tag ${tag}`;
-
-    await exec(command, undefined, { silent });
-
-    return tag;
-  }
-
   static async run(image, parameters, silent = false) {
     let runCommand = '';
     switch (process.platform) {
@@ -33,7 +18,7 @@ class Docker {
   }
 
   static getLinuxCommand(image, parameters): string {
-    const { workspace, actionFolder, unitySerial, runnerTempPath, sshAgent } = parameters;
+    const { workspace, actionFolder, runnerTempPath, sshAgent } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
@@ -56,7 +41,6 @@ class Docker {
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
             ${image} \
-            -- \
             /bin/bash -c /entrypoint.sh`;
   }
 
@@ -78,7 +62,6 @@ class Docker {
             --volume "${actionFolder}/platforms/windows/entrypoint.ps1":"c:/entrypoint.ps1" \
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
             ${image} \
-            -- \
             powershell c:/entrypoint.ps1`;
   }
 }
