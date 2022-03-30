@@ -37,7 +37,7 @@ class Docker {
     --rm \
     ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
     ${baseOsSpecificArguments} \
-    ${image} -- \
+    ${image} \
     /usr/bin/bash -c /entrypoint.sh`;
 
     await exec(runCommand, undefined, { silent });
