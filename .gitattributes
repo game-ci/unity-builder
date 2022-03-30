@@ -1,5 +1,6 @@
-* text eol=lf
+[attr]generated-code-file -diff text eol=lf linguist-generated=true
+[attr]generated-binary-file -diff -text linguist-generated=true
 
-dist/index* -diff linguist-generated=true
-dist/licenses* -diff linguist-generated=true
-dist/sourcemap* -diff linguist-generated=true
+dist/index* generated-code-file
+dist/licenses* generated-code-file
+dist/sourcemap* generated-code-file
