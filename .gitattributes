@@ -1,5 +1,5 @@
-[attr]generated-code-file -diff text eol=lf linguist-generated=true
-[attr]generated-binary-file -diff -text linguist-generated=true
+[attr]generated-code-file text eol=lf -diff linguist-generated=true
+[attr]generated-binary-file -text -diff linguist-generated=true
 
 dist/index* generated-code-file
 dist/licenses* generated-code-file
