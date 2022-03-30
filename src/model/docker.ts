@@ -1,5 +1,4 @@
 import { exec } from '@actions/exec';
-import ImageTag from './image-tag';
 import ImageEnvironmentFactory from './image-environment-factory';
 import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
