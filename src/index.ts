@@ -27,8 +27,8 @@ async function runMain() {
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder, workspace, buildParameters);
       } else {
-        builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-        await Docker.run(builtImage, { workspace, ...buildParameters });
+        //builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
+        await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
       }
     }
 

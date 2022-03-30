@@ -21,11 +21,12 @@ class Docker {
   }
 
   static async run(image, parameters, silent = false) {
-    const { workspace, unitySerial, runnerTempPath, sshAgent } = parameters;
+    const { workspace, actionFolder, unitySerial, runnerTempPath, sshAgent } = parameters;
 
     const baseOsSpecificArguments = this.getBaseOsSpecificArguments(
       process.platform,
       workspace,
+      actionFolder,
       unitySerial,
       runnerTempPath,
       sshAgent,
@@ -36,12 +37,13 @@ class Docker {
     --rm \
     ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
     ${baseOsSpecificArguments} \
-    ${image}`;
+    ${image} -- \
+    /usr/bin/bash -c /entrypoint.sh`;
 
     await exec(runCommand, undefined, { silent });
   }
 
-  static getBaseOsSpecificArguments(baseOs, workspace, unitySerial, runnerTemporaryPath, sshAgent): string {
+  static getBaseOsSpecificArguments(baseOs, workspace, actionFolder, unitySerial, runnerTemporaryPath, sshAgent): string {
     switch (baseOs) {
       case 'linux': {
         const githubHome = path.join(runnerTemporaryPath, '_github_home');
@@ -55,6 +57,9 @@ class Docker {
                 --volume "${githubHome}":"/root:z" \
                 --volume "${githubWorkflow}":"/github/workflow:z" \
                 --volume "${workspace}":"/github/workspace:z" \
+                --volume "${actionFolder}/default-build-script:/UnityBuilderAction:z" \
+                --volume "${actionFolder}/platforms/ubuntu/steps:/steps:z" \
+                --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
                 ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
                 ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
       }
