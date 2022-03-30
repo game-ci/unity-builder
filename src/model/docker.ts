@@ -43,7 +43,14 @@ class Docker {
     await exec(runCommand, undefined, { silent });
   }
 
-  static getBaseOsSpecificArguments(baseOs, workspace, actionFolder, unitySerial, runnerTemporaryPath, sshAgent): string {
+  static getBaseOsSpecificArguments(
+    baseOs,
+    workspace,
+    actionFolder,
+    unitySerial,
+    runnerTemporaryPath,
+    sshAgent,
+  ): string {
     switch (baseOs) {
       case 'linux': {
         const githubHome = path.join(runnerTemporaryPath, '_github_home');
