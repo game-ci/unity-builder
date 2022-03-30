@@ -30,11 +30,4 @@ describe('Action', () => {
     expect(path.basename(actionFolder)).toStrictEqual('dist');
     expect(fs.existsSync(actionFolder)).toStrictEqual(true);
   });
-
-  it('returns the docker file', () => {
-    const { dockerfile } = Action;
-
-    expect(path.basename(dockerfile)).toStrictEqual('Dockerfile');
-    expect(fs.existsSync(dockerfile)).toStrictEqual(true);
-  });
 });
