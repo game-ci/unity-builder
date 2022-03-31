@@ -57,11 +57,10 @@ class Docker {
             --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
             --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
             --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
-            --volume "${actionFolder}/platforms/ubuntu/steps":"c:/steps" \
-            --volume "${actionFolder}/platforms/windows/entrypoint.ps1":"c:/entrypoint.ps1" \
+            --volume "${actionFolder}/platforms/windows":"c:/steps" \
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
             ${image} \
-            powershell c:/entrypoint.ps1`;
+            powershell c:/steps/entrypoint.ps1`;
   }
 }
 
