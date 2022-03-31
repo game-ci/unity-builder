@@ -28,10 +28,14 @@ if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   fi
 
   # Activate license
-  ACTIVATION_OUTPUT=$(unity-editor \
-      -logFile /dev/stdout \
-      -quit \
-      -manualLicenseFile $FILE_PATH)
+  # Set to always return true, otherwise the shell will exit on pipelines set to fail on error
+  ACTIVATION_OUTPUT=UnityActivation.log
+
+  unity-editor \
+    -logFile "$ACTIVATION_OUTPUT" \
+    -quit \
+    -manualLicenseFile $FILE_PATH \
+    || true
 
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
@@ -43,7 +47,7 @@ if [[ -n "$UNITY_LICENSE" ]] || [[ -n "$UNITY_LICENSE_FILE" ]]; then
   #
   #   "LICENSE SYSTEM [2020120 18:51:20] Next license update check is after 2019-11-25T18:23:38"
   #
-  ACTIVATION_SUCCESSFUL=$(echo $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l)
+  ACTIVATION_SUCCESSFUL=$(cat $ACTIVATION_OUTPUT | grep 'Next license update check is after' | wc -l)
 
   # Set exit code to 0 if activation was successful
   if [[ $ACTIVATION_SUCCESSFUL -eq 1 ]]; then
