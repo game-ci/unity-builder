@@ -5,23 +5,32 @@ class ImageTag {
   public name: string;
   public version: string;
   public platform: any;
-  public builderPlatform: string;
+  public builderPlatformSuffix: string;
+  public cloudRunnerBuilderPlatform: string;
   public customImage: any;
 
   constructor(imageProperties) {
-    const { repository = 'unityci', name = 'editor', version = '2019.2.11f1', platform, customImage } = imageProperties;
+    const {
+      repository = 'unityci',
+      name = 'editor',
+      version = '2019.2.11f1',
+      platform,
+      cloudRunnerBuilderPlatform,
+      customImage,
+    } = imageProperties;
 
     if (!ImageTag.versionPattern.test(version)) {
       throw new Error(`Invalid version "${version}".`);
     }
 
-    const builderPlatform = ImageTag.getTargetPlatformToImageSuffixMap(platform, version);
+    const builderPlatformSuffix = ImageTag.getTargetPlatformToImageSuffixMap(platform, version);
 
     this.repository = repository;
     this.name = name;
     this.version = version;
     this.platform = platform;
-    this.builderPlatform = builderPlatform;
+    this.builderPlatformSuffix = builderPlatformSuffix;
+    this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
     this.customImage = customImage;
   }
 
@@ -120,12 +129,13 @@ class ImageTag {
   }
 
   get tag() {
+    const tagPlatform = this.cloudRunnerBuilderPlatform ? this.cloudRunnerBuilderPlatform : process.platform;
     //We check the host os so we know what type of the images we need to pull
-    switch (process.platform) {
+    switch (tagPlatform) {
       case 'win32':
-        return `windows-${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+        return `windows-${this.version}-${this.builderPlatformSuffix}`.replace(/-+$/, '');
       case 'linux':
-        return `${this.version}-${this.builderPlatform}`.replace(/-+$/, '');
+        return `${this.version}-${this.builderPlatformSuffix}`.replace(/-+$/, '');
       default:
         break;
     }

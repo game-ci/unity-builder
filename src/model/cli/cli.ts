@@ -11,15 +11,6 @@ import * as SDK from 'aws-sdk';
 
 export class CLI {
   private static options;
-  static async RunCli(): Promise<void> {
-    Input.githubInputEnabled = false;
-    await Input.PopulateQueryOverrideInput();
-    CLI.logInput();
-    const results = GetCliFunctions(CLI.options.mode);
-    CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
-    CLI.options.versioning = 'None';
-    return await results.target[results.propertyKey]();
-  }
 
   public static InitCliMode() {
     const program = new Command();
@@ -39,6 +30,16 @@ export class CLI {
     CLI.options = program.opts();
     Input.cliOptions = CLI.options;
     return Input.cliMode;
+  }
+
+  static async RunCli(): Promise<void> {
+    Input.githubInputEnabled = false;
+    await Input.PopulateQueryOverrideInput();
+    CLI.logInput();
+    const results = GetCliFunctions(CLI.options.mode);
+    CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
+    CLI.options.versioning = 'None';
+    return await results.target[results.propertyKey]();
   }
 
   private static logInput() {

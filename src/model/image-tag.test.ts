@@ -28,7 +28,7 @@ describe('ImageTag', () => {
       expect(image.name).toStrictEqual(some.name);
       expect(image.version).toStrictEqual(some.version);
       expect(image.platform).toStrictEqual(some.platform);
-      expect(image.builderPlatform).toStrictEqual(some.builderPlatform);
+      expect(image.builderPlatformSuffix).toStrictEqual(some.builderPlatform);
     });
 
     test.each(['2000.0.0f0', '2011.1.11f1'])('accepts %p version format', (version) => {

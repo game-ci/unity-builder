@@ -107,6 +107,9 @@ class Input {
       return '';
     }
   }
+  static get cloudRunnerBuilderPlatform() {
+    return Input.getInput('cloudRunnerBuilderPlatform') || false;
+  }
 
   static get gitSha() {
     if (Input.getInput(`GITHUB_SHA`)) {

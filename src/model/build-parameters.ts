@@ -64,6 +64,7 @@ class BuildParameters {
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
   public cloudRunnerIntegrationTests!: boolean;
+  public cloudRunnerBuilderPlatform!: string;
   public cliMode!: boolean;
 
   static async create(): Promise<BuildParameters> {
@@ -120,6 +121,7 @@ class BuildParameters {
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
       cloudRunnerCluster: Input.cloudRunnerCluster,
+      cloudRunnerBuilderPlatform: Input.cloudRunnerBuilderPlatform,
       awsBaseStackName: Input.awsBaseStackName,
       kubeConfig: Input.kubeConfig,
       cloudRunnerMemory: Input.cloudRunnerMemory,
