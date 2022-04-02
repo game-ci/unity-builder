@@ -52,10 +52,29 @@ class AWSTaskRunner {
         },
       },
     }).promise();
-
-    CloudRunnerLogger.log('Cloud runner job is starting');
     const taskArn = task.tasks?.[0].taskArn || '';
+    CloudRunnerLogger.log('Cloud runner job is starting');
+    await AWSTaskRunner.waitUntilTaskRunning(ECS, taskArn, cluster);
+    CloudRunnerLogger.log(
+      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(ECS, cluster, taskArn))?.lastStatus}`,
+    );
+    const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+    const taskData = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
+    const exitCode = taskData.containers?.[0].exitCode;
+    const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
+    if (wasSuccessful) {
+      CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
+      return output;
+    } else {
+      const message = `Cloud runner job exit code ${exitCode}`;
+      taskData.overrides = undefined;
+      taskData.attachments = undefined;
+      CloudRunnerLogger.log(`${message} ${JSON.stringify(taskData, undefined, 4)}`);
+      throw new Error(message);
+    }
+  }
 
+  private static async waitUntilTaskRunning(ECS: AWS.ECS, taskArn: string, cluster: string) {
     try {
       await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
     } catch (error_) {
@@ -69,25 +88,6 @@ class AWSTaskRunner {
 
       core.setFailed(error);
       core.error(error);
-    }
-    CloudRunnerLogger.log(`Cloud runner job is running`);
-
-    const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
-    const exitCode = (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].exitCode;
-    CloudRunnerLogger.log(`Cloud runner job exit code ${exitCode}`);
-    CloudRunnerLogger.log(
-      `job failed with exit code ${exitCode} ${JSON.stringify(
-        await ECS.describeTasks({ tasks: [taskArn], cluster }).promise(),
-        undefined,
-        4,
-      )}`,
-    );
-    if (exitCode !== 0 && exitCode !== undefined) {
-      core.error(`job failed with exit code ${exitCode} "exitCode !== 0 && exitCode !== undefined"`);
-      throw new Error(`job failed with exit code ${exitCode}`);
-    } else {
-      CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
-      return output;
     }
   }
 
@@ -114,10 +114,6 @@ class AWSTaskRunner {
     const kinesis = new AWS.Kinesis();
     const stream = await AWSTaskRunner.getLogStream(kinesis, kinesisStreamName);
     let iterator = await AWSTaskRunner.getLogIterator(kinesis, stream);
-
-    CloudRunnerLogger.log(
-      `Cloud runner job status is ${(await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn))?.lastStatus}`,
-    );
 
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${CF.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
@@ -157,6 +153,9 @@ class AWSTaskRunner {
   }
 
   private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, shouldReadLogs: boolean) {
+    if (taskData?.lastStatus === 'UNKNOWN') {
+      CloudRunnerLogger.log('## Cloud runner job unknwon');
+    }
     if (taskData?.lastStatus !== 'RUNNING') {
       if (timestamp === 0) {
         CloudRunnerLogger.log('## Cloud runner job stopped, streaming end of logs');
@@ -193,7 +192,7 @@ class AWSTaskRunner {
               core.warning('LIBRARY NOT FOUND!');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-            if (Input.cloudRunnerTests) {
+            if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
               output += message;
             }
             CloudRunnerLogger.log(message);

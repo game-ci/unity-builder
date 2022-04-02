@@ -1,7 +1,6 @@
 import { assert } from 'console';
 import fs from 'fs';
 import path from 'path';
-import { Input } from '../../..';
 import CloudRunnerLogger from '../../../cloud-runner/services/cloud-runner-logger';
 import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state';
 import { CloudRunnerSystem } from './cloud-runner-system';
@@ -18,7 +17,7 @@ export class Caching {
       }
       process.chdir(path.resolve(sourceFolder, '..'));
 
-      if (Input.cloudRunnerTests) {
+      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(
           `Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
             sourceFolder,
@@ -26,7 +25,7 @@ export class Caching {
         );
       }
 
-      if (Input.cloudRunnerTests) {
+      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
         await CloudRunnerSystem.Run(`ls ${path.basename(sourceFolder)}`);
       }
       // eslint-disable-next-line func-style
@@ -46,7 +45,7 @@ export class Caching {
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
 
-      if (Input.cloudRunnerTests) {
+      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
         await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
       }
     } catch (error) {

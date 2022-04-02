@@ -9,7 +9,7 @@ export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
-      if (Input.cloudRunnerTests) {
+      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(`Parsing build steps: ${buildSteps}`);
       }
       try {

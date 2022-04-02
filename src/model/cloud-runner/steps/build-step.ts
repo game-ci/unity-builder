@@ -1,5 +1,4 @@
 import path from 'path';
-import { Input } from '../..';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
@@ -23,15 +22,27 @@ export class BuildStep implements StepInterface {
     secrets: CloudRunnerSecret[],
   ) {
     CloudRunnerLogger.logLine(` `);
-    CloudRunnerLogger.logLine('Starting part 2/2 (build unity project)');
+    CloudRunnerLogger.logLine('Starting build automation job');
     const hooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunnerState.buildParams.customJobHooks).filter((x) =>
       x.step.includes(`setup`),
     );
     return await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
       CloudRunnerState.buildParams.buildGuid,
       image,
-      `${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      `apt-get update
+        apt-get install -y -q zip tree nodejs git-lfs jq unzip
+        ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GITHUB_WORKSPACE="${CloudRunnerState.repoPathFull}"
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+        mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
+        git clone -q -b ${CloudRunnerState.buildParams.cloudRunnerBranch} ${
+        CloudRunnerState.unityBuilderRepoUrl
+      } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
+        ${
+          CloudRunnerState.buildParams.cloudRunnerIntegrationTests ? '' : '#'
+        } tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
+        chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
+        node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli
         cp -r "${path
           .join(CloudRunnerState.builderPathFull, 'dist', 'default-build-script')
           .replace(/\\/g, `/`)}" "/UnityBuilderAction"
@@ -44,8 +55,6 @@ export class BuildStep implements StepInterface {
         chmod -R +x "/entrypoint.sh"
         chmod -R +x "/steps"
         /entrypoint.sh
-        apt-get update
-        apt-get install -y -q zip tree nodejs
         cd "${CloudRunnerState.libraryFolderFull.replace(/\\/g, `/`)}/.."
         zip -r "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "Library"
         mv "lib-${CloudRunnerState.buildParams.buildGuid}.zip" "${CloudRunnerState.cacheFolderFull.replace(
@@ -64,7 +73,9 @@ export class BuildStep implements StepInterface {
           .replace(/\\/g, `/`)} -m cache-push "Library" "lib-${
         CloudRunnerState.buildParams.buildGuid
       }.zip" "${CloudRunnerState.cacheFolderFull.replace(/\\/g, `/`)}/Library"
-        ${Input.cloudRunnerTests ? '' : '#'} tree -lh "${CloudRunnerState.cacheFolderFull}"
+        ${CloudRunnerState.buildParams.cloudRunnerIntegrationTests ? '' : '#'} tree -lh "${
+        CloudRunnerState.cacheFolderFull
+      }"
         ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       `,
       `/${CloudRunnerState.buildVolumeFolder}`,

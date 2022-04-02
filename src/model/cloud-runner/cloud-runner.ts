@@ -15,8 +15,10 @@ class CloudRunner {
     CloudRunnerState.setup(buildParameters);
     CloudRunner.setupBuildPlatform();
     const parameters = TaskParameterSerializer.readBuildEnvironmentVariables();
-    for (const element of parameters) {
-      core.setOutput(element.name, element.value);
+    if (!buildParameters.cliMode) {
+      for (const element of parameters) {
+        core.setOutput(element.name, element.value);
+      }
     }
   }
 
@@ -37,14 +39,14 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      core.startGroup('Setup remote runner');
+      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('Setup remote runner');
       await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
         CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
         CloudRunnerState.branchName,
         CloudRunnerState.defaultSecrets,
       );
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(
           baseImage,
@@ -52,7 +54,7 @@ class CloudRunner {
           CloudRunnerState.defaultSecrets,
         ),
       );
-      core.startGroup('Cleanup');
+      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('Cleanup');
       await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
         CloudRunnerState.buildParams.buildGuid,
         CloudRunnerState.buildParams,
@@ -60,10 +62,10 @@ class CloudRunner {
         CloudRunnerState.defaultSecrets,
       );
       CloudRunnerLogger.log(`Cleanup complete`);
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       return output;
     } catch (error) {
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       await CloudRunnerError.handleException(error);
       throw error;
     }

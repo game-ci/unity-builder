@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { GenericInputReader } from './input-readers/generic-input-reader';
-import { GitRepoReader } from './input-readers/git-repo';
-import { GithubCliReader } from './input-readers/github-cli';
 import Platform from './platform';
 
 const formatFunction = (value, arguments_) => {
@@ -41,6 +39,9 @@ class Input {
       }
     }
   }
+  static get cliMode() {
+    return Input.cliOptions !== undefined && Input.cliOptions.mode !== undefined && Input.cliOptions.mode !== '';
+  }
 
   private static async queryOverride(query) {
     if (!this.shouldUseOverride(query)) {
@@ -66,7 +67,7 @@ class Input {
       return coreInput;
     }
 
-    if (Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined) {
+    if (Input.cliMode && Input.cliOptions[query] !== undefined) {
       return Input.cliOptions[query];
     }
 
@@ -94,23 +95,16 @@ class Input {
     return Input.getInput('region') || 'eu-west-2';
   }
 
-  static async githubRepo() {
-    return (
-      Input.getInput('GITHUB_REPOSITORY') ||
-      Input.getInput('GITHUB_REPO') ||
-      (await GitRepoReader.GetRemote()) ||
-      'game-ci/unity-builder'
-    );
+  static get githubRepo() {
+    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || false;
   }
-  static async branch() {
-    if (await GitRepoReader.GetBranch()) {
-      return await GitRepoReader.GetBranch();
-    } else if (Input.getInput(`GITHUB_REF`)) {
+  static get branch() {
+    if (Input.getInput(`GITHUB_REF`)) {
       return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
     } else {
-      return 'main';
+      return '';
     }
   }
 
@@ -119,8 +113,6 @@ class Input {
       return Input.getInput(`GITHUB_SHA`);
     } else if (Input.getInput(`GitSHA`)) {
       return Input.getInput(`GitSHA`);
-    } else if (GitRepoReader.GetSha()) {
-      return GitRepoReader.GetSha();
     }
   }
   static get runNumber() {
@@ -212,8 +204,8 @@ class Input {
     return Input.getInput('sshAgent') || '';
   }
 
-  static async gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
+  static get gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || false;
   }
 
   static get customJob() {
@@ -238,6 +230,10 @@ class Input {
 
   static readInputOverrideCommand() {
     return Input.getInput('readInputOverrideCommand') || '';
+  }
+
+  static get cloudRunnerBranch() {
+    return Input.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
   }
 
   static get chownFilesTo() {

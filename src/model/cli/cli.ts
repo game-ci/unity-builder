@@ -10,39 +10,25 @@ import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-r
 import * as SDK from 'aws-sdk';
 
 export class CLI {
-  static async RunCli(options: any): Promise<void> {
+  private static options;
+  static async RunCli(): Promise<void> {
     Input.githubInputEnabled = false;
-
-    const results = GetCliFunctions(options.mode);
-
-    if (results === undefined || results.length === 0) {
-      throw new Error('no CLI mode found');
-    }
-
+    await Input.PopulateQueryOverrideInput();
+    CLI.logInput();
+    const results = GetCliFunctions(CLI.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
-
-    options.versioning = 'None';
-    Input.cliOptions = options;
+    CLI.options.versioning = 'None';
     return await results.target[results.propertyKey]();
   }
-  static isCliMode(options: any) {
-    return options.mode !== undefined && options.mode !== '';
-  }
 
-  public static SetupCli() {
+  public static InitCliMode() {
     const program = new Command();
     program.version('0.0.1');
     const properties = Object.getOwnPropertyNames(Input);
-    core.info(`\n`);
-    core.info(`INPUT:`);
     const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
       program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
-      if (Input[element] !== undefined && Input[element] !== '' && typeof Input[element] !== `function`) {
-        core.info(`${element} ${Input[element]}`);
-      }
     }
-    core.info(`\n`);
     program.option(
       '-m, --mode <mode>',
       GetAllCliModes()
@@ -50,8 +36,28 @@ export class CLI {
         .join(` | `),
     );
     program.parse(process.argv);
+    CLI.options = program.opts();
+    Input.cliOptions = CLI.options;
+    return Input.cliMode;
+  }
 
-    return program.opts();
+  private static logInput() {
+    core.info(`\n`);
+    core.info(`INPUT:`);
+    const properties = Object.getOwnPropertyNames(Input);
+    for (const element of properties) {
+      if (
+        Input[element] !== undefined &&
+        Input[element] !== '' &&
+        typeof Input[element] !== `function` &&
+        element !== 'length' &&
+        element !== 'cliOptions' &&
+        element !== 'prototype'
+      ) {
+        core.info(`${element} ${Input[element]}`);
+      }
+    }
+    core.info(`\n`);
   }
 
   @CliFunction(`cli`, `runs a cloud runner build`)

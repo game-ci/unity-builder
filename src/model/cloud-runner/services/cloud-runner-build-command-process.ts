@@ -1,6 +1,7 @@
-import { BuildParameters, Input } from '../..';
+import { BuildParameters } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
+import { CloudRunnerState } from '../state/cloud-runner-state';
 
 export class CloudRunnerBuildCommandProcessor {
   public static ProcessCommands(commands: string, buildParameters: BuildParameters): string {
@@ -10,12 +11,12 @@ export class CloudRunnerBuildCommandProcessor {
 
     return `echo "---"
       echo "start cloud runner init"
-      ${Input.cloudRunnerTests ? '' : '#'} printenv
-      echo "start cloud runner job"
+      ${CloudRunnerState.buildParams.cloudRunnerIntegrationTests ? '' : '#'} printenv
+      echo "start of cloud runner job"
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${commands}
       ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      echo "end of cloud runner job
+      echo "end of cloud runner job"
       ---${buildParameters.logId}"
     `;
   }

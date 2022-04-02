@@ -5,6 +5,10 @@ import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 async function runMain() {
   try {
+    if (CLI.InitCliMode()) {
+      await CLI.RunCli();
+      return;
+    }
     Action.checkCompatibility();
     Cache.verify();
 
@@ -38,9 +42,4 @@ async function runMain() {
     core.setFailed((error as Error).message);
   }
 }
-const options = CLI.SetupCli();
-if (CLI.isCliMode(options)) {
-  CLI.RunCli(options);
-} else {
-  runMain();
-}
+runMain();

@@ -11,7 +11,11 @@ export function CliFunction(key: string, description: string) {
   };
 }
 export function GetCliFunctions(key) {
-  return targets.find((x) => x.key === key);
+  const results = targets.find((x) => x.key === key);
+  if (results === undefined || results.length === 0) {
+    throw new Error('no CLI mode found');
+  }
+  return results;
 }
 export function GetAllCliModes() {
   return targets.map((x) => {

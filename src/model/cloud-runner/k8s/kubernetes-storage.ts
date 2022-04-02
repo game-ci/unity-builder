@@ -25,7 +25,9 @@ class KubernetesStorage {
     CloudRunnerLogger.log(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
       CloudRunnerLogger.log(`pvc ${pvcName} already exists`);
-      core.setOutput('volume', pvcName);
+      if (!buildParameters.cliMode) {
+        core.setOutput('volume', pvcName);
+      }
       return;
     }
     CloudRunnerLogger.log(`Creating PVC ${pvcName} (does not exist)`);

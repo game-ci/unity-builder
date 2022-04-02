@@ -3,7 +3,6 @@ import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
 import { BuildStep } from '../steps/build-step';
-import { SetupStep } from '../steps/setup-step';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
@@ -21,26 +20,27 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
-      core.startGroup('pre build steps');
+      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('pre build steps');
       let output = '';
       if (CloudRunnerState.buildParams.preBuildSteps !== '') {
         output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.preBuildSteps);
       }
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
-      core.startGroup('setup');
-      output += await new SetupStep().run(
-        new CloudRunnerStepState(
-          'alpine/git',
-          TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunnerState.defaultSecrets,
-        ),
-      );
-      core.endGroup();
-      CloudRunnerLogger.logWithTime('Download repository step time');
+      // core.startGroup('setup');
+      // output += await new SetupStep().run(
+      //   new CloudRunnerStepState(
+      //     'alpine/git',
+      //     TaskParameterSerializer.readBuildEnvironmentVariables(),
+      //     CloudRunnerState.defaultSecrets,
+      //   ),
+      // );
+      // core.endGroup();
+      // CloudRunnerLogger.logWithTime('Download repository step time');
 
-      core.startGroup('build');
+      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('build');
+      CloudRunnerLogger.log(baseImage.toString());
       output += await new BuildStep().run(
         new CloudRunnerStepState(
           baseImage,
@@ -48,14 +48,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerState.defaultSecrets,
         ),
       );
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
-      core.startGroup('post build steps');
+      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('post build steps');
       if (CloudRunnerState.buildParams.postBuildSteps !== '') {
         output += await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.postBuildSteps);
       }
-      core.endGroup();
+      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);

@@ -1,5 +1,4 @@
 import path from 'path';
-import { Input } from '../..';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
@@ -21,12 +20,6 @@ export class SetupStep implements StepInterface {
     }
   }
 
-  private static getCloudRunnerBranch() {
-    return process.env.CLOUD_RUNNER_BRANCH?.includes('/')
-      ? process.env.CLOUD_RUNNER_BRANCH.split('/').reverse()[0]
-      : process.env.CLOUD_RUNNER_BRANCH;
-  }
-
   private static async downloadRepository(
     image: string,
     environmentVariables: CloudRunnerEnvironmentVariable[],
@@ -46,10 +39,12 @@ export class SetupStep implements StepInterface {
         ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         mkdir -p ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
-        git clone -q -b ${SetupStep.getCloudRunnerBranch()} ${
+        git clone -q -b ${CloudRunnerState.buildParams.cloudRunnerBranch} ${
           CloudRunnerState.unityBuilderRepoUrl
         } "${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}"
-        ${Input.cloudRunnerTests ? '' : '#'} tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
+        ${
+          CloudRunnerState.buildParams.cloudRunnerIntegrationTests ? '' : '#'
+        } tree ${CloudRunnerState.builderPathFull.replace(/\\/g, `/`)}
         chmod +x ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
         node ${path.join(CloudRunnerState.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli
         ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}

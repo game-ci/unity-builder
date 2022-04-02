@@ -7,6 +7,8 @@ import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
+import { GitRepoReader } from './input-readers/git-repo';
+import { GithubCliReader } from './input-readers/github-cli';
 
 class BuildParameters {
   public version!: string;
@@ -60,6 +62,9 @@ class BuildParameters {
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
+  public cloudRunnerBranch!: string;
+  public cloudRunnerIntegrationTests!: boolean;
+  public cliMode!: boolean;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -71,8 +76,6 @@ class BuildParameters {
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
 
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
-
-    await Input.PopulateQueryOverrideInput();
 
     let unitySerial = '';
     if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && Input.cliOptions === undefined) {
@@ -87,7 +90,9 @@ class BuildParameters {
     } else {
       unitySerial = process.env.UNITY_SERIAL!;
     }
-    core.setSecret(unitySerial);
+    if (!Input.cliMode) {
+      core.setSecret(unitySerial);
+    }
 
     return {
       version: unityVersion,
@@ -112,7 +117,7 @@ class BuildParameters {
       androidSdkManagerParameters,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
-      gitPrivateToken: await Input.gitPrivateToken(),
+      gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
       cloudRunnerCluster: Input.cloudRunnerCluster,
       awsBaseStackName: Input.awsBaseStackName,
@@ -125,9 +130,12 @@ class BuildParameters {
       preBuildSteps: Input.preBuildSteps,
       customJob: Input.customJob,
       runNumber: Input.runNumber,
-      branch: await Input.branch(),
-      githubRepo: await Input.githubRepo(),
+      branch: Input.branch || (await GitRepoReader.GetBranch()),
+      cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
+      cloudRunnerIntegrationTests: Input.cloudRunnerTests,
+      githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       remoteBuildCluster: Input.cloudRunnerCluster,
+      cliMode: Input.cliMode,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),

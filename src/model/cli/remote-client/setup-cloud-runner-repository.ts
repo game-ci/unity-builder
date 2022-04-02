@@ -3,7 +3,6 @@ import { CloudRunnerState } from '../../cloud-runner/state/cloud-runner-state';
 import { Caching } from './remote-client-services/caching';
 import { LFSHashing } from './remote-client-services/lfs-hashing';
 import { CloudRunnerSystem } from './remote-client-services/cloud-runner-system';
-import { Input } from '../..';
 import { RemoteClientLogger } from './remote-client-services/remote-client-logger';
 import path from 'path';
 import { assert } from 'console';
@@ -65,7 +64,7 @@ export class SetupCloudRunnerRepository {
   }
 
   private static async pullLatestLFS() {
-    if (Input.cloudRunnerTests) {
+    if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
       await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
     }
     process.chdir(CloudRunnerState.repoPathFull);
@@ -75,7 +74,7 @@ export class SetupCloudRunnerRepository {
     RemoteClientLogger.log(`pulled latest LFS files`);
     assert(fs.existsSync(CloudRunnerState.lfsDirectoryFull));
 
-    if (Input.cloudRunnerTests) {
+    if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
       await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerState.lfsDirectoryFull}/..`);
     }
   }

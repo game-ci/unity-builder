@@ -4,11 +4,8 @@ import fs from 'fs';
 import { CloudRunnerSystem } from '../cli/remote-client/remote-client-services/cloud-runner-system';
 
 export class GitRepoReader {
-  static GetSha() {
-    return '';
-  }
   public static async GetRemote() {
-    return (await CloudRunnerSystem.Run(`git remote -v`))
+    return (await CloudRunnerSystem.Run(`git remote -v`, false, true))
       .split(' ')[1]
       .split('https://github.com/')[1]
       .split('.git')[0];
