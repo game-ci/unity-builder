@@ -114,7 +114,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         .replace(/\\/g, `/`)}" "/steps"
       chmod -R +x "/entrypoint.sh"
       chmod -R +x "/steps"
+      echo "enter build scripts"
       /entrypoint.sh
+      echo "post build scripts"
       cd "${CloudRunnerFolders.libraryFolderFull.replace(/\\/g, `/`)}/.."
       zip -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
       mv "lib-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
