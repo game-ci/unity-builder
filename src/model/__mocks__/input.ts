@@ -2,7 +2,7 @@
 import Platform from '../platform';
 
 export const mockGetFromUser = jest.fn().mockResolvedValue({
-  version: '',
+  editorVersion: '',
   targetPlatform: Platform.types.Test,
   projectPath: '.',
   buildName: Platform.types.Test,

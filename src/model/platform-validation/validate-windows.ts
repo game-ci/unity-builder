@@ -3,7 +3,7 @@ import { BuildParameters } from '..';
 
 class ValidateWindows {
   public static validate(buildParameters: BuildParameters) {
-    ValidateWindows.validateWindowsPlatformRequirements(buildParameters.platform);
+    ValidateWindows.validateWindowsPlatformRequirements(buildParameters.targetPlatform);
     if (!(process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD)) {
       throw new Error(`Unity email and password must be set for Windows based builds to
                        authenticate the license. Make sure to set them inside UNITY_EMAIL

@@ -60,7 +60,7 @@ class KubernetesJobSpecFactory {
         },
         {
           name: 'BUILD_TARGET',
-          value: buildParameters.platform,
+          value: buildParameters.targetPlatform,
         },
         {
           name: 'ANDROID_VERSION_CODE',
