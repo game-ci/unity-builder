@@ -76,6 +76,7 @@ jobs:
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
           unityVersion: ${{ matrix.unityVersion }}
           cloudRunnerTests: true
+          versioning: None
 
       ###########################
       # Cloud Runner Build Test #

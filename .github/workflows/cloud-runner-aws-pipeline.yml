@@ -68,6 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           cloudRunnerTests: true
+          versioning: None
       - uses: ./
         id: aws-fargate-unity-build
         timeout-minutes: 25
