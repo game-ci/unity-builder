@@ -51,7 +51,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         baseImage.toString(),
         BuildAutomationWorkflow.FullWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
-        `/${CloudRunnerFolders.projectPathFull}`,
+        `/${CloudRunnerFolders.buildVolumeFolder}/`,
         TaskParameterSerializer.readBuildEnvironmentVariables(),
         CloudRunner.defaultSecrets,
       );
@@ -74,17 +74,23 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static get FullWorkflow() {
-    const hooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter((x) =>
-      x.step.includes(`setup`),
+    const setupHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
+      (x) => x.step.includes(`setup`),
+    );
+    const buildHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
+      (x) => x.step.includes(`build`),
     );
     return `apt-get update
       apt-get install -y -q zip tree npm git-lfs jq unzip git 
       npm install -g n
       n stable
-      ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull}"
       ${BuildAutomationWorkflow.SetupCommands}
-      ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      cd ${CloudRunnerFolders.projectPathFull.replace(/\\/g, `/`)}
+      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.BuildCommands}`;
   }
 
