@@ -98,7 +98,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     } tree ${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}
     chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
     echo "caching"
-    ls ${path.join(CloudRunnerFolders.builderPathFull, 'dist')}
+    ls ${path.join(CloudRunnerFolders.builderPathFull, 'dist').replace(/\\/g, `/`)}
     node ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli`;
   }
 

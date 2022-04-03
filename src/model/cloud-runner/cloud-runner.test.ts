@@ -38,6 +38,7 @@ describe('Cloud Runner', () => {
       Input.githubInputEnabled = false;
       // setup parameters
       const buildParameter = await BuildParameters.create();
+      Input.githubInputEnabled = true;
       const baseImage = new ImageTag(buildParameter);
       // run the job
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
@@ -73,7 +74,6 @@ describe('Cloud Runner', () => {
       expect(results).toContain(libraryString);
       const results2 = await CloudRunner.run(buildParameter, baseImage.toString());
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
-      Input.githubInputEnabled = true;
     }, 1000000);
   }
 });
