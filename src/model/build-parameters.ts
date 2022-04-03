@@ -116,6 +116,7 @@ class BuildParameters {
       customJob: Input.customJob,
       runNumber: Input.runNumber,
       branch: await Input.branch(),
+      // Todo - move this out of UserInput and into some class that determines additional information (as needed)
       githubRepo: await Input.githubRepo(),
       remoteBuildCluster: Input.cloudRunnerCluster,
       awsStackName: Input.awsBaseStackName,

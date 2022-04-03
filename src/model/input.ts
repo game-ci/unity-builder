@@ -45,6 +45,7 @@ class Input {
     return (
       Input.getInput('GITHUB_REPOSITORY') ||
       Input.getInput('GITHUB_REPO') ||
+      // todo - move this to some class specific for determining additional information
       (await GitRepoReader.GetRemote()) ||
       'game-ci/unity-builder'
     );
@@ -52,6 +53,7 @@ class Input {
 
   static async branch() {
     if (await GitRepoReader.GetBranch()) {
+      // todo - move this to some class specific for determining additional information
       return await GitRepoReader.GetBranch();
     } else if (Input.getInput(`GITHUB_REF`)) {
       return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
@@ -68,6 +70,7 @@ class Input {
     } else if (Input.getInput(`GitSHA`)) {
       return Input.getInput(`GitSHA`);
     } else if (GitRepoReader.GetSha()) {
+      // todo - move this to some class specific for determining additional information
       return GitRepoReader.GetSha();
     }
   }
