@@ -81,15 +81,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       (x) => x.step.includes(`build`),
     );
     return `apt-get update
-      apt-get install -y -q zip tree npm git-lfs jq unzip git 
+      apt-get install -y -q zip tree npm git-lfs jq unzip git
       npm install -g n
       n stable
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull}"
+      export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
       ${BuildAutomationWorkflow.SetupCommands}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      cd ${CloudRunnerFolders.projectPathFull.replace(/\\/g, `/`)}
+      cd ${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.BuildCommands}`;
   }
@@ -126,7 +126,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "post build scripts"
     cd "${CloudRunnerFolders.libraryFolderFull.replace(/\\/g, `/`)}/.."
-    zip -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
+    zip -q -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
     mv "lib-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
       /\\/g,
       `/`,

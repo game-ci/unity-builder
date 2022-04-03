@@ -36,7 +36,7 @@ export class Caching {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
-      await CloudRunnerSystem.Run(`zip ${cacheKey}.zip ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`zip -q ${cacheKey}.zip ${path.basename(sourceFolder)}`);
       assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
@@ -99,7 +99,7 @@ export class Caching {
         assert(`${fs.existsSync(destinationFolder)}`);
         assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
+        await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         assert(`${fs.existsSync(fullResultsFolder)}`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
