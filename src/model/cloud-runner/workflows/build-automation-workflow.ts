@@ -79,6 +79,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
     return `apt-get update
       apt-get install -y -q zip tree nodejs git-lfs jq unzip git
+      npm install -g n
+      n stable
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull}"
       ${BuildAutomationWorkflow.SetupCommands}
@@ -106,29 +108,26 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `cp -r "${path
       .join(CloudRunnerFolders.builderPathFull, 'dist', 'default-build-script')
       .replace(/\\/g, `/`)}" "/UnityBuilderAction"
-      cp -r "${path
-        .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'entrypoint.sh')
-        .replace(/\\/g, `/`)}" "/entrypoint.sh"
-      cp -r "${path
-        .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'steps')
-        .replace(/\\/g, `/`)}" "/steps"
-      chmod -R +x "/entrypoint.sh"
-      chmod -R +x "/steps"
-      echo "enter build scripts"
-      /entrypoint.sh
-      echo "post build scripts"
-      cd "${CloudRunnerFolders.libraryFolderFull.replace(/\\/g, `/`)}/.."
-      zip -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
-      mv "lib-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
+    cp -r "${path
+      .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'entrypoint.sh')
+      .replace(/\\/g, `/`)}" "/entrypoint.sh"
+    cp -r "${path
+      .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'steps')
+      .replace(/\\/g, `/`)}" "/steps"
+    chmod -R +x "/entrypoint.sh"
+    chmod -R +x "/steps"
+    echo "enter build scripts"
+    /entrypoint.sh
+    echo "post build scripts"
+    cd "${CloudRunnerFolders.libraryFolderFull.replace(/\\/g, `/`)}/.."
+    zip -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
+    mv "lib-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
       /\\/g,
       `/`,
     )}/Library"
-      cd "${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
-      zip -r "build-${CloudRunner.buildParameters.buildGuid}.zip" "build"
-      mv "build-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
-      /\\/g,
-      `/`,
-    )}"
+    cd "${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
+    zip -r "build-${CloudRunner.buildParameters.buildGuid}.zip" "build"
+    mv "build-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}"
     chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
     node ${path
       .join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`)
