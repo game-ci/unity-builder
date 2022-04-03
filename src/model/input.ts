@@ -10,6 +10,8 @@ const core = require('@actions/core');
  * Input variables specified in workflows using "with" prop.
  *
  * Note that input is always passed as a string, even booleans.
+ *
+ * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
   public static cliOptions;
@@ -19,6 +21,7 @@ class Input {
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
+
   private static getInput(query) {
     const coreInput = core.getInput(query);
     if (Input.githubInputEnabled && coreInput && coreInput !== '') {
@@ -33,9 +36,11 @@ class Input {
       ? process.env[Input.ToEnvVarFormat(query)]
       : '';
   }
+
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
+
   static async githubRepo() {
     return (
       Input.getInput('GITHUB_REPOSITORY') ||
@@ -44,6 +49,7 @@ class Input {
       'game-ci/unity-builder'
     );
   }
+
   static async branch() {
     if (await GitRepoReader.GetBranch()) {
       return await GitRepoReader.GetBranch();
@@ -65,6 +71,7 @@ class Input {
       return GitRepoReader.GetSha();
     }
   }
+
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }
@@ -89,6 +96,7 @@ class Input {
         !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
       ? 'test-project'
       : '.';
+
     return rawProjectPath.replace(/\/$/, '');
   }
 
@@ -197,6 +205,7 @@ class Input {
   }
 
   static async githubToken() {
+    // Todo - move GitHubCLI out of the simple input class. It is in fact not input from the user.
     return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 

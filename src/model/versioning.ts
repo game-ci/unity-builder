@@ -79,7 +79,7 @@ export default class Versioning {
     return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
-  static async determineVersion(strategy: string, inputVersion: string) {
+  static async determineBuildVersion(strategy: string, inputVersion: string) {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
       throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);

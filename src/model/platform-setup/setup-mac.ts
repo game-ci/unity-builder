@@ -7,7 +7,7 @@ class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
-    const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.version}/Unity.app/Contents/MacOS/Unity`;
+    const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
 
     // Only install unity if the editor doesn't already exist
     if (!fs.existsSync(unityEditorPath)) {
@@ -31,9 +31,9 @@ class SetupMac {
   }
 
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
-    const unityChangeset = await getUnityChangeset(buildParameters.version);
+    const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
     const command = `${this.unityHubPath} -- --headless install \
-                                          --version ${buildParameters.version} \
+                                          --version ${buildParameters.editorVersion} \
                                           --changeset ${unityChangeset.changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
@@ -50,10 +50,10 @@ class SetupMac {
     // Need to set environment variables from here because we execute
     // the scripts on the host for mac
     process.env.ACTION_FOLDER = actionFolder;
-    process.env.UNITY_VERSION = buildParameters.version;
+    process.env.UNITY_VERSION = buildParameters.editorVersion;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
     process.env.PROJECT_PATH = buildParameters.projectPath;
-    process.env.BUILD_TARGET = buildParameters.platform;
+    process.env.BUILD_TARGET = buildParameters.targetPlatform;
     process.env.BUILD_NAME = buildParameters.buildName;
     process.env.BUILD_PATH = buildParameters.buildPath;
     process.env.BUILD_FILE = buildParameters.buildFile;
