@@ -94,6 +94,15 @@ class Input {
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
+  static get unitySerial(): string {
+    return Input.getInput('unitySerial') || false;
+  }
+  static get unityUsername(): string {
+    return Input.getInput('unityUsername') || false;
+  }
+  static get unityPassword(): string {
+    return Input.getInput('unityPassword') || false;
+  }
 
   static get githubRepo() {
     return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || false;

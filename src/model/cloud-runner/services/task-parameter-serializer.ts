@@ -19,6 +19,18 @@ export class TaskParameterSerializer {
         name: 'BUILD_TARGET',
         value: CloudRunner.buildParameters.platform,
       },
+      {
+        name: 'UNITY_SERIAL',
+        value: Input.unitySerial,
+      },
+      {
+        name: 'UNITY_USERNAME',
+        value: Input.unityUsername,
+      },
+      {
+        name: 'UNITY_PASSWORD',
+        value: Input.unityPassword,
+      },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
   }
