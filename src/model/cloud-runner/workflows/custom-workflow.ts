@@ -1,15 +1,15 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { CloudRunnerState } from '../state/cloud-runner-state';
+import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import YAML from 'yaml';
-import { Input } from '../..';
+import { CloudRunner, Input } from '../..';
 import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 
 export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
-      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
+      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(`Parsing build steps: ${buildSteps}`);
       }
       try {
@@ -24,14 +24,14 @@ export class CustomWorkflow {
             };
             return secret;
           });
-          output += await CloudRunnerState.CloudRunnerProviderPlatform.runTask(
-            CloudRunnerState.buildParams.buildGuid,
+          output += await CloudRunner.CloudRunnerProviderPlatform.runTask(
+            CloudRunner.buildParameters.buildGuid,
             step['image'],
             step['commands'],
-            `/${CloudRunnerState.buildVolumeFolder}`,
-            `/${CloudRunnerState.buildVolumeFolder}/`,
+            `/${CloudRunnerFolders.buildVolumeFolder}`,
+            `/${CloudRunnerFolders.buildVolumeFolder}/`,
             TaskParameterSerializer.readBuildEnvironmentVariables(),
-            [...CloudRunnerState.defaultSecrets, ...stepSecrets],
+            [...CloudRunner.defaultSecrets, ...stepSecrets],
           );
         }
         return output;

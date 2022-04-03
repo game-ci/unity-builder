@@ -1,7 +1,6 @@
-import { Input } from '../..';
+import { CloudRunner, Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
 
 export class TaskParameterSerializer {
@@ -10,15 +9,15 @@ export class TaskParameterSerializer {
     return [
       {
         name: 'ContainerMemory',
-        value: CloudRunnerState.buildParams.cloudRunnerMemory,
+        value: CloudRunner.buildParameters.cloudRunnerMemory,
       },
       {
         name: 'ContainerCpu',
-        value: CloudRunnerState.buildParams.cloudRunnerCpu,
+        value: CloudRunner.buildParameters.cloudRunnerCpu,
       },
       {
         name: 'BUILD_TARGET',
-        value: CloudRunnerState.buildParams.platform,
+        value: CloudRunner.buildParameters.platform,
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
@@ -27,7 +26,7 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunnerState.buildParams.customJobHooks);
+    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks);
     const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
     if (secrets.length > 0) {
       // eslint-disable-next-line unicorn/no-array-reduce
@@ -46,14 +45,14 @@ export class TaskParameterSerializer {
   }
 
   private static readBuildParameters(array: any[]) {
-    const keys = Object.keys(CloudRunnerState.buildParams);
+    const keys = Object.keys(CloudRunner.buildParameters);
     for (const element of keys) {
       array.push({
         name: element,
-        value: CloudRunnerState.buildParams[element],
+        value: CloudRunner.buildParameters[element],
       });
     }
-    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
+    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunner.buildParameters) });
     return array;
   }
 
@@ -71,15 +70,15 @@ export class TaskParameterSerializer {
   }
 
   private static setupDefaultSecrets() {
-    if (CloudRunnerState.defaultSecrets === undefined)
-      CloudRunnerState.defaultSecrets = ImageEnvironmentFactory.getEnvironmentVariables(
-        CloudRunnerState.buildParams,
-      ).map((x) => {
-        return {
-          ParameterKey: x.name,
-          EnvironmentVariable: x.name,
-          ParameterValue: x.value,
-        };
-      });
+    if (CloudRunner.defaultSecrets === undefined)
+      CloudRunner.defaultSecrets = ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map(
+        (x) => {
+          return {
+            ParameterKey: x.name,
+            EnvironmentVariable: x.name,
+            ParameterValue: x.value,
+          };
+        },
+      );
   }
 }

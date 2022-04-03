@@ -5,7 +5,6 @@ import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
 import { RemoteClientLogger } from './remote-client/remote-client-services/remote-client-logger';
-import { CloudRunnerState } from '../cloud-runner/state/cloud-runner-state';
 import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
 import * as SDK from 'aws-sdk';
 
@@ -74,7 +73,7 @@ export class CLI {
     RemoteClientLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
-    CloudRunnerState.setup(buildParameter);
+    CloudRunner.buildParameters = buildParameter;
     await SetupCloudRunnerRepository.run();
   }
 

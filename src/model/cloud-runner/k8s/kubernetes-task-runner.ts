@@ -4,7 +4,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import * as core from '@actions/core';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 import waitUntil from 'async-wait-until';
-import { CloudRunnerState } from '../state/cloud-runner-state';
+import CloudRunner from '../cloud-runner';
 
 class KubernetesTaskRunner {
   static async runTask(
@@ -24,7 +24,7 @@ class KubernetesTaskRunner {
       didStreamAnyLogs = true;
       let message = chunk.toString().trimRight(`\n`);
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-      if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
+      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         output += message;
       }
       logCallback(message);

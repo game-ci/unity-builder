@@ -1,18 +1,22 @@
 import AWSBuildPlatform from './aws';
 import { BuildParameters } from '..';
-import { CloudRunnerState } from './state/cloud-runner-state';
 import Kubernetes from './k8s';
 import CloudRunnerLogger from './services/cloud-runner-logger';
-import { CloudRunnerStepState } from './state/cloud-runner-step-state';
+import { CloudRunnerStepState } from './cloud-runner-step-state';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
 import { CloudRunnerError } from './error/cloud-runner-error';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import * as core from '@actions/core';
+import CloudRunnerSecret from './services/cloud-runner-secret';
+import { CloudRunnerProviderInterface } from './services/cloud-runner-provider-interface';
 
 class CloudRunner {
+  public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
+  static buildParameters: BuildParameters;
+  public static defaultSecrets: CloudRunnerSecret[];
   private static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
-    CloudRunnerState.setup(buildParameters);
+    CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupBuildPlatform();
     const parameters = TaskParameterSerializer.readBuildEnvironmentVariables();
     if (!buildParameters.cliMode) {
@@ -23,15 +27,15 @@ class CloudRunner {
   }
 
   private static setupBuildPlatform() {
-    switch (CloudRunnerState.buildParams.cloudRunnerCluster) {
+    switch (CloudRunner.buildParameters.cloudRunnerCluster) {
       case 'k8s':
         CloudRunnerLogger.log('Cloud Runner platform selected Kubernetes');
-        CloudRunnerState.CloudRunnerProviderPlatform = new Kubernetes(CloudRunnerState.buildParams);
+        CloudRunner.CloudRunnerProviderPlatform = new Kubernetes(CloudRunner.buildParameters);
         break;
       default:
       case 'aws':
         CloudRunnerLogger.log('Cloud Runner platform selected AWS');
-        CloudRunnerState.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunnerState.buildParams);
+        CloudRunner.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunner.buildParameters);
         break;
     }
   }
@@ -39,33 +43,33 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('Setup remote runner');
-      await CloudRunnerState.CloudRunnerProviderPlatform.setupSharedResources(
-        CloudRunnerState.buildParams.buildGuid,
-        CloudRunnerState.buildParams,
-        CloudRunnerState.branchName,
-        CloudRunnerState.defaultSecrets,
+      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Setup remote runner');
+      await CloudRunner.CloudRunnerProviderPlatform.setupSharedResources(
+        CloudRunner.buildParameters.buildGuid,
+        CloudRunner.buildParameters,
+        CloudRunner.buildParameters.branch,
+        CloudRunner.defaultSecrets,
       );
-      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
+      if (!CloudRunner.buildParameters.cliMode) core.endGroup();
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(
           baseImage,
           TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunnerState.defaultSecrets,
+          CloudRunner.defaultSecrets,
         ),
       );
-      if (!CloudRunnerState.buildParams.cliMode) core.startGroup('Cleanup');
-      await CloudRunnerState.CloudRunnerProviderPlatform.cleanupSharedResources(
-        CloudRunnerState.buildParams.buildGuid,
-        CloudRunnerState.buildParams,
-        CloudRunnerState.branchName,
-        CloudRunnerState.defaultSecrets,
+      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Cleanup');
+      await CloudRunner.CloudRunnerProviderPlatform.cleanupSharedResources(
+        CloudRunner.buildParameters.buildGuid,
+        CloudRunner.buildParameters,
+        CloudRunner.buildParameters.branch,
+        CloudRunner.defaultSecrets,
       );
       CloudRunnerLogger.log(`Cleanup complete`);
-      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
+      if (!CloudRunner.buildParameters.cliMode) core.endGroup();
       return output;
     } catch (error) {
-      if (!CloudRunnerState.buildParams.cliMode) core.endGroup();
+      if (!CloudRunner.buildParameters.cliMode) core.endGroup();
       await CloudRunnerError.handleException(error);
       throw error;
     }

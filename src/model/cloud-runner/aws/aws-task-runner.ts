@@ -5,7 +5,7 @@ import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import * as zlib from 'zlib';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { Input } from '../..';
-import { CloudRunnerState } from '../state/cloud-runner-state';
+import CloudRunner from '../cloud-runner';
 import { CloudRunnerStatics } from '../cloud-runner-statics';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
 
@@ -39,7 +39,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment,
-            command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands, CloudRunnerState.buildParams)],
+            command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands, CloudRunner.buildParameters)],
           },
         ],
       },
@@ -185,14 +185,14 @@ class AWSTaskRunner {
         if (json.messageType === 'DATA_MESSAGE') {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
             let message = json.logEvents[logEventsIndex].message;
-            if (json.logEvents[logEventsIndex].message.includes(`---${CloudRunnerState.buildParams.logId}`)) {
+            if (json.logEvents[logEventsIndex].message.includes(`---${CloudRunner.buildParameters.logId}`)) {
               CloudRunnerLogger.log('End of log transmission received');
               shouldReadLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-            if (CloudRunnerState.buildParams.cloudRunnerIntegrationTests) {
+            if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
               output += message;
             }
             CloudRunnerLogger.log(message);

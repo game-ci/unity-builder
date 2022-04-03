@@ -1,5 +1,5 @@
 import path from 'path';
-import { CloudRunnerState } from '../../../cloud-runner/state/cloud-runner-state';
+import { CloudRunnerFolders } from '../../../cloud-runner/services/cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';
@@ -13,10 +13,10 @@ export class LFSHashing {
       assert(fs.existsSync(`.lfs-assets-guid`));
       const lfsHashes = {
         lfsGuid: fs
-          .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid`)}`, 'utf8')
+          .readFileSync(`${path.join(CloudRunnerFolders.repoPathFull, `.lfs-assets-guid`)}`, 'utf8')
           .replace(/\n/g, ``),
         lfsGuidSum: fs
-          .readFileSync(`${path.join(CloudRunnerState.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
+          .readFileSync(`${path.join(CloudRunnerFolders.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
           .replace('  .lfs-assets-guid', '')
           .replace(/\n/g, ``),
       };
