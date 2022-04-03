@@ -80,7 +80,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const buildHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
       (x) => x.step.includes(`build`),
     );
-    return `apt-get update
+    return `apt-get update -q
       apt-get install -y -q zip tree npm git-lfs jq unzip git
       npm install -g n
       n stable
