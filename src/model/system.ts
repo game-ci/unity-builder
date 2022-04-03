@@ -45,6 +45,10 @@ class System {
     };
 
     try {
+      if (command.trim() === '') {
+        throw new Error(`Failed to execute empty command`);
+      }
+
       const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
       showOutput();
       if (exitCode !== 0) {

@@ -12,12 +12,10 @@ async function runMain() {
     Action.checkCompatibility();
     Cache.verify();
 
-    const { dockerfile, workspace, actionFolder } = Action;
+    const { workspace, actionFolder } = Action;
 
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
-
-    let builtImage;
 
     if (
       buildParameters.cloudRunnerCluster &&
@@ -31,8 +29,7 @@ async function runMain() {
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder, workspace, buildParameters);
       } else {
-        builtImage = await Docker.build({ path: actionFolder, dockerfile, baseImage });
-        await Docker.run(builtImage, { workspace, ...buildParameters });
+        await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
       }
     }
 

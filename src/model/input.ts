@@ -200,7 +200,7 @@ class Input {
   }
 
   static get androidTargetSdkVersion() {
-    return core.getInput('androidTargetSdkVersion') || '';
+    return Input.getInput('androidTargetSdkVersion') || '';
   }
 
   static get sshAgent() {

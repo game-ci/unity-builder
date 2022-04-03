@@ -1,75 +1,66 @@
 import { exec } from '@actions/exec';
-import ImageTag from './image-tag';
 import ImageEnvironmentFactory from './image-environment-factory';
 import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async build(buildParameters, silent = false) {
-    const { path: buildPath, dockerfile, baseImage } = buildParameters;
-    const { version, platform } = baseImage;
-
-    const tag = new ImageTag({ repository: '', name: 'unity-builder', version, platform });
-    const command = `docker build ${buildPath} \
-      --file ${dockerfile} \
-      --build-arg IMAGE=${baseImage} \
-      --tag ${tag}`;
-
-    await exec(command, undefined, { silent });
-
-    return tag;
-  }
-
   static async run(image, parameters, silent = false) {
-    const { workspace, unitySerial, runnerTempPath, sshAgent } = parameters;
-
-    const baseOsSpecificArguments = this.getBaseOsSpecificArguments(
-      process.platform,
-      workspace,
-      unitySerial,
-      runnerTempPath,
-      sshAgent,
-    );
-
-    const runCommand = `docker run \
-    --workdir /github/workspace \
-    --rm \
-    ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
-    ${baseOsSpecificArguments} \
-    ${image}`;
-
+    let runCommand = '';
+    switch (process.platform) {
+      case 'linux':
+        runCommand = this.getLinuxCommand(image, parameters);
+        break;
+      case 'win32':
+        runCommand = this.getWindowsCommand(image, parameters);
+    }
     await exec(runCommand, undefined, { silent });
   }
 
-  static getBaseOsSpecificArguments(baseOs, workspace, unitySerial, runnerTemporaryPath, sshAgent): string {
-    switch (baseOs) {
-      case 'linux': {
-        const githubHome = path.join(runnerTemporaryPath, '_github_home');
-        if (!existsSync(githubHome)) mkdirSync(githubHome);
-        const githubWorkflow = path.join(runnerTemporaryPath, '_github_workflow');
-        if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
+  static getLinuxCommand(image, parameters): string {
+    const { workspace, actionFolder, runnerTempPath, sshAgent } = parameters;
 
-        return `--env UNITY_SERIAL \
-                --env GITHUB_WORKSPACE=/github/workspace \
-                ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
-                --volume "/var/run/docker.sock":"/var/run/docker.sock:z" \
-                --volume "${githubHome}":"/root:z" \
-                --volume "${githubWorkflow}":"/github/workflow:z" \
-                --volume "${workspace}":"/github/workspace:z" \
-                ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
-                ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''}`;
-      }
-      case 'win32':
-        return `--env UNITY_SERIAL="${unitySerial}" \
-                --env GITHUB_WORKSPACE=c:/github/workspace \
-                --volume "${workspace}":"c:/github/workspace" \
-                --volume "c:/regkeys":"c:/regkeys" \
-                --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
-                --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
-                --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio"`;
-      //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
-    }
-    return '';
+    const githubHome = path.join(runnerTempPath, '_github_home');
+    if (!existsSync(githubHome)) mkdirSync(githubHome);
+    const githubWorkflow = path.join(runnerTempPath, '_github_workflow');
+    if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
+
+    return `docker run \
+            --workdir /github/workspace \
+            --rm \
+            ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
+            --env UNITY_SERIAL \
+            --env GITHUB_WORKSPACE=/github/workspace \
+            ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
+            --volume "${githubHome}":"/root:z" \
+            --volume "${githubWorkflow}":"/github/workflow:z" \
+            --volume "${workspace}":"/github/workspace:z" \
+            --volume "${actionFolder}/default-build-script:/UnityBuilderAction:z" \
+            --volume "${actionFolder}/platforms/ubuntu/steps:/steps:z" \
+            --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
+            ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
+            ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
+            ${image} \
+            /bin/bash -c /entrypoint.sh`;
+  }
+
+  static getWindowsCommand(image: any, parameters: any): string {
+    const { workspace, actionFolder, unitySerial } = parameters;
+    return `docker run \
+            --workdir /github/workspace \
+            --rm \
+            ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
+            --env UNITY_SERIAL="${unitySerial}" \
+            --env GITHUB_WORKSPACE=c:/github/workspace \
+            --volume "${workspace}":"c:/github/workspace" \
+            --volume "c:/regkeys":"c:/regkeys" \
+            --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
+            --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
+            --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
+            --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
+            --volume "${actionFolder}/platforms/windows":"c:/steps" \
+            --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
+            ${image} \
+            powershell c:/steps/entrypoint.ps1`;
   }
 }
 
