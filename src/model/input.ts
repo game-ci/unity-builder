@@ -95,13 +95,13 @@ class Input {
     return Input.getInput('region') || 'eu-west-2';
   }
   static get unitySerial(): string {
-    return Input.getInput('unitySerial') || false;
+    return Input.getInput('UNITY_SERIAL') || false;
   }
   static get unityUsername(): string {
-    return Input.getInput('unityUsername') || false;
+    return Input.getInput('UNITY_USERNAME') || false;
   }
   static get unityPassword(): string {
-    return Input.getInput('unityPassword') || false;
+    return Input.getInput('UNITY_PASSWORD') || false;
   }
 
   static get githubRepo() {
