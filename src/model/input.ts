@@ -108,7 +108,7 @@ class Input {
     }
   }
   static get cloudRunnerBuilderPlatform() {
-    return Input.getInput('cloudRunnerBuilderPlatform') || false;
+    return Input.cloudRunnerCluster === 'local' ? Input.getInput('cloudRunnerBuilderPlatform') || false : 'linux';
   }
 
   static get gitSha() {
@@ -262,6 +262,9 @@ class Input {
   }
 
   static get cloudRunnerCluster() {
+    if (Input.cliMode) {
+      return Input.getInput('cloudRunnerCluster') || 'aws';
+    }
     return Input.getInput('cloudRunnerCluster') || 'local';
   }
 
