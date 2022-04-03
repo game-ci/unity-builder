@@ -78,7 +78,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       x.step.includes(`setup`),
     );
     return `apt-get update
-      apt-get install -y -q zip tree nodejs git-lfs jq unzip git
+      apt-get install -y -q zip tree npm git-lfs jq unzip git 
       npm install -g n
       n stable
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
