@@ -86,7 +86,7 @@ export class TaskParameterSerializer {
     return array;
   }
   private static getValue(key) {
-    return Input.queryOverrides !== null && Input.queryOverrides[key] !== undefined
+    return Input.queryOverrides !== undefined && Input.queryOverrides[key] !== undefined
       ? Input.queryOverrides[key]
       : process.env[key];
   }
