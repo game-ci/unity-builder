@@ -66,6 +66,9 @@ class AWSTaskRunner {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
       return output;
     } else {
+      if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
+        throw new Error('Container exited with code 1');
+      }
       const message = `Cloud runner job exit code ${exitCode}`;
       taskData.overrides = undefined;
       taskData.attachments = undefined;
