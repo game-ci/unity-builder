@@ -45,10 +45,6 @@ export class Caching {
       CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
-
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-        await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      }
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;
@@ -96,12 +92,11 @@ export class Caching {
         const resultsFolder = `results${CloudRunner.buildParameters.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
-        assert(`${fs.existsSync(destinationFolder)}`);
-        assert(`${fs.existsSync(`${cacheSelection}.zip`)}`);
+        assert(`${fs.existsSync(destinationFolder)}`, `destination folder to pull into exists`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
         await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
-        assert(`${fs.existsSync(fullResultsFolder)}`);
+        assert(`${fs.existsSync(fullResultsFolder)}`, `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
         if (fs.existsSync(destinationFolder)) {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
