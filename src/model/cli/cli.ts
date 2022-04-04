@@ -7,6 +7,7 @@ import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
 import { RemoteClientLogger } from './remote-client/remote-client-services/remote-client-logger';
 import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
 import * as SDK from 'aws-sdk';
+import { Caching } from './remote-client/remote-client-services/caching';
 
 export class CLI {
   private static options;
@@ -25,6 +26,7 @@ export class CLI {
         .map((x) => `${x.key} (${x.description})`)
         .join(` | `),
     );
+    program.option('--populateOverride <populate>', 'should use override query to pull input false by default');
     program.parse(process.argv);
     CLI.options = program.opts();
     Input.cliOptions = CLI.options;
@@ -33,7 +35,9 @@ export class CLI {
 
   static async RunCli(): Promise<void> {
     Input.githubInputEnabled = false;
-    await Input.PopulateQueryOverrideInput();
+    if (CLI.options['populate'] === `true`) {
+      await Input.PopulateQueryOverrideInput();
+    }
     CLI.logInput();
     const results = GetCliFunctions(CLI.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
@@ -78,7 +82,21 @@ export class CLI {
   }
 
   @CliFunction(`cache-push`, `push to cache`)
-  static async cachePush() {}
+  static async cachePush() {
+    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+    RemoteClientLogger.log(`Build Params:
+      ${JSON.stringify(buildParameter, undefined, 4)}
+    `);
+    CloudRunner.buildParameters = buildParameter;
+    await Caching.PushToCache(
+      Input.cliOptions['cachePushFrom'],
+      Input.cliOptions['cachePushTo'],
+      Input.cliOptions['artifactName'],
+    );
+    CloudRunnerLogger.log(
+      `${Input.cliOptions['cachePushFrom']} ${Input.cliOptions['cachePushTo']} ${Input.cliOptions['artifactName']}`,
+    );
+  }
 
   @CliFunction(`cache-pull`, `pull from cache`)
   static async cachePull() {}

@@ -70,22 +70,16 @@ class Input {
       return Input.cliOptions[query];
     }
 
-    if (Input.queryOverrides !== undefined) {
-      if (Input.queryOverrides[query] !== undefined) {
-        return Input.queryOverrides[query];
-      }
-
-      if (Input.queryOverrides[Input.ToEnvVarFormat(query)] !== undefined) {
-        return Input.queryOverrides[Input.ToEnvVarFormat(query)];
-      }
+    if (Input.queryOverrides && Input.queryOverrides[query] !== undefined) {
+      return Input.queryOverrides[query];
     }
 
     if (process.env[query] !== undefined) {
       return process.env[query];
     }
 
-    if (process.env[Input.ToEnvVarFormat(query)] !== undefined) {
-      return process.env[Input.ToEnvVarFormat(query)];
+    if (Input.ToEnvVarFormat(query) !== query) {
+      return Input.getInput(Input.ToEnvVarFormat(query));
     }
 
     return '';
@@ -304,6 +298,9 @@ class Input {
   }
 
   public static ToEnvVarFormat(input: string) {
+    if (input.toUpperCase() === input) {
+      return input;
+    }
     return input
       .replace(/([A-Z])/g, ' $1')
       .trim()

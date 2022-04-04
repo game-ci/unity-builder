@@ -122,11 +122,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     zip -r "build-${CloudRunner.buildParameters.buildGuid}.zip" "build"
     mv "build-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}"
     chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
-    node "${path
+    node ${path
       .join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`)
-      .replace(/\\/g, `/`)}" -m cache-push "Library" "lib-${
+      .replace(/\\/g, `/`)} -m cache-push --cachePushFrom "Library" --artifactName "lib-${
       CloudRunner.buildParameters.buildGuid
-    }.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
+    }.zip" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
     ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'} tree -lh "${
       CloudRunnerFolders.cacheFolderFull
     }"`;
