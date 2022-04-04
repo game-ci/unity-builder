@@ -70,15 +70,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
     return `apt-get update > /dev/null
       apt-get install -y zip tree npm git-lfs jq unzip git > /dev/null
-      npm install -g n
-      n stable
+      npm install -g n > /dev/null
+      n stable > /dev/null
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
       ${BuildAutomationWorkflow.SetupCommands}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands}`;
+      ${BuildAutomationWorkflow.BuildCommands}
+      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
   private static get SetupCommands() {
