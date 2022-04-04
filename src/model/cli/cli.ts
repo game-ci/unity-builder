@@ -77,10 +77,10 @@ export class CLI {
     await SetupCloudRunnerRepository.run();
   }
 
-  @CliFunction(`cach-push`, `push to cache`)
+  @CliFunction(`cache-push`, `push to cache`)
   static async cachePush() {}
 
-  @CliFunction(`cach-pull`, `pull from cache`)
+  @CliFunction(`cache-pull`, `pull from cache`)
   static async cachePull() {}
 
   @CliFunction(`garbage-collect-aws`, `garbage collect aws`)
