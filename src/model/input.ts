@@ -67,7 +67,7 @@ class Input {
     }
   }
   static get cloudRunnerBuilderPlatform() {
-    return Input.cloudRunnerCluster === 'local' ? Input.getInput('cloudRunnerBuilderPlatform') || false : 'linux';
+    return Input.cloudRunnerCluster === 'local' ? Input.getInput('cloudRunnerBuilderPlatform') || false : 'ubuntu';
   }
 
   static get gitSha() {
