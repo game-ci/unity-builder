@@ -25,10 +25,6 @@ export class Caching {
           )}`,
         );
       }
-
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-        await CloudRunnerSystem.Run(`ls ${path.basename(sourceFolder)}`);
-      }
       // eslint-disable-next-line func-style
       const formatFunction = function (format: string) {
         const arguments_ = Array.prototype.slice.call([path.resolve(sourceFolder, '..'), cacheFolder, cacheKey], 1);

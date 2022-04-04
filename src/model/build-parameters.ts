@@ -36,7 +36,6 @@ class BuildParameters {
   public cloudRunnerCluster!: string;
   public awsBaseStackName!: string;
   public gitPrivateToken!: string;
-  public remoteBuildCluster!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
   public cloudRunnerMemory!: string;
@@ -135,7 +134,6 @@ class BuildParameters {
       cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerIntegrationTests: Input.cloudRunnerTests,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
-      remoteBuildCluster: Input.cloudRunnerCluster,
       cliMode: CLI.cliMode,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
