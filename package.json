@@ -13,6 +13,7 @@
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "cli": "yarn ts-node src/index.ts -m cli",
     "gcp-secrets-cli": "cross-env cloudRunnerTests=true readInputOverrideCommand=\"gcloud secrets versions access 1 --secret=\"{0}\"\" yarn ts-node src/index.ts -m cli --populateOverride true --readInputFromOverrideList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
+    "aws-secrets-cli": "cross-env cloudRunnerTests=true readInputOverrideCommand=\"aws secretsmanager get-secret-value --secret-id {0}\" yarn ts-node src/index.ts -m cli --populateOverride true --readInputFromOverrideList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "cli-aws": "cross-env cloudRunnerCluster=aws yarn run test-cli",
     "cli-k8s": "cross-env cloudRunnerCluster=k8s yarn run test-cli",
     "test-cli": "cross-env cloudRunnerTests=true yarn ts-node src/index.ts -m cli --projectPath test-project",
