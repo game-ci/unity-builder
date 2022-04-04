@@ -4,11 +4,10 @@ import { GenericInputReader } from './input-readers/generic-input-reader';
 import Platform from './platform';
 
 const formatFunction = (value, arguments_) => {
-  let formatted = value;
-  for (const argument in arguments_) {
-    formatted = formatted.replace(`{${arguments_[argument].key}}`, arguments_[argument].value);
+  for (const element of arguments_) {
+    value = value.replace(`{${element.key}}`, element.value);
   }
-  return formatted;
+  return value;
 };
 
 const core = require('@actions/core');
