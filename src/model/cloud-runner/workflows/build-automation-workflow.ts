@@ -84,38 +84,33 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
   private static SetupCommands(builderPath) {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-    echo "cloning game ci"
+    echo "game ci cloud runner clone"
     mkdir -p ${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}
     git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}"
     chmod +x ${builderPath}
-    echo "cloud runner remote cli"
-    node --version
+    echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli`;
   }
 
   private static BuildCommands(builderPath) {
-    return `cp -r "${path
-      .join(CloudRunnerFolders.builderPathFull, 'dist', 'default-build-script')
-      .replace(/\\/g, `/`)}" "/UnityBuilderAction"
-    cp -r "${path
-      .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'entrypoint.sh')
-      .replace(/\\/g, `/`)}" "/entrypoint.sh"
-    cp -r "${path
-      .join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu', 'steps')
-      .replace(/\\/g, `/`)}" "/steps"
+    const guid = CloudRunner.buildParameters.buildGuid;
+    const linuxCacheFolder = CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`);
+    const distFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist');
+    const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu');
+    return `echo "game ci cloud runner init"
+    cp -r "${path.join(distFolder, 'default-build-script').replace(/\\/g, `/`)}" "/UnityBuilderAction"
+    cp -r "${path.join(ubuntuPlatformsFolder, 'entrypoint.sh').replace(/\\/g, `/`)}" "/entrypoint.sh"
+    cp -r "${path.join(ubuntuPlatformsFolder, 'steps').replace(/\\/g, `/`)}" "/steps"
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
-    echo "enter build scripts"
+    echo "game ci cloud runner start"
     /entrypoint.sh
-    echo "post build scripts"
+    echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    node ${builderPath} -m cache-push --cachePushFrom "Library" --artifactName "lib-${
-      CloudRunner.buildParameters.buildGuid
-    }" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
-    node ${builderPath} -m cache-push --cachePushFrom "build" --artifactName "build-${
-      CloudRunner.buildParameters.buildGuid
-    }" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}""`;
+    node ${builderPath} -m cache-push --cachePushFrom Library --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
+    echo "game ci cloud runner push build to cache"
+    node ${builderPath} -m cache-push --cachePushFrom build --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}`;
   }
 }
