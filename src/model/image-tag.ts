@@ -60,7 +60,7 @@ class ImageTag {
       case 'linux':
         return 'ubuntu';
       default:
-        throw new Error('The Operating System of this runner is not yet supported.');
+        return '';
     }
   }
 
