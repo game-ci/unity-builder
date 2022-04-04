@@ -2,7 +2,6 @@ import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import { BuildAutomationWorkflow } from './build-automation-workflow';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import CloudRunner from '../cloud-runner';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
@@ -20,11 +19,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
         return await CustomWorkflow.runCustomJob(CloudRunner.buildParameters.customJob);
       }
       return await new BuildAutomationWorkflow().run(
-        new CloudRunnerStepState(
-          baseImage,
-          TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunner.defaultSecrets,
-        ),
+        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
     } catch (error) {
       throw error;

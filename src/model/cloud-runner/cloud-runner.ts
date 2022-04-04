@@ -9,18 +9,21 @@ import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import * as core from '@actions/core';
 import CloudRunnerSecret from './services/cloud-runner-secret';
 import { CloudRunnerProviderInterface } from './services/cloud-runner-provider-interface';
+import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
 
 class CloudRunner {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
   static buildParameters: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
+  public static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   private static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupBuildPlatform();
-    const parameters = TaskParameterSerializer.readBuildEnvironmentVariables();
+    CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
+    CloudRunner.cloudRunnerEnvironmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
     if (!buildParameters.cliMode) {
-      for (const element of parameters) {
+      for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
         core.setOutput(element.name, element.value);
       }
     }
@@ -52,11 +55,7 @@ class CloudRunner {
       );
       if (!CloudRunner.buildParameters.cliMode) core.endGroup();
       const output = await new WorkflowCompositionRoot().run(
-        new CloudRunnerStepState(
-          baseImage,
-          TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunner.defaultSecrets,
-        ),
+        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
       if (!CloudRunner.buildParameters.cliMode) core.startGroup('Cleanup');
       await CloudRunner.CloudRunnerProviderPlatform.cleanupSharedResources(

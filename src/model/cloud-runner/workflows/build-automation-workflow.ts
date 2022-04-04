@@ -1,5 +1,4 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { CustomWorkflow } from './custom-workflow';
@@ -52,7 +51,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         BuildAutomationWorkflow.FullWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        TaskParameterSerializer.readBuildEnvironmentVariables(),
+        CloudRunner.cloudRunnerEnvironmentVariables,
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.cliMode) core.endGroup();

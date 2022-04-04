@@ -2,10 +2,10 @@ import { CloudRunner, Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
+import CloudRunnerSecret from './cloud-runner-secret';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
-    TaskParameterSerializer.setupDefaultSecrets();
     return [
       {
         name: 'ContainerMemory',
@@ -69,30 +69,28 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  private static setupDefaultSecrets() {
-    if (CloudRunner.defaultSecrets === undefined) {
-      const array = new Array();
-      TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
-      TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
-      TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
-      array.push(
-        ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map((x) => {
-          return {
-            ParameterKey: x.name,
-            EnvironmentVariable: x.name,
-            ParameterValue: x.value,
-          };
-        }),
-      );
-      CloudRunner.defaultSecrets = array;
-    }
+  public static readDefaultSecrets(): CloudRunnerSecret[] {
+    const array = new Array();
+    TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
+    TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
+    TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+    array.push(
+      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map((x) => {
+        return {
+          ParameterKey: x.name,
+          EnvironmentVariable: x.name,
+          ParameterValue: x.value,
+        };
+      }),
+    );
+    return array;
   }
   private static getValue(key) {
     return Input.queryOverrides !== null && Input.queryOverrides[key] !== undefined
       ? Input.queryOverrides[key]
       : process.env[key];
   }
-  private static tryAddInput(array, key) {
+  private static tryAddInput(array, key): CloudRunnerSecret[] {
     if (TaskParameterSerializer.getValue(key) !== undefined) {
       array.push({
         ParameterKey: key,
