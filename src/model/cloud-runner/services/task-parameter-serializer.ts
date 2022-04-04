@@ -21,15 +21,15 @@ export class TaskParameterSerializer {
       },
       {
         name: 'UNITY_SERIAL',
-        value: Input.unitySerial,
+        value: Input.queryOverrides['UNITY_SERIAL'],
       },
       {
         name: 'UNITY_USERNAME',
-        value: Input.unityUsername,
+        value: Input.queryOverrides['UNITY_EMAIL'],
       },
       {
         name: 'UNITY_PASSWORD',
-        value: Input.unityPassword,
+        value: Input.queryOverrides['UNITY_PASSWORD'],
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];

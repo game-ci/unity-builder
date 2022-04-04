@@ -47,14 +47,15 @@ export class SetupCloudRunnerRepository {
       RemoteClientLogger.log(`Cloning the repository being built:`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
-      await CloudRunnerSystem.Run(`git lfs install`);
+      await CloudRunnerSystem.Run(`ls`);
       await CloudRunnerSystem.Run(
         `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
           `..`,
           path.basename(CloudRunnerFolders.repoPathFull),
         )}`,
       );
-      assert(fs.existsSync(`.git`));
+      await CloudRunnerSystem.Run(`git lfs install`);
+      assert(fs.existsSync(`.git`), 'git folder exists');
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
