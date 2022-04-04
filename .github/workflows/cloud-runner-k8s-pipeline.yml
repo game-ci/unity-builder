@@ -50,7 +50,7 @@ jobs:
       ###########################
       #          Setup          #
       ###########################
-      - uses: google-github-actions/setup-gcloud@main
+      - uses: google-github-actions/setup-gcloud@v0
         with:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
