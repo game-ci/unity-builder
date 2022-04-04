@@ -17,7 +17,7 @@ export class TaskParameterSerializer {
       },
       {
         name: 'BUILD_TARGET',
-        value: CloudRunner.buildParameters.platform,
+        value: CloudRunner.buildParameters.targetPlatform,
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];

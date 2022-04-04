@@ -1,14 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { GenericInputReader } from './input-readers/generic-input-reader';
 import Platform from './platform';
-
-const formatFunction = (value, arguments_) => {
-  for (const element of arguments_) {
-    value = value.replace(`{${element.key}}`, element.value);
-  }
-  return value;
-};
 
 const core = require('@actions/core');
 
@@ -16,6 +8,8 @@ const core = require('@actions/core');
  * Input variables specified in workflows using "with" prop.
  *
  * Note that input is always passed as a string, even booleans.
+ *
+ * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
   public static cliOptions;
@@ -26,38 +20,9 @@ class Input {
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
   }
-  private static shouldUseOverride(query) {
-    if (Input.readInputOverrideCommand() !== '') {
-      if (Input.readInputFromOverrideList() !== '') {
-        const doesInclude =
-          Input.readInputFromOverrideList().split(',').includes(query) ||
-          Input.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
-        return doesInclude ? true : false;
-      } else {
-        return true;
-      }
-    }
-  }
+
   static get cliMode() {
     return Input.cliOptions !== undefined && Input.cliOptions.mode !== undefined && Input.cliOptions.mode !== '';
-  }
-
-  private static async queryOverride(query) {
-    if (!this.shouldUseOverride(query)) {
-      throw new Error(`Should not be trying to run override query on ${query}`);
-    }
-
-    return await GenericInputReader.Run(formatFunction(Input.readInputOverrideCommand(), [{ key: 0, value: query }]));
-  }
-
-  public static async PopulateQueryOverrideInput() {
-    const queries = Input.readInputFromOverrideList().split(',');
-    Input.queryOverrides = new Array();
-    for (const element of queries) {
-      if (Input.shouldUseOverride(element)) {
-        Input.queryOverrides[element] = await Input.queryOverride(element);
-      }
-    }
   }
 
   public static getInput(query) {
@@ -84,6 +49,7 @@ class Input {
 
     return '';
   }
+
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
@@ -111,6 +77,7 @@ class Input {
       return Input.getInput(`GitSHA`);
     }
   }
+
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }
@@ -135,6 +102,7 @@ class Input {
         !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
       ? 'test-project'
       : '.';
+
     return rawProjectPath.replace(/\/$/, '');
   }
 

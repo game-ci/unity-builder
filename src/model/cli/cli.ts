@@ -8,6 +8,7 @@ import { RemoteClientLogger } from './remote-client/remote-client-services/remot
 import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
 import * as SDK from 'aws-sdk';
 import { Caching } from './remote-client/remote-client-services/caching';
+import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
 
 export class CLI {
   private static options;
@@ -27,6 +28,9 @@ export class CLI {
         .join(` | `),
     );
     program.option('--populateOverride <populate>', 'should use override query to pull input false by default');
+    program.option('--cachePushFrom <cachePushFrom>', 'cache push from source folder');
+    program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
+    program.option('--artifactName <artifactName>', 'caching artifact name');
     program.parse(process.argv);
     CLI.options = program.opts();
     Input.cliOptions = CLI.options;
@@ -36,7 +40,7 @@ export class CLI {
   static async RunCli(): Promise<void> {
     Input.githubInputEnabled = false;
     if (CLI.options['populate'] === `true`) {
-      await Input.PopulateQueryOverrideInput();
+      await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
     CLI.logInput();
     const results = GetCliFunctions(CLI.options.mode);

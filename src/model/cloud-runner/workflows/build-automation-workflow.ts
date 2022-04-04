@@ -83,16 +83,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
   private static get SetupCommands() {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-    echo "cloning"
+    echo "cloning game ci"
     mkdir -p ${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}
     git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}"
-    ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'
-    } tree ${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}
     chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
-    echo "caching"
+    echo "cloud runner remote cli"
     node --version
     node ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli`;
   }

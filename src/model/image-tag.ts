@@ -1,44 +1,45 @@
 import Platform from './platform';
 
+import BuildParameters from './build-parameters';
+
 class ImageTag {
   public repository: string;
   public name: string;
-  public version: string;
-  public platform: any;
-  public builderPlatformSuffix: string;
-  public cloudRunnerBuilderPlatform: string;
+  public cloudRunnerBuilderPlatform!: string | undefined;
+  public editorVersion: string;
+  public targetPlatform: any;
+  public builderPlatform: string;
   public customImage: any;
+  public imageRollingVersion: number;
+  public imagePlatformPrefix: string;
 
-  constructor(imageProperties) {
-    const {
-      repository = 'unityci',
-      name = 'editor',
-      version = '2019.2.11f1',
-      platform,
-      cloudRunnerBuilderPlatform,
-      customImage,
-    } = imageProperties;
+  constructor(imageProperties: Partial<BuildParameters>) {
+    const { editorVersion = '2019.2.11f1', targetPlatform, customImage, cloudRunnerBuilderPlatform } = imageProperties;
 
-    if (!ImageTag.versionPattern.test(version)) {
-      throw new Error(`Invalid version "${version}".`);
+    if (!ImageTag.versionPattern.test(editorVersion)) {
+      throw new Error(`Invalid version "${editorVersion}".`);
     }
 
-    const builderPlatformSuffix = ImageTag.getTargetPlatformToImageSuffixMap(platform, version);
-
-    this.repository = repository;
-    this.name = name;
-    this.version = version;
-    this.platform = platform;
-    this.builderPlatformSuffix = builderPlatformSuffix;
-    this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
+    // Todo we might as well skip this class for customImage.
+    // Either
     this.customImage = customImage;
+
+    // Or
+    this.repository = 'unityci';
+    this.name = 'editor';
+    this.editorVersion = editorVersion;
+    this.targetPlatform = targetPlatform;
+    this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
+    this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(targetPlatform, editorVersion);
+    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(process.platform);
+    this.imageRollingVersion = 1; // will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern() {
     return /^20\d{2}\.\d\.\w{3,4}|3$/;
   }
 
-  static get imageSuffixes() {
+  static get targetPlatformSuffixes() {
     return {
       generic: '',
       webgl: 'webgl',
@@ -55,9 +56,20 @@ class ImageTag {
     };
   }
 
-  static getTargetPlatformToImageSuffixMap(platform, version) {
+  static getImagePlatformPrefixes(platform) {
+    switch (platform) {
+      case 'win32':
+        return 'windows';
+      case 'linux':
+        return 'ubuntu';
+      default:
+        return '';
+    }
+  }
+
+  static getTargetPlatformToTargetPlatformSuffixMap(platform, version) {
     const { generic, webgl, mac, windows, windowsIl2cpp, wsaPlayer, linux, linuxIl2cpp, android, ios, tvos, facebook } =
-      ImageTag.imageSuffixes;
+      ImageTag.targetPlatformSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
@@ -129,16 +141,11 @@ class ImageTag {
   }
 
   get tag() {
-    const tagPlatform = this.cloudRunnerBuilderPlatform ? this.cloudRunnerBuilderPlatform : process.platform;
-    //We check the host os so we know what type of the images we need to pull
-    switch (tagPlatform) {
-      case 'win32':
-        return `windows-${this.version}-${this.builderPlatformSuffix}`.replace(/-+$/, '');
-      case 'linux':
-        return `${this.version}-${this.builderPlatformSuffix}`.replace(/-+$/, '');
-      default:
-        break;
-    }
+    const versionAndPlatform = `${this.editorVersion}-${this.builderPlatform}`.replace(/-+$/, '');
+
+    return `${
+      this.cloudRunnerBuilderPlatform ? this.cloudRunnerBuilderPlatform : this.imagePlatformPrefix
+    }-${versionAndPlatform}-${this.imageRollingVersion}`;
   }
 
   get image() {
@@ -148,12 +155,9 @@ class ImageTag {
   toString() {
     const { image, tag, customImage } = this;
 
-    if (customImage && customImage !== '') {
-      return customImage;
-    }
+    if (customImage) return customImage;
 
-    return `${image}:${tag}-0`; // '0' here represents the docker repo version
+    return `${image}:${tag}`; // '0' here represents the docker repo version
   }
 }
-
 export default ImageTag;

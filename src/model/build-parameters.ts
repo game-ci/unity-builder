@@ -11,11 +11,11 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 
 class BuildParameters {
-  public version!: string;
+  public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
   public runnerTempPath: string | undefined;
-  public platform!: string;
+  public targetPlatform!: string;
   public projectPath!: string;
   public buildName!: string;
   public buildPath!: string;
@@ -69,8 +69,8 @@ class BuildParameters {
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
-    const unityVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
-    const buildVersion = await Versioning.determineVersion(Input.versioningStrategy, Input.specifiedVersion);
+    const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
+    const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
 
@@ -94,12 +94,12 @@ class BuildParameters {
     }
 
     return {
-      version: unityVersion,
+      editorVersion,
       customImage: Input.customImage,
       unitySerial,
 
       runnerTempPath: process.env.RUNNER_TEMP,
-      platform: Input.targetPlatform,
+      targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
       buildName: Input.buildName,
       buildPath: `${Input.buildsPath}/${Input.targetPlatform}`,
