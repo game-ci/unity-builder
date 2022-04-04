@@ -71,11 +71,11 @@ class Input {
     }
 
     if (Input.queryOverrides !== undefined) {
-      if (Input.queryOverrides[query] !== null) {
+      if (Input.queryOverrides[query] !== undefined) {
         return Input.queryOverrides[query];
       }
 
-      if (Input.queryOverrides[Input.ToEnvVarFormat(query)] !== null) {
+      if (Input.queryOverrides[Input.ToEnvVarFormat(query)] !== undefined) {
         return Input.queryOverrides[Input.ToEnvVarFormat(query)];
       }
     }
