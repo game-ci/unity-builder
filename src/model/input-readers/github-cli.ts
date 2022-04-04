@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 export class GithubCliReader {
   static async GetGitHubAuthToken() {
     try {
-      const authStatus = await CloudRunnerSystem.Run(`gh auth status`, false, true);
+      const authStatus = await CloudRunnerSystem.Run(`gh auth status`, true, true);
       if (authStatus.includes('You are not logged') || authStatus === '') {
         return '';
       }
