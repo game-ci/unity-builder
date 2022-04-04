@@ -19,20 +19,23 @@ export class TaskParameterSerializer {
         name: 'BUILD_TARGET',
         value: CloudRunner.buildParameters.platform,
       },
-      {
-        name: 'UNITY_SERIAL',
-        value: Input.queryOverrides['UNITY_SERIAL'],
-      },
-      {
-        name: 'UNITY_USERNAME',
-        value: Input.queryOverrides['UNITY_EMAIL'],
-      },
-      {
-        name: 'UNITY_PASSWORD',
-        value: Input.queryOverrides['UNITY_PASSWORD'],
-      },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
+  }
+  private static getValue(key) {
+    return Input.queryOverrides !== null && Input.queryOverrides[key] !== undefined
+      ? Input.queryOverrides[key]
+      : process.env[key];
+  }
+  private static tryAddInput(array, key) {
+    if (TaskParameterSerializer.getValue(key) !== undefined) {
+      array.push({
+        ParameterKey: key,
+        EnvironmentVariable: key,
+        ParameterValue: TaskParameterSerializer.getValue(key),
+      });
+    }
+    return array();
   }
   private static get serializeBuildParamsAndInput() {
     let array = new Array();
@@ -82,15 +85,21 @@ export class TaskParameterSerializer {
   }
 
   private static setupDefaultSecrets() {
-    if (CloudRunner.defaultSecrets === undefined)
-      CloudRunner.defaultSecrets = ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map(
-        (x) => {
+    if (CloudRunner.defaultSecrets === undefined) {
+      const array = new Array();
+      TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
+      TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
+      TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+      array.push(
+        ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map((x) => {
           return {
             ParameterKey: x.name,
             EnvironmentVariable: x.name,
             ParameterValue: x.value,
           };
-        },
+        }),
       );
+      CloudRunner.defaultSecrets = array;
+    }
   }
 }
