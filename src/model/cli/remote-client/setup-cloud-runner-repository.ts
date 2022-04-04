@@ -47,7 +47,6 @@ export class SetupCloudRunnerRepository {
       RemoteClientLogger.log(`Cloning the repository being built:`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
-      await CloudRunnerSystem.Run(`ls`);
       await CloudRunnerSystem.Run(
         `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
           `..`,
