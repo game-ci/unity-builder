@@ -68,33 +68,34 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const buildHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
       (x) => x.step.includes(`build`),
     );
+    const builderPath = path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`);
     return `apt-get update > /dev/null
       apt-get install -y zip tree npm git-lfs jq unzip git > /dev/null
       npm install -g n > /dev/null
       n stable > /dev/null
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
-      ${BuildAutomationWorkflow.SetupCommands}
+      ${BuildAutomationWorkflow.SetupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands}
+      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
-  private static get SetupCommands() {
+  private static SetupCommands(builderPath) {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "cloning game ci"
     mkdir -p ${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}
     git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.builderPathFull.replace(/\\/g, `/`)}"
-    chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
+    chmod +x ${builderPath}
     echo "cloud runner remote cli"
     node --version
-    node ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)} -m remote-cli`;
+    node ${builderPath} -m remote-cli`;
   }
 
-  private static get BuildCommands() {
+  private static BuildCommands(builderPath) {
     return `cp -r "${path
       .join(CloudRunnerFolders.builderPathFull, 'dist', 'default-build-script')
       .replace(/\\/g, `/`)}" "/UnityBuilderAction"
@@ -109,23 +110,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "enter build scripts"
     /entrypoint.sh
     echo "post build scripts"
-    cd "${CloudRunnerFolders.libraryFolderFull.replace(/\\/g, `/`)}/.."
-    zip -q -r "lib-${CloudRunner.buildParameters.buildGuid}.zip" "Library"
-    mv "lib-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(
-      /\\/g,
-      `/`,
-    )}/Library"
-    cd "${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
-    zip -r "build-${CloudRunner.buildParameters.buildGuid}.zip" "build"
-    mv "build-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}"
-    chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
-    node ${path
-      .join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`)
-      .replace(/\\/g, `/`)} -m cache-push --cachePushFrom "Library" --artifactName "lib-${
+    chmod +x ${builderPath}
+    node ${builderPath} -m cache-push --cachePushFrom "Library" --artifactName "lib-${
       CloudRunner.buildParameters.buildGuid
     }.zip" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'} tree -lh "${
-      CloudRunnerFolders.cacheFolderFull
-    }"`;
+    node ${builderPath} -m cache-push --cachePushFrom "build" --artifactName "build-${
+      CloudRunner.buildParameters.buildGuid
+    }.zip" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}""`;
   }
 }
