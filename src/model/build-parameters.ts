@@ -131,7 +131,7 @@ class BuildParameters {
       preBuildSteps: Input.preBuildSteps,
       customJob: Input.customJob,
       runNumber: Input.runNumber,
-      branch: Input.branch || (await GitRepoReader.GetBranch()),
+      branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerIntegrationTests: Input.cloudRunnerTests,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',

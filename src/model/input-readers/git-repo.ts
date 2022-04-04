@@ -13,6 +13,10 @@ export class GitRepoReader {
 
   public static async GetBranch() {
     assert(fs.existsSync(`.git`));
-    return (await System.run(`git branch`, [], {}, false)).split('*')[1].split(`\n`)[0].replace(/ /g, ``);
+    return (await System.run(`git branch`, [], {}, false))
+      .split('*')[1]
+      .split(`\n`)[0]
+      .replace(/ /g, ``)
+      .replace('/head', '');
   }
 }
