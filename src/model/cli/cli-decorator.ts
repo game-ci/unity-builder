@@ -13,7 +13,7 @@ export function CliFunction(key: string, description: string) {
 export function GetCliFunctions(key) {
   const results = targets.find((x) => x.key === key);
   if (results === undefined || results.length === 0) {
-    throw new Error('no CLI mode found');
+    throw new Error(`no CLI mode found for ${key}`);
   }
   return results;
 }

@@ -29,17 +29,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.cliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
-      // core.startGroup('setup');
-      // output += await new SetupStep().run(
-      //   new CloudRunnerStepState(
-      //     'alpine/git',
-      //     TaskParameterSerializer.readBuildEnvironmentVariables(),
-      //     CloudRunnerState.defaultSecrets,
-      //   ),
-      // );
-      // core.endGroup();
-      // CloudRunnerLogger.logWithTime('Download repository step time');
-
       if (!CloudRunner.buildParameters.cliMode) core.startGroup('build');
       CloudRunnerLogger.log(baseImage.toString());
       CloudRunnerLogger.logLine(` `);
@@ -83,7 +72,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       apt-get install -q -y zip tree npm git-lfs jq unzip git
       npm install -g n
       n stable
-      cd ${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.repoPathFull.replace(/\\/g, `/`)}"
       ${BuildAutomationWorkflow.SetupCommands}
@@ -134,9 +122,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     zip -r "build-${CloudRunner.buildParameters.buildGuid}.zip" "build"
     mv "build-${CloudRunner.buildParameters.buildGuid}.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}"
     chmod +x ${path.join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`).replace(/\\/g, `/`)}
-    node ${path
+    node "${path
       .join(CloudRunnerFolders.builderPathFull, 'dist', `index.js`)
-      .replace(/\\/g, `/`)} -m cache-push "Library" "lib-${
+      .replace(/\\/g, `/`)}" -m cache-push "Library" "lib-${
       CloudRunner.buildParameters.buildGuid
     }.zip" "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
     ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'} tree -lh "${
