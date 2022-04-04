@@ -9,6 +9,14 @@ const formatFunction = (value, arguments_) => {
 };
 
 class CloudRunnerQueryOverride {
+  static queryOverrides: any;
+
+  public static query(key) {
+    return CloudRunnerQueryOverride.queryOverrides && CloudRunnerQueryOverride.queryOverrides[key] !== undefined
+      ? CloudRunnerQueryOverride.queryOverrides[key]
+      : undefined;
+  }
+
   private static shouldUseOverride(query) {
     if (Input.readInputOverrideCommand() !== '') {
       if (Input.readInputFromOverrideList() !== '') {
@@ -32,10 +40,10 @@ class CloudRunnerQueryOverride {
 
   public static async PopulateQueryOverrideInput() {
     const queries = Input.readInputFromOverrideList().split(',');
-    Input.queryOverrides = new Array();
+    CloudRunnerQueryOverride.queryOverrides = new Array();
     for (const element of queries) {
       if (CloudRunnerQueryOverride.shouldUseOverride(element)) {
-        Input.queryOverrides[element] = await CloudRunnerQueryOverride.queryOverride(element);
+        CloudRunnerQueryOverride.queryOverrides[element] = await CloudRunnerQueryOverride.queryOverride(element);
       }
     }
   }

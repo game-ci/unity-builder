@@ -9,6 +9,7 @@ import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
+import { CLI } from './cli/cli';
 
 class BuildParameters {
   public editorVersion!: string;
@@ -77,7 +78,7 @@ class BuildParameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && Input.cliOptions === undefined) {
+    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && CLI.options === undefined) {
       //No serial was present so it is a personal license that we need to convert
       if (!process.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
@@ -89,7 +90,7 @@ class BuildParameters {
     } else {
       unitySerial = process.env.UNITY_SERIAL!;
     }
-    if (!Input.cliMode) {
+    if (!CLI.cliMode) {
       core.setSecret(unitySerial);
     }
 
@@ -135,7 +136,7 @@ class BuildParameters {
       cloudRunnerIntegrationTests: Input.cloudRunnerTests,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       remoteBuildCluster: Input.cloudRunnerCluster,
-      cliMode: Input.cliMode,
+      cliMode: CLI.cliMode,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),

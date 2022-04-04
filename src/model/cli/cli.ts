@@ -11,7 +11,13 @@ import { Caching } from './remote-client/remote-client-services/caching';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
 
 export class CLI {
-  private static options;
+  public static options;
+  static get cliMode() {
+    return CLI.options !== undefined && CLI.options.mode !== undefined && CLI.options.mode !== '';
+  }
+  public static query(key) {
+    return CLI.cliMode && CLI.options[key] !== undefined ? CLI.options[key] : undefined;
+  }
 
   public static InitCliMode() {
     const program = new Command();
@@ -27,19 +33,18 @@ export class CLI {
         .map((x) => `${x.key} (${x.description})`)
         .join(` | `),
     );
-    program.option('--populateOverride <populate>', 'should use override query to pull input false by default');
+    program.option('--populateOverride <populateOverride>', 'should use override query to pull input false by default');
     program.option('--cachePushFrom <cachePushFrom>', 'cache push from source folder');
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.parse(process.argv);
     CLI.options = program.opts();
-    Input.cliOptions = CLI.options;
-    return Input.cliMode;
+    return CLI.cliMode;
   }
 
   static async RunCli(): Promise<void> {
     Input.githubInputEnabled = false;
-    if (CLI.options['populate'] === `true`) {
+    if (CLI.options['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
     CLI.logInput();
@@ -92,13 +97,9 @@ export class CLI {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    await Caching.PushToCache(
-      Input.cliOptions['cachePushFrom'],
-      Input.cliOptions['cachePushTo'],
-      Input.cliOptions['artifactName'],
-    );
+    await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
     CloudRunnerLogger.log(
-      `${Input.cliOptions['cachePushFrom']} ${Input.cliOptions['cachePushTo']} ${Input.cliOptions['artifactName']}`,
+      `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
     );
   }
 

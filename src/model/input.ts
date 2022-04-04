@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { CLI } from './cli/cli';
+import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
 import Platform from './platform';
 
 const core = require('@actions/core');
@@ -12,17 +14,11 @@ const core = require('@actions/core');
  * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
-  public static cliOptions;
-  public static queryOverrides;
   public static githubInputEnabled: boolean = true;
 
   // also enabled debug logging for cloud runner
   static get cloudRunnerTests(): boolean {
     return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
-  }
-
-  static get cliMode() {
-    return Input.cliOptions !== undefined && Input.cliOptions.mode !== undefined && Input.cliOptions.mode !== '';
   }
 
   public static getInput(query) {
@@ -31,12 +27,12 @@ class Input {
       return coreInput;
     }
 
-    if (Input.cliMode && Input.cliOptions[query] !== undefined) {
-      return Input.cliOptions[query];
+    if (CLI.query(query)) {
+      return CLI.query(query);
     }
 
-    if (Input.queryOverrides && Input.queryOverrides[query] !== undefined) {
-      return Input.queryOverrides[query];
+    if (CloudRunnerQueryOverride.query(query)) {
+      return CloudRunnerQueryOverride.query(query);
     }
 
     if (process.env[query] !== undefined) {
@@ -223,7 +219,7 @@ class Input {
   }
 
   static get cloudRunnerCluster() {
-    if (Input.cliMode) {
+    if (CLI.cliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
     return Input.getInput('cloudRunnerCluster') || 'local';

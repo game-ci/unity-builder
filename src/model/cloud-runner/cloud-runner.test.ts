@@ -4,6 +4,7 @@ import Input from '../input';
 import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import UnityVersioning from '../unity-versioning';
+import { CLI } from '../cli/cli';
 
 function guid() {
   return Math.trunc((1 + Math.random()) * 0x10000)
@@ -22,7 +23,7 @@ describe('Cloud Runner', () => {
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
       // build parameters
-      Input.cliOptions = {
+      CLI.options = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
@@ -60,7 +61,7 @@ describe('Cloud Runner', () => {
       Input.githubInputEnabled = true;
     }, 1000000);
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
-      Input.cliOptions = {
+      CLI.options = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),

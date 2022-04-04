@@ -3,6 +3,7 @@ import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
 import CloudRunnerSecret from './cloud-runner-secret';
+import CloudRunnerQueryOverride from './cloud-runner-query-override';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
@@ -86,8 +87,9 @@ export class TaskParameterSerializer {
     return array;
   }
   private static getValue(key) {
-    return Input.queryOverrides !== undefined && Input.queryOverrides[key] !== undefined
-      ? Input.queryOverrides[key]
+    return CloudRunnerQueryOverride.queryOverrides !== undefined &&
+      CloudRunnerQueryOverride.queryOverrides[key] !== undefined
+      ? CloudRunnerQueryOverride.queryOverrides[key]
       : process.env[key];
   }
   private static tryAddInput(array, key): CloudRunnerSecret[] {
