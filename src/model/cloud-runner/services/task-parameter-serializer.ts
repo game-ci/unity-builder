@@ -22,21 +22,6 @@ export class TaskParameterSerializer {
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
   }
-  private static getValue(key) {
-    return Input.queryOverrides !== null && Input.queryOverrides[key] !== undefined
-      ? Input.queryOverrides[key]
-      : process.env[key];
-  }
-  private static tryAddInput(array, key) {
-    if (TaskParameterSerializer.getValue(key) !== undefined) {
-      array.push({
-        ParameterKey: key,
-        EnvironmentVariable: key,
-        ParameterValue: TaskParameterSerializer.getValue(key),
-      });
-    }
-    return array();
-  }
   private static get serializeBuildParamsAndInput() {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
@@ -101,5 +86,20 @@ export class TaskParameterSerializer {
       );
       CloudRunner.defaultSecrets = array;
     }
+  }
+  private static getValue(key) {
+    return Input.queryOverrides !== null && Input.queryOverrides[key] !== undefined
+      ? Input.queryOverrides[key]
+      : process.env[key];
+  }
+  private static tryAddInput(array, key) {
+    if (TaskParameterSerializer.getValue(key) !== undefined) {
+      array.push({
+        ParameterKey: key,
+        EnvironmentVariable: key,
+        ParameterValue: TaskParameterSerializer.getValue(key),
+      });
+    }
+    return array;
   }
 }
