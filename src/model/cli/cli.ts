@@ -97,10 +97,10 @@ export class CLI {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
     CloudRunnerLogger.log(
       `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
     );
+    await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
   }
 
   @CliFunction(`cache-pull`, `pull from cache`)

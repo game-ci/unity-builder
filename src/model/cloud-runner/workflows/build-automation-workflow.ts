@@ -113,9 +113,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     chmod +x ${builderPath}
     node ${builderPath} -m cache-push --cachePushFrom "Library" --artifactName "lib-${
       CloudRunner.buildParameters.buildGuid
-    }.zip" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
+    }" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}/Library"
     node ${builderPath} -m cache-push --cachePushFrom "build" --artifactName "build-${
       CloudRunner.buildParameters.buildGuid
-    }.zip" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}""`;
+    }" --cachePushTo "${CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`)}""`;
   }
 }
