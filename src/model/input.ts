@@ -39,7 +39,7 @@ class Input {
       return process.env[alternativeQuery];
     }
 
-    return '';
+    return;
   }
 
   static get region(): string {
@@ -90,7 +90,7 @@ class Input {
   }
 
   static get customImage() {
-    return Input.getInput('customImage');
+    return Input.getInput('customImage') || '';
   }
 
   static get projectPath() {
@@ -225,7 +225,7 @@ class Input {
     if (CLI.cliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
-    return Input.getInput('cloudRunnerCluster') || false;
+    return Input.getInput('cloudRunnerCluster') || undefined;
   }
 
   static get cloudRunnerCpu() {
