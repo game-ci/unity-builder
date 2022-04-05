@@ -15,34 +15,14 @@ export class CloudRunnerSystem {
           throwError(error);
         }
         if (stderr) {
-          RemoteClientLogger.log('stderr');
           const diagnosticOutput = `${stderr.toString()}`;
           if (!suppressLogs) {
             RemoteClientLogger.logCliDiagnostic(diagnosticOutput);
           }
           output += diagnosticOutput;
         }
-        RemoteClientLogger.log('stdout');
         const outputChunk = `${stdout}`;
         output += outputChunk;
-      });
-      child.on('message', (message) => {
-        RemoteClientLogger.log('message');
-        const outputChunk = `${message}`;
-        output += outputChunk;
-      });
-      child.on('error', (error) => {
-        RemoteClientLogger.log('error');
-        RemoteClientLogger.log(error.toString());
-        if (error) {
-          throwError(error);
-        }
-      });
-      child.on('disconnect', (error) => {
-        RemoteClientLogger.log('disconnect');
-        if (error) {
-          throwError(error);
-        }
       });
       child.on('close', (code) => {
         RemoteClientLogger.log('close');
