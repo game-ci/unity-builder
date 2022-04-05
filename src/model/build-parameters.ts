@@ -64,7 +64,7 @@ class BuildParameters {
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
   public cloudRunnerIntegrationTests!: boolean;
-  public cloudRunnerBuilderPlatform!: string;
+  public cloudRunnerBuilderPlatform!: string | undefined;
   public cliMode!: boolean;
 
   static async create(): Promise<BuildParameters> {

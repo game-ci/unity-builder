@@ -10,6 +10,9 @@ import * as core from '@actions/core';
 import CloudRunnerSecret from './services/cloud-runner-secret';
 import { CloudRunnerProviderInterface } from './services/cloud-runner-provider-interface';
 import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
+import TestCloudRunner from './test';
+import LocalCloudRunner from './local';
+import LocalDockerCloudRunner from './local-docker';
 
 class CloudRunner {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;
@@ -30,15 +33,22 @@ class CloudRunner {
   }
 
   private static setupBuildPlatform() {
+    CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.cloudRunnerCluster}`);
     switch (CloudRunner.buildParameters.cloudRunnerCluster) {
       case 'k8s':
-        CloudRunnerLogger.log('Cloud Runner platform selected Kubernetes');
         CloudRunner.CloudRunnerProviderPlatform = new Kubernetes(CloudRunner.buildParameters);
         break;
-      default:
       case 'aws':
-        CloudRunnerLogger.log('Cloud Runner platform selected AWS');
         CloudRunner.CloudRunnerProviderPlatform = new AWSBuildPlatform(CloudRunner.buildParameters);
+        break;
+      case 'test':
+        CloudRunner.CloudRunnerProviderPlatform = new TestCloudRunner();
+        break;
+      case 'local':
+        CloudRunner.CloudRunnerProviderPlatform = new LocalCloudRunner();
+        break;
+      case 'local-docker':
+        CloudRunner.CloudRunnerProviderPlatform = new LocalDockerCloudRunner();
         break;
     }
   }

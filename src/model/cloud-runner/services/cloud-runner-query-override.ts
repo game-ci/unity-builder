@@ -11,10 +11,18 @@ const formatFunction = (value, arguments_) => {
 class CloudRunnerQueryOverride {
   static queryOverrides: any;
 
-  public static query(key) {
-    return CloudRunnerQueryOverride.queryOverrides && CloudRunnerQueryOverride.queryOverrides[key] !== undefined
-      ? CloudRunnerQueryOverride.queryOverrides[key]
-      : undefined;
+  public static query(key, alternativeKey) {
+    if (CloudRunnerQueryOverride.queryOverrides && CloudRunnerQueryOverride.queryOverrides[key] !== undefined) {
+      return CloudRunnerQueryOverride.queryOverrides[key];
+    }
+    if (
+      CloudRunnerQueryOverride.queryOverrides &&
+      alternativeKey &&
+      CloudRunnerQueryOverride.queryOverrides[alternativeKey] !== undefined
+    ) {
+      return CloudRunnerQueryOverride.queryOverrides[alternativeKey];
+    }
+    return;
   }
 
   private static shouldUseOverride(query) {

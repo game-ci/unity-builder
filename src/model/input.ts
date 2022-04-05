@@ -16,31 +16,27 @@ const core = require('@actions/core');
 class Input {
   public static githubInputEnabled: boolean = true;
 
-  // also enabled debug logging for cloud runner
-  static get cloudRunnerTests(): boolean {
-    return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
-  }
-
   public static getInput(query) {
-    const coreInput = core.getInput(query);
-    if (Input.githubInputEnabled && coreInput && coreInput !== '') {
-      return coreInput;
+    if (Input.githubInputEnabled) {
+      const coreInput = core.getInput(query);
+      if (coreInput && coreInput !== '') {
+        return coreInput;
+      }
     }
+    const alternativeQuery = Input.ToEnvVarFormat(query);
 
-    if (CLI.query(query)) {
-      return CLI.query(query);
+    // query input sources
+    if (CLI.query(query, alternativeQuery)) {
+      return CLI.query(query, alternativeQuery);
     }
-
-    if (CloudRunnerQueryOverride.query(query)) {
-      return CloudRunnerQueryOverride.query(query);
+    if (CloudRunnerQueryOverride.query(query, alternativeQuery)) {
+      return CloudRunnerQueryOverride.query(query, alternativeQuery);
     }
-
     if (process.env[query] !== undefined) {
       return process.env[query];
     }
-
-    if (Input.ToEnvVarFormat(query) !== query) {
-      return Input.getInput(Input.ToEnvVarFormat(query));
+    if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
+      return process.env[alternativeQuery];
     }
 
     return '';
@@ -51,7 +47,7 @@ class Input {
   }
 
   static get githubRepo() {
-    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || false;
+    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || undefined;
   }
   static get branch() {
     if (Input.getInput(`GITHUB_REF`)) {
@@ -63,7 +59,14 @@ class Input {
     }
   }
   static get cloudRunnerBuilderPlatform() {
-    return Input.cloudRunnerCluster === 'local' ? Input.getInput('cloudRunnerBuilderPlatform') || false : 'ubuntu';
+    const input = Input.getInput('cloudRunnerBuilderPlatform');
+    if (input) {
+      return input;
+    }
+    if (this.cloudRunnerCluster) {
+      return 'ubuntu';
+    }
+    return;
   }
 
   static get gitSha() {
@@ -222,7 +225,7 @@ class Input {
     if (CLI.cliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
-    return Input.getInput('cloudRunnerCluster') || 'local';
+    return Input.getInput('cloudRunnerCluster') || false;
   }
 
   static get cloudRunnerCpu() {
@@ -259,6 +262,10 @@ class Input {
 
   static get cacheKey(): string {
     return Input.getInput('cacheKey') || '';
+  }
+
+  static get cloudRunnerTests(): boolean {
+    return Input.getInput(`cloudRunnerTests`) || false;
   }
 
   public static ToEnvVarFormat(input: string) {

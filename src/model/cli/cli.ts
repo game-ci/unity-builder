@@ -15,8 +15,14 @@ export class CLI {
   static get cliMode() {
     return CLI.options !== undefined && CLI.options.mode !== undefined && CLI.options.mode !== '';
   }
-  public static query(key) {
-    return CLI.cliMode && CLI.options[key] !== undefined ? CLI.options[key] : undefined;
+  public static query(key, alternativeKey) {
+    if (CLI.options && CLI.options[key] !== undefined) {
+      return CLI.options[key];
+    }
+    if (CLI.options && alternativeKey && CLI.options[alternativeKey] !== undefined) {
+      return CLI.options[alternativeKey];
+    }
+    return;
   }
 
   public static InitCliMode() {
