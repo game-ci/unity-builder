@@ -33,7 +33,7 @@ class BuildParameters {
   public androidSdkManagerParameters!: string;
   public customParameters!: string;
   public sshAgent!: string;
-  public cloudRunnerCluster!: string;
+  public cloudRunnerCluster!: string | undefined;
   public awsBaseStackName!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
