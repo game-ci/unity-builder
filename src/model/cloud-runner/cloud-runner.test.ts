@@ -120,7 +120,9 @@ describe('Cloud Runner', () => {
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
       expect(results).toContain(libraryString);
-      const results2 = await CloudRunner.run(buildParameter, baseImage.toString());
+      const buildParameter2 = await BuildParameters.create();
+      const baseImage2 = new ImageTag(buildParameter2);
+      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
       delete CLI.options;
     }, 1000000);

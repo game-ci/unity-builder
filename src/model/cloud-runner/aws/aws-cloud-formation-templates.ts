@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-export class AWSTemplates {
+export class AWSCloudFormationTemplates {
   public static getParameterTemplate(p1) {
     return `
   ${p1}:

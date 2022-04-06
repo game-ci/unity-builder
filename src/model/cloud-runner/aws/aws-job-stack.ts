@@ -1,7 +1,7 @@
 import * as SDK from 'aws-sdk';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { AWSTemplates } from './aws-templates';
+import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
 
@@ -22,7 +22,7 @@ export class AWSJobStack {
     secrets: CloudRunnerSecret[],
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
-    let taskDefCloudFormation = AWSTemplates.readTaskCloudFormationTemplate();
+    let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -35,20 +35,20 @@ export class AWSJobStack {
         secrets = secrets.filter((x) => x !== secret);
         continue;
       }
-      taskDefCloudFormation = AWSTemplates.insertAtTemplate(
+      taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p1 - input',
-        AWSTemplates.getParameterTemplate(secret.ParameterKey),
+        AWSCloudFormationTemplates.getParameterTemplate(secret.ParameterKey),
       );
-      taskDefCloudFormation = AWSTemplates.insertAtTemplate(
+      taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p2 - secret',
-        AWSTemplates.getSecretTemplate(`${secret.ParameterKey}`),
+        AWSCloudFormationTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
-      taskDefCloudFormation = AWSTemplates.insertAtTemplate(
+      taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p3 - container def',
-        AWSTemplates.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey),
+        AWSCloudFormationTemplates.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey),
       );
     }
     const secretsMappedToCloudFormationParameters = secrets.map((x) => {
