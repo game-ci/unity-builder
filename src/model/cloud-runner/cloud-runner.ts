@@ -31,6 +31,8 @@ class CloudRunner {
         core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
       }
       for (const element of buildParameterPropertyNames) {
+        if (!buildParameters.cloudRunnerIntegrationTests)
+          CloudRunnerLogger.log(`Setting build parameters output ${element}`);
         core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
     }
