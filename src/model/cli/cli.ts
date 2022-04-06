@@ -127,7 +127,21 @@ export class CLI {
     process.env.AWS_REGION = Input.region;
     const CF = new SDK.CloudFormation();
 
-    const stacks = await CF.listStacks().promise();
-    CloudRunnerLogger.log(JSON.stringify(stacks, undefined, 4));
+    const stacks = (await CF.listStacks().promise()).StackSummaries?.filter(
+      (_x) => _x.StackStatus !== 'DELETE_COMPLETE',
+    );
+    if (stacks === undefined) {
+      return;
+    }
+    CloudRunnerLogger.log(`Cloud Formation stacks`);
+    for (const element of stacks) {
+      CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
+      await CF.deleteStack({ StackName: element.StackName }).promise();
+    }
+
+    CloudRunnerLogger.log(`ECS Clusters`);
+    const ecs = new SDK.ECS();
+    CloudRunnerLogger.log(JSON.stringify(await ecs.listClusters().promise(), undefined, 4));
+    CloudRunnerLogger.log(JSON.stringify(await ecs.describeClusters().promise(), undefined, 4));
   }
 }

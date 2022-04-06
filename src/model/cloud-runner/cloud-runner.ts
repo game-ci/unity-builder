@@ -26,10 +26,11 @@ class CloudRunner {
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
     if (!buildParameters.cliMode) {
+      const buildParameterPropertyNames = Object.getOwnPropertyNames(buildParameters);
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
         core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
       }
-      for (const element in buildParameters) {
+      for (const element of buildParameterPropertyNames) {
         core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
     }
