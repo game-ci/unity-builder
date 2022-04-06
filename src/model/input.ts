@@ -51,7 +51,7 @@ class Input {
   }
   static get branch() {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
+      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
     } else {
