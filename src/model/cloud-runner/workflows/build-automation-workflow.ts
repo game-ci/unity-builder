@@ -111,6 +111,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     chmod +x ${builderPath}
     node ${builderPath} -m cache-push --cachePushFrom Library --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
     echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom build --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}`;
+    node ${builderPath} -m cache-push --cachePushFrom build --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}/build`;
   }
 }
