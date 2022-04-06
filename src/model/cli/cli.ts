@@ -107,7 +107,7 @@ export class CLI {
       CloudRunnerLogger.log(
         `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
       );
-      await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
+      await Caching.PushToCache(CLI.options['cachePushTo'], CLI.options['cachePushFrom'], CLI.options['artifactName']);
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);
     }

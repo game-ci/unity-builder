@@ -56,7 +56,7 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Setup remote runner');
+      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Setup shared cloud runner resources');
       await CloudRunner.CloudRunnerProviderPlatform.setupSharedResources(
         CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
@@ -67,7 +67,7 @@ class CloudRunner {
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
-      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Cleanup');
+      if (!CloudRunner.buildParameters.cliMode) core.startGroup('Cleanup shared cloud runner resources');
       await CloudRunner.CloudRunnerProviderPlatform.cleanupSharedResources(
         CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,

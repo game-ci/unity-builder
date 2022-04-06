@@ -74,18 +74,11 @@ export class SetupCloudRunnerRepository {
   }
 
   private static async pullLatestLFS() {
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerFolders.lfsDirectoryFull}/..`);
-    }
     process.chdir(CloudRunnerFolders.repoPathFull);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
     assert(fs.existsSync(CloudRunnerFolders.lfsDirectoryFull));
-
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      await CloudRunnerSystem.Run(`ls -lh ${CloudRunnerFolders.lfsDirectoryFull}/..`);
-    }
   }
 }
