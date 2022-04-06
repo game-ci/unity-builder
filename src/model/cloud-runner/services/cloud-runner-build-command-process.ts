@@ -17,7 +17,7 @@ export class CloudRunnerBuildCommandProcessor {
       ${commands}
       ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       echo "end of cloud runner job"
-      ---${buildParameters.logId}`;
+      echo"---${buildParameters.logId}"`;
   }
 
   public static getHooks(customJobHooks): Hook[] {
