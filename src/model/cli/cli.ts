@@ -9,6 +9,7 @@ import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-r
 import * as SDK from 'aws-sdk';
 import { Caching } from './remote-client/remote-client-services/caching';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
+import { LFSHashing } from './remote-client/remote-client-services/lfs-hashing';
 
 export class CLI {
   public static options;
@@ -143,5 +144,11 @@ export class CLI {
     const ecs = new SDK.ECS();
     CloudRunnerLogger.log(JSON.stringify(await ecs.listClusters().promise(), undefined, 4));
     CloudRunnerLogger.log(JSON.stringify(await ecs.describeClusters().promise(), undefined, 4));
+  }
+
+  @CliFunction(`hash`, `hash all folder contents`)
+  static async hash() {
+    const folder = CLI.options['cachePushFrom'];
+    LFSHashing.hashAllFiles(folder);
   }
 }
