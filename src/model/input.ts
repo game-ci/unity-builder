@@ -63,8 +63,8 @@ class Input {
     if (input) {
       return input;
     }
-    if (this.cloudRunnerCluster) {
-      return 'ubuntu';
+    if (Input.cloudRunnerCluster !== 'local') {
+      return 'linux';
     }
     return;
   }
@@ -225,7 +225,7 @@ class Input {
     if (CLI.cliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
-    return Input.getInput('cloudRunnerCluster') || undefined;
+    return Input.getInput('cloudRunnerCluster') || 'local';
   }
 
   static get cloudRunnerCpu() {

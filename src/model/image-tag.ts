@@ -30,8 +30,11 @@ class ImageTag {
     this.editorVersion = editorVersion;
     this.targetPlatform = targetPlatform;
     this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
+    const isCloudRunnerLocal = cloudRunnerBuilderPlatform === 'local' || cloudRunnerBuilderPlatform === undefined;
     this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(targetPlatform, editorVersion);
-    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(process.platform);
+    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
+      isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
+    );
     this.imageRollingVersion = 1; // will automatically roll to the latest non-breaking version.
   }
 
@@ -143,9 +146,7 @@ class ImageTag {
   get tag() {
     const versionAndPlatform = `${this.editorVersion}-${this.builderPlatform}`.replace(/-+$/, '');
 
-    return `${
-      this.cloudRunnerBuilderPlatform ? this.cloudRunnerBuilderPlatform : this.imagePlatformPrefix
-    }-${versionAndPlatform}-${this.imageRollingVersion}`;
+    return `${this.imagePlatformPrefix}-${versionAndPlatform}-${this.imageRollingVersion}`;
   }
 
   get image() {

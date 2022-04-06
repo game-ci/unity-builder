@@ -26,7 +26,7 @@ describe('Cloud Runner', () => {
       versioning: 'None',
       projectPath: 'test-project',
       unityVersion: UnityVersioning.read('test-project'),
-      cloudRunnerCluster: 'local',
+      cloudRunnerCluster: 'local-system',
       targetPlatform: 'StandaloneLinux64',
       customJob: `
       - name: 'step 1'
@@ -44,7 +44,7 @@ describe('Cloud Runner', () => {
     // run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
-    CLI.options = undefined;
+    delete CLI.options;
   }, 1000000);
   it('Test cloud runner returns commands', async () => {
     // build parameters
@@ -62,7 +62,7 @@ describe('Cloud Runner', () => {
     // run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
-    CLI.options = undefined;
+    delete CLI.options;
   }, 1000000);
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
@@ -103,7 +103,7 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
-      CLI.options = undefined;
+      delete CLI.options;
     }, 1000000);
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       CLI.options = {
@@ -122,7 +122,7 @@ describe('Cloud Runner', () => {
       expect(results).toContain(libraryString);
       const results2 = await CloudRunner.run(buildParameter, baseImage.toString());
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
-      CLI.options = undefined;
+      delete CLI.options;
     }, 1000000);
   }
 });

@@ -44,7 +44,7 @@ class CloudRunner {
       case 'test':
         CloudRunner.CloudRunnerProviderPlatform = new TestCloudRunner();
         break;
-      case 'local':
+      case 'local-system':
         CloudRunner.CloudRunnerProviderPlatform = new LocalCloudRunner();
         break;
       case 'local-docker':
