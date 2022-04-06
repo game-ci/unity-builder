@@ -25,9 +25,8 @@ export class CloudRunnerSystem {
         output += outputChunk;
       });
       child.on('close', (code) => {
-        RemoteClientLogger.log('close');
         if (!suppressLogs) {
-          RemoteClientLogger.log(`[Exit code ${code}]`);
+          RemoteClientLogger.log(`[${code}]`);
         }
         if (code !== 0 && !suppressError) {
           throwError(output);
