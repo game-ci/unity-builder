@@ -13,31 +13,31 @@ export class CustomWorkflow {
       }
       try {
         buildSteps = YAML.parse(buildSteps);
-        let output = '';
-        for (const step of buildSteps) {
-          const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
-            const secret: CloudRunnerSecret = {
-              ParameterKey: x.name,
-              EnvironmentVariable: Input.ToEnvVarFormat(x.name),
-              ParameterValue: x.value,
-            };
-            return secret;
-          });
-          output += await CloudRunner.CloudRunnerProviderPlatform.runTask(
-            CloudRunner.buildParameters.buildGuid,
-            step['image'],
-            step['commands'],
-            `/${CloudRunnerFolders.buildVolumeFolder}`,
-            `/${CloudRunnerFolders.buildVolumeFolder}/`,
-            CloudRunner.cloudRunnerEnvironmentVariables,
-            [...CloudRunner.defaultSecrets, ...stepSecrets],
-          );
-        }
-        return output;
       } catch (error) {
         CloudRunnerLogger.log(`failed to parse a custom job "${buildSteps}"`);
         throw error;
       }
+      let output = '';
+      for (const step of buildSteps) {
+        const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
+          const secret: CloudRunnerSecret = {
+            ParameterKey: x.name,
+            EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+            ParameterValue: x.value,
+          };
+          return secret;
+        });
+        output += await CloudRunner.CloudRunnerProviderPlatform.runTask(
+          CloudRunner.buildParameters.buildGuid,
+          step['image'],
+          step['commands'],
+          `/${CloudRunnerFolders.buildVolumeFolder}`,
+          `/${CloudRunnerFolders.buildVolumeFolder}/`,
+          CloudRunner.cloudRunnerEnvironmentVariables,
+          [...CloudRunner.defaultSecrets, ...stepSecrets],
+        );
+      }
+      return output;
     } catch (error) {
       throw error;
     }
