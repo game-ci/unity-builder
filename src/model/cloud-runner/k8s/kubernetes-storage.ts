@@ -50,7 +50,7 @@ class KubernetesStorage {
       CloudRunnerLogger.log(`${await this.getPVCPhase(kubeClient, name, namespace)}`);
       await waitUntil(
         async () => {
-          return (await this.getPVCPhase(kubeClient, name, namespace)) !== 'Pending';
+          return (await this.getPVCPhase(kubeClient, name, namespace)) === 'Pending';
         },
         {
           timeout: 750000,
