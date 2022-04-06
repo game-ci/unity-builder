@@ -17,7 +17,7 @@ class Docker {
   }
 
   static getLinuxCommand(image, parameters): string {
-    const { workspace, actionFolder, runnerTempPath, sshAgent } = parameters;
+    const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
@@ -30,6 +30,7 @@ class Docker {
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \
+            ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
             --volume "${githubHome}":"/root:z" \
             --volume "${githubWorkflow}":"/github/workflow:z" \
@@ -44,13 +45,14 @@ class Docker {
   }
 
   static getWindowsCommand(image: any, parameters: any): string {
-    const { workspace, actionFolder, unitySerial } = parameters;
+    const { workspace, actionFolder, unitySerial, gitPrivateToken } = parameters;
     return `docker run \
             --workdir /github/workspace \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env UNITY_SERIAL="${unitySerial}" \
             --env GITHUB_WORKSPACE=c:/github/workspace \
+            ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:/github/workspace" \
             --volume "c:/regkeys":"c:/regkeys" \
             --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
