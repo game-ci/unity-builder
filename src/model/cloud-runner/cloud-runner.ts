@@ -1,5 +1,5 @@
 import AWSBuildPlatform from './aws';
-import { BuildParameters } from '..';
+import { BuildParameters, Input } from '..';
 import Kubernetes from './k8s';
 import CloudRunnerLogger from './services/cloud-runner-logger';
 import { CloudRunnerStepState } from './cloud-runner-step-state';
@@ -27,10 +27,10 @@ class CloudRunner {
     CloudRunner.cloudRunnerEnvironmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
     if (!buildParameters.cliMode) {
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
-        core.setOutput(element.name, element.value);
+        core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
       }
       for (const element in buildParameters) {
-        core.setOutput(element, buildParameters[element]);
+        core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
     }
   }
