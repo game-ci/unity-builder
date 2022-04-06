@@ -29,6 +29,9 @@ class CloudRunner {
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
         core.setOutput(element.name, element.value);
       }
+      for (const element in buildParameters) {
+        core.setOutput(element, buildParameters[element]);
+      }
     }
   }
 
