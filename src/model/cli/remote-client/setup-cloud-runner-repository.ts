@@ -7,6 +7,7 @@ import { CloudRunnerSystem } from './remote-client-services/cloud-runner-system'
 import { RemoteClientLogger } from './remote-client-services/remote-client-logger';
 import path from 'path';
 import { assert } from 'console';
+import CloudRunnerLogger from '../../cloud-runner/services/cloud-runner-logger';
 
 export class SetupCloudRunnerRepository {
   public static async run() {
@@ -14,9 +15,9 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.buildPathFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.repoPathFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.cacheFolderFull}`);
-
       process.chdir(CloudRunnerFolders.repoPathFull);
       await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
+      await SetupCloudRunnerRepository.sizeOfFolder('repo before lfs cache pull', CloudRunnerFolders.repoPathFull);
       const lfsHashes = await LFSHashing.createLFSHashFiles();
       if (fs.existsSync(CloudRunnerFolders.libraryFolderFull)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
@@ -26,17 +27,25 @@ export class SetupCloudRunnerRepository {
         CloudRunnerFolders.lfsDirectoryFull,
         `${lfsHashes.lfsGuidSum}`,
       );
+      await SetupCloudRunnerRepository.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathFull);
       await SetupCloudRunnerRepository.pullLatestLFS();
+      await SetupCloudRunnerRepository.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathFull);
       await Caching.PushToCache(
         CloudRunnerFolders.lfsCacheFolderFull,
         CloudRunnerFolders.lfsDirectoryFull,
         `${lfsHashes.lfsGuidSum}`,
       );
       await Caching.PullFromCache(CloudRunnerFolders.libraryCacheFolderFull, CloudRunnerFolders.libraryFolderFull);
+      await SetupCloudRunnerRepository.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathFull);
       Caching.handleCachePurging();
     } catch (error) {
       throw error;
     }
+  }
+
+  private static async sizeOfFolder(message: string, folder: string) {
+    CloudRunnerLogger.log(`Size of ${message}`);
+    await CloudRunnerSystem.Run(`du -sh ${folder}`);
   }
 
   private static async cloneRepoWithoutLFSFiles() {
