@@ -98,15 +98,19 @@ export class CLI {
 
   @CliFunction(`cache-push`, `push to cache`)
   static async cachePush() {
-    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-    RemoteClientLogger.log(`Build Params:
-      ${JSON.stringify(buildParameter, undefined, 4)}
-    `);
-    CloudRunner.buildParameters = buildParameter;
-    CloudRunnerLogger.log(
-      `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
-    );
-    await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
+    try {
+      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+      RemoteClientLogger.log(`Build Params:
+        ${JSON.stringify(buildParameter, undefined, 4)}
+      `);
+      CloudRunner.buildParameters = buildParameter;
+      CloudRunnerLogger.log(
+        `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
+      );
+      await Caching.PushToCache(CLI.options['cachePushFrom'], CLI.options['cachePushTo'], CLI.options['artifactName']);
+    } catch (error: any) {
+      CloudRunnerLogger.log(`${error}`);
+    }
   }
 
   @CliFunction(`cache-pull`, `pull from cache`)
