@@ -100,13 +100,7 @@ export class CLI {
   static async cachePush() {
     try {
       const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-      RemoteClientLogger.log(`Build Params:
-        ${JSON.stringify(buildParameter, undefined, 4)}
-      `);
       CloudRunner.buildParameters = buildParameter;
-      CloudRunnerLogger.log(
-        `${CLI.options['cachePushFrom']} ${CLI.options['cachePushTo']} ${CLI.options['artifactName']}`,
-      );
       await Caching.PushToCache(CLI.options['cachePushTo'], CLI.options['cachePushFrom'], CLI.options['artifactName']);
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);
@@ -114,7 +108,19 @@ export class CLI {
   }
 
   @CliFunction(`cache-pull`, `pull from cache`)
-  static async cachePull() {}
+  static async cachePull() {
+    try {
+      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+      CloudRunner.buildParameters = buildParameter;
+      await Caching.PullFromCache(
+        CLI.options['cachePushFrom'],
+        CLI.options['cachePushTo'],
+        CLI.options['artifactName'],
+      );
+    } catch (error: any) {
+      CloudRunnerLogger.log(`${error}`);
+    }
+  }
 
   @CliFunction(`garbage-collect-aws`, `garbage collect aws`)
   static async garbageCollectAws() {
