@@ -5,6 +5,7 @@ import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import UnityVersioning from '../unity-versioning';
 import { CLI } from '../cli/cli';
+import CloudRunnerLogger from './services/cloud-runner-logger';
 
 function guid() {
   return Math.trunc((1 + Math.random()) * 0x10000)
@@ -37,9 +38,11 @@ describe('Cloud Runner', () => {
       const buildSucceededString = 'Build succeeded';
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
+      CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await BuildParameters.create();
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      CloudRunnerLogger.log(`run 2 succeeded`);
       expect(results2).toContain(buildSucceededString);
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
       Input.githubInputEnabled = true;
