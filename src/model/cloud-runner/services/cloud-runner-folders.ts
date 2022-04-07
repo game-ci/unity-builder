@@ -15,13 +15,10 @@ export class CloudRunnerFolders {
       '/',
       CloudRunnerFolders.buildVolumeFolder,
       CloudRunnerFolders.cacheFolder,
-      CloudRunnerFolders.cacheKey,
+      CloudRunner.buildParameters.cacheKey,
     );
   }
 
-  public static get cacheKey(): string {
-    return CloudRunner.buildParameters.cacheKey || CloudRunner.buildParameters.branch;
-  }
   public static get builderPathFull(): string {
     return path.join(CloudRunnerFolders.buildPathFull, `builder`);
   }

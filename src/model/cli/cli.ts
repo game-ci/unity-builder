@@ -4,12 +4,7 @@ import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
-import { RemoteClientLogger } from './remote-client/remote-client-services/remote-client-logger';
-import { SetupCloudRunnerRepository } from './remote-client/setup-cloud-runner-repository';
-import * as SDK from 'aws-sdk';
-import { Caching } from './remote-client/remote-client-services/caching';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
-import { LFSHashing } from './remote-client/remote-client-services/lfs-hashing';
 
 export class CLI {
   public static options;
@@ -61,6 +56,7 @@ export class CLI {
     return await results.target[results.propertyKey]();
   }
 
+  @CliFunction(`print-input`, `prints all input`)
   private static logInput() {
     core.info(`\n`);
     core.info(`INPUT:`);
@@ -85,74 +81,5 @@ export class CLI {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
     return await CloudRunner.run(buildParameter, baseImage.toString());
-  }
-
-  @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
-  static async runRemoteClientJob() {
-    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-    RemoteClientLogger.log(`Build Params:
-      ${JSON.stringify(buildParameter, undefined, 4)}
-    `);
-    CloudRunner.buildParameters = buildParameter;
-    await SetupCloudRunnerRepository.run();
-  }
-
-  @CliFunction(`cache-push`, `push to cache`)
-  static async cachePush() {
-    try {
-      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-      CloudRunner.buildParameters = buildParameter;
-      await Caching.PushToCache(
-        CLI.options['cachePushTo'],
-        CLI.options['cachePushFrom'],
-        CLI.options['artifactName'] || '',
-      );
-    } catch (error: any) {
-      CloudRunnerLogger.log(`${error}`);
-    }
-  }
-
-  @CliFunction(`cache-pull`, `pull from cache`)
-  static async cachePull() {
-    try {
-      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-      CloudRunner.buildParameters = buildParameter;
-      await Caching.PullFromCache(
-        CLI.options['cachePushFrom'],
-        CLI.options['cachePushTo'],
-        CLI.options['artifactName'] || '',
-      );
-    } catch (error: any) {
-      CloudRunnerLogger.log(`${error}`);
-    }
-  }
-
-  @CliFunction(`garbage-collect-aws`, `garbage collect aws`)
-  static async garbageCollectAws() {
-    process.env.AWS_REGION = Input.region;
-    const CF = new SDK.CloudFormation();
-
-    const stacks = (await CF.listStacks().promise()).StackSummaries?.filter(
-      (_x) => _x.StackStatus !== 'DELETE_COMPLETE',
-    );
-    if (stacks === undefined) {
-      return;
-    }
-    CloudRunnerLogger.log(`Cloud Formation stacks`);
-    for (const element of stacks) {
-      CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
-      await CF.deleteStack({ StackName: element.StackName }).promise();
-    }
-
-    CloudRunnerLogger.log(`ECS Clusters`);
-    const ecs = new SDK.ECS();
-    CloudRunnerLogger.log(JSON.stringify(await ecs.listClusters().promise(), undefined, 4));
-    CloudRunnerLogger.log(JSON.stringify(await ecs.describeClusters().promise(), undefined, 4));
-  }
-
-  @CliFunction(`hash`, `hash all folder contents`)
-  static async hash() {
-    const folder = CLI.options['cachePushFrom'];
-    LFSHashing.hashAllFiles(folder);
   }
 }

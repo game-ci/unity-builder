@@ -1,6 +1,6 @@
 import { assert } from 'console';
 import fs from 'fs';
-import { CloudRunnerSystem } from '../cli/remote-client/remote-client-services/cloud-runner-system';
+import { CloudRunnerSystem } from '../cloud-runner/remote-client/cloud-runner-system';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 
 export class GitRepoReader {

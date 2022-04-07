@@ -2,7 +2,7 @@ import { customAlphabet } from 'nanoid';
 import * as core from '@actions/core';
 import AndroidVersioning from './android-versioning';
 import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
-import CloudRunnerNamespace from './cloud-runner/services/cloud-runner-namespace';
+import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -138,7 +138,7 @@ class BuildParameters {
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
-      buildGuid: CloudRunnerNamespace.generateBuildName(Input.runNumber, Input.targetPlatform),
+      buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
       customJobHooks: Input.customJobHooks(),
       cachePullOverrideCommand: Input.cachePullOverrideCommand(),
       cachePushOverrideCommand: Input.cachePushOverrideCommand(),

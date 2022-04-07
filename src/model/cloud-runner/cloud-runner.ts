@@ -1,6 +1,6 @@
-import AWSBuildPlatform from './aws';
+import AWSBuildPlatform from './cloud-runner-providers/aws';
 import { BuildParameters, Input } from '..';
-import Kubernetes from './k8s';
+import Kubernetes from './cloud-runner-providers/k8s';
 import CloudRunnerLogger from './services/cloud-runner-logger';
 import { CloudRunnerStepState } from './cloud-runner-step-state';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
@@ -8,11 +8,11 @@ import { CloudRunnerError } from './error/cloud-runner-error';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import * as core from '@actions/core';
 import CloudRunnerSecret from './services/cloud-runner-secret';
-import { CloudRunnerProviderInterface } from './services/cloud-runner-provider-interface';
+import { CloudRunnerProviderInterface } from './cloud-runner-providers/cloud-runner-provider-interface';
 import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
-import TestCloudRunner from './test';
-import LocalCloudRunner from './local';
-import LocalDockerCloudRunner from './local-docker';
+import TestCloudRunner from './cloud-runner-providers/test';
+import LocalCloudRunner from './cloud-runner-providers/local';
+import LocalDockerCloudRunner from './cloud-runner-providers/local-docker';
 
 class CloudRunner {
   public static CloudRunnerProviderPlatform: CloudRunnerProviderInterface;

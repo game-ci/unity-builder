@@ -1,4 +1,4 @@
-import { CloudRunnerSystem } from '../../cli/remote-client/remote-client-services/cloud-runner-system';
+import { CloudRunnerSystem } from '../remote-client/cloud-runner-system';
 import Input from '../../input';
 
 class DependencyOverrideService {
