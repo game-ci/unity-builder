@@ -41,14 +41,14 @@ export class Caching {
     }
   }
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
-    CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-    CloudRunnerSystem.Run(`ls ${sourceFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     try {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
+      CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      CloudRunnerSystem.Run(`ls ${sourceFolder}`);
       process.chdir(path.resolve(sourceFolder, '..'));
 
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
