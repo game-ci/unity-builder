@@ -3,9 +3,8 @@ import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import { CliFunction, GetAllCliModes, GetCliFunctions, RequireAll } from './cli-decorator';
+import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
-import path from 'path';
 
 export class CLI {
   public static options;
@@ -51,9 +50,6 @@ export class CLI {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
     CLI.logInput();
-    if (require.main && require.main.filename.endsWith('.ts')) {
-      RequireAll(path.dirname(require.main.filename));
-    }
     const results = GetCliFunctions(CLI.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     CLI.options.versioning = 'None';
