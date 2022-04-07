@@ -47,8 +47,8 @@ export class Caching {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
-      CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      CloudRunnerSystem.Run(`ls ${sourceFolder}`);
+      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
       process.chdir(path.resolve(sourceFolder, '..'));
 
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
@@ -72,9 +72,9 @@ export class Caching {
       assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
-        CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
+        await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
       }
-      CloudRunnerSystem.Run(`mv ${cacheArtifactName}.zip ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheArtifactName}.zip to ${cacheFolder}`);
       assert(fs.existsSync(`${path.join(cacheFolder, cacheArtifactName)}.zip`), 'cache zip exists inside cache folder');
     } catch (error) {
@@ -101,8 +101,8 @@ export class Caching {
         .replace('.zip', '');
 
       process.chdir(cacheFolder);
-      CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      CloudRunnerSystem.Run(`ls ${destinationFolder}`);
+      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`ls ${destinationFolder}`);
 
       const cacheSelection =
         cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
@@ -120,7 +120,7 @@ export class Caching {
       };
 
       if (CloudRunner.buildParameters.cachePullOverrideCommand) {
-        CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePullOverrideCommand));
+        await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePullOverrideCommand));
       }
 
       if (fs.existsSync(`${cacheSelection}.zip`)) {
