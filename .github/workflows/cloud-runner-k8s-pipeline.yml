@@ -104,8 +104,8 @@ jobs:
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$CACHE_KEY
-                echo "/data/cache/build/$CACHE_KEY/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/$BUILD_FILE"
-                aws s3 cp /data/cache/build/$CACHE_KEY/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.zip
+                echo "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/$BUILD_FILE"
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.zip
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}

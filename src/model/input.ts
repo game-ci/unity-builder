@@ -261,7 +261,7 @@ class Input {
   }
 
   static get cacheKey(): string {
-    return Input.getInput('cacheKey') || '';
+    return Input.getInput('cacheKey') || Input.branch;
   }
 
   static get cloudRunnerTests(): boolean {

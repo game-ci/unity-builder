@@ -9,8 +9,8 @@ import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 
 export class Caching {
-  public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheKey: string) {
-    cacheKey = cacheKey.replace(' ', '');
+  public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
+    cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     try {
       if (!fs.existsSync(cacheFolder)) {
@@ -27,28 +27,31 @@ export class Caching {
       }
       // eslint-disable-next-line func-style
       const formatFunction = function (format: string) {
-        const arguments_ = Array.prototype.slice.call([path.resolve(sourceFolder, '..'), cacheFolder, cacheKey], 1);
+        const arguments_ = Array.prototype.slice.call(
+          [path.resolve(sourceFolder, '..'), cacheFolder, cacheArtifactName],
+          1,
+        );
         return format.replace(/{(\d+)}/g, function (match, number) {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
-      await CloudRunnerSystem.Run(`zip -q ${cacheKey}.zip ${path.basename(sourceFolder)}`);
-      assert(fs.existsSync(`${cacheKey}.zip`), 'cache zip exists');
+      await CloudRunnerSystem.Run(`zip -q ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
+      assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
         CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
       }
-      CloudRunnerSystem.Run(`mv ${cacheKey}.zip ${cacheFolder}`);
-      RemoteClientLogger.log(`moved ${cacheKey}.zip to ${cacheFolder}`);
-      assert(fs.existsSync(`${path.join(cacheFolder, cacheKey)}.zip`), 'cache zip exists inside cache folder');
+      CloudRunnerSystem.Run(`mv ${cacheArtifactName}.zip ${cacheFolder}`);
+      RemoteClientLogger.log(`moved ${cacheArtifactName}.zip to ${cacheFolder}`);
+      assert(fs.existsSync(`${path.join(cacheFolder, cacheArtifactName)}.zip`), 'cache zip exists inside cache folder');
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;
     }
     process.chdir(`${startPath}`);
   }
-  public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheKey: string = ``) {
-    cacheKey = cacheKey.replace(' ', '');
+  public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
+    cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
@@ -66,13 +69,14 @@ export class Caching {
 
       process.chdir(cacheFolder);
 
-      const cacheSelection = cacheKey !== `` && fs.existsSync(`${cacheKey}.zip`) ? cacheKey : latestInBranch;
-      await CloudRunnerLogger.log(`cache key ${cacheKey} selection ${cacheSelection}`);
+      const cacheSelection =
+        cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
+      await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
 
       // eslint-disable-next-line func-style
       const formatFunction = function (format: string) {
         const arguments_ = Array.prototype.slice.call(
-          [path.resolve(destinationFolder, '..'), cacheFolder, cacheKey],
+          [path.resolve(destinationFolder, '..'), cacheFolder, cacheArtifactName],
           1,
         );
         return format.replace(/{(\d+)}/g, function (match, number) {
@@ -101,9 +105,9 @@ export class Caching {
           `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
         );
       } else {
-        RemoteClientLogger.logWarning(`cache item ${cacheKey} doesn't exist ${destinationFolder}`);
+        RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
-          RemoteClientLogger.logWarning(`cache item ${cacheKey}.zip doesn't exist ${destinationFolder}`);
+          RemoteClientLogger.logWarning(`cache item ${cacheArtifactName}.zip doesn't exist ${destinationFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
