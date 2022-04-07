@@ -58,7 +58,7 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
       await CloudRunnerSystem.Run(
-        `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
+        `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
           `..`,
           path.basename(CloudRunnerFolders.repoPathFull),
         )}`,
