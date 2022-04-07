@@ -85,7 +85,6 @@ export class Caching {
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-    CloudRunnerSystem.Run(`ls ${destinationFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
