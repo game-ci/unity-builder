@@ -102,7 +102,6 @@ export class Caching {
 
       process.chdir(cacheFolder);
       await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      await CloudRunnerSystem.Run(`ls ${destinationFolder}`);
 
       const cacheSelection =
         cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
@@ -139,6 +138,7 @@ export class Caching {
         await CloudRunnerSystem.Run(
           `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
         );
+        await CloudRunnerSystem.Run(`ls ${destinationFolder}`);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
