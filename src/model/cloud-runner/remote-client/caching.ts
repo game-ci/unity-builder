@@ -4,8 +4,8 @@ import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunnerSystem } from './cloud-runner-system';
-import { LFSHashing } from './lfs-hashing';
+import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { LFSHashing } from '../services/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import { CLI } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
@@ -41,6 +41,8 @@ export class Caching {
     }
   }
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
+    CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+    CloudRunnerSystem.Run(`ls ${sourceFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     try {
@@ -82,6 +84,8 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
+    CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+    CloudRunnerSystem.Run(`ls ${destinationFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);

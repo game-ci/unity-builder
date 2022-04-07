@@ -7,7 +7,7 @@ import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-quer
 import { CliFunction, CLIFunctionsRepository } from './cli-functions-repository';
 import { AWSCLICommands } from '../cloud-runner/cloud-runner-providers/aws/commands/aws-cli-commands';
 import { Caching } from '../cloud-runner/remote-client/caching';
-import { LFSHashing } from '../cloud-runner/remote-client/lfs-hashing';
+import { LFSHashing } from '../cloud-runner/services/lfs-hashing';
 import { SetupCloudRunnerRepository } from '../cloud-runner/remote-client/setup-cloud-runner-repository';
 
 export class CLI {

@@ -1,5 +1,5 @@
-import { CloudRunnerSystem } from '../remote-client/cloud-runner-system';
 import Input from '../../input';
+import { CloudRunnerSystem } from './cloud-runner-system';
 
 class DependencyOverrideService {
   public static async CheckHealth() {

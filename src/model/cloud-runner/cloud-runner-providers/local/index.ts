@@ -1,5 +1,5 @@
 import BuildParameters from '../../../build-parameters';
-import { CloudRunnerSystem } from '../../remote-client/cloud-runner-system';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';

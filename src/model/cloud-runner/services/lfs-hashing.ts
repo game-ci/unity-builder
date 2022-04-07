@@ -1,5 +1,5 @@
 import path from 'path';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
+import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';

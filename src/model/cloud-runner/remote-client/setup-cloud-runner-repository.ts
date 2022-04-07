@@ -2,13 +2,13 @@ import fs from 'fs';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { Caching } from './caching';
-import { LFSHashing } from './lfs-hashing';
-import { CloudRunnerSystem } from './cloud-runner-system';
+import { LFSHashing } from '../services/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import path from 'path';
 import { assert } from 'console';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
+import { CloudRunnerSystem } from '../services/cloud-runner-system';
 
 export class SetupCloudRunnerRepository {
   public static async run() {

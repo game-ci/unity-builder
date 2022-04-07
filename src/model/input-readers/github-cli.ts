@@ -1,4 +1,4 @@
-import { CloudRunnerSystem } from '../cloud-runner/remote-client/cloud-runner-system';
+import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import * as core from '@actions/core';
 
 export class GithubCliReader {
