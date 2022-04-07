@@ -84,7 +84,6 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
-    CloudRunnerSystem.Run(`ls ${cacheFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
@@ -102,6 +101,8 @@ export class Caching {
         .replace('.zip', '');
 
       process.chdir(cacheFolder);
+      CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      CloudRunnerSystem.Run(`ls ${destinationFolder}`);
 
       const cacheSelection =
         cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
