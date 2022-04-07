@@ -8,7 +8,7 @@ import { CloudRunnerSystem } from './cloud-runner-system';
 import { LFSHashing } from './lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import { CLI } from '../../cli/cli';
-import { CliFunction } from '../../cli/cli-decorator';
+import { CliFunction } from '../../cli/cli-functions-repository';
 
 export class Caching {
   @CliFunction(`cache-push`, `push to cache`)

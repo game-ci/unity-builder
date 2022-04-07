@@ -4,7 +4,7 @@ import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';
 import { CLI } from '../../cli/cli';
-import { CliFunction } from '../../cli/cli-decorator';
+import { CliFunction } from '../../cli/cli-functions-repository';
 
 export class LFSHashing {
   public static async createLFSHashFiles() {

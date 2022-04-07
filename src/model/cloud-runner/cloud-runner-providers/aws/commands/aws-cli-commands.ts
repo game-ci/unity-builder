@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk';
-import { CliFunction } from '../../../../cli/cli-decorator';
+import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 

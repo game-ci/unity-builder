@@ -3,8 +3,12 @@ import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import { CliFunction, GetAllCliModes, GetCliFunctions } from './cli-decorator';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
+import { CliFunction, CLIFunctionsRepository } from './cli-functions-repository';
+import { AWSCLICommands } from '../cloud-runner/cloud-runner-providers/aws/commands/aws-cli-commands';
+import { Caching } from '../cloud-runner/remote-client/caching';
+import { LFSHashing } from '../cloud-runner/remote-client/lfs-hashing';
+import { SetupCloudRunnerRepository } from '../cloud-runner/remote-client/setup-cloud-runner-repository';
 
 export class CLI {
   public static options;
@@ -22,6 +26,10 @@ export class CLI {
   }
 
   public static InitCliMode() {
+    CLIFunctionsRepository.PushCliFunctionSource(AWSCLICommands);
+    CLIFunctionsRepository.PushCliFunctionSource(Caching);
+    CLIFunctionsRepository.PushCliFunctionSource(LFSHashing);
+    CLIFunctionsRepository.PushCliFunctionSource(SetupCloudRunnerRepository);
     const program = new Command();
     program.version('0.0.1');
     const properties = Object.getOwnPropertyNames(Input);
@@ -31,7 +39,7 @@ export class CLI {
     }
     program.option(
       '-m, --mode <mode>',
-      GetAllCliModes()
+      CLIFunctionsRepository.GetAllCliModes()
         .map((x) => `${x.key} (${x.description})`)
         .join(` | `),
     );
@@ -50,7 +58,7 @@ export class CLI {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
     CLI.logInput();
-    const results = GetCliFunctions(CLI.options.mode);
+    const results = CLIFunctionsRepository.GetCliFunctions(CLI.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     CLI.options.versioning = 'None';
     return await results.target[results.propertyKey]();

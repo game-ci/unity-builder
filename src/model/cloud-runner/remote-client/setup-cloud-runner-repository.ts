@@ -8,7 +8,7 @@ import { RemoteClientLogger } from './remote-client-logger';
 import path from 'path';
 import { assert } from 'console';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CliFunction } from '../../cli/cli-decorator';
+import { CliFunction } from '../../cli/cli-functions-repository';
 
 export class SetupCloudRunnerRepository {
   public static async run() {
