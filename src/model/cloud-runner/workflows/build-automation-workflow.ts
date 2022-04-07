@@ -78,7 +78,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ${BuildAutomationWorkflow.SetupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
+      ${BuildAutomationWorkflow.BuildCommands(builderPath, CloudRunner.buildParameters.buildGuid)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
@@ -94,7 +94,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     node ${builderPath} -m remote-cli`;
   }
 
-  private static BuildCommands(builderPath) {
+  private static BuildCommands(builderPath, guid) {
     const linuxCacheFolder = CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`);
     const distFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu');
@@ -108,8 +108,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    node ${builderPath} -m cache-push --cachePushFrom Library --cachePushTo ${linuxCacheFolder}/Library
+    node ${builderPath} -m cache-push --cachePushFrom Library --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
     echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom build --cachePushTo ${linuxCacheFolder}/build`;
+    node ${builderPath} -m cache-push --cachePushFrom build --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}/build`;
   }
 }
