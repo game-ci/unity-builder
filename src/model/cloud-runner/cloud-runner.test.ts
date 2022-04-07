@@ -31,15 +31,18 @@ describe('Cloud Runner', () => {
       };
       Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
-      Input.githubInputEnabled = true;
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
+      const buildSucceededString = 'Build succeeded';
       expect(results).toContain(libraryString);
+      expect(results).toContain(buildSucceededString);
       const buildParameter2 = await BuildParameters.create();
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      expect(results2).toContain(buildSucceededString);
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
+      Input.githubInputEnabled = true;
       delete CLI.options;
     }, 1000000);
     it('All build parameters sent to cloud runner as env vars', async () => {
