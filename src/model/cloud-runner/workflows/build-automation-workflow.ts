@@ -99,7 +99,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const distFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathFull, 'dist', 'platforms', 'ubuntu');
     return `echo "game ci cloud runner init"
-    mkdir -p ${`${linuxCacheFolder}/build`.replace(/\\/g, `/`)}
+    mkdir -p ${`${CloudRunnerFolders.projectBuildFolderFull}/build`.replace(/\\/g, `/`)}
     cd ${CloudRunnerFolders.projectPathFull}
     cp -r "${path.join(distFolder, 'default-build-script').replace(/\\/g, `/`)}" "/UnityBuilderAction"
     cp -r "${path.join(ubuntuPlatformsFolder, 'entrypoint.sh').replace(/\\/g, `/`)}" "/entrypoint.sh"
