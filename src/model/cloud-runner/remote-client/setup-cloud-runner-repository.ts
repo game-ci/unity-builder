@@ -13,7 +13,7 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 export class SetupCloudRunnerRepository {
   public static async run() {
     try {
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.buildPathFull}`);
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.uniqueCloudRunnerJobFolderFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.repoPathFull}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.cacheFolderFull}`);
       process.chdir(CloudRunnerFolders.repoPathFull);

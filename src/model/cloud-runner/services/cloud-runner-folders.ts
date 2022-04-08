@@ -6,7 +6,7 @@ export class CloudRunnerFolders {
 
   // only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 
-  public static get buildPathFull(): string {
+  public static get uniqueCloudRunnerJobFolderFull(): string {
     return path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
   }
 
@@ -20,11 +20,11 @@ export class CloudRunnerFolders {
   }
 
   public static get builderPathFull(): string {
-    return path.join(CloudRunnerFolders.buildPathFull, `builder`);
+    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderFull, `builder`);
   }
 
   public static get repoPathFull(): string {
-    return path.join(CloudRunnerFolders.buildPathFull, CloudRunnerFolders.repositoryFolder);
+    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderFull, CloudRunnerFolders.repositoryFolder);
   }
 
   public static get projectPathFull(): string {
