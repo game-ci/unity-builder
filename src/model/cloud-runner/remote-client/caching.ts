@@ -50,6 +50,7 @@ export class Caching {
       await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
       await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
       process.chdir(path.resolve(sourceFolder, '..'));
+      await CloudRunnerSystem.Run(`ls`);
 
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(
@@ -68,7 +69,9 @@ export class Caching {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
+      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
       await CloudRunnerSystem.Run(`zip -q ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
       assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
@@ -135,9 +138,11 @@ export class Caching {
         if (fs.existsSync(destinationFolder)) {
           fs.rmSync(destinationFolder, { recursive: true, force: true });
         }
+        await CloudRunnerSystem.Run(`ls ${destinationParentFolder}`);
         await CloudRunnerSystem.Run(
           `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
         );
+        await CloudRunnerSystem.Run(`ls ${destinationParentFolder}`);
         await CloudRunnerSystem.Run(`ls ${destinationFolder}`);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
