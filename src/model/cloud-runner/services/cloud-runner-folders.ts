@@ -35,6 +35,10 @@ export class CloudRunnerFolders {
     return path.join(CloudRunnerFolders.projectPathFull, `Library`);
   }
 
+  public static get projectBuildFolderFull(): string {
+    return path.join(CloudRunnerFolders.projectPathFull, `build`);
+  }
+
   public static get lfsDirectoryFull(): string {
     return path.join(CloudRunnerFolders.repoPathFull, `.git`, `lfs`);
   }

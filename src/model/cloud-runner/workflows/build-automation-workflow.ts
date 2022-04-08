@@ -108,8 +108,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    node ${builderPath} -m cache-push --cachePushFrom Library --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
+    node ${builderPath} -m cache-push --cachePushFrom ${
+      CloudRunnerFolders.libraryFolderFull
+    } --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
     echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom build --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}/build`;
+    node ${builderPath} -m cache-push --cachePushFrom ${
+      CloudRunnerFolders.projectBuildFolderFull
+    } --artifactName build-${guid} --cachePushTo ${linuxCacheFolder}/build`;
   }
 }
