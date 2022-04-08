@@ -5,6 +5,7 @@ import { CLI } from '../../cli/cli';
 import Input from '../../input';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
+import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from './caching';
 
 function guid() {
@@ -47,6 +48,7 @@ describe('Cloud Runner Caching', () => {
         testFolder.replace(/\\/g, `/`),
         `${CLI.options.cacheKey}.zip`,
       );
+      await CloudRunnerSystem.Run(`ls ${__dirname}`);
       // compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'))).toContain(CLI.options.cacheKey);
       fs.rmdirSync(testFolder, { recursive: true });
