@@ -115,6 +115,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     } --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
     echo "game ci cloud runner push build to cache"
     du -h ${CloudRunnerFolders.projectBuildFolderFull}
+    du -h ${CloudRunnerFolders.projectPathFull}
+    du -h ${CloudRunnerFolders.repoPathFull}
     node ${builderPath} -m cache-push --cachePushFrom ${
       CloudRunnerFolders.projectBuildFolderFull
     } --artifactName build-${guid} --cachePushTo ${`${linuxCacheFolder}/build`.replace(/\\/g, `/`)}
