@@ -48,7 +48,8 @@ export class Caching {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
       await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
+      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder, '..')}`);
+      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder)}`);
       process.chdir(path.resolve(sourceFolder, '..'));
       await CloudRunnerSystem.Run(`ls`);
 
