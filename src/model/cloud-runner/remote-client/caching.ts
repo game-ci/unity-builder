@@ -40,6 +40,7 @@ export class Caching {
       CloudRunnerLogger.log(`${error}`);
     }
   }
+
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
@@ -47,9 +48,9 @@ export class Caching {
       if (!fs.existsSync(cacheFolder)) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
-      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
-      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder, '..')}`);
-      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`ls ${cacheFolder.replace(/\\/g, `/`)}`);
+      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder, '..').replace(/\\/g, `/`)}`);
+      await CloudRunnerSystem.Run(`ls ${path.resolve(sourceFolder).replace(/\\/g, `/`)}`);
       process.chdir(path.resolve(sourceFolder, '..'));
       await CloudRunnerSystem.Run(`ls`);
 
@@ -70,9 +71,9 @@ export class Caching {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
-      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
+      await CloudRunnerSystem.Run(`ls ${sourceFolder.replace(/\\/g, `/`)}`);
       await CloudRunnerSystem.Run(`zip -q ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
-      await CloudRunnerSystem.Run(`ls ${sourceFolder}`);
+      await CloudRunnerSystem.Run(`ls ${sourceFolder.replace(/\\/g, `/`)}`);
       assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
@@ -105,7 +106,7 @@ export class Caching {
         .replace('.zip', '');
 
       process.chdir(cacheFolder);
-      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`ls ${cacheFolder.replace(/\\/g, `/`)}`);
 
       const cacheSelection =
         cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
@@ -135,7 +136,7 @@ export class Caching {
         await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         RemoteClientLogger.log(` `);
-        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}`);
+        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder.replace(/\\/g, `/`)}`);
         RemoteClientLogger.log(` `);
         await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/resultsFolder`);
         RemoteClientLogger.log(` `);
