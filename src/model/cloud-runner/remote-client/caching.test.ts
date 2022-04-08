@@ -41,7 +41,7 @@ describe('Cloud Runner Caching', () => {
       fs.writeFileSync(path.resolve(testFolder, 'test.txt'), CLI.options.cacheKey);
       await Caching.PushToCache(cacheFolder, testFolder, `${CLI.options.cacheKey}.zip`);
       // delete test folder
-      fs.rmdirSync(testFolder);
+      fs.rmdirSync(testFolder, { recursive: true });
       await Caching.PullFromCache(
         cacheFolder.replace(/\\/g, `/`),
         testFolder.replace(/\\/g, `/`),
@@ -49,8 +49,8 @@ describe('Cloud Runner Caching', () => {
       );
       // compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'))).toContain(CLI.options.cacheKey);
-      fs.rmdirSync(testFolder);
-      fs.rmdirSync(cacheFolder);
+      fs.rmdirSync(testFolder, { recursive: true });
+      fs.rmdirSync(cacheFolder, { recursive: true });
 
       Input.githubInputEnabled = true;
       delete CLI.options;
