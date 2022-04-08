@@ -72,7 +72,7 @@ export class Caching {
         });
       };
       //await CloudRunnerSystem.Run(`ls ${sourceFolder.replace(/\\/g, `/`)}`);
-      await CloudRunnerSystem.Run(`zip -q ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`zip ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
       //await CloudRunnerSystem.Run(`ls ${sourceFolder.replace(/\\/g, `/`)}`);
       assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
       assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
@@ -133,7 +133,7 @@ export class Caching {
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
         assert(`${fs.existsSync(destinationFolder)}`, `destination folder to pull into exists`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
+        await CloudRunnerSystem.Run(`unzip ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         //await CloudRunnerSystem.Run(`du -h ${fullResultsFolder.replace(/\\/g, `/`)}`);
         //await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/${path.basename(destinationFolder)}`);
