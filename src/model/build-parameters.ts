@@ -1,5 +1,4 @@
 import { customAlphabet } from 'nanoid';
-import * as core from '@actions/core';
 import AndroidVersioning from './android-versioning';
 import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
 import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid';
@@ -88,9 +87,6 @@ class BuildParameters {
       unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
     } else {
       unitySerial = process.env.UNITY_SERIAL!;
-    }
-    if (!CLI.cliMode) {
-      core.setSecret(unitySerial);
     }
 
     return {

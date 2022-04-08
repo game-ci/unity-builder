@@ -47,7 +47,7 @@ export class SetupCloudRunnerRepository {
   private static async sizeOfFolder(message: string, folder: string) {
     CloudRunnerLogger.log(`Size of ${message}`);
     await CloudRunnerSystem.Run(`du -sh ${folder}`);
-    await CloudRunnerSystem.Run(`du -h ${folder}`);
+    await CloudRunnerSystem.Run(`du -s ${folder}`);
   }
 
   private static async cloneRepoWithoutLFSFiles() {
