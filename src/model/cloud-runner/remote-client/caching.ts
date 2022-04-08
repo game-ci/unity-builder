@@ -138,7 +138,7 @@ export class Caching {
         RemoteClientLogger.log(` `);
         await CloudRunnerSystem.Run(`du -h ${fullResultsFolder.replace(/\\/g, `/`)}`);
         RemoteClientLogger.log(` `);
-        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/resultsFolder`);
+        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/${resultsFolder}`);
         RemoteClientLogger.log(` `);
         await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/${path.basename(destinationFolder)}`);
         RemoteClientLogger.log(` `);
