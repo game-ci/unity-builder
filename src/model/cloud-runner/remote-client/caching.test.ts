@@ -40,13 +40,13 @@ describe('Cloud Runner Caching', () => {
       fs.mkdirSync(cacheFolder);
       // add test has file to test folders
       fs.writeFileSync(path.resolve(testFolder, 'test.txt'), CLI.options.cacheKey);
-      await Caching.PushToCache(cacheFolder, testFolder, `${CLI.options.cacheKey}.zip`);
+      await Caching.PushToCache(cacheFolder, testFolder, `${CLI.options.cacheKey}`);
       // delete test folder
       fs.rmdirSync(testFolder, { recursive: true });
       await Caching.PullFromCache(
         cacheFolder.replace(/\\/g, `/`),
         testFolder.replace(/\\/g, `/`),
-        `${CLI.options.cacheKey}.zip`,
+        `${CLI.options.cacheKey}`,
       );
       await CloudRunnerSystem.Run(`ls ${__dirname}`);
       await CloudRunnerSystem.Run(`ls ${testFolder}`);
