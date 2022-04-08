@@ -133,12 +133,9 @@ export class Caching {
         if (fs.existsSync(destinationFolder)) {
           fs.rmdirSync(destinationFolder, { recursive: true });
         }
-        await CloudRunnerSystem.Run(`ls ${destinationParentFolder}`);
         await CloudRunnerSystem.Run(
           `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
         );
-        await CloudRunnerSystem.Run(`ls ${destinationParentFolder}`);
-        await CloudRunnerSystem.Run(`ls ${destinationFolder}`);
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
