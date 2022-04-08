@@ -143,7 +143,7 @@ export class Caching {
         assert(`${fs.existsSync(fullResultsFolder)}`, `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
         if (fs.existsSync(destinationFolder)) {
-          fs.rmSync(destinationFolder, { recursive: true, force: true });
+          fs.rmdirSync(destinationFolder, { recursive: true });
         }
         await CloudRunnerSystem.Run(`ls ${destinationParentFolder}`);
         await CloudRunnerSystem.Run(
