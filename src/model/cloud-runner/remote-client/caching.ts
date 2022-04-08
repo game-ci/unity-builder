@@ -134,7 +134,13 @@ export class Caching {
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
         await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
-        await CloudRunnerSystem.Run(`du -h ${resultsFolder}`);
+        RemoteClientLogger.log(` `);
+        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}`);
+        RemoteClientLogger.log(` `);
+        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/resultsFolder`);
+        RemoteClientLogger.log(` `);
+        await CloudRunnerSystem.Run(`du -h ${fullResultsFolder}/${path.basename(destinationFolder)}`);
+        RemoteClientLogger.log(` `);
         assert(`${fs.existsSync(fullResultsFolder)}`, `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
         if (fs.existsSync(destinationFolder)) {
