@@ -62,7 +62,6 @@ jobs:
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test "caching"
-      - run: yarn run test "cloud-runner"
       - run: yarn run test-i-aws
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
