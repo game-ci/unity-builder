@@ -66,6 +66,7 @@ jobs:
           node-version: 12.x
       - run: yarn
       - run: yarn run cli --help
+      - run: yarn run test "caching"
       - name: Cloud Runner Test Suite
         run: yarn run test-i-k8s --detectOpenHandles --forceExit
         env:
