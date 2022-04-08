@@ -48,9 +48,9 @@ describe('Cloud Runner Caching', () => {
         testFolder.replace(/\\/g, `/`),
         `${CLI.options.cacheKey}`,
       );
-      await CloudRunnerSystem.Run(`ls ${__dirname}`);
-      await CloudRunnerSystem.Run(`ls ${testFolder}`);
-      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`du -h ${__dirname}`);
+      await CloudRunnerSystem.Run(`tree ${testFolder}`);
+      await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
       // compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'))).toContain(CLI.options.cacheKey);
       fs.rmdirSync(testFolder, { recursive: true });
