@@ -49,6 +49,8 @@ describe('Cloud Runner Caching', () => {
         `${CLI.options.cacheKey}.zip`,
       );
       await CloudRunnerSystem.Run(`ls ${__dirname}`);
+      await CloudRunnerSystem.Run(`ls ${testFolder}`);
+      await CloudRunnerSystem.Run(`ls ${cacheFolder}`);
       // compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'))).toContain(CLI.options.cacheKey);
       fs.rmdirSync(testFolder, { recursive: true });
