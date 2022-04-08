@@ -52,7 +52,9 @@ describe('Cloud Runner Caching', () => {
       await CloudRunnerSystem.Run(`tree ${testFolder}`);
       await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
       // compare validity to original hash
-      expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'))).toContain(CLI.options.cacheKey);
+      expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
+        CLI.options.cacheKey,
+      );
       fs.rmdirSync(testFolder, { recursive: true });
       fs.rmdirSync(cacheFolder, { recursive: true });
 
