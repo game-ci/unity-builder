@@ -4,7 +4,7 @@ import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 
 export class AWSCLICommands {
-  @CliFunction(`garbage-collect-aws`, `garbage collect aws`)
+  @CliFunction(`aws-garbage-collect`, `garbage collect aws`)
   static async garbageCollectAws() {
     process.env.AWS_REGION = Input.region;
     CloudRunnerLogger.log(`Cloud Formation stacks`);
