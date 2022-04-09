@@ -84,6 +84,10 @@ describe('Cloud Runner', () => {
             element.value = element.value.replace(/\s+/g, '');
           }
           CloudRunnerLogger.log(`checking input/build param ${element} ${element.value}`);
+        }
+      }
+      for (const element of environmentVariables) {
+        if (element.value !== undefined && typeof element.value !== 'function') {
           expect(newLinePurgedFile).toContain(`${element.name}`);
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
