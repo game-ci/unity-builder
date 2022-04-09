@@ -13,7 +13,6 @@ export class AWSCLICommands {
       (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
     for (const element of stacks) {
       CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
-      if (Input.cloudRunnerTests) await CF.deleteStack({ StackName: element.StackName }).promise();
     }
     CloudRunnerLogger.log(`ECS Clusters`);
     const ecs = new AWS.ECS();
