@@ -22,32 +22,6 @@ describe('Cloud Runner', () => {
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
   if (Input.cloudRunnerTests) {
-    it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
-      CLI.options = {
-        versioning: 'None',
-        projectPath: 'test-project',
-        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
-        targetPlatform: 'StandaloneLinux64',
-        cacheKey: `test-case-${guidGenerator()}`,
-      };
-      Input.githubInputEnabled = false;
-      const buildParameter = await BuildParameters.create();
-      const baseImage = new ImageTag(buildParameter);
-      const results = await CloudRunner.run(buildParameter, baseImage.toString());
-      const libraryString = 'Rebuilding Library because the asset database could not be found!';
-      const buildSucceededString = 'Build succeeded';
-      expect(results).toContain(libraryString);
-      expect(results).toContain(buildSucceededString);
-      CloudRunnerLogger.log(`run 1 succeeded`);
-      const buildParameter2 = await BuildParameters.create();
-      const baseImage2 = new ImageTag(buildParameter2);
-      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
-      CloudRunnerLogger.log(`run 2 succeeded`);
-      expect(results2).toContain(buildSucceededString);
-      expect(results2).toEqual(expect.not.stringContaining(libraryString));
-      Input.githubInputEnabled = true;
-      delete CLI.options;
-    }, 1000000);
     it('All build parameters sent to cloud runner as env vars', async () => {
       // build parameters
       CLI.options = {
@@ -92,6 +66,32 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
+      delete CLI.options;
+    }, 1000000);
+    it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
+      CLI.options = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${guidGenerator()}`,
+      };
+      Input.githubInputEnabled = false;
+      const buildParameter = await BuildParameters.create();
+      const baseImage = new ImageTag(buildParameter);
+      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      const libraryString = 'Rebuilding Library because the asset database could not be found!';
+      const buildSucceededString = 'Build succeeded';
+      expect(results).toContain(libraryString);
+      expect(results).toContain(buildSucceededString);
+      CloudRunnerLogger.log(`run 1 succeeded`);
+      const buildParameter2 = await BuildParameters.create();
+      const baseImage2 = new ImageTag(buildParameter2);
+      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      CloudRunnerLogger.log(`run 2 succeeded`);
+      expect(results2).toContain(buildSucceededString);
+      expect(results2).toEqual(expect.not.stringContaining(libraryString));
+      Input.githubInputEnabled = true;
       delete CLI.options;
     }, 1000000);
   }
