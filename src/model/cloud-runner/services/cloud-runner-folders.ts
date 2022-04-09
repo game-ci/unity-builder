@@ -36,7 +36,7 @@ export class CloudRunnerFolders {
   }
 
   public static get projectBuildFolderFull(): string {
-    return path.join(CloudRunnerFolders.projectPathFull, `build`);
+    return path.join(CloudRunnerFolders.repoPathFull, CloudRunner.buildParameters.buildPath);
   }
 
   public static get lfsDirectoryFull(): string {
