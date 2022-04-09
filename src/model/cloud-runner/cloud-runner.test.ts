@@ -83,6 +83,8 @@ describe('Cloud Runner', () => {
           if (typeof element.value === `string`) {
             element.value = element.value.replace(/\s+/g, '');
           }
+          CloudRunnerLogger.log(`checking input/build param ${element} ${element.value}`);
+          expect(newLinePurgedFile).toContain(`${element.name}`);
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
