@@ -7,15 +7,8 @@ import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from './caching';
+import { v4 as uuidv4 } from 'uuid';
 
-function guid() {
-  return Math.trunc((1 + Math.random()) * 0x10000)
-    .toString(16)
-    .slice(1);
-}
-function guidGenerator() {
-  return `${guid() + guid()}-${guid()}-${guid()}-${guid()}-${guid()}${guid()}${guid()}`;
-}
 describe('Cloud Runner Caching', () => {
   it('responds', () => {});
 });
@@ -27,7 +20,7 @@ describe('Cloud Runner Caching', () => {
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
         targetPlatform: 'StandaloneLinux64',
-        cacheKey: `test-case-${guidGenerator()}`,
+        cacheKey: `test-case-${uuidv4()}`,
       };
       Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
