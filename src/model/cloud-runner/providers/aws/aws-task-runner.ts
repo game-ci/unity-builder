@@ -193,6 +193,11 @@ class AWSTaskRunner {
               shouldReadLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
+            } else if (message.includes('Build succeeded')) {
+              core.setOutput('build-result', 'success');
+            } else if (message.includes('Build fail')) {
+              core.setOutput('build-result', 'failed');
+              core.error('BUILD FAILED!');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
             if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
