@@ -74,16 +74,17 @@ export class TaskParameterSerializer {
     const array = new Array();
     TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
-    TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL', 'UNITY_USERNAME');
     TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
     array.push(
-      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters).map((x) => {
-        return {
-          ParameterKey: x.name,
-          EnvironmentVariable: x.name,
-          ParameterValue: x.value,
-        };
-      }),
+      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
+        .filter((x) => array.find((y) => y.ParameterKey !== x.name))
+        .map((x) => {
+          return {
+            ParameterKey: x.name,
+            EnvironmentVariable: x.name,
+            ParameterValue: x.value,
+          };
+        }),
     );
     return array;
   }
@@ -93,21 +94,15 @@ export class TaskParameterSerializer {
       ? CloudRunnerQueryOverride.queryOverrides[key]
       : process.env[key];
   }
-  private static tryAddInput(array, key, override = ''): CloudRunnerSecret[] {
-    if (TaskParameterSerializer.getValue(key) !== undefined) {
-      if (override !== '') {
-        array.push({
-          ParameterKey: override,
-          EnvironmentVariable: override,
-          ParameterValue: TaskParameterSerializer.getValue(key),
-        });
-      } else {
-        array.push({
-          ParameterKey: key,
-          EnvironmentVariable: key,
-          ParameterValue: TaskParameterSerializer.getValue(key),
-        });
-      }
+  s;
+  private static tryAddInput(array, key): CloudRunnerSecret[] {
+    const value = TaskParameterSerializer.getValue(key);
+    if (value !== undefined && value !== '') {
+      array.push({
+        ParameterKey: key,
+        EnvironmentVariable: key,
+        ParameterValue: value,
+      });
     }
     return array;
   }

@@ -134,7 +134,12 @@ export class Caching {
           fs.rmdirSync(destinationFolder, { recursive: true });
         }
         await CloudRunnerSystem.Run(
-          `mv "${fullResultsFolder}/${path.basename(destinationFolder)}" "${destinationParentFolder}"`,
+          `mv "${path.join(fullResultsFolder, path.basename(destinationFolder))}" "${destinationParentFolder}"`,
+        );
+        await CloudRunnerSystem.Run(`du -sh ${path.join(destinationParentFolder, path.basename(destinationFolder))}`);
+        const contents = fs.readdirSync(path.join(destinationParentFolder, path.basename(destinationFolder)));
+        CloudRunnerLogger.log(
+          `There is ${contents.length} files/dir in the cache pulled contents for ${path.basename(destinationFolder)}`,
         );
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
