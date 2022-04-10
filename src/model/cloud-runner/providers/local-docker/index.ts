@@ -2,11 +2,11 @@ import BuildParameters from '../../../build-parameters';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
+import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 
-class LocalCloudRunner implements CloudRunnerProviderInterface {
-  cleanupSharedResources(
+class LocalDockerCloudRunner implements ProviderInterface {
+  cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -16,7 +16,7 @@ class LocalCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  public setupSharedResources(
+  setup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -26,10 +26,11 @@ class LocalCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  public async runTask(
-    buildGuid: string,
-    image: string,
+  public runTask(
     commands: string,
+    buildGuid: string,
+    // eslint-disable-next-line no-unused-vars
+    image: string,
     // eslint-disable-next-line no-unused-vars
     mountdir: string,
     // eslint-disable-next-line no-unused-vars
@@ -39,10 +40,9 @@ class LocalCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
-    CloudRunnerLogger.log(image);
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
-    return await CloudRunnerSystem.Run(commands);
+    return CloudRunnerSystem.Run(commands, false, false);
   }
 }
-export default LocalCloudRunner;
+export default LocalDockerCloudRunner;

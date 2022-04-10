@@ -2,7 +2,7 @@ import fs from 'fs';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { Caching } from './caching';
-import { LFSHashing } from '../services/lfs-hashing';
+import { LfsHashing } from '../services/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import path from 'path';
 import { assert } from 'console';
@@ -10,35 +10,35 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 
-export class SetupCloudRunnerRepository {
-  public static async run() {
+export class RemoteClient {
+  public static async bootstrapRepository() {
     try {
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.uniqueCloudRunnerJobFolderFull}`);
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.repoPathFull}`);
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.repoPathAbsolute}`);
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.cacheFolderFull}`);
-      process.chdir(CloudRunnerFolders.repoPathFull);
-      await SetupCloudRunnerRepository.cloneRepoWithoutLFSFiles();
-      await SetupCloudRunnerRepository.sizeOfFolder('repo before lfs cache pull', CloudRunnerFolders.repoPathFull);
-      const lfsHashes = await LFSHashing.createLFSHashFiles();
-      if (fs.existsSync(CloudRunnerFolders.libraryFolderFull)) {
+      process.chdir(CloudRunnerFolders.repoPathAbsolute);
+      await RemoteClient.cloneRepoWithoutLFSFiles();
+      await RemoteClient.sizeOfFolder('repo before lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
+      const lfsHashes = await LfsHashing.createLFSHashFiles();
+      if (fs.existsSync(CloudRunnerFolders.libraryFolderAbsolute)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
       }
       await Caching.PullFromCache(
         CloudRunnerFolders.lfsCacheFolderFull,
-        CloudRunnerFolders.lfsDirectoryFull,
+        CloudRunnerFolders.lfsFolderAbsolute,
         `${lfsHashes.lfsGuidSum}`,
       );
-      await SetupCloudRunnerRepository.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathFull);
-      await SetupCloudRunnerRepository.pullLatestLFS();
-      await SetupCloudRunnerRepository.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathFull);
+      await RemoteClient.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
+      await RemoteClient.pullLatestLFS();
+      await RemoteClient.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathAbsolute);
       await Caching.PushToCache(
         CloudRunnerFolders.lfsCacheFolderFull,
-        CloudRunnerFolders.lfsDirectoryFull,
+        CloudRunnerFolders.lfsFolderAbsolute,
         `${lfsHashes.lfsGuidSum}`,
       );
-      await Caching.PullFromCache(CloudRunnerFolders.libraryCacheFolderFull, CloudRunnerFolders.libraryFolderFull);
-      await SetupCloudRunnerRepository.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathFull);
-      Caching.handleCachePurging();
+      await Caching.PullFromCache(CloudRunnerFolders.libraryCacheFolderFull, CloudRunnerFolders.libraryFolderAbsolute);
+      await RemoteClient.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathAbsolute);
+      await Caching.handleCachePurging();
     } catch (error) {
       throw error;
     }
@@ -51,7 +51,7 @@ export class SetupCloudRunnerRepository {
 
   private static async cloneRepoWithoutLFSFiles() {
     try {
-      process.chdir(`${CloudRunnerFolders.repoPathFull}`);
+      process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
@@ -60,7 +60,7 @@ export class SetupCloudRunnerRepository {
       await CloudRunnerSystem.Run(
         `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
           `..`,
-          path.basename(CloudRunnerFolders.repoPathFull),
+          path.basename(CloudRunnerFolders.repoPathAbsolute),
         )}`,
       );
       await CloudRunnerSystem.Run(`git lfs install`);
@@ -75,12 +75,12 @@ export class SetupCloudRunnerRepository {
   }
 
   private static async pullLatestLFS() {
-    process.chdir(CloudRunnerFolders.repoPathFull);
+    process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
     await CloudRunnerSystem.Run(`git lfs pull`);
     RemoteClientLogger.log(`pulled latest LFS files`);
-    assert(fs.existsSync(CloudRunnerFolders.lfsDirectoryFull));
+    assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
   }
 
   @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
@@ -90,6 +90,6 @@ export class SetupCloudRunnerRepository {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    await SetupCloudRunnerRepository.run();
+    await RemoteClient.bootstrapRepository();
   }
 }

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import BuildParameters from '../../build-parameters';
-import { CLI } from '../../cli/cli';
+import { Cli } from '../../cli/cli';
 import Input from '../../input';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
@@ -22,7 +22,7 @@ describe('Cloud Runner Caching', () => {
 describe('Cloud Runner Caching', () => {
   if (process.platform === 'linux') {
     it('Simple caching works', async () => {
-      CLI.options = {
+      Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
@@ -32,34 +32,39 @@ describe('Cloud Runner Caching', () => {
       Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
       CloudRunner.buildParameters = buildParameter;
+
       // create test folder
-      const testFolder = path.resolve(__dirname, CLI.options.cacheKey);
+      const testFolder = path.resolve(__dirname, Cli.options.cacheKey);
       fs.mkdirSync(testFolder);
+
       // crate cache folder
-      const cacheFolder = path.resolve(__dirname, `cache-${CLI.options.cacheKey}`);
+      const cacheFolder = path.resolve(__dirname, `cache-${Cli.options.cacheKey}`);
       fs.mkdirSync(cacheFolder);
+
       // add test has file to test folders
-      fs.writeFileSync(path.resolve(testFolder, 'test.txt'), CLI.options.cacheKey);
-      await Caching.PushToCache(cacheFolder, testFolder, `${CLI.options.cacheKey}`);
+      fs.writeFileSync(path.resolve(testFolder, 'test.txt'), Cli.options.cacheKey);
+      await Caching.PushToCache(cacheFolder, testFolder, `${Cli.options.cacheKey}`);
+
       // delete test folder
       fs.rmdirSync(testFolder, { recursive: true });
       await Caching.PullFromCache(
         cacheFolder.replace(/\\/g, `/`),
         testFolder.replace(/\\/g, `/`),
-        `${CLI.options.cacheKey}`,
+        `${Cli.options.cacheKey}`,
       );
       await CloudRunnerSystem.Run(`du -h ${__dirname}`);
       await CloudRunnerSystem.Run(`tree ${testFolder}`);
       await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
+
       // compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
-        CLI.options.cacheKey,
+        Cli.options.cacheKey,
       );
       fs.rmdirSync(testFolder, { recursive: true });
       fs.rmdirSync(cacheFolder, { recursive: true });
 
       Input.githubInputEnabled = true;
-      delete CLI.options;
+      delete Cli.options;
     }, 1000000);
   }
 });

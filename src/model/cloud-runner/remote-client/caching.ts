@@ -5,9 +5,9 @@ import CloudRunner from '../cloud-runner';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { LFSHashing } from '../services/lfs-hashing';
+import { LfsHashing } from '../services/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
-import { CLI } from '../../cli/cli';
+import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 
 export class Caching {
@@ -17,9 +17,9 @@ export class Caching {
       const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PushToCache(
-        CLI.options['cachePushTo'],
-        CLI.options['cachePushFrom'],
-        CLI.options['artifactName'] || '',
+        Cli.options['cachePushTo'],
+        Cli.options['cachePushFrom'],
+        Cli.options['artifactName'] || '',
       );
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);
@@ -32,9 +32,9 @@ export class Caching {
       const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PullFromCache(
-        CLI.options['cachePushFrom'],
-        CLI.options['cachePushTo'],
-        CLI.options['artifactName'] || '',
+        Cli.options['cachePushFrom'],
+        Cli.options['cachePushTo'],
+        Cli.options['artifactName'] || '',
       );
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);
@@ -45,14 +45,15 @@ export class Caching {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     try {
-      if (!fs.existsSync(cacheFolder)) {
+      const cacheFolderStat = await fs.promises.stat(cacheFolder);
+      if (!cacheFolderStat.isDirectory()) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
       process.chdir(path.resolve(sourceFolder, '..'));
 
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(
-          `Hashed cache folder ${await LFSHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
+          `Hashed cache folder ${await LfsHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
             sourceFolder,
           )}`,
         );
@@ -68,14 +69,17 @@ export class Caching {
         });
       };
       await CloudRunnerSystem.Run(`zip -q -r ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
-      assert(fs.existsSync(`${cacheArtifactName}.zip`), 'cache zip exists');
-      assert(fs.existsSync(path.basename(sourceFolder)), 'source folder exists');
+      const cacheArtifactStatPreMove = await fs.promises.stat(`${cacheArtifactName}.zip`);
+      assert(cacheArtifactStatPreMove.isFile(), 'cache zip exists');
+      const sourceFolderStat = await fs.promises.stat(path.basename(sourceFolder));
+      assert(sourceFolderStat.isDirectory(), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
         await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
       }
       await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.zip ${cacheFolder}`);
       RemoteClientLogger.log(`moved ${cacheArtifactName}.zip to ${cacheFolder}`);
-      assert(fs.existsSync(`${path.join(cacheFolder, cacheArtifactName)}.zip`), 'cache zip exists inside cache folder');
+      const cacheArtifactStat = await fs.promises.stat(`${path.join(cacheFolder, cacheArtifactName)}.zip`);
+      assert(cacheArtifactStat.isFile(), 'cache zip exists inside cache folder');
     } catch (error) {
       process.chdir(`${startPath}`);
       throw error;
@@ -87,12 +91,15 @@ export class Caching {
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
-      if (!fs.existsSync(cacheFolder)) {
-        fs.mkdirSync(cacheFolder);
+      const cacheFolderStat = await fs.promises.stat(cacheFolder);
+      if (!cacheFolderStat.isDirectory()) {
+        await fs.promises.mkdir(cacheFolder);
       }
 
-      if (!fs.existsSync(destinationFolder)) {
-        fs.mkdirSync(destinationFolder);
+      const destinationStat = await fs.promises.stat(destinationFolder);
+
+      if (!destinationStat.isDirectory()) {
+        await fs.promises.mkdir(destinationFolder);
       }
 
       const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
@@ -100,9 +107,10 @@ export class Caching {
         .replace('.zip', '');
 
       process.chdir(cacheFolder);
+      const cacheArtifactStat = await fs.promises.stat(`${cacheArtifactName}.zip`);
 
       const cacheSelection =
-        cacheArtifactName !== `` && fs.existsSync(`${cacheArtifactName}.zip`) ? cacheArtifactName : latestInBranch;
+        cacheArtifactName !== `` && cacheArtifactStat.isFile() ? cacheArtifactName : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
 
       // eslint-disable-next-line func-style
@@ -120,24 +128,29 @@ export class Caching {
         await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePullOverrideCommand));
       }
 
-      if (fs.existsSync(`${cacheSelection}.zip`)) {
+      const cacheSelectionExistsStat = await fs.promises.stat(`${cacheSelection}.zip`);
+      if (cacheSelectionExistsStat.isFile()) {
         const resultsFolder = `results${CloudRunner.buildParameters.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
-        assert(`${fs.existsSync(destinationFolder)}`, `destination folder to pull into exists`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
         await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
-        assert(`${fs.existsSync(fullResultsFolder)}`, `cache extraction results folder exists`);
+        const fullResultsFolderStat = await fs.promises.stat(fullResultsFolder);
+        assert(fullResultsFolderStat.isDirectory(), `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
-        if (fs.existsSync(destinationFolder)) {
-          fs.rmdirSync(destinationFolder, { recursive: true });
+
+        const destinationFolderStat = await fs.promises.stat(destinationFolder);
+        if (destinationFolderStat.isDirectory()) {
+          await fs.promises.rmdir(destinationFolder, { recursive: true });
         }
         await CloudRunnerSystem.Run(
           `mv "${path.join(fullResultsFolder, path.basename(destinationFolder))}" "${destinationParentFolder}"`,
         );
         await CloudRunnerSystem.Run(`du -sh ${path.join(destinationParentFolder, path.basename(destinationFolder))}`);
-        const contents = fs.readdirSync(path.join(destinationParentFolder, path.basename(destinationFolder)));
+        const contents = await fs.promises.readdir(
+          path.join(destinationParentFolder, path.basename(destinationFolder)),
+        );
         CloudRunnerLogger.log(
           `There is ${contents.length} files/dir in the cache pulled contents for ${path.basename(destinationFolder)}`,
         );
@@ -155,10 +168,10 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
 
-  public static handleCachePurging() {
+  public static async handleCachePurging() {
     if (process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined) {
       RemoteClientLogger.log(`purging ${CloudRunnerFolders.purgeRemoteCaching}`);
-      fs.rmdirSync(CloudRunnerFolders.cacheFolder, { recursive: true });
+      fs.promises.rmdir(CloudRunnerFolders.cacheFolder, { recursive: true });
     }
   }
 }

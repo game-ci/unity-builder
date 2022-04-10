@@ -1,12 +1,11 @@
 import BuildParameters from '../../../build-parameters';
-import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
+import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 
-class LocalDockerCloudRunner implements CloudRunnerProviderInterface {
-  cleanupSharedResources(
+class TestCloudRunner implements ProviderInterface {
+  cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -16,7 +15,7 @@ class LocalDockerCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  setupSharedResources(
+  setup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -26,10 +25,9 @@ class LocalDockerCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  public runTask(
+  public async runTask(
     commands: string,
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     image: string,
     // eslint-disable-next-line no-unused-vars
     mountdir: string,
@@ -40,9 +38,12 @@ class LocalDockerCloudRunner implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
+    CloudRunnerLogger.log(image);
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
-    return CloudRunnerSystem.Run(commands, false, false);
+    return await new Promise((result) => {
+      result(commands);
+    });
   }
 }
-export default LocalDockerCloudRunner;
+export default TestCloudRunner;

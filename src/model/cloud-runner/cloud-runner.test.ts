@@ -4,7 +4,7 @@ import Input from '../input';
 import { CloudRunnerStatics } from './cloud-runner-statics';
 import { TaskParameterSerializer } from './services/task-parameter-serializer';
 import UnityVersioning from '../unity-versioning';
-import { CLI } from '../cli/cli';
+import { Cli } from '../cli/cli';
 import CloudRunnerLogger from './services/cloud-runner-logger';
 
 function guid() {
@@ -24,7 +24,7 @@ describe('Cloud Runner', () => {
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
       // build parameters
-      CLI.options = {
+      Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
@@ -66,10 +66,10 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
-      delete CLI.options;
+      delete Cli.options;
     }, 1000000);
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
-      CLI.options = {
+      Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
@@ -92,12 +92,12 @@ describe('Cloud Runner', () => {
       expect(results2).toContain(buildSucceededString);
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
       Input.githubInputEnabled = true;
-      delete CLI.options;
+      delete Cli.options;
     }, 1000000);
   }
   it('Local cloud runner returns commands', async () => {
     // build parameters
-    CLI.options = {
+    Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
       unityVersion: UnityVersioning.read('test-project'),
@@ -119,11 +119,11 @@ describe('Cloud Runner', () => {
     // run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
-    delete CLI.options;
+    delete Cli.options;
   }, 1000000);
   it('Test cloud runner returns commands', async () => {
     // build parameters
-    CLI.options = {
+    Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
       unityVersion: UnityVersioning.read('test-project'),
@@ -137,6 +137,6 @@ describe('Cloud Runner', () => {
     // run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
-    delete CLI.options;
+    delete Cli.options;
   }, 1000000);
 });

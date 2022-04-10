@@ -3,20 +3,20 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import AWSTaskRunner from './aws-task-runner';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
+import { ProviderInterface } from '../provider-interface';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSJobStack } from './aws-job-stack';
 import { AWSBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
 
-class AWSBuildEnvironment implements CloudRunnerProviderInterface {
+class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  async cleanupSharedResources(
+  async cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -26,7 +26,7 @@ class AWSBuildEnvironment implements CloudRunnerProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  async setupSharedResources(
+  async setup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars

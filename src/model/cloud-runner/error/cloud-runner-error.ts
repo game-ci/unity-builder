@@ -6,7 +6,7 @@ export class CloudRunnerError {
   public static async handleException(error: unknown) {
     CloudRunnerLogger.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Cloud Runner failed');
-    await CloudRunner.CloudRunnerProviderPlatform.cleanupSharedResources(
+    await CloudRunner.Provider.cleanup(
       CloudRunner.buildParameters.buildGuid,
       CloudRunner.buildParameters,
       CloudRunner.buildParameters.branch,

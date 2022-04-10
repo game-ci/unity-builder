@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { CLI } from './cli/cli';
+import { Cli } from './cli/cli';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
 import Platform from './platform';
 
@@ -26,15 +26,18 @@ class Input {
     const alternativeQuery = Input.ToEnvVarFormat(query);
 
     // query input sources
-    if (CLI.query(query, alternativeQuery)) {
-      return CLI.query(query, alternativeQuery);
+    if (Cli.query(query, alternativeQuery)) {
+      return Cli.query(query, alternativeQuery);
     }
+
     if (CloudRunnerQueryOverride.query(query, alternativeQuery)) {
       return CloudRunnerQueryOverride.query(query, alternativeQuery);
     }
+
     if (process.env[query] !== undefined) {
       return process.env[query];
     }
+
     if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
       return process.env[alternativeQuery];
     }
@@ -222,7 +225,7 @@ class Input {
   }
 
   static get cloudRunnerCluster() {
-    if (CLI.cliMode) {
+    if (Cli.isCliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
     return Input.getInput('cloudRunnerCluster') || 'local';

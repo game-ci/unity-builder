@@ -1,4 +1,4 @@
-export class CLIFunctionsRepository {
+export class CliFunctionsRepository {
   private static targets: any[] = [];
   public static PushCliFunction(
     target: any,
@@ -7,7 +7,7 @@ export class CLIFunctionsRepository {
     key: string,
     description: string,
   ) {
-    CLIFunctionsRepository.targets.push({
+    CliFunctionsRepository.targets.push({
       target,
       propertyKey,
       descriptor,
@@ -15,27 +15,30 @@ export class CLIFunctionsRepository {
       description,
     });
   }
+
   public static GetCliFunctions(key) {
-    const results = CLIFunctionsRepository.targets.find((x) => x.key === key);
+    const results = CliFunctionsRepository.targets.find((x) => x.key === key);
     if (results === undefined || results.length === 0) {
       throw new Error(`no CLI mode found for ${key}`);
     }
     return results;
   }
+
   public static GetAllCliModes() {
-    return CLIFunctionsRepository.targets.map((x) => {
+    return CliFunctionsRepository.targets.map((x) => {
       return {
         key: x.key,
         description: x.description,
       };
     });
   }
+
   // eslint-disable-next-line no-unused-vars
   public static PushCliFunctionSource(cliFunction: any) {}
 }
 
 export function CliFunction(key: string, description: string) {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    CLIFunctionsRepository.PushCliFunction(target, propertyKey, descriptor, key, description);
+    CliFunctionsRepository.PushCliFunction(target, propertyKey, descriptor, key, description);
   };
 }

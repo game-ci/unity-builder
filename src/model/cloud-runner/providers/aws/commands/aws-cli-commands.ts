@@ -3,7 +3,7 @@ import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 
-export class AWSCLICommands {
+export class AwsCliCommands {
   @CliFunction(`aws-garbage-collect`, `garbage collect aws`)
   static async garbageCollectAws() {
     process.env.AWS_REGION = Input.region;

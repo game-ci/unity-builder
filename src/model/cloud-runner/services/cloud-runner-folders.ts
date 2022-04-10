@@ -6,7 +6,7 @@ export class CloudRunnerFolders {
 
   // only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 
-  public static get uniqueCloudRunnerJobFolderFull(): string {
+  public static get uniqueCloudRunnerJobFolderAbsolute(): string {
     return path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
   }
 
@@ -19,28 +19,28 @@ export class CloudRunnerFolders {
     );
   }
 
-  public static get builderPathFull(): string {
-    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderFull, `builder`);
+  public static get builderPathAbsolute(): string {
+    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute, `builder`);
   }
 
-  public static get repoPathFull(): string {
-    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderFull, CloudRunnerFolders.repositoryFolder);
+  public static get repoPathAbsolute(): string {
+    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute, CloudRunnerFolders.repositoryFolder);
   }
 
-  public static get projectPathFull(): string {
-    return path.join(CloudRunnerFolders.repoPathFull, CloudRunner.buildParameters.projectPath);
+  public static get projectPathAbsolute(): string {
+    return path.join(CloudRunnerFolders.repoPathAbsolute, CloudRunner.buildParameters.projectPath);
   }
 
-  public static get libraryFolderFull(): string {
-    return path.join(CloudRunnerFolders.projectPathFull, `Library`);
+  public static get libraryFolderAbsolute(): string {
+    return path.join(CloudRunnerFolders.projectPathAbsolute, `Library`);
   }
 
-  public static get projectBuildFolderFull(): string {
-    return path.join(CloudRunnerFolders.repoPathFull, CloudRunner.buildParameters.buildPath);
+  public static get projectBuildFolderAbsolute(): string {
+    return path.join(CloudRunnerFolders.repoPathAbsolute, CloudRunner.buildParameters.buildPath);
   }
 
-  public static get lfsDirectoryFull(): string {
-    return path.join(CloudRunnerFolders.repoPathFull, `.git`, `lfs`);
+  public static get lfsFolderAbsolute(): string {
+    return path.join(CloudRunnerFolders.repoPathAbsolute, `.git`, `lfs`);
   }
 
   public static get purgeRemoteCaching(): boolean {

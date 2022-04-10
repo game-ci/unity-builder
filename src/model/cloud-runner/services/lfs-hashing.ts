@@ -3,10 +3,10 @@ import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { assert } from 'console';
-import { CLI } from '../../cli/cli';
+import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 
-export class LFSHashing {
+export class LfsHashing {
   public static async createLFSHashFiles() {
     try {
       await CloudRunnerSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
@@ -15,10 +15,10 @@ export class LFSHashing {
       assert(fs.existsSync(`.lfs-assets-guid`));
       const lfsHashes = {
         lfsGuid: fs
-          .readFileSync(`${path.join(CloudRunnerFolders.repoPathFull, `.lfs-assets-guid`)}`, 'utf8')
+          .readFileSync(`${path.join(CloudRunnerFolders.repoPathAbsolute, `.lfs-assets-guid`)}`, 'utf8')
           .replace(/\n/g, ``),
         lfsGuidSum: fs
-          .readFileSync(`${path.join(CloudRunnerFolders.repoPathFull, `.lfs-assets-guid-sum`)}`, 'utf8')
+          .readFileSync(`${path.join(CloudRunnerFolders.repoPathAbsolute, `.lfs-assets-guid-sum`)}`, 'utf8')
           .replace('  .lfs-assets-guid', '')
           .replace(/\n/g, ``),
       };
@@ -39,7 +39,7 @@ export class LFSHashing {
 
   @CliFunction(`hash`, `hash all folder contents`)
   static async hash() {
-    const folder = CLI.options['cachePushFrom'];
-    LFSHashing.hashAllFiles(folder);
+    const folder = Cli.options['cachePushFrom'];
+    LfsHashing.hashAllFiles(folder);
   }
 }

@@ -4,32 +4,32 @@ import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
-import { CliFunction, CLIFunctionsRepository } from './cli-functions-repository';
-import { AWSCLICommands } from '../cloud-runner/cloud-runner-providers/aws/commands/aws-cli-commands';
+import { CliFunction, CliFunctionsRepository } from './cli-functions-repository';
+import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-commands';
 import { Caching } from '../cloud-runner/remote-client/caching';
-import { LFSHashing } from '../cloud-runner/services/lfs-hashing';
-import { SetupCloudRunnerRepository } from '../cloud-runner/remote-client/setup-cloud-runner-repository';
+import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
+import { RemoteClient } from '../cloud-runner/remote-client';
 
-export class CLI {
+export class Cli {
   public static options;
-  static get cliMode() {
-    return CLI.options !== undefined && CLI.options.mode !== undefined && CLI.options.mode !== '';
+  static get isCliMode() {
+    return Cli.options !== undefined && Cli.options.mode !== undefined && Cli.options.mode !== '';
   }
   public static query(key, alternativeKey) {
-    if (CLI.options && CLI.options[key] !== undefined) {
-      return CLI.options[key];
+    if (Cli.options && Cli.options[key] !== undefined) {
+      return Cli.options[key];
     }
-    if (CLI.options && alternativeKey && CLI.options[alternativeKey] !== undefined) {
-      return CLI.options[alternativeKey];
+    if (Cli.options && alternativeKey && Cli.options[alternativeKey] !== undefined) {
+      return Cli.options[alternativeKey];
     }
     return;
   }
 
   public static InitCliMode() {
-    CLIFunctionsRepository.PushCliFunctionSource(AWSCLICommands);
-    CLIFunctionsRepository.PushCliFunctionSource(Caching);
-    CLIFunctionsRepository.PushCliFunctionSource(LFSHashing);
-    CLIFunctionsRepository.PushCliFunctionSource(SetupCloudRunnerRepository);
+    CliFunctionsRepository.PushCliFunctionSource(AwsCliCommands);
+    CliFunctionsRepository.PushCliFunctionSource(Caching);
+    CliFunctionsRepository.PushCliFunctionSource(LfsHashing);
+    CliFunctionsRepository.PushCliFunctionSource(RemoteClient);
     const program = new Command();
     program.version('0.0.1');
     const properties = Object.getOwnPropertyNames(Input);
@@ -39,7 +39,7 @@ export class CLI {
     }
     program.option(
       '-m, --mode <mode>',
-      CLIFunctionsRepository.GetAllCliModes()
+      CliFunctionsRepository.GetAllCliModes()
         .map((x) => `${x.key} (${x.description})`)
         .join(` | `),
     );
@@ -48,19 +48,19 @@ export class CLI {
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.parse(process.argv);
-    CLI.options = program.opts();
-    return CLI.cliMode;
+    Cli.options = program.opts();
+    return Cli.isCliMode;
   }
 
   static async RunCli(): Promise<void> {
     Input.githubInputEnabled = false;
-    if (CLI.options['populateOverride'] === `true`) {
+    if (Cli.options['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
-    CLI.logInput();
-    const results = CLIFunctionsRepository.GetCliFunctions(CLI.options.mode);
+    Cli.logInput();
+    const results = CliFunctionsRepository.GetCliFunctions(Cli.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
-    CLI.options.versioning = 'None';
+    Cli.options.versioning = 'None';
     return await results.target[results.propertyKey]();
   }
 

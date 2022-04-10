@@ -1,7 +1,7 @@
 import * as k8s from '@kubernetes/client-node';
 import { BuildParameters, Output } from '../../..';
 import * as core from '@actions/core';
-import { CloudRunnerProviderInterface } from '../cloud-runner-provider-interface';
+import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
@@ -14,7 +14,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 import DependencyOverrideService from '../../services/depdency-override-service';
 
-class Kubernetes implements CloudRunnerProviderInterface {
+class Kubernetes implements ProviderInterface {
   private kubeConfig: k8s.KubeConfig;
   private kubeClient: k8s.CoreV1Api;
   private kubeClientBatch: k8s.BatchV1Api;
@@ -39,7 +39,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
-  public async setupSharedResources(
+  public async setup(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -174,7 +174,7 @@ class Kubernetes implements CloudRunnerProviderInterface {
     } catch {}
   }
 
-  async cleanupSharedResources(
+  async cleanup(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
