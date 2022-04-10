@@ -71,13 +71,13 @@ export class TaskParameterSerializer {
   }
 
   public static readDefaultSecrets(): CloudRunnerSecret[] {
-    const array = new Array();
-    TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
-    TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
-    TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+    let array = new Array();
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
     array.push(
       ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
-        .filter((x) => array.find((y) => y.ParameterKey !== x.name))
+        .filter((x) => array.every((y) => y.ParameterKey !== x.name))
         .map((x) => {
           return {
             ParameterKey: x.name,
