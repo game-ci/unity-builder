@@ -50,7 +50,7 @@ jobs:
       ###########################
       #          Setup          #
       ###########################
-      - uses: google-github-actions/setup-gcloud@master
+      - uses: google-github-actions/setup-gcloud@v0
         with:
           version: '288.0.0'
           service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
@@ -66,6 +66,7 @@ jobs:
           node-version: 12.x
       - run: yarn
       - run: yarn run cli --help
+      - run: yarn run test "caching"
       - name: Cloud Runner Test Suite
         run: yarn run test-i-k8s --detectOpenHandles --forceExit
         env:
@@ -75,6 +76,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
           unityVersion: ${{ matrix.unityVersion }}
+          cloudRunnerTests: true
+          versioning: None
 
       ###########################
       # Cloud Runner Build Test #
@@ -101,9 +104,9 @@ jobs:
                 aws configure set region $AWS_DEFAULT_REGION --profile default
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
-                ls /data/cache/$BRANCH
-                echo "/data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/$BUILD_FILE"
-                aws s3 cp /data/cache/$BRANCH/build-$BUILD_GUID.zip s3://game-ci-test-storage/$BRANCH/build-$BUILD_GUID.zip
+                ls /data/cache/$CACHE_KEY
+                echo "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/$BUILD_FILE"
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.zip
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -112,7 +115,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.BRANCH }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip
+          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.CACHE_KEY }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.zip
           ls
       ###########################
       #          Upload         #

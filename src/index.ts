@@ -1,10 +1,14 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
-import { CLI } from './model/cli/cli';
+import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 async function runMain() {
   try {
+    if (Cli.InitCliMode()) {
+      await Cli.RunCli();
+      return;
+    }
     Action.checkCompatibility();
     Cache.verify();
 
@@ -13,11 +17,7 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    if (
-      buildParameters.cloudRunnerCluster &&
-      buildParameters.cloudRunnerCluster !== '' &&
-      buildParameters.cloudRunnerCluster !== 'local'
-    ) {
+    if (buildParameters.cloudRunnerCluster !== 'local') {
       await CloudRunner.run(buildParameters, baseImage.toString());
     } else {
       core.info('Building locally');
@@ -35,9 +35,4 @@ async function runMain() {
     core.setFailed((error as Error).message);
   }
 }
-const options = CLI.SetupCli();
-if (CLI.isCliMode(options)) {
-  CLI.RunCli(options);
-} else {
-  runMain();
-}
+runMain();

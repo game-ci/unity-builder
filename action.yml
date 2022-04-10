@@ -98,6 +98,10 @@ inputs:
     required: false
     default: ''
     description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+  customJobHooks:
+    required: false
+    default: ''
+    description: 'Specify custom commands and trigger hooks (injects commands into jobs)'
   customJob:
     required: false
     default: ''
@@ -118,10 +122,22 @@ inputs:
     default: '750M'
     required: false
     description: 'Amount of memory to assign the remote build container'
-  githubToken:
+  cachePushOverrideCommand:
     default: ''
     required: false
-    description: 'GitHub token for cloning, only needed when kubeconfig is used.'
+    description: 'A command run every time a file is pushed to cache, formatted with input file path and remote cache path'
+  cachePullOverrideCommand:
+    default: ''
+    required: false
+    description: 'A command run every time before a file is being pulled from cache, formatted with request cache file and destination path'
+  readInputFromOverrideList:
+    default: ''
+    required: false
+    description: 'Comma separated list of input value names to read from "input override command"'
+  readInputOverrideCommand:
+    default: ''
+    required: false
+    description: 'Extend game ci by specifying a command to execute to pull input from external source e.g cloud provider secret managers'
   kubeConfig:
     default: ''
     required: false
@@ -130,10 +146,26 @@ inputs:
     default: ''
     required: false
     description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
+  kubeStorageClass:
+    default: ''
+    required: false
+    description: 'Kubernetes storage class to use for cloud runner jobs, leave empty to install rook cluster.'
   kubeVolumeSize:
     default: '5Gi'
     required: false
     description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
+  cacheKey:
+    default: ''
+    required: false
+    description: 'Cache key to indicate bucket for cache'
+  checkDependencyHealthOverride:
+    default: ''
+    required: false
+    description: 'Use to specify a way to check depdency services health to enable resilient self-starting jobs'
+  startDependenciesOverride:
+    default: ''
+    required: false
+    description: 'Use to specify a way to start depdency services health to enable resilient self-starting jobs'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

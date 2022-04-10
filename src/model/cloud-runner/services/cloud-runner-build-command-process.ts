@@ -1,25 +1,27 @@
-import { BuildParameters, Input } from '../..';
+import { BuildParameters } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
+import CloudRunner from '../cloud-runner';
 
 export class CloudRunnerBuildCommandProcessor {
   public static ProcessCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerBuildCommandProcessor.getHooks().filter((x) => x.step.includes(`all`));
+    const hooks = CloudRunnerBuildCommandProcessor.getHooks(buildParameters.customJobHooks).filter((x) =>
+      x.step.includes(`all`),
+    );
 
     return `echo "---"
       echo "start cloud runner init"
-      ${Input.cloudRunnerTests ? '' : '#'} printenv
-      echo "start cloud runner job"
+      ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'} printenv
+      echo "start of cloud runner job"
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${commands}
       ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      echo "end of cloud runner job
-      ---${buildParameters.logId}"
-    `;
+      echo "end of cloud runner job"
+      echo "---${buildParameters.logId}"`;
   }
 
-  public static getHooks(): Hook[] {
-    const experimentHooks = process.env.EXPERIMENTAL_HOOKS;
+  public static getHooks(customJobHooks): Hook[] {
+    const experimentHooks = customJobHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
       try {

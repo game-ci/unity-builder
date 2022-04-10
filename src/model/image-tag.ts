@@ -1,9 +1,11 @@
 import Platform from './platform';
+
 import BuildParameters from './build-parameters';
 
 class ImageTag {
   public repository: string;
   public name: string;
+  public cloudRunnerBuilderPlatform!: string | undefined;
   public editorVersion: string;
   public targetPlatform: any;
   public builderPlatform: string;
@@ -12,7 +14,7 @@ class ImageTag {
   public imagePlatformPrefix: string;
 
   constructor(imageProperties: Partial<BuildParameters>) {
-    const { editorVersion = '2019.2.11f1', targetPlatform, customImage } = imageProperties;
+    const { editorVersion = '2019.2.11f1', targetPlatform, customImage, cloudRunnerBuilderPlatform } = imageProperties;
 
     if (!ImageTag.versionPattern.test(editorVersion)) {
       throw new Error(`Invalid version "${editorVersion}".`);
@@ -27,8 +29,12 @@ class ImageTag {
     this.name = 'editor';
     this.editorVersion = editorVersion;
     this.targetPlatform = targetPlatform;
+    this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
+    const isCloudRunnerLocal = cloudRunnerBuilderPlatform === 'local' || cloudRunnerBuilderPlatform === undefined;
     this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(targetPlatform, editorVersion);
-    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(process.platform);
+    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
+      isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
+    );
     this.imageRollingVersion = 1; // will automatically roll to the latest non-breaking version.
   }
 
@@ -155,5 +161,4 @@ class ImageTag {
     return `${image}:${tag}`; // '0' here represents the docker repo version
   }
 }
-
 export default ImageTag;

@@ -1,10 +1,8 @@
-import { CloudRunnerState } from '../state/cloud-runner-state';
-import { CloudRunnerStepState } from '../state/cloud-runner-step-state';
+import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import { BuildAutomationWorkflow } from './build-automation-workflow';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
-import { SetupStep } from '../steps/setup-step';
+import CloudRunner from '../cloud-runner';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -17,23 +15,11 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
 
   private static async runJob(baseImage: any) {
     try {
-      if (CloudRunnerState.buildParams.customJob === `setup`) {
-        return await new SetupStep().run(
-          new CloudRunnerStepState(
-            baseImage,
-            TaskParameterSerializer.readBuildEnvironmentVariables(),
-            CloudRunnerState.defaultSecrets,
-          ),
-        );
-      } else if (CloudRunnerState.buildParams.customJob !== '') {
-        return await CustomWorkflow.runCustomJob(CloudRunnerState.buildParams.customJob);
+      if (CloudRunner.buildParameters.customJob !== '') {
+        return await CustomWorkflow.runCustomJob(CloudRunner.buildParameters.customJob);
       }
       return await new BuildAutomationWorkflow().run(
-        new CloudRunnerStepState(
-          baseImage,
-          TaskParameterSerializer.readBuildEnvironmentVariables(),
-          CloudRunnerState.defaultSecrets,
-        ),
+        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
     } catch (error) {
       throw error;

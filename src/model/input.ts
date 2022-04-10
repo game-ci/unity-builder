@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { GitRepoReader } from './input-readers/git-repo';
-import { GithubCliReader } from './input-readers/github-cli';
+import { Cli } from './cli/cli';
+import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
 import Platform from './platform';
 
 const core = require('@actions/core');
@@ -14,54 +14,62 @@ const core = require('@actions/core');
  * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
-  public static cliOptions;
   public static githubInputEnabled: boolean = true;
 
-  // also enabled debug logging for cloud runner
-  static get cloudRunnerTests(): boolean {
-    return Input.getInput(`cloudRunnerTests`) || Input.getInput(`CloudRunnerTests`) || false;
-  }
+  public static getInput(query) {
+    if (Input.githubInputEnabled) {
+      const coreInput = core.getInput(query);
+      if (coreInput && coreInput !== '') {
+        return coreInput;
+      }
+    }
+    const alternativeQuery = Input.ToEnvVarFormat(query);
 
-  private static getInput(query) {
-    const coreInput = core.getInput(query);
-    if (Input.githubInputEnabled && coreInput && coreInput !== '') {
-      return coreInput;
+    // query input sources
+    if (Cli.query(query, alternativeQuery)) {
+      return Cli.query(query, alternativeQuery);
     }
 
-    return Input.cliOptions !== undefined && Input.cliOptions[query] !== undefined
-      ? Input.cliOptions[query]
-      : process.env[query] !== undefined
-      ? process.env[query]
-      : process.env[Input.ToEnvVarFormat(query)]
-      ? process.env[Input.ToEnvVarFormat(query)]
-      : '';
+    if (CloudRunnerQueryOverride.query(query, alternativeQuery)) {
+      return CloudRunnerQueryOverride.query(query, alternativeQuery);
+    }
+
+    if (process.env[query] !== undefined) {
+      return process.env[query];
+    }
+
+    if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
+      return process.env[alternativeQuery];
+    }
+
+    return;
   }
 
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
 
-  static async githubRepo() {
-    return (
-      Input.getInput('GITHUB_REPOSITORY') ||
-      Input.getInput('GITHUB_REPO') ||
-      // todo - move this to some class specific for determining additional information
-      (await GitRepoReader.GetRemote()) ||
-      'game-ci/unity-builder'
-    );
+  static get githubRepo() {
+    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || undefined;
   }
-
-  static async branch() {
-    if (await GitRepoReader.GetBranch()) {
-      // todo - move this to some class specific for determining additional information
-      return await GitRepoReader.GetBranch();
-    } else if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '');
+  static get branch() {
+    if (Input.getInput(`GITHUB_REF`)) {
+      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch');
     } else {
-      return 'main';
+      return '';
     }
+  }
+  static get cloudRunnerBuilderPlatform() {
+    const input = Input.getInput('cloudRunnerBuilderPlatform');
+    if (input) {
+      return input;
+    }
+    if (Input.cloudRunnerCluster !== 'local') {
+      return 'linux';
+    }
+    return;
   }
 
   static get gitSha() {
@@ -69,9 +77,6 @@ class Input {
       return Input.getInput(`GITHUB_SHA`);
     } else if (Input.getInput(`GitSHA`)) {
       return Input.getInput(`GitSHA`);
-    } else if (GitRepoReader.GetSha()) {
-      // todo - move this to some class specific for determining additional information
-      return GitRepoReader.GetSha();
     }
   }
 
@@ -88,7 +93,7 @@ class Input {
   }
 
   static get customImage() {
-    return Input.getInput('customImage');
+    return Input.getInput('customImage') || '';
   }
 
   static get projectPath() {
@@ -165,8 +170,36 @@ class Input {
     return Input.getInput('sshAgent') || '';
   }
 
-  static async gitPrivateToken() {
-    return Input.getInput('gitPrivateToken') || (await Input.githubToken());
+  static get gitPrivateToken() {
+    return core.getInput('gitPrivateToken') || false;
+  }
+
+  static get customJob() {
+    return Input.getInput('customJob') || '';
+  }
+
+  static customJobHooks() {
+    return Input.getInput('customJobHooks') || '';
+  }
+
+  static cachePushOverrideCommand() {
+    return Input.getInput('cachePushOverrideCommand') || '';
+  }
+
+  static cachePullOverrideCommand() {
+    return Input.getInput('cachePullOverrideCommand') || '';
+  }
+
+  static readInputFromOverrideList() {
+    return Input.getInput('readInputFromOverrideList') || '';
+  }
+
+  static readInputOverrideCommand() {
+    return Input.getInput('readInputOverrideCommand') || '';
+  }
+
+  static get cloudRunnerBranch() {
+    return Input.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
   }
 
   static get chownFilesTo() {
@@ -187,15 +220,14 @@ class Input {
     return Input.getInput('preBuildSteps') || '';
   }
 
-  static get customJob() {
-    return Input.getInput('customJob') || '';
-  }
-
   static get awsBaseStackName() {
     return Input.getInput('awsBaseStackName') || 'game-ci';
   }
 
   static get cloudRunnerCluster() {
+    if (Cli.isCliMode) {
+      return Input.getInput('cloudRunnerCluster') || 'aws';
+    }
     return Input.getInput('cloudRunnerCluster') || 'local';
   }
 
@@ -205,11 +237,6 @@ class Input {
 
   static get cloudRunnerMemory() {
     return Input.getInput('cloudRunnerMemory') || '750M';
-  }
-
-  static async githubToken() {
-    // Todo - move GitHubCLI out of the simple input class. It is in fact not input from the user.
-    return Input.getInput('githubToken') || (await GithubCliReader.GetGitHubAuthToken()) || '';
   }
 
   static get kubeConfig() {
@@ -224,7 +251,30 @@ class Input {
     return Input.getInput('kubeVolumeSize') || '5Gi';
   }
 
+  static get kubeStorageClass(): string {
+    return Input.getInput('kubeStorageClass') || '';
+  }
+
+  static get checkDependencyHealthOverride(): string {
+    return Input.getInput('checkDependencyHealthOverride') || '';
+  }
+
+  static get startDependenciesOverride(): string {
+    return Input.getInput('startDependenciesOverride') || '';
+  }
+
+  static get cacheKey(): string {
+    return Input.getInput('cacheKey') || Input.branch;
+  }
+
+  static get cloudRunnerTests(): boolean {
+    return Input.getInput(`cloudRunnerTests`) || false;
+  }
+
   public static ToEnvVarFormat(input: string) {
+    if (input.toUpperCase() === input) {
+      return input;
+    }
     return input
       .replace(/([A-Z])/g, ' $1')
       .trim()

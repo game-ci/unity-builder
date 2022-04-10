@@ -1,24 +1,24 @@
-import { Input } from '../..';
+import { CloudRunner, Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerState } from '../state/cloud-runner-state';
 import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
+import CloudRunnerSecret from './cloud-runner-secret';
+import CloudRunnerQueryOverride from './cloud-runner-query-override';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
-    TaskParameterSerializer.setupDefaultSecrets();
     return [
       {
         name: 'ContainerMemory',
-        value: CloudRunnerState.buildParams.cloudRunnerMemory,
+        value: CloudRunner.buildParameters.cloudRunnerMemory,
       },
       {
         name: 'ContainerCpu',
-        value: CloudRunnerState.buildParams.cloudRunnerCpu,
+        value: CloudRunner.buildParameters.cloudRunnerCpu,
       },
       {
         name: 'BUILD_TARGET',
-        value: CloudRunnerState.buildParams.targetPlatform,
+        value: CloudRunner.buildParameters.targetPlatform,
       },
       ...TaskParameterSerializer.serializeBuildParamsAndInput,
     ];
@@ -27,7 +27,7 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks();
+    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks);
     const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
     if (secrets.length > 0) {
       // eslint-disable-next-line unicorn/no-array-reduce
@@ -46,14 +46,14 @@ export class TaskParameterSerializer {
   }
 
   private static readBuildParameters(array: any[]) {
-    const keys = Object.keys(CloudRunnerState.buildParams);
+    const keys = Object.keys(CloudRunner.buildParameters);
     for (const element of keys) {
       array.push({
         name: element,
-        value: CloudRunnerState.buildParams[element],
+        value: CloudRunner.buildParameters[element],
       });
     }
-    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunnerState.buildParams) });
+    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunner.buildParameters) });
     return array;
   }
 
@@ -70,16 +70,40 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  private static setupDefaultSecrets() {
-    if (CloudRunnerState.defaultSecrets === undefined)
-      CloudRunnerState.defaultSecrets = ImageEnvironmentFactory.getEnvironmentVariables(
-        CloudRunnerState.buildParams,
-      ).map((x) => {
-        return {
-          ParameterKey: x.name,
-          EnvironmentVariable: x.name,
-          ParameterValue: x.value,
-        };
+  public static readDefaultSecrets(): CloudRunnerSecret[] {
+    let array = new Array();
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+    array.push(
+      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
+        .filter((x) => array.every((y) => y.ParameterKey !== x.name))
+        .map((x) => {
+          return {
+            ParameterKey: x.name,
+            EnvironmentVariable: x.name,
+            ParameterValue: x.value,
+          };
+        }),
+    );
+    return array;
+  }
+  private static getValue(key) {
+    return CloudRunnerQueryOverride.queryOverrides !== undefined &&
+      CloudRunnerQueryOverride.queryOverrides[key] !== undefined
+      ? CloudRunnerQueryOverride.queryOverrides[key]
+      : process.env[key];
+  }
+  s;
+  private static tryAddInput(array, key): CloudRunnerSecret[] {
+    const value = TaskParameterSerializer.getValue(key);
+    if (value !== undefined && value !== '') {
+      array.push({
+        ParameterKey: key,
+        EnvironmentVariable: key,
+        ParameterValue: value,
       });
+    }
+    return array;
   }
 }
