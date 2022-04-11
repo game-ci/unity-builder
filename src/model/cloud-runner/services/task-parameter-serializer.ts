@@ -40,8 +40,10 @@ export class TaskParameterSerializer {
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;
+
       return x;
     });
+
     return array;
   }
 
@@ -54,6 +56,7 @@ export class TaskParameterSerializer {
       });
     }
     array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunner.buildParameters) });
+
     return array;
   }
 
@@ -67,6 +70,7 @@ export class TaskParameterSerializer {
         });
       }
     }
+
     return array;
   }
 
@@ -86,6 +90,7 @@ export class TaskParameterSerializer {
           };
         }),
     );
+
     return array;
   }
   private static getValue(key) {
@@ -104,6 +109,7 @@ export class TaskParameterSerializer {
         ParameterValue: value,
       });
     }
+
     return array;
   }
 }

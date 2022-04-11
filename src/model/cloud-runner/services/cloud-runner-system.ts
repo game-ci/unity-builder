@@ -8,6 +8,7 @@ export class CloudRunnerSystem {
         RemoteClientLogger.log(element);
       }
     }
+
     return await new Promise<string>((promise, throwError) => {
       let output = '';
       const child = exec(command, (error, stdout, stderr) => {

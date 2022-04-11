@@ -16,6 +16,7 @@ class KubernetesStorage {
     if (buildParameters.kubeVolume) {
       CloudRunnerLogger.log(buildParameters.kubeVolume);
       pvcName = buildParameters.kubeVolume;
+
       return;
     }
     const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
@@ -28,6 +29,7 @@ class KubernetesStorage {
       if (!buildParameters.isCliMode) {
         core.setOutput('volume', pvcName);
       }
+
       return;
     }
     CloudRunnerLogger.log(`Creating PVC ${pvcName} (does not exist)`);
@@ -97,6 +99,7 @@ class KubernetesStorage {
       YAML.parse(process.env.K8s_STORAGE_PVC_SPEC);
     }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
+
     return result;
   }
 

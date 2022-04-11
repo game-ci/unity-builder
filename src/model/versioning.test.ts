@@ -110,6 +110,7 @@ describe('Versioning', () => {
 
       expect(logDiffSpy).toHaveBeenCalledTimes(1);
       expect(gitSpy).toHaveBeenCalledTimes(1);
+
       // Todo - this no longer works since typescript
       // const issuedCommand = System.run.mock.calls[0][2].input.toString();
       // expect(issuedCommand.indexOf('diff')).toBeGreaterThan(-1);
@@ -137,6 +138,7 @@ describe('Versioning', () => {
 
     test.each(['v0', 'v0.1', 'v0.1.2', 'v0.1-2', 'v0.1-2-g'])('does not like %s', (description) => {
       expect(Versioning.descriptionRegex1.test(description)).toBeFalsy();
+
       // Also, never expect without the v to work for any of these cases.
       expect(Versioning.descriptionRegex1.test(description?.slice(1))).toBeFalsy();
     });

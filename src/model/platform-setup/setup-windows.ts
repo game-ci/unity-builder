@@ -13,8 +13,9 @@ class SetupWindows {
     if (!fs.existsSync('c:/regkeys')) {
       fs.mkdirSync('c:/regkeys');
     }
+
+    // These all need the Windows 10 SDK
     switch (targetPlatform) {
-      //These all need the Windows 10 SDK
       case 'StandaloneWindows':
       case 'StandaloneWindows64':
       case 'WSAPlayer':

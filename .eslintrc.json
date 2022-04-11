@@ -17,9 +17,31 @@
     "jest/globals": true
   },
   "rules": {
+    // Error out for code formatting errors
     "prettier/prettier": "error",
-    "import/no-extraneous-dependencies": 0,
+    // Namespaces or sometimes needed
     "import/no-namespace": "off",
+    // Properly format comments
+    "spaced-comment": ["error", "always"],
+    "lines-around-comment": [
+      "error",
+      {
+        "beforeBlockComment": true,
+        "beforeLineComment": true,
+        "allowBlockStart": true,
+        "allowObjectStart": true,
+        "allowArrayStart": true,
+        "allowClassStart": true,
+        "ignorePattern": "pragma|ts-ignore"
+      }
+    ],
+    // Mandatory spacing
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "*", "next": "return" },
+      { "blankLine": "always", "prev": "directive", "next": "*" },
+      { "blankLine": "any", "prev": "directive", "next": "directive" }
+    ],
     // Allow forOfStatements
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     // Continue is viable in forOf loops in generators

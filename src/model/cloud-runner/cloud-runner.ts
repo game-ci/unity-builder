@@ -80,6 +80,7 @@ class CloudRunner {
       );
       CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+
       return output;
     } catch (error) {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();

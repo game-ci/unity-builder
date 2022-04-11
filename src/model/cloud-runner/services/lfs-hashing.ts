@@ -22,6 +22,7 @@ export class LfsHashing {
           .replace('  .lfs-assets-guid', '')
           .replace(/\n/g, ``),
       };
+
       return lfsHashes;
     } catch (error) {
       throw error;
@@ -34,6 +35,7 @@ export class LfsHashing {
       .replace(/\n/g, '')
       .split(` `)[0];
     process.chdir(startPath);
+
     return result;
   }
 

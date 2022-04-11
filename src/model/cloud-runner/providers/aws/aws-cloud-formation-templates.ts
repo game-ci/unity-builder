@@ -29,6 +29,7 @@ export class AWSCloudFormationTemplates {
   public static insertAtTemplate(template, insertionKey, insertion) {
     const index = template.search(insertionKey) + insertionKey.length + '\n'.length;
     template = [template.slice(0, index), insertion, template.slice(index)].join('');
+
     return template;
   }
 

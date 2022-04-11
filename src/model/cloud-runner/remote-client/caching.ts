@@ -65,6 +65,7 @@ export class Caching {
           [path.resolve(sourceFolder, '..'), cacheFolder, cacheArtifactName],
           1,
         );
+
         return format.replace(/{(\d+)}/g, function (match, number) {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
@@ -116,6 +117,7 @@ export class Caching {
           [path.resolve(destinationFolder, '..'), cacheFolder, cacheArtifactName],
           1,
         );
+
         return format.replace(/{(\d+)}/g, function (match, number) {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });

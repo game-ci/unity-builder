@@ -42,6 +42,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
   ): Promise<string> {
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
+
     return CloudRunnerSystem.Run(commands, false, false);
   }
 }

@@ -73,6 +73,7 @@ class KubernetesTaskRunner {
       throw error;
     }
     CloudRunnerLogger.log('end of log stream');
+
     return output;
   }
 
@@ -90,6 +91,7 @@ class KubernetesTaskRunner {
           }`,
         );
         if (success || phase !== 'Pending') return true;
+
         return false;
       },
       {
@@ -97,6 +99,7 @@ class KubernetesTaskRunner {
         intervalBetweenAttempts: 15000,
       },
     );
+
     return success;
   }
 }

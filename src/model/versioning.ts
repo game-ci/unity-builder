@@ -130,6 +130,7 @@ export default class Versioning {
     if (!(await this.hasAnyVersionTags())) {
       const version = `0.0.${await this.getTotalNumberOfCommits()}`;
       core.info(`Generated version ${version} (no version tags found).`);
+
       return version;
     }
 
@@ -148,6 +149,7 @@ export default class Versioning {
 
     const version = `0.0.${await this.getTotalNumberOfCommits()}`;
     core.info(`Generated version ${version} (semantic version couldn't be determined).`);
+
     return version;
   }
 
@@ -203,6 +205,7 @@ export default class Versioning {
           core.warning(
             `Failed to parse git describe output or version can not be determined through: "${description}".`,
           );
+
           return false;
         }
       }

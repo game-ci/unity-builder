@@ -25,7 +25,7 @@ class Input {
     }
     const alternativeQuery = Input.ToEnvVarFormat(query);
 
-    // query input sources
+    // Query input sources
     if (Cli.query(query, alternativeQuery)) {
       return Cli.query(query, alternativeQuery);
     }
@@ -69,6 +69,7 @@ class Input {
     if (Input.cloudRunnerCluster !== 'local') {
       return 'linux';
     }
+
     return;
   }
 
@@ -117,7 +118,7 @@ class Input {
   }
 
   static get buildMethod() {
-    return Input.getInput('buildMethod') || ''; // processed in docker file
+    return Input.getInput('buildMethod') || ''; // Processed in docker file
   }
 
   static get customParameters() {
@@ -228,6 +229,7 @@ class Input {
     if (Cli.isCliMode) {
       return Input.getInput('cloudRunnerCluster') || 'aws';
     }
+
     return Input.getInput('cloudRunnerCluster') || 'local';
   }
 
@@ -275,6 +277,7 @@ class Input {
     if (input.toUpperCase() === input) {
       return input;
     }
+
     return input
       .replace(/([A-Z])/g, ' $1')
       .trim()

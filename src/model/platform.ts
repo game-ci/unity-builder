@@ -17,12 +17,14 @@ class Platform {
       XboxOne: 'XboxOne',
       tvOS: 'tvOS',
       Switch: 'Switch',
+
       // Unsupported
       Lumin: 'Lumin',
       BJM: 'BJM',
       Stadia: 'Stadia',
       Facebook: 'Facebook',
       NoTarget: 'NoTarget',
+
       // Test specific
       Test: 'Test',
     };
