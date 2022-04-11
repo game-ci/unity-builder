@@ -42,6 +42,8 @@
       { "blankLine": "always", "prev": "directive", "next": "*" },
       { "blankLine": "any", "prev": "directive", "next": "directive" }
     ],
+    // Enforce camelCase
+    "camelcase": "error",
     // Allow forOfStatements
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     // Continue is viable in forOf loops in generators
