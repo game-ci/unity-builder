@@ -26,19 +26,19 @@ describe('Cloud Runner Caching', () => {
       const buildParameter = await BuildParameters.create();
       CloudRunner.buildParameters = buildParameter;
 
-      // create test folder
+      // Create test folder
       const testFolder = path.resolve(__dirname, Cli.options.cacheKey);
       fs.mkdirSync(testFolder);
 
-      // crate cache folder
+      // Create cache folder
       const cacheFolder = path.resolve(__dirname, `cache-${Cli.options.cacheKey}`);
       fs.mkdirSync(cacheFolder);
 
-      // add test has file to test folders
+      // Add test file to test folders
       fs.writeFileSync(path.resolve(testFolder, 'test.txt'), Cli.options.cacheKey);
       await Caching.PushToCache(cacheFolder, testFolder, `${Cli.options.cacheKey}`);
 
-      // delete test folder
+      // Delete test folder
       fs.rmdirSync(testFolder, { recursive: true });
       await Caching.PullFromCache(
         cacheFolder.replace(/\\/g, `/`),
@@ -49,7 +49,7 @@ describe('Cloud Runner Caching', () => {
       await CloudRunnerSystem.Run(`tree ${testFolder}`);
       await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
 
-      // compare validity to original hash
+      // Compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
         Cli.options.cacheKey,
       );

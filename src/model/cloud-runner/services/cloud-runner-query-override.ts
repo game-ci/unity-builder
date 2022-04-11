@@ -5,6 +5,7 @@ const formatFunction = (value, arguments_) => {
   for (const element of arguments_) {
     value = value.replace(`{${element.key}}`, element.value);
   }
+
   return value;
 };
 
@@ -22,6 +23,7 @@ class CloudRunnerQueryOverride {
     ) {
       return CloudRunnerQueryOverride.queryOverrides[alternativeKey];
     }
+
     return;
   }
 
@@ -31,6 +33,7 @@ class CloudRunnerQueryOverride {
         const doesInclude =
           Input.readInputFromOverrideList().split(',').includes(query) ||
           Input.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
+
         return doesInclude ? true : false;
       } else {
         return true;

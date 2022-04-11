@@ -69,6 +69,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       (x) => x.step.includes(`build`),
     );
     const builderPath = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`).replace(/\\/g, `/`);
+
     return `apt-get update > /dev/null
       apt-get install -y zip tree npm git-lfs jq unzip git > /dev/null
       npm install -g n > /dev/null
@@ -98,6 +99,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const linuxCacheFolder = CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`);
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
+
     return `echo "game ci cloud runner init"
     mkdir -p ${`${CloudRunnerFolders.projectBuildFolderAbsolute}/build`.replace(/\\/g, `/`)}
     cd ${CloudRunnerFolders.projectPathAbsolute}

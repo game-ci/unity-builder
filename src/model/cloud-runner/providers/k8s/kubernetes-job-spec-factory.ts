@@ -117,6 +117,7 @@ class KubernetesJobSpecFactory {
                   const environmentVariable = new V1EnvVar();
                   environmentVariable.name = x.name;
                   environmentVariable.value = x.value;
+
                   return environmentVariable;
                 }),
                 ...secrets.map((x) => {
@@ -127,6 +128,7 @@ class KubernetesJobSpecFactory {
                   const environmentVariable = new V1EnvVar();
                   environmentVariable.name = x.EnvironmentVariable;
                   environmentVariable.valueFrom = secret;
+
                   return environmentVariable;
                 }),
               ],
@@ -155,6 +157,7 @@ class KubernetesJobSpecFactory {
         },
       },
     };
+
     return job;
   }
 }

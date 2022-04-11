@@ -41,6 +41,7 @@ class TestCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(image);
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
+
     return await new Promise((result) => {
       result(commands);
     });

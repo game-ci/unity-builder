@@ -42,6 +42,7 @@ class LocalCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(image);
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
+
     return await CloudRunnerSystem.Run(commands);
   }
 }

@@ -77,7 +77,7 @@ class BuildParameters {
     // ---
     let unitySerial = '';
     if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && Cli.options === undefined) {
-      //No serial was present so it is a personal license that we need to convert
+      // No serial was present, so it is a personal license that we need to convert
       if (!process.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
                           is a personal license, make sure to follow the activation
@@ -167,6 +167,7 @@ class BuildParameters {
       throw new Error(`License File was corrupted, unable to locate serial`);
     }
     const endIndex = license.indexOf(endKey, startIndex);
+
     // Slice off the first 4 characters as they are garbage values
     return Buffer.from(license.slice(startIndex, endIndex), 'base64').toString('binary').slice(4);
   }

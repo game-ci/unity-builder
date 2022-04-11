@@ -30,6 +30,7 @@ export class CloudRunnerBuildCommandProcessor {
         throw error;
       }
     }
+
     return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
   }
 }

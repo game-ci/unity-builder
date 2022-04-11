@@ -4,7 +4,7 @@ import { CloudRunner } from '../..';
 export class CloudRunnerFolders {
   public static readonly repositoryFolder = 'repo';
 
-  // only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
+  // Only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 
   public static get uniqueCloudRunnerJobFolderAbsolute(): string {
     return path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);

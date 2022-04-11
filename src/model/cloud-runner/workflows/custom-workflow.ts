@@ -25,6 +25,7 @@ export class CustomWorkflow {
             EnvironmentVariable: Input.ToEnvVarFormat(x.name),
             ParameterValue: x.value,
           };
+
           return secret;
         });
         output += await CloudRunner.Provider.runTask(
@@ -37,6 +38,7 @@ export class CustomWorkflow {
           [...CloudRunner.defaultSecrets, ...stepSecrets],
         );
       }
+
       return output;
     } catch (error) {
       throw error;

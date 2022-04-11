@@ -4,6 +4,7 @@ import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import YAML from 'yaml';
+import { IncomingMessage } from 'http';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -15,6 +16,7 @@ class KubernetesStorage {
     if (buildParameters.kubeVolume) {
       CloudRunnerLogger.log(buildParameters.kubeVolume);
       pvcName = buildParameters.kubeVolume;
+
       return;
     }
     const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
@@ -27,6 +29,7 @@ class KubernetesStorage {
       if (!buildParameters.isCliMode) {
         core.setOutput('volume', pvcName);
       }
+
       return;
     }
     CloudRunnerLogger.log(`Creating PVC ${pvcName} (does not exist)`);
@@ -96,11 +99,12 @@ class KubernetesStorage {
       YAML.parse(process.env.K8s_STORAGE_PVC_SPEC);
     }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
+
     return result;
   }
 
   private static async handleResult(
-    result: { response: import('http').IncomingMessage; body: k8s.V1PersistentVolumeClaim },
+    result: { response: IncomingMessage; body: k8s.V1PersistentVolumeClaim },
     kubeClient: k8s.CoreV1Api,
     namespace: string,
     pvcName: string,

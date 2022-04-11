@@ -21,6 +21,7 @@ class ImageEnvironmentFactory {
 
       string += `--env ${p.name}="${p.value}" `;
     }
+
     return string;
   }
   public static getEnvironmentVariables(parameters: BuildParameters) {
@@ -65,6 +66,7 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
     if (parameters.sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
+
     return environmentVariables;
   }
 }

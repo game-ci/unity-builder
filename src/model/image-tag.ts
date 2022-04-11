@@ -35,7 +35,7 @@ class ImageTag {
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
       isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
     );
-    this.imageRollingVersion = 1; // will automatically roll to the latest non-breaking version.
+    this.imageRollingVersion = 1; // Will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern() {
@@ -75,6 +75,7 @@ class ImageTag {
       ImageTag.targetPlatformSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
+
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     switch (platform) {
       case Platform.types.StandaloneOSX:
@@ -91,12 +92,14 @@ class ImageTag {
                              If you are trying to build for windows-mono, please use a Linux based OS.`);
           }
         }
+
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
         if (major >= 2020 || (major === 2019 && minor >= 3)) {
           return linuxIl2cpp;
         }
+
         return linux;
       }
       case Platform.types.iOS:
@@ -109,6 +112,7 @@ class ImageTag {
         if (process.platform !== 'win32') {
           throw new Error(`WSAPlayer can only be built on a windows base OS`);
         }
+
         return wsaPlayer;
       case Platform.types.PS4:
         return windows;
@@ -118,9 +122,11 @@ class ImageTag {
         if (process.platform !== 'win32') {
           throw new Error(`tvOS can only be built on a windows base OS`);
         }
+
         return tvos;
       case Platform.types.Switch:
         return windows;
+
       // Unsupported
       case Platform.types.Lumin:
         return windows;

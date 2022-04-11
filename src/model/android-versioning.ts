@@ -6,12 +6,14 @@ export default class AndroidVersioning {
     if (!inputVersionCode) {
       return AndroidVersioning.versionToVersionCode(version);
     }
+
     return inputVersionCode;
   }
 
   static versionToVersionCode(version) {
     if (version === 'none') {
       core.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
+
       return 0;
     }
 
@@ -19,6 +21,7 @@ export default class AndroidVersioning {
 
     if (!parsedVersion) {
       core.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
+
       return 1;
     }
 
@@ -32,11 +35,13 @@ export default class AndroidVersioning {
       );
     }
     core.info(`Using android versionCode ${versionCode}`);
+
     return versionCode;
   }
 
   static determineSdkManagerParameters(targetSdkVersion) {
     const parsedVersion = Number.parseInt(targetSdkVersion.slice(-2), 10);
+
     return Number.isNaN(parsedVersion) ? '' : `platforms;android-${parsedVersion}`;
   }
 }

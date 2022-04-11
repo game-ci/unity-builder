@@ -8,12 +8,14 @@ export class GithubCliReader {
       if (authStatus.includes('You are not logged') || authStatus === '') {
         return '';
       }
+
       return (await CloudRunnerSystem.Run(`gh auth status -t`, false, true))
         .split(`Token: `)[1]
         .replace(/ /g, '')
         .replace(/\n/g, '');
     } catch (error: any) {
       core.info(error || 'Failed to get github auth token from gh cli');
+
       return '';
     }
   }

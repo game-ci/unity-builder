@@ -10,6 +10,7 @@ export default class UnityVersioning {
     if (unityVersion === 'auto') {
       return UnityVersioning.read(projectPath);
     }
+
     return unityVersion;
   }
 
@@ -18,6 +19,7 @@ export default class UnityVersioning {
     if (!fs.existsSync(filePath)) {
       throw new Error(`Project settings file not found at "${filePath}". Have you correctly set the projectPath?`);
     }
+
     return UnityVersioning.parse(fs.readFileSync(filePath, 'utf8'));
   }
 
@@ -26,6 +28,7 @@ export default class UnityVersioning {
     if (!matches || matches.length === 0) {
       throw new Error(`Failed to parse version from "${projectVersionTxt}".`);
     }
+
     return matches[0];
   }
 }

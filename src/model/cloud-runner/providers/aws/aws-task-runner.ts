@@ -64,6 +64,7 @@ class AWSTaskRunner {
     const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
+
       return output;
     } else {
       if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
@@ -135,6 +136,7 @@ class AWSTaskRunner {
         output,
       ));
     }
+
     return output;
   }
 
@@ -152,6 +154,7 @@ class AWSTaskRunner {
       .promise();
     iterator = records.NextShardIterator || '';
     ({ shouldReadLogs, output } = AWSTaskRunner.logRecords(records, iterator, taskDef, shouldReadLogs, output));
+
     return { iterator, shouldReadLogs, output };
   }
 
@@ -170,6 +173,7 @@ class AWSTaskRunner {
       }
       CloudRunnerLogger.log(`## Status of job: ${taskData.lastStatus}`);
     }
+
     return { timestamp, shouldReadLogs };
   }
 
@@ -208,6 +212,7 @@ class AWSTaskRunner {
         }
       }
     }
+
     return { shouldReadLogs, output };
   }
 
