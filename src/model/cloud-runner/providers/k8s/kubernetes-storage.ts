@@ -4,6 +4,7 @@ import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import YAML from 'yaml';
+import { IncomingMessage } from 'http';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -100,7 +101,7 @@ class KubernetesStorage {
   }
 
   private static async handleResult(
-    result: { response: import('http').IncomingMessage; body: k8s.V1PersistentVolumeClaim },
+    result: { response: IncomingMessage; body: k8s.V1PersistentVolumeClaim },
     kubeClient: k8s.CoreV1Api,
     namespace: string,
     pvcName: string,

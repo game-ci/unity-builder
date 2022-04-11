@@ -1,10 +1,15 @@
 {
   "plugins": ["jest", "@typescript-eslint", "prettier", "unicorn"],
-  "extends": ["plugin:unicorn/recommended", "plugin:github/recommended", "prettier"],
+  "extends": ["plugin:unicorn/recommended", "plugin:github/recommended", "plugin:prettier/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 9,
-    "sourceType": "module"
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "extraFileExtensions": [".mjs"],
+    "ecmaFeatures": {
+      "impliedStrict": true
+    },
+    "project": "./tsconfig.json"
   },
   "env": {
     "node": true,
@@ -15,6 +20,17 @@
     "prettier/prettier": "error",
     "import/no-extraneous-dependencies": 0,
     "import/no-namespace": "off",
-    "no-undef": "off" // TODO: REMOVE THIS LINE WHEN UPDATING ESLINT RULES
+    // Allow forOfStatements
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
+    // Continue is viable in forOf loops in generators
+    "no-continue": "off",
+    // From experience, named exports are almost always desired. I got tired of this rule
+    "import/prefer-default-export": "off",
+    // Unused vars are useful to keep method signatures consistent and documented
+    "@typescript-eslint/no-unused-vars": "off",
+    // For this project only use kebab-case
+    "unicorn/filename-case": ["error", { "cases": { "kebabCase": true } }],
+    // Allow Array.from(set) mitigate TS2569 which would require '--downlevelIteration'
+    "unicorn/prefer-spread": "off"
   }
 }
