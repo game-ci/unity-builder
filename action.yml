@@ -1,6 +1,58 @@
 name: 'Unity - Builder'
 author: Webber Takken <webber@takken.io>
 description: 'Build Unity projects for different platforms.'
+runs:
+  using: 'composite'
+  steps:
+    - run: echo "Using GameCI CLI to build project"
+      shell: bash
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+    - run: |
+        deno run --allow-run .\src\deno-1\gameci.ts build \
+        --targetPlatform="${{ inputs.targetPlatform }}" \
+        --unityVersion="${{ inputs.unityVersion }}" \
+        --customImage="${{ inputs.customImage }}" \
+        --projectPath="${{ inputs.projectPath }}" \
+        --buildName="${{ inputs.buildName }}" \
+        --buildsPath="${{ inputs.buildsPath }}" \
+        --buildMethod="${{ inputs.buildMethod }}" \
+        --customParameters="${{ inputs.customParameters }}" \
+        --versioning="${{ inputs.versioning }}" \
+        --version="${{ inputs.version }}" \
+        --androidVersionCode="${{ inputs.androidVersionCode }}" \
+        --androidAppBundle="${{ inputs.androidAppBundle }}" \
+        --androidKeystoreName="${{ inputs.androidKeystoreName }}" \
+        --androidKeystoreBase64="${{ inputs.androidKeystoreBase64 }}" \
+        --androidKeystorePass="${{ inputs.androidKeystorePass }}" \
+        --androidKeyaliasName="${{ inputs.androidKeyaliasName }}" \
+        --androidKeyaliasPass="${{ inputs.androidKeyaliasPass }}" \
+        --androidTargetSdkVersion="${{ inputs.androidTargetSdkVersion }}" \
+        --sshAgent="${{ inputs.sshAgent }}" \
+        --gitPrivateToken="${{ inputs.gitPrivateToken }}" \
+        --chownFilesTo="${{ inputs.chownFilesTo }}" \
+        --allowDirtyBuild="${{ inputs.allowDirtyBuild }}" \
+        --postBuildSteps="${{ inputs.postBuildSteps }}" \
+        --preBuildSteps="${{ inputs.preBuildSteps }}" \
+        --customJobHooks="${{ inputs.customJobHooks }}" \
+        --customJob="${{ inputs.customJob }}" \
+        --awsBaseStackName="${{ inputs.awsBaseStackName }}" \
+        --cloudRunnerCluster="${{ inputs.cloudRunnerCluster }}" \
+        --cloudRunnerCpu="${{ inputs.cloudRunnerCpu }}" \
+        --cloudRunnerMemory="${{ inputs.cloudRunnerMemory }}" \
+        --cachePushOverrideCommand="${{ inputs.cachePushOverrideCommand }}" \
+        --cachePullOverrideCommand="${{ inputs.cachePullOverrideCommand }}" \
+        --readInputFromOverrideList="${{ inputs.readInputFromOverrideList }}" \
+        --readInputOverrideCommand="${{ inputs.readInputOverrideCommand }}" \
+        --kubeConfig="${{ inputs.kubeConfig }}" \
+        --kubeVolume="${{ inputs.kubeVolume }}" \
+        --kubeStorageClass="${{ inputs.kubeStorageClass }}" \
+        --kubeVolumeSize="${{ inputs.kubeVolumeSize }}" \
+        --cacheKey="${{ inputs.cacheKey }}" \
+        --checkDependencyHealthOverride="${{ inputs.checkDependencyHealthOverride }}" \
+        --startDependenciesOverride="${{ inputs.startDependenciesOverride }}"
+      shell: bash
 inputs:
   targetPlatform:
     required: true
@@ -174,6 +226,3 @@ outputs:
 branding:
   icon: 'box'
   color: 'gray-dark'
-runs:
-  using: 'node12'
-  main: 'dist/index.js'
