@@ -10,7 +10,7 @@ runs:
       with:
         deno-version: v1.x
     - run: |
-        deno run --allow-run .\src\deno-1\gameci.ts build \
+        deno run --allow-run .\cli\index.ts build \
         --targetPlatform="${{ inputs.targetPlatform }}" \
         --unityVersion="${{ inputs.unityVersion }}" \
         --customImage="${{ inputs.customImage }}" \
