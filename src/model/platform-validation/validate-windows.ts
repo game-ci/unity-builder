@@ -32,7 +32,7 @@ class ValidateWindows {
   }
 
   private static checkForWin10SDK() {
-    //Check for Windows 10 SDK on runner
+    // Check for Windows 10 SDK on runner
     const windows10SDKPathExists = fs.existsSync('C:/Program Files (x86)/Windows Kits');
     if (!windows10SDKPathExists) {
       throw new Error(`Windows 10 SDK not found in default location. Make sure
@@ -42,7 +42,7 @@ class ValidateWindows {
   }
 
   private static checkForVisualStudio() {
-    //Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
+    // Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
     const visualStudioInstallPathExists = fs.existsSync('C:/Program Files (x86)/Microsoft Visual Studio');
     const visualStudioDataPathExists = fs.existsSync('C:/ProgramData/Microsoft/VisualStudio');
 

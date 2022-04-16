@@ -77,7 +77,7 @@ class Kubernetes implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     try {
-      // setup
+      // Setup
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${buildGuid}`;
       this.jobName = `unity-builder-job-${buildGuid}`;
@@ -98,7 +98,7 @@ class Kubernetes implements ProviderInterface {
         k8s,
       );
 
-      //run
+      // Run
       const jobResult = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
       CloudRunnerLogger.log(`Creating build job ${JSON.stringify(jobResult.body.metadata, undefined, 4)}`);
 
@@ -131,6 +131,7 @@ class Kubernetes implements ProviderInterface {
         }
       }
       await this.cleanupTaskResources();
+
       return output;
     } catch (error) {
       CloudRunnerLogger.log('Running job failed');
@@ -163,6 +164,7 @@ class Kubernetes implements ProviderInterface {
         async () => {
           const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
           const podBody = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+
           return (jobBody === null || jobBody.status?.active === 0) && podBody === null;
         },
         {
@@ -195,6 +197,7 @@ class Kubernetes implements ProviderInterface {
     if (pod === undefined) {
       throw new Error("pod with job-name label doesn't exist");
     }
+
     return pod;
   }
 }

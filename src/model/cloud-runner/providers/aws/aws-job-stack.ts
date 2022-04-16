@@ -112,14 +112,7 @@ export class AWSJobStack {
       CloudRunnerLogger.log('Creating cloud runner job');
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
-      await AWSError.handleStackCreationFailure(
-        error,
-        CF,
-        taskDefStackName,
-        //taskDefCloudFormation,
-        //parameters,
-        //secrets,
-      );
+      await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
       throw error;
     }
 

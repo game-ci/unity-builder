@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, Docker, ImageTag, Output, CloudRunner } from './model';
+import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model';
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
@@ -7,6 +7,7 @@ async function runMain() {
   try {
     if (Cli.InitCliMode()) {
       await Cli.RunCli();
+
       return;
     }
     Action.checkCompatibility();

@@ -16,7 +16,7 @@ describe('Cloud Runner', () => {
   const testSecretValue = 'testSecretValue';
   if (Input.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
-      // build parameters
+      // Build parameters
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -32,13 +32,16 @@ describe('Cloud Runner', () => {
         `,
       };
       Input.githubInputEnabled = false;
-      // setup parameters
+
+      // Setup parameters
       const buildParameter = await BuildParameters.create();
       Input.githubInputEnabled = true;
       const baseImage = new ImageTag(buildParameter);
-      // run the job
+
+      // Run the job
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
-      // assert results
+
+      // Assert results
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
@@ -89,7 +92,7 @@ describe('Cloud Runner', () => {
     }, 1000000);
   }
   it('Local cloud runner returns commands', async () => {
-    // build parameters
+    // Build parameters
     Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
@@ -106,16 +109,18 @@ describe('Cloud Runner', () => {
       `,
     };
     Input.githubInputEnabled = false;
-    // setup parameters
+
+    // Setup parameters
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
-    // run the job
+
+    // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
     delete Cli.options;
   }, 1000000);
   it('Test cloud runner returns commands', async () => {
-    // build parameters
+    // Build parameters
     Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
@@ -124,10 +129,12 @@ describe('Cloud Runner', () => {
       targetPlatform: 'StandaloneLinux64',
     };
     Input.githubInputEnabled = false;
-    // setup parameters
+
+    // Setup parameters
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
-    // run the job
+
+    // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
     delete Cli.options;

@@ -46,6 +46,7 @@ class Docker {
 
   static getWindowsCommand(image: any, parameters: any): string {
     const { workspace, actionFolder, unitySerial, gitPrivateToken } = parameters;
+
     return `docker run \
             --workdir /github/workspace \
             --rm \

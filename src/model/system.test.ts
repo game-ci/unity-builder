@@ -34,6 +34,7 @@ describe('System', () => {
       it('outputs info', async () => {
         execSpy.mockImplementationOnce(async (input, _, options) => {
           options?.listeners?.stdout?.(Buffer.from(input, 'utf8'));
+
           return 0;
         });
 

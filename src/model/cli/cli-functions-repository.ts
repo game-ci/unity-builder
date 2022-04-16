@@ -21,6 +21,7 @@ export class CliFunctionsRepository {
     if (results === undefined || results.length === 0) {
       throw new Error(`no CLI mode found for ${key}`);
     }
+
     return results;
   }
 

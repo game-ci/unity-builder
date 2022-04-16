@@ -22,6 +22,7 @@ export class Cli {
     if (Cli.options && alternativeKey && Cli.options[alternativeKey] !== undefined) {
       return Cli.options[alternativeKey];
     }
+
     return;
   }
 
@@ -49,6 +50,7 @@ export class Cli {
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.parse(process.argv);
     Cli.options = program.opts();
+
     return Cli.isCliMode;
   }
 
@@ -61,6 +63,7 @@ export class Cli {
     const results = CliFunctionsRepository.GetCliFunctions(Cli.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options.versioning = 'None';
+
     return await results.target[results.propertyKey]();
   }
 
@@ -88,6 +91,7 @@ export class Cli {
   public static async CLIBuild(): Promise<string> {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
+
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
 }

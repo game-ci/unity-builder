@@ -1,5 +1,5 @@
 import { BuildParameters } from '.';
-import { SetupWindows, SetupMac } from './platform-setup/';
+import { SetupMac, SetupWindows } from './platform-setup/';
 import ValidateWindows from './platform-validation/validate-windows';
 
 class PlatformSetup {
@@ -12,7 +12,8 @@ class PlatformSetup {
       case 'darwin':
         await SetupMac.setup(buildParameters, actionFolder);
         break;
-      //Add other baseOS's here
+
+      // Add other baseOS's here
     }
   }
 }
