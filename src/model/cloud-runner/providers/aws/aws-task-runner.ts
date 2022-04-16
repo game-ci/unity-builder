@@ -221,6 +221,7 @@ class AWSTaskRunner {
               core.setOutput('cloud runner stop watching', 'true');
               shouldReadLogs = false;
               shouldCleanup = false;
+              core.warning('cloud runner stop watching');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
             if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
