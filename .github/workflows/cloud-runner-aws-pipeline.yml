@@ -37,9 +37,9 @@ jobs:
           #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - WebGL # WebGL.
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
-          #- WebGL # WebGL.
           #          - StandaloneWindows # Build a Windows standalone.
           #          - WSAPlayer # Build an Windows Store Apps player.
           #          - PS4 # Build a PS4 Standalone.
