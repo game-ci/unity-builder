@@ -141,7 +141,6 @@ export class Caching {
         await CloudRunnerSystem.Run(
           `mv "${path.join(fullResultsFolder, path.basename(destinationFolder))}" "${destinationParentFolder}"`,
         );
-        await CloudRunnerSystem.Run(`du -sh ${path.join(destinationParentFolder, path.basename(destinationFolder))}`);
         const contents = await fs.promises.readdir(
           path.join(destinationParentFolder, path.basename(destinationFolder)),
         );
