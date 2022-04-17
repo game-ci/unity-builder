@@ -15,33 +15,21 @@ on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push: { branches: [main, cloud-runner-develop] }
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   boot-self-hosted-runner:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          lfs: 'false'
-          fetch-depth: 0
-      ###########################
-      # Ephemeral Runner        #
-      ###########################
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
       - name: Unity - Builder
-        # You may pin to the exact commit or the version.
-        # uses: game-ci/unity-builder@3d0eb0805bbe2df90e319abbe42e41d0b9105625
         uses: ./
         with:
+          branch: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 4096
@@ -68,6 +56,12 @@ jobs:
     runs-on: self-hosted
     needs: boot-self-hosted-runner
     steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
       - name: Unity - Builder
         id: aws-fargate-unity-build
         # You may pin to the exact commit or the version.
