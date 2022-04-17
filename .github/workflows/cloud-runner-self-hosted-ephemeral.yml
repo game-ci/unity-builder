@@ -52,6 +52,7 @@ jobs:
                 repo="game-ci/unity-builder"
                 TOKEN=$(curl -X POST -H "Authorization: Bearer $GIT_PRIVATE_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$repo/actions/runners/registration-token | jq -r .token)
                 ./config.sh --url https://github.com/$repo --token $TOKEN --ephemeral
+                echo $TOKEN
                 echo "cloud runner stop watching job"
                 ./run.sh
               secrets: []
