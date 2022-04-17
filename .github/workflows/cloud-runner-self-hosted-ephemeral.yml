@@ -73,8 +73,8 @@ jobs:
         # uses: game-ci/unity-builder@3d0eb0805bbe2df90e319abbe42e41d0b9105625
         uses: game-ci/unity-builder@cloud-runner-develop
         with:
-          branch: ${{ GITHUB_REF }}
-          GITHUB_SHA: ${{ GITHUB_SHA }}
+          branch: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 8192
