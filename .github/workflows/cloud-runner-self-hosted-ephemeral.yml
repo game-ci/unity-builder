@@ -68,16 +68,14 @@ jobs:
   boot-game-ci-cloud-runner:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
-        with:
-          lfs: false
-          fetch-depth: 0
       - name: Unity - Builder
         id: aws-fargate-unity-build
         # You may pin to the exact commit or the version.
         # uses: game-ci/unity-builder@3d0eb0805bbe2df90e319abbe42e41d0b9105625
         uses: game-ci/unity-builder@cloud-runner-develop
         with:
+          branch: ${{ GITHUB_REF }}
+          GITHUB_SHA: ${{ GITHUB_SHA }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 8192
