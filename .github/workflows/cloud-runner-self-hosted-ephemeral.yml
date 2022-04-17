@@ -47,7 +47,9 @@ jobs:
                 apt-get update
                 apt-get install -qy unzip curl libdigest-sha-perl apt-transport-https libicu-dev jq git git-lfs
                 mkdir -p $BUILD_GUID/actions-runner && cd $BUILD_GUID/actions-runner
-                curl -o actions-runner-linux-x64-2.289.2.tar.gz -L https://github.com/actions/runner/releases/download/v2.289.2/actions-runner-linux-x64-2.289.2.tar.gz && echo "7ba89bb75397896a76e98197633c087a9499d4c1db7603f21910e135b0d0a238  actions-runner-linux-x64-2.289.2.tar.gz" | shasum -a 256 -c && tar xzf ./actions-runner-linux-x64-2.289.2.tar.gz
+                curl -o actions-runner-linux-x64-2.289.2.tar.gz -L https://github.com/actions/runner/releases/download/v2.289.2/actions-runner-linux-x64-2.289.2.tar.gz
+                echo "7ba89bb75397896a76e98197633c087a9499d4c1db7603f21910e135b0d0a238  actions-runner-linux-x64-2.289.2.tar.gz" | shasum -a 256 -c
+                tar xzf ./actions-runner-linux-x64-2.289.2.tar.gz
                 repo="game-ci/unity-builder"
                 TOKEN=$(curl -X POST -H "Authorization: Bearer $GIT_PRIVATE_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$repo/actions/runners/registration-token | jq -r .token)
                 ./config.sh --url https://github.com/$repo --token $TOKEN --ephemeral
