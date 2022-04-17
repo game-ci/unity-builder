@@ -33,6 +33,7 @@ jobs:
         uses: ./
         with:
           cloudRunnerCluster: aws
+          versioning: None
           allowDirtyBuild: true
           cloudRunnerMemory: 4096
           cloudRunnerCpu: 2048
@@ -79,6 +80,7 @@ jobs:
           cloudRunnerCpu: 2048
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: StandaloneWindows64
+          versioning: None
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
