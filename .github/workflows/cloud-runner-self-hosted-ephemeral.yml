@@ -30,6 +30,7 @@ jobs:
         with:
           branch: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repositoryUrl }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 4096
@@ -70,6 +71,7 @@ jobs:
         with:
           branch: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repositoryUrl }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 8192
