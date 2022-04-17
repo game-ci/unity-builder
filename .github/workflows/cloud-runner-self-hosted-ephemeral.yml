@@ -66,6 +66,7 @@ jobs:
                 ./run.sh
   boot-game-ci-cloud-runner:
     runs-on: self-hosted
+    needs: boot-self-hosted-runner
     steps:
       - name: Unity - Builder
         id: aws-fargate-unity-build
