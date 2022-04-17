@@ -19,6 +19,10 @@ jobs:
   boot-self-hosted-runner:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+            lfs: false
+            fetch-depth: 0
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -28,9 +32,6 @@ jobs:
       - name: Unity - Builder
         uses: ./
         with:
-          branch: ${{ github.ref }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repositoryUrl }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 4096
@@ -57,6 +58,10 @@ jobs:
     runs-on: self-hosted
     needs: boot-self-hosted-runner
     steps:
+      - uses: actions/checkout@v2
+        with:
+            lfs: false
+            fetch-depth: 0
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -69,9 +74,6 @@ jobs:
         # uses: game-ci/unity-builder@3d0eb0805bbe2df90e319abbe42e41d0b9105625
         uses: game-ci/unity-builder@cloud-runner-develop
         with:
-          branch: ${{ github.ref }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repositoryUrl }}
           cloudRunnerCluster: aws
           allowDirtyBuild: true
           cloudRunnerMemory: 8192
