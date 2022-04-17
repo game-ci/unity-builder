@@ -54,7 +54,7 @@ jobs:
                 ./config.sh --url https://github.com/$repo --token $TOKEN --ephemeral
                 echo "cloud runner stop watching job"
                 ./run.sh
-              secrets:
+              secrets: []
   boot-game-ci-cloud-runner:
     runs-on: self-hosted
     needs: boot-self-hosted-runner
