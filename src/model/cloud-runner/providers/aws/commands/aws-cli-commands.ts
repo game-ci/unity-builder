@@ -12,8 +12,12 @@ export class AwsCliCommands {
   static async garbageCollectAwsAll() {
     await AwsCliCommands.cleanup(true);
   }
+  @CliFunction(`aws-garbage-collect-all-1d-older`, `garbage collect aws`)
+  static async garbageCollectAwsAllOlderThanOneDay() {
+    await AwsCliCommands.cleanup(true, 24);
+  }
 
-  private static async cleanup(deleteResources = false) {
+  private static async cleanup(deleteResources = false, olderThanAgeInHours = 0) {
     process.env.AWS_REGION = Input.region;
     CloudRunnerLogger.log(`Cloud Formation stacks`);
     const CF = new AWS.CloudFormation();
@@ -40,13 +44,17 @@ export class AwsCliCommands {
           taskElement.overrides = {};
           taskElement.attachments = [];
           CloudRunnerLogger.log(JSON.stringify(taskElement, undefined, 4));
-          if (deleteResources) {
+          if (taskElement.createdAt === undefined) {
+            CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
+            continue;
+          }
+          if (
+            deleteResources &&
+            new Date(Date.now()).getUTCMilliseconds() - taskElement.createdAt.getUTCMilliseconds() > olderThanAgeInHours
+          ) {
             await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
           }
         }
-      }
-      if (deleteResources) {
-        await ecs.deleteCluster({ cluster: element }).promise();
       }
     }
     const stacks =
@@ -54,7 +62,14 @@ export class AwsCliCommands {
     for (const element of stacks) {
       CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
       const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
-      if (deleteResources) {
+      if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
+        CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
+        continue;
+      }
+      if (
+        deleteResources &&
+        new Date(Date.now()).getUTCMilliseconds() - element.CreationTime.getUTCMilliseconds() > olderThanAgeInHours
+      ) {
         await CF.deleteStack(deleteStackInput).promise();
       }
     }
