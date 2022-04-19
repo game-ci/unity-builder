@@ -4,6 +4,7 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
+import CloudRunner from '../../cloud-runner';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -82,6 +83,14 @@ export class AWSJobStack {
       {
         ParameterKey: 'EFSMountDirectory',
         ParameterValue: mountdir,
+      },
+      {
+        ParameterKey: 'ContainerMemory',
+        ParameterValue: CloudRunner.buildParameters.cloudRunnerMemory,
+      },
+      {
+        ParameterKey: 'ContainerCpu',
+        ParameterValue: CloudRunner.buildParameters.cloudRunnerCpu,
       },
       ...secretsMappedToCloudFormationParameters,
     ];
