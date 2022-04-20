@@ -70,17 +70,17 @@ export class Caching {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
-      await CloudRunnerSystem.Run(`zip -q -r ${cacheArtifactName}.zip ${path.basename(sourceFolder)}`);
-      assert(await fileExists(`${cacheArtifactName}.zip`), 'cache zip exists');
+      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar -C ${path.basename(sourceFolder)}`);
+      assert(await fileExists(`${cacheArtifactName}.tar`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
         await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
       }
-      await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.zip ${cacheFolder}`);
-      RemoteClientLogger.log(`moved ${cacheArtifactName}.zip to ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar ${cacheFolder}`);
+      RemoteClientLogger.log(`moved cache entry ${cacheArtifactName} to ${cacheFolder}`);
       assert(
-        await fileExists(`${path.join(cacheFolder, cacheArtifactName)}.zip`),
-        'cache zip exists inside cache folder',
+        await fileExists(`${path.join(cacheFolder, cacheArtifactName)}.tar`),
+        'cache archive exists inside cache folder',
       );
     } catch (error) {
       process.chdir(`${startPath}`);
@@ -101,14 +101,14 @@ export class Caching {
         await fs.promises.mkdir(destinationFolder);
       }
 
-      const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .zip$ | head -1`))
+      const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar$ | head -1`))
         .replace(/\n/g, ``)
-        .replace('.zip', '');
+        .replace('.tar', '');
 
       process.chdir(cacheFolder);
 
       const cacheSelection =
-        cacheArtifactName !== `` && (await fileExists(`${cacheArtifactName}.zip`)) ? cacheArtifactName : latestInBranch;
+        cacheArtifactName !== `` && (await fileExists(`${cacheArtifactName}.tar`)) ? cacheArtifactName : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
 
       // eslint-disable-next-line func-style
@@ -127,12 +127,12 @@ export class Caching {
         await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePullOverrideCommand));
       }
 
-      if (await fileExists(`${cacheSelection}.zip`)) {
+      if (await fileExists(`${cacheSelection}.tar`)) {
         const resultsFolder = `results${CloudRunner.buildParameters.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
-        RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.zip`);
+        RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.tar`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        await CloudRunnerSystem.Run(`unzip -q ${cacheSelection}.zip -d ${path.basename(resultsFolder)}`);
+        await CloudRunnerSystem.Run(`tar -xf ${cacheSelection}.tar -C ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         assert(await fileExists(fullResultsFolder), `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
@@ -152,7 +152,7 @@ export class Caching {
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
-          RemoteClientLogger.logWarning(`cache item ${cacheArtifactName}.zip doesn't exist ${destinationFolder}`);
+          RemoteClientLogger.logWarning(`cache item ${cacheArtifactName}.tar doesn't exist ${destinationFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
