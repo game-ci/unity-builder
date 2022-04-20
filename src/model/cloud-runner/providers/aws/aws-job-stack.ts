@@ -24,6 +24,10 @@ export class AWSJobStack {
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
+    const cpu = CloudRunner.buildParameters.cloudRunnerCpu || '1024';
+    const memory = CloudRunner.buildParameters.cloudRunnerMemory || '2048';
+    taskDefCloudFormation = taskDefCloudFormation.replace('1024', cpu);
+    taskDefCloudFormation = taskDefCloudFormation.replace('2048', memory);
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -83,14 +87,6 @@ export class AWSJobStack {
       {
         ParameterKey: 'EFSMountDirectory',
         ParameterValue: mountdir,
-      },
-      {
-        ParameterKey: 'ContainerMemory',
-        ParameterValue: CloudRunner.buildParameters.cloudRunnerMemory || '2048',
-      },
-      {
-        ParameterKey: 'ContainerCpu',
-        ParameterValue: CloudRunner.buildParameters.cloudRunnerCpu || '1024',
       },
       ...secretsMappedToCloudFormationParameters,
     ];
