@@ -87,12 +87,12 @@ export class AWSJobStack {
       {
         ParameterKey: 'ContainerMemory',
         ParameterValue: CloudRunner.buildParameters.cloudRunnerMemory || '2048',
-        ParameterType: 'Number',
+        Type: 'Number',
       },
       {
         ParameterKey: 'ContainerCpu',
         ParameterValue: CloudRunner.buildParameters.cloudRunnerCpu || '1024',
-        ParameterType: 'Number',
+        Type: 'Number',
       },
       ...secretsMappedToCloudFormationParameters,
     ];
@@ -114,14 +114,15 @@ export class AWSJobStack {
         }
       }
     }
+    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+      StackName: taskDefStackName,
+      TemplateBody: taskDefCloudFormation,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: parameters,
+    };
 
     try {
-      await CF.createStack({
-        StackName: taskDefStackName,
-        TemplateBody: taskDefCloudFormation,
-        Capabilities: ['CAPABILITY_IAM'],
-        Parameters: parameters,
-      }).promise();
+      await CF.createStack(createStackInput).promise();
       CloudRunnerLogger.log('Creating cloud runner job');
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
