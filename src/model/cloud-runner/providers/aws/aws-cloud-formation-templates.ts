@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
 
 export class AWSCloudFormationTemplates {
   public static getParameterTemplate(p1) {
@@ -34,6 +34,6 @@ export class AWSCloudFormationTemplates {
   }
 
   public static readTaskCloudFormationTemplate(): string {
-    return fs.readFileSync(`${__dirname}/cloud-formations/task-def-formation.yml`, 'utf8');
+    return TaskDefinitionFormation.formation;
   }
 }
