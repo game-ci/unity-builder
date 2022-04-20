@@ -94,7 +94,9 @@ export class AWSJobStack {
       },
       ...secretsMappedToCloudFormationParameters,
     ];
-
+    CloudRunnerLogger.log(
+      `Starting AWS job with memory: ${CloudRunner.buildParameters.cloudRunnerMemory} cpu: ${CloudRunner.buildParameters.cloudRunnerCpu}`,
+    );
     let previousStackExists = true;
     while (previousStackExists) {
       previousStackExists = false;
