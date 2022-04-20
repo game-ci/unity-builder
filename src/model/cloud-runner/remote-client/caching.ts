@@ -70,7 +70,7 @@ export class Caching {
           return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
         });
       };
-      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar -C ${path.basename(sourceFolder)}/`);
+      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar ${path.basename(sourceFolder)}`);
       assert(await fileExists(`${cacheArtifactName}.tar`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
       if (CloudRunner.buildParameters.cachePushOverrideCommand) {
@@ -132,7 +132,7 @@ export class Caching {
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
         RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.tar`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        await CloudRunnerSystem.Run(`tar -xf ${cacheSelection}.tar -C ${path.basename(resultsFolder)}/`);
+        await CloudRunnerSystem.Run(`tar -xf ${cacheSelection}.tar ${path.basename(resultsFolder)}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         assert(await fileExists(fullResultsFolder), `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
