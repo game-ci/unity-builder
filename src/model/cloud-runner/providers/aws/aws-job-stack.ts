@@ -29,12 +29,14 @@ export class AWSJobStack {
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerCpu:
     Default: 1024`,
-      cpu,
+      `ContainerCpu:
+    Default: ${cpu}`,
     );
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerMemory:
     Default: 2048`,
-      memory,
+      `ContainerMemory:
+    Default: ${memory}`,
     );
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
