@@ -4,6 +4,59 @@ import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 
 export class AwsCliCommands {
+  @CliFunction(`aws-list-stacks`, `List stacks`)
+  static async awsListStacks() {
+    process.env.AWS_REGION = Input.region;
+    const CF = new AWS.CloudFormation();
+    const stacks =
+      (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
+    for (const element of stacks) {
+      CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
+      if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
+        CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
+        continue;
+      }
+      CloudRunnerLogger.log(`${element.StackName}`);
+    }
+    if (stacks === undefined) {
+      return;
+    }
+  }
+  @CliFunction(`aws-list-tasks`, `List tasks`)
+  static async awsListTasks() {
+    process.env.AWS_REGION = Input.region;
+    CloudRunnerLogger.log(`ECS Clusters`);
+    const ecs = new AWS.ECS();
+    const clusters = (await ecs.listClusters().promise()).clusterArns || [];
+    for (const element of clusters) {
+      const input: AWS.ECS.ListTasksRequest = {
+        cluster: element,
+      };
+      const list = (await ecs.listTasks(input).promise()).taskArns || [];
+      if (list.length > 0) {
+        CloudRunnerLogger.log(`DescribeTasksRequest`);
+        CloudRunnerLogger.log(JSON.stringify(list, undefined, 4));
+        const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
+        const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
+        if (describeList === []) {
+          continue;
+        }
+        for (const taskElement of describeList) {
+          if (taskElement === undefined) {
+            continue;
+          }
+          taskElement.overrides = {};
+          taskElement.attachments = [];
+          CloudRunnerLogger.log(JSON.stringify(taskElement, undefined, 4));
+          if (taskElement.createdAt === undefined) {
+            CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
+            continue;
+          }
+        }
+      }
+    }
+  }
+
   @CliFunction(`aws-garbage-collect`, `garbage collect aws`)
   static async garbageCollectAws() {
     await AwsCliCommands.cleanup(false);
