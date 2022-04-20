@@ -9,6 +9,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   CLOUD_RUNNER_BRANCH: cloud-runner-develop
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  AWS_BASE_STACK_NAME: game-ci-github-pipelines
 
 # Controls when the workflow will run
 on:
