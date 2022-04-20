@@ -12,10 +12,6 @@ export class AwsCliCommands {
       (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
     for (const element of stacks) {
       CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
-      if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
-        CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
-        continue;
-      }
       CloudRunnerLogger.log(`${element.StackName}`);
       perResultCallback(element);
     }
@@ -81,6 +77,11 @@ export class AwsCliCommands {
         deleteResources &&
         new Date(Date.now()).getUTCMilliseconds() - element.CreationTime.getUTCMilliseconds() > olderThanAgeInHours
       ) {
+        if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
+          CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
+
+          return;
+        }
         const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
         await CF.deleteStack(deleteStackInput).promise();
       }
