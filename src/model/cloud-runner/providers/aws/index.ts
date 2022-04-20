@@ -78,6 +78,7 @@ class AWSBuildEnvironment implements ProviderInterface {
       const postCleanupTimeMs = Date.now();
       if (postRunTaskTimeMs !== undefined)
         CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((postCleanupTimeMs - postRunTaskTimeMs) / 1000)}s`);
+
       return output;
     } catch (error) {
       await this.cleanupResources(CF, taskDef);
