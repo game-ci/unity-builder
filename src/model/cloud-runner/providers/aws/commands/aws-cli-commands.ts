@@ -10,10 +10,11 @@ export class AwsCliCommands {
     const CF = new AWS.CloudFormation();
     const stacks =
       (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
+    CloudRunnerLogger.log(`DescribeStacksRequest ${stacks.length}`);
     for (const element of stacks) {
       CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
       CloudRunnerLogger.log(`${element.StackName}`);
-      perResultCallback(element);
+      if (perResultCallback) await perResultCallback(element);
     }
     if (stacks === undefined) {
       return;
@@ -31,13 +32,12 @@ export class AwsCliCommands {
       };
       const list = (await ecs.listTasks(input).promise()).taskArns || [];
       if (list.length > 0) {
-        CloudRunnerLogger.log(`DescribeTasksRequest`);
-        CloudRunnerLogger.log(JSON.stringify(list, undefined, 4));
         const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
         const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
         if (describeList === []) {
           continue;
         }
+        CloudRunnerLogger.log(`DescribeTasksRequest ${describeList.length}`);
         for (const taskElement of describeList) {
           if (taskElement === undefined) {
             continue;
@@ -49,7 +49,7 @@ export class AwsCliCommands {
             CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
             continue;
           }
-          perResultCallback(taskElement, element);
+          if (perResultCallback) await perResultCallback(taskElement, element);
         }
       }
     }
