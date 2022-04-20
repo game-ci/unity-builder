@@ -5,7 +5,7 @@ import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 
 export class AwsCliCommands {
   @CliFunction(`aws-list-stacks`, `List stacks`)
-  static async awsListStacks() {
+  static async awsListStacks(perResultCallback: any) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
@@ -17,13 +17,14 @@ export class AwsCliCommands {
         continue;
       }
       CloudRunnerLogger.log(`${element.StackName}`);
+      perResultCallback(element);
     }
     if (stacks === undefined) {
       return;
     }
   }
   @CliFunction(`aws-list-tasks`, `List tasks`)
-  static async awsListTasks() {
+  static async awsListTasks(perResultCallback: any) {
     process.env.AWS_REGION = Input.region;
     CloudRunnerLogger.log(`ECS Clusters`);
     const ecs = new AWS.ECS();
@@ -52,6 +53,7 @@ export class AwsCliCommands {
             CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
             continue;
           }
+          perResultCallback(taskElement, element);
         }
       }
     }
@@ -72,62 +74,24 @@ export class AwsCliCommands {
 
   private static async cleanup(deleteResources = false, olderThanAgeInHours = 0) {
     process.env.AWS_REGION = Input.region;
-    CloudRunnerLogger.log(`Cloud Formation stacks`);
     const CF = new AWS.CloudFormation();
-    CloudRunnerLogger.log(`ECS Clusters`);
     const ecs = new AWS.ECS();
-    const clusters = (await ecs.listClusters().promise()).clusterArns || [];
-    for (const element of clusters) {
-      const input: AWS.ECS.ListTasksRequest = {
-        cluster: element,
-      };
-      const list = (await ecs.listTasks(input).promise()).taskArns || [];
-      if (list.length > 0) {
-        CloudRunnerLogger.log(`DescribeTasksRequest`);
-        CloudRunnerLogger.log(JSON.stringify(list, undefined, 4));
-        const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
-        const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
-        if (describeList === []) {
-          continue;
-        }
-        for (const taskElement of describeList) {
-          if (taskElement === undefined) {
-            continue;
-          }
-          taskElement.overrides = {};
-          taskElement.attachments = [];
-          CloudRunnerLogger.log(JSON.stringify(taskElement, undefined, 4));
-          if (taskElement.createdAt === undefined) {
-            CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
-            continue;
-          }
-          if (
-            deleteResources &&
-            new Date(Date.now()).getUTCMilliseconds() - taskElement.createdAt.getUTCMilliseconds() > olderThanAgeInHours
-          ) {
-            await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
-          }
-        }
-      }
-    }
-    const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
-    for (const element of stacks) {
-      CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
-      const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
-      if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
-        CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
-        continue;
-      }
+    AwsCliCommands.awsListStacks(async (element) => {
       if (
         deleteResources &&
         new Date(Date.now()).getUTCMilliseconds() - element.CreationTime.getUTCMilliseconds() > olderThanAgeInHours
       ) {
+        const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
         await CF.deleteStack(deleteStackInput).promise();
       }
-    }
-    if (stacks === undefined) {
-      return;
-    }
+    });
+    AwsCliCommands.awsListTasks(async (taskElement, element) => {
+      if (
+        deleteResources &&
+        new Date(Date.now()).getUTCMilliseconds() - taskElement.createdAt.getUTCMilliseconds() > olderThanAgeInHours
+      ) {
+        await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
+      }
+    });
   }
 }
