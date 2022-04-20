@@ -221,7 +221,7 @@ class AWSTaskRunner {
             } else if (message.includes('Build fail')) {
               core.setOutput('build-result', 'failed');
               core.error('BUILD FAILED!');
-            } else if (message.includes('cloud runner stop watching job')) {
+            } else if (message.includes(': Listening for Jobs')) {
               core.setOutput('cloud runner stop watching', 'true');
               shouldReadLogs = false;
               shouldCleanup = false;
