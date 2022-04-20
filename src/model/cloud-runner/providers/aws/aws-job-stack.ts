@@ -26,8 +26,16 @@ export class AWSJobStack {
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
     const cpu = CloudRunner.buildParameters.cloudRunnerCpu || '1024';
     const memory = CloudRunner.buildParameters.cloudRunnerMemory || '2048';
-    taskDefCloudFormation = taskDefCloudFormation.replace('1024', cpu);
-    taskDefCloudFormation = taskDefCloudFormation.replace('2048', memory);
+    taskDefCloudFormation = taskDefCloudFormation.replace(
+      `ContainerCpu:
+    Default: 1024`,
+      cpu,
+    );
+    taskDefCloudFormation = taskDefCloudFormation.replace(
+      `ContainerMemory:
+    Default: 2048`,
+      memory,
+    );
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,

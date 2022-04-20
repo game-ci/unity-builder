@@ -24,12 +24,12 @@ Parameters:
     Default: 80
     Description: What port number the application inside the docker container is binding to
   ContainerCpu:
-    Type: Number
     Default: 1024
+    Type: Number
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
-    Type: Number
     Default: 2048
+    Type: Number
     Description: How much memory in megabytes to give the container
   BUILDGUID:
     Type: String
