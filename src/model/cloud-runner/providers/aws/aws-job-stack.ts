@@ -86,11 +86,11 @@ export class AWSJobStack {
       },
       {
         ParameterKey: 'ContainerMemory',
-        ParameterValue: CloudRunner.buildParameters.cloudRunnerMemory,
+        ParameterValue: CloudRunner.buildParameters.cloudRunnerMemory || '2048',
       },
       {
         ParameterKey: 'ContainerCpu',
-        ParameterValue: CloudRunner.buildParameters.cloudRunnerCpu,
+        ParameterValue: CloudRunner.buildParameters.cloudRunnerCpu || '1024',
       },
       ...secretsMappedToCloudFormationParameters,
     ];
