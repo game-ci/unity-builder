@@ -25,7 +25,7 @@ export class AWSJobStack {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
     const cpu = CloudRunner.buildParameters.cloudRunnerCpu || '1024';
-    const memory = CloudRunner.buildParameters.cloudRunnerMemory || '2048';
+    const memory = CloudRunner.buildParameters.cloudRunnerMemory || '3072';
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerCpu:
     Default: 1024`,
