@@ -65,18 +65,15 @@ export class AwsCliCommands {
   }
   @CliFunction(`aws-garbage-collect-all-1d-older`, `garbage collect aws`)
   static async garbageCollectAwsAllOlderThanOneDay() {
-    await AwsCliCommands.cleanup(true, 24);
+    await AwsCliCommands.cleanup(true);
   }
 
-  private static async cleanup(deleteResources = false, olderThanAgeInHours = 0) {
+  private static async cleanup(deleteResources = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const ecs = new AWS.ECS();
-    AwsCliCommands.awsListStacks(async (element) => {
-      if (
-        deleteResources &&
-        new Date(Date.now()).getUTCMilliseconds() - element.CreationTime.getUTCMilliseconds() > olderThanAgeInHours
-      ) {
+    await AwsCliCommands.awsListStacks(async (element) => {
+      if (deleteResources) {
         if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
           CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
 
@@ -86,11 +83,8 @@ export class AwsCliCommands {
         await CF.deleteStack(deleteStackInput).promise();
       }
     });
-    AwsCliCommands.awsListTasks(async (taskElement, element) => {
-      if (
-        deleteResources &&
-        new Date(Date.now()).getUTCMilliseconds() - taskElement.createdAt.getUTCMilliseconds() > olderThanAgeInHours
-      ) {
+    await AwsCliCommands.awsListTasks(async (taskElement, element) => {
+      if (deleteResources) {
         await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
       }
     });
