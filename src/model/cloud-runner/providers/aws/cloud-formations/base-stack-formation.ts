@@ -1,7 +1,6 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: AWS Fargate cluster that can span public and private subnets. Supports
-  public facing load balancers, private internal load balancers, and
-  both internal and external service discovery namespaces.
+export class BaseStackFormation {
+  public static readonly formation: string = `AWSTemplateFormatVersion: '2010-09-09'
+Description: Game-CI base stack
 Parameters:
   EnvironmentName:
     Type: String
@@ -335,57 +334,58 @@ Outputs:
     Description: 'The connection endpoint for the database.'
     Value: !Ref EfsFileStorage
     Export:
-      Name: !Sub ${EnvironmentName}:EfsFileStorageId
+      Name: !Sub ${'${EnvironmentName}'}:EfsFileStorageId
   ClusterName:
     Description: The name of the ECS cluster
     Value: !Ref 'ECSCluster'
     Export:
-      Name: !Sub ${EnvironmentName}:ClusterName
+      Name: !Sub${' ${EnvironmentName}'}:ClusterName
   AutoscalingRole:
     Description: The ARN of the role used for autoscaling
     Value: !GetAtt 'AutoscalingRole.Arn'
     Export:
-      Name: !Sub ${EnvironmentName}:AutoscalingRole
+      Name: !Sub ${'${EnvironmentName}'}:AutoscalingRole
   ECSRole:
     Description: The ARN of the ECS role
     Value: !GetAtt 'ECSRole.Arn'
     Export:
-      Name: !Sub ${EnvironmentName}:ECSRole
+      Name: !Sub ${'${EnvironmentName}'}:ECSRole
   ECSTaskExecutionRole:
     Description: The ARN of the ECS role tsk execution role
     Value: !GetAtt 'ECSTaskExecutionRole.Arn'
     Export:
-      Name: !Sub ${EnvironmentName}:ECSTaskExecutionRole
+      Name: !Sub ${'${EnvironmentName}'}:ECSTaskExecutionRole
 
   DeleteCFNLambdaExecutionRole:
     Description: Lambda execution role for cleaning up cloud formations
     Value: !GetAtt 'DeleteCFNLambdaExecutionRole.Arn'
     Export:
-      Name: !Sub ${EnvironmentName}:DeleteCFNLambdaExecutionRole
+      Name: !Sub ${'${EnvironmentName}'}:DeleteCFNLambdaExecutionRole
 
   CloudWatchIAMRole:
     Description: The ARN of the CloudWatch role for subscription filter
     Value: !GetAtt 'CloudWatchIAMRole.Arn'
     Export:
-      Name: !Sub ${EnvironmentName}:CloudWatchIAMRole
+      Name: !Sub ${'${EnvironmentName}'}:CloudWatchIAMRole
   VpcId:
     Description: The ID of the VPC that this stack is deployed in
     Value: !Ref 'VPC'
     Export:
-      Name: !Sub ${EnvironmentName}:VpcId
+      Name: !Sub ${'${EnvironmentName}'}:VpcId
   PublicSubnetOne:
     Description: Public subnet one
     Value: !Ref 'PublicSubnetOne'
     Export:
-      Name: !Sub ${EnvironmentName}:PublicSubnetOne
+      Name: !Sub ${'${EnvironmentName}'}:PublicSubnetOne
   PublicSubnetTwo:
     Description: Public subnet two
     Value: !Ref 'PublicSubnetTwo'
     Export:
-      Name: !Sub ${EnvironmentName}:PublicSubnetTwo
-
+      Name: !Sub ${'${EnvironmentName}'}:PublicSubnetTwo
   ContainerSecurityGroup:
     Description: A security group used to allow Fargate containers to receive traffic
     Value: !Ref 'ContainerSecurityGroup'
     Export:
-      Name: !Sub ${EnvironmentName}:ContainerSecurityGroup
+      Name: !Sub ${'${EnvironmentName}'}:ContainerSecurityGroup
+`;
+}

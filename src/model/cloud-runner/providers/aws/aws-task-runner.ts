@@ -58,14 +58,21 @@ class AWSTaskRunner {
     CloudRunnerLogger.log(
       `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(ECS, cluster, taskArn))?.lastStatus}`,
     );
-    const output = await this.streamLogsUntilTaskStops(ECS, CF, taskDef, cluster, taskArn, streamName);
+    const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(
+      ECS,
+      CF,
+      taskDef,
+      cluster,
+      taskArn,
+      streamName,
+    );
     const taskData = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
     const exitCode = taskData.containers?.[0].exitCode;
     const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
 
-      return output;
+      return { output, shouldCleanup };
     } else {
       if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
         throw new Error('Container exited with code 1');
@@ -122,22 +129,24 @@ class AWSTaskRunner {
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${CF.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let shouldReadLogs = true;
+    let shouldCleanup = true;
     let timestamp: number = 0;
     let output = '';
     while (shouldReadLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn);
       ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
-      ({ iterator, shouldReadLogs, output } = await AWSTaskRunner.handleLogStreamIteration(
+      ({ iterator, shouldReadLogs, output, shouldCleanup } = await AWSTaskRunner.handleLogStreamIteration(
         kinesis,
         iterator,
         shouldReadLogs,
         taskDef,
         output,
+        shouldCleanup,
       ));
     }
 
-    return output;
+    return { output, shouldCleanup };
   }
 
   private static async handleLogStreamIteration(
@@ -146,6 +155,7 @@ class AWSTaskRunner {
     shouldReadLogs: boolean,
     taskDef: CloudRunnerAWSTaskDef,
     output: string,
+    shouldCleanup: boolean,
   ) {
     const records = await kinesis
       .getRecords({
@@ -153,9 +163,16 @@ class AWSTaskRunner {
       })
       .promise();
     iterator = records.NextShardIterator || '';
-    ({ shouldReadLogs, output } = AWSTaskRunner.logRecords(records, iterator, taskDef, shouldReadLogs, output));
+    ({ shouldReadLogs, output, shouldCleanup } = AWSTaskRunner.logRecords(
+      records,
+      iterator,
+      taskDef,
+      shouldReadLogs,
+      output,
+      shouldCleanup,
+    ));
 
-    return { iterator, shouldReadLogs, output };
+    return { iterator, shouldReadLogs, output, shouldCleanup };
   }
 
   private static checkStreamingShouldContinue(taskData: AWS.ECS.Task, timestamp: number, shouldReadLogs: boolean) {
@@ -183,6 +200,7 @@ class AWSTaskRunner {
     taskDef: CloudRunnerAWSTaskDef,
     shouldReadLogs: boolean,
     output: string,
+    shouldCleanup: boolean,
   ) {
     if (records.Records.length > 0 && iterator) {
       for (let index = 0; index < records.Records.length; index++) {
@@ -197,11 +215,18 @@ class AWSTaskRunner {
               shouldReadLogs = false;
             } else if (message.includes('Rebuilding Library because the asset database could not be found!')) {
               core.warning('LIBRARY NOT FOUND!');
+              core.setOutput('library-found', 'false');
             } else if (message.includes('Build succeeded')) {
               core.setOutput('build-result', 'success');
             } else if (message.includes('Build fail')) {
               core.setOutput('build-result', 'failed');
+              core.setFailed('unity build failed');
               core.error('BUILD FAILED!');
+            } else if (message.includes(': Listening for Jobs')) {
+              core.setOutput('cloud runner stop watching', 'true');
+              shouldReadLogs = false;
+              shouldCleanup = false;
+              core.warning('cloud runner stop watching');
             }
             message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
             if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
@@ -213,7 +238,7 @@ class AWSTaskRunner {
       }
     }
 
-    return { shouldReadLogs, output };
+    return { shouldReadLogs, output, shouldCleanup };
   }
 
   private static async getLogStream(kinesis: AWS.Kinesis, kinesisStreamName: string) {

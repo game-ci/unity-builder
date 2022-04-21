@@ -66,21 +66,24 @@ class AWSBuildEnvironment implements ProviderInterface {
     );
 
     let postRunTaskTimeMs;
-    let output = '';
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      output = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
+      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
-    } finally {
-      await this.cleanupResources(CF, taskDef);
+      if (shouldCleanup) {
+        await this.cleanupResources(CF, taskDef);
+      }
       const postCleanupTimeMs = Date.now();
       if (postRunTaskTimeMs !== undefined)
         CloudRunnerLogger.log(`Cleanup job time: ${Math.floor((postCleanupTimeMs - postRunTaskTimeMs) / 1000)}s`);
-    }
 
-    return output;
+      return output;
+    } catch (error) {
+      await this.cleanupResources(CF, taskDef);
+      throw error;
+    }
   }
 
   async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {

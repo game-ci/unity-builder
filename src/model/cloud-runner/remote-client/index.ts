@@ -45,8 +45,10 @@ export class RemoteClient {
   }
 
   private static async sizeOfFolder(message: string, folder: string) {
-    CloudRunnerLogger.log(`Size of ${message}`);
-    await CloudRunnerSystem.Run(`du -sh ${folder}`);
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      CloudRunnerLogger.log(`Size of ${message}`);
+      await CloudRunnerSystem.Run(`du -sh ${folder}`);
+    }
   }
 
   private static async cloneRepoWithoutLFSFiles() {

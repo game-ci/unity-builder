@@ -1,8 +1,7 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
 import * as SDK from 'aws-sdk';
-import * as fs from 'fs';
-import path from 'path';
+import { BaseStackFormation } from './cloud-formations/base-stack-formation';
 const crypto = require('crypto');
 
 export class AWSBaseStack {
@@ -14,7 +13,7 @@ export class AWSBaseStack {
   async setupBaseStack(CF: SDK.CloudFormation) {
     const baseStackName = this.baseStackName;
 
-    const baseStack = fs.readFileSync(path.join(__dirname, 'cloud-formations', 'base-setup.yml'), 'utf8');
+    const baseStack = BaseStackFormation.formation;
 
     // Cloud Formation Input
     const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {

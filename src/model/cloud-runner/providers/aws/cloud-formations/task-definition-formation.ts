@@ -1,4 +1,5 @@
-AWSTemplateFormatVersion: 2010-09-09
+export class TaskDefinitionFormation {
+  public static readonly formation: string = `AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS Fargate cluster that can span public and private subnets. Supports public
   facing load balancers, private internal load balancers, and both internal and
@@ -23,12 +24,12 @@ Parameters:
     Default: 80
     Description: What port number the application inside the docker container is binding to
   ContainerCpu:
-    Type: Number
     Default: 1024
+    Type: Number
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
-    Type: Number
     Default: 2048
+    Type: Number
     Description: How much memory in megabytes to give the container
   BUILDGUID:
     Type: String
@@ -47,7 +48,7 @@ Parameters:
     Default: ''
     Description: >-
       (Optional) An IAM role to give the service's containers if the code within
-      needs to access other AWS resources
+      needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
   EFSMountDirectory:
     Type: String
     Default: '/efsdata'
@@ -78,7 +79,7 @@ Resources:
     Properties:
       FilterPattern: ''
       RoleArn:
-        'Fn::ImportValue': !Sub '${EnvironmentName}:CloudWatchIAMRole'
+        'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:CloudWatchIAMRole'
       LogGroupName: !Ref ServiceName
       DestinationArn:
         'Fn::GetAtt':
@@ -98,9 +99,7 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
-
   # template secrets p2 - secret
-
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -112,12 +111,12 @@ Resources:
         - Name: efs-data
           EFSVolumeConfiguration:
             FilesystemId:
-              'Fn::ImportValue': !Sub '${EnvironmentName}:EfsFileStorageId'
+              'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:EfsFileStorageId'
             TransitEncryption: ENABLED
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn:
-        'Fn::ImportValue': !Sub '${EnvironmentName}:ECSTaskExecutionRole'
+        'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:ECSTaskExecutionRole'
       TaskRoleArn:
         'Fn::If':
           - HasCustomRole
@@ -130,12 +129,12 @@ Resources:
           Image: !Ref ImageUrl
           EntryPoint:
             Fn::Split:
-                - ","
-                - !Ref EntryPoint
+              - ','
+              - !Ref EntryPoint
           Command:
             Fn::Split:
-                - ","
-                - !Ref Command
+              - ','
+              - !Ref Command
           WorkingDirectory: !Ref WorkingDirectory
           Environment:
             - Name: ALLOW_EMPTY_PASSWORD
@@ -153,69 +152,7 @@ Resources:
               awslogs-group: !Ref ServiceName
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: !Ref ServiceName
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: dabb0116-abe0-48a6-a8af-cf9111c879a5
     DependsOn:
       - LogGroup
-Metadata:
-  'AWS::CloudFormation::Designer':
-    dabb0116-abe0-48a6-a8af-cf9111c879a5:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 270
-        'y': 90
-      z: 1
-      embeds: []
-      dependson:
-        - aece53ae-b82d-4267-bc16-ed964b05db27
-    c6f18447-b879-4696-8873-f981b2cedd2b:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 270
-        'y': 210
-      z: 1
-      embeds: []
-    7f809e91-9e5d-4678-98c1-c5085956c480:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 60
-        'y': 300
-      z: 1
-      embeds: []
-      dependson:
-        - aece53ae-b82d-4267-bc16-ed964b05db27
-        - c6f18447-b879-4696-8873-f981b2cedd2b
-    aece53ae-b82d-4267-bc16-ed964b05db27:
-      size:
-        width: 150
-        height: 150
-      position:
-        x: 60
-        'y': 90
-      z: 1
-      embeds: []
-    4d2da56c-3643-46b8-aaee-e46e19f95fcc:
-      source:
-        id: 7f809e91-9e5d-4678-98c1-c5085956c480
-      target:
-        id: aece53ae-b82d-4267-bc16-ed964b05db27
-      z: 11
-    14eb957b-f094-4653-93c4-77b2f851953c:
-      source:
-        id: 7f809e91-9e5d-4678-98c1-c5085956c480
-      target:
-        id: c6f18447-b879-4696-8873-f981b2cedd2b
-      z: 12
-    85c57444-e5bb-4230-bc85-e545cd4558f6:
-      source:
-        id: dabb0116-abe0-48a6-a8af-cf9111c879a5
-      target:
-        id: aece53ae-b82d-4267-bc16-ed964b05db27
-      z: 13
+`;
+}

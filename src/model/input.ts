@@ -234,11 +234,11 @@ class Input {
   }
 
   static get cloudRunnerCpu() {
-    return Input.getInput('cloudRunnerCpu') || '1.0';
+    return Input.getInput('cloudRunnerCpu');
   }
 
   static get cloudRunnerMemory() {
-    return Input.getInput('cloudRunnerMemory') || '750M';
+    return Input.getInput('cloudRunnerMemory');
   }
 
   static get kubeConfig() {

@@ -108,8 +108,8 @@ class KubernetesJobSpecFactory {
               workingDir: `${workingDirectory}`,
               resources: {
                 requests: {
-                  memory: buildParameters.cloudRunnerMemory,
-                  cpu: buildParameters.cloudRunnerCpu,
+                  memory: buildParameters.cloudRunnerMemory || '750M',
+                  cpu: buildParameters.cloudRunnerCpu || '1',
                 },
               },
               env: [

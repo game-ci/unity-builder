@@ -71,7 +71,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const builderPath = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`).replace(/\\/g, `/`);
 
     return `apt-get update > /dev/null
-      apt-get install -y zip tree npm git-lfs jq unzip git > /dev/null
+      apt-get install -y tar tree npm git-lfs jq git > /dev/null
       npm install -g n > /dev/null
       n stable > /dev/null
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}

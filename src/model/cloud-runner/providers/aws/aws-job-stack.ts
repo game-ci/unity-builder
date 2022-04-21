@@ -4,6 +4,7 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
+import CloudRunner from '../../cloud-runner';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -23,6 +24,20 @@ export class AWSJobStack {
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
+    const cpu = CloudRunner.buildParameters.cloudRunnerCpu || '1024';
+    const memory = CloudRunner.buildParameters.cloudRunnerMemory || '3072';
+    taskDefCloudFormation = taskDefCloudFormation.replace(
+      `ContainerCpu:
+    Default: 1024`,
+      `ContainerCpu:
+    Default: ${Number.parseInt(cpu)}`,
+    );
+    taskDefCloudFormation = taskDefCloudFormation.replace(
+      `ContainerMemory:
+    Default: 2048`,
+      `ContainerMemory:
+    Default: ${Number.parseInt(memory)}`,
+    );
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -85,7 +100,9 @@ export class AWSJobStack {
       },
       ...secretsMappedToCloudFormationParameters,
     ];
-
+    CloudRunnerLogger.log(
+      `Starting AWS job with memory: ${CloudRunner.buildParameters.cloudRunnerMemory} cpu: ${CloudRunner.buildParameters.cloudRunnerCpu}`,
+    );
     let previousStackExists = true;
     while (previousStackExists) {
       previousStackExists = false;
@@ -101,14 +118,15 @@ export class AWSJobStack {
         }
       }
     }
+    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+      StackName: taskDefStackName,
+      TemplateBody: taskDefCloudFormation,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: parameters,
+    };
 
     try {
-      await CF.createStack({
-        StackName: taskDefStackName,
-        TemplateBody: taskDefCloudFormation,
-        Capabilities: ['CAPABILITY_IAM'],
-        Parameters: parameters,
-      }).promise();
+      await CF.createStack(createStackInput).promise();
       CloudRunnerLogger.log('Creating cloud runner job');
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {

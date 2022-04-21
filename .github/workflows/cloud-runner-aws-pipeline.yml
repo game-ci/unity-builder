@@ -37,9 +37,9 @@ jobs:
           #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - WebGL # WebGL.
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
-          #- WebGL # WebGL.
           #          - StandaloneWindows # Build a Windows standalone.
           #          - WSAPlayer # Build an Windows Store Apps player.
           #          - PS4 # Build a PS4 Standalone.
@@ -91,7 +91,7 @@ jobs:
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$CACHE_KEY
                 ls /data/cache/$CACHE_KEY/build
-                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.zip s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.zip
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -100,7 +100,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
           ls
       - run: yarn run cli -m aws-garbage-collect
       ###########################
@@ -110,5 +110,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: AWS Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.zip
+          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
           retention-days: 14
