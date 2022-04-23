@@ -1,7 +1,11 @@
-import { Kernel } from './core/kernel.ts';
+/* eslint-disable no-console */
+import { Bootstrapper } from './bootstrapper.ts';
 
 (async () => {
-  const kernel = new Kernel();
-
-  await kernel.run();
+  try {
+    await new Bootstrapper().run(Deno.args);
+  } catch (error) {
+    console.error(error);
+    Deno.exit(1);
+  }
 })();

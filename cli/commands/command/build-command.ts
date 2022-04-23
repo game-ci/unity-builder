@@ -1,17 +1,15 @@
-/* eslint-disable no-console */
+import { CommandInterface } from './CommandInterface.ts';
 import { exec, OutputMode } from 'https://deno.land/x/exec@0.0.5/mod.ts';
-import { CliOptions } from '../core/cli-options.ts';
+import { Options } from '../../config/options.ts';
 
-export class Bootstrapper {
-  private readonly options: CliOptions;
+export class BuildCommand implements CommandInterface {
+  public readonly name: string;
 
-  constructor(cliOptions: CliOptions) {
-    this.options = cliOptions;
+  constructor(name: string) {
+    this.name = name;
   }
 
-  public async run() {
-    console.log('using options', this.options);
-
+  public async execute(options: Options) {
     const result = await exec('docker run -it unityci/editor:2020.3.15f2-base-1 /bin/bash -c "echo test"', {
       output: OutputMode.Capture,
       continueOnError: true,
@@ -19,6 +17,7 @@ export class Bootstrapper {
       // verbose: true,
     });
 
+    console.log(options);
     console.log(result.output);
   }
 }
