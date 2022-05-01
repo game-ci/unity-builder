@@ -3,6 +3,7 @@ import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
+import { TaskDefinitionFormation } from '../cloud-formations/task-definition-formation';
 
 export class AwsCliCommands {
   @CliFunction(`aws-list-all`, `List all resources`)
@@ -18,7 +19,8 @@ export class AwsCliCommands {
     const stacks =
       (await CF.listStacks().promise()).StackSummaries?.filter(
         (_x) =>
-          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
+          _x.StackStatus !== 'DELETE_COMPLETE' &&
+          _x.TemplateDescription === TaskDefinitionFormation.description.replace('\n', ''),
       ) || [];
     CloudRunnerLogger.log(`Stacks ${stacks.length}`);
     for (const element of stacks) {
