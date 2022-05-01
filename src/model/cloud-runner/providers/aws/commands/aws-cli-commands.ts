@@ -2,18 +2,35 @@ import AWS from 'aws-sdk';
 import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
+import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 
 export class AwsCliCommands {
+  @CliFunction(`aws-list-all`, `List all resources`)
+  static async awsListAll() {
+    await AwsCliCommands.awsListStacks();
+    await AwsCliCommands.awsListTasks();
+    await AwsCliCommands.awsListLogGroups();
+  }
   @CliFunction(`aws-list-stacks`, `List stacks`)
-  static async awsListStacks(perResultCallback: any) {
+  static async awsListStacks(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter((_x) => _x.StackStatus !== 'DELETE_COMPLETE') || [];
-    CloudRunnerLogger.log(`DescribeStacksRequest ${stacks.length}`);
+      (await CF.listStacks().promise()).StackSummaries?.filter(
+        (_x) =>
+          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
+      ) || [];
+    CloudRunnerLogger.log(`Stacks ${stacks.length}`);
     for (const element of stacks) {
-      CloudRunnerLogger.log(JSON.stringify(element, undefined, 4));
-      CloudRunnerLogger.log(`${element.StackName}`);
+      if (perResultCallback) await perResultCallback(element);
+    }
+    const baseStacks =
+      (await CF.listStacks().promise()).StackSummaries?.filter(
+        (_x) =>
+          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription === BaseStackFormation.baseStackDecription,
+      ) || [];
+    CloudRunnerLogger.log(`Base Stacks ${baseStacks.length}`);
+    for (const element of baseStacks) {
       if (perResultCallback) await perResultCallback(element);
     }
     if (stacks === undefined) {
@@ -21,11 +38,11 @@ export class AwsCliCommands {
     }
   }
   @CliFunction(`aws-list-tasks`, `List tasks`)
-  static async awsListTasks(perResultCallback: any) {
+  static async awsListTasks(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
-    CloudRunnerLogger.log(`ECS Clusters`);
     const ecs = new AWS.ECS();
     const clusters = (await ecs.listClusters().promise()).clusterArns || [];
+    CloudRunnerLogger.log(`Clusters ${clusters.length}`);
     for (const element of clusters) {
       const input: AWS.ECS.ListTasksRequest = {
         cluster: element,
@@ -37,14 +54,13 @@ export class AwsCliCommands {
         if (describeList === []) {
           continue;
         }
-        CloudRunnerLogger.log(`DescribeTasksRequest ${describeList.length}`);
+        CloudRunnerLogger.log(`Tasks ${describeList.length}`);
         for (const taskElement of describeList) {
           if (taskElement === undefined) {
             continue;
           }
           taskElement.overrides = {};
           taskElement.attachments = [];
-          CloudRunnerLogger.log(JSON.stringify(taskElement, undefined, 4));
           if (taskElement.createdAt === undefined) {
             CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
             continue;
@@ -52,6 +68,21 @@ export class AwsCliCommands {
           if (perResultCallback) await perResultCallback(taskElement, element);
         }
       }
+    }
+  }
+  @CliFunction(`aws-list-log-groups`, `List tasks`)
+  static async awsListLogGroups(perResultCallback: any = false) {
+    process.env.AWS_REGION = Input.region;
+    const ecs = new AWS.CloudWatchLogs();
+    const logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = { logGroupNamePrefix: 'game-ci' };
+    const logGroups = (await ecs.describeLogGroups(logStreamInput).promise()).logGroups || [];
+    CloudRunnerLogger.log(`Log Groups ${logGroups.length}`);
+    for (const element of logGroups) {
+      if (element.creationTime === undefined) {
+        CloudRunnerLogger.log(`Skipping ${element.logGroupName} no createdAt date`);
+        continue;
+      }
+      if (perResultCallback) await perResultCallback(element, element);
     }
   }
 
