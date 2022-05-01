@@ -126,7 +126,7 @@ class AWSTaskRunner {
     const stream = await AWSTaskRunner.getLogStream(kinesis, kinesisStreamName);
     let iterator = await AWSTaskRunner.getLogIterator(kinesis, stream);
 
-    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${CF.config.region}#logsV2:log-groups/log-group/${taskDef.taskDefStackName}`;
+    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
     CloudRunnerLogger.log(`You can also see the logs at AWS Cloud Watch: ${logBaseUrl}`);
     let shouldReadLogs = true;
     let shouldCleanup = true;
