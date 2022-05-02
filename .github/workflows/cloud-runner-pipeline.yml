@@ -1,7 +1,7 @@
 name: Cloud Runner
 
 on:
-  push: { branches: [cloud-runner-develop] }
+  push: { branches: [cloud-runner-develop, main] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
