@@ -4,7 +4,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
 import { CloudRunnerStatics } from '../../cloud-runner-statics';
 import waitUntil from 'async-wait-until';
-import CloudRunner from '../../cloud-runner';
+import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 
 class KubernetesTaskRunner {
   static async runTask(
@@ -14,20 +14,23 @@ class KubernetesTaskRunner {
     podName: string,
     containerName: string,
     namespace: string,
-    logCallback: any,
   ) {
     CloudRunnerLogger.log(`Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace}`);
     const stream = new Writable();
     let output = '';
     let didStreamAnyLogs: boolean = false;
+    let shouldReadLogs = true;
+    let shouldCleanup = true;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
       let message = chunk.toString().trimRight(`\n`);
       message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-        output += message;
-      }
-      logCallback(message);
+      ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+        message,
+        shouldReadLogs,
+        shouldCleanup,
+        output,
+      ));
       next();
     };
     const logOptions = {

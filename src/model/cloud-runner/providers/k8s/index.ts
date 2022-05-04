@@ -119,7 +119,6 @@ class Kubernetes implements ProviderInterface {
             this.podName,
             'main',
             this.namespace,
-            CloudRunnerLogger.log,
           );
           break;
         } catch (error: any) {

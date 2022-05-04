@@ -1,6 +1,7 @@
 export class BaseStackFormation {
+  public static readonly baseStackDecription = `Game-CI base stack`;
   public static readonly formation: string = `AWSTemplateFormatVersion: '2010-09-09'
-Description: Game-CI base stack
+Description: ${BaseStackFormation.baseStackDecription}
 Parameters:
   EnvironmentName:
     Type: String

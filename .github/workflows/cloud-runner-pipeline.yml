@@ -1,0 +1,218 @@
+name: Cloud Runner
+
+on:
+  push: { branches: [cloud-runner-develop, main] }
+#  push: { branches: [main] }
+#  pull_request:
+#    paths-ignore:
+#      - '.github/**'
+
+env:
+  GKE_ZONE: 'us-central1'
+  GKE_REGION: 'us-central1'
+  GKE_PROJECT: 'unitykubernetesbuilder'
+  GKE_CLUSTER: 'game-ci-github-pipelines'
+  GCP_LOGGING: true
+  GCP_PROJECT: unitykubernetesbuilder
+  GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
+  AWS_REGION: eu-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-west-2
+  AWS_BASE_STACK_NAME: game-ci-github-pipelines
+  CLOUD_RUNNER_BRANCH: ${{ github.ref }}
+  CLOUD_RUNNER_TESTS: true
+  DEBUG: true
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+jobs:
+  awsBuild:
+    name: AWS Fargate Build
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - test-project
+        unityVersion:
+          #  - 2019.2.11f1
+          - 2019.3.15f1
+        targetPlatform:
+          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - WebGL # WebGL.
+          #- iOS # Build an iOS player.
+          #- Android # Build an Android .apk.
+          #          - StandaloneWindows # Build a Windows standalone.
+          #          - WSAPlayer # Build an Windows Store Apps player.
+          #          - PS4 # Build a PS4 Standalone.
+          #          - XboxOne # Build a Xbox One Standalone.
+          #          - tvOS # Build to Apple's tvOS platform.
+          #          - Switch # Build a Nintendo Switch player
+    # steps
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
+        with:
+          lfs: true
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run test "caching"
+      - run: yarn run test-i-aws
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: ${{ matrix.projectPath }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
+          cloudRunnerTests: true
+          versioning: None
+      - uses: ./
+        id: aws-fargate-unity-build
+        timeout-minutes: 25
+        with:
+          cloudRunnerCluster: aws
+          versioning: None
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          postBuildSteps: |
+            - name: upload
+              image: amazon/aws-cli
+              commands: |
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+                aws configure set region $AWS_DEFAULT_REGION --profile default
+                aws s3 ls
+                aws s3 ls game-ci-test-storage
+                ls /data/cache/$CACHE_KEY
+                ls /data/cache/$CACHE_KEY/build
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar
+              secrets:
+              - name: awsAccessKeyId
+                value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              - name: awsSecretAccessKey
+                value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              - name: awsDefaultRegion
+                value: eu-west-2
+      - run: |
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
+          ls
+      - run: yarn run cli -m aws-garbage-collect
+      ###########################
+      #          Upload         #
+      ###########################
+      # download from cloud storage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: AWS Build (${{ matrix.targetPlatform }})
+          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
+          retention-days: 14
+  k8sBuilds:
+    name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          #  - 2019.2.11f1
+          - 2019.3.15f1
+        targetPlatform:
+          #  - StandaloneWindows64
+          - StandaloneLinux64
+    steps:
+      ###########################
+      #         Checkout        #
+      ###########################
+      - uses: actions/checkout@v2
+        if: github.event.event_type != 'pull_request_target'
+        with:
+          lfs: true
+
+      ###########################
+      #          Setup          #
+      ###########################
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: '288.0.0'
+          service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: Get GKE cluster credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+
+      ###########################
+      # Cloud Runner Test Suite #
+      ###########################
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run test "caching"
+      - name: Cloud Runner Test Suite
+        run: yarn run test-i-k8s --detectOpenHandles --forceExit
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: ${{ matrix.projectPath }}
+          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
+          unityVersion: ${{ matrix.unityVersion }}
+          cloudRunnerTests: true
+          versioning: None
+
+      ###########################
+      # Cloud Runner Build Test #
+      ###########################
+      - name: Cloud Runner Build Test
+        uses: ./
+        id: k8s-unity-build
+        timeout-minutes: 30
+        with:
+          cloudRunnerCluster: k8s
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          kubeConfig: ${{ steps.read-base64.outputs.base64 }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectPath: test-project
+          unityVersion: ${{ matrix.unityVersion }}
+          versioning: None
+          postBuildSteps: |
+            - name: upload
+              image: amazon/aws-cli
+              commands: |
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+                aws configure set region $AWS_DEFAULT_REGION --profile default
+                aws s3 ls
+                aws s3 ls game-ci-test-storage
+                ls /data/cache/$CACHE_KEY
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar
+              secrets:
+              - name: awsAccessKeyId
+                value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              - name: awsSecretAccessKey
+                value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              - name: awsDefaultRegion
+                value: eu-west-2
+      - run: |
+          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.CACHE_KEY }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar
+          ls
+      ###########################
+      #          Upload         #
+      ###########################
+      # download from cloud storage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: K8s Build (${{ matrix.targetPlatform }})
+          path: build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar
+          retention-days: 14

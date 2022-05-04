@@ -76,7 +76,7 @@ class BuildParameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled && Cli.options === undefined) {
+    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
       if (!process.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this

@@ -1,9 +1,7 @@
 export class TaskDefinitionFormation {
+  public static readonly description: string = `Game CI Cloud Runner Task Stack`;
   public static readonly formation: string = `AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  AWS Fargate cluster that can span public and private subnets. Supports public
-  facing load balancers, private internal load balancers, and both internal and
-  external service discovery namespaces.
+Description: ${TaskDefinitionFormation.description}
 Parameters:
   EnvironmentName:
     Type: String
