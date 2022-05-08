@@ -9,6 +9,8 @@ pushd "$ACTIVATE_LICENSE_PATH"
   -batchmode \
   -nographics \
   -quit \
+  -username "$UNITY_EMAIL" \
+  -password "$UNITY_PASSWORD" \
   -returnlicense \
   -projectPath "$ACTIVATE_LICENSE_PATH"
 
