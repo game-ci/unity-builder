@@ -11,7 +11,7 @@ export class AwsCliCommands {
     await AwsCliCommands.awsListTasks();
     await AwsCliCommands.awsListLogGroups(undefined, true);
   }
-  @CliFunction(`aws-garbage-collect`, `garbage collect aws resources not in use !WIP!`)
+  @CliFunction(`aws-garbage-collect-list`, `garbage collect aws resources not in use !WIP!`)
   static async garbageCollectAws() {
     await AwsCliCommands.cleanup(false);
   }
@@ -142,7 +142,24 @@ export class AwsCliCommands {
     const CF = new AWS.CloudFormation();
     const ecs = new AWS.ECS();
     const cwl = new AWS.CloudWatchLogs();
+    const taskDefinitionsInUse = new Array();
+    await AwsCliCommands.awsListTasks(async (taskElement, element) => {
+      taskDefinitionsInUse.push(taskElement.taskDefinitionArn);
+      if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(taskElement.CreatedAt))) {
+        CloudRunnerLogger.log(`Stopping task ${taskElement.containers?.[0].name}`);
+        await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
+      }
+    });
     await AwsCliCommands.awsListStacks(async (element) => {
+      if (
+        (await CF.describeStackResources({ StackName: element.StackName }).promise()).StackResources?.some(
+          (x) => x.ResourceType === 'AWS::ECS::TaskDefinition' && taskDefinitionsInUse.includes(x.PhysicalResourceId),
+        )
+      ) {
+        CloudRunnerLogger.log(`Skipping ${element.StackName} - active task was running not deleting`);
+
+        return;
+      }
       if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(element.CreationTime))) {
         if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
           CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
@@ -152,12 +169,6 @@ export class AwsCliCommands {
         CloudRunnerLogger.log(`Deleting ${element.logGroupName}`);
         const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
         await CF.deleteStack(deleteStackInput).promise();
-      }
-    });
-    await AwsCliCommands.awsListTasks(async (taskElement, element) => {
-      if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(taskElement.CreatedAt))) {
-        CloudRunnerLogger.log(`Stopping task ${taskElement.containers?.[0].name}`);
-        await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
       }
     });
     await AwsCliCommands.awsListLogGroups(async (element) => {
