@@ -107,7 +107,7 @@ jobs:
       - run: |
           aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
           ls
-      - run: yarn run cli -m aws-garbage-collect
+      - run: yarn run cli -m aws-list-all
       ###########################
       #          Upload         #
       ###########################
