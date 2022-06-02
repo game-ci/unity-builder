@@ -84,7 +84,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           postBuildSteps: |
             - name: upload
               image: amazon/aws-cli
@@ -182,7 +182,7 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           targetPlatform: ${{ matrix.targetPlatform }}
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
           unityVersion: ${{ matrix.unityVersion }}
           versioning: None
