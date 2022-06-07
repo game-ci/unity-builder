@@ -1,5 +1,5 @@
-import Action from './action';
-import Docker from './docker';
+import Action from './action.ts';
+import Docker from './docker.ts';
 
 describe('Docker', () => {
   it.skip('runs', async () => {

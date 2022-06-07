@@ -1,4 +1,4 @@
-import UnityVersioning from './unity-versioning';
+import UnityVersioning from './unity-versioning.ts';
 
 describe('Unity Versioning', () => {
   describe('parse', () => {

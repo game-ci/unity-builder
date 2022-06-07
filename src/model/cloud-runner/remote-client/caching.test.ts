@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import BuildParameters from '../../build-parameters';
-import { Cli } from '../../cli/cli';
-import Input from '../../input';
-import UnityVersioning from '../../unity-versioning';
+import fs from '../../../node_modules/fs';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import BuildParameters from '../../build-parameters.ts';
+import { Cli } from '../../cli/cli.ts';
+import Input from '../../input.ts';
+import UnityVersioning from '../../unity-versioning.ts';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { Caching } from './caching';
-import { v4 as uuidv4 } from 'uuid';
+import { Caching } from './caching.ts';
+import { v4 as uuidv4 } from '../../../node_modules/uuid';
 
 describe('Cloud Runner Caching', () => {
   it('responds', () => {});

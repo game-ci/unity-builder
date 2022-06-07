@@ -1,5 +1,5 @@
 import { CoreV1Api } from '@kubernetes/client-node';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import * as k8s from '@kubernetes/client-node';
 const base64 = require('base-64');
 

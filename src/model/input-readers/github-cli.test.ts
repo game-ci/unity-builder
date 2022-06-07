@@ -1,5 +1,5 @@
-import { GithubCliReader } from './github-cli';
-import * as core from '@actions/core';
+import { GithubCliReader } from './github-cli.ts';
+import * as core from '../../../node_modules/@actions/core';
 
 describe(`github cli`, () => {
   // Todo - We can not assume that everyone has the GitHub cli installed locally.

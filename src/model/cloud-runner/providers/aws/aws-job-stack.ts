@@ -1,10 +1,10 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { AWSError } from './aws-error';
-import CloudRunner from '../../cloud-runner';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
+import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates.ts';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import { AWSError } from './aws-error.ts';
+import CloudRunner from '../../cloud-runner.ts';
 
 export class AWSJobStack {
   private baseStackName: string;

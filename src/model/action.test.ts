@@ -1,6 +1,6 @@
-import path from 'path';
-import fs from 'fs';
-import Action from './action';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import fs from '../../../node_modules/fs';
+import Action from './action.ts';
 
 describe('Action', () => {
   describe('compatibility check', () => {

@@ -1,14 +1,14 @@
-import { customAlphabet } from 'nanoid';
-import AndroidVersioning from './android-versioning';
-import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
-import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid';
-import Input from './input';
-import Platform from './platform';
-import UnityVersioning from './unity-versioning';
-import Versioning from './versioning';
-import { GitRepoReader } from './input-readers/git-repo';
-import { GithubCliReader } from './input-readers/github-cli';
-import { Cli } from './cli/cli';
+import { customAlphabet } from '../../../node_modules/nanoid';
+import AndroidVersioning from './android-versioning.ts';
+import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants.ts';
+import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid.ts';
+import Input from './input.ts';
+import Platform from './platform.ts';
+import UnityVersioning from './unity-versioning.ts';
+import Versioning from './versioning.ts';
+import { GitRepoReader } from './input-readers/git-repo.ts';
+import { GithubCliReader } from './input-readers/github-cli.ts';
+import { Cli } from './cli/cli.ts';
 
 class BuildParameters {
   public editorVersion!: string;

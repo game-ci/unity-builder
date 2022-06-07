@@ -1,10 +1,10 @@
 import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
-import { Writable } from 'stream';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import * as core from '@actions/core';
-import { CloudRunnerStatics } from '../../cloud-runner-statics';
+import { Writable } from '../../../node_modules/stream';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import * as core from '../../../node_modules/@actions/core';
+import { CloudRunnerStatics } from '../../cloud-runner-statics.ts';
 import waitUntil from 'async-wait-until';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
+import { FollowLogStreamService } from '../../services/follow-log-stream-service.ts';
 
 class KubernetesTaskRunner {
   static async runTask(

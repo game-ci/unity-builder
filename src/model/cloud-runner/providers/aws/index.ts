@@ -1,14 +1,14 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import AWSTaskRunner from './aws-task-runner';
-import { ProviderInterface } from '../provider-interface';
-import BuildParameters from '../../../build-parameters';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { AWSJobStack } from './aws-job-stack';
-import { AWSBaseStack } from './aws-base-stack';
-import { Input } from '../../..';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
+import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
+import AWSTaskRunner from './aws-task-runner.ts';
+import { ProviderInterface } from '../provider-interface.ts';
+import BuildParameters from '../../../build-parameters.ts';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import { AWSJobStack } from './aws-job-stack.ts';
+import { AWSBaseStack } from './aws-base-stack.ts';
+import { Input } from '../../...ts';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;

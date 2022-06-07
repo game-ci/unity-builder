@@ -1,5 +1,5 @@
-import Input from '../../input';
-import { CloudRunnerSystem } from './cloud-runner-system';
+import Input from '../../input.ts';
+import { CloudRunnerSystem } from './cloud-runner-system.ts';
 
 class DependencyOverrideService {
   public static async CheckHealth() {

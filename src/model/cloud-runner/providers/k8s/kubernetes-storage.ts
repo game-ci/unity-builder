@@ -1,10 +1,10 @@
 import waitUntil from 'async-wait-until';
-import * as core from '@actions/core';
+import * as core from '../../../node_modules/@actions/core';
 import * as k8s from '@kubernetes/client-node';
-import BuildParameters from '../../../build-parameters';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import YAML from 'yaml';
-import { IncomingMessage } from 'http';
+import BuildParameters from '../../../build-parameters.ts';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import YAML from '../../../node_modules/yaml';
+import { IncomingMessage } from '../../../node_modules/http';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(

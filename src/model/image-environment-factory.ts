@@ -1,5 +1,5 @@
-import BuildParameters from './build-parameters';
-import { ReadLicense } from './input-readers/test-license-reader';
+import BuildParameters from './build-parameters.ts';
+import { ReadLicense } from './input-readers/test-license-reader.ts';
 
 class Parameter {
   public name;

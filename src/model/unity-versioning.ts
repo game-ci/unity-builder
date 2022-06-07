@@ -1,5 +1,6 @@
-import * as fs from 'fs';
-import path from 'path';
+import * as fs from '../../../node_modules/fs';
+import * as fs from 'https://deno.land/std@0.141.0/fs/mod.ts';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
 
 export default class UnityVersioning {
   static get versionPattern() {

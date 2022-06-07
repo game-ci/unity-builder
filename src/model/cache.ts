@@ -1,7 +1,7 @@
-import * as core from '@actions/core';
-import fs from 'fs';
-import Action from './action';
-import Project from './project';
+import * as core from '../../../node_modules/@actions/core';
+import fs from '../../../node_modules/fs';
+import Action from './action.ts';
+import Project from './project.ts';
 
 class Cache {
   static verify() {

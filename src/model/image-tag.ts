@@ -1,6 +1,6 @@
-import Platform from './platform';
+import Platform from './platform.ts';
 
-import BuildParameters from './build-parameters';
+import BuildParameters from './build-parameters.ts';
 
 class ImageTag {
   public repository: string;

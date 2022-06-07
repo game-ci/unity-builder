@@ -1,6 +1,6 @@
-import { BuildParameters } from '.';
-import { SetupMac, SetupWindows } from './platform-setup/';
-import ValidateWindows from './platform-validation/validate-windows';
+import { BuildParameters } from './index.ts';
+import { SetupMac, SetupWindows } from './platform-setup/index.ts';
+import ValidateWindows from './platform-validation/validate-windows.ts';
 
 class PlatformSetup {
   static async setup(buildParameters: BuildParameters, actionFolder: string) {

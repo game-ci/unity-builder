@@ -1,6 +1,6 @@
 import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '@kubernetes/client-node';
-import BuildParameters from '../../../build-parameters';
-import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process';
+import BuildParameters from '../../../build-parameters.ts';
+import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process.ts';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import CloudRunner from '../../cloud-runner';

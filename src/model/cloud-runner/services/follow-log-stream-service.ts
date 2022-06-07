@@ -1,7 +1,7 @@
-import CloudRunnerLogger from './cloud-runner-logger';
-import * as core from '@actions/core';
-import CloudRunner from '../cloud-runner';
-import { CloudRunnerStatics } from '../cloud-runner-statics';
+import CloudRunnerLogger from './cloud-runner-logger.ts';
+import * as core from '../../../node_modules/@actions/core';
+import CloudRunner from '../cloud-runner.ts';
+import { CloudRunnerStatics } from '../cloud-runner-statics.ts';
 
 export class FollowLogStreamService {
   public static handleIteration(message, shouldReadLogs, shouldCleanup, output) {

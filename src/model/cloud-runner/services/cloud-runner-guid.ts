@@ -1,5 +1,5 @@
-import { customAlphabet } from 'nanoid';
-import CloudRunnerConstants from './cloud-runner-constants';
+import { customAlphabet } from '../../../node_modules/nanoid';
+import CloudRunnerConstants from './cloud-runner-constants.ts';
 
 class CloudRunnerNamespace {
   static generateGuid(runNumber: string | number, platform: string) {

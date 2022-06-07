@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
 
 class Action {
   static get supportedPlatforms() {
@@ -10,7 +10,7 @@ class Action {
   }
 
   static get isRunningFromSource() {
-    return path.basename(__dirname) === 'model';
+    return path.basename(__dirname) === "model";
   }
 
   static get canonicalName() {

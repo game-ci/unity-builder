@@ -1,4 +1,4 @@
-import { stat } from 'fs/promises';
+import { stat } from 'https://deno.land/std@0.142.0/node/fs/promises/mod.ts';
 
 describe('Integrity tests', () => {
   describe('package-lock.json', () => {

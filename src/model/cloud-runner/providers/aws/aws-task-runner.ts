@@ -1,13 +1,13 @@
 import * as AWS from 'aws-sdk';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import * as core from '@actions/core';
-import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import * as zlib from 'zlib';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { Input } from '../../..';
-import CloudRunner from '../../cloud-runner';
-import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
+import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
+import * as core from '../../../node_modules/@actions/core';
+import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
+import * as zlib from '../../../node_modules/zlib';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import { Input } from '../../...ts';
+import CloudRunner from '../../cloud-runner.ts';
+import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process.ts';
+import { FollowLogStreamService } from '../../services/follow-log-stream-service.ts';
 
 class AWSTaskRunner {
   static async runTask(

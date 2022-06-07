@@ -1,7 +1,7 @@
-import { BuildParameters } from '..';
-import { getUnityChangeset } from 'unity-changeset';
-import { exec } from '@actions/exec';
-import fs from 'fs';
+import { BuildParameters } from '../index.ts';
+import { getUnityChangeset } from '../../../node_modules/unity-changeset';
+import { exec } from '../../../node_modules/@actions/exec';
+import fs from '../../../node_modules/fs';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;

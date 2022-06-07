@@ -1,5 +1,5 @@
-import { exec } from '@actions/exec';
-import { BuildParameters } from '.';
+import { exec } from '../../../node_modules/@actions/exec';
+import { BuildParameters } from './build-parameters.ts';
 
 class MacBuilder {
   public static async run(actionFolder, workspace, buildParameters: BuildParameters, silent = false) {

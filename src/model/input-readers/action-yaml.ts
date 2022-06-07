@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import YAML from 'yaml';
+import fs from '../../../node_modules/fs';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import YAML from '../../../node_modules/yaml';
 
 export class ActionYamlReader {
   private actionYamlParsed: any;

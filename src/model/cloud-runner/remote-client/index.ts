@@ -1,14 +1,14 @@
-import fs from 'fs';
-import CloudRunner from '../cloud-runner';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { Caching } from './caching';
-import { LfsHashing } from '../services/lfs-hashing';
-import { RemoteClientLogger } from './remote-client-logger';
-import path from 'path';
-import { assert } from 'console';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CliFunction } from '../../cli/cli-functions-repository';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import fs from '../../../node_modules/fs';
+import CloudRunner from '../cloud-runner.ts';
+import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
+import { Caching } from './caching.ts';
+import { LfsHashing } from '../services/lfs-hashing.ts';
+import { RemoteClientLogger } from './remote-client-logger.ts';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { assert } from '../../../node_modules/console';
+import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
+import { CliFunction } from '../../cli/cli-functions-repository.ts';
+import { CloudRunnerSystem } from '../services/cloud-runner-system.ts';
 
 export class RemoteClient {
   public static async bootstrapRepository() {

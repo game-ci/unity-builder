@@ -1,4 +1,4 @@
-import Unity from './unity';
+import Unity from './unity.ts';
 
 describe('Unity', () => {
   describe('libraryFolder', () => {

@@ -1,8 +1,8 @@
 import AWS from 'aws-sdk';
-import { CliFunction } from '../../../../cli/cli-functions-repository';
-import Input from '../../../../input';
-import CloudRunnerLogger from '../../../services/cloud-runner-logger';
-import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
+import { CliFunction } from '../../../../cli/cli-functions-repository.ts';
+import Input from '../../../../input.ts';
+import CloudRunnerLogger from '../../../services/cloud-runner-logger.ts';
+import { BaseStackFormation } from '../cloud-formations/base-stack-formation.ts';
 
 export class AwsCliCommands {
   @CliFunction(`aws-list-all`, `List all resources`)

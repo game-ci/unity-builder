@@ -1,12 +1,12 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunnerStepState } from '../cloud-runner-step-state';
-import { CustomWorkflow } from './custom-workflow';
-import { WorkflowInterface } from './workflow-interface';
-import * as core from '@actions/core';
-import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
-import path from 'path';
-import CloudRunner from '../cloud-runner';
+import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
+import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
+import { CloudRunnerStepState } from '../cloud-runner-step-state.ts';
+import { CustomWorkflow } from './custom-workflow.ts';
+import { WorkflowInterface } from './workflow-interface.ts';
+import * as core from '../../../../node_modules/@actions/core';
+import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process.ts';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import CloudRunner from '../cloud-runner.ts';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {

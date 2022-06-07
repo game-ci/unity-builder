@@ -1,8 +1,8 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import YAML from 'yaml';
-import { CloudRunner, Input } from '../..';
+import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
+import CloudRunnerSecret from '../services/cloud-runner-secret.ts';
+import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
+import YAML from '../../../../node_modules/yaml';
+import { CloudRunner, Input } from '../../index.ts';
 
 export class CustomWorkflow {
   public static async runCustomJob(buildSteps) {

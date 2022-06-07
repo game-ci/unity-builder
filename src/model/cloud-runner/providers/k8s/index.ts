@@ -1,18 +1,18 @@
-import * as k8s from '@kubernetes/client-node';
-import { BuildParameters, Output } from '../../..';
-import * as core from '@actions/core';
-import { ProviderInterface } from '../provider-interface';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import KubernetesStorage from './kubernetes-storage';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import KubernetesTaskRunner from './kubernetes-task-runner';
-import KubernetesSecret from './kubernetes-secret';
-import waitUntil from 'async-wait-until';
-import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
-import KubernetesServiceAccount from './kubernetes-service-account';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { CoreV1Api } from '@kubernetes/client-node';
-import DependencyOverrideService from '../../services/depdency-override-service';
+import * as k8s from '../../../node_modules/@kubernetes/client-node';
+import { BuildParameters, Output } from '../../../index.ts';
+import * as core from '../../../node_modules/@actions/core';
+import { ProviderInterface } from '../provider-interface.ts';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
+import KubernetesStorage from './kubernetes-storage.ts';
+import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
+import KubernetesTaskRunner from './kubernetes-task-runner.ts';
+import KubernetesSecret from './kubernetes-secret.ts';
+import waitUntil from '../../../node_modules/async-wait-until';
+import KubernetesJobSpecFactory from './kubernetes-job-spec-factory.ts';
+import KubernetesServiceAccount from './kubernetes-service-account.ts';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import { CoreV1Api } from '../../../node_modules/@kubernetes/client-node';
+import DependencyOverrideService from '../../services/depdency-override-service.ts';
 
 class Kubernetes implements ProviderInterface {
   private kubeConfig: k8s.KubeConfig;

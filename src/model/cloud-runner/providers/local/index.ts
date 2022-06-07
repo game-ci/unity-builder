@@ -1,9 +1,9 @@
-import BuildParameters from '../../../build-parameters';
-import { CloudRunnerSystem } from '../../services/cloud-runner-system';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { ProviderInterface } from '../provider-interface';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import BuildParameters from '../../../build-parameters.ts';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system.ts';
+import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
+import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
+import { ProviderInterface } from '../provider-interface.ts';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 
 class LocalCloudRunner implements ProviderInterface {
   cleanup(

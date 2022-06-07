@@ -1,5 +1,5 @@
-import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
-import CloudRunnerSecret from './services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable.ts';
+import CloudRunnerSecret from './services/cloud-runner-secret.ts';
 
 export class CloudRunnerStepState {
   public image: string;

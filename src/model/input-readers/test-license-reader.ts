@@ -1,7 +1,7 @@
-import path from 'path';
-import fs from 'fs';
-import YAML from 'yaml';
-import Input from '../input';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import fs from '../../../node_modules/fs';
+import YAML from '../../../node_modules/yaml';
+import Input from '../input.ts';
 
 export function ReadLicense() {
   if (Input.cloudRunnerCluster === 'local') {

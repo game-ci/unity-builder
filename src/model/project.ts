@@ -1,6 +1,6 @@
-import Input from './input';
-import Unity from './unity';
-import Action from './action';
+import Input from './input.ts';
+import Unity from './unity.ts';
+import Action from './action.ts';
 
 class Project {
   static get relativePath() {

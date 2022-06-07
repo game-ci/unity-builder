@@ -1,5 +1,5 @@
-import fs from 'fs';
-import { BuildParameters } from '..';
+import fs from '../../../node_modules/fs';
+import { BuildParameters } from '../index.ts';
 
 class ValidateWindows {
   public static validate(buildParameters: BuildParameters) {

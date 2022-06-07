@@ -1,8 +1,8 @@
-import { CloudRunnerStepState } from '../cloud-runner-step-state';
-import { CustomWorkflow } from './custom-workflow';
-import { WorkflowInterface } from './workflow-interface';
-import { BuildAutomationWorkflow } from './build-automation-workflow';
-import CloudRunner from '../cloud-runner';
+import { CloudRunnerStepState } from '../cloud-runner-step-state.ts';
+import { CustomWorkflow } from './custom-workflow.ts';
+import { WorkflowInterface } from './workflow-interface.ts';
+import { BuildAutomationWorkflow } from './build-automation-workflow.ts';
+import CloudRunner from '../cloud-runner.ts';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {

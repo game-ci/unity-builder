@@ -1,10 +1,10 @@
-import path from 'path';
-import { CloudRunnerFolders } from './cloud-runner-folders';
-import { CloudRunnerSystem } from './cloud-runner-system';
-import fs from 'fs';
-import { assert } from 'console';
-import { Cli } from '../../cli/cli';
-import { CliFunction } from '../../cli/cli-functions-repository';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { CloudRunnerFolders } from './cloud-runner-folders.ts';
+import { CloudRunnerSystem } from './cloud-runner-system.ts';
+import fs from '../../../node_modules/fs';
+import { assert } from '../../../node_modules/console';
+import { Cli } from '../../cli/cli.ts';
+import { CliFunction } from '../../cli/cli-functions-repository.ts';
 
 export class LfsHashing {
   public static async createLFSHashFiles() {

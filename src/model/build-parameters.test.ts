@@ -1,9 +1,9 @@
-import Versioning from './versioning';
-import UnityVersioning from './unity-versioning';
-import AndroidVersioning from './android-versioning';
-import BuildParameters from './build-parameters';
-import Input from './input';
-import Platform from './platform';
+import Versioning from './versioning.ts';
+import UnityVersioning from './unity-versioning.ts';
+import AndroidVersioning from './android-versioning.ts';
+import BuildParameters from './build-parameters.ts';
+import Input from './input.ts';
+import Platform from './platform.ts';
 
 // Todo - Don't use process.env directly, that's what the input model class is for.
 const testLicense =

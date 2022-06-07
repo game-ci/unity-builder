@@ -1,4 +1,4 @@
-import { CloudRunnerStepState } from '../cloud-runner-step-state';
+import { CloudRunnerStepState } from '../cloud-runner-step-state.ts';
 
 export interface WorkflowInterface {
   run(

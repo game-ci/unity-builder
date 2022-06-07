@@ -1,5 +1,5 @@
-import Input from '../../input';
-import { GenericInputReader } from '../../input-readers/generic-input-reader';
+import Input from '../../input.ts';
+import { GenericInputReader } from '../../input-readers/generic-input-reader.ts';
 
 const formatFunction = (value, arguments_) => {
   for (const element of arguments_) {

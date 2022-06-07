@@ -1,8 +1,9 @@
-import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model';
-import { Cli } from './model/cli/cli';
-import MacBuilder from './model/mac-builder';
-import PlatformSetup from './model/platform-setup';
+import * as core from '../node_modules/@actions/core';
+import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model.ts';
+import { Cli } from './model/cli/cli.ts';
+import MacBuilder from './model/mac-builder.ts';
+import PlatformSetup from './model/platform-setup.ts';
+
 async function runMain() {
   try {
     if (Cli.InitCliMode()) {
@@ -36,4 +37,5 @@ async function runMain() {
     core.setFailed((error as Error).message);
   }
 }
+
 runMain();

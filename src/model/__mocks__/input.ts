@@ -1,5 +1,5 @@
 // Import this named export into your test file:
-import Platform from '../platform';
+import Platform from '../platform.ts';
 
 export const mockGetFromUser = jest.fn().mockResolvedValue({
   editorVersion: '',

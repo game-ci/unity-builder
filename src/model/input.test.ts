@@ -1,7 +1,7 @@
-import * as core from '@actions/core';
+import * as core from '../../../node_modules/@actions/core';
 
-import Input from './input';
-import Platform from './platform';
+import Input from './input.ts';
+import Platform from './platform.ts';
 
 afterEach(() => {
   jest.restoreAllMocks();

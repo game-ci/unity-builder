@@ -1,8 +1,8 @@
-import * as core from '@actions/core';
-import NotImplementedException from './error/not-implemented-exception';
-import System from './system';
-import Versioning from './versioning';
-import { validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions';
+import * as core from '../../../node_modules/@actions/core';
+import NotImplementedException from './error/not-implemented-exception.ts';
+import System from './system.ts';
+import Versioning from './versioning.ts';
+import { validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions.ts';
 
 afterEach(() => {
   jest.restoreAllMocks();

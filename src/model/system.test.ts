@@ -1,6 +1,6 @@
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import System from './system';
+import * as core from '../../../node_modules/@actions/core';
+import * as exec from '../../../node_modules/@actions/exec';
+import System from './system.ts';
 
 jest.spyOn(core, 'debug').mockImplementation(() => {});
 const info = jest.spyOn(core, 'info').mockImplementation(() => {});

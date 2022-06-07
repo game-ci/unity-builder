@@ -1,4 +1,4 @@
-import * as core from '@actions/core';
+import * as core from '../../../node_modules/@actions/core';
 
 class CloudRunnerLogger {
   private static timestamp: number;

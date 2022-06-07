@@ -1,7 +1,7 @@
-import { BuildParameters } from '../..';
-import YAML from 'yaml';
-import CloudRunnerSecret from './cloud-runner-secret';
-import CloudRunner from '../cloud-runner';
+import { BuildParameters } from '../../index.ts';
+import YAML from '../../../../node_modules/yaml';
+import CloudRunnerSecret from './cloud-runner-secret.ts';
+import CloudRunner from '../cloud-runner.ts';
 
 export class CloudRunnerBuildCommandProcessor {
   public static ProcessCommands(commands: string, buildParameters: BuildParameters): string {

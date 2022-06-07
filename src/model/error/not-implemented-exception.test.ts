@@ -1,4 +1,4 @@
-import NotImplementedException from './not-implemented-exception';
+import NotImplementedException from './not-implemented-exception.ts';
 
 describe('NotImplementedException', () => {
   it('instantiates', () => {

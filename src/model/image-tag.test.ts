@@ -1,4 +1,4 @@
-import ImageTag from './image-tag';
+import ImageTag from './image-tag.ts';
 
 describe('ImageTag', () => {
   const some = {

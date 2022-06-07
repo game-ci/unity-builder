@@ -1,12 +1,12 @@
 import { BuildParameters, ImageTag } from '..';
-import CloudRunner from './cloud-runner';
-import Input from '../input';
-import { CloudRunnerStatics } from './cloud-runner-statics';
-import { TaskParameterSerializer } from './services/task-parameter-serializer';
-import UnityVersioning from '../unity-versioning';
-import { Cli } from '../cli/cli';
-import CloudRunnerLogger from './services/cloud-runner-logger';
-import { v4 as uuidv4 } from 'uuid';
+import CloudRunner from './cloud-runner.ts';
+import Input from '../input.ts';
+import { CloudRunnerStatics } from './cloud-runner-statics.ts';
+import { TaskParameterSerializer } from './services/task-parameter-serializer.ts';
+import UnityVersioning from '../unity-versioning.ts';
+import { Cli } from '../cli/cli.ts';
+import CloudRunnerLogger from './services/cloud-runner-logger.ts';
+import { v4 as uuidv4 } from '../../../node_modules/uuid';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});

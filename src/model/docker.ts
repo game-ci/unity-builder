@@ -1,7 +1,7 @@
-import { exec } from '@actions/exec';
-import ImageEnvironmentFactory from './image-environment-factory';
-import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+import { exec } from '../../../node_modules/@actions/exec';
+import ImageEnvironmentFactory from './image-environment-factory.ts';
+import { existsSync, mkdirSync } from '../../../node_modules/fs';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
 
 class Docker {
   static async run(image, parameters, silent = false) {

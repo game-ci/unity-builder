@@ -1,6 +1,6 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import * as core from '@actions/core';
-import CloudRunner from '../cloud-runner';
+import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
+import * as core from '../../../../node_modules/@actions/core';
+import CloudRunner from '../cloud-runner.ts';
 
 export class CloudRunnerError {
   public static async handleException(error: unknown) {

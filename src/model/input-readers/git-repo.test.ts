@@ -1,4 +1,4 @@
-import { GitRepoReader } from './git-repo';
+import { GitRepoReader } from './git-repo.ts';
 
 describe(`git repo tests`, () => {
   it(`Branch value parsed from CLI to not contain illegal characters`, async () => {

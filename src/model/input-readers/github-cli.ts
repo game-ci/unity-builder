@@ -1,6 +1,6 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
-import * as core from '@actions/core';
-import Input from '../input';
+import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system.ts';
+import * as core from '../../../node_modules/@actions/core';
+import Input from '../input.ts';
 
 export class GithubCliReader {
   static async GetGitHubAuthToken() {

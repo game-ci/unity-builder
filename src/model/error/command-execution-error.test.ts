@@ -1,4 +1,4 @@
-import CommandExecutionError from './command-execution-error';
+import CommandExecutionError from './command-execution-error.ts';
 
 describe('CommandExecutionError', () => {
   it('instantiates', () => {

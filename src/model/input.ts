@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import { Cli } from './cli/cli';
-import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
-import Platform from './platform';
+import fs from '../../../node_modules/fs';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { Cli } from './cli/cli.ts';
+import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
+import Platform from './platform.ts';
 
 const core = require('@actions/core');
 

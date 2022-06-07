@@ -1,8 +1,8 @@
-import * as core from '@actions/core';
-import NotImplementedException from './error/not-implemented-exception';
-import ValidationError from './error/validation-error';
-import Input from './input';
-import System from './system';
+import * as core from '../../../node_modules/@actions/core';
+import NotImplementedException from './error/not-implemented-exception.ts';
+import ValidationError from './error/validation-error.ts';
+import Input from './input.ts';
+import System from './system.ts';
 
 export default class Versioning {
   static get projectPath() {

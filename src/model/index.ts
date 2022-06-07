@@ -1,15 +1,15 @@
-import Action from './action';
-import BuildParameters from './build-parameters';
-import Cache from './cache';
-import Docker from './docker';
-import Input from './input';
-import ImageTag from './image-tag';
-import Output from './output';
-import Platform from './platform';
-import Project from './project';
-import Unity from './unity';
-import Versioning from './versioning';
-import CloudRunner from './cloud-runner/cloud-runner';
+import Action from './action.ts';
+import BuildParameters from './build-parameters.ts';
+import Cache from './cache.ts';
+import Docker from './docker.ts';
+import Input from './input.ts';
+import ImageTag from './image-tag.ts';
+import Output from './output.ts';
+import Platform from './platform.ts';
+import Project from './project.ts';
+import Unity from './unity.ts';
+import Versioning from './versioning.ts';
+import CloudRunner from './cloud-runner/cloud-runner.ts';
 
 export {
   Action,

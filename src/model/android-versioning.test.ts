@@ -1,4 +1,4 @@
-import AndroidVersioning from './android-versioning';
+import AndroidVersioning from './android-versioning.ts';
 
 describe('Android Versioning', () => {
   describe('versionToVersionCode', () => {

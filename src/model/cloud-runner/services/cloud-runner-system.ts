@@ -1,5 +1,5 @@
-import { exec } from 'child_process';
-import { RemoteClientLogger } from '../remote-client/remote-client-logger';
+import { exec } from '../../../../node_modules/child_process';
+import { RemoteClientLogger } from '../remote-client/remote-client-logger.ts';
 
 export class CloudRunnerSystem {
   public static async Run(command: string, suppressError = false, suppressLogs = false) {

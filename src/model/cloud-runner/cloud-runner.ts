@@ -1,18 +1,18 @@
-import AwsBuildPlatform from './providers/aws';
-import { BuildParameters, Input } from '..';
-import Kubernetes from './providers/k8s';
-import CloudRunnerLogger from './services/cloud-runner-logger';
-import { CloudRunnerStepState } from './cloud-runner-step-state';
-import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
-import { CloudRunnerError } from './error/cloud-runner-error';
-import { TaskParameterSerializer } from './services/task-parameter-serializer';
-import * as core from '@actions/core';
-import CloudRunnerSecret from './services/cloud-runner-secret';
-import { ProviderInterface } from './providers/provider-interface';
-import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
-import TestCloudRunner from './providers/test';
-import LocalCloudRunner from './providers/local';
-import LocalDockerCloudRunner from './providers/local-docker';
+import AwsBuildPlatform from './providers/aws/index.ts';
+import { BuildParameters, Input } from '../index.ts';
+import Kubernetes from './providers/k8s/index.ts';
+import CloudRunnerLogger from './services/cloud-runner-logger.ts';
+import { CloudRunnerStepState } from './cloud-runner-step-state.ts';
+import { WorkflowCompositionRoot } from './workflows/workflow-composition-root.ts';
+import { CloudRunnerError } from './error/cloud-runner-error.ts';
+import { TaskParameterSerializer } from './services/task-parameter-serializer.ts';
+import * as core from '../../../node_modules/@actions/core';
+import CloudRunnerSecret from './services/cloud-runner-secret.ts';
+import { ProviderInterface } from './providers/provider-interface.ts';
+import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable.ts';
+import TestCloudRunner from './providers/test/index.ts';
+import LocalCloudRunner from './providers/local/index.ts';
+import LocalDockerCloudRunner from './providers/local-docker/index.ts';
 
 class CloudRunner {
   public static Provider: ProviderInterface;

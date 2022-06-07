@@ -1,5 +1,5 @@
-import * as core from '@actions/core';
-import * as semver from 'semver';
+import * as core from '../../../node_modules/@actions/core';
+import * as semver from '../../../node_modules/semver';
 
 export default class AndroidVersioning {
   static determineVersionCode(version, inputVersionCode) {

@@ -1,14 +1,14 @@
-import { assert } from 'console';
-import fs from 'fs';
-import path from 'path';
-import CloudRunner from '../cloud-runner';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { LfsHashing } from '../services/lfs-hashing';
-import { RemoteClientLogger } from './remote-client-logger';
-import { Cli } from '../../cli/cli';
-import { CliFunction } from '../../cli/cli-functions-repository';
+import { assert } from '../../../node_modules/console';
+import fs from '../../../node_modules/fs';
+import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import CloudRunner from '../cloud-runner.ts';
+import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
+import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
+import { CloudRunnerSystem } from '../services/cloud-runner-system.ts';
+import { LfsHashing } from '../services/lfs-hashing.ts';
+import { RemoteClientLogger } from './remote-client-logger.ts';
+import { Cli } from '../../cli/cli.ts';
+import { CliFunction } from '../../cli/cli-functions-repository.ts';
 // eslint-disable-next-line github/no-then
 const fileExists = async (fpath) => !!(await fs.promises.stat(fpath).catch(() => false));
 

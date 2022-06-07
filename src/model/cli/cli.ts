@@ -1,14 +1,14 @@
-import { Command } from 'commander-ts';
-import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
-import * as core from '@actions/core';
-import { ActionYamlReader } from '../input-readers/action-yaml';
-import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
-import { CliFunction, CliFunctionsRepository } from './cli-functions-repository';
-import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-commands';
-import { Caching } from '../cloud-runner/remote-client/caching';
-import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
-import { RemoteClient } from '../cloud-runner/remote-client';
+import { Command } from '../../../node_modules/commander-ts';
+import { BuildParameters, CloudRunner, ImageTag, Input } from '../index.ts';
+import * as core from '../../../node_modules/@actions/core';
+import { ActionYamlReader } from '../input-readers/action-yaml.ts';
+import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger.ts';
+import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override.ts';
+import { CliFunction, CliFunctionsRepository } from './cli-functions-repository.ts';
+import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-commands.ts';
+import { Caching } from '../cloud-runner/remote-client/caching.ts';
+import { LfsHashing } from '../cloud-runner/services/lfs-hashing.ts';
+import { RemoteClient } from '../cloud-runner/remote-client/index.ts';
 
 export class Cli {
   public static options;
