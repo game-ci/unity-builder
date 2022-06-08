@@ -33,7 +33,7 @@ export class AwsCliCommands {
   }
   @CliFunction(`aws-list-stacks`, `List stacks`)
   static async awsListStacks(perResultCallback: any = false, verbose: boolean = false) {
-    process.env.AWS_REGION = Input.region;
+    Deno.env.set('AWS_REGION', Input.region);
     const CF = new AWS.CloudFormation();
     const stacks =
       (await CF.listStacks().promise()).StackSummaries?.filter(
@@ -71,7 +71,7 @@ export class AwsCliCommands {
   }
   @CliFunction(`aws-list-tasks`, `List tasks`)
   static async awsListTasks(perResultCallback: any = false) {
-    process.env.AWS_REGION = Input.region;
+    Deno.env.set('AWS_REGION', Input.region);
     const ecs = new AWS.ECS();
     const clusters = (await ecs.listClusters().promise()).clusterArns || [];
     CloudRunnerLogger.log(`Clusters ${clusters.length}`);
@@ -105,7 +105,7 @@ export class AwsCliCommands {
   }
   @CliFunction(`aws-list-log-groups`, `List tasks`)
   static async awsListLogGroups(perResultCallback: any = false, verbose: boolean = false) {
-    process.env.AWS_REGION = Input.region;
+    Deno.env.set('AWS_REGION', Input.region);
     const ecs = new AWS.CloudWatchLogs();
     let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {
       /* logGroupNamePrefix: 'game-ci' */
@@ -138,7 +138,7 @@ export class AwsCliCommands {
   }
 
   private static async cleanup(deleteResources = false, OneDayOlderOnly: boolean = false) {
-    process.env.AWS_REGION = Input.region;
+    Deno.env.set('AWS_REGION', Input.region);
     const CF = new AWS.CloudFormation();
     const ecs = new AWS.ECS();
     const cwl = new AWS.CloudWatchLogs();

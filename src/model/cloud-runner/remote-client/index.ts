@@ -1,11 +1,9 @@
-import fs from '../../../node_modules/fs';
+import { fs, assert, path } from '../../../dependencies.ts';
 import CloudRunner from '../cloud-runner.ts';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
 import { Caching } from './caching.ts';
 import { LfsHashing } from '../services/lfs-hashing.ts';
 import { RemoteClientLogger } from './remote-client-logger.ts';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
-import { assert } from '../../../node_modules/console';
 import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
 import { CliFunction } from '../../cli/cli-functions-repository.ts';
 import { CloudRunnerSystem } from '../services/cloud-runner-system.ts';
@@ -70,7 +68,7 @@ export class RemoteClient {
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
-      RemoteClientLogger.log(`Checked out ${process.env.GITHUB_SHA}`);
+      RemoteClientLogger.log(`Checked out ${Deno.env.get('GITHUB_SHA')}`);
     } catch (error) {
       throw error;
     }
@@ -87,7 +85,7 @@ export class RemoteClient {
 
   @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
-    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+    const buildParameter = JSON.parse(Deno.env.get('BUILD_PARAMETERS') || '{}');
     RemoteClientLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);

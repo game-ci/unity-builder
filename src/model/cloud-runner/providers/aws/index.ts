@@ -46,7 +46,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
-    process.env.AWS_REGION = Input.region;
+    Deno.env.set('AWS_REGION', Input.region);
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);

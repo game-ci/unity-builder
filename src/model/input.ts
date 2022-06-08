@@ -1,5 +1,4 @@
-import fs from '../../../node_modules/fs';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { fs, path } from '../dependencies.ts';
 import { Cli } from './cli/cli.ts';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
 import Platform from './platform.ts';

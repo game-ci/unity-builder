@@ -1,6 +1,5 @@
-import { exec } from '../../../node_modules/@actions/exec';
-import fs from '../../../node_modules/fs';
-import { BuildParameters } from '..';
+import { fsSync as fs, exec } from '../../dependencies.ts';
+import { BuildParameters } from '../index.ts';
 
 class SetupWindows {
   public static async setup(buildParameters: BuildParameters) {

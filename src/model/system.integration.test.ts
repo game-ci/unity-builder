@@ -15,7 +15,7 @@ describe('System', () => {
      * To ensure our integration with '@actions/exec' works as expected we run some specific tests in CI only
      */
     describe('integration', () => {
-      if (!process.env.CI) {
+      if (!Deno.env.get('CI')) {
         it("doesn't run locally", () => {
           expect(true).toBe(true);
         });

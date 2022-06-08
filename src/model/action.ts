@@ -1,4 +1,4 @@
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { path, __dirname } from '../dependencies.ts';
 
 class Action {
   static get supportedPlatforms() {
@@ -6,11 +6,11 @@ class Action {
   }
 
   static get isRunningLocally() {
-    return process.env.RUNNER_WORKSPACE === undefined;
+    return Deno.env.get('RUNNER_WORKSPACE') === undefined;
   }
 
   static get isRunningFromSource() {
-    return path.basename(__dirname) === "model";
+    return path.basename(__dirname) === 'model';
   }
 
   static get canonicalName() {
@@ -30,7 +30,7 @@ class Action {
   }
 
   static get workspace() {
-    return process.env.GITHUB_WORKSPACE;
+    return Deno.env.get('GITHUB_WORKSPACE');
   }
 
   static checkCompatibility() {

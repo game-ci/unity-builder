@@ -1,6 +1,4 @@
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
-import fs from '../../../node_modules/fs';
-import YAML from '../../../node_modules/yaml';
+import { fsSync as fs, path, YAML, __dirname } from '../../dependencies.ts';
 import Input from '../input.ts';
 
 export function ReadLicense() {

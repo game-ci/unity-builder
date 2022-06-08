@@ -1,4 +1,4 @@
-import * as SDK from 'aws-sdk';
+import { aws } from '../../../../dependencies.ts';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates.ts';
@@ -13,7 +13,7 @@ export class AWSJobStack {
   }
 
   public async setupCloudFormations(
-    CF: SDK.CloudFormation,
+    CF: aws.CloudFormation,
     buildGuid: string,
     image: string,
     entrypoint: string[],
@@ -118,7 +118,7 @@ export class AWSJobStack {
         }
       }
     }
-    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+    const createStackInput: aws.CloudFormation.CreateStackInput = {
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
       Capabilities: ['CAPABILITY_IAM'],

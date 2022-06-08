@@ -1,7 +1,5 @@
-import { exec } from '../../../node_modules/@actions/exec';
 import ImageEnvironmentFactory from './image-environment-factory.ts';
-import { existsSync, mkdirSync } from '../../../node_modules/fs';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { path, exec, fs } from '../dependencies.ts';
 
 class Docker {
   static async run(image, parameters, silent = false) {
@@ -20,9 +18,9 @@ class Docker {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
-    if (!existsSync(githubHome)) mkdirSync(githubHome);
+    if (!fs.existsSync(githubHome)) fs.mkdirSync(githubHome);
     const githubWorkflow = path.join(runnerTempPath, '_github_workflow');
-    if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
+    if (!fs.existsSync(githubWorkflow)) fs.mkdirSync(githubWorkflow);
 
     return `docker run \
             --workdir /github/workspace \

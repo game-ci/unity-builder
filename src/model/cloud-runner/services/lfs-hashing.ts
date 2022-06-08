@@ -1,8 +1,6 @@
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
 import { CloudRunnerFolders } from './cloud-runner-folders.ts';
 import { CloudRunnerSystem } from './cloud-runner-system.ts';
-import fs from '../../../node_modules/fs';
-import { assert } from '../../../node_modules/console';
+import { fsSync as fs, assert, path } from '../../../dependencies.ts';
 import { Cli } from '../../cli/cli.ts';
 import { CliFunction } from '../../cli/cli-functions-repository.ts';
 

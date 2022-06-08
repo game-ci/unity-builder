@@ -1,5 +1,4 @@
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
-import fs from '../../../node_modules/fs';
+import { fs, path } from '../dependencies.ts';
 import Action from './action.ts';
 
 describe('Action', () => {

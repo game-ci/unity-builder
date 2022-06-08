@@ -33,21 +33,21 @@ export default class Versioning {
    * For pull requests we can reliably use GITHUB_HEAD_REF
    */
   static get headRef() {
-    return process.env.GITHUB_HEAD_REF;
+    return Deno.env.get('GITHUB_HEAD_REF');
   }
 
   /**
    * For branches GITHUB_REF will have format `refs/heads/feature-branch-1`
    */
   static get ref() {
-    return process.env.GITHUB_REF;
+    return Deno.env.get('GITHUB_REF');
   }
 
   /**
    * The commit SHA that triggered the workflow run.
    */
   static get sha() {
-    return process.env.GITHUB_SHA;
+    return Deno.env.get('GITHUB_SHA');
   }
 
   /**

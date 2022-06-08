@@ -1,6 +1,6 @@
 import { Command } from '../../../node_modules/commander-ts';
 import { BuildParameters, CloudRunner, ImageTag, Input } from '../index.ts';
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import { ActionYamlReader } from '../input-readers/action-yaml.ts';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger.ts';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override.ts';

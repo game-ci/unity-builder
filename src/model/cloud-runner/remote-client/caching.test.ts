@@ -1,13 +1,11 @@
-import fs from '../../../node_modules/fs';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { fs, uuid, path, __dirname } from '../../../dependencies.ts';
 import BuildParameters from '../../build-parameters.ts';
 import { Cli } from '../../cli/cli.ts';
 import Input from '../../input.ts';
 import UnityVersioning from '../../unity-versioning.ts';
-import CloudRunner from '../cloud-runner';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import CloudRunner from '../cloud-runner.ts';
+import { CloudRunnerSystem } from '../services/cloud-runner-system/index.ts';
 import { Caching } from './caching.ts';
-import { v4 as uuidv4 } from '../../../node_modules/uuid';
 
 describe('Cloud Runner Caching', () => {
   it('responds', () => {});
@@ -20,7 +18,7 @@ describe('Cloud Runner Caching', () => {
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
         targetPlatform: 'StandaloneLinux64',
-        cacheKey: `test-case-${uuidv4()}`,
+        cacheKey: `test-case-${uuid()}`,
       };
       Input.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();

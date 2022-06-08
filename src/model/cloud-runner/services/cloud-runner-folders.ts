@@ -44,7 +44,7 @@ export class CloudRunnerFolders {
   }
 
   public static get purgeRemoteCaching(): boolean {
-    return process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined;
+    return Deno.env.get('PURGE_REMOTE_BUILDER_CACHE') !== undefined;
   }
 
   public static get lfsCacheFolderFull() {

@@ -1,6 +1,4 @@
-import fs from '../../../node_modules/fs';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
-import YAML from '../../../node_modules/yaml';
+import { fsSync as fs, path, YAML, __dirname } from '../../dependencies.ts';
 
 export class ActionYamlReader {
   private actionYamlParsed: any;

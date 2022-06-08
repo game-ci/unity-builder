@@ -1,6 +1,4 @@
-import { assert } from '../../../node_modules/console';
-import fs from '../../../node_modules/fs';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
+import { fs, path, assert } from '../../../dependencies.ts';
 import CloudRunner from '../cloud-runner.ts';
 import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
@@ -16,7 +14,7 @@ export class Caching {
   @CliFunction(`cache-push`, `push to cache`)
   static async cachePush() {
     try {
-      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+      const buildParameter = JSON.parse(Deno.env.get('BUILD_PARAMETERS') || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PushToCache(
         Cli.options['cachePushTo'],
@@ -31,7 +29,7 @@ export class Caching {
   @CliFunction(`cache-pull`, `pull from cache`)
   static async cachePull() {
     try {
-      const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+      const buildParameter = JSON.parse(Deno.env.get('BUILD_PARAMETERS') || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PullFromCache(
         Cli.options['cachePushFrom'],
@@ -164,7 +162,7 @@ export class Caching {
   }
 
   public static async handleCachePurging() {
-    if (process.env.PURGE_REMOTE_BUILDER_CACHE !== undefined) {
+    if (Deno.env.get('PURGE_REMOTE_BUILDER_CACHE') !== undefined) {
       RemoteClientLogger.log(`purging ${CloudRunnerFolders.purgeRemoteCaching}`);
       fs.promises.rmdir(CloudRunnerFolders.cacheFolder, { recursive: true });
     }

@@ -1,9 +1,7 @@
+import { k8s, core, YAML } from '../../../../dependencies.ts';
 import waitUntil from 'async-wait-until';
-import * as core from '../../../node_modules/@actions/core';
-import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters.ts';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import YAML from '../../../node_modules/yaml';
 import { IncomingMessage } from '../../../node_modules/http';
 
 class KubernetesStorage {
@@ -95,8 +93,8 @@ class KubernetesStorage {
         },
       },
     };
-    if (process.env.K8s_STORAGE_PVC_SPEC) {
-      YAML.parse(process.env.K8s_STORAGE_PVC_SPEC);
+    if (Deno.env.get('K8s_STORAGE_PVC_SPEC')) {
+      YAML.parse(Deno.env.get('K8s_STORAGE_PVC_SPEC'));
     }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
 

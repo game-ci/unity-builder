@@ -1,7 +1,5 @@
 import { BuildParameters } from '../index.ts';
-import { getUnityChangeset } from '../../../node_modules/unity-changeset';
-import { exec } from '../../../node_modules/@actions/exec';
-import fs from '../../../node_modules/fs';
+import { fsSync as fs, exec, getUnityChangeset } from '../../dependencies.ts';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
@@ -49,26 +47,26 @@ class SetupMac {
   private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
     // Need to set environment variables from here because we execute
     // the scripts on the host for mac
-    process.env.ACTION_FOLDER = actionFolder;
-    process.env.UNITY_VERSION = buildParameters.editorVersion;
-    process.env.UNITY_SERIAL = buildParameters.unitySerial;
-    process.env.PROJECT_PATH = buildParameters.projectPath;
-    process.env.BUILD_TARGET = buildParameters.targetPlatform;
-    process.env.BUILD_NAME = buildParameters.buildName;
-    process.env.BUILD_PATH = buildParameters.buildPath;
-    process.env.BUILD_FILE = buildParameters.buildFile;
-    process.env.BUILD_METHOD = buildParameters.buildMethod;
-    process.env.VERSION = buildParameters.buildVersion;
-    process.env.ANDROID_VERSION_CODE = buildParameters.androidVersionCode;
-    process.env.ANDROID_KEYSTORE_NAME = buildParameters.androidKeystoreName;
-    process.env.ANDROID_KEYSTORE_BASE64 = buildParameters.androidKeystoreBase64;
-    process.env.ANDROID_KEYSTORE_PASS = buildParameters.androidKeystorePass;
-    process.env.ANDROID_KEYALIAS_NAME = buildParameters.androidKeyaliasName;
-    process.env.ANDROID_KEYALIAS_PASS = buildParameters.androidKeyaliasPass;
-    process.env.ANDROID_TARGET_SDK_VERSION = buildParameters.androidTargetSdkVersion;
-    process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
-    process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
-    process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
+    Deno.env.set('ACTION_FOLDER', actionFolder);
+    Deno.env.set('UNITY_VERSION', buildParameters.editorVersion);
+    Deno.env.set('UNITY_SERIAL', buildParameters.unitySerial);
+    Deno.env.set('PROJECT_PATH', buildParameters.projectPath);
+    Deno.env.set('BUILD_TARGET', buildParameters.targetPlatform);
+    Deno.env.set('BUILD_NAME', buildParameters.buildName);
+    Deno.env.set('BUILD_PATH', buildParameters.buildPath);
+    Deno.env.set('BUILD_FILE', buildParameters.buildFile);
+    Deno.env.set('BUILD_METHOD', buildParameters.buildMethod);
+    Deno.env.set('VERSION', buildParameters.buildVersion);
+    Deno.env.set('ANDROID_VERSION_CODE', buildParameters.androidVersionCode);
+    Deno.env.set('ANDROID_KEYSTORE_NAME', buildParameters.androidKeystoreName);
+    Deno.env.set('ANDROID_KEYSTORE_BASE64', buildParameters.androidKeystoreBase64);
+    Deno.env.set('ANDROID_KEYSTORE_PASS', buildParameters.androidKeystorePass);
+    Deno.env.set('ANDROID_KEYALIAS_NAME', buildParameters.androidKeyaliasName);
+    Deno.env.set('ANDROID_KEYALIAS_PASS', buildParameters.androidKeyaliasPass);
+    Deno.env.set('ANDROID_TARGET_SDK_VERSION', buildParameters.androidTargetSdkVersion);
+    Deno.env.set('ANDROID_SDK_MANAGER_PARAMETERS', buildParameters.androidSdkManagerParameters);
+    Deno.env.set('CUSTOM_PARAMETERS', buildParameters.customParameters);
+    Deno.env.set('CHOWN_FILES_TO', buildParameters.chownFilesTo);
   }
 }
 

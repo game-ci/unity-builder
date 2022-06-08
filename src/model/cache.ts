@@ -1,11 +1,10 @@
-import * as core from '../../../node_modules/@actions/core';
-import fs from '../../../node_modules/fs';
+import { fsSync, core } from '../dependencies.ts';
 import Action from './action.ts';
 import Project from './project.ts';
 
 class Cache {
   static verify() {
-    if (!fs.existsSync(Project.libraryFolder)) {
+    if (!fsSync.existsSync(Project.libraryFolder)) {
       this.notifyAboutCachingPossibility();
     }
   }

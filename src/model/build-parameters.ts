@@ -76,17 +76,17 @@ class BuildParameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
+    if (!Deno.env.get('UNITY_SERIAL') && Input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
-      if (!process.env.UNITY_LICENSE) {
+      if (!Deno.env.get('UNITY_LICENSE')) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
                           is a personal license, make sure to follow the activation
                           steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                           serial number inside the UNITY_SERIAL GitHub secret.`);
       }
-      unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+      unitySerial = this.getSerialFromLicenseFile(Deno.env.get('UNITY_LICENSE'));
     } else {
-      unitySerial = process.env.UNITY_SERIAL!;
+      unitySerial = Deno.env.get('UNITY_SERIAL')!;
     }
 
     return {
@@ -94,7 +94,7 @@ class BuildParameters {
       customImage: Input.customImage,
       unitySerial,
 
-      runnerTempPath: process.env.RUNNER_TEMP,
+      runnerTempPath: Deno.env.get('RUNNER_TEMP'),
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
       buildName: Input.buildName,

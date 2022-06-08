@@ -16,6 +16,9 @@
     "es6": true,
     "jest/globals": true
   },
+  "globals": {
+    "Deno": true
+  },
   "rules": {
     // Error out for code formatting errors
     "prettier/prettier": "error",
