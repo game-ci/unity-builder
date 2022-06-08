@@ -1,4 +1,4 @@
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../dependencies.ts';
 
 import Input from './input.ts';
 import Platform from './platform.ts';

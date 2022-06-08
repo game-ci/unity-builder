@@ -1,10 +1,9 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import * as SDK from 'aws-sdk';
-import * as core from '../../../node_modules/@actions/core';
+import { core, aws } from '../../dependencies.ts';
 import CloudRunner from '../../cloud-runner.ts';
 
 export class AWSError {
-  static async handleStackCreationFailure(error: any, CF: SDK.CloudFormation, taskDefStackName: string) {
+  static async handleStackCreationFailure(error: any, CF: aws.CloudFormation, taskDefStackName: string) {
     CloudRunnerLogger.log('aws error: ');
     core.error(JSON.stringify(error, undefined, 4));
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {

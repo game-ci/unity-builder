@@ -1,8 +1,7 @@
 import * as AWS from 'aws-sdk';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
-import * as core from '../../../node_modules/@actions/core';
+import { core, compress } from '../../dependencies.ts';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
-import * as zlib from '../../../node_modules/zlib';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
 import { Input } from '../../...ts';
 import CloudRunner from '../../cloud-runner.ts';
@@ -205,7 +204,7 @@ class AWSTaskRunner {
     if (records.Records.length > 0 && iterator) {
       for (let index = 0; index < records.Records.length; index++) {
         const json = JSON.parse(
-          zlib.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
+          compress.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
         );
         if (json.messageType === 'DATA_MESSAGE') {
           for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {

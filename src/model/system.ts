@@ -1,5 +1,4 @@
-import * as core from '../../node_modules/@actions/core';
-import { exec } from '../../node_modules/@actions/exec';
+import { core, exec } from '../dependencies.ts';
 
 class System {
   static async run(command, arguments_: any = [], options = {}, shouldLog = true) {

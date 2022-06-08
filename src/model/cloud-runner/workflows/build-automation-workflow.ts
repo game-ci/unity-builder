@@ -3,9 +3,8 @@ import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
 import { CloudRunnerStepState } from '../cloud-runner-step-state.ts';
 import { CustomWorkflow } from './custom-workflow.ts';
 import { WorkflowInterface } from './workflow-interface.ts';
-import * as core from '../../../../node_modules/@actions/core';
+import { core, path } from '../../../dependencies.ts';
 import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process.ts';
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
 import CloudRunner from '../cloud-runner.ts';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {

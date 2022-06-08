@@ -1,8 +1,6 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import * as core from '../../../node_modules/@actions/core';
-import * as SDK from 'aws-sdk';
+import { core, aws, crypto } from '../../../../dependencies.ts';
 import { BaseStackFormation } from './cloud-formations/base-stack-formation.ts';
-const crypto = require('crypto');
 
 export class AWSBaseStack {
   constructor(baseStackName: string) {
@@ -10,33 +8,33 @@ export class AWSBaseStack {
   }
   private baseStackName: string;
 
-  async setupBaseStack(CF: SDK.CloudFormation) {
+  async setupBaseStack(CF: aws.CloudFormation) {
     const baseStackName = this.baseStackName;
 
     const baseStack = BaseStackFormation.formation;
 
     // Cloud Formation Input
-    const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
+    const describeStackInput: aws.CloudFormation.DescribeStacksInput = {
       StackName: baseStackName,
     };
-    const parametersWithoutHash: SDK.CloudFormation.Parameter[] = [
+    const parametersWithoutHash: aws.CloudFormation.Parameter[] = [
       { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
     ];
     const parametersHash = crypto
       .createHash('md5')
       .update(baseStack + JSON.stringify(parametersWithoutHash))
       .digest('hex');
-    const parameters: SDK.CloudFormation.Parameter[] = [
+    const parameters: aws.CloudFormation.Parameter[] = [
       ...parametersWithoutHash,
       ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
     ];
-    const updateInput: SDK.CloudFormation.UpdateStackInput = {
+    const updateInput: aws.CloudFormation.UpdateStackInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
       Parameters: parameters,
       Capabilities: ['CAPABILITY_IAM'],
     };
-    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+    const createStackInput: aws.CloudFormation.CreateStackInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
       Parameters: parameters,

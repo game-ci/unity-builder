@@ -1,4 +1,4 @@
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import NotImplementedException from './error/not-implemented-exception.ts';
 import ValidationError from './error/validation-error.ts';
 import Input from './input.ts';

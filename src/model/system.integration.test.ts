@@ -1,4 +1,4 @@
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import System from './system.ts';
 
 jest.spyOn(core, 'debug').mockImplementation(() => {});

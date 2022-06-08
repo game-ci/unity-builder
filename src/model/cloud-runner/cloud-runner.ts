@@ -6,7 +6,7 @@ import { CloudRunnerStepState } from './cloud-runner-step-state.ts';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root.ts';
 import { CloudRunnerError } from './error/cloud-runner-error.ts';
 import { TaskParameterSerializer } from './services/task-parameter-serializer.ts';
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import CloudRunnerSecret from './services/cloud-runner-secret.ts';
 import { ProviderInterface } from './providers/provider-interface.ts';
 import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable.ts';

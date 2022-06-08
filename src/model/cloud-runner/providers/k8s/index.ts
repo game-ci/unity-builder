@@ -1,17 +1,14 @@
-import * as k8s from '../../../node_modules/@kubernetes/client-node';
 import { BuildParameters, Output } from '../../../index.ts';
-import * as core from '../../../node_modules/@actions/core';
+import { core, k8s, waitUntil } from '../../dependencies.ts';
 import { ProviderInterface } from '../provider-interface.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import KubernetesStorage from './kubernetes-storage.ts';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
 import KubernetesTaskRunner from './kubernetes-task-runner.ts';
 import KubernetesSecret from './kubernetes-secret.ts';
-import waitUntil from '../../../node_modules/async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory.ts';
 import KubernetesServiceAccount from './kubernetes-service-account.ts';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import { CoreV1Api } from '../../../node_modules/@kubernetes/client-node';
 import DependencyOverrideService from '../../services/depdency-override-service.ts';
 
 class Kubernetes implements ProviderInterface {
@@ -190,7 +187,7 @@ class Kubernetes implements ProviderInterface {
     process.exit();
   }
 
-  static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
+  static async findPodFromJob(kubeClient: k8s.CoreV1Api, jobName: string, namespace: string) {
     const namespacedPods = await kubeClient.listNamespacedPod(namespace);
     const pod = namespacedPods.body.items.find((x) => x.metadata?.labels?.['job-name'] === jobName);
     if (pod === undefined) {

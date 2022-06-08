@@ -1,4 +1,4 @@
-import * as core from '../node_modules/@actions/core';
+import { core, process } from './dependencies.ts';
 import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model.ts';
 import { Cli } from './model/cli/cli.ts';
 import MacBuilder from './model/mac-builder.ts';

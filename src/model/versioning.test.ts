@@ -1,4 +1,4 @@
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import NotImplementedException from './error/not-implemented-exception.ts';
 import System from './system.ts';
 import Versioning from './versioning.ts';

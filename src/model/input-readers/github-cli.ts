@@ -1,5 +1,5 @@
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system.ts';
-import * as core from '../../../node_modules/@actions/core';
+import { core } from '../../dependencies.ts';
 import Input from '../input.ts';
 
 export class GithubCliReader {
