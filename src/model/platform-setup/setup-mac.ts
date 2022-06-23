@@ -1,5 +1,5 @@
 import { BuildParameters } from '../index.ts';
-import { fsSync as fs, exec, getUnityChangeset } from '../../dependencies.ts';
+import { fsSync as fs, exec, getUnityChangeSet } from '../../dependencies.ts';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;

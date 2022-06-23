@@ -1,4 +1,4 @@
-import { Command } from '../../../node_modules/commander-ts';
+import { Command } from '../../dependencies.ts';
 import { BuildParameters, CloudRunner, ImageTag, Input } from '../index.ts';
 import { core } from '../../dependencies.ts';
 import { ActionYamlReader } from '../input-readers/action-yaml.ts';

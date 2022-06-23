@@ -1,14 +1,12 @@
-import { CoreV1Api } from '@kubernetes/client-node';
+import { k8sTypes, k8s, base64 } from '../../../../dependencies.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
-import * as k8s from '@kubernetes/client-node';
-const base64 = require('base-64');
 
 class KubernetesSecret {
   static async createSecret(
     secrets: CloudRunnerSecret[],
     secretName: string,
     namespace: string,
-    kubeClient: CoreV1Api,
+    kubeClient: k8sTypes.CoreV1Api,
   ) {
     const secret = new k8s.V1Secret();
     secret.apiVersion = 'v1';

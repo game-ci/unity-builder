@@ -58,6 +58,8 @@
     // For this project only use kebab-case
     "unicorn/filename-case": ["error", { "cases": { "kebabCase": true } }],
     // Allow Array.from(set) mitigate TS2569 which would require '--downlevelIteration'
-    "unicorn/prefer-spread": "off"
+    "unicorn/prefer-spread": "off",
+    // Deno has dependencies file, this rule enforces it's named re-exports
+    "unicorn/prevent-abbreviations": "off"
   }
 }

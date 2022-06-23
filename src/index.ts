@@ -1,5 +1,5 @@
 import { core, process } from './dependencies.ts';
-import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model.ts';
+import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model/index.ts';
 import { Cli } from './model/cli/cli.ts';
 import MacBuilder from './model/mac-builder.ts';
 import PlatformSetup from './model/platform-setup.ts';

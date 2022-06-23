@@ -1,5 +1,5 @@
 import { BuildParameters, Output } from '../../../index.ts';
-import { core, k8s, waitUntil } from '../../dependencies.ts';
+import { k8sTypes, core, k8s, waitUntil } from '../../../../dependencies.ts';
 import { ProviderInterface } from '../provider-interface.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import KubernetesStorage from './kubernetes-storage.ts';
@@ -12,9 +12,9 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
 import DependencyOverrideService from '../../services/depdency-override-service.ts';
 
 class Kubernetes implements ProviderInterface {
-  private kubeConfig: k8s.KubeConfig;
-  private kubeClient: k8s.CoreV1Api;
-  private kubeClientBatch: k8s.BatchV1Api;
+  private kubeConfig: k8sTypes.KubeConfig;
+  private kubeClient: k8sTypes.CoreV1Api;
+  private kubeClientBatch: k8sTypes.BatchV1Api;
   private buildGuid: string = '';
   private buildParameters: BuildParameters;
   private pvcName: string = '';
@@ -29,7 +29,7 @@ class Kubernetes implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
-    this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+    this.kubeClient = this.kubeConfig.makeApiClient(k8sTypes.CoreV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
 
@@ -187,7 +187,7 @@ class Kubernetes implements ProviderInterface {
     process.exit();
   }
 
-  static async findPodFromJob(kubeClient: k8s.CoreV1Api, jobName: string, namespace: string) {
+  static async findPodFromJob(kubeClient: k8sTypes.CoreV1Api, jobName: string, namespace: string) {
     const namespacedPods = await kubeClient.listNamespacedPod(namespace);
     const pod = namespacedPods.body.items.find((x) => x.metadata?.labels?.['job-name'] === jobName);
     if (pod === undefined) {

@@ -1,4 +1,4 @@
-import { exec } from '../../../node_modules/@actions/exec';
+import { exec } from '../dependencies.ts';
 import { BuildParameters } from './build-parameters.ts';
 
 class MacBuilder {

@@ -1,4 +1,4 @@
-import { core } from '../../dependencies.ts';
+import { core } from '../../../dependencies.ts';
 
 class CloudRunnerLogger {
   private static timestamp: number;

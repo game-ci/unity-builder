@@ -1,4 +1,4 @@
-import { core, semver } from '../../dependencies.ts';
+import { core, semver } from '../dependencies.ts';
 
 export default class AndroidVersioning {
   static determineVersionCode(version, inputVersionCode) {

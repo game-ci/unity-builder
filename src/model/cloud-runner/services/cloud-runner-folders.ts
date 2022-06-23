@@ -1,5 +1,5 @@
-import * as path from 'https://deno.land/std@0.141.0/path/mod.ts';
-import { CloudRunner } from '../...ts';
+import { path } from '../../../dependencies.ts';
+import { CloudRunner } from '../../index.ts';
 
 export class CloudRunnerFolders {
   public static readonly repositoryFolder = 'repo';

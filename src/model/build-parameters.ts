@@ -1,4 +1,4 @@
-import { customAlphabet } from '../../../node_modules/nanoid';
+import { nanoid } from '../dependencies.ts';
 import AndroidVersioning from './android-versioning.ts';
 import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants.ts';
 import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid.ts';
@@ -133,7 +133,7 @@ class BuildParameters {
       isCliMode: Cli.isCliMode,
       awsStackName: Input.awsBaseStackName,
       gitSha: Input.gitSha,
-      logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
+      logId: nanoid.customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
       customJobHooks: Input.customJobHooks(),
       cachePullOverrideCommand: Input.cachePullOverrideCommand(),

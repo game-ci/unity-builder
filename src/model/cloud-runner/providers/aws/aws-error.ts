@@ -1,5 +1,5 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import { core, aws } from '../../dependencies.ts';
+import { core, aws } from '../../../../dependencies.ts';
 import CloudRunner from '../../cloud-runner.ts';
 
 export class AWSError {

@@ -1,5 +1,5 @@
 import { BuildParameters } from '../../index.ts';
-import YAML from '../../../../node_modules/yaml';
+import { yaml } from '../../../dependencies.ts';
 import CloudRunnerSecret from './cloud-runner-secret.ts';
 import CloudRunner from '../cloud-runner.ts';
 
@@ -25,7 +25,7 @@ export class CloudRunnerBuildCommandProcessor {
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
       try {
-        output = YAML.parse(experimentHooks);
+        output = yaml.parse(experimentHooks);
       } catch (error) {
         throw error;
       }

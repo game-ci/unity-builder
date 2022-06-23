@@ -1,13 +1,12 @@
-import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import { core, Writable, waitUntil } from '../../../../dependencies.ts';
+import { k8sTypes, k8s, core, Writable, waitUntil } from '../../../../dependencies.ts';
 import { CloudRunnerStatics } from '../../cloud-runner-statics.ts';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service.ts';
 
 class KubernetesTaskRunner {
   static async runTask(
-    kubeConfig: KubeConfig,
-    kubeClient: CoreV1Api,
+    kubeConfig: k8sTypes.KubeConfig,
+    kubeClient: k8sTypes.CoreV1Api,
     jobName: string,
     podName: string,
     containerName: string,
@@ -38,7 +37,7 @@ class KubernetesTaskRunner {
     };
     try {
       const resultError = await new Promise((resolve) =>
-        new Log(kubeConfig).log(namespace, podName, containerName, stream, resolve, logOptions),
+        new k8s.Log(kubeConfig).log(namespace, podName, containerName, stream, resolve, logOptions),
       );
       stream.destroy();
       if (resultError) {
@@ -78,7 +77,7 @@ class KubernetesTaskRunner {
     return output;
   }
 
-  static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
+  static async watchUntilPodRunning(kubeClient: k8sTypes.CoreV1Api, podName: string, namespace: string) {
     let success: boolean = false;
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
     await waitUntil(

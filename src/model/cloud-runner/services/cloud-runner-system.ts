@@ -1,4 +1,4 @@
-import { exec } from '../../../../node_modules/child_process';
+import { exec } from '../../../dependencies.ts';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger.ts';
 
 export class CloudRunnerSystem {

@@ -1,7 +1,7 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger.ts';
 import CloudRunnerSecret from '../services/cloud-runner-secret.ts';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
-import YAML from '../../../../node_modules/yaml';
+import { yaml } from '../../../dependencies.ts';
 import { CloudRunner, Input } from '../../index.ts';
 
 export class CustomWorkflow {
@@ -12,7 +12,7 @@ export class CustomWorkflow {
         CloudRunnerLogger.log(`Parsing build steps: ${buildSteps}`);
       }
       try {
-        buildSteps = YAML.parse(buildSteps);
+        buildSteps = yaml.parse(buildSteps);
       } catch (error) {
         CloudRunnerLogger.log(`failed to parse a custom job "${buildSteps}"`);
         throw error;

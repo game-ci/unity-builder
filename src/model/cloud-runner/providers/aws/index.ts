@@ -1,4 +1,4 @@
-import * as SDK from 'aws-sdk';
+import { aws } from '../../../../dependencies.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
@@ -8,7 +8,7 @@ import BuildParameters from '../../../build-parameters.ts';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
 import { AWSJobStack } from './aws-job-stack.ts';
 import { AWSBaseStack } from './aws-base-stack.ts';
-import { Input } from '../../...ts';
+import { Input } from '../../../index.ts';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -47,8 +47,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     Deno.env.set('AWS_REGION', Input.region);
-    const ECS = new SDK.ECS();
-    const CF = new SDK.CloudFormation();
+    const ECS = new aws.ECS();
+    const CF = new aws.CloudFormation();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
@@ -86,7 +86,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     }
   }
 
-  async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
+  async cleanupResources(CF: aws.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
     CloudRunnerLogger.log('Cleanup starting');
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,

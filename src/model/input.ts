@@ -1,9 +1,7 @@
-import { fs, path } from '../dependencies.ts';
+import { fs, path, core } from '../dependencies.ts';
 import { Cli } from './cli/cli.ts';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
 import Platform from './platform.ts';
-
-const core = require('@actions/core');
 
 /**
  * Input variables specified in workflows using "with" prop.

@@ -1,4 +1,4 @@
-const core = require('@actions/core');
+import { core } from '../dependencies.ts';
 
 class Output {
   static async setBuildVersion(buildVersion) {

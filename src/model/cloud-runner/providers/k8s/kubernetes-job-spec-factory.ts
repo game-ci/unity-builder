@@ -1,9 +1,9 @@
-import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '@kubernetes/client-node';
+import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '../../../../dependencies.ts';
 import BuildParameters from '../../../build-parameters.ts';
 import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process.ts';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import CloudRunner from '../../cloud-runner';
+import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
+import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
+import CloudRunner from '../../cloud-runner.ts';
 
 class KubernetesJobSpecFactory {
   static getJobSpec(
@@ -114,7 +114,7 @@ class KubernetesJobSpecFactory {
               },
               env: [
                 ...environment.map((x) => {
-                  const environmentVariable = new V1EnvVar();
+                  const environmentVariable = new k8s.V1EnvVar();
                   environmentVariable.name = x.name;
                   environmentVariable.value = x.value;
 
