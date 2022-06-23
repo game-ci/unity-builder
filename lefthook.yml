@@ -23,9 +23,9 @@ pre-commit:
       glob: '*.{js,jsx,ts,tsx}'
       exclude: 'dist/'
       run: yarn jest --passWithNoTests --findRelatedTests {staged_files}
-    build distributables:
-      skip: ['merge', 'rebase']
-      run: yarn build && git add dist
+#    build distributables:
+#      skip: ['merge', 'rebase']
+#      run: yarn build && git add dist
     make shell script executable:
       glob: '*.sh'
       run: git update-index --chmod=+x
