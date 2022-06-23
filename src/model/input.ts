@@ -1,4 +1,4 @@
-import { fs, path, core } from '../dependencies.ts';
+import { fsSync as fs, path, core } from '../dependencies.ts';
 import { Cli } from './cli/cli.ts';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
 import Platform from './platform.ts';

@@ -1,4 +1,4 @@
-import { fs, path } from '../dependencies.ts';
+import { fsSync as fs, path } from '../dependencies.ts';
 
 export default class UnityVersioning {
   static get versionPattern() {
@@ -19,7 +19,7 @@ export default class UnityVersioning {
       throw new Error(`Project settings file not found at "${filePath}". Have you correctly set the projectPath?`);
     }
 
-    return UnityVersioning.parse(fs.readFileSync(filePath, 'utf8'));
+    return UnityVersioning.parse(Deno.readTextFileSync(filePath, 'utf8'));
   }
 
   static parse(projectVersionTxt) {

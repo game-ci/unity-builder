@@ -7,7 +7,7 @@ export class ActionYamlReader {
     if (!fs.existsSync(filename)) {
       filename = path.join(__dirname, `..`, filename);
     }
-    this.actionYamlParsed = yaml.parse(fs.readFileSync(filename).toString());
+    this.actionYamlParsed = yaml.parse(Deno.readTextFileSync(filename));
   }
   public GetActionYamlValue(key: string) {
     return this.actionYamlParsed.inputs[key]?.description || 'No description found in action.yml';

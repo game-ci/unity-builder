@@ -34,6 +34,7 @@ async function runMain() {
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
   } catch (error) {
+    core.error(error);
     core.setFailed((error as Error).message);
   }
 }

@@ -1,4 +1,4 @@
-import { path, __dirname } from '../dependencies.ts';
+import { path, __dirname, __filename } from '../dependencies.ts';
 
 class Action {
   static get supportedPlatforms() {

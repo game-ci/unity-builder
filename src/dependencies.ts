@@ -3,7 +3,7 @@ import * as assert from 'https://deno.land/std@0.144.0/testing/asserts.ts';
 import * as aws from 'https://deno.land/x/aws_api/client/mod.ts';
 import * as base64 from 'https://deno.land/std@0.145.0/encoding/base64.ts';
 import * as compress from 'https://deno.land/x/compress@v0.3.3/mod.ts';
-// import * as core from 'https://deno.land/x/deno_actions_core/mod.ts';
+// import * as core from 'https://deno.land/x/deno_actions_core@0.1.3/mod.ts';
 import * as fs from 'https://deno.land/std@0.142.0/node/fs/promises.ts';
 import * as fsSync from 'https://deno.land/std@0.142.0/fs/mod.ts';
 import * as k8s from 'https://deno.land/x/kubernetes_client/mod.ts';
@@ -17,11 +17,27 @@ import * as yaml from 'https://deno.land/std@0.145.0/encoding/yaml.ts';
 import { crypto } from 'https://deno.land/std@0.142.0/crypto/mod.ts';
 import { v4 as uuid } from 'https://deno.land/std@0.142.0/uuid/mod.ts';
 import * as http from 'https://deno.land/std@0.145.0/node/http.ts';
+import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 
 const core = {
-  setFailed: () => {},
-  info: () => {},
-  error: () => {},
+  info: console.log,
+  error: (error) => console.error(error, error.stack),
+  setFailed: (failure) => console.error('setFailed:', failure),
+
+  // Adapted from: https://github.com/actions/toolkit/blob/9b7bcb1567c9b7f134eb3c2d6bbf409a5106a956/packages/core/src/core.ts#L128
+  getInput: (name, options) => {
+    const val: string = Deno.env.get(`INPUT_${name.replace(/ /g, '_').toUpperCase()}`) || '';
+
+    if (options?.required && !val) {
+      throw new Error(`Input required and not supplied: ${name}`);
+    }
+
+    if (options && options.trimWhitespace === false) {
+      return val;
+    }
+
+    return val.trim();
+  },
 };
 
 const exec = () => {
@@ -32,26 +48,17 @@ const getUnityChangeSet = () => {
   throw new Error('getUnityChangeSet is not implemented'); // unity-changeset'
 };
 
-const waitUntil = async (function_: () => Promise, options = {}) => {
-  const { timeout = 10000, interval = 1000 } = options;
-  if (timeout || interval) {
-    // TODO - do some timeout stuff here
-  }
-
-  await function_();
-};
-
 class Writable {
   constructor() {
     throw new Error('Writable is not implemented'); // stream
   }
 }
 
-class Command {
-  constructor() {
-    throw new Error('Command is not implemented'); // commander-ts
-  }
-}
+// class Command {
+//   constructor() {
+//     throw new Error('Command is not implemented'); // commander-ts
+//   }
+// }
 
 const __filename = path.fromFileUrl(import.meta.url);
 const __dirname = path.dirname(path.fromFileUrl(import.meta.url));

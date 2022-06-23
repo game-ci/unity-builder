@@ -48,7 +48,7 @@ describe('Cloud Runner Caching', () => {
       await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
 
       // Compare validity to original hash
-      expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
+      expect(Deno.readTextFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
         Cli.options.cacheKey,
       );
       fs.rmdirSync(testFolder, { recursive: true });

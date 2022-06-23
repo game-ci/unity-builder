@@ -7,5 +7,5 @@ export function ReadLicense() {
   }
   const pipelineFile = path.join(__dirname, `.github`, `workflows`, `cloud-runner-k8s-pipeline.yml`);
 
-  return fs.existsSync(pipelineFile) ? yaml.parse(fs.readFileSync(pipelineFile, 'utf8')).env.UNITY_LICENSE : '';
+  return fs.existsSync(pipelineFile) ? yaml.parse(Deno.readTextFileSync(pipelineFile, 'utf8')).env.UNITY_LICENSE : '';
 }

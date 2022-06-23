@@ -1,5 +1,5 @@
 import { assert } from 'https://deno.land/std@0.142.0/testing/asserts.ts';
-import { fs } from '../../dependencies.ts';
+import { fsSync as fs } from '../../dependencies.ts';
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system.ts';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger.ts';
 import Input from '../input.ts';

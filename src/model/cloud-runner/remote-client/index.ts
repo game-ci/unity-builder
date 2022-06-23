@@ -1,4 +1,4 @@
-import { fs, assert, path } from '../../../dependencies.ts';
+import { fsSync as fs, assert, path } from '../../../dependencies.ts';
 import CloudRunner from '../cloud-runner.ts';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders.ts';
 import { Caching } from './caching.ts';
