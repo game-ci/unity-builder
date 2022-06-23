@@ -48,7 +48,7 @@ class System {
         throw new Error(`Failed to execute empty command`);
       }
 
-      const exitCode = await exec(command, arguments_, { silent: true, listeners, ...options });
+      const { exitCode } = await exec(command, arguments_, { silent: true, listeners, ...options });
       showOutput();
       if (exitCode !== 0) {
         throwContextualError(`Command returned non-zero exit code.\nError: ${error}`);

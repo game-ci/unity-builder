@@ -21,8 +21,8 @@ class SetupMac {
     if (!fs.existsSync(this.unityHubPath)) {
       // Ignoring return code because the log seems to overflow the internal buffer which triggers
       // a false error
-      const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
-      if (errorCode) {
+      const { exitCode } = await exec(command, undefined, { silent, ignoreReturnCode: true });
+      if (exitCode) {
         throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
       }
     }
@@ -38,8 +38,8 @@ class SetupMac {
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
-    const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
-    if (errorCode) {
+    const { exitCode } = await exec(command, undefined, { silent, ignoreReturnCode: true });
+    if (exitCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }
   }
