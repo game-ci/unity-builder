@@ -16,26 +16,17 @@ import { crypto } from 'https://deno.land/std@0.142.0/crypto/mod.ts';
 import { v4 as uuid } from 'https://deno.land/std@0.142.0/uuid/mod.ts';
 import * as http from 'https://deno.land/std@0.145.0/node/http.ts';
 import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
+import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 
 // Internally managed
 import waitUntil from './modules/wait-until.ts';
 import { core, exec } from './modules/actions/index.ts';
-
-const getUnityChangeSet = () => {
-  throw new Error('getUnityChangeSet is not implemented'); // unity-changeset'
-};
 
 class Writable {
   constructor() {
     throw new Error('Writable is not implemented'); // stream
   }
 }
-
-// class Command {
-//   constructor() {
-//     throw new Error('Command is not implemented'); // commander-ts
-//   }
-// }
 
 const __filename = path.fromFileUrl(import.meta.url);
 const __dirname = path.dirname(path.fromFileUrl(import.meta.url));
