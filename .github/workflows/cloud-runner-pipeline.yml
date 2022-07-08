@@ -96,7 +96,7 @@ jobs:
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$CACHE_KEY
                 ls /data/cache/$CACHE_KEY/build
-                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar.lz4
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -105,7 +105,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
+          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       - run: yarn run cli -m aws-list-all
       ###########################
@@ -115,7 +115,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: AWS Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
+          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
   k8sBuilds:
     name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
@@ -196,7 +196,7 @@ jobs:
                 aws s3 ls
                 aws s3 ls game-ci-test-storage
                 ls /data/cache/$CACHE_KEY
-                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar
+                aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar.lz4
               secrets:
               - name: awsAccessKeyId
                 value: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -205,7 +205,7 @@ jobs:
               - name: awsDefaultRegion
                 value: eu-west-2
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.CACHE_KEY }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar
+          aws s3 cp s3://game-ci-test-storage/${{ steps.k8s-unity-build.outputs.CACHE_KEY }}/build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       ###########################
       #          Upload         #
@@ -214,5 +214,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: K8s Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar
+          path: build-${{ steps.k8s-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
