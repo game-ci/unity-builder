@@ -59,7 +59,9 @@ export class Cli {
     if (Cli.options['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
-    Cli.logInput();
+    if (Cli.options['logInput']) {
+      Cli.logInput();
+    }
     const results = CliFunctionsRepository.GetCliFunctions(Cli.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options.versioning = 'None';
