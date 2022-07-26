@@ -36,6 +36,7 @@ class SetupMac {
                                           --version ${buildParameters.editorVersion} \
                                           --changeset ${unityChangeset.changeset} \
                                           --module mac-il2cpp \
+                                          --module ios \
                                           --childModules`;
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
