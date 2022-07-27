@@ -137,6 +137,26 @@ export class AwsCliCommands {
     }
   }
 
+  @CliFunction(`aws-list-jobs`, `List tasks`)
+  static async awsListJobs(perResultCallback: any = false, verbose: boolean = false) {
+    process.env.AWS_REGION = Input.region;
+    const CF = new AWS.CloudFormation();
+    const stacks =
+      (await CF.listStacks().promise()).StackSummaries?.filter(
+        (_x) =>
+          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
+      ) || [];
+    CloudRunnerLogger.log(`Stacks ${stacks.length}`);
+    for (const element of stacks) {
+      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
+      if (verbose)
+        CloudRunnerLogger.log(
+          `Task Stack ${element.StackName} - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+        );
+      if (perResultCallback) await perResultCallback(element);
+    }
+  }
+
   private static async cleanup(deleteResources = false, OneDayOlderOnly: boolean = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
