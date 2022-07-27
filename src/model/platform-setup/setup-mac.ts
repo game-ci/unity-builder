@@ -30,14 +30,41 @@ class SetupMac {
     }
   }
 
+  private static getModuleParametersForTargetPlatform(targetPlatform: string): string {
+    let command = '';
+    switch (targetPlatform) {
+      case 'iOS':
+        command += '--module ios ';
+        break;
+      case 'tvOS':
+        command += '--module tvos ';
+        break;
+      case 'Android':
+        command += '--module android ';
+        break;
+      case 'MacOS':
+        command += '--module mac-il2cpp ';
+        break;
+      case 'WebGL':
+        command += '--module webgl ';
+        break;
+      default:
+        throw new Error(`Unsupported module for target platform: ${targetPlatform}.`);
+    }
+
+    command += `--childModules`;
+
+    return command.trim();
+  }
+
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
+    const moduleCommand = this.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+
     const command = `${this.unityHubPath} -- --headless install \
                                           --version ${buildParameters.editorVersion} \
                                           --changeset ${unityChangeset.changeset} \
-                                          --module mac-il2cpp \
-                                          --module ios \
-                                          --childModules`;
+                                          ${moduleCommand}`;
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
