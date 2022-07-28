@@ -143,6 +143,12 @@ class Input {
     return input === 'true';
   }
 
+  static get exportAsGoogleAndroidProject() {
+    const input = Input.getInput('exportAsGoogleAndroidProject') || false;
+
+    return input === 'true';
+  }
+
   static get androidKeystoreName() {
     return Input.getInput('androidKeystoreName') || '';
   }

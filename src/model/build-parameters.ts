@@ -30,6 +30,8 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
+  public androidAppBundle!: boolean;
+  public exportAsGoogleAndroidProject!: boolean;
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
@@ -67,7 +69,12 @@ class BuildParameters {
   public isCliMode!: boolean;
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+    const buildFile = this.parseBuildFile(
+      Input.buildName,
+      Input.targetPlatform,
+      Input.androidAppBundle,
+      Input.exportAsGoogleAndroidProject,
+    );
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
@@ -110,6 +117,8 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
+      androidAppBundle: Input.androidAppBundle,
+      exportAsGoogleAndroidProject: Input.exportAsGoogleAndroidProject,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -147,12 +156,12 @@ class BuildParameters {
     };
   }
 
-  static parseBuildFile(filename, platform, androidAppBundle) {
+  static parseBuildFile(filename, platform, androidAppBundle, exportAsGoogleAndroidProject) {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
 
-    if (Platform.isAndroid(platform)) {
+    if (Platform.isAndroid(platform) && !exportAsGoogleAndroidProject) {
       return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
     }
 

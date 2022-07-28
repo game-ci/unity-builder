@@ -144,6 +144,8 @@ echo ""
   -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
   -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
   -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
+  -androidAppBundle "$ANDROID_APP_BUNDLE" \
+  -exportAsGoogleAndroidProject "$EXPORT_AS_GOOGLE_ANDROID_PROJECT" \
   $CUSTOM_PARAMETERS \
   > "$UNITY_PROJECT_PATH/out.log" 2>&1
 

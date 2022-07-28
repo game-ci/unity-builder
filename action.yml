@@ -74,6 +74,10 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
+  exportAsGoogleAndroidProject:
+    required: false
+    default: 'false'
+    description: 'To export Google Android Studio project.'
   sshAgent:
     required: false
     default: ''
