@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 
@@ -8,7 +8,27 @@ namespace UnityBuilderAction.Input
   {
     public static void Apply(Dictionary<string, string> options)
     {
-      EditorUserBuildSettings.buildAppBundle = options["customBuildPath"].EndsWith(".aab");
+      if (options.TryGetValue("androidAppBundle", out string androidAppBundle) || options["customBuildPath"].EndsWith(".aab"))
+      {
+        EditorUserBuildSettings.buildAppBundle = androidAppBundle == "true" || androidAppBundle == string.Empty;
+
+        Console.WriteLine("Set Android App Bundle: " + EditorUserBuildSettings.buildAppBundle);
+      }
+      else
+      {
+        EditorUserBuildSettings.buildAppBundle = false;
+      }
+
+      if (options.TryGetValue("exportAsGoogleAndroidProject", out string exportAsGoogleAndroidProject))
+      {
+        EditorUserBuildSettings.exportAsGoogleAndroidProject = exportAsGoogleAndroidProject == "true" || exportAsGoogleAndroidProject == string.Empty;
+        Console.WriteLine("Set Export as Google Project: " + EditorUserBuildSettings.exportAsGoogleAndroidProject);
+      }
+      else
+      {
+        EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
+      }
+
       if (options.TryGetValue("androidKeystoreName", out string keystoreName) && !string.IsNullOrEmpty(keystoreName))
       {
         PlayerSettings.Android.useCustomKeystore = true;
