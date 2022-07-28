@@ -10,7 +10,7 @@ namespace UnityBuilderAction.Input
     {
       if (options.TryGetValue("androidAppBundle", out string androidAppBundle) || options["customBuildPath"].EndsWith(".aab"))
       {
-        EditorUserBuildSettings.buildAppBundle = androidAppBundle == "true" || androidAppBundle == string.Empty;
+        EditorUserBuildSettings.buildAppBundle = androidAppBundle == "true" || androidAppBundle == string.Empty || options["customBuildPath"].EndsWith(".aab";
 
         Console.WriteLine("Set Android App Bundle: " + EditorUserBuildSettings.buildAppBundle);
       }
