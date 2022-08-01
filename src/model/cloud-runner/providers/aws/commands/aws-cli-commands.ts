@@ -7,9 +7,9 @@ import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 export class AwsCliCommands {
   @CliFunction(`aws-list-all`, `List all resources`)
   static async awsListAll() {
-    await AwsCliCommands.awsListStacks(undefined, true);
+    await AwsCliCommands.awsListStacks();
     await AwsCliCommands.awsListTasks();
-    await AwsCliCommands.awsListLogGroups(undefined, true);
+    await AwsCliCommands.awsListLogGroups();
   }
   @CliFunction(`aws-garbage-collect-list`, `garbage collect aws resources not in use !WIP!`)
   static async garbageCollectAws() {
@@ -32,7 +32,7 @@ export class AwsCliCommands {
     return ageDate.getDay() > 0;
   }
   @CliFunction(`aws-list-stacks`, `List stacks`)
-  static async awsListStacks(perResultCallback: any = false, verbose: boolean = false) {
+  static async awsListStacks(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
@@ -42,11 +42,14 @@ export class AwsCliCommands {
       ) || [];
     CloudRunnerLogger.log(`Stacks ${stacks.length}`);
     for (const element of stacks) {
-      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Task Stack ${element.StackName} - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-        );
+      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+
+      // if (verbose)
+      CloudRunnerLogger.log(
+        `Task Stack ${element.StackName} - Age D${Math.floor(
+          ageDate.getHours() / 24,
+        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+      );
       if (perResultCallback) await perResultCallback(element);
     }
     const baseStacks =
@@ -56,13 +59,14 @@ export class AwsCliCommands {
       ) || [];
     CloudRunnerLogger.log(`Base Stacks ${baseStacks.length}`);
     for (const element of baseStacks) {
-      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Base Stack ${
-            element.StackName
-          } - Age D${ageDate.getHours()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-        );
+      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+
+      // if (verbose)
+      CloudRunnerLogger.log(
+        `Task Stack ${element.StackName} - Age D${Math.floor(
+          ageDate.getHours() / 24,
+        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+      );
       if (perResultCallback) await perResultCallback(element);
     }
     if (stacks === undefined) {
@@ -104,7 +108,7 @@ export class AwsCliCommands {
     }
   }
   @CliFunction(`aws-list-log-groups`, `List tasks`)
-  static async awsListLogGroups(perResultCallback: any = false, verbose: boolean = false) {
+  static async awsListLogGroups(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const ecs = new AWS.CloudWatchLogs();
     let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {
@@ -124,21 +128,20 @@ export class AwsCliCommands {
         CloudRunnerLogger.log(`Skipping ${element.logGroupName} no createdAt date`);
         continue;
       }
-      const ageDate = new Date(new Date(element.creationTime).getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Log Group Name ${
-            element.logGroupName
-          } - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()} - 1d old ${AwsCliCommands.isOlderThan1day(
-            new Date(element.creationTime),
-          )}`,
-        );
+      const ageDate: Date = new Date(Date.now() - element.creationTime);
+
+      // if (verbose)
+      CloudRunnerLogger.log(
+        `Task Stack ${element.logGroupName} - Age D${Math.floor(
+          ageDate.getHours() / 24,
+        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+      );
       if (perResultCallback) await perResultCallback(element, element);
     }
   }
 
   @CliFunction(`aws-list-jobs`, `List tasks`)
-  static async awsListJobs(perResultCallback: any = false, verbose: boolean = false) {
+  static async awsListJobs(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
@@ -148,11 +151,14 @@ export class AwsCliCommands {
       ) || [];
     CloudRunnerLogger.log(`Stacks ${stacks.length}`);
     for (const element of stacks) {
-      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Task Stack ${element.StackName} - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-        );
+      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+
+      // if (verbose)
+      CloudRunnerLogger.log(
+        `Task Stack ${element.StackName} - Age D${Math.floor(
+          ageDate.getHours() / 24,
+        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+      );
       if (perResultCallback) await perResultCallback(element);
     }
   }
