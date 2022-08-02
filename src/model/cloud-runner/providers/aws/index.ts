@@ -10,7 +10,6 @@ import { AWSJobStack } from './aws-job-stack';
 import { AWSBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
 import { AwsCliCommands } from './commands/aws-cli-commands';
-import { TaskService } from './services/task-service';
 import { TertiaryResourcesService } from './services/tertiary-resources-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
@@ -41,14 +40,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     throw new Error('Method not implemented.');
   }
 
-  async listAll() {
+  async listResources() {
     await AwsCliCommands.awsListAll();
-
-    return '';
-  }
-  async listTasks() {
-    await AwsCliCommands.awsListJobs();
-    await TaskService.awsListTasks();
 
     return '';
   }

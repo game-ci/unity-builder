@@ -12,13 +12,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
   watch(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  listAll(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  listTasks(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  listOtherResources(): Promise<string> {
+  listResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(
