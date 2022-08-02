@@ -1,7 +1,7 @@
 import { CloudRunner, Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
 
@@ -27,7 +27,7 @@ export class TaskParameterSerializer {
     let array = new Array();
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks);
+    const configurableHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks);
     const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
     if (secrets.length > 0) {
       // eslint-disable-next-line unicorn/no-array-reduce

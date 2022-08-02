@@ -6,7 +6,7 @@ import * as zlib from 'zlib';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
-import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 
 class AWSTaskRunner {
@@ -39,7 +39,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment,
-            command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands, CloudRunner.buildParameters)],
+            command: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
           },
         ],
       },

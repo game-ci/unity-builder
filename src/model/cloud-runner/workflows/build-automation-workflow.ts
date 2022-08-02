@@ -4,7 +4,7 @@ import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
-import { CloudRunnerBuildCommandProcessor } from '../services/cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'path';
 import CloudRunner from '../cloud-runner';
 
@@ -62,11 +62,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static get BuildWorkflow() {
-    const setupHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
-      (x) => x.step.includes(`setup`),
+    const setupHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks).filter((x) =>
+      x.step.includes(`setup`),
     );
-    const buildHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks).filter(
-      (x) => x.step.includes(`build`),
+    const buildHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks).filter((x) =>
+      x.step.includes(`build`),
     );
     const builderPath = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`).replace(/\\/g, `/`);
 

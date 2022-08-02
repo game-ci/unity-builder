@@ -5,6 +5,29 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 
 class TestCloudRunner implements ProviderInterface {
+  inspect(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  watch(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listAll(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listTasks(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listOtherResources(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+  ): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
   cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,

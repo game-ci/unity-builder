@@ -1,6 +1,6 @@
 import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
-import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import CloudRunner from '../../cloud-runner';
@@ -103,7 +103,7 @@ class KubernetesJobSpecFactory {
               name: 'main',
               image,
               command: ['/bin/sh'],
-              args: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(command, CloudRunner.buildParameters)],
+              args: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)],
 
               workingDir: `${workingDirectory}`,
               resources: {

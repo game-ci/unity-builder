@@ -39,6 +39,29 @@ class Kubernetes implements ProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
+  inspect(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  watch(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listAll(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listTasks(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  listOtherResources(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+  ): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
   public async setup(
     buildGuid: string,
     buildParameters: BuildParameters,

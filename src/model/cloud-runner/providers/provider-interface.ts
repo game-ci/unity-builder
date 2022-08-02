@@ -39,4 +39,15 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string>;
+  listAll(): Promise<string>;
+  listTasks(): Promise<string>;
+  listOtherResources(): Promise<string>;
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+  ): Promise<string>;
+  inspect(): Promise<string>;
+  watch(): Promise<string>;
 }

@@ -9,6 +9,9 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSJobStack } from './aws-job-stack';
 import { AWSBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
+import { AwsCliCommands } from './commands/aws-cli-commands';
+import { TaskService } from './services/task-service';
+import { TertiaryResourcesService } from './services/tertiary-resources-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -16,6 +19,40 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
+  inspect(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  watch(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+
+  async listOtherResources(): Promise<string> {
+    await TertiaryResourcesService.AwsListLogGroups();
+
+    return '';
+  }
+
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+  ): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+
+  async listAll() {
+    await AwsCliCommands.awsListAll();
+
+    return '';
+  }
+  async listTasks() {
+    await AwsCliCommands.awsListJobs();
+    await TaskService.awsListTasks();
+
+    return '';
+  }
+
   async cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
