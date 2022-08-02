@@ -9,6 +9,8 @@ import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-c
 import { Caching } from '../cloud-runner/remote-client/caching';
 import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
+import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-options-reader';
+import GitHub from '../github';
 
 export class Cli {
   public static options;
@@ -33,7 +35,8 @@ export class Cli {
     CliFunctionsRepository.PushCliFunctionSource(RemoteClient);
     const program = new Command();
     program.version('0.0.1');
-    const properties = Object.getOwnPropertyNames(Input);
+
+    const properties = CloudRunnerOptionsReader.GetProperties();
     const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
       program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
@@ -55,7 +58,7 @@ export class Cli {
   }
 
   static async RunCli(): Promise<void> {
-    Input.githubInputEnabled = false;
+    GitHub.githubInputEnabled = false;
     if (Cli.options['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
@@ -73,7 +76,7 @@ export class Cli {
   private static logInput() {
     core.info(`\n`);
     core.info(`INPUT:`);
-    const properties = Object.getOwnPropertyNames(Input);
+    const properties = CloudRunnerOptionsReader.GetProperties();
     for (const element of properties) {
       if (
         Input[element] !== undefined &&

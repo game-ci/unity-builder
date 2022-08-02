@@ -2,11 +2,11 @@ import { assert } from 'console';
 import fs from 'fs';
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import Input from '../input';
+import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export class GitRepoReader {
   public static async GetRemote() {
-    if (Input.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
       return '';
     }
     assert(fs.existsSync(`.git`));
@@ -18,7 +18,7 @@ export class GitRepoReader {
   }
 
   public static async GetBranch() {
-    if (Input.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
       return '';
     }
     assert(fs.existsSync(`.git`));

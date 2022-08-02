@@ -1,11 +1,11 @@
-import Input from '../../input';
 import { CloudRunnerSystem } from './cloud-runner-system';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 class DependencyOverrideService {
   public static async CheckHealth() {
-    if (Input.checkDependencyHealthOverride) {
+    if (CloudRunnerOptions.checkDependencyHealthOverride) {
       try {
-        await CloudRunnerSystem.Run(Input.checkDependencyHealthOverride);
+        await CloudRunnerSystem.Run(CloudRunnerOptions.checkDependencyHealthOverride);
       } catch {
         return false;
       }
@@ -14,8 +14,8 @@ class DependencyOverrideService {
     return true;
   }
   public static async TryStartDependencies() {
-    if (Input.startDependenciesOverride) {
-      await CloudRunnerSystem.Run(Input.startDependenciesOverride);
+    if (CloudRunnerOptions.startDependenciesOverride) {
+      await CloudRunnerSystem.Run(CloudRunnerOptions.startDependenciesOverride);
     }
   }
 }

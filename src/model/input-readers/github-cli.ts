@@ -1,10 +1,10 @@
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import * as core from '@actions/core';
-import Input from '../input';
+import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export class GithubCliReader {
   static async GetGitHubAuthToken() {
-    if (Input.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
       return '';
     }
     try {

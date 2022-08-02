@@ -7,6 +7,8 @@ import UnityVersioning from '../unity-versioning';
 import { Cli } from '../cli/cli';
 import CloudRunnerLogger from './services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
+import CloudRunnerOptions from './cloud-runner-options';
+import GitHub from '../github';
 
 describe('Cloud Runner', () => {
   it('responds', () => {});
@@ -14,7 +16,7 @@ describe('Cloud Runner', () => {
 describe('Cloud Runner', () => {
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
-  if (Input.cloudRunnerTests) {
+  if (CloudRunnerOptions.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
       // Build parameters
       Cli.options = {
@@ -31,11 +33,11 @@ describe('Cloud Runner', () => {
               value: '${testSecretValue}'
         `,
       };
-      Input.githubInputEnabled = false;
+      GitHub.githubInputEnabled = false;
 
       // Setup parameters
       const buildParameter = await BuildParameters.create();
-      Input.githubInputEnabled = true;
+      GitHub.githubInputEnabled = true;
       const baseImage = new ImageTag(buildParameter);
 
       // Run the job
@@ -72,7 +74,7 @@ describe('Cloud Runner', () => {
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
-      Input.githubInputEnabled = false;
+      GitHub.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
@@ -87,7 +89,7 @@ describe('Cloud Runner', () => {
       CloudRunnerLogger.log(`run 2 succeeded`);
       expect(results2).toContain(buildSucceededString);
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
-      Input.githubInputEnabled = true;
+      GitHub.githubInputEnabled = true;
       delete Cli.options;
     }, 1000000);
   }
@@ -108,7 +110,7 @@ describe('Cloud Runner', () => {
             value: '${testSecretValue}'
       `,
     };
-    Input.githubInputEnabled = false;
+    GitHub.githubInputEnabled = false;
 
     // Setup parameters
     const buildParameter = await BuildParameters.create();
@@ -116,7 +118,7 @@ describe('Cloud Runner', () => {
 
     // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
-    Input.githubInputEnabled = true;
+    GitHub.githubInputEnabled = true;
     delete Cli.options;
   }, 1000000);
   it('Test cloud runner returns commands', async () => {
@@ -128,7 +130,7 @@ describe('Cloud Runner', () => {
       cloudRunnerCluster: 'test',
       targetPlatform: 'StandaloneLinux64',
     };
-    Input.githubInputEnabled = false;
+    GitHub.githubInputEnabled = false;
 
     // Setup parameters
     const buildParameter = await BuildParameters.create();
@@ -136,7 +138,7 @@ describe('Cloud Runner', () => {
 
     // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
-    Input.githubInputEnabled = true;
+    GitHub.githubInputEnabled = true;
     delete Cli.options;
   }, 1000000);
 });

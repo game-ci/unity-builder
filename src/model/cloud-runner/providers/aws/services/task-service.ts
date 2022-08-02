@@ -59,7 +59,7 @@ export class TaskService {
       if (list.length > 0) {
         const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
         const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
-        if (describeList === []) {
+        if (describeList.length === 0) {
           continue;
         }
         CloudRunnerLogger.log(`Tasks ${describeList.length}`);

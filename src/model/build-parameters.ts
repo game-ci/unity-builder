@@ -9,6 +9,8 @@ import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
+import GitHub from './github';
+import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class BuildParameters {
   public editorVersion!: string;
@@ -76,7 +78,7 @@ class BuildParameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
+    if (!process.env.UNITY_SERIAL && GitHub.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
       if (!process.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
@@ -114,36 +116,36 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
-      cloudRunnerCluster: Input.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: Input.cloudRunnerBuilderPlatform,
-      awsBaseStackName: Input.awsBaseStackName,
-      kubeConfig: Input.kubeConfig,
-      cloudRunnerMemory: Input.cloudRunnerMemory,
-      cloudRunnerCpu: Input.cloudRunnerCpu,
-      kubeVolumeSize: Input.kubeVolumeSize,
-      kubeVolume: Input.kubeVolume,
-      postBuildSteps: Input.postBuildSteps,
-      preBuildSteps: Input.preBuildSteps,
-      customJob: Input.customJob,
+      cloudRunnerCluster: CloudRunnerOptions.cloudRunnerCluster,
+      cloudRunnerBuilderPlatform: CloudRunnerOptions.cloudRunnerBuilderPlatform,
+      awsBaseStackName: CloudRunnerOptions.awsBaseStackName,
+      kubeConfig: CloudRunnerOptions.kubeConfig,
+      cloudRunnerMemory: CloudRunnerOptions.cloudRunnerMemory,
+      cloudRunnerCpu: CloudRunnerOptions.cloudRunnerCpu,
+      kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
+      kubeVolume: CloudRunnerOptions.kubeVolume,
+      postBuildSteps: CloudRunnerOptions.postBuildSteps,
+      preBuildSteps: CloudRunnerOptions.preBuildSteps,
+      customJob: CloudRunnerOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerIntegrationTests: Input.cloudRunnerTests,
+      cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
+      cloudRunnerIntegrationTests: CloudRunnerOptions.cloudRunnerTests,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
-      awsStackName: Input.awsBaseStackName,
+      awsStackName: CloudRunnerOptions.awsBaseStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customJobHooks: Input.customJobHooks(),
-      cachePullOverrideCommand: Input.cachePullOverrideCommand(),
-      cachePushOverrideCommand: Input.cachePushOverrideCommand(),
-      readInputOverrideCommand: Input.readInputOverrideCommand(),
-      readInputFromOverrideList: Input.readInputFromOverrideList(),
-      kubeStorageClass: Input.kubeStorageClass,
-      checkDependencyHealthOverride: Input.checkDependencyHealthOverride,
-      startDependenciesOverride: Input.startDependenciesOverride,
-      cacheKey: Input.cacheKey,
+      customJobHooks: CloudRunnerOptions.customJobHooks(),
+      cachePullOverrideCommand: CloudRunnerOptions.cachePullOverrideCommand(),
+      cachePushOverrideCommand: CloudRunnerOptions.cachePushOverrideCommand(),
+      readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
+      readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
+      kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
+      checkDependencyHealthOverride: CloudRunnerOptions.checkDependencyHealthOverride,
+      startDependenciesOverride: CloudRunnerOptions.startDependenciesOverride,
+      cacheKey: CloudRunnerOptions.cacheKey,
     };
   }
 

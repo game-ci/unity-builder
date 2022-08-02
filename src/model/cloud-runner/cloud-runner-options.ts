@@ -1,11 +1,11 @@
 import { Cli } from '../cli/cli';
 import CloudRunnerQueryOverride from './services/cloud-runner-query-override';
-import Input from '../input';
+import GitHub from '../github';
 const core = require('@actions/core');
 
 class CloudRunnerOptions {
   public static getInput(query) {
-    if (Input.githubInputEnabled) {
+    if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
         return coreInput;

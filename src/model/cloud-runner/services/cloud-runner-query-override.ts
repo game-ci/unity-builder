@@ -1,5 +1,6 @@
 import Input from '../../input';
 import { GenericInputReader } from '../../input-readers/generic-input-reader';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 const formatFunction = (value, arguments_) => {
   for (const element of arguments_) {
@@ -28,11 +29,11 @@ class CloudRunnerQueryOverride {
   }
 
   private static shouldUseOverride(query) {
-    if (Input.readInputOverrideCommand() !== '') {
-      if (Input.readInputFromOverrideList() !== '') {
+    if (CloudRunnerOptions.readInputOverrideCommand() !== '') {
+      if (CloudRunnerOptions.readInputFromOverrideList() !== '') {
         const doesInclude =
-          Input.readInputFromOverrideList().split(',').includes(query) ||
-          Input.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
+          CloudRunnerOptions.readInputFromOverrideList().split(',').includes(query) ||
+          CloudRunnerOptions.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
 
         return doesInclude ? true : false;
       } else {
@@ -46,11 +47,13 @@ class CloudRunnerQueryOverride {
       throw new Error(`Should not be trying to run override query on ${query}`);
     }
 
-    return await GenericInputReader.Run(formatFunction(Input.readInputOverrideCommand(), [{ key: 0, value: query }]));
+    return await GenericInputReader.Run(
+      formatFunction(CloudRunnerOptions.readInputOverrideCommand(), [{ key: 0, value: query }]),
+    );
   }
 
   public static async PopulateQueryOverrideInput() {
-    const queries = Input.readInputFromOverrideList().split(',');
+    const queries = CloudRunnerOptions.readInputFromOverrideList().split(',');
     CloudRunnerQueryOverride.queryOverrides = new Array();
     for (const element of queries) {
       if (CloudRunnerQueryOverride.shouldUseOverride(element)) {
