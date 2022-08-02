@@ -40,7 +40,7 @@ namespace UnityBuilderAction.Versioning
     /// </summary>
     public static string GetTagVersion()
     {
-      string version = Run(@"tag --points-at HEAD | grep ?[0-9]*");
+      string version = Run(@"tag --points-at HEAD | grep *[0-9]*");
 
       version = version.Substring(1);
 
@@ -62,7 +62,7 @@ namespace UnityBuilderAction.Versioning
     /// </summary>
     static bool HasAnyVersionTags()
     {
-      return "0" != Run(@"tag --list --merged HEAD | grep ?[0-9]* | wc -l");
+      return "0" != Run(@"tag --list --merged HEAD | grep *[0-9]* | wc -l");
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ namespace UnityBuilderAction.Versioning
     /// </summary>
     static string GetVersionString()
     {
-      return Run(@"describe --tags --long --match ""?[0-9]*""");
+      return Run(@"describe --tags --long --match ""*[0-9]*""");
 
       // Todo - implement split function based on this more complete query
       // return Run(@"describe --long --tags --dirty --always");
