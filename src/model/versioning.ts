@@ -272,18 +272,18 @@ export default class Versioning {
   }
 
   /**
-   * Whether or not the repository has any version tags yet.
+   * Whether the current tree has any version tags yet.
    */
   static async hasAnyVersionTags() {
-    const numberOfCommitsAsString = await System.run('sh', undefined, {
-      input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
+    const numberOfTagsAsString = await System.run('sh', undefined, {
+      input: Buffer.from(`git tag --list --merged HEAD | grep -E ^v?(\\d+\\.){0,2}\\d+[\\w\\-.+]* | wc -l`),
       cwd: this.projectPath,
       silent: false,
     });
 
-    const numberOfCommits = Number.parseInt(numberOfCommitsAsString, 10);
+    const numberOfTags = Number.parseInt(numberOfTagsAsString, 10);
 
-    return numberOfCommits !== 0;
+    return numberOfTags !== 0;
   }
 
   /**
