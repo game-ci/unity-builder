@@ -273,10 +273,12 @@ export default class Versioning {
 
   /**
    * Whether the current tree has any version tags yet.
+   *
+   * Note: Currently this is run in all OSes, so the syntax must be cross-platform.
    */
   static async hasAnyVersionTags() {
     const numberOfTagsAsString = await System.run('sh', undefined, {
-      input: Buffer.from(`git tag --list --merged HEAD | grep -E ^v?(\\d+\\.){0,2}\\d+[\\w\\-.+]* | wc -l`),
+      input: Buffer.from(`git tag --list --merged HEAD | grep -E '^v?([0-9]+\\.)*[0-9]+.*' | wc -l`),
       cwd: this.projectPath,
       silent: false,
     });
