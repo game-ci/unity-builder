@@ -79,6 +79,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     process.env.AWS_REGION = Input.region;
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
+    AWSTaskRunner.ECS = ECS;
+    AWSTaskRunner.Kinesis = new SDK.Kinesis();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
@@ -99,7 +101,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
+      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, environment, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
       if (shouldCleanup) {

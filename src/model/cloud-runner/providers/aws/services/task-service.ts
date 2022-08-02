@@ -4,6 +4,9 @@ import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 
 export class TaskService {
+  static watch() {
+    throw new Error('Method not implemented.');
+  }
   public static async awsListStacks(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();

@@ -34,10 +34,6 @@ export class AwsCliCommands {
   static async awsListTasks(perResultCallback: any = false) {
     return TaskService.awsListJobs(perResultCallback);
   }
-  @CliFunction(`list-tasks`, `List tasks`)
-  static async listTasks(perResultCallback: any = false) {
-    return TaskService.awsListJobs(perResultCallback);
-  }
 
   @CliFunction(`aws-list-log-groups`, `List tasks`)
   static async awsListLogGroups(perResultCallback: any = false) {
@@ -47,5 +43,15 @@ export class AwsCliCommands {
   @CliFunction(`aws-list-jobs`, `List tasks`)
   public static async awsListJobs(perResultCallback: any = false) {
     return TaskService.awsListJobs(perResultCallback);
+  }
+
+  @CliFunction(`list-tasks`, `List tasks`)
+  static async listTasks(perResultCallback: any = false) {
+    return TaskService.awsListJobs(perResultCallback);
+  }
+
+  @CliFunction(`watch`, `List tasks`)
+  static async watchTasks() {
+    return TaskService.watch();
   }
 }
