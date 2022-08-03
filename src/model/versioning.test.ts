@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import NotImplementedException from './error/not-implemented-exception';
 import System from './system';
 import Versioning from './versioning';
-import { completelyValidSemanticVersions, validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions';
+import { validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions';
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -47,10 +47,6 @@ describe('Versioning', () => {
     };
 
     it.concurrent.each(validVersionTagInputs)(`accepts valid tag input '%s'`, async (input) => {
-      expect(await matchInputUsingGrep(input)).toStrictEqual(input);
-    });
-
-    it.concurrent.each(completelyValidSemanticVersions)(`accepts valid semantic version '%s'`, async (input) => {
       expect(await matchInputUsingGrep(input)).toStrictEqual(input);
     });
 

@@ -1,30 +1,3 @@
-const addVariantsPrependingV = (array: string[]) => array.map((tag) => [tag, `v${tag}`]).flat();
-
-/**
- * Array of versions that will be detected as version tags. Not all of these are
- * "semantic versions", but can be used to generate one. Especially using the
- * `versioning: Semantic` option.
- */
-export const validVersionTagInputs = addVariantsPrependingV(['0', '1', '0.1', '1.0', '1.1.0', '1.2.3']);
-export const invalidVersionTagInputs = addVariantsPrependingV([
-  '+invalid',
-  '-invalid',
-  '-invalid+invalid',
-  '-invalid.01',
-  'alpha',
-  'alpha.beta',
-  'alpha.beta.1',
-  'alpha.1',
-  'alpha+beta',
-  'alpha_beta',
-  'alpha.',
-  'alpha..',
-  'beta',
-  '-alpha.',
-  '-1.0.3-gamma+b7718',
-  '+justmeta',
-]);
-
 export const completelyValidSemanticVersions = [
   '0.0.4',
   '1.2.3',
@@ -59,7 +32,6 @@ export const completelyValidSemanticVersions = [
   '1.0.0-0A.is.legal',
 ];
 
-// Not completely valid semantic versions
 export const notCompletelyValidSemanticVersions = [
   '1',
   '1.2',
@@ -102,3 +74,39 @@ export const notCompletelyValidSemanticVersions = [
   '9.8.7-whatever+meta+meta',
   '99999999999999999999999.999999999999999999.99999999999999999----RC-SNAPSHOT.12.09.1--------------------------------..12',
 ];
+
+const addVariantsPrependingV = (array: string[]) => array.map((tag) => [tag, `v${tag}`]).flat();
+
+/**
+ * Array of versions that will be detected as version tags. Not all of these are
+ * "semantic versions", but can be used to generate one. Especially using the
+ * `versioning: Semantic` option.
+ */
+export const validVersionTagInputs = addVariantsPrependingV([
+  '0',
+  '1',
+  '0.1',
+  '1.0',
+  '1.1.0',
+  '1.2.3',
+  ...completelyValidSemanticVersions,
+]);
+
+export const invalidVersionTagInputs = addVariantsPrependingV([
+  '+invalid',
+  '-invalid',
+  '-invalid+invalid',
+  '-invalid.01',
+  'alpha',
+  'alpha.beta',
+  'alpha.beta.1',
+  'alpha.1',
+  'alpha+beta',
+  'alpha_beta',
+  'alpha.',
+  'alpha..',
+  'beta',
+  '-alpha.',
+  '-1.0.3-gamma+b7718',
+  '+justmeta',
+]);
