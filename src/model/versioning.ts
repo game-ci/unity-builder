@@ -17,6 +17,10 @@ export default class Versioning {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
 
+  static get grepCompatibleInputVersionRegex() {
+    return '^v?([0-9]+\\.)*[0-9]+.*';
+  }
+
   /**
    * Get the branch name of the (related) branch
    */
@@ -278,7 +282,7 @@ export default class Versioning {
    */
   static async hasAnyVersionTags() {
     const numberOfTagsAsString = await System.run('sh', undefined, {
-      input: Buffer.from(`git tag --list --merged HEAD | grep -E '^v?([0-9]+\\.)*[0-9]+.*' | wc -l`),
+      input: Buffer.from(`git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`),
       cwd: this.projectPath,
       silent: false,
     });

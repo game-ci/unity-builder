@@ -4,13 +4,12 @@
 
 #### Code of Conduct
 
-This repository has adopted the Contributor Covenant as it's
-Code of Conduct. It is expected that participants adhere to it.
+This repository has adopted the Contributor Covenant as it's Code of Conduct. It is expected that participants adhere to
+it.
 
 #### Proposing a Change
 
-If you are unsure about whether or not a change is desired,
-you can create an issue. This is useful because it creates
+If you are unsure about whether or not a change is desired, you can create an issue. This is useful because it creates
 the possibility for a discussion that's visible to everyone.
 
 When fixing a bug it is fine to submit a pull request right away.
@@ -33,6 +32,11 @@ Please note that commit hooks will run automatically to perform some tasks;
 - format your code
 - run tests
 - build distributable files
+
+#### Windows users
+
+Make sure your editor and terminal that run the tests are set to `Powershell 7` or above with
+`Git's Unix tools for Windows` installed. Some tests require you to be able to run `sh` and other unix commands.
 
 #### License
 

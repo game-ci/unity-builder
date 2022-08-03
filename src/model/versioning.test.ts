@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import NotImplementedException from './error/not-implemented-exception';
 import System from './system';
 import Versioning from './versioning';
+import { completelyValidSemanticVersions, validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions';
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -31,6 +32,30 @@ describe('Versioning', () => {
 
     it('has an option that allows custom input', () => {
       expect(Versioning.strategies).toHaveProperty('Custom');
+    });
+  });
+
+  describe('grepCompatibleInputVersionRegex', () => {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const matchInputUsingGrep = async (input) => {
+      const output = await System.run('sh', undefined, {
+        input: Buffer.from(`echo '${input}' | grep -E '${Versioning.grepCompatibleInputVersionRegex}'`),
+        silent: true,
+      });
+
+      return output.trim();
+    };
+
+    it.concurrent.each(validVersionTagInputs)(`accepts valid tag input '%s'`, async (input) => {
+      expect(await matchInputUsingGrep(input)).toStrictEqual(input);
+    });
+
+    it.concurrent.each(completelyValidSemanticVersions)(`accepts valid semantic version '%s'`, async (input) => {
+      expect(await matchInputUsingGrep(input)).toStrictEqual(input);
+    });
+
+    it.concurrent.each(invalidVersionTagInputs)(`rejects non-version tag input '%s'`, async (input) => {
+      await expect(async () => matchInputUsingGrep(input)).rejects.toThrowError(/^Failed to run/);
     });
   });
 
