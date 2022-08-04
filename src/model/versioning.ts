@@ -17,6 +17,10 @@ export default class Versioning {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
 
+  static get grepCompatibleInputVersionRegex() {
+    return '^v?([0-9]+\\.)*[0-9]+.*';
+  }
+
   /**
    * Get the branch name of the (related) branch
    */
@@ -272,18 +276,20 @@ export default class Versioning {
   }
 
   /**
-   * Whether or not the repository has any version tags yet.
+   * Whether the current tree has any version tags yet.
+   *
+   * Note: Currently this is run in all OSes, so the syntax must be cross-platform.
    */
   static async hasAnyVersionTags() {
-    const numberOfCommitsAsString = await System.run('sh', undefined, {
-      input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
+    const numberOfTagsAsString = await System.run('sh', undefined, {
+      input: Buffer.from(`git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`),
       cwd: this.projectPath,
       silent: false,
     });
 
-    const numberOfCommits = Number.parseInt(numberOfCommitsAsString, 10);
+    const numberOfTags = Number.parseInt(numberOfTagsAsString, 10);
 
-    return numberOfCommits !== 0;
+    return numberOfTags !== 0;
   }
 
   /**
