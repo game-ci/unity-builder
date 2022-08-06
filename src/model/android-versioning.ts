@@ -11,7 +11,7 @@ export default class AndroidVersioning {
 
   static versionToVersionCode(version) {
     if (version === 'none') {
-      core.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
+      log.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
 
       return 0;
     }
@@ -19,7 +19,7 @@ export default class AndroidVersioning {
     const parsedVersion = semver.parse(version);
 
     if (!parsedVersion) {
-      core.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
+      log.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
 
       return 1;
     }
@@ -33,7 +33,7 @@ export default class AndroidVersioning {
         `Generated versionCode ${versionCode} is dangerously close to the maximum allowed number 2100000000. Consider a different versioning scheme to be able to continue updating your application.`,
       );
     }
-    core.info(`Using android versionCode ${versionCode}`);
+    log.info(`Using android versionCode ${versionCode}`);
 
     return versionCode;
   }

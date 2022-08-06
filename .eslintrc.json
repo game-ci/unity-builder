@@ -55,6 +55,8 @@
     "no-continue": "off",
     // From experience, named exports are almost always desired. I got tired of this rule
     "import/prefer-default-export": "off",
+    // Disable in favour of TS equivalent
+    "no-unused-vars": "off",
     // Unused vars are useful to keep method signatures consistent and documented
     "@typescript-eslint/no-unused-vars": "off",
     // For this project only use kebab-case
@@ -65,9 +67,13 @@
     "unicorn/prevent-abbreviations": "off",
     // Allow disabling eslint per file
     "eslint-comments/no-use": "off",
-    // Deno import style
+    // Deno import style not supported (enable after upgrading)
     "import/extensions": "off",
-    // Deno import style
-    "import/no-unresolved": "off"
+    // Deno import style not supported (enable after upgrading)
+    "import/no-unresolved": "off",
+    // App it not yet internationalised
+    "i18n-text/no-en": "off",
+    // Showing false positives (enable after upgrading)
+    "no-shadow": "off"
   }
 }

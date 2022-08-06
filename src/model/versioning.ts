@@ -89,6 +89,8 @@ export default class Versioning {
       throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
     }
 
+    log.info('Versioning strategy:', strategy);
+
     let version;
     switch (strategy) {
       case this.strategies.None:
@@ -106,6 +108,8 @@ export default class Versioning {
       default:
         throw new NotImplementedException(`Strategy ${strategy} is not implemented.`);
     }
+
+    log.info('Version of this build:', version);
 
     return version;
   }
@@ -133,7 +137,7 @@ export default class Versioning {
 
     if (!(await this.hasAnyVersionTags())) {
       const version = `0.0.${await this.getTotalNumberOfCommits()}`;
-      core.info(`Generated version ${version} (no version tags found).`);
+      log.info(`Generated version ${version} (no version tags found).`);
 
       return version;
     }
@@ -146,13 +150,13 @@ export default class Versioning {
       const [major, minor, patch] = `${tag}.${commits}`.split('.');
       const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
 
-      core.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
+      log.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
 
       return `${threeDigitVersion}`;
     }
 
     const version = `0.0.${await this.getTotalNumberOfCommits()}`;
-    core.info(`Generated version ${version} (semantic version couldn't be determined).`);
+    log.info(`Generated version ${version} (semantic version couldn't be determined).`);
 
     return version;
   }
@@ -206,7 +210,7 @@ export default class Versioning {
             hash,
           };
         } catch {
-          core.warning(
+          log.warning(
             `Failed to parse git describe output or version can not be determined through: "${description}".`,
           );
 
@@ -235,8 +239,10 @@ export default class Versioning {
   static async fetch() {
     try {
       await this.git(['fetch', '--unshallow']);
-    } catch (error) {
-      core.warning(`Fetch --unshallow caught: ${error}`);
+    } catch {
+      log.warning(
+        `fetch --unshallow did not work, falling back to regular fetch (which probably just means it's not running on GH actions)`,
+      );
       await this.git(['fetch']);
     }
   }
@@ -261,8 +267,8 @@ export default class Versioning {
     const isDirty = output !== '';
 
     if (isDirty) {
-      core.warning('Changes were made to the following files and folders:\n');
-      core.warning(output);
+      log.warning('Changes were made to the following files and folders:\n');
+      log.warning(output);
     }
 
     return isDirty;

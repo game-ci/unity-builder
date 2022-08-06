@@ -68,8 +68,8 @@ export class Cli {
 
   @CliFunction(`print-input`, `prints all input`)
   private static logInput() {
-    core.info(`\n`);
-    core.info(`INPUT:`);
+    log.info(`\n`);
+    log.info(`INPUT:`);
     const properties = Object.getOwnPropertyNames(Input);
     for (const element of properties) {
       if (
@@ -80,10 +80,10 @@ export class Cli {
         element !== 'cliOptions' &&
         element !== 'prototype'
       ) {
-        core.info(`${element} ${Input[element]}`);
+        log.info(`${element} ${Input[element]}`);
       }
     }
-    core.info(`\n`);
+    log.info(`\n`);
   }
 
   @CliFunction(`cli`, `runs a cloud runner build`)

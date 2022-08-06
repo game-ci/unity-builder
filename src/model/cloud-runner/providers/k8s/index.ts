@@ -131,7 +131,7 @@ class Kubernetes implements ProviderInterface {
       return output;
     } catch (error) {
       CloudRunnerLogger.log('Running job failed');
-      core.error(JSON.stringify(error, undefined, 4));
+      log.error(JSON.stringify(error, undefined, 4));
       await this.cleanupTaskResources();
       throw error;
     }
@@ -151,7 +151,7 @@ class Kubernetes implements ProviderInterface {
       await new Promise((promise) => setTimeout(promise, 5000));
     } catch (error) {
       CloudRunnerLogger.log('Failed to cleanup, error:');
-      core.error(JSON.stringify(error, undefined, 4));
+      log.error(JSON.stringify(error, undefined, 4));
       CloudRunnerLogger.log('Abandoning cleanup, build error:');
       throw error;
     }

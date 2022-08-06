@@ -14,7 +14,7 @@ class Cache {
       return;
     }
 
-    core.warning(`
+    log.warning(`
       Library folder does not exist.
       Consider setting up caching to speed up your workflow,
       if this is not your first build.

@@ -10,24 +10,24 @@ class CloudRunnerLogger {
   }
 
   public static log(message: string) {
-    core.info(message);
+    log.info(message);
   }
 
   public static logWarning(message: string) {
-    core.warning(message);
+    log.warning(message);
   }
 
   public static logLine(message: string) {
-    core.info(`${message}\n`);
+    log.info(`${message}\n`);
   }
 
   public static error(message: string) {
-    core.error(message);
+    log.error(message);
   }
 
   public static logWithTime(message: string) {
     const newTimestamp = this.createTimestamp();
-    core.info(
+    log.info(
       `${message} (Since previous: ${this.calculateTimeDiff(
         newTimestamp,
         this.timestamp,

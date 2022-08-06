@@ -11,7 +11,13 @@ export const createFormatter = ({
   showBrackets = true,
   depth = 3,
 } = {}): FormatterFunction => {
-  const column = (value: string) => (showBrackets ? `[${value}]` : ` ${value}`);
+  const column = (input: string, { width = 0, align = 'left' } = {}) => {
+    const totalWidth = showBrackets ? width + 2 : width;
+    const value = showBrackets ? `[${input}]` : ` ${input}`;
+    const paddingOptions = { side: align === 'left' ? 'right' : 'left' };
+
+    return pad(value, totalWidth, paddingOptions);
+  };
 
   return ({ level, levelName, msg, args, loggerName }: LogRecord) => {
     let line = '';
@@ -31,7 +37,7 @@ export const createFormatter = ({
 
     if (showLevelName) {
       const shortName = levelName.length <= 5 ? levelName : levelName.slice(0, 4);
-      line += column(`${pad(shortName, 5, { side: 'left' })}`);
+      line += column(shortName, { width: 5, align: 'right' });
     }
 
     if (showLevel) {

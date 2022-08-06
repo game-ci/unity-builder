@@ -37,8 +37,8 @@ class KubernetesStorage {
     try {
       return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
     } catch (error) {
-      core.error('Failed to get PVC phase');
-      core.error(JSON.stringify(error, undefined, 4));
+      log.error('Failed to get PVC phase');
+      log.error(JSON.stringify(error, undefined, 4));
       throw error;
     }
   }
@@ -57,9 +57,9 @@ class KubernetesStorage {
         },
       );
     } catch (error: any) {
-      core.error('Failed to watch PVC');
-      core.error(error.toString());
-      core.error(
+      log.error('Failed to watch PVC');
+      log.error(error.toString());
+      log.error(
         `PVC Body: ${JSON.stringify(
           (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body,
           undefined,

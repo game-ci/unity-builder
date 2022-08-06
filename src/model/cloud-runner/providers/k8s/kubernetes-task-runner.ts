@@ -44,8 +44,8 @@ class KubernetesTaskRunner {
         throw resultError;
       }
       if (!didStreamAnyLogs) {
-        core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
-        core.error(
+        log.error('Failed to stream any logs, listing namespace events, check for an error with the container');
+        log.error(
           JSON.stringify(
             {
               events: (await kubeClient.listNamespacedEvent(namespace)).body.items

@@ -18,7 +18,7 @@ export class GithubCliReader {
         .replace(/ /g, '')
         .replace(/\n/g, '');
     } catch (error: any) {
-      core.info(error || 'Failed to get github auth token from gh cli');
+      log.info(error || 'Failed to get github auth token from gh cli');
 
       return '';
     }

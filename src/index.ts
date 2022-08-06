@@ -8,7 +8,8 @@ import PlatformSetup from './model/platform-setup.ts';
 async function runMain() {
   try {
     if (Cli.InitCliMode()) {
-      log.debug('CloudBuilder CLI mode');
+      // Todo - this is only here for testing the entire flow in deno and making sure I'm hitting the right path
+      log.error('CloudBuilder CLI mode');
       await Cli.RunCli();
 
       return;
@@ -28,7 +29,7 @@ async function runMain() {
     if (buildParameters.cloudRunnerCluster !== 'local') {
       await CloudRunner.run(buildParameters, baseImage.toString());
     } else {
-      core.info('Building locally');
+      log.info('Building locally');
       await PlatformSetup.setup(buildParameters, actionFolder);
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder, workspace, buildParameters);
@@ -40,7 +41,7 @@ async function runMain() {
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
   } catch (error) {
-    core.error(error);
+    log.error(error);
     core.setFailed((error as Error).message);
   }
 }

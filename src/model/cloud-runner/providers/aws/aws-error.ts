@@ -5,7 +5,7 @@ import CloudRunner from '../../cloud-runner.ts';
 export class AWSError {
   static async handleStackCreationFailure(error: any, CF: aws.CloudFormation, taskDefStackName: string) {
     CloudRunnerLogger.log('aws error: ');
-    core.error(JSON.stringify(error, undefined, 4));
+    log.error(JSON.stringify(error, undefined, 4));
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
       CloudRunnerLogger.log('Getting events and resources for task stack');
       const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;

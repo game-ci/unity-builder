@@ -20,19 +20,19 @@ class System {
 
     const showOutput = () => {
       if (debug !== '' && shouldLog) {
-        core.debug(debug);
+        log.debug(debug);
       }
 
       if (result !== '' && shouldLog) {
-        core.info(result);
+        log.info(result);
       }
 
       if (error !== '' && shouldLog) {
-        core.warning(error);
+        log.warning(error);
       }
     };
 
-    const throwContextualError = (message) => {
+    const throwContextualError = (message: string) => {
       let commandAsString = command;
       if (Array.isArray(arguments_)) {
         commandAsString += ` ${arguments_.join(' ')}`;

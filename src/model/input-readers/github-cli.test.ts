@@ -7,6 +7,6 @@ describe(`github cli`, () => {
     const token = await GithubCliReader.GetGitHubAuthToken();
 
     // Todo - use expect(result).toStrictEqual(something)
-    core.info(token);
+    log.info(token);
   });
 });

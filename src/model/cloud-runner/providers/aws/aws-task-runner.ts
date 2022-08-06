@@ -96,7 +96,7 @@ class AWSTaskRunner {
       );
 
       core.setFailed(error);
-      core.error(error);
+      log.error(error);
     }
   }
 

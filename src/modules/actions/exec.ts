@@ -1,4 +1,4 @@
-import { exec as originalExec } from 'https://deno.land/x/exec/mod.ts';
+import { exec as originalExec } from 'https://deno.land/x/exec@0.0.5/mod.ts';
 import { core } from './core.ts';
 
 export enum OutputMode {
@@ -8,22 +8,34 @@ export enum OutputMode {
   Tee, // both dump and capture the output
 }
 
-export interface IExecResponse {
-  code: number;
+export interface ICommandResult {
+  status?: {
+    code: number;
+    success: boolean;
+  };
+  output: string;
+}
+
+export interface ISanitisedCommandResult {
+  exitCode: number;
   success: boolean;
   output: string;
 }
 
 interface IOptions {
+  silent?: boolean;
+  ignoreReturnCode?: boolean;
   output?: OutputMode;
   verbose?: boolean;
   continueOnError?: boolean;
 }
 
 // Todo - change signature of exec inside the code instead of adapting the exec method
-const exec = async (command, args: string | string[] = [], ghActionsOptions: IOptions = {}): Promise<IExecResponse> => {
-  core.info('Running command: ', command, args);
-
+const exec = async (
+  command: string,
+  args: string | string[] = [],
+  ghActionsOptions: IOptions = {},
+): Promise<ISanitisedCommandResult> => {
   const options = {
     output: OutputMode.Tee,
     verbose: false,
@@ -31,16 +43,20 @@ const exec = async (command, args: string | string[] = [], ghActionsOptions: IOp
   };
 
   const { silent = false, ignoreReturnCode } = ghActionsOptions;
-  if (silent) options.output = OutputMode.None;
+  if (silent) options.output = OutputMode.Capture;
   if (ignoreReturnCode) options.continueOnError = true;
 
-  const result = await originalExec(`${command} ${args.join(' ')}`, options);
-  core.info('result:', result);
+  const argsString = typeof args === 'string' ? args : args.join(' ');
+  log.debug('Command: ', command, argsString);
 
-  const { status = {}, output = '' } = result;
+  const result: ICommandResult = await originalExec(`${command} ${argsString}`, options);
+
+  log.debug('Result:', result);
+
+  const { status, output = '' } = result;
   const { code: exitCode, success } = status;
 
-  return { exitCode, success, output };
+  return { exitCode, success, output: output.trim() };
 };
 
 export { exec };
