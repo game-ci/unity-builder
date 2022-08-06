@@ -46,4 +46,4 @@ async function runMain() {
   }
 }
 
-runMain();
+await runMain();

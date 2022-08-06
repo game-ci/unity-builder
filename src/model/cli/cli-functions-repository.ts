@@ -34,7 +34,6 @@ export class CliFunctionsRepository {
     });
   }
 
-  // eslint-disable-next-line no-unused-vars
   public static PushCliFunctionSource(cliFunction: any) {}
 }
 

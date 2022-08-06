@@ -74,7 +74,7 @@ class ImageTag {
     const { generic, webgl, mac, windows, windowsIl2cpp, wsaPlayer, linux, linuxIl2cpp, android, ios, tvos, facebook } =
       ImageTag.targetPlatformSuffixes;
 
-    const [major, minor] = version.split('.').map((digit) => Number(digit));
+    const [major, minor] = version.split('.').map(Number);
 
     // @see: https://docs.unity3d.com/ScriptReference/BuildTarget.html
     switch (platform) {

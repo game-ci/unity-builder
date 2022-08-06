@@ -1,5 +1,5 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import { k8sTypes, k8s, core, Writable, waitUntil } from '../../../../dependencies.ts';
+import { k8sTypes, k8s, Writable, waitUntil } from '../../../../dependencies.ts';
 import { CloudRunnerStatics } from '../../cloud-runner-statics.ts';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service.ts';
 
@@ -45,10 +45,11 @@ class KubernetesTaskRunner {
       }
       if (!didStreamAnyLogs) {
         log.error('Failed to stream any logs, listing namespace events, check for an error with the container');
+        const listedEvents = await kubeClient.listNamespacedEvent(namespace);
         log.error(
           JSON.stringify(
             {
-              events: (await kubeClient.listNamespacedEvent(namespace)).body.items
+              events: listedEvents.body.items
                 .filter((x) => {
                   return x.involvedObject.name === podName || x.involvedObject.name === jobName;
                 })
@@ -90,13 +91,12 @@ class KubernetesTaskRunner {
             status.body.status?.conditions?.[0].message || ''
           }`,
         );
-        if (success || phase !== 'Pending') return true;
 
-        return false;
+        return success || phase !== 'Pending';
       },
       {
-        timeout: 2000000,
-        intervalBetweenAttempts: 15000,
+        timeout: 2_000_000,
+        intervalBetweenAttempts: 15_000,
       },
     );
 

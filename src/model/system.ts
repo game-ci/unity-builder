@@ -58,7 +58,7 @@ class System {
       throwContextualError(`In-command error caught: ${inCommandError}`);
     }
 
-    return result;
+    return result.replace(/\n+$/, '');
   }
 }
 

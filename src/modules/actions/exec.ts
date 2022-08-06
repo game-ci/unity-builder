@@ -1,5 +1,4 @@
 import { exec as originalExec } from 'https://deno.land/x/exec@0.0.5/mod.ts';
-import { core } from './core.ts';
 
 export enum OutputMode {
   None = 0, // no output, just run the command

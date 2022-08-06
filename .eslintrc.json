@@ -61,6 +61,7 @@
     "@typescript-eslint/no-unused-vars": "off",
     // For this project only use kebab-case
     "unicorn/filename-case": ["error", { "cases": { "kebabCase": true } }],
+    "filenames/match-regex": ["error", "^[a-z-]+(\\.(d|integration|test|setup))*$"],
     // Allow Array.from(set) mitigate TS2569 which would require '--downlevelIteration'
     "unicorn/prefer-spread": "off",
     // Deno has dependencies file, this rule enforces it's named re-exports
@@ -76,6 +77,10 @@
     // Showing false positives (enable after upgrading)
     "no-shadow": "off",
     // (enable to add improvements)
-    "unicorn/no-static-only-class": "off"
+    "unicorn/no-static-only-class": "off",
+    // Null is useful when explicit value is passed
+    "unicorn/no-null": "off",
+    // (enable to add improvements)
+    "unicorn/prefer-export-from": "off"
   }
 }

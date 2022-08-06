@@ -29,10 +29,10 @@ class SetupMac {
   }
 
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
-    const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
+    const unityChangeSet = await getUnityChangeSet(buildParameters.editorVersion);
     const command = `${this.unityHubPath} -- --headless install \
                                           --version ${buildParameters.editorVersion} \
-                                          --changeset ${unityChangeset.changeset} \
+                                          --changeset ${unityChangeSet.changeset} \
                                           --module mac-il2cpp \
                                           --childModules`;
 

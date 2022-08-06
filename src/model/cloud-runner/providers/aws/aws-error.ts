@@ -1,5 +1,5 @@
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
-import { core, aws } from '../../../../dependencies.ts';
+import { aws } from '../../../../dependencies.ts';
 import CloudRunner from '../../cloud-runner.ts';
 
 export class AWSError {
@@ -8,7 +8,8 @@ export class AWSError {
     log.error(JSON.stringify(error, undefined, 4));
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
       CloudRunnerLogger.log('Getting events and resources for task stack');
-      const events = (await CF.describeStackEvents({ StackName: taskDefStackName }).promise()).StackEvents;
+      const stackEventsDescription = await CF.describeStackEvents({ StackName: taskDefStackName }).promise();
+      const events = stackEventsDescription.StackEvents;
       CloudRunnerLogger.log(JSON.stringify(events, undefined, 4));
     }
   }

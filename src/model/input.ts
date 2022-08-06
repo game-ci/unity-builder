@@ -20,7 +20,7 @@ class Input {
         return coreInput;
       }
     }
-    const alternativeQuery = Input.ToEnvVarFormat(query);
+    const alternativeQuery = Input.toEnvVarFormat(query);
 
     // Query input sources
     if (Cli.query(query, alternativeQuery)) {
@@ -95,15 +95,17 @@ class Input {
   }
 
   static get projectPath() {
-    const input = Input.getInput('projectPath');
-    const rawProjectPath = input
-      ? input
-      : fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
-        !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
-      ? 'test-project'
-      : '.';
+    let input = Input.getInput('projectPath');
 
-    return rawProjectPath.replace(/\/$/, '');
+    // Todo - remove hardcoded test project reference
+    const isTestProject =
+      fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
+      !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'));
+    if (!input && isTestProject) input = 'test-project';
+
+    if (!input) input = '.';
+
+    return input.replace(/\/$/, '');
   }
 
   static get buildName() {
@@ -270,7 +272,7 @@ class Input {
     return Input.getInput(`cloudRunnerTests`) || false;
   }
 
-  public static ToEnvVarFormat(input: string) {
+  public static toEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
     }

@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-export-from */
 // These are the packages from Deno that replace the ones from Node.
 import * as assert from 'https://deno.land/std@0.144.0/testing/asserts.ts';
 import * as aws from 'https://deno.land/x/aws_api/client/mod.ts';

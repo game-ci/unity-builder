@@ -37,7 +37,7 @@ describe('System', () => {
             System.run('sh', undefined, {
               input: Buffer.from('git tag --list --merged HEAD | grep v[0-9]* | wc -l'),
               // eslint-disable-next-line github/no-then
-            }).then((result) => Number(result)),
+            }).then(Number),
           ).resolves.not.toBeNaN();
         });
       }

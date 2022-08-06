@@ -53,9 +53,8 @@ class AWSTaskRunner {
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(ECS, taskArn, cluster);
-    CloudRunnerLogger.log(
-      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(ECS, cluster, taskArn))?.lastStatus}`,
-    );
+    const { lastStatus } = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
+    CloudRunnerLogger.log(`Cloud runner job status is running ${lastStatus}`);
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(
       ECS,
       CF,
@@ -89,11 +88,8 @@ class AWSTaskRunner {
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      CloudRunnerLogger.log(
-        `Cloud runner job has ended ${
-          (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
-        }`,
-      );
+      const tasksDescription = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
+      CloudRunnerLogger.log(`Cloud runner job has ended ${tasksDescription.containers?.[0].lastStatus}`);
 
       core.setFailed(error);
       log.error(error);
@@ -182,7 +178,7 @@ class AWSTaskRunner {
         CloudRunnerLogger.log('## Cloud runner job stopped, streaming end of logs');
         timestamp = Date.now();
       }
-      if (timestamp !== 0 && Date.now() - timestamp > 30000) {
+      if (timestamp !== 0 && Date.now() - timestamp > 30_000) {
         CloudRunnerLogger.log('## Cloud runner status is not RUNNING for 30 seconds, last query for logs');
         shouldReadLogs = false;
       }
@@ -231,17 +227,15 @@ class AWSTaskRunner {
   }
 
   private static async getLogIterator(kinesis: aws.Kinesis, stream) {
-    return (
-      (
-        await kinesis
-          .getShardIterator({
-            ShardIteratorType: 'TRIM_HORIZON',
-            StreamName: stream.StreamDescription.StreamName,
-            ShardId: stream.StreamDescription.Shards[0].ShardId,
-          })
-          .promise()
-      ).ShardIterator || ''
-    );
+    const description = await kinesis
+      .getShardIterator({
+        ShardIteratorType: 'TRIM_HORIZON',
+        StreamName: stream.StreamDescription.StreamName,
+        ShardId: stream.StreamDescription.Shards[0].ShardId,
+      })
+      .promise();
+
+    return description.ShardIterator || '';
   }
 }
 export default AWSTaskRunner;

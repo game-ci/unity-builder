@@ -11,7 +11,7 @@ describe('Android Versioning', () => {
     });
 
     it('returns a number', () => {
-      expect(AndroidVersioning.versionToVersionCode('123.456.789')).toBe(123456789);
+      expect(AndroidVersioning.versionToVersionCode('123.456.789')).toBe(123_456_789);
     });
 
     it('throw when generated version code is too large', () => {
@@ -21,7 +21,7 @@ describe('Android Versioning', () => {
 
   describe('determineVersionCode', () => {
     it('defaults to parsed version', () => {
-      expect(AndroidVersioning.determineVersionCode('1.2.3', '')).toBe(1002003);
+      expect(AndroidVersioning.determineVersionCode('1.2.3', '')).toBe(1_002_003);
     });
 
     it('use specified code', () => {

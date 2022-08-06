@@ -56,6 +56,6 @@ describe('Cloud Runner Caching', () => {
 
       Input.githubInputEnabled = true;
       delete Cli.options;
-    }, 1000000);
+    }, 1_000_000);
   }
 });

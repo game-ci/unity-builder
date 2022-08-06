@@ -26,7 +26,7 @@ export class AWSBaseStack {
       .digest('hex');
     const parameters: aws.CloudFormation.Parameter[] = [
       ...parametersWithoutHash,
-      ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
+      { ParameterKey: 'Version', ParameterValue: parametersHash },
     ];
     const updateInput: aws.CloudFormation.UpdateStackInput = {
       StackName: baseStackName,
@@ -55,7 +55,7 @@ export class AWSBaseStack {
         await CF.createStack(createStackInput).promise();
         CloudRunnerLogger.log(`created stack (version: ${parametersHash})`);
       }
-      const CFState = await describeStack();
+      let CFState = await describeStack();
       let stack = CFState.Stacks?.[0];
       if (!stack) {
         throw new Error(`Base stack doesn't exist, even after creation, stackExists check: ${stackExists}`);
@@ -84,7 +84,9 @@ export class AWSBaseStack {
         } else {
           CloudRunnerLogger.log(`No update required`);
         }
-        stack = (await describeStack()).Stacks?.[0];
+
+        CFState = await describeStack();
+        stack = CFState.Stacks?.[0];
         if (!stack) {
           throw new Error(
             `Base stack doesn't exist, even after updating and creation, stackExists check: ${stackExists}`,

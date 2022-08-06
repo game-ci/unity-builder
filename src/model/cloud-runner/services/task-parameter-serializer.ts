@@ -38,7 +38,7 @@ export class TaskParameterSerializer {
       (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',
     );
     array = array.map((x) => {
-      x.name = Input.ToEnvVarFormat(x.name);
+      x.name = Input.toEnvVarFormat(x.name);
       x.value = `${x.value}`;
 
       return x;

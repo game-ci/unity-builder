@@ -1,3 +1,4 @@
+/* eslint-disable github/no-then,lines-around-comment */
 // Source: https://github.com/devlato/async-wait-until/blob/master/src/index.ts
 
 /**
@@ -42,9 +43,9 @@ export class TimeoutError extends Error {
  */
 const getScheduler = (): Scheduler => ({
   schedule: (fn, interval) => {
-    let scheduledTimer: number | NodeJS.Timeout | undefined = undefined;
+    let scheduledTimer: number | undefined;
 
-    const cleanUp = (timer: number | NodeJS.Timeout | undefined) => {
+    const cleanUp = (timer: number | undefined) => {
       if (timer != null) {
         clearTimeout(timer as number);
       }
@@ -78,8 +79,8 @@ const delay = (scheduler: Scheduler, interval: number): Promise<void> =>
   new Promise((resolve, reject) => {
     try {
       scheduler.schedule(resolve, interval);
-    } catch (e) {
-      reject(e);
+    } catch (error) {
+      reject(error);
     }
   });
 
@@ -139,8 +140,8 @@ export const waitUntil = <T extends PredicateReturnValue>(
     new Promise((resolve, reject) => {
       try {
         resolve(predicate());
-      } catch (e) {
-        reject(e);
+      } catch (error) {
+        reject(error);
       }
     });
 
@@ -157,6 +158,7 @@ export const waitUntil = <T extends PredicateReturnValue>(
           .then((result) => {
             if (result) {
               resolve(result);
+
               return;
             }
 
@@ -207,7 +209,6 @@ export type TruthyValue =
   | Record<string, unknown>
   | unknown[]
   | symbol
-  // eslint-disable-next-line no-unused-vars
   | ((...args: unknown[]) => unknown)
   | Exclude<number, 0>
   | Exclude<string, ''>
@@ -226,14 +227,10 @@ export type PredicateReturnValue = TruthyValue | FalsyValue;
  * @category Common Types
  */
 export type Options = {
-  /**
-   * @property Maximum wait interval, *5000 ms* by default
-   */
+  // Maximum wait interval, *5000 ms* by default
   timeout?: number;
 
-  /**
-   * @property Interval to wait for between attempts, optional, *50 ms* by default
-   */
+  // Interval to wait for between attempts, optional, *50 ms* by default
   intervalBetweenAttempts?: number;
 };
 
@@ -247,7 +244,8 @@ export type Options = {
  * @throws Error
  * @category Common Types
  */
-type ScheduleFn = <T>(callback: (...args: T[]) => void, interval: number) => ScheduleCanceler; // eslint-disable-line no-unused-vars
+type ScheduleFn = <T>(callback: (...args: T[]) => void, interval: number) => ScheduleCanceler;
+
 /**
  * A function that cancels the previously scheduled callback's execution
  * @private
@@ -255,6 +253,7 @@ type ScheduleFn = <T>(callback: (...args: T[]) => void, interval: number) => Sch
  * @category Common Types
  */
 type CancelScheduledFn = () => void;
+
 /**
  * A stateful abstraction over Node.js & web browser timers that cancels the scheduled task
  * @private
@@ -266,6 +265,7 @@ type ScheduleCanceler = {
    */
   cancel: CancelScheduledFn;
 };
+
 /**
  * A stateful abstraction over Node.js & web browser timers that schedules a task
  * @private

@@ -15,9 +15,9 @@ class KubernetesStorage {
 
       return;
     }
-    const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
-      (x) => x.metadata?.name,
-    );
+
+    const listedPvcs = await kubeClient.listNamespacedPersistentVolumeClaim(namespace);
+    const pvcList = listedPvcs.body.items.map((x) => x.metadata?.name);
     CloudRunnerLogger.log(`Current PVCs in namespace ${namespace}`);
     CloudRunnerLogger.log(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
@@ -35,7 +35,9 @@ class KubernetesStorage {
 
   public static async getPVCPhase(kubeClient: k8sTypes.CoreV1Api, name: string, namespace: string) {
     try {
-      return (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body.status?.phase;
+      const pvc = await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace);
+
+      return pvc.body.status?.phase;
     } catch (error) {
       log.error('Failed to get PVC phase');
       log.error(JSON.stringify(error, undefined, 4));
@@ -52,20 +54,15 @@ class KubernetesStorage {
           return (await this.getPVCPhase(kubeClient, name, namespace)) === 'Pending';
         },
         {
-          timeout: 750000,
-          intervalBetweenAttempts: 15000,
+          timeout: 750_000,
+          intervalBetweenAttempts: 15_000,
         },
       );
     } catch (error: any) {
       log.error('Failed to watch PVC');
       log.error(error.toString());
-      log.error(
-        `PVC Body: ${JSON.stringify(
-          (await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace)).body,
-          undefined,
-          4,
-        )}`,
-      );
+      const pvc = await kubeClient.readNamespacedPersistentVolumeClaim(name, namespace);
+      log.error(`PVC Body: ${JSON.stringify(pvc.body, undefined, 4)}`);
       throw error;
     }
   }

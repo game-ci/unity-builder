@@ -88,6 +88,7 @@ export class Caching {
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
+
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
@@ -99,18 +100,15 @@ export class Caching {
         await fs.promises.mkdir(destinationFolder);
       }
 
-      const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar$ | head -1`))
-        .replace(/\n/g, ``)
-        .replace('.tar', '');
+      const latestInBranchRaw = await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar$ | head -1`);
+      const latestInBranch = latestInBranchRaw.replace(/\n/g, ``).replace('.tar', '');
 
       process.chdir(cacheFolder);
-
       const cacheSelection =
         cacheArtifactName !== `` && (await fileExists(`${cacheArtifactName}.tar`)) ? cacheArtifactName : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
 
-      // eslint-disable-next-line func-style
-      const formatFunction = function (format: string) {
+      const formatFunction = (format: string) => {
         const arguments_ = Array.prototype.slice.call(
           [path.resolve(destinationFolder, '..'), cacheFolder, cacheArtifactName],
           1,

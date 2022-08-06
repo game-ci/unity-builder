@@ -17,23 +17,15 @@ class AWSBuildEnvironment implements ProviderInterface {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
   async cleanup(
-    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
-    // eslint-disable-next-line no-unused-vars
     branchName: string,
-    // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
   async setup(
-    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
-    // eslint-disable-next-line no-unused-vars
     branchName: string,
-    // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
 

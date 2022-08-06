@@ -32,7 +32,7 @@ class CloudRunnerQueryOverride {
       if (Input.readInputFromOverrideList() !== '') {
         const doesInclude =
           Input.readInputFromOverrideList().split(',').includes(query) ||
-          Input.readInputFromOverrideList().split(',').includes(Input.ToEnvVarFormat(query));
+          Input.readInputFromOverrideList().split(',').includes(Input.toEnvVarFormat(query));
 
         return doesInclude ? true : false;
       } else {

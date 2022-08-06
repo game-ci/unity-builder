@@ -35,8 +35,9 @@ export class AwsCliCommands {
   static async awsListStacks(perResultCallback: any = false, verbose: boolean = false) {
     Deno.env.set('AWS_REGION', Input.region);
     const CF = new aws.CloudFormation();
+    let cfStacks = await CF.listStacks().promise();
     const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
+      cfStacks.StackSummaries?.filter(
         (_x) => _x.StackStatus !== 'DELETE_COMPLETE', // &&
         // _x.TemplateDescription === TaskDefinitionFormation.description.replace('\n', ''),
       ) || [];
@@ -49,8 +50,9 @@ export class AwsCliCommands {
         );
       if (perResultCallback) await perResultCallback(element);
     }
+    cfStacks = await CF.listStacks().promise();
     const baseStacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
+      cfStacks.StackSummaries?.filter(
         (_x) =>
           _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription === BaseStackFormation.baseStackDecription,
       ) || [];
@@ -73,17 +75,20 @@ export class AwsCliCommands {
   static async awsListTasks(perResultCallback: any = false) {
     Deno.env.set('AWS_REGION', Input.region);
     const ecs = new aws.ECS();
-    const clusters = (await ecs.listClusters().promise()).clusterArns || [];
+    const ecsClusters = await ecs.listClusters().promise();
+    const clusters = ecsClusters.clusterArns || [];
     CloudRunnerLogger.log(`Clusters ${clusters.length}`);
     for (const element of clusters) {
       const input: aws.ECS.ListTasksRequest = {
         cluster: element,
       };
 
-      const list = (await ecs.listTasks(input).promise()).taskArns || [];
+      const listedTasks = await ecs.listTasks(input).promise();
+      const list = listedTasks.taskArns || [];
       if (list.length > 0) {
         const describeInput: aws.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
-        const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
+        const tasksDescription = await ecs.describeTasks(describeInput).promise();
+        const describeList = tasksDescription.tasks || [];
         if (describeList === []) {
           continue;
         }

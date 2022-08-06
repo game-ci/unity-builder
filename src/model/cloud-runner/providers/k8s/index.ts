@@ -1,5 +1,5 @@
 import { BuildParameters, Output } from '../../../index.ts';
-import { k8sTypes, core, k8s, waitUntil } from '../../../../dependencies.ts';
+import { k8sTypes, k8s, waitUntil } from '../../../../dependencies.ts';
 import { ProviderInterface } from '../provider-interface.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
 import KubernetesStorage from './kubernetes-storage.ts';
@@ -39,9 +39,7 @@ class Kubernetes implements ProviderInterface {
   public async setup(
     buildGuid: string,
     buildParameters: BuildParameters,
-    // eslint-disable-next-line no-unused-vars
     branchName: string,
-    // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
@@ -119,9 +117,7 @@ class Kubernetes implements ProviderInterface {
           );
           break;
         } catch (error: any) {
-          if (error.message.includes(`HTTP`)) {
-            continue;
-          } else {
+          if (!error.message.includes(`HTTP`)) {
             throw error;
           }
         }
@@ -158,26 +154,25 @@ class Kubernetes implements ProviderInterface {
     try {
       await waitUntil(
         async () => {
-          const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
-          const podBody = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
+          const { body: jobBody } = await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace);
+          const { body: podBody } = await this.kubeClient.readNamespacedPod(this.podName, this.namespace);
 
           return (jobBody === null || jobBody.status?.active === 0) && podBody === null;
         },
         {
-          timeout: 500000,
-          intervalBetweenAttempts: 15000,
+          timeout: 500_000,
+          intervalBetweenAttempts: 15_000,
         },
       );
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch {
+      log.debug('Moved into empty catch block');
+    }
   }
 
   async cleanup(
     buildGuid: string,
     buildParameters: BuildParameters,
-    // eslint-disable-next-line no-unused-vars
     branchName: string,
-    // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     CloudRunnerLogger.log(`deleting PVC`);

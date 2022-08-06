@@ -28,10 +28,10 @@ class CloudRunner {
     if (!buildParameters.isCliMode) {
       const buildParameterPropertyNames = Object.getOwnPropertyNames(buildParameters);
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
-        core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
+        core.setOutput(Input.toEnvVarFormat(element.name), element.value);
       }
       for (const element of buildParameterPropertyNames) {
-        core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
+        core.setOutput(Input.toEnvVarFormat(element), buildParameters[element]);
       }
     }
   }

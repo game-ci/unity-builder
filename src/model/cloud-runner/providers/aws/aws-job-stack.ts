@@ -134,13 +134,13 @@ export class AWSJobStack {
       throw error;
     }
 
-    const taskDefResources = (
-      await CF.describeStackResources({
-        StackName: taskDefStackName,
-      }).promise()
-    ).StackResources;
+    const { StackResources: taskDefResources } = await CF.describeStackResources({
+      StackName: taskDefStackName,
+    }).promise();
 
-    const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
+    const { StackResources: baseResources } = await CF.describeStackResources({
+      StackName: this.baseStackName,
+    }).promise();
 
     return {
       taskDefStackName,

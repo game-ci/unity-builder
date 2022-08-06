@@ -22,7 +22,7 @@ export class CustomWorkflow {
         const stepSecrets: CloudRunnerSecret[] = step.secrets.map((x) => {
           const secret: CloudRunnerSecret = {
             ParameterKey: x.name,
-            EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+            EnvironmentVariable: Input.toEnvVarFormat(x.name),
             ParameterValue: x.value,
           };
 

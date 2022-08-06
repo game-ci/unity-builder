@@ -21,60 +21,58 @@ class KubernetesJobSpecFactory {
     k8s,
   ) {
     environment.push(
-      ...[
-        {
-          name: 'GITHUB_SHA',
-          value: buildGuid,
-        },
-        {
-          name: 'GITHUB_WORKSPACE',
-          value: '/data/repo',
-        },
-        {
-          name: 'PROJECT_PATH',
-          value: buildParameters.projectPath,
-        },
-        {
-          name: 'BUILD_PATH',
-          value: buildParameters.buildPath,
-        },
-        {
-          name: 'BUILD_FILE',
-          value: buildParameters.buildFile,
-        },
-        {
-          name: 'BUILD_NAME',
-          value: buildParameters.buildName,
-        },
-        {
-          name: 'BUILD_METHOD',
-          value: buildParameters.buildMethod,
-        },
-        {
-          name: 'CUSTOM_PARAMETERS',
-          value: buildParameters.customParameters,
-        },
-        {
-          name: 'CHOWN_FILES_TO',
-          value: buildParameters.chownFilesTo,
-        },
-        {
-          name: 'BUILD_TARGET',
-          value: buildParameters.targetPlatform,
-        },
-        {
-          name: 'ANDROID_VERSION_CODE',
-          value: buildParameters.androidVersionCode.toString(),
-        },
-        {
-          name: 'ANDROID_KEYSTORE_NAME',
-          value: buildParameters.androidKeystoreName,
-        },
-        {
-          name: 'ANDROID_KEYALIAS_NAME',
-          value: buildParameters.androidKeyaliasName,
-        },
-      ],
+      {
+        name: 'GITHUB_SHA',
+        value: buildGuid,
+      },
+      {
+        name: 'GITHUB_WORKSPACE',
+        value: '/data/repo',
+      },
+      {
+        name: 'PROJECT_PATH',
+        value: buildParameters.projectPath,
+      },
+      {
+        name: 'BUILD_PATH',
+        value: buildParameters.buildPath,
+      },
+      {
+        name: 'BUILD_FILE',
+        value: buildParameters.buildFile,
+      },
+      {
+        name: 'BUILD_NAME',
+        value: buildParameters.buildName,
+      },
+      {
+        name: 'BUILD_METHOD',
+        value: buildParameters.buildMethod,
+      },
+      {
+        name: 'CUSTOM_PARAMETERS',
+        value: buildParameters.customParameters,
+      },
+      {
+        name: 'CHOWN_FILES_TO',
+        value: buildParameters.chownFilesTo,
+      },
+      {
+        name: 'BUILD_TARGET',
+        value: buildParameters.targetPlatform,
+      },
+      {
+        name: 'ANDROID_VERSION_CODE',
+        value: buildParameters.androidVersionCode.toString(),
+      },
+      {
+        name: 'ANDROID_KEYSTORE_NAME',
+        value: buildParameters.androidKeystoreName,
+      },
+      {
+        name: 'ANDROID_KEYALIAS_NAME',
+        value: buildParameters.androidKeyaliasName,
+      },
     );
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';

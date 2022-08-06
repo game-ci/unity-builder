@@ -11,7 +11,8 @@ export class GitRepoReader {
       return '';
     }
     assert(fs.existsSync(`.git`));
-    const value = (await CloudRunnerSystem.Run(`git remote -v`, false, true)).replace(/ /g, ``);
+    const upstream = await CloudRunnerSystem.Run(`git remote -v`, false, true);
+    const value = upstream.replace(/ /g, '');
     CloudRunnerLogger.log(`value ${value}`);
     assert(value.includes('github.com'));
 
@@ -19,14 +20,11 @@ export class GitRepoReader {
   }
 
   public static async GetBranch() {
-    if (Input.cloudRunnerCluster === 'local') {
-      return '';
-    }
-    assert(fs.existsSync(`.git`));
+    if (Input.cloudRunnerCluster === 'local') return '';
 
-    return (await CloudRunnerSystem.Run(`git branch --show-current`, false, true))
-      .split('\n')[0]
-      .replace(/ /g, ``)
-      .replace('/head', '');
+    assert(fs.existsSync(`.git`));
+    const currentBranch = await CloudRunnerSystem.Run(`git branch --show-current`, false, true);
+
+    return currentBranch.split('\n')[0].replace(/ /g, ``).replace('/head', '');
   }
 }

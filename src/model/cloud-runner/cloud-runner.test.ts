@@ -43,7 +43,7 @@ describe('Cloud Runner', () => {
 
       // Assert results
       expect(file).toContain(JSON.stringify(buildParameter));
-      expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
+      expect(file).toContain(`${Input.toEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
@@ -63,7 +63,7 @@ describe('Cloud Runner', () => {
         }
       }
       delete Cli.options;
-    }, 1000000);
+    }, 1_000_000);
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       Cli.options = {
         versioning: 'None',
@@ -89,7 +89,7 @@ describe('Cloud Runner', () => {
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
       Input.githubInputEnabled = true;
       delete Cli.options;
-    }, 1000000);
+    }, 1_000_000);
   }
   it('Local cloud runner returns commands', async () => {
     // Build parameters
@@ -118,7 +118,7 @@ describe('Cloud Runner', () => {
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
     delete Cli.options;
-  }, 1000000);
+  }, 1_000_000);
   it('Test cloud runner returns commands', async () => {
     // Build parameters
     Cli.options = {
@@ -138,5 +138,5 @@ describe('Cloud Runner', () => {
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     Input.githubInputEnabled = true;
     delete Cli.options;
-  }, 1000000);
+  }, 1_000_000);
 });

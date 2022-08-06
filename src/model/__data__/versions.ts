@@ -75,7 +75,7 @@ export const notCompletelyValidSemanticVersions = [
   '99999999999999999999999.999999999999999999.99999999999999999----RC-SNAPSHOT.12.09.1--------------------------------..12',
 ];
 
-const addVariantsPrependingV = (array: string[]) => array.map((tag) => [tag, `v${tag}`]).flat();
+const addVariantsPrependingV = (array: string[]) => array.flatMap((tag) => [tag, `v${tag}`]);
 
 /**
  * Array of versions that will be detected as version tags. Not all of these are
