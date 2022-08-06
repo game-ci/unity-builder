@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-export-from */
 // These are the packages from Deno that replace the ones from Node.
 import * as assert from 'https://deno.land/std@0.144.0/testing/asserts.ts';
 import * as aws from 'https://deno.land/x/aws_api/client/mod.ts';
@@ -15,6 +16,7 @@ import * as yaml from 'https://deno.land/std@0.145.0/encoding/yaml.ts';
 import { crypto } from 'https://deno.land/std@0.142.0/crypto/mod.ts';
 import { v4 as uuid } from 'https://deno.land/std@0.142.0/uuid/mod.ts';
 import * as http from 'https://deno.land/std@0.145.0/node/http.ts';
+import * as string from 'https://deno.land/std@0.36.0/strings/mod.ts';
 import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 
@@ -57,6 +59,7 @@ export {
   path,
   process,
   semver,
+  string,
   uuid,
   waitUntil,
   Writable,

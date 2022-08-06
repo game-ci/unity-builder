@@ -68,10 +68,15 @@ class BuildParameters {
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+    log.debug('buildFile:', buildFile);
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
+    log.debug('editorVersion:', editorVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
+    log.debug('buildVersion', buildVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
+    log.debug('androidVersionCode', androidVersionCode);
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+    log.debug('androidSdkManagerParameters', androidSdkManagerParameters);
 
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---

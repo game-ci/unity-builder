@@ -5,3 +5,4 @@ lib/
 .vsconfig
 yarn-error.log
 .orig
+*.log

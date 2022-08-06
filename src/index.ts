@@ -1,3 +1,4 @@
+import './core/logger/index.ts';
 import { core, process } from './dependencies.ts';
 import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model/index.ts';
 import { Cli } from './model/cli/cli.ts';
@@ -7,6 +8,7 @@ import PlatformSetup from './model/platform-setup.ts';
 async function runMain() {
   try {
     if (Cli.InitCliMode()) {
+      log.debug('CloudBuilder CLI mode');
       await Cli.RunCli();
 
       return;
@@ -15,9 +17,13 @@ async function runMain() {
     Cache.verify();
 
     const { workspace, actionFolder } = Action;
+    log.debug('workspace', workspace, 'actionFolder', actionFolder);
 
     const buildParameters = await BuildParameters.create();
+    log.debug('buildParameters', buildParameters);
+
     const baseImage = new ImageTag(buildParameters);
+    log.debug('baseImage', baseImage);
 
     if (buildParameters.cloudRunnerCluster !== 'local') {
       await CloudRunner.run(buildParameters, baseImage.toString());

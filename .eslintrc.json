@@ -17,7 +17,9 @@
     "jest/globals": true
   },
   "globals": {
-    "Deno": true
+    "Deno": true,
+    "log": true,
+    "window": true
   },
   "rules": {
     // Error out for code formatting errors
@@ -62,6 +64,10 @@
     // Deno has dependencies file, this rule enforces it's named re-exports
     "unicorn/prevent-abbreviations": "off",
     // Allow disabling eslint per file
-    "eslint-comments/no-use": "off"
+    "eslint-comments/no-use": "off",
+    // Deno import style
+    "import/extensions": "off",
+    // Deno import style
+    "import/no-unresolved": "off"
   }
 }
