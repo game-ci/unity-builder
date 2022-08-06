@@ -74,6 +74,8 @@
     // App it not yet internationalised
     "i18n-text/no-en": "off",
     // Showing false positives (enable after upgrading)
-    "no-shadow": "off"
+    "no-shadow": "off",
+    // (enable to add improvements)
+    "unicorn/no-static-only-class": "off"
   }
 }

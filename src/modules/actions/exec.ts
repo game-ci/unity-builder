@@ -30,7 +30,6 @@ interface IOptions {
   continueOnError?: boolean;
 }
 
-// Todo - change signature of exec inside the code instead of adapting the exec method
 const exec = async (
   command: string,
   args: string | string[] = [],
@@ -47,14 +46,13 @@ const exec = async (
   if (ignoreReturnCode) options.continueOnError = true;
 
   const argsString = typeof args === 'string' ? args : args.join(' ');
-  log.debug('Command: ', command, argsString);
-
   const result: ICommandResult = await originalExec(`${command} ${argsString}`, options);
-
-  log.debug('Result:', result);
 
   const { status, output = '' } = result;
   const { code: exitCode, success } = status;
+
+  const symbol = success ? '✅' : '❗';
+  log.debug('Command:', command, argsString, symbol, result);
 
   return { exitCode, success, output: output.trim() };
 };
