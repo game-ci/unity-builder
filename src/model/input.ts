@@ -2,6 +2,7 @@ import { fsSync as fs, path, core } from '../dependencies.ts';
 import { Cli } from './cli/cli.ts';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
 import Platform from './platform.ts';
+import { CliArguments } from '../core/cli/cli-arguments.ts';
 
 /**
  * Input variables specified in workflows using "with" prop.
@@ -11,9 +12,29 @@ import Platform from './platform.ts';
  * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
+  private readonly arguments: CliArguments;
+
+  constructor(argumentsFromCli: CliArguments) {
+    this.arguments = argumentsFromCli;
+
+    log.debug('Input initialised.');
+
+    return this;
+  }
+
   public static githubInputEnabled: boolean = true;
 
-  public static getInput(query) {
+  // Todo - Note that this is now invoked both statically and dynamically - which is a temporary mess.
+  public getInput(query) {
+    if (this && this.arguments) {
+      const value = this.arguments.get(query);
+      log.warning('arg', query, '=', value);
+
+      return this.arguments.get(query);
+    }
+
+    // Legacy (static)
+    log.warn(`Querying static`);
     if (Input.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
@@ -42,24 +63,24 @@ class Input {
     return;
   }
 
-  static get region(): string {
-    return Input.getInput('region') || 'eu-west-2';
+  public get region(): string {
+    return this.getInput('region') || 'eu-west-2';
   }
 
-  static get githubRepo() {
-    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || undefined;
+  public get githubRepo() {
+    return this.getInput('GITHUB_REPOSITORY') || this.getInput('GITHUB_REPO') || undefined;
   }
-  static get branch() {
-    if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
-    } else if (Input.getInput('branch')) {
-      return Input.getInput('branch');
+  public get branch() {
+    if (this.getInput(`GITHUB_REF`)) {
+      return this.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+    } else if (this.getInput('branch')) {
+      return this.getInput('branch');
     } else {
       return '';
     }
   }
-  static get cloudRunnerBuilderPlatform() {
-    const input = Input.getInput('cloudRunnerBuilderPlatform');
+  public get cloudRunnerBuilderPlatform() {
+    const input = this.getInput('cloudRunnerBuilderPlatform');
     if (input) {
       return input;
     }
@@ -70,32 +91,32 @@ class Input {
     return;
   }
 
-  static get gitSha() {
-    if (Input.getInput(`GITHUB_SHA`)) {
-      return Input.getInput(`GITHUB_SHA`);
-    } else if (Input.getInput(`GitSHA`)) {
-      return Input.getInput(`GitSHA`);
+  public get gitSha() {
+    if (this.getInput(`GITHUB_SHA`)) {
+      return this.getInput(`GITHUB_SHA`);
+    } else if (this.getInput(`GitSHA`)) {
+      return this.getInput(`GitSHA`);
     }
   }
 
-  static get runNumber() {
-    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+  public get runNumber() {
+    return this.getInput('GITHUB_RUN_NUMBER') || '0';
   }
 
-  static get targetPlatform() {
-    return Input.getInput('targetPlatform') || Platform.default;
+  public get targetPlatform() {
+    return this.getInput('targetPlatform') || Platform.default;
   }
 
-  static get unityVersion() {
-    return Input.getInput('unityVersion') || 'auto';
+  public get unityVersion() {
+    return this.getInput('unityVersion') || 'auto';
   }
 
-  static get customImage() {
-    return Input.getInput('customImage') || '';
+  public get customImage() {
+    return this.getInput('customImage') || '';
   }
 
-  static get projectPath() {
-    let input = Input.getInput('projectPath');
+  public get projectPath() {
+    let input = this.getInput('projectPath');
 
     // Todo - remove hardcoded test project reference
     const isTestProject =
@@ -108,168 +129,169 @@ class Input {
     return input.replace(/\/$/, '');
   }
 
-  static get buildName() {
-    return Input.getInput('buildName') || this.targetPlatform;
+  public get buildName() {
+    return this.getInput('buildName') || this.targetPlatform;
   }
 
-  static get buildsPath() {
-    return Input.getInput('buildsPath') || 'build';
+  public get buildsPath() {
+    return this.getInput('buildsPath') || 'build';
   }
 
-  static get buildMethod() {
-    return Input.getInput('buildMethod') || ''; // Processed in docker file
+  public get buildMethod() {
+    return this.getInput('buildMethod') || ''; // Processed in docker file
   }
 
-  static get customParameters() {
-    return Input.getInput('customParameters') || '';
+  public get customParameters() {
+    return this.getInput('customParameters') || '';
   }
 
-  static get versioningStrategy() {
-    return Input.getInput('versioning') || 'Semantic';
+  public get versioningStrategy() {
+    return this.getInput('versioning') || 'Semantic';
   }
 
-  static get specifiedVersion() {
-    return Input.getInput('version') || '';
+  public get specifiedVersion() {
+    return this.getInput('version') || '';
   }
 
-  static get androidVersionCode() {
-    return Input.getInput('androidVersionCode');
+  public get androidVersionCode() {
+    return this.getInput('androidVersionCode');
   }
 
-  static get androidAppBundle() {
-    const input = Input.getInput('androidAppBundle') || false;
+  public get androidAppBundle() {
+    const input = this.getInput('androidAppBundle') || false;
 
     return input === 'true';
   }
 
-  static get androidKeystoreName() {
-    return Input.getInput('androidKeystoreName') || '';
+  public get androidKeystoreName() {
+    return this.getInput('androidKeystoreName') || '';
   }
 
-  static get androidKeystoreBase64() {
-    return Input.getInput('androidKeystoreBase64') || '';
+  public get androidKeystoreBase64() {
+    return this.getInput('androidKeystoreBase64') || '';
   }
 
-  static get androidKeystorePass() {
-    return Input.getInput('androidKeystorePass') || '';
+  public get androidKeystorePass() {
+    return this.getInput('androidKeystorePass') || '';
   }
 
-  static get androidKeyaliasName() {
-    return Input.getInput('androidKeyaliasName') || '';
+  public get androidKeyaliasName() {
+    return this.getInput('androidKeyaliasName') || '';
   }
 
-  static get androidKeyaliasPass() {
-    return Input.getInput('androidKeyaliasPass') || '';
+  public get androidKeyaliasPass() {
+    return this.getInput('androidKeyaliasPass') || '';
   }
 
-  static get androidTargetSdkVersion() {
-    return Input.getInput('androidTargetSdkVersion') || '';
+  public get androidTargetSdkVersion() {
+    return this.getInput('androidTargetSdkVersion') || '';
   }
 
-  static get sshAgent() {
-    return Input.getInput('sshAgent') || '';
+  public get sshAgent() {
+    return this.getInput('sshAgent') || '';
   }
 
-  static get gitPrivateToken() {
+  public get gitPrivateToken() {
     return core.getInput('gitPrivateToken') || false;
   }
 
-  static get customJob() {
-    return Input.getInput('customJob') || '';
+  public get customJob() {
+    return this.getInput('customJob') || '';
   }
 
-  static customJobHooks() {
-    return Input.getInput('customJobHooks') || '';
+  public customJobHooks() {
+    return this.getInput('customJobHooks') || '';
   }
 
-  static cachePushOverrideCommand() {
-    return Input.getInput('cachePushOverrideCommand') || '';
+  public cachePushOverrideCommand() {
+    return this.getInput('cachePushOverrideCommand') || '';
   }
 
-  static cachePullOverrideCommand() {
-    return Input.getInput('cachePullOverrideCommand') || '';
+  public cachePullOverrideCommand() {
+    return this.getInput('cachePullOverrideCommand') || '';
   }
 
-  static readInputFromOverrideList() {
-    return Input.getInput('readInputFromOverrideList') || '';
+  public readInputFromOverrideList() {
+    return this.getInput('readInputFromOverrideList') || '';
   }
 
-  static readInputOverrideCommand() {
-    return Input.getInput('readInputOverrideCommand') || '';
+  public readInputOverrideCommand() {
+    return this.getInput('readInputOverrideCommand') || '';
   }
 
-  static get cloudRunnerBranch() {
-    return Input.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
+  public get cloudRunnerBranch() {
+    return this.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
   }
 
-  static get chownFilesTo() {
-    return Input.getInput('chownFilesTo') || '';
+  public get chownFilesTo() {
+    return this.getInput('chownFilesTo') || '';
   }
 
-  static get allowDirtyBuild() {
-    const input = Input.getInput('allowDirtyBuild') || false;
+  public get allowDirtyBuild() {
+    const input = this.getInput('allowDirtyBuild');
+    log.debug('input === ', input);
 
-    return input === 'true';
+    return input || false === true;
   }
 
-  static get postBuildSteps() {
-    return Input.getInput('postBuildSteps') || '';
+  public get postBuildSteps() {
+    return this.getInput('postBuildSteps') || '';
   }
 
-  static get preBuildSteps() {
-    return Input.getInput('preBuildSteps') || '';
+  public get preBuildSteps() {
+    return this.getInput('preBuildSteps') || '';
   }
 
-  static get awsBaseStackName() {
-    return Input.getInput('awsBaseStackName') || 'game-ci';
+  public get awsBaseStackName() {
+    return this.getInput('awsBaseStackName') || 'game-ci';
   }
 
-  static get cloudRunnerCluster() {
+  public get cloudRunnerCluster() {
     if (Cli.isCliMode) {
-      return Input.getInput('cloudRunnerCluster') || 'aws';
+      return this.getInput('cloudRunnerCluster') || 'aws';
     }
 
-    return Input.getInput('cloudRunnerCluster') || 'local';
+    return this.getInput('cloudRunnerCluster') || 'local';
   }
 
-  static get cloudRunnerCpu() {
-    return Input.getInput('cloudRunnerCpu');
+  public get cloudRunnerCpu() {
+    return this.getInput('cloudRunnerCpu');
   }
 
-  static get cloudRunnerMemory() {
-    return Input.getInput('cloudRunnerMemory');
+  public get cloudRunnerMemory() {
+    return this.getInput('cloudRunnerMemory');
   }
 
-  static get kubeConfig() {
-    return Input.getInput('kubeConfig') || '';
+  public get kubeConfig() {
+    return this.getInput('kubeConfig') || '';
   }
 
-  static get kubeVolume() {
-    return Input.getInput('kubeVolume') || '';
+  public get kubeVolume() {
+    return this.getInput('kubeVolume') || '';
   }
 
-  static get kubeVolumeSize() {
-    return Input.getInput('kubeVolumeSize') || '5Gi';
+  public get kubeVolumeSize() {
+    return this.getInput('kubeVolumeSize') || '5Gi';
   }
 
-  static get kubeStorageClass(): string {
-    return Input.getInput('kubeStorageClass') || '';
+  public get kubeStorageClass(): string {
+    return this.getInput('kubeStorageClass') || '';
   }
 
-  static get checkDependencyHealthOverride(): string {
-    return Input.getInput('checkDependencyHealthOverride') || '';
+  public get checkDependencyHealthOverride(): string {
+    return this.getInput('checkDependencyHealthOverride') || '';
   }
 
-  static get startDependenciesOverride(): string {
-    return Input.getInput('startDependenciesOverride') || '';
+  public get startDependenciesOverride(): string {
+    return this.getInput('startDependenciesOverride') || '';
   }
 
-  static get cacheKey(): string {
-    return Input.getInput('cacheKey') || Input.branch;
+  public get cacheKey(): string {
+    return this.getInput('cacheKey') || Input.branch;
   }
 
-  static get cloudRunnerTests(): boolean {
-    return Input.getInput(`cloudRunnerTests`) || false;
+  public get cloudRunnerTests(): boolean {
+    return this.getInput(`cloudRunnerTests`) || false;
   }
 
   public static toEnvVarFormat(input: string) {

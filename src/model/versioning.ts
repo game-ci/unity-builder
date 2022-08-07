@@ -1,4 +1,3 @@
-import { Buffer } from '../dependencies.ts';
 import NotImplementedException from './error/not-implemented-exception.ts';
 import ValidationError from './error/validation-error.ts';
 import Input from './input.ts';
@@ -7,10 +6,6 @@ import System from './system.ts';
 export default class Versioning {
   static get projectPath() {
     return Input.projectPath;
-  }
-
-  static get isDirtyAllowed() {
-    return Input.allowDirtyBuild;
   }
 
   static get strategies() {
@@ -58,16 +53,6 @@ export default class Versioning {
   }
 
   /**
-   * Log up to maxDiffLines of the git diff.
-   */
-  static async logDiff() {
-    const diffCommand = `git --no-pager diff | head -n ${this.maxDiffLines.toString()}`;
-    const result = await System.shellRun(diffCommand);
-
-    log.debug(result.output);
-  }
-
-  /**
    * Regex to parse version description into separate fields
    */
   static get descriptionRegex1() {
@@ -82,7 +67,7 @@ export default class Versioning {
     return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
-  static async determineBuildVersion(strategy: string, inputVersion: string) {
+  static async determineBuildVersion(strategy: string, inputVersion: string, allowDirtyBuild: boolean) {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
       throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
@@ -99,7 +84,7 @@ export default class Versioning {
         version = inputVersion;
         break;
       case this.strategies.Semantic:
-        version = await this.generateSemanticVersion();
+        version = await this.generateSemanticVersion(allowDirtyBuild);
         break;
       case this.strategies.Tag:
         version = await this.generateTagVersion();
@@ -114,6 +99,16 @@ export default class Versioning {
   }
 
   /**
+   * Log up to maxDiffLines of the git diff.
+   */
+  static async logDiff() {
+    const diffCommand = `git --no-pager diff | head -n ${this.maxDiffLines.toString()}`;
+    const result = await System.shellRun(diffCommand);
+
+    log.debug(result.output);
+  }
+
+  /**
    * Automatically generates a version based on SemVer out of the box.
    *
    * The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.
@@ -123,14 +118,14 @@ export default class Versioning {
    *
    * @See: https://semver.org/
    */
-  static async generateSemanticVersion() {
+  static async generateSemanticVersion(allowDirtyBuild) {
     if (await this.isShallow()) {
       await this.fetch();
     }
 
     await Versioning.logDiff();
 
-    if ((await this.isDirty()) && !this.isDirtyAllowed) {
+    if ((await this.isDirty()) && !allowDirtyBuild) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
     }
 
@@ -209,9 +204,7 @@ export default class Versioning {
             hash,
           };
         } catch {
-          log.warning(
-            `Failed to parse git describe output or version can not be determined through: "${description}".`,
-          );
+          log.warning(`Failed to parse git describe output or version can not be determined through "${description}".`);
 
           return false;
         }
@@ -286,13 +279,15 @@ export default class Versioning {
    * Note: Currently this is run in all OSes, so the syntax must be cross-platform.
    */
   static async hasAnyVersionTags() {
-    const numberOfTagsAsString = await System.run('sh', undefined, {
-      input: Buffer.from(`git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`),
-      cwd: this.projectPath,
-      silent: false,
-    });
+    const command = `git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`;
+    const result = await System.shellRun(command, { cwd: this.projectPath, silent: false });
 
+    log.debug(result);
+
+    const { output: numberOfTagsAsString } = result;
     const numberOfTags = Number.parseInt(numberOfTagsAsString, 10);
+
+    log.debug('numberOfTags', numberOfTags);
 
     return numberOfTags !== 0;
   }

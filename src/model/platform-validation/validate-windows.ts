@@ -1,8 +1,8 @@
 import { fsSync as fs } from '../../dependencies.ts';
-import { BuildParameters } from '../index.ts';
+import { Parameters } from '../index.ts';
 
 class ValidateWindows {
-  public static validate(buildParameters: BuildParameters) {
+  public static validate(buildParameters: Parameters) {
     ValidateWindows.validateWindowsPlatformRequirements(buildParameters.targetPlatform);
     if (!(Deno.env.get('UNITY_EMAIL') && Deno.env.get('UNITY_PASSWORD'))) {
       throw new Error(`Unity email and password must be set for Windows based builds to

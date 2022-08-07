@@ -1,10 +1,10 @@
 import { k8sTypes, k8s, core, yaml, waitUntil, http } from '../../../../dependencies.ts';
-import BuildParameters from '../../../build-parameters.ts';
+import Parameters from '../../../parameters.ts';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     pvcName: string,
     kubeClient: k8sTypes.CoreV1Api,
     namespace: string,
@@ -69,7 +69,7 @@ class KubernetesStorage {
 
   private static async createPVC(
     pvcName: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     kubeClient: k8sTypes.CoreV1Api,
     namespace: string,
   ) {

@@ -1,5 +1,5 @@
 import AwsBuildPlatform from './providers/aws/index.ts';
-import { BuildParameters, Input } from '../index.ts';
+import { Parameters, Input } from '../index.ts';
 import Kubernetes from './providers/k8s/index.ts';
 import CloudRunnerLogger from './services/cloud-runner-logger.ts';
 import { CloudRunnerStepState } from './cloud-runner-step-state.ts';
@@ -16,10 +16,10 @@ import LocalDockerCloudRunner from './providers/local-docker/index.ts';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
-  static buildParameters: BuildParameters;
+  static buildParameters: Parameters;
   public static defaultSecrets: CloudRunnerSecret[];
   public static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
-  private static setup(buildParameters: BuildParameters) {
+  private static setup(buildParameters: Parameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupBuildPlatform();
@@ -57,7 +57,7 @@ class CloudRunner {
     }
   }
 
-  static async run(buildParameters: BuildParameters, baseImage: string) {
+  static async run(buildParameters: Parameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');

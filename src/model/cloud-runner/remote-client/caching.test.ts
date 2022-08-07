@@ -1,5 +1,5 @@
 import { fs, uuid, path, __dirname } from '../../../dependencies.ts';
-import BuildParameters from '../../build-parameters.ts';
+import Parameters from '../../parameters.ts';
 import { Cli } from '../../cli/cli.ts';
 import Input from '../../input.ts';
 import UnityVersioning from '../../unity-versioning.ts';
@@ -21,7 +21,7 @@ describe('Cloud Runner Caching', () => {
         cacheKey: `test-case-${uuid()}`,
       };
       Input.githubInputEnabled = false;
-      const buildParameter = await BuildParameters.create();
+      const buildParameter = await Parameters.create();
       CloudRunner.buildParameters = buildParameter;
 
       // Create test folder

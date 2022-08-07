@@ -4,7 +4,7 @@ import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environm
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def.ts';
 import AWSTaskRunner from './aws-task-runner.ts';
 import { ProviderInterface } from '../provider-interface.ts';
-import BuildParameters from '../../../build-parameters.ts';
+import Parameters from '../../../parameters.ts';
 import CloudRunnerLogger from '../../services/cloud-runner-logger.ts';
 import { AWSJobStack } from './aws-job-stack.ts';
 import { AWSBaseStack } from './aws-base-stack.ts';
@@ -13,18 +13,18 @@ import { Input } from '../../../index.ts';
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
 
-  constructor(buildParameters: BuildParameters) {
+  constructor(buildParameters: Parameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
   async cleanup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
   async setup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}

@@ -10,7 +10,7 @@ import { GitRepoReader } from './input-readers/git-repo.ts';
 import { GithubCliReader } from './input-readers/github-cli.ts';
 import { Cli } from './cli/cli.ts';
 
-class BuildParameters {
+class Parameters {
   public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
@@ -51,7 +51,6 @@ class BuildParameters {
   public checkDependencyHealthOverride!: string;
   public startDependenciesOverride!: string;
   public cacheKey!: string;
-
   public postBuildSteps!: string;
   public preBuildSteps!: string;
   public customJob!: string;
@@ -66,22 +65,36 @@ class BuildParameters {
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
 
-  static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+  constructor(input: Input) {
+    this.input = input;
+  }
+
+  public async parse(): Promise<Parameters> {
+    const buildFile = Parameters.parseBuildFile(
+      this.input.buildName,
+      this.input.targetPlatform,
+      this.input.androidAppBundle,
+    );
     log.debug('buildFile:', buildFile);
-    const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
+    const editorVersion = UnityVersioning.determineUnityVersion(this.input.projectPath, this.input.unityVersion);
     log.debug('editorVersion:', editorVersion);
-    const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
+    const buildVersion = await Versioning.determineBuildVersion(
+      this.input.versioningStrategy,
+      this.input.specifiedVersion,
+      this.input.allowDirtyBuild,
+    );
     log.debug('buildVersion', buildVersion);
-    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
+    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, this.input.androidVersionCode);
     log.debug('androidVersionCode', androidVersionCode);
-    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(
+      this.input.androidTargetSdkVersion,
+    );
     log.debug('androidSdkManagerParameters', androidSdkManagerParameters);
 
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!Deno.env.get('UNITY_SERIAL') && Input.githubInputEnabled) {
+    if (!Deno.env.get('UNITY_SERIAL') && this.input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
       if (!Deno.env.get('UNITY_LICENSE')) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
@@ -96,59 +109,59 @@ class BuildParameters {
 
     return {
       editorVersion,
-      customImage: Input.customImage,
+      customImage: this.input.customImage,
       unitySerial,
 
       runnerTempPath: Deno.env.get('RUNNER_TEMP'),
-      targetPlatform: Input.targetPlatform,
-      projectPath: Input.projectPath,
-      buildName: Input.buildName,
-      buildPath: `${Input.buildsPath}/${Input.targetPlatform}`,
+      targetPlatform: this.input.targetPlatform,
+      projectPath: this.input.projectPath,
+      buildName: this.input.buildName,
+      buildPath: `${this.input.buildsPath}/${this.input.targetPlatform}`,
       buildFile,
-      buildMethod: Input.buildMethod,
+      buildMethod: this.input.buildMethod,
       buildVersion,
       androidVersionCode,
-      androidKeystoreName: Input.androidKeystoreName,
-      androidKeystoreBase64: Input.androidKeystoreBase64,
-      androidKeystorePass: Input.androidKeystorePass,
-      androidKeyaliasName: Input.androidKeyaliasName,
-      androidKeyaliasPass: Input.androidKeyaliasPass,
-      androidTargetSdkVersion: Input.androidTargetSdkVersion,
+      androidKeystoreName: this.input.androidKeystoreName,
+      androidKeystoreBase64: this.input.androidKeystoreBase64,
+      androidKeystorePass: this.input.androidKeystorePass,
+      androidKeyaliasName: this.input.androidKeyaliasName,
+      androidKeyaliasPass: this.input.androidKeyaliasPass,
+      androidTargetSdkVersion: this.input.androidTargetSdkVersion,
       androidSdkManagerParameters,
-      customParameters: Input.customParameters,
-      sshAgent: Input.sshAgent,
-      gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
-      chownFilesTo: Input.chownFilesTo,
-      cloudRunnerCluster: Input.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: Input.cloudRunnerBuilderPlatform,
-      awsBaseStackName: Input.awsBaseStackName,
-      kubeConfig: Input.kubeConfig,
-      cloudRunnerMemory: Input.cloudRunnerMemory,
-      cloudRunnerCpu: Input.cloudRunnerCpu,
-      kubeVolumeSize: Input.kubeVolumeSize,
-      kubeVolume: Input.kubeVolume,
-      postBuildSteps: Input.postBuildSteps,
-      preBuildSteps: Input.preBuildSteps,
-      customJob: Input.customJob,
-      runNumber: Input.runNumber,
-      branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerIntegrationTests: Input.cloudRunnerTests,
-      githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
+      customParameters: this.input.customParameters,
+      sshAgent: this.input.sshAgent,
+      gitPrivateToken: this.input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
+      chownFilesTo: this.input.chownFilesTo,
+      cloudRunnerCluster: this.input.cloudRunnerCluster,
+      cloudRunnerBuilderPlatform: this.input.cloudRunnerBuilderPlatform,
+      awsBaseStackName: this.input.awsBaseStackName,
+      kubeConfig: this.input.kubeConfig,
+      cloudRunnerMemory: this.input.cloudRunnerMemory,
+      cloudRunnerCpu: this.input.cloudRunnerCpu,
+      kubeVolumeSize: this.input.kubeVolumeSize,
+      kubeVolume: this.input.kubeVolume,
+      postBuildSteps: this.input.postBuildSteps,
+      preBuildSteps: this.input.preBuildSteps,
+      customJob: this.input.customJob,
+      runNumber: this.input.runNumber,
+      branch: this.input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
+      cloudRunnerBranch: this.input.cloudRunnerBranch.split('/').reverse()[0],
+      cloudRunnerIntegrationTests: this.input.cloudRunnerTests,
+      githubRepo: this.input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
-      awsStackName: Input.awsBaseStackName,
-      gitSha: Input.gitSha,
+      awsStackName: this.input.awsBaseStackName,
+      gitSha: this.input.gitSha,
       logId: nanoid.customAlphabet(CloudRunnerConstants.alphabet, 9)(),
-      buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customJobHooks: Input.customJobHooks(),
-      cachePullOverrideCommand: Input.cachePullOverrideCommand(),
-      cachePushOverrideCommand: Input.cachePushOverrideCommand(),
-      readInputOverrideCommand: Input.readInputOverrideCommand(),
-      readInputFromOverrideList: Input.readInputFromOverrideList(),
-      kubeStorageClass: Input.kubeStorageClass,
-      checkDependencyHealthOverride: Input.checkDependencyHealthOverride,
-      startDependenciesOverride: Input.startDependenciesOverride,
-      cacheKey: Input.cacheKey,
+      buildGuid: CloudRunnerBuildGuid.generateGuid(this.input.runNumber, this.input.targetPlatform),
+      customJobHooks: this.input.customJobHooks(),
+      cachePullOverrideCommand: this.input.cachePullOverrideCommand(),
+      cachePushOverrideCommand: this.input.cachePushOverrideCommand(),
+      readInputOverrideCommand: this.input.readInputOverrideCommand(),
+      readInputFromOverrideList: this.input.readInputFromOverrideList(),
+      kubeStorageClass: this.input.kubeStorageClass,
+      checkDependencyHealthOverride: this.input.checkDependencyHealthOverride,
+      startDependenciesOverride: this.input.startDependenciesOverride,
+      cacheKey: this.input.cacheKey,
     };
   }
 
@@ -178,4 +191,4 @@ class BuildParameters {
   }
 }
 
-export default BuildParameters;
+export default Parameters;

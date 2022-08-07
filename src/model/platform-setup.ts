@@ -1,9 +1,9 @@
-import { BuildParameters } from './index.ts';
+import { Parameters } from './index.ts';
 import { SetupMac, SetupWindows } from './platform-setup/index.ts';
 import ValidateWindows from './platform-validation/validate-windows.ts';
 
 class PlatformSetup {
-  static async setup(buildParameters: BuildParameters, actionFolder: string) {
+  static async setup(buildParameters: Parameters, actionFolder: string) {
     switch (process.platform) {
       case 'win32':
         ValidateWindows.validate(buildParameters);

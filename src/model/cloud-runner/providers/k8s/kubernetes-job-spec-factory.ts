@@ -1,5 +1,5 @@
 import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '../../../../dependencies.ts';
-import BuildParameters from '../../../build-parameters.ts';
+import Parameters from '../../../parameters.ts';
 import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process.ts';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
@@ -14,7 +14,7 @@ class KubernetesJobSpecFactory {
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     secretName,
     pvcName,
     jobName,

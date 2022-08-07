@@ -1,8 +1,8 @@
 import { fsSync as fs, exec } from '../../dependencies.ts';
-import { BuildParameters } from '../index.ts';
+import { Parameters } from '../index.ts';
 
 class SetupWindows {
-  public static async setup(buildParameters: BuildParameters) {
+  public static async setup(buildParameters: Parameters) {
     const { targetPlatform } = buildParameters;
 
     await SetupWindows.setupWindowsRun(targetPlatform);

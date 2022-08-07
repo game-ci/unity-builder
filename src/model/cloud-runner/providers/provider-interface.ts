@@ -1,17 +1,17 @@
-import BuildParameters from '../../build-parameters.ts';
+import Parameters from '../../parameters.ts';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable.ts';
 import CloudRunnerSecret from '../services/cloud-runner-secret.ts';
 
 export interface ProviderInterface {
   cleanup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
   setup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );

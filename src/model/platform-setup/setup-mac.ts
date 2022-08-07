@@ -1,10 +1,10 @@
-import { BuildParameters } from '../index.ts';
+import { Parameters } from '../index.ts';
 import { fsSync as fs, exec, getUnityChangeSet } from '../../dependencies.ts';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
 
-  public static async setup(buildParameters: BuildParameters, actionFolder: string) {
+  public static async setup(buildParameters: Parameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
 
     // Only install unity if the editor doesn't already exist
@@ -28,7 +28,7 @@ class SetupMac {
     }
   }
 
-  private static async installUnity(buildParameters: BuildParameters, silent = false) {
+  private static async installUnity(buildParameters: Parameters, silent = false) {
     const unityChangeSet = await getUnityChangeSet(buildParameters.editorVersion);
     const command = `${this.unityHubPath} -- --headless install \
                                           --version ${buildParameters.editorVersion} \
@@ -44,7 +44,7 @@ class SetupMac {
     }
   }
 
-  private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
+  private static async setEnvironmentVariables(buildParameters: Parameters, actionFolder: string) {
     // Need to set environment variables from here because we execute
     // the scripts on the host for mac
     Deno.env.set('ACTION_FOLDER', actionFolder);

@@ -1,6 +1,6 @@
 import Platform from './platform.ts';
 
-import BuildParameters from './build-parameters.ts';
+import Parameters from './parameters.ts';
 
 class ImageTag {
   public repository: string;
@@ -13,7 +13,7 @@ class ImageTag {
   public imageRollingVersion: number;
   public imagePlatformPrefix: string;
 
-  constructor(imageProperties: Partial<BuildParameters>) {
+  constructor(imageProperties: Partial<Parameters>) {
     const { editorVersion = '2019.2.11f1', targetPlatform, customImage, cloudRunnerBuilderPlatform } = imageProperties;
 
     if (!ImageTag.versionPattern.test(editorVersion)) {

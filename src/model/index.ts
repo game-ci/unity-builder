@@ -1,5 +1,5 @@
 import Action from './action.ts';
-import BuildParameters from './build-parameters.ts';
+import Parameters from './parameters.ts';
 import Cache from './cache.ts';
 import Docker from './docker.ts';
 import Input from './input.ts';
@@ -13,7 +13,7 @@ import CloudRunner from './cloud-runner/cloud-runner.ts';
 
 export {
   Action,
-  BuildParameters,
+  Parameters,
   Cache,
   Docker,
   Input,
@@ -23,5 +23,5 @@ export {
   Project,
   Unity,
   Versioning,
-  CloudRunner as CloudRunner,
+  CloudRunner,
 };

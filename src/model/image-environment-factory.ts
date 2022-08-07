@@ -1,4 +1,4 @@
-import BuildParameters from './build-parameters.ts';
+import Parameters from './parameters.ts';
 import { ReadLicense } from './input-readers/test-license-reader.ts';
 
 class Parameter {
@@ -24,7 +24,7 @@ class ImageEnvironmentFactory {
 
     return string;
   }
-  public static getEnvironmentVariables(parameters: BuildParameters) {
+  public static getEnvironmentVariables(parameters: Parameters) {
     const environmentVariables: Parameter[] = [
       { name: 'UNITY_LICENSE', value: Deno.env.get('UNITY_LICENSE') || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: Deno.env.get('UNITY_LICENSE_FILE') },

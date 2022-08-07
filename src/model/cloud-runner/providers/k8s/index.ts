@@ -1,4 +1,4 @@
-import { BuildParameters, Output } from '../../../index.ts';
+import { Parameters, Output } from '../../../index.ts';
 import { k8sTypes, k8s, waitUntil } from '../../../../dependencies.ts';
 import { ProviderInterface } from '../provider-interface.ts';
 import CloudRunnerSecret from '../../services/cloud-runner-secret.ts';
@@ -16,7 +16,7 @@ class Kubernetes implements ProviderInterface {
   private kubeClient: k8sTypes.CoreV1Api;
   private kubeClientBatch: k8sTypes.BatchV1Api;
   private buildGuid: string = '';
-  private buildParameters: BuildParameters;
+  private buildParameters: Parameters;
   private pvcName: string = '';
   private secretName: string = '';
   private jobName: string = '';
@@ -26,7 +26,7 @@ class Kubernetes implements ProviderInterface {
   private cleanupCronJobName: string = '';
   private serviceAccountName: string = '';
 
-  constructor(buildParameters: BuildParameters) {
+  constructor(buildParameters: Parameters) {
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8sTypes.CoreV1Api);
@@ -38,7 +38,7 @@ class Kubernetes implements ProviderInterface {
   }
   public async setup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
@@ -171,7 +171,7 @@ class Kubernetes implements ProviderInterface {
 
   async cleanup(
     buildGuid: string,
-    buildParameters: BuildParameters,
+    buildParameters: Parameters,
     branchName: string,
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {

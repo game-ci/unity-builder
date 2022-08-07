@@ -1,4 +1,4 @@
-import { BuildParameters, ImageTag } from '..';
+import { Parameters, ImageTag } from '..';
 import CloudRunner from './cloud-runner.ts';
 import Input from '../input.ts';
 import { CloudRunnerStatics } from './cloud-runner-statics.ts';
@@ -34,7 +34,7 @@ describe('Cloud Runner', () => {
       Input.githubInputEnabled = false;
 
       // Setup parameters
-      const buildParameter = await BuildParameters.create();
+      const buildParameter = await Parameters.create();
       Input.githubInputEnabled = true;
       const baseImage = new ImageTag(buildParameter);
 
@@ -73,7 +73,7 @@ describe('Cloud Runner', () => {
         cacheKey: `test-case-${uuidv4()}`,
       };
       Input.githubInputEnabled = false;
-      const buildParameter = await BuildParameters.create();
+      const buildParameter = await Parameters.create();
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
@@ -81,7 +81,7 @@ describe('Cloud Runner', () => {
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
       CloudRunnerLogger.log(`run 1 succeeded`);
-      const buildParameter2 = await BuildParameters.create();
+      const buildParameter2 = await Parameters.create();
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
@@ -111,7 +111,7 @@ describe('Cloud Runner', () => {
     Input.githubInputEnabled = false;
 
     // Setup parameters
-    const buildParameter = await BuildParameters.create();
+    const buildParameter = await Parameters.create();
     const baseImage = new ImageTag(buildParameter);
 
     // Run the job
@@ -131,7 +131,7 @@ describe('Cloud Runner', () => {
     Input.githubInputEnabled = false;
 
     // Setup parameters
-    const buildParameter = await BuildParameters.create();
+    const buildParameter = await Parameters.create();
     const baseImage = new ImageTag(buildParameter);
 
     // Run the job

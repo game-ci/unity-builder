@@ -19,6 +19,19 @@ export const createFormatter = ({
     return pad(value, totalWidth, paddingOptions);
   };
 
+  const formatValue = (value) => {
+    switch (typeof value) {
+      case 'object':
+        return Deno.inspect(value, { depth });
+      case 'undefined':
+        return 'undefined';
+      case 'string':
+        return value;
+      default:
+        return `${value} (${typeof value})`;
+    }
+  };
+
   return ({ level, levelName, msg, args, loggerName }: LogRecord) => {
     let line = '';
 
@@ -46,23 +59,12 @@ export const createFormatter = ({
 
     if (msg) {
       if (line.length > 0) line += ' ';
-      line += msg;
+      line += formatValue(msg);
     }
 
     if (args) {
       if (line.length > 0) line += ' ';
-      line += args
-        .map((value) => {
-          switch (typeof value) {
-            case 'object':
-              return Deno.inspect(value, { depth });
-            case 'undefined':
-              return 'undefined';
-            default:
-              return value;
-          }
-        })
-        .join(' ');
+      line += args.map((arg) => formatValue(arg)).join(' ');
     }
 
     return line;

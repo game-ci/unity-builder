@@ -1,5 +1,5 @@
 import { exec } from '../dependencies.ts';
-import { BuildParameters } from './build-parameters.ts';
+import { Parameters } from './parameters.ts';
 
 class MacBuilder {
   public static async run(actionFolder, workspace, buildParameters: BuildParameters, silent = false) {
