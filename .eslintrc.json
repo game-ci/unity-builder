@@ -81,6 +81,8 @@
     // Null is useful when explicit value is passed
     "unicorn/no-null": "off",
     // (enable to add improvements)
-    "unicorn/prefer-export-from": "off"
+    "unicorn/prefer-export-from": "off",
+    // Deno uses const a=new Buffer(new TextEncoder().encode('Hello World'));
+    "unicorn/no-new-buffer": "off"
   }
 }

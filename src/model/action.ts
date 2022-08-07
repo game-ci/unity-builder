@@ -30,6 +30,8 @@ class Action {
   }
 
   static get workspace() {
+    if (Action.isRunningLocally) return Deno.cwd();
+
     return Deno.env.get('GITHUB_WORKSPACE');
   }
 

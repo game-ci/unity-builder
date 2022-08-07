@@ -40,6 +40,8 @@ const exec = async (
     continueOnError: false,
   };
 
+  // log.debug('Command:', command, args);
+
   const { silent = false, ignoreReturnCode } = ghActionsOptions;
   if (silent) options.output = OutputMode.Capture;
   if (ignoreReturnCode) options.continueOnError = true;
@@ -53,7 +55,7 @@ const exec = async (
   const symbol = success ? '✅' : '❗';
   log.debug('Command:', command, argsString, symbol, result);
 
-  return { exitCode, success, output: output.trim() };
+  return { exitCode, success, output: output.replace(/\n+$/, '') };
 };
 
 export { exec };

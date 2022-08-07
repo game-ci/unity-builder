@@ -1,6 +1,45 @@
-import { core, exec } from '../dependencies.ts';
+import { exec } from '../dependencies.ts';
 
 class System {
+  static async shellRun(command) {
+    return System.newRun('sh', ['-c', command]);
+  }
+
+  /**
+   * Example:
+   *   System.newRun(sh, ['-c', 'echo something'])
+   *
+   * private for now, but could become public if this happens to be a great replacement for the other run method.
+   */
+  private static async newRun(command, args: string | string[] = []) {
+    if (!Array.isArray(args)) args = [args];
+
+    const argsString = args.join(' ');
+    const process = Deno.run({
+      cmd: [command, ...args],
+      stdout: 'piped',
+      stderr: 'piped',
+    });
+
+    const status = await process.status();
+    const outputBuffer = await process.output();
+    const errorBuffer = await process.stderrOutput();
+
+    process.close();
+
+    const output = new TextDecoder().decode(outputBuffer);
+    const error = new TextDecoder().decode(errorBuffer);
+
+    const result = { status, output };
+    const symbol = status.success ? '✅' : '❗';
+
+    log.debug('Command:', command, argsString, symbol, result);
+
+    if (error) throw new Error(error);
+
+    return result;
+  }
+
   static async run(command, arguments_: any = [], options = {}, shouldLog = true) {
     let result = '';
     let error = '';
@@ -48,17 +87,25 @@ class System {
         throw new Error(`Failed to execute empty command`);
       }
 
-      const { exitCode } = await exec(command, arguments_, { silent: true, listeners, ...options });
+      const { exitCode, success, output } = await exec(command, arguments_, { silent: true, listeners, ...options });
       showOutput();
-      if (exitCode !== 0) {
-        throwContextualError(`Command returned non-zero exit code.\nError: ${error}`);
+      if (!success) {
+        throwContextualError(`Command returned non-zero exit code (${exitCode}).\nError: ${error}`);
       }
+
+      // Todo - remove this after verifying it works as expected
+      const trimmedResult = result.replace(/\n+$/, '');
+      if (!output && trimmedResult) {
+        log.warning('returning result instead of output for backward compatibility');
+
+        return trimmedResult;
+      }
+
+      return output;
     } catch (inCommandError) {
       showOutput();
       throwContextualError(`In-command error caught: ${inCommandError}`);
     }
-
-    return result.replace(/\n+$/, '');
   }
 }
 

@@ -1,4 +1,4 @@
-import { core } from '../dependencies.ts';
+import { Buffer } from '../dependencies.ts';
 import NotImplementedException from './error/not-implemented-exception.ts';
 import ValidationError from './error/validation-error.ts';
 import Input from './input.ts';
@@ -62,10 +62,9 @@ export default class Versioning {
    */
   static async logDiff() {
     const diffCommand = `git --no-pager diff | head -n ${this.maxDiffLines.toString()}`;
-    await System.run('sh', undefined, {
-      input: Buffer.from(diffCommand),
-      silent: true,
-    });
+    const result = await System.shellRun(diffCommand);
+
+    log.debug(result.output);
   }
 
   /**
@@ -129,7 +128,7 @@ export default class Versioning {
       await this.fetch();
     }
 
-    await this.logDiff();
+    await Versioning.logDiff();
 
     if ((await this.isDirty()) && !this.isDirtyAllowed) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
@@ -226,7 +225,7 @@ export default class Versioning {
   static async isShallow() {
     const output = await this.git(['rev-parse', '--is-shallow-repository']);
 
-    return output !== 'false\n';
+    return output !== 'false';
   }
 
   /**
@@ -240,9 +239,7 @@ export default class Versioning {
     try {
       await this.git(['fetch', '--unshallow']);
     } catch {
-      log.warning(
-        `fetch --unshallow did not work, falling back to regular fetch (which probably just means it's not running on GH actions)`,
-      );
+      log.warning(`fetch --unshallow did not work, falling back to regular fetch`);
       await this.git(['fetch']);
     }
   }
@@ -267,8 +264,10 @@ export default class Versioning {
     const isDirty = output !== '';
 
     if (isDirty) {
-      log.warning('Changes were made to the following files and folders:\n');
-      log.warning(output);
+      log.warning(
+        `Changes were made to the following files and folders:\n\n  A = addition, M = modification, D = deletion\n\n`,
+        output,
+      );
     }
 
     return isDirty;
