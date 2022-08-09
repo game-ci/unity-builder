@@ -4,6 +4,7 @@ import type { EnvVariables } from './core/env/env-variables.ts';
 import { Options } from './config/options.ts';
 import { CommandFactory } from './commands/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';
+import System from './model/system.ts';
 
 export class GameCI {
   private readonly commandFactory: CommandFactory;

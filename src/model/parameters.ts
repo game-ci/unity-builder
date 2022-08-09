@@ -9,6 +9,7 @@ import Versioning from './versioning.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
 import { GithubCliReader } from './input-readers/github-cli.ts';
 import { Cli } from './cli/cli.ts';
+import { EnvVariables } from '../core/env/env-variables.ts';
 
 class Parameters {
   public editorVersion!: string;
@@ -65,8 +66,12 @@ class Parameters {
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
 
-  constructor(input: Input) {
+  private readonly input: Input;
+  private readonly env: EnvVariables;
+
+  constructor(input: Input, env: EnvVariables) {
     this.input = input;
+    this.env = env;
   }
 
   public async parse(): Promise<Parameters> {

@@ -19,9 +19,18 @@ export default class Versioning {
   /**
    * Get the branch name of the (related) branch
    */
-  static get branch() {
-    // Todo - use optional chaining (https://github.com/zeit/ncc/issues/534)
-    return this.headRef || (this.ref && this.ref.slice(11));
+  static async getCurrentBranch() {
+    // GitHub pull request, GitHub non pull request
+    let branchName = this.headRef || this.ref?.slice(11);
+
+    // Local
+    if (!branchName) {
+      const { status, output } = await System.shellRun('git branch --show-current');
+      if (!status.success) throw new Error('did not expect "git branch --show-current"');
+      branchName = output;
+    }
+
+    return branchName;
   }
 
   /**
@@ -144,7 +153,8 @@ export default class Versioning {
       const [major, minor, patch] = `${tag}.${commits}`.split('.');
       const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
 
-      log.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
+      const branch = await this.getCurrentBranch();
+      log.info(`Found semantic version ${threeDigitVersion} for ${branch}@${hash}`);
 
       return `${threeDigitVersion}`;
     }
@@ -280,6 +290,7 @@ export default class Versioning {
    */
   static async hasAnyVersionTags() {
     const command = `git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`;
+    // Todo - make sure this cwd is actually passed in somehow
     const result = await System.shellRun(command, { cwd: this.projectPath, silent: false });
 
     log.debug(result);

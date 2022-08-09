@@ -14,7 +14,7 @@ export class Options {
 
   public async generateParameters(args: CliArguments) {
     this.input = new Input(args);
-    this.parameters = await new Parameters(this.input).parse();
+    this.parameters = await new Parameters(this.input, this.env).parse();
 
     log.debug('Parameters generated.');
 

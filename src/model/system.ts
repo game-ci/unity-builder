@@ -1,7 +1,22 @@
 import { exec } from '../dependencies.ts';
 
+export interface ShellRunOptions {
+  pwd: string;
+}
+
 class System {
-  static async shellRun(command) {
+  /**
+   * Run any command as if you're typing in shell.
+   * Make sure it's Windows/MacOS/Ubuntu compatible or has alternative commands.
+   *
+   * Intended to always be silent and capture the output.
+   */
+  static async shellRun(rawCommand: string, options: ShellRunOptions = {}) {
+    const { pwd } = options;
+
+    let command = rawCommand;
+    if (pwd) command = `cd ${pwd} ; ${command}`;
+
     return System.newRun('sh', ['-c', command]);
   }
 
@@ -33,13 +48,17 @@ class System {
     const result = { status, output };
     const symbol = status.success ? '✅' : '❗';
 
-    log.debug('Command:', command, argsString, symbol, result);
+    const truncatedOutput = output.length >= 30 ? `${output.slice(0, 27)}...` : output;
+    log.debug('Command:', command, argsString, symbol, { status, output: truncatedOutput });
 
     if (error) throw new Error(error);
 
     return result;
   }
 
+  /**
+   * @deprecated use more simplified `shellRun` if possible.
+   */
   static async run(command, arguments_: any = [], options = {}, shouldLog = true) {
     let result = '';
     let error = '';

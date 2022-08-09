@@ -56,10 +56,10 @@ describe('Versioning', () => {
   });
 
   describe('branch', () => {
-    it('returns headRef when set', () => {
+    it('returns headRef when set', async () => {
       const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockReturnValue('feature-branch-1');
 
-      expect(Versioning.branch).toStrictEqual('feature-branch-1');
+      await expect(Versioning.getCurrentBranch).resolves.toStrictEqual('feature-branch-1');
       expect(headReference).toHaveBeenCalledTimes(1);
     });
 
@@ -67,7 +67,7 @@ describe('Versioning', () => {
       jest.spyOn(Versioning, 'headRef', 'get').mockImplementation();
       const reference = jest.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-branch-2');
 
-      expect(Versioning.branch).toStrictEqual('feature-branch-2');
+      await expect(Versioning.getCurrentBranch).resolves.toStrictEqual('feature-branch-2');
       expect(reference).toHaveBeenCalledTimes(2);
     });
 
@@ -75,16 +75,16 @@ describe('Versioning', () => {
       const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockReturnValue('feature-branch-1');
       const reference = jest.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-2');
 
-      expect(Versioning.branch).toStrictEqual('feature-branch-1');
+      await expect(Versioning.getCurrentBranch).resolves.toStrictEqual('feature-branch-1');
       expect(headReference).toHaveBeenCalledTimes(1);
       expect(reference).toHaveBeenCalledTimes(0);
     });
 
-    it('returns undefined when headRef and ref are not set', () => {
+    it('returns undefined when headRef and ref are not set', async () => {
       const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockImplementation();
       const reference = jest.spyOn(Versioning, 'ref', 'get').mockImplementation();
 
-      expect(Versioning.branch).not.toBeDefined();
+      await expect(Versioning.getCurrentBranch).resolves.not.toBeDefined();
 
       expect(headReference).toHaveBeenCalledTimes(1);
       expect(reference).toHaveBeenCalledTimes(1);
