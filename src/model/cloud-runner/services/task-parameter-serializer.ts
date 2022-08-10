@@ -26,6 +26,7 @@ export class TaskParameterSerializer {
   }
   private static get serializeBuildParamsAndInput() {
     let array = new Array();
+    CloudRunner.buildParameters.projectPath = '.';
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
     const configurableHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks);
@@ -35,9 +36,9 @@ export class TaskParameterSerializer {
       array.push(secrets.reduce((x, y) => [...x, ...y]));
     }
 
-    array = array.filter(
-      (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',
-    );
+    const blocked = new Set(['0', 'length', 'prototype', '', 'projectPath']);
+
+    array = array.filter((x) => !blocked.has(x.name));
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;
@@ -80,6 +81,7 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+    CloudRunner.buildParameters.projectPath = '.';
     array.push(
       ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
         .filter((x) => array.every((y) => y.ParameterKey !== x.name))

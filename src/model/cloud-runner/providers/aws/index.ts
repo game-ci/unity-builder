@@ -11,6 +11,7 @@ import { AWSBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
 import { AwsCliCommands } from './commands/aws-cli-commands';
 import { TertiaryResourcesService } from './services/tertiary-resources-service';
+import { TaskService } from './services/task-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -18,8 +19,8 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  inspect(): Promise<string> {
-    throw new Error('Method not implemented.');
+  async inspect(): Promise<string> {
+    return await TaskService.awsDescribeJob('');
   }
   watch(): Promise<string> {
     throw new Error('Method not implemented.');

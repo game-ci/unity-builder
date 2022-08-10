@@ -19,7 +19,7 @@ class CloudRunner {
   static buildParameters: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
   public static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
-  private static setup(buildParameters: BuildParameters) {
+  public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupBuildPlatform();

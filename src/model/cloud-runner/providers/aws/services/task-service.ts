@@ -102,4 +102,25 @@ export class TaskService {
       if (perResultCallback) await perResultCallback(element);
     }
   }
+  public static async awsDescribeJob(job: string) {
+    process.env.AWS_REGION = Input.region;
+    const CF = new AWS.CloudFormation();
+    const stack = (await CF.listStacks().promise()).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
+    const stackInfo = (await CF.describeStackResources({ StackName: job }).promise()) || undefined;
+    const stackInfo2 = (await CF.describeStacks({ StackName: job }).promise()) || undefined;
+    if (stack === undefined) {
+      throw new Error('stack not defined');
+    }
+    const ageDate: Date = new Date(Date.now() - stack.CreationTime.getTime());
+    const message = `
+    Task Stack ${stack.StackName}
+    Age D${Math.floor(ageDate.getHours() / 24)} H${ageDate.getHours()} M${ageDate.getMinutes()}
+    ${JSON.stringify(stack, undefined, 4)}
+    ${JSON.stringify(stackInfo, undefined, 4)}
+    ${JSON.stringify(stackInfo2, undefined, 4)}
+    `;
+    CloudRunnerLogger.log(message);
+
+    return message;
+  }
 }

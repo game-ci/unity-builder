@@ -159,10 +159,10 @@ export class Caching {
         }
       }
     } catch (error) {
-      process.chdir(`${startPath}`);
+      process.chdir(startPath);
       throw error;
     }
-    process.chdir(`${startPath}`);
+    process.chdir(startPath);
   }
 
   public static async handleCachePurging() {

@@ -51,6 +51,7 @@ export class Cli {
     program.option('--cachePushFrom <cachePushFrom>', 'cache push from source folder');
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
+    program.option('--select <select>', 'select a particular resource');
     program.parse(process.argv);
     Cli.options = program.opts();
 
@@ -69,7 +70,7 @@ export class Cli {
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options.versioning = 'None';
 
-    return await results.target[results.propertyKey]();
+    return await results.target[results.propertyKey](Cli.options);
   }
 
   @CliFunction(`print-input`, `prints all input`)
