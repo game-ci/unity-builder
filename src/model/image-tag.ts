@@ -83,9 +83,9 @@ class ImageTag {
       case Platform.types.StandaloneWindows:
       case Platform.types.StandaloneWindows64:
         // Can only build windows-il2cpp on a windows based system
-        if (process.platform === 'win32') {
+        if (process.env.il2cppEnabled && process.platform === 'win32') {
           // Unity versions before 2019.3 do not support il2cpp
-          if ((process.env.il2cppEnabled && major >= 2020) || (major === 2019 && minor >= 3)) {
+          if (major >= 2020 || (major === 2019 && minor >= 3)) {
             return windowsIl2cpp;
           } else {
             throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity.
