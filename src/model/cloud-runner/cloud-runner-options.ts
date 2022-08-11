@@ -160,7 +160,7 @@ class CloudRunnerOptions {
   static get watchCloudRunnerToEnd(): boolean {
     const input = CloudRunnerOptions.getInput(`watchToEnd`);
 
-    return input && input === 'true';
+    return !input || input === 'true';
   }
 
   public static ToEnvVarFormat(input: string) {
