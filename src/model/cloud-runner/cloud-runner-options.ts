@@ -158,7 +158,7 @@ class CloudRunnerOptions {
   }
 
   static get watchCloudRunnerToEnd(): boolean {
-    return CloudRunnerOptions.getInput(`watchCloudRunnerToEnd`) !== 'false' || true;
+    return CloudRunnerOptions.getInput(`watchToEnd`) !== 'false' || true;
   }
 
   public static ToEnvVarFormat(input: string) {
