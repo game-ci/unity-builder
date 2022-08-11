@@ -27,7 +27,7 @@ export class GitRepoReader {
     }
     assert(fs.existsSync(`.git`));
 
-    return (await CloudRunnerSystem.Run(`git branch --show-current`, false, true))
+    return (await CloudRunnerSystem.Run(`cd ${Input.projectPath} && git branch --show-current`, false, true))
       .split('\n')[0]
       .replace(/ /g, ``)
       .replace('/head', '');
