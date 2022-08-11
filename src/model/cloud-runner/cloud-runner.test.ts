@@ -91,7 +91,7 @@ describe('Cloud Runner', () => {
       expect(results2).toEqual(expect.not.stringContaining(libraryString));
       GitHub.githubInputEnabled = true;
       delete Cli.options;
-    }, 1000000);
+    }, 10000000);
   }
   it('Local cloud runner returns commands', async () => {
     // Build parameters
@@ -120,7 +120,7 @@ describe('Cloud Runner', () => {
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     GitHub.githubInputEnabled = true;
     delete Cli.options;
-  }, 1000000);
+  }, 10000000);
   it('Test cloud runner returns commands', async () => {
     // Build parameters
     Cli.options = {
@@ -140,5 +140,5 @@ describe('Cloud Runner', () => {
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
     GitHub.githubInputEnabled = true;
     delete Cli.options;
-  }, 1000000);
+  }, 10000000);
 });
