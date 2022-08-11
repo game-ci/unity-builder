@@ -166,6 +166,10 @@ inputs:
     default: ''
     required: false
     description: 'Use to specify a way to start depdency services health to enable resilient self-starting jobs'
+  watchToEnd:
+    default: 'true'
+    required: false
+    description: 'Watch build to end or leave unattended: true/false'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'
