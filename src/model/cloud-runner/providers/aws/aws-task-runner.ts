@@ -8,6 +8,7 @@ import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
 import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
+import CloudRunnerOptions from '../../cloud-runner-options';
 
 class AWSTaskRunner {
   public static ECS: AWS.ECS;
@@ -16,7 +17,7 @@ class AWSTaskRunner {
     taskDef: CloudRunnerAWSTaskDef,
     environment: CloudRunnerEnvironmentVariable[],
     commands: string,
-  ) {
+  ): Promise<{ output: string; shouldCleanup: boolean }> {
     const cluster = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
     const taskDefinition =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId || '';
@@ -57,6 +58,12 @@ class AWSTaskRunner {
     CloudRunnerLogger.log(
       `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus}`,
     );
+    if (CloudRunnerOptions.watchCloudRunnerToEnd) {
+      const shouldCleanup: boolean = false;
+      const output: string = '';
+
+      return { output, shouldCleanup };
+    }
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
     const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
     const exitCode = taskData.containers?.[0].exitCode;

@@ -157,6 +157,10 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`cloudRunnerTests`) || false;
   }
 
+  static get watchCloudRunnerToEnd(): boolean {
+    return CloudRunnerOptions.getInput(`watchCloudRunnerToEnd`) !== 'false' || true;
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
