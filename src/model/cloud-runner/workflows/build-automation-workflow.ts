@@ -118,6 +118,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner push build to cache"
     node ${builderPath} -m cache-push --cachePushFrom ${
       CloudRunnerFolders.projectBuildFolderAbsolute
-    } --artifactName build-${guid} --cachePushTo ${`${linuxCacheFolder}/build`.replace(/\\/g, `/`)}`;
+    } --artifactName build-${guid} --cachePushTo ${`${linuxCacheFolder}/build`.replace(/\\/g, `/`)}
+    rm -r ${CloudRunnerFolders.projectPathAbsolute}`;
   }
 }
