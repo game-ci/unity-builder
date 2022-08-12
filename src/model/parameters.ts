@@ -10,8 +10,10 @@ import { GitRepoReader } from './input-readers/git-repo.ts';
 import { GithubCliReader } from './input-readers/github-cli.ts';
 import { Cli } from './cli/cli.ts';
 import { EnvVariables } from '../core/env/env-variables.ts';
+import { CommandInterface } from '../commands/command/command-interface.ts';
 
 class Parameters {
+  private command: CommandInterface;
   public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
@@ -99,25 +101,24 @@ class Parameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!Deno.env.get('UNITY_SERIAL') && this.input.githubInputEnabled) {
+    if (!this.env.UNITY_SERIAL && this.input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
-      if (!Deno.env.get('UNITY_LICENSE')) {
+      if (!this.env.UNITY_LICENSE) {
         throw new Error(`Missing Unity License File and no Serial was found. If this
                           is a personal license, make sure to follow the activation
                           steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                           serial number inside the UNITY_SERIAL GitHub secret.`);
       }
-      unitySerial = this.getSerialFromLicenseFile(Deno.env.get('UNITY_LICENSE'));
+      unitySerial = this.getSerialFromLicenseFile(this.env.UNITY_LICENSE);
     } else {
-      unitySerial = Deno.env.get('UNITY_SERIAL')!;
+      unitySerial = this.env.UNITY_SERIAL!;
     }
 
-    return {
+    const parameters = {
       editorVersion,
       customImage: this.input.customImage,
       unitySerial,
-
-      runnerTempPath: Deno.env.get('RUNNER_TEMP'),
+      runnerTempPath: this.env.RUNNER_TEMP,
       targetPlatform: this.input.targetPlatform,
       projectPath: this.input.projectPath,
       buildName: this.input.buildName,
@@ -168,6 +169,14 @@ class Parameters {
       startDependenciesOverride: this.input.startDependenciesOverride,
       cacheKey: this.input.cacheKey,
     };
+
+    const commandParameterOverrides = this.command.parseParameters(this.input, parameters);
+
+    // Todo - Maybe return an instance instead
+    return {
+      ...parameters,
+      ...commandParameterOverrides,
+    };
   }
 
   static parseBuildFile(filename, platform, androidAppBundle) {
@@ -193,6 +202,12 @@ class Parameters {
 
     // Slice off the first 4 characters as they are garbage values
     return Buffer.from(license.slice(startIndex, endIndex), 'base64').toString('binary').slice(4);
+  }
+
+  registerCommand(command: CommandInterface) {
+    this.command = command;
+
+    return this;
   }
 }
 

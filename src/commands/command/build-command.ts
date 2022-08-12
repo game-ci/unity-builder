@@ -1,10 +1,11 @@
 import { exec, OutputMode } from 'https://deno.land/x/exec@0.0.5/mod.ts';
 import { CommandInterface } from './command-interface.ts';
 import { Options } from '../../config/options.ts';
-import { Action, Cache, CloudRunner, Docker, ImageTag, Output } from '../../model/index.ts';
+import { Action, Cache, CloudRunner, Docker, ImageTag, Input, Output } from '../../model/index.ts';
 import PlatformSetup from '../../model/platform-setup.ts';
 import { core, process } from '../../dependencies.ts';
 import MacBuilder from '../../model/mac-builder.ts';
+import Parameters from '../../model/parameters.ts';
 
 export class BuildCommand implements CommandInterface {
   public readonly name: string;
@@ -12,6 +13,8 @@ export class BuildCommand implements CommandInterface {
   constructor(name: string) {
     this.name = name;
   }
+
+  public async parseParameters(input: Input, parameters: Parameters) {}
 
   public async execute(options: Options): Promise<boolean> {
     try {

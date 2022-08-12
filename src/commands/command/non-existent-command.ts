@@ -11,4 +11,6 @@ export class NonExistentCommand implements CommandInterface {
   public async execute(options: Options): Promise<boolean> {
     throw new Error(`Command ${this.name} does not exist`);
   }
+
+  public async parseParameters() {}
 }

@@ -1,7 +1,8 @@
 import { CommandInterface } from './command-interface.ts';
 import { Options } from '../../config/options.ts';
-import { CloudRunner, ImageTag, Output } from '../../model/index.ts';
+import { CloudRunner, ImageTag, Input, Output } from '../../model/index.ts';
 import { core } from '../../dependencies.ts';
+import Parameters from '../../model/parameters.ts';
 
 // Todo - Verify this entire flow
 export class BuildRemoteCommand implements CommandInterface {
@@ -10,6 +11,8 @@ export class BuildRemoteCommand implements CommandInterface {
   constructor(name: string) {
     this.name = name;
   }
+
+  public async parseParameters(input: Input, parameters: Parameters) {}
 
   public async execute(options: Options): Promise<boolean> {
     try {
