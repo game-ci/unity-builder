@@ -88,7 +88,7 @@ describe('Cloud Runner', () => {
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
       expect(results2).toContain(buildSucceededString);
-      expect(results2).toEqual(expect.not.stringContaining(libraryString));
+      expect(results2).not.toContain(libraryString);
       GitHub.githubInputEnabled = true;
       delete Cli.options;
     }, 1000000);
