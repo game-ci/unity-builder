@@ -80,15 +80,21 @@ describe('Cloud Runner', () => {
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
       const buildSucceededString = 'Build succeeded';
-      expect(results).toContain(libraryString);
-      expect(results).toContain(buildSucceededString);
+
+      test('1st build contains build success and library string', () => {
+        expect(results).toContain(libraryString);
+        expect(results).toContain(buildSucceededString);
+      });
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await BuildParameters.create();
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
-      expect(results2).toContain(buildSucceededString);
-      expect(results2).not.toContain(libraryString);
+
+      test('2nd build contains build success and no library string', () => {
+        expect(results2).toContain(buildSucceededString);
+        expect(results2).not.toContain(libraryString);
+      });
       GitHub.githubInputEnabled = true;
       delete Cli.options;
     }, 1000000);
