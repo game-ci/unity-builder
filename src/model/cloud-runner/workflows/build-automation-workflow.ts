@@ -95,6 +95,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     node ${builderPath} -m remote-cli`;
   }
 
+  // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
   private static BuildCommands(builderPath, guid) {
     const linuxCacheFolder = CloudRunnerFolders.cacheFolderFull.replace(/\\/g, `/`);
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
