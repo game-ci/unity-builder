@@ -9,8 +9,8 @@ import Versioning from './versioning.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
 import { GithubCliReader } from './input-readers/github-cli.ts';
 import { Cli } from './cli/cli.ts';
-import { EnvVariables } from '../core/env/env-variables.ts';
 import { CommandInterface } from '../commands/command/command-interface.ts';
+import { Environment } from '../core/env/environment.ts';
 
 class Parameters {
   private command: CommandInterface;
@@ -69,9 +69,9 @@ class Parameters {
   public isCliMode!: boolean;
 
   private readonly input: Input;
-  private readonly env: EnvVariables;
+  private readonly env: Environment;
 
-  constructor(input: Input, env: EnvVariables) {
+  constructor(input: Input, env: Environment) {
     this.input = input;
     this.env = env;
   }

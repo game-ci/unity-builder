@@ -1,34 +1,27 @@
 import './core/logger/index.ts';
-import type { CommandInterface } from './commands/command/command-interface.ts';
-import type { EnvVariables } from './core/env/env-variables.ts';
 import { Options } from './config/options.ts';
 import { CommandFactory } from './commands/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';
-import System from './model/system.ts';
+import { Environment } from './core/env/environment.ts';
+import { EngineDetector } from './core/engine/engine-detector.ts';
 
 export class GameCI {
-  private readonly commandFactory: CommandFactory;
-  private readonly argumentsParser: ArgumentsParser;
-  private readonly env: EnvVariables;
+  private readonly env: Environment;
 
-  private options?: Options;
-  private command?: CommandInterface;
-
-  constructor(envVariables: EnvVariables) {
-    this.env = envVariables;
-
-    this.commandFactory = new CommandFactory();
-    this.argumentsParser = new ArgumentsParser();
+  constructor() {
+    this.env = new Environment(Deno.env);
+    this.args = Deno.args;
   }
 
-  public async run(cliArguments: string[]) {
+  public async run() {
     try {
-      const { commandName, args } = this.argumentsParser.parse(cliArguments);
+      const { commandName, subCommands, args } = new ArgumentsParser().parse(this.args);
+      const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();
 
-      this.options = await new Options(this.env).generateParameters(args);
-      this.command = this.commandFactory.createCommand(commandName);
+      const command = new CommandFactory().selectEngine(engine, engineVersion).createCommand(commandName, subCommands);
+      const options = await new Options(command, this.env).registerCommand(command).generateParameters(args);
 
-      await this.command.execute(this.options);
+      await command.execute(options);
     } catch (error) {
       log.error(error);
       Deno.exit(1);
@@ -36,4 +29,4 @@ export class GameCI {
   }
 }
 
-await new GameCI(Deno.env.toObject()).run(Deno.args);
+await new GameCI().run();

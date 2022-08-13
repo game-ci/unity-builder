@@ -1,8 +1,8 @@
-import { CommandInterface } from './command-interface.ts';
-import { Options } from '../../config/options.ts';
-import { CloudRunner, ImageTag, Input, Output } from '../../model/index.ts';
-import { core } from '../../dependencies.ts';
-import Parameters from '../../model/parameters.ts';
+import { CommandInterface } from '../command-interface.ts';
+import { Options } from '../../../config/options.ts';
+import { CloudRunner, ImageTag, Input, Output } from '../../../model/index.ts';
+import { core } from '../../../dependencies.ts';
+import Parameters from '../../../model/parameters.ts';
 
 // Todo - Verify this entire flow
 export class BuildRemoteCommand implements CommandInterface {
