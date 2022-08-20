@@ -20,9 +20,13 @@ import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 import { Buffer } from 'https://deno.land/std@0.151.0/io/buffer.ts';
 
-// Internally managed
+// Internally managed packages
 import waitUntil from './modules/wait-until.ts';
 import { core, exec } from './modules/actions/index.ts';
+import { dedent } from './modules/dedent.ts';
+
+// Polyfill for https://github.com/tc39/proposal-string-dedent
+String.dedent = dedent;
 
 class Writable {
   constructor() {
