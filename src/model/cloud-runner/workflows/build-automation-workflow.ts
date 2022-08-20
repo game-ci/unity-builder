@@ -7,6 +7,7 @@ import * as core from '@actions/core';
 import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'path';
 import CloudRunner from '../cloud-runner';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -120,6 +121,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     node ${builderPath} -m cache-push --cachePushFrom ${
       CloudRunnerFolders.projectBuildFolderAbsolute
     } --artifactName build-${guid} --cachePushTo ${`${linuxCacheFolder}/build`.replace(/\\/g, `/`)}
-    rm -r ${CloudRunnerFolders.projectPathAbsolute}`;
+    ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
+  }
+
+  private static GetCleanupCommand(cleanupPath: string) {
+    return CloudRunnerOptions.retainWorkspaces ? `` : `rm -r ${cleanupPath}`;
   }
 }

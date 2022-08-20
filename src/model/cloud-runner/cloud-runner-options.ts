@@ -163,7 +163,7 @@ class CloudRunnerOptions {
     return !input || input === 'true';
   }
 
-  static get retainWorkspaces(): boolean {
+  public static get retainWorkspaces(): boolean {
     return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
   }
 
