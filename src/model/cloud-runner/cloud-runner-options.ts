@@ -163,6 +163,14 @@ class CloudRunnerOptions {
     return !input || input === 'true';
   }
 
+  static get retainWorkspaces(): boolean {
+    return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
+  }
+
+  static get retainWorkspacesMax(): number {
+    return Number(CloudRunnerOptions.getInput(`retainWorkspacesMax`)) || 5;
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
