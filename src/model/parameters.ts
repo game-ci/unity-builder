@@ -98,8 +98,6 @@ class Parameters {
     );
     log.debug('androidSdkManagerParameters', androidSdkManagerParameters);
 
-    // Todo - Don't use process.env directly, that's what the input model class is for.
-    // ---
     let unitySerial = '';
     if (!this.env.UNITY_SERIAL && this.input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
@@ -114,13 +112,22 @@ class Parameters {
       unitySerial = this.env.UNITY_SERIAL!;
     }
 
+    const branch = (await Versioning.getCurrentBranch()) || (await GitRepoReader.GetBranch());
+    log.info(`branch: "${branch}"`);
+
+    const projectPath = this.input.projectPath;
+    log.info(`projectPath: "${projectPath}"`);
+
+    const targetPlatform = this.input.targetPlatform;
+    log.info(`targetPlatform: "${targetPlatform}"`);
+
     const parameters = {
       editorVersion,
       customImage: this.input.customImage,
       unitySerial,
       runnerTempPath: this.env.RUNNER_TEMP,
-      targetPlatform: this.input.targetPlatform,
-      projectPath: this.input.projectPath,
+      targetPlatform,
+      projectPath,
       buildName: this.input.buildName,
       buildPath: `${this.input.buildsPath}/${this.input.targetPlatform}`,
       buildFile,
@@ -136,41 +143,13 @@ class Parameters {
       androidSdkManagerParameters,
       customParameters: this.input.customParameters,
       sshAgent: this.input.sshAgent,
-      gitPrivateToken: this.input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
+      gitPrivateToken: this.input.gitPrivateToken,
       chownFilesTo: this.input.chownFilesTo,
-      cloudRunnerCluster: this.input.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: this.input.cloudRunnerBuilderPlatform,
-      awsBaseStackName: this.input.awsBaseStackName,
-      kubeConfig: this.input.kubeConfig,
-      cloudRunnerMemory: this.input.cloudRunnerMemory,
-      cloudRunnerCpu: this.input.cloudRunnerCpu,
-      kubeVolumeSize: this.input.kubeVolumeSize,
-      kubeVolume: this.input.kubeVolume,
-      postBuildSteps: this.input.postBuildSteps,
-      preBuildSteps: this.input.preBuildSteps,
       customJob: this.input.customJob,
-      runNumber: this.input.runNumber,
-      branch: this.input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: this.input.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerIntegrationTests: this.input.cloudRunnerTests,
-      githubRepo: this.input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
-      isCliMode: Cli.isCliMode,
-      awsStackName: this.input.awsBaseStackName,
-      gitSha: this.input.gitSha,
-      logId: nanoid.customAlphabet(CloudRunnerConstants.alphabet, 9)(),
-      buildGuid: CloudRunnerBuildGuid.generateGuid(this.input.runNumber, this.input.targetPlatform),
-      customJobHooks: this.input.customJobHooks(),
-      cachePullOverrideCommand: this.input.cachePullOverrideCommand(),
-      cachePushOverrideCommand: this.input.cachePushOverrideCommand(),
-      readInputOverrideCommand: this.input.readInputOverrideCommand(),
-      readInputFromOverrideList: this.input.readInputFromOverrideList(),
-      kubeStorageClass: this.input.kubeStorageClass,
-      checkDependencyHealthOverride: this.input.checkDependencyHealthOverride,
-      startDependenciesOverride: this.input.startDependenciesOverride,
-      cacheKey: this.input.cacheKey,
+      branch,
     };
 
-    const commandParameterOverrides = this.command.parseParameters(this.input, parameters);
+    const commandParameterOverrides = await this.command.parseParameters(this.input, parameters);
 
     // Todo - Maybe return an instance instead
     return {

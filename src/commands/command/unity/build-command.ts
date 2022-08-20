@@ -18,7 +18,6 @@ export class BuildCommand implements CommandInterface {
 
   public async execute(options: Options): Promise<boolean> {
     try {
-      log.info('options', options);
       const { workspace, actionFolder } = Action;
       const { buildParameters } = options;
 

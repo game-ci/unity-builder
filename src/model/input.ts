@@ -5,8 +5,9 @@ import Platform from './platform.ts';
 import { CliArguments } from '../core/cli/cli-arguments.ts';
 
 /**
- * Input variables specified in workflows using "with" prop.
+ * Input variables specified directly on the commandline.
  *
+ * Todo - check if the following statement is still correct:
  * Note that input is always passed as a string, even booleans.
  *
  * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
@@ -17,18 +18,17 @@ class Input {
   constructor(argumentsFromCli: CliArguments) {
     this.arguments = argumentsFromCli;
 
-    log.debug('Input initialised.');
-
     return this;
   }
 
   public static githubInputEnabled: boolean = true;
 
   // Todo - Note that this is now invoked both statically and dynamically - which is a temporary mess.
-  public getInput(query) {
+  public getInput(query: string) {
     if (this && this.arguments) {
       const value = this.arguments.get(query);
-      log.warning('arg', query, '=', value);
+
+      if (log.isVeryVerbose) log.debug('arg', query, '=', value);
 
       return this.arguments.get(query);
     }
@@ -70,15 +70,17 @@ class Input {
   public get githubRepo() {
     return this.getInput('GITHUB_REPOSITORY') || this.getInput('GITHUB_REPO') || undefined;
   }
+
   public get branch() {
     if (this.getInput(`GITHUB_REF`)) {
       return this.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (this.getInput('branch')) {
-      return this.getInput('branch');
+      return this.getInput('branch').replace('/head', '');
     } else {
       return '';
     }
   }
+
   public get cloudRunnerBuilderPlatform() {
     const input = this.getInput('cloudRunnerBuilderPlatform');
     if (input) {

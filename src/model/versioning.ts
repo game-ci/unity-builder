@@ -132,9 +132,8 @@ export default class Versioning {
       await this.fetch();
     }
 
-    await Versioning.logDiff();
-
     if ((await this.isDirty()) && !allowDirtyBuild) {
+      await Versioning.logDiff();
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
     }
 
@@ -290,6 +289,7 @@ export default class Versioning {
    */
   static async hasAnyVersionTags() {
     const command = `git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`;
+
     // Todo - make sure this cwd is actually passed in somehow
     const result = await System.shellRun(command, { cwd: this.projectPath, silent: false });
 

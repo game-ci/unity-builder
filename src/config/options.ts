@@ -20,7 +20,7 @@ export class Options {
     this.input = new Input(args);
     this.parameters = await new Parameters(this.input, this.env).registerCommand(this.command).parse();
 
-    log.debug('Parameters generated.');
+    log.info('Parameters generated.');
 
     return this;
   }

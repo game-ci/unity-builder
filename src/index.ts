@@ -1,4 +1,4 @@
-import './core/logger/index.ts';
+import { configureLogger, Verbosity } from './core/logger/index.ts';
 import { Options } from './config/options.ts';
 import { CommandFactory } from './commands/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';
@@ -15,11 +15,15 @@ export class GameCI {
 
   public async run() {
     try {
-      const { commandName, subCommands, args } = new ArgumentsParser().parse(this.args);
-      const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();
+      const { commandName, subCommands, args, verbosity } = new ArgumentsParser().parse(this.args);
 
+      await configureLogger(verbosity);
+
+      const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();
       const command = new CommandFactory().selectEngine(engine, engineVersion).createCommand(commandName, subCommands);
       const options = await new Options(command, this.env).registerCommand(command).generateParameters(args);
+
+      if (log.isVerbose) log.info('Executing', command.name);
 
       await command.execute(options);
     } catch (error) {

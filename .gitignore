@@ -6,3 +6,5 @@ lib/
 yarn-error.log
 .orig
 *.log
+logs/*
+!**/.gitkeep

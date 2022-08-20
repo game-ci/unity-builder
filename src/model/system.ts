@@ -42,14 +42,20 @@ class System {
 
     process.close();
 
-    const output = new TextDecoder().decode(outputBuffer);
-    const error = new TextDecoder().decode(errorBuffer);
+    const output = new TextDecoder().decode(outputBuffer).replace(/\n+$/, '');
+    const error = new TextDecoder().decode(errorBuffer).replace(/\n+$/, '');
 
     const result = { status, output };
-    const symbol = status.success ? '✅' : '❗';
 
-    const truncatedOutput = output.length >= 30 ? `${output.slice(0, 27)}...` : output;
-    log.debug('Command:', command, argsString, symbol, { status, output: truncatedOutput });
+    // Log command output if verbose is enabled
+    if (log.isVeryVerbose) {
+      const symbol = status.success ? '✅' : '❗';
+      const truncatedOutput = output.length >= 30 ? `${output.slice(0, 27)}...` : output;
+      log.debug('Command:', command, argsString, symbol, {
+        status,
+        output: log.isMaxVerbose ? output : truncatedOutput,
+      });
+    }
 
     if (error) throw new Error(error);
 
