@@ -1,6 +1,6 @@
 import { Parameters } from './index.ts';
-import { SetupMac, SetupWindows } from './platform-setup/index.ts';
-import ValidateWindows from './platform-validation/validate-windows.ts';
+import { SetupMac, SetupWindows } from '../logic/unity/platform-setup/index.ts';
+import ValidateWindows from '../logic/unity/platform-validation/validate-windows.ts';
 
 class PlatformSetup {
   static async setup(buildParameters: Parameters, actionFolder: string) {

@@ -5,12 +5,15 @@ import CloudRunner from '../cloud-runner.ts';
 export class CloudRunnerError {
   public static async handleException(error: unknown) {
     CloudRunnerLogger.error(JSON.stringify(error, undefined, 4));
-    core.setFailed('Cloud Runner failed');
+    log.error('Cloud runner failed');
+
     await CloudRunner.Provider.cleanup(
       CloudRunner.buildParameters.buildGuid,
       CloudRunner.buildParameters,
       CloudRunner.buildParameters.branch,
       CloudRunner.defaultSecrets,
     );
+
+    Deno.exit(1);
   }
 }

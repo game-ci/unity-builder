@@ -1,9 +1,8 @@
 import { exec, OutputMode } from 'https://deno.land/x/exec@0.0.5/mod.ts';
 import { CommandInterface } from '../command-interface.ts';
 import { Options } from '../../../config/options.ts';
-import { Action, Cache, CloudRunner, Docker, ImageTag, Input, Output } from '../../../model/index.ts';
+import { Action, Cache, Docker, ImageTag, Input, Output } from '../../../model/index.ts';
 import PlatformSetup from '../../../model/platform-setup.ts';
-import { core, process } from '../../../dependencies.ts';
 import MacBuilder from '../../../model/mac-builder.ts';
 import Parameters from '../../../model/parameters.ts';
 
@@ -19,31 +18,28 @@ export class BuildCommand implements CommandInterface {
   public async execute(options: Options): Promise<boolean> {
     try {
       const { workspace, actionFolder } = Action;
-      const { buildParameters } = options;
+      const { parameters, env } = options;
 
       Action.checkCompatibility();
       Cache.verify();
 
-      const baseImage = new ImageTag(buildParameters);
+      const baseImage = new ImageTag(parameters);
       log.debug('baseImage', baseImage);
 
-      if (buildParameters.cloudRunnerCluster !== 'local') {
-        await CloudRunner.run(buildParameters, baseImage.toString());
+      await PlatformSetup.setup(parameters, actionFolder);
+      log.info('Platform setup done.');
+      log.info('OS:', env.getOS());
+      if (env.getOS() === 'darwin') {
+        MacBuilder.run(actionFolder, workspace, parameters);
       } else {
-        log.info('Building locally');
-        await PlatformSetup.setup(buildParameters, actionFolder);
-        if (process.platform === 'darwin') {
-          MacBuilder.run(actionFolder, workspace, buildParameters);
-        } else {
-          await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
-        }
+        await Docker.run(baseImage, { workspace, actionFolder, ...parameters });
       }
 
       // Set output
-      await Output.setBuildVersion(buildParameters.buildVersion);
+      await Output.setBuildVersion(parameters.buildVersion);
     } catch (error) {
       log.error(error);
-      core.setFailed((error as Error).message);
+      Deno.exit(1);
     }
 
     const result = await exec('docker run -it unityci/editor:2020.3.15f2-base-1 /bin/bash -c "echo test"', {

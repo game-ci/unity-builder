@@ -84,7 +84,7 @@ class Parameters {
     );
     log.debug('buildFile:', buildFile);
     const editorVersion = UnityVersioning.determineUnityVersion(this.input.projectPath, this.input.unityVersion);
-    log.debug('editorVersion:', editorVersion);
+    log.info('Detected editorVersion', editorVersion);
     const buildVersion = await Versioning.determineBuildVersion(
       this.input.versioningStrategy,
       this.input.specifiedVersion,

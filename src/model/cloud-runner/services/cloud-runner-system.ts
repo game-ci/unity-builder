@@ -1,5 +1,5 @@
-import { exec } from '../../../dependencies.ts';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger.ts';
+import { spawn } from 'https://deno.land/std@0.152.0/node/child_process.ts';
 
 export class CloudRunnerSystem {
   public static async Run(command: string, suppressError = false, suppressLogs = false) {
@@ -11,7 +11,9 @@ export class CloudRunnerSystem {
 
     return await new Promise<string>((promise, throwError) => {
       let output = '';
-      const child = exec(command, (error, stdout, stderr) => {
+
+      // Todo - find Deno variant of child_process or rewrite this method to use execSync
+      const child = spawn(command, (error, stdout, stderr) => {
         if (!suppressError && error) {
           RemoteClientLogger.log(error.toString());
           throwError(error);

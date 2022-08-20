@@ -248,7 +248,8 @@ class Input {
     return this.getInput('awsBaseStackName') || 'game-ci';
   }
 
-  public get cloudRunnerCluster() {
+  // Todo - move to parameters
+  public static get cloudRunnerCluster() {
     if (Cli.isCliMode) {
       return this.getInput('cloudRunnerCluster') || 'aws';
     }

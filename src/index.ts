@@ -1,4 +1,5 @@
-import { configureLogger, Verbosity } from './core/logger/index.ts';
+import './dependencies.ts';
+import { configureLogger } from './core/logger/index.ts';
 import { Options } from './config/options.ts';
 import { CommandFactory } from './commands/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';

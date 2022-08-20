@@ -1,13 +1,15 @@
-import { fsSync as fs } from '../../dependencies.ts';
-import { Parameters } from '../index.ts';
+import { fsSync as fs } from '../../../dependencies.ts';
+import { Parameters } from '../../../model/index.ts';
 
 class ValidateWindows {
   public static validate(buildParameters: Parameters) {
     ValidateWindows.validateWindowsPlatformRequirements(buildParameters.targetPlatform);
     if (!(Deno.env.get('UNITY_EMAIL') && Deno.env.get('UNITY_PASSWORD'))) {
-      throw new Error(`Unity email and password must be set for Windows based builds to
-                       authenticate the license. Make sure to set them inside UNITY_EMAIL
-                       and UNITY_PASSWORD in Github Secrets and pass them into the environment.`);
+      throw new Error(String.dedent`
+        Unity email and password must be set for Windows based builds to authenticate the license.
+
+        Make sure to set them inside UNITY_EMAIL and UNITY_PASSWORD in Github Secrets and pass them into the environment.
+      `);
     }
   }
 
@@ -35,9 +37,11 @@ class ValidateWindows {
     // Check for Windows 10 SDK on runner
     const windows10SDKPathExists = fs.existsSync('C:/Program Files (x86)/Windows Kits');
     if (!windows10SDKPathExists) {
-      throw new Error(`Windows 10 SDK not found in default location. Make sure
-                      the runner has a Windows 10 SDK installed in the default
-                      location.`);
+      throw new Error(String.dedent`
+        Windows 10 SDK not found in default location. Make sure this machine has a Windows 10 SDK installed.
+
+        Download here: https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
+      `);
     }
   }
 
@@ -47,9 +51,13 @@ class ValidateWindows {
     const visualStudioDataPathExists = fs.existsSync('C:/ProgramData/Microsoft/VisualStudio');
 
     if (!visualStudioInstallPathExists || !visualStudioDataPathExists) {
-      throw new Error(`Visual Studio not found at the default location.
-              Make sure the runner has Visual Studio installed in the
-              default location`);
+      throw new Error(String.dedent`
+        Visual Studio not found at the default location.
+
+        Make sure the runner has Visual Studio installed in the default location
+
+        Download here: https://visualstudio.microsoft.com/downloads/
+      `);
     }
   }
 }

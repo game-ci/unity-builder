@@ -1,5 +1,5 @@
-import { fsSync as fs, exec } from '../../dependencies.ts';
-import { Parameters } from '../index.ts';
+import { fsSync as fs, exec } from '../../../dependencies.ts';
+import { Parameters } from '../../../model/index.ts';
 
 class SetupWindows {
   public static async setup(buildParameters: Parameters) {

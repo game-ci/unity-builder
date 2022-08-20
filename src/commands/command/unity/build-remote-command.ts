@@ -64,7 +64,7 @@ export class BuildRemoteCommand implements CommandInterface {
       return status.success;
     } catch (error) {
       log.error(error);
-      core.setFailed((error as Error).message);
+      Deno.exit(1);
     }
   }
 }

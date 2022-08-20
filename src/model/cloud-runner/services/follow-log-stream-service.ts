@@ -15,8 +15,8 @@ export class FollowLogStreamService {
       core.setOutput('build-result', 'success');
     } else if (message.includes('Build fail')) {
       core.setOutput('build-result', 'failed');
-      core.setFailed('unity build failed');
-      log.error('BUILD FAILED!');
+      log.error('build-result: failed');
+      Deno.exit(1);
     } else if (CloudRunner.buildParameters.cloudRunnerIntegrationTests && message.includes(': Listening for Jobs')) {
       core.setOutput('cloud runner stop watching', 'true');
       shouldReadLogs = false;

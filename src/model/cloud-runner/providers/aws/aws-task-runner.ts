@@ -91,8 +91,8 @@ class AWSTaskRunner {
       const tasksDescription = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
       CloudRunnerLogger.log(`Cloud runner job has ended ${tasksDescription.containers?.[0].lastStatus}`);
 
-      core.setFailed(error);
       log.error(error);
+      Deno.exit(1);
     }
   }
 
