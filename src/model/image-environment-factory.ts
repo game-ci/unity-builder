@@ -25,14 +25,17 @@ class ImageEnvironmentFactory {
     return string;
   }
   public static getEnvironmentVariables(parameters: Parameters) {
+    // Todo - replace with simple for of loop, mapping parameters to this specific format
+    // All parameters should be straight forward at this point in the process.
+    // We can convert between camelCase and UPPER_SNAKE_CASE relatively easily.
     const environmentVariables: Parameter[] = [
-      { name: 'UNITY_LICENSE', value: Deno.env.get('UNITY_LICENSE') || ReadLicense() },
-      { name: 'UNITY_LICENSE_FILE', value: Deno.env.get('UNITY_LICENSE_FILE') },
-      { name: 'UNITY_EMAIL', value: Deno.env.get('UNITY_EMAIL') },
-      { name: 'UNITY_PASSWORD', value: Deno.env.get('UNITY_PASSWORD') },
+      { name: 'UNITY_LICENSE', value: parameters.unityLicense || ReadLicense(parameters) },
+      { name: 'UNITY_LICENSE_FILE', value: parameters.unityLicenseFile },
+      { name: 'UNITY_EMAIL', value: parameters.unityEmail },
+      { name: 'UNITY_PASSWORD', value: parameters.unityPassword },
       { name: 'UNITY_SERIAL', value: parameters.unitySerial },
       { name: 'UNITY_VERSION', value: parameters.editorVersion },
-      { name: 'USYM_UPLOAD_AUTH_TOKEN', value: Deno.env.get('USYM_UPLOAD_AUTH_TOKEN') },
+      { name: 'USYM_UPLOAD_AUTH_TOKEN', value: parameters.uploadAuthToken },
       { name: 'PROJECT_PATH', value: parameters.projectPath },
       { name: 'BUILD_TARGET', value: parameters.targetPlatform },
       { name: 'BUILD_NAME', value: parameters.buildName },

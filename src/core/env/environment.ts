@@ -4,10 +4,21 @@ export class Environment implements EnvVariables {
   public readonly os: string;
   public readonly arch: string;
 
-  constructor(env: Deno.env) {
+  constructor(env: Deno.env, envFile: EnvVariables) {
     // Make an immutable copy of the environment variables.
     for (const [key, value] of Object.entries(env.toObject())) {
-      if (value !== undefined) this[key] = value;
+      // Todo - check if this ever happens at all
+      if (value === undefined) {
+        // eslint-disable-next-line no-console
+        console.error(`Environment variable ${key} is undefined.`);
+      }
+
+      this[key] = value;
+    }
+
+    // Override any env variables that are set in a .env file.
+    for (const [key, value] of Object.entries(envFile)) {
+      this[key] = value;
     }
 
     // Override specific variables.

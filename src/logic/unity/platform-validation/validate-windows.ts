@@ -2,13 +2,13 @@ import { fsSync as fs } from '../../../dependencies.ts';
 import { Parameters } from '../../../model/index.ts';
 
 class ValidateWindows {
-  public static validate(buildParameters: Parameters) {
-    ValidateWindows.validateWindowsPlatformRequirements(buildParameters.targetPlatform);
-    if (!(Deno.env.get('UNITY_EMAIL') && Deno.env.get('UNITY_PASSWORD'))) {
+  public static validate(parameters: Parameters) {
+    ValidateWindows.validateWindowsPlatformRequirements(parameters.targetPlatform);
+    if (!parameters.unityEmail || !parameters.unityPassword) {
       throw new Error(String.dedent`
         Unity email and password must be set for Windows based builds to authenticate the license.
 
-        Make sure to set them inside UNITY_EMAIL and UNITY_PASSWORD in Github Secrets and pass them into the environment.
+        Please make sure to set the unityEmail (UNITY_EMAIL) and unityPassword (UNITY_PASSWORD) parameters.
       `);
     }
   }
@@ -38,7 +38,7 @@ class ValidateWindows {
     const windows10SDKPathExists = fs.existsSync('C:/Program Files (x86)/Windows Kits');
     if (!windows10SDKPathExists) {
       throw new Error(String.dedent`
-        Windows 10 SDK not found in default location. Make sure this machine has a Windows 10 SDK installed.
+        Windows 10 SDK not found in default location. Please make sure this machine has a Windows 10 SDK installed.
 
         Download here: https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
       `);
@@ -54,7 +54,7 @@ class ValidateWindows {
       throw new Error(String.dedent`
         Visual Studio not found at the default location.
 
-        Make sure the runner has Visual Studio installed in the default location
+        Please make sure the runner has Visual Studio installed in the default location
 
         Download here: https://visualstudio.microsoft.com/downloads/
       `);

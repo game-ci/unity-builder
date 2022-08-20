@@ -19,6 +19,7 @@ import * as string from 'https://deno.land/std@0.36.0/strings/mod.ts';
 import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 import { Buffer } from 'https://deno.land/std@0.151.0/io/buffer.ts';
+import { config, configSync } from 'https://deno.land/std@0.151.0/dotenv/mod.ts';
 
 // Internally managed packages
 import waitUntil from './modules/wait-until.ts';
@@ -53,6 +54,8 @@ export {
   Buffer,
   Command,
   compress,
+  config,
+  configSync,
   core,
   crypto,
   exec,

@@ -98,15 +98,24 @@ class Parameters {
     );
     log.debug('androidSdkManagerParameters', androidSdkManagerParameters);
 
-    let unitySerial = '';
-    if (!this.env.UNITY_SERIAL && this.input.githubInputEnabled) {
+    // Commandline takes precedence over environment variables
+    const unityEmail = this.input.unityEmail || this.env.get('UNITY_EMAIL');
+    const unityPassword = this.input.unityPassword || this.env.get('UNITY_PASSWORD');
+    const unityLicense = this.input.unityLicense || this.env.get('UNITY_LICENSE');
+    const unityLicenseFile = this.input.unityLicenseFile || this.env.get('UNITY_LICENSE_FILE');
+    let unitySerial = this.input.unitySerial || this.env.get('UNITY_SERIAL');
+
+    // For Windows, we need to use the serial from the license file
+    if (!unitySerial && this.input.githubInputEnabled) {
       // No serial was present, so it is a personal license that we need to convert
-      if (!this.env.UNITY_LICENSE) {
-        throw new Error(`Missing Unity License File and no Serial was found. If this
-                          is a personal license, make sure to follow the activation
-                          steps and set the UNITY_LICENSE GitHub secret or enter a Unity
-                          serial number inside the UNITY_SERIAL GitHub secret.`);
+      if (!unityLicense) {
+        throw new Error(String.dedent`
+          Missing Unity License File and no Serial was found. If this is a personal license,
+          make sure to follow the activation steps and set the UNITY_LICENSE variable or enter
+          a Unity serial number inside the UNITY_SERIAL variable.
+        `);
       }
+
       unitySerial = this.getSerialFromLicenseFile(this.env.UNITY_LICENSE);
     } else {
       unitySerial = this.env.UNITY_SERIAL!;
@@ -124,7 +133,12 @@ class Parameters {
     const parameters = {
       editorVersion,
       customImage: this.input.customImage,
+      unityEmail,
+      unityPassword,
+      unityLicense,
+      unityLicenseFile,
       unitySerial,
+      usymUploadAuthToken: this.input.usymUploadAuthToken || this.env.get('USYM_UPLOAD_AUTH_TOKEN'),
       runnerTempPath: this.env.RUNNER_TEMP,
       targetPlatform,
       projectPath,

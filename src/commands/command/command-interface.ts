@@ -6,4 +6,6 @@ export interface CommandInterface {
   name: string;
   execute: (options: Options) => Promise<boolean>;
   parseParameters: (input: Input, parameters: Parameters) => Promise<Partial<Parameters>>;
+  configure(options: Options): this;
+  validate(): Promise<this>;
 }

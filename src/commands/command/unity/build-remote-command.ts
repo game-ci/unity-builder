@@ -8,24 +8,27 @@ import { Cli } from '../../../model/cli/cli.ts';
 import CloudRunnerConstants from '../../../model/cloud-runner/services/cloud-runner-constants.ts';
 import CloudRunnerBuildGuid from '../../../model/cloud-runner/services/cloud-runner-guid.ts';
 import { GithubCliReader } from '../../../model/input-readers/github-cli.ts';
+import { CommandBase } from './command-base.ts';
 
 // Todo - Verify this entire flow
-export class BuildRemoteCommand implements CommandInterface {
-  public readonly name: string;
-
-  constructor(name: string) {
-    this.name = name;
+export class BuildRemoteCommand extends CommandBase implements CommandInterface {
+  public async validate() {
+    await super.validate();
   }
 
-  public async parseParameters(input: Input, parameters: Parameters) {
+  public async parseParameters(input: Input, parameters: Parameters): Promise<Partial<Parameters>> {
+    const cloudRunnerCluster = Cli.isCliMode
+      ? this.input.getInput('cloudRunnerCluster') || 'aws'
+      : this.input.getInput('cloudRunnerCluster') || 'local';
+
     return {
+      cloudRunnerCluster,
       cloudRunnerBranch: input.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerIntegrationTests: input.cloudRunnerTests,
       githubRepo: input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       gitPrivateToken: parameters.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       isCliMode: Cli.isCliMode,
       awsStackName: input.awsBaseStackName,
-      cloudRunnerCluster: input.cloudRunnerCluster,
       cloudRunnerBuilderPlatform: input.cloudRunnerBuilderPlatform,
       awsBaseStackName: input.awsBaseStackName,
       kubeConfig: input.kubeConfig,
@@ -52,19 +55,14 @@ export class BuildRemoteCommand implements CommandInterface {
   }
 
   public async execute(options: Options): Promise<boolean> {
-    try {
-      const { buildParameters } = options;
-      const baseImage = new ImageTag(buildParameters);
+    const { buildParameters } = options;
+    const baseImage = new ImageTag(buildParameters);
 
-      const result = await CloudRunner.run(buildParameters, baseImage.toString());
-      const { status, output } = result;
+    const result = await CloudRunner.run(buildParameters, baseImage.toString());
+    const { status, output } = result;
 
-      await Output.setBuildVersion(buildParameters.buildVersion);
+    await Output.setBuildVersion(buildParameters.buildVersion);
 
-      return status.success;
-    } catch (error) {
-      log.error(error);
-      Deno.exit(1);
-    }
+    return status.success;
   }
 }

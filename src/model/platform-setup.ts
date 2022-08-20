@@ -3,14 +3,14 @@ import { SetupMac, SetupWindows } from '../logic/unity/platform-setup/index.ts';
 import ValidateWindows from '../logic/unity/platform-validation/validate-windows.ts';
 
 class PlatformSetup {
-  static async setup(buildParameters: Parameters, actionFolder: string) {
+  static async setup(parameters: Parameters, actionFolder: string) {
     switch (process.platform) {
       case 'win32':
-        ValidateWindows.validate(buildParameters);
-        SetupWindows.setup(buildParameters);
+        ValidateWindows.validate(parameters);
+        SetupWindows.setup(parameters);
         break;
       case 'darwin':
-        await SetupMac.setup(buildParameters, actionFolder);
+        await SetupMac.setup(parameters, actionFolder);
         break;
 
       // Add other baseOS's here

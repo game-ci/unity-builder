@@ -113,6 +113,30 @@ class Input {
     return this.getInput('unityVersion') || 'auto';
   }
 
+  public get unityEmail() {
+    return this.getInput('unityEmail') || '';
+  }
+
+  public get unityPassword() {
+    return this.getInput('unityPassword') || '';
+  }
+
+  public get unityLicense() {
+    return this.getInput('unityLicense') || '';
+  }
+
+  public get unityLicenseFile() {
+    return this.getInput('unityLicenseFile') || '';
+  }
+
+  public get unitySerial() {
+    return this.getInput('unitySerial') || '';
+  }
+
+  public get usymUploadAuthToken() {
+    return this.getInput('usymUploadAuthToken') || '';
+  }
+
   public get customImage() {
     return this.getInput('customImage') || '';
   }
@@ -246,15 +270,6 @@ class Input {
 
   public get awsBaseStackName() {
     return this.getInput('awsBaseStackName') || 'game-ci';
-  }
-
-  // Todo - move to parameters
-  public static get cloudRunnerCluster() {
-    if (Cli.isCliMode) {
-      return this.getInput('cloudRunnerCluster') || 'aws';
-    }
-
-    return this.getInput('cloudRunnerCluster') || 'local';
   }
 
   public get cloudRunnerCpu() {

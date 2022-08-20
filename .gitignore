@@ -8,3 +8,5 @@ yarn-error.log
 *.log
 logs/*
 !**/.gitkeep
+.env*
+!.env*.dist
