@@ -6,8 +6,7 @@ class PlatformSetup {
   static async setup(parameters: Parameters, actionFolder: string) {
     switch (process.platform) {
       case 'win32':
-        ValidateWindows.validate(parameters);
-        SetupWindows.setup(parameters);
+        await SetupWindows.setup(parameters);
         break;
       case 'darwin':
         await SetupMac.setup(parameters, actionFolder);

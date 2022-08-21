@@ -1,8 +1,10 @@
 import { fsSync as fs, exec } from '../../../dependencies.ts';
 import { Parameters } from '../../../model/index.ts';
+import ValidateWindows from '../platform-validation/validate-windows.ts';
 
 class SetupWindows {
   public static async setup(parameters: Parameters) {
+    ValidateWindows.validate(parameters);
     await this.generateWinSdkRegistryKey(parameters);
   }
 

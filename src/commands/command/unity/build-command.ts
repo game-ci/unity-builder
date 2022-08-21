@@ -21,8 +21,6 @@ export class BuildCommand extends CommandBase implements CommandInterface {
       log.debug('baseImage', baseImage);
 
       await PlatformSetup.setup(parameters, actionFolder);
-      log.info('Platform setup done.');
-      log.info('OS:', env.getOS());
       if (env.getOS() === 'darwin') {
         MacBuilder.run(actionFolder, workspace, parameters);
       } else {
