@@ -52,7 +52,8 @@ class Docker {
     const { workspace, actionFolder, unitySerial, gitPrivateToken, cliStoragePath } = parameters;
 
     // Todo - get this to work on a non-github runner local machine
-    // return String.dedent`run ${image} powershell c:/steps/entrypoint.ps1`;
+    // Note: difference between `docker run` and `run`
+    return String.dedent`run ${image} powershell c:/steps/entrypoint.ps1`;
     return String.dedent`
       docker run \
         --workdir /github/workspace \

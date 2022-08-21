@@ -8,8 +8,12 @@ class System {
    * Make sure it's Windows/MacOS/Ubuntu compatible or has alternative commands.
    *
    * Intended to always be silent and capture the output.
+   *
+   * @returns {string} output of the command on success or failure
+   *
+   * @throws  {Error}  if anything was output to stderr.
    */
-  static async run(rawCommand: string, options: RunOptions = {}) {
+  static async run(rawCommand: string, options: RunOptions = {}): Promise<string> {
     const { pwd } = options;
 
     let command = rawCommand;
@@ -23,11 +27,11 @@ class System {
     return shellMethod(command, options);
   }
 
-  static async shellRun(command: string, options: RunOptions = {}) {
+  static async shellRun(command: string, options: RunOptions = {}): Promise<string> {
     return System.newRun('sh', ['-c', command]);
   }
 
-  static async powershellRun(command: string, options: RunOptions = {}) {
+  static async powershellRun(command: string, options: RunOptions = {}): Promise<string> {
     return System.newRun('powershell', [command]);
   }
 
@@ -45,9 +49,9 @@ class System {
    *     System.newRun(sh, ['-c', 'echo something'])
    *     System.newRun(powershell, ['echo something'])
    *
-   * @deprecated use System.run instead, this method will be private
+   * @deprecated not really deprecated, but please use System.run instead because this method will be made private.
    */
-  public static async newRun(command, args: string | string[] = []) {
+  public static async newRun(command, args: string | string[] = []): Promise<string> {
     if (!Array.isArray(args)) args = [args];
 
     const argsString = args.join(' ');
@@ -78,7 +82,13 @@ class System {
       });
     }
 
-    if (error) throw new Error(error);
+    if (error) {
+      // Make sure we don't swallow any output
+      const errorMessage = output ? `${error}\n\n---\n\nOutput before the error:\n${output}` : error;
+
+      // Throw instead or returning when any output was written to stdout
+      throw new Error(errorMessage);
+    }
 
     return result;
   }
