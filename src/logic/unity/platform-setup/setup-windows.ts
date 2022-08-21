@@ -2,32 +2,20 @@ import { fsSync as fs, exec } from '../../../dependencies.ts';
 import { Parameters } from '../../../model/index.ts';
 
 class SetupWindows {
-  public static async setup(buildParameters: Parameters) {
-    const { targetPlatform } = buildParameters;
-
-    await SetupWindows.setupWindowsRun(targetPlatform);
+  public static async setup(parameters: Parameters) {
+    await this.generateWinSdkRegistryKey(parameters);
   }
 
-  private static async setupWindowsRun(targetPlatform, silent = false) {
-    if (!fs.existsSync('c:/regkeys')) {
-      fs.mkdirSync('c:/regkeys');
-    }
+  private static async generateWinSdkRegistryKey(parameters) {
+    const { targetPlatform, cliStoragePath } = parameters;
 
-    // These all need the Windows 10 SDK
-    switch (targetPlatform) {
-      case 'StandaloneWindows':
-      case 'StandaloneWindows64':
-      case 'WSAPlayer':
-        await this.generateWinSDKRegKeys(silent);
-        break;
-    }
-  }
+    if (!['StandaloneWindows', 'StandaloneWindows64', 'WSAPlayer'].includes(targetPlatform)) return;
 
-  private static async generateWinSDKRegKeys(silent = false) {
-    // Export registry keys that point to the Windows 10 SDK
-    const exportWinSDKRegKeysCommand =
-      'reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg /y';
-    await exec(exportWinSDKRegKeysCommand, undefined, { silent });
+    const registryKeysPath = `${cliStoragePath}/registry-keys`;
+    const copyWinSdkRegistryKeyCommand = `reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" ${registryKeysPath}/winsdk.reg /y`;
+
+    await fs.ensureDir(registryKeysPath);
+    await exec(copyWinSdkRegistryKeyCommand);
   }
 }
 

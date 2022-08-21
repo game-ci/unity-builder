@@ -24,10 +24,4 @@ export class Options {
 
     return this;
   }
-
-  registerCommand(command: CommandInterface) {
-    this.command = command;
-
-    return this;
-  }
 }

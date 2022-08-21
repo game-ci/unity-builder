@@ -1,14 +1,10 @@
-import { nanoid } from '../dependencies.ts';
+import { default as getHomeDir } from 'https://deno.land/x/dir@1.5.1/home_dir/mod.ts';
 import AndroidVersioning from './android-versioning.ts';
-import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants.ts';
-import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid.ts';
 import Input from './input.ts';
 import Platform from './platform.ts';
 import UnityVersioning from './unity-versioning.ts';
 import Versioning from './versioning.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
-import { GithubCliReader } from './input-readers/github-cli.ts';
-import { Cli } from './cli/cli.ts';
 import { CommandInterface } from '../commands/command/command-interface.ts';
 import { Environment } from '../core/env/environment.ts';
 
@@ -77,6 +73,8 @@ class Parameters {
   }
 
   public async parse(): Promise<Parameters> {
+    const cliStoragePath = `${getHomeDir()}/.game-ci`;
+
     const buildFile = Parameters.parseBuildFile(
       this.input.buildName,
       this.input.targetPlatform,
@@ -131,6 +129,7 @@ class Parameters {
     log.info(`targetPlatform: "${targetPlatform}"`);
 
     const parameters = {
+      cliStoragePath,
       editorVersion,
       customImage: this.input.customImage,
       unityEmail,

@@ -20,16 +20,18 @@ export class GameCI {
       const { commandName, subCommands, args, verbosity } = new ArgumentsParser().parse(this.args);
       await configureLogger(verbosity);
 
-      // Determine the command and its options
+      // Determine which command to run
       const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();
       const command = new CommandFactory().selectEngine(engine, engineVersion).createCommand(commandName, subCommands);
-      const options = await new Options(command, this.env).registerCommand(command).generateParameters(args);
+
+      // Provide the command with options
+      const options = await new Options(command, this.env).generateParameters(args);
       await command.configure(options).validate();
 
       // Execute
       if (log.isVerbose) log.info('Executing', command.name);
       const success = await command.execute();
-      if (!success) log.warning(`Command ${command.name} failed.`);
+      if (!success) log.info(`Command ${command.name} failed.`);
     } catch (error) {
       log.error(error);
       Deno.exit(1);
