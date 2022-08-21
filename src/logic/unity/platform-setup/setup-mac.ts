@@ -1,5 +1,6 @@
 import { Parameters } from '../../../model/index.ts';
-import { fsSync as fs, exec, getUnityChangeSet } from '../../../dependencies.ts';
+import { fsSync as fs, getUnityChangeSet } from '../../../dependencies.ts';
+import System from '../../../model/system.ts';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;
@@ -19,11 +20,10 @@ class SetupMac {
   private static async installUnityHub(silent = false) {
     const command = 'brew install unity-hub';
     if (!fs.existsSync(this.unityHubPath)) {
-      // Ignoring return code because the log seems to overflow the internal buffer which triggers
-      // a false error
-      const { exitCode } = await exec(command, undefined, { silent, ignoreReturnCode: true });
-      if (exitCode) {
-        throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+      try {
+        await System.run(command, { silent, ignoreReturnCode: true });
+      } catch (error) {
+        throw new Error(`There was an error installing the Unity Editor. See logs above for details. ${error}`);
       }
     }
   }
@@ -36,11 +36,10 @@ class SetupMac {
                                           --module mac-il2cpp \
                                           --childModules`;
 
-    // Ignoring return code because the log seems to overflow the internal buffer which triggers
-    // a false error
-    const { exitCode } = await exec(command, undefined, { silent, ignoreReturnCode: true });
-    if (exitCode) {
-      throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+    try {
+      await System.run(command, { silent, ignoreReturnCode: true });
+    } catch (error) {
+      throw new Error(`There was an error installing the Unity Editor. See logs above for details. ${error}`);
     }
   }
 

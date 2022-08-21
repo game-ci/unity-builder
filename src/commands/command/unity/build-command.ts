@@ -27,19 +27,6 @@ export class BuildCommand extends CommandBase implements CommandInterface {
         await Docker.run(baseImage, { workspace, actionFolder, ...parameters });
       }
 
-      // const result = await exec('docker run -it unityci/editor:2020.3.15f2-base-1 /bin/bash -c "echo test"', {
-      //   output: OutputMode.Capture,
-      //   continueOnError: true,
-      //
-      //   // verbose: true,
-      // });
-      //
-      // log.info('result', result.output);
-      // const { success } = result.status;
-      // log.info('success', success);
-      //
-      // return success;
-
       // Set output
       await Output.setBuildVersion(parameters.buildVersion);
     } catch (error) {

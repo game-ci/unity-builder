@@ -2,6 +2,7 @@ import NotImplementedException from './error/not-implemented-exception.ts';
 import ValidationError from './error/validation-error.ts';
 import Input from './input.ts';
 import System from './system.ts';
+import { Action } from './index.ts';
 
 export default class Versioning {
   static get projectPath() {
@@ -225,7 +226,7 @@ export default class Versioning {
    * Returns whether the repository is shallow.
    */
   static async isShallow() {
-    const output = await this.git(['rev-parse', '--is-shallow-repository']);
+    const output = await this.git('rev-parse --is-shallow-repository');
 
     return output !== 'false';
   }
@@ -239,10 +240,10 @@ export default class Versioning {
    */
   static async fetch() {
     try {
-      await this.git(['fetch', '--unshallow']);
+      await this.git('fetch --unshallow');
     } catch {
       log.warning(`fetch --unshallow did not work, falling back to regular fetch`);
-      await this.git(['fetch']);
+      await this.git('fetch');
     }
   }
 
@@ -255,14 +256,23 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return this.git(['describe', '--long', '--tags', '--always', this.sha]);
+    let commitIsh = '';
+
+    // In CI the repo is checked out in detached head mode.
+    // We MUST specify the commitIsh that triggered the job.
+    // Todo - make this compatible with more CI systems
+    if (!Action.isRunningLocally) {
+      commitIsh = this.sha;
+    }
+
+    return this.git(`describe --long --tags --always ${commitIsh}`);
   }
 
   /**
    * Returns whether there are uncommitted changes that are not ignored.
    */
   static async isDirty() {
-    const output = await this.git(['status', '--porcelain']);
+    const output = await this.git('status --porcelain');
     const isDirty = output !== '';
 
     if (isDirty) {
@@ -279,7 +289,7 @@ export default class Versioning {
    * Get the tag if there is one pointing at HEAD
    */
   static async getTag() {
-    return await this.git(['tag', '--points-at', 'HEAD']);
+    return await this.git('tag --points-at HEAD');
   }
 
   /**
@@ -309,7 +319,7 @@ export default class Versioning {
    * Note: HEAD should not be used, as it may be detached, resulting in an additional count.
    */
   static async getTotalNumberOfCommits() {
-    const numberOfCommitsAsString = await this.git(['rev-list', '--count', this.sha]);
+    const numberOfCommitsAsString = await this.git(`rev-list --count ${this.sha}`);
 
     return Number.parseInt(numberOfCommitsAsString, 10);
   }
@@ -318,6 +328,10 @@ export default class Versioning {
    * Run git in the specified project path
    */
   static async git(arguments_, options = {}) {
-    return System.run('git', arguments_, { cwd: this.projectPath, ...options });
+    const result = await System.run(`git ${arguments_}`, { cwd: this.projectPath, ...options });
+
+    log.warning(result);
+
+    return result.output;
   }
 }

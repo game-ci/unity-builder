@@ -23,7 +23,7 @@ import { config, configSync } from 'https://deno.land/std@0.151.0/dotenv/mod.ts'
 
 // Internally managed packages
 import waitUntil from './modules/wait-until.ts';
-import { core, exec } from './modules/actions/index.ts';
+import { core } from './modules/actions/index.ts';
 import { dedent } from './modules/dedent.ts';
 
 // Polyfill for https://github.com/tc39/proposal-string-dedent
@@ -58,7 +58,6 @@ export {
   configSync,
   core,
   crypto,
-  exec,
   fs,
   fsSync,
   getUnityChangeSet,

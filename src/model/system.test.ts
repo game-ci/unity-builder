@@ -1,11 +1,11 @@
-import { core, exec } from '../../dependencies.ts';
+import { core } from '../../dependencies.ts';
 import System from './system.ts';
 
 jest.spyOn(core, 'debug').mockImplementation(() => {});
 const info = jest.spyOn(core, 'info').mockImplementation(() => {});
 jest.spyOn(core, 'warning').mockImplementation(() => {});
 jest.spyOn(core, 'error').mockImplementation(() => {});
-const execSpy = jest.spyOn(exec, 'exec').mockImplementation(async () => 0);
+const execSpy = jest.spyOn(System, 'run').mockImplementation(async () => 0);
 
 afterEach(() => jest.clearAllMocks());
 

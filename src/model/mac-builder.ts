@@ -1,10 +1,10 @@
-import { exec } from '../dependencies.ts';
 import { Parameters } from './parameters.ts';
+import System from './system.ts';
 
 class MacBuilder {
-  public static async run(actionFolder, workspace, buildParameters: BuildParameters, silent = false) {
-    await exec('bash', [`${actionFolder}/platforms/mac/entrypoint.sh`], {
-      silent,
+  public static async run(actionFolder) {
+    log.warning('running the process');
+    await System.run(`bash ${actionFolder}/platforms/mac/entrypoint.sh`, {
       ignoreReturnCode: true,
     });
   }

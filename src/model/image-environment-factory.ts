@@ -19,7 +19,14 @@ class ImageEnvironmentFactory {
         continue;
       }
 
-      string += `--env ${p.name}="${p.value}" `;
+      if (Deno.build.os === 'windows') {
+        // The ampersand (&) character is not allowed. The & operator is reserved for future use; wrap an ampersand in
+        // double quotation marks ("&") to pass it as part of a string.
+        const escapedValue = typeof p.value !== 'string' ? p.value : p.value?.replace(/&/, '\\"&\\"');
+        string += `--env ${p.name}='${escapedValue}' `;
+      } else {
+        string += `--env ${p.name}="${p.value}" `;
+      }
     }
 
     return string;

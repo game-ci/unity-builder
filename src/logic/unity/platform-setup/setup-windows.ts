@@ -1,6 +1,7 @@
-import { fsSync as fs, exec } from '../../../dependencies.ts';
+import { fsSync as fs } from '../../../dependencies.ts';
 import { Parameters } from '../../../model/index.ts';
 import ValidateWindows from '../platform-validation/validate-windows.ts';
+import System from '../../../model/system.ts';
 
 class SetupWindows {
   public static async setup(parameters: Parameters) {
@@ -17,7 +18,7 @@ class SetupWindows {
     const copyWinSdkRegistryKeyCommand = `reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" ${registryKeysPath}/winsdk.reg /y`;
 
     await fs.ensureDir(registryKeysPath);
-    await exec(copyWinSdkRegistryKeyCommand);
+    await System.run(copyWinSdkRegistryKeyCommand);
   }
 }
 

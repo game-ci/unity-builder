@@ -1,6 +1,4 @@
-import { exec } from '../dependencies.ts';
-
-export interface ShellRunOptions {
+export interface RunOptions {
   pwd: string;
 }
 
@@ -11,22 +9,45 @@ class System {
    *
    * Intended to always be silent and capture the output.
    */
-  static async shellRun(rawCommand: string, options: ShellRunOptions = {}) {
+  static async run(rawCommand: string, options: RunOptions = {}) {
     const { pwd } = options;
 
     let command = rawCommand;
     if (pwd) command = `cd ${pwd} ; ${command}`;
 
+    const isWindows = Deno.build.os === 'windows';
+    const shellMethod = isWindows ? System.powershellRun : System.shellRun;
+
+    if (log.isVeryVerbose) log.debug(`The following command is run using ${shellMethod.name}`);
+
+    return shellMethod(command, options);
+  }
+
+  static async shellRun(command: string, options: RunOptions = {}) {
     return System.newRun('sh', ['-c', command]);
   }
 
+  static async powershellRun(command: string, options: RunOptions = {}) {
+    return System.newRun('powershell', [command]);
+  }
+
   /**
-   * Example:
-   *   System.newRun(sh, ['-c', 'echo something'])
+   * Internal cross-platform run, that spawns a new process and captures its output.
    *
-   * private for now, but could become public if this happens to be a great replacement for the other run method.
+   * If any error is written to stderr, this method will throw them.
+   *   ❌ new Error(stdoutErrors)
+   *
+   * In case of no errors, this will return an object similar to these examples
+   *   ✔️ { status: { success: true, code: 0 }, output: 'output from the command' }
+   *   ⚠️ { status: { success: false, code: 1~255 }, output: 'output from the command' }
+   *
+   * Example usage:
+   *     System.newRun(sh, ['-c', 'echo something'])
+   *     System.newRun(powershell, ['echo something'])
+   *
+   * @deprecated use System.run instead, this method will be private
    */
-  private static async newRun(command, args: string | string[] = []) {
+  public static async newRun(command, args: string | string[] = []) {
     if (!Array.isArray(args)) args = [args];
 
     const argsString = args.join(' ');
@@ -42,8 +63,8 @@ class System {
 
     process.close();
 
-    const output = new TextDecoder().decode(outputBuffer).replace(/\n+$/, '');
-    const error = new TextDecoder().decode(errorBuffer).replace(/\n+$/, '');
+    const output = new TextDecoder().decode(outputBuffer).replace(/[\n\r]+$/, '');
+    const error = new TextDecoder().decode(errorBuffer).replace(/[\n\r]+$/, '');
 
     const result = { status, output };
 
@@ -60,77 +81,6 @@ class System {
     if (error) throw new Error(error);
 
     return result;
-  }
-
-  /**
-   * @deprecated use more simplified `shellRun` if possible.
-   */
-  static async run(command, arguments_: any = [], options = {}, shouldLog = true) {
-    let result = '';
-    let error = '';
-    let debug = '';
-
-    const listeners = {
-      stdout: (dataBuffer) => {
-        result += dataBuffer.toString();
-      },
-      stderr: (dataBuffer) => {
-        error += dataBuffer.toString();
-      },
-      debug: (dataString) => {
-        debug += dataString.toString();
-      },
-    };
-
-    const showOutput = () => {
-      if (debug !== '' && shouldLog) {
-        log.debug(debug);
-      }
-
-      if (result !== '' && shouldLog) {
-        log.info(result);
-      }
-
-      if (error !== '' && shouldLog) {
-        log.warning(error);
-      }
-    };
-
-    const throwContextualError = (message: string) => {
-      let commandAsString = command;
-      if (Array.isArray(arguments_)) {
-        commandAsString += ` ${arguments_.join(' ')}`;
-      } else if (typeof arguments_ === 'string') {
-        commandAsString += ` ${arguments_}`;
-      }
-
-      throw new Error(`Failed to run "${commandAsString}".\n ${message}`);
-    };
-
-    try {
-      if (command.trim() === '') {
-        throw new Error(`Failed to execute empty command`);
-      }
-
-      const { exitCode, success, output } = await exec(command, arguments_, { silent: true, listeners, ...options });
-      showOutput();
-      if (!success) {
-        throwContextualError(`Command returned non-zero exit code (${exitCode}).\nError: ${error}`);
-      }
-
-      // Todo - remove this after verifying it works as expected
-      const trimmedResult = result.replace(/\n+$/, '');
-      if (!output && trimmedResult) {
-        log.warning('returning result instead of output for backward compatibility');
-
-        return trimmedResult;
-      }
-
-      return output;
-    } catch (inCommandError) {
-      showOutput();
-      throwContextualError(`In-command error caught: ${inCommandError}`);
-    }
   }
 }
 
