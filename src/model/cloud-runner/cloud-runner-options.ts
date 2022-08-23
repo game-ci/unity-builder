@@ -77,18 +77,6 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('customJobHooks') || '';
   }
 
-  static cachePushOverrideCommand() {
-    return CloudRunnerOptions.getInput('cachePushOverrideCommand') || '';
-  }
-
-  static cachePullOverrideCommand() {
-    return CloudRunnerOptions.getInput('cachePullOverrideCommand') || '';
-  }
-
-  static storageProvider() {
-    return CloudRunnerOptions.getInput('storageProvider') || 'shared-volume'; // TODO also need to accept premade types AWS S3 + GCP Storage and custom yaml definitions
-  }
-
   static readInputFromOverrideList() {
     return CloudRunnerOptions.getInput('readInputFromOverrideList') || '';
   }

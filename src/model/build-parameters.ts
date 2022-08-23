@@ -46,8 +46,6 @@ class BuildParameters {
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
   public customJobHooks!: string;
-  public cachePushOverrideCommand!: string;
-  public cachePullOverrideCommand!: string;
   public readInputFromOverrideList!: string;
   public readInputOverrideCommand!: string;
   public checkDependencyHealthOverride!: string;
@@ -95,7 +93,6 @@ class BuildParameters {
       editorVersion,
       customImage: Input.customImage,
       unitySerial,
-
       runnerTempPath: process.env.RUNNER_TEMP,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
@@ -138,8 +135,6 @@ class BuildParameters {
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
       customJobHooks: CloudRunnerOptions.customJobHooks(),
-      cachePullOverrideCommand: CloudRunnerOptions.cachePullOverrideCommand(),
-      cachePushOverrideCommand: CloudRunnerOptions.cachePushOverrideCommand(),
       readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
       readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
