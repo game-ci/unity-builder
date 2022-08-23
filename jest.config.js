@@ -18,6 +18,7 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  autoRun: false,
 
   // Indicates whether each individual test should be reported during the run
   verbose: true,

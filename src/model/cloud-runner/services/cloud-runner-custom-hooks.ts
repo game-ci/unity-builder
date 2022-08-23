@@ -4,6 +4,7 @@ import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunner from '../cloud-runner';
 
 export class CloudRunnerCustomHooks {
+  // TODO also accept hooks as yaml files in the repo
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
     const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks).filter((x) => x.step.includes(`all`));
 

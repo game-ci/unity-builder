@@ -19,6 +19,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static async standardBuildAutomation(baseImage: any) {
+    // TODO accept post and pre build steps as yaml files in the repo
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 

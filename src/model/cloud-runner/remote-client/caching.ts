@@ -59,23 +59,9 @@ export class Caching {
           )}`,
         );
       }
-      // eslint-disable-next-line func-style
-      const formatFunction = function (format: string) {
-        const arguments_ = Array.prototype.slice.call(
-          [path.resolve(sourceFolder, '..'), cacheFolder, cacheArtifactName],
-          1,
-        );
-
-        return format.replace(/{(\d+)}/g, function (match, number) {
-          return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
-        });
-      };
       await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
       assert(await fileExists(`${cacheArtifactName}.tar.lz4`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
-      if (CloudRunner.buildParameters.cachePushOverrideCommand) {
-        await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePushOverrideCommand));
-      }
       await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar.lz4 ${cacheFolder}`);
       RemoteClientLogger.log(`moved cache entry ${cacheArtifactName} to ${cacheFolder}`);
       assert(
@@ -112,22 +98,6 @@ export class Caching {
           ? cacheArtifactName
           : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
-
-      // eslint-disable-next-line func-style
-      const formatFunction = function (format: string) {
-        const arguments_ = Array.prototype.slice.call(
-          [path.resolve(destinationFolder, '..'), cacheFolder, cacheArtifactName],
-          1,
-        );
-
-        return format.replace(/{(\d+)}/g, function (match, number) {
-          return typeof arguments_[number] != 'undefined' ? arguments_[number] : match;
-        });
-      };
-
-      if (CloudRunner.buildParameters.cachePullOverrideCommand) {
-        await CloudRunnerSystem.Run(formatFunction(CloudRunner.buildParameters.cachePullOverrideCommand));
-      }
 
       if (await fileExists(`${cacheSelection}.tar.lz4`)) {
         const resultsFolder = `results${CloudRunner.buildParameters.buildGuid}`;

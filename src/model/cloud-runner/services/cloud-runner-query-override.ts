@@ -13,6 +13,8 @@ const formatFunction = (value, arguments_) => {
 class CloudRunnerQueryOverride {
   static queryOverrides: any;
 
+  // TODO accept premade secret sources or custom secret source definition yamls
+
   public static query(key, alternativeKey) {
     if (CloudRunnerQueryOverride.queryOverrides && CloudRunnerQueryOverride.queryOverrides[key] !== undefined) {
       return CloudRunnerQueryOverride.queryOverrides[key];
