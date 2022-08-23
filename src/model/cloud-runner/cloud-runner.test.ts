@@ -10,6 +10,19 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from './cloud-runner-options';
 import GitHub from '../github';
 
+async function CreateParameters(overrides) {
+  if (overrides) {
+    Cli.options = overrides;
+  }
+  const originalValue = GitHub.githubInputEnabled;
+  GitHub.githubInputEnabled = false;
+  const results = await BuildParameters.create();
+  GitHub.githubInputEnabled = originalValue;
+  delete Cli.options;
+
+  return results;
+}
+
 describe('Cloud Runner', () => {
   it('responds', () => {});
 });
@@ -18,8 +31,8 @@ describe('Cloud Runner', () => {
   const testSecretValue = 'testSecretValue';
   if (CloudRunnerOptions.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
-      // Build parameters
-      Cli.options = {
+      // Setup parameters
+      const buildParameter = await CreateParameters({
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
@@ -32,12 +45,7 @@ describe('Cloud Runner', () => {
             - name: '${testSecretName}'
               value: '${testSecretValue}'
         `,
-      };
-      GitHub.githubInputEnabled = false;
-
-      // Setup parameters
-      const buildParameter = await BuildParameters.create();
-      GitHub.githubInputEnabled = true;
+      });
       const baseImage = new ImageTag(buildParameter);
 
       // Run the job
@@ -64,18 +72,16 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
-      delete Cli.options;
     }, 100000);
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
-      Cli.options = {
+      const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
-      GitHub.githubInputEnabled = false;
-      const buildParameter = await BuildParameters.create();
+      const buildParameter = await CreateParameters(overrides);
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
@@ -86,7 +92,7 @@ describe('Cloud Runner', () => {
         expect(results).toContain(buildSucceededString);
       });
       CloudRunnerLogger.log(`run 1 succeeded`);
-      const buildParameter2 = await BuildParameters.create();
+      const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
@@ -95,13 +101,11 @@ describe('Cloud Runner', () => {
         expect(results2).toContain(buildSucceededString);
         expect(results2).not.toContain(libraryString);
       });
-      GitHub.githubInputEnabled = true;
-      delete Cli.options;
     }, 1000000);
   }
   it('Local cloud runner returns commands', async () => {
-    // Build parameters
-    Cli.options = {
+    // Setup parameters
+    const buildParameter = await CreateParameters({
       versioning: 'None',
       projectPath: 'test-project',
       unityVersion: UnityVersioning.read('test-project'),
@@ -115,36 +119,24 @@ describe('Cloud Runner', () => {
           - name: '${testSecretName}'
             value: '${testSecretValue}'
       `,
-    };
-    GitHub.githubInputEnabled = false;
-
-    // Setup parameters
-    const buildParameter = await BuildParameters.create();
+    });
     const baseImage = new ImageTag(buildParameter);
 
     // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
-    GitHub.githubInputEnabled = true;
-    delete Cli.options;
   }, 1000000);
   it('Test cloud runner returns commands', async () => {
-    // Build parameters
-    Cli.options = {
+    // Setup parameters
+    const buildParameter = await CreateParameters({
       versioning: 'None',
       projectPath: 'test-project',
       unityVersion: UnityVersioning.read('test-project'),
       cloudRunnerCluster: 'test',
       targetPlatform: 'StandaloneLinux64',
-    };
-    GitHub.githubInputEnabled = false;
-
-    // Setup parameters
-    const buildParameter = await BuildParameters.create();
+    });
     const baseImage = new ImageTag(buildParameter);
 
     // Run the job
     await expect(CloudRunner.run(buildParameter, baseImage.toString())).resolves.not.toThrow();
-    GitHub.githubInputEnabled = true;
-    delete Cli.options;
   }, 1000000);
 });
