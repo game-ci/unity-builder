@@ -7,6 +7,7 @@ import Versioning from './versioning.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
 import { CommandInterface } from '../commands/command/command-interface.ts';
 import { Environment } from '../core/env/environment.ts';
+import { Parameter } from './parameter.ts';
 
 class Parameters {
   private command: CommandInterface;
@@ -64,85 +65,70 @@ class Parameters {
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
 
+  private defaults: Partial<Parameters> = {
+    region: 'eu-west-2',
+  };
+
   private readonly input: Input;
   private readonly env: Environment;
 
   constructor(input: Input, env: Environment) {
     this.input = input;
     this.env = env;
+
+    // Todo - ~/.gameci should hold a config with default settings, like cloud region = 'eu-west-2'
+    // this.config = config;
+  }
+
+  public get(query, useDefault = true) {
+    const defaultValue = useDefault ? this.default(query) : undefined;
+    const value = this.input.get(query) || this.env.get(Parameter.toUpperSnakeCase(query)) || defaultValue;
+
+    if (log.isVeryVerbose) log.debug('Argument:', query, '=', value);
+
+    return value;
+  }
+
+  private default(query) {
+    return this.defaults[query];
   }
 
   public async parse(): Promise<Parameters> {
     const cliStoragePath = `${getHomeDir()}/.game-ci`;
+    const targetPlatform = this.input.get('targetPlatform');
+    const buildsPath = this.input.get('buildsPath');
+    const projectPath = this.get('projectPath');
+    const unityVersion = this.get('unityVersion');
+    const versioningStrategy = this.get('versioningStrategy');
+    const specifiedVersion = this.get('specifiedVersion');
+    const allowDirtyBuild = this.get('allowDirtyBuild');
+    const androidTargetSdkVersion = this.get('androidTargetSdkVersion');
 
-    const buildFile = Parameters.parseBuildFile(
-      this.input.buildName,
-      this.input.targetPlatform,
-      this.input.androidAppBundle,
-    );
-    log.debug('buildFile:', buildFile);
-    const editorVersion = UnityVersioning.determineUnityVersion(this.input.projectPath, this.input.unityVersion);
-    log.info('Detected editorVersion', editorVersion);
-    const buildVersion = await Versioning.determineBuildVersion(
-      this.input.versioningStrategy,
-      this.input.specifiedVersion,
-      this.input.allowDirtyBuild,
-    );
-    log.debug('buildVersion', buildVersion);
-    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, this.input.androidVersionCode);
-    log.debug('androidVersionCode', androidVersionCode);
-    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(
-      this.input.androidTargetSdkVersion,
-    );
-    log.debug('androidSdkManagerParameters', androidSdkManagerParameters);
-
-    // Commandline takes precedence over environment variables
-    const unityEmail = this.input.unityEmail || this.env.get('UNITY_EMAIL');
-    const unityPassword = this.input.unityPassword || this.env.get('UNITY_PASSWORD');
-    const unityLicense = this.input.unityLicense || this.env.get('UNITY_LICENSE');
-    const unityLicenseFile = this.input.unityLicenseFile || this.env.get('UNITY_LICENSE_FILE');
-    let unitySerial = this.input.unitySerial || this.env.get('UNITY_SERIAL');
-
-    // For Windows, we need to use the serial from the license file
-    if (!unitySerial && this.input.githubInputEnabled) {
-      // No serial was present, so it is a personal license that we need to convert
-      if (!unityLicense) {
-        throw new Error(String.dedent`
-          Missing Unity License File and no Serial was found. If this is a personal license,
-          make sure to follow the activation steps and set the UNITY_LICENSE variable or enter
-          a Unity serial number inside the UNITY_SERIAL variable.
-        `);
-      }
-
-      unitySerial = this.getSerialFromLicenseFile(this.env.UNITY_LICENSE);
-    } else {
-      unitySerial = this.env.UNITY_SERIAL!;
-    }
-
+    const buildName = this.input.get('buildName') || targetPlatform;
+    const buildFile = Parameters.parseBuildFile(buildName, targetPlatform, this.get('androidAppBundle'));
+    const buildPath = `${buildsPath}/${targetPlatform}`;
+    const editorVersion = UnityVersioning.determineUnityVersion(projectPath, unityVersion);
+    const buildVersion = await Versioning.determineBuildVersion(versioningStrategy, specifiedVersion, allowDirtyBuild);
+    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, this.get('androidVersionCode'));
+    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(androidTargetSdkVersion);
     const branch = (await Versioning.getCurrentBranch()) || (await GitRepoReader.GetBranch());
-    log.info(`branch: "${branch}"`);
-
-    const projectPath = this.input.projectPath;
-    log.info(`projectPath: "${projectPath}"`);
-
-    const targetPlatform = this.input.targetPlatform;
-    log.info(`targetPlatform: "${targetPlatform}"`);
 
     const parameters = {
+      branch,
+      unityEmail: this.get('unityEmail'),
+      unityPassword: this.get('unityPassword'),
+      unityLicense: this.get('unityLicense'),
+      unityLicenseFile: this.get('unityLicenseFile'),
+      unitySerial: this.getUnitySerial(),
       cliStoragePath,
       editorVersion,
-      customImage: this.input.customImage,
-      unityEmail,
-      unityPassword,
-      unityLicense,
-      unityLicenseFile,
-      unitySerial,
-      usymUploadAuthToken: this.input.usymUploadAuthToken || this.env.get('USYM_UPLOAD_AUTH_TOKEN'),
-      runnerTempPath: this.env.RUNNER_TEMP,
+      customImage: this.get('customImage'),
+      usymUploadAuthToken: this.get('usymUploadAuthToken'),
+      runnerTempPath: this.env.get('RUNNER_TEMP'),
       targetPlatform,
       projectPath,
-      buildName: this.input.buildName,
-      buildPath: `${this.input.buildsPath}/${this.input.targetPlatform}`,
+      buildName,
+      buildPath,
       buildFile,
       buildMethod: this.input.buildMethod,
       buildVersion,
@@ -152,14 +138,13 @@ class Parameters {
       androidKeystorePass: this.input.androidKeystorePass,
       androidKeyaliasName: this.input.androidKeyaliasName,
       androidKeyaliasPass: this.input.androidKeyaliasPass,
-      androidTargetSdkVersion: this.input.androidTargetSdkVersion,
+      androidTargetSdkVersion,
       androidSdkManagerParameters,
-      customParameters: this.input.customParameters,
+      customParameters: this.get('customParameters'),
       sshAgent: this.input.sshAgent,
-      gitPrivateToken: this.input.gitPrivateToken,
+      gitPrivateToken: this.get('gitPrivateToken'),
       chownFilesTo: this.input.chownFilesTo,
       customJob: this.input.customJob,
-      branch,
     };
 
     const commandParameterOverrides = await this.command.parseParameters(this.input, parameters);
@@ -183,7 +168,27 @@ class Parameters {
     return filename;
   }
 
-  static getSerialFromLicenseFile(license) {
+  static getUnitySerial() {
+    let unitySerial = this.get('unitySerial');
+
+    if (!unitySerial && this.env.getOS() === 'windows') {
+      const unityLicense = this.get('unityLicense');
+
+      unitySerial = this.getSerialFromLicense(unityLicense);
+    }
+
+    return unitySerial;
+  }
+
+  static getSerialFromLicense(license) {
+    if (!license) {
+      throw new Error(String.dedent`
+          Missing Unity License File and no Unity Serial was found. If this is a personal license,
+          make sure to follow the activation steps and set the UNITY_LICENSE variable or enter
+          a Unity serial number inside the UNITY_SERIAL variable.
+        `);
+    }
+
     const startKey = `<DeveloperData Value="`;
     const endKey = `"/>`;
     const startIndex = license.indexOf(startKey) + startKey.length;

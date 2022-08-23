@@ -21,15 +21,12 @@ class Input {
     return this;
   }
 
+  // Todo - read something from environment instead and make that into a parameter, then use that.
   public static githubInputEnabled: boolean = true;
 
   // Todo - Note that this is now invoked both statically and dynamically - which is a temporary mess.
-  public getInput(query: string) {
+  public get(query: string) {
     if (this && this.arguments) {
-      const value = this.arguments.get(query);
-
-      if (log.isVeryVerbose) log.debug('arg', query, '=', value);
-
       return this.arguments.get(query);
     }
 
@@ -64,25 +61,25 @@ class Input {
   }
 
   public get region(): string {
-    return this.getInput('region') || 'eu-west-2';
+    return this.get('region');
   }
 
   public get githubRepo() {
-    return this.getInput('GITHUB_REPOSITORY') || this.getInput('GITHUB_REPO') || undefined;
+    return this.get('GITHUB_REPOSITORY') || this.get('GITHUB_REPO') || undefined;
   }
 
   public get branch() {
-    if (this.getInput(`GITHUB_REF`)) {
-      return this.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
-    } else if (this.getInput('branch')) {
-      return this.getInput('branch').replace('/head', '');
+    if (this.get(`GITHUB_REF`)) {
+      return this.get(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+    } else if (this.get('branch')) {
+      return this.get('branch').replace('/head', '');
     } else {
       return '';
     }
   }
 
   public get cloudRunnerBuilderPlatform() {
-    const input = this.getInput('cloudRunnerBuilderPlatform');
+    const input = this.get('cloudRunnerBuilderPlatform');
     if (input) {
       return input;
     }
@@ -94,55 +91,55 @@ class Input {
   }
 
   public get gitSha() {
-    if (this.getInput(`GITHUB_SHA`)) {
-      return this.getInput(`GITHUB_SHA`);
-    } else if (this.getInput(`GitSHA`)) {
-      return this.getInput(`GitSHA`);
+    if (this.get(`GITHUB_SHA`)) {
+      return this.get(`GITHUB_SHA`);
+    } else if (this.get(`GitSHA`)) {
+      return this.get(`GitSHA`);
     }
   }
 
   public get runNumber() {
-    return this.getInput('GITHUB_RUN_NUMBER') || '0';
+    return this.get('GITHUB_RUN_NUMBER') || '0';
   }
 
   public get targetPlatform() {
-    return this.getInput('targetPlatform') || Platform.default;
+    return this.get('targetPlatform') || Platform.default;
   }
 
   public get unityVersion() {
-    return this.getInput('unityVersion') || 'auto';
+    return this.get('unityVersion') || 'auto';
   }
 
   public get unityEmail() {
-    return this.getInput('unityEmail') || '';
+    return this.get('unityEmail') || '';
   }
 
   public get unityPassword() {
-    return this.getInput('unityPassword') || '';
+    return this.get('unityPassword') || '';
   }
 
   public get unityLicense() {
-    return this.getInput('unityLicense') || '';
+    return this.get('unityLicense') || '';
   }
 
   public get unityLicenseFile() {
-    return this.getInput('unityLicenseFile') || '';
+    return this.get('unityLicenseFile') || '';
   }
 
   public get unitySerial() {
-    return this.getInput('unitySerial') || '';
+    return this.get('unitySerial') || '';
   }
 
   public get usymUploadAuthToken() {
-    return this.getInput('usymUploadAuthToken') || '';
+    return this.get('usymUploadAuthToken') || '';
   }
 
   public get customImage() {
-    return this.getInput('customImage') || '';
+    return this.get('customImage') || '';
   }
 
   public get projectPath() {
-    let input = this.getInput('projectPath');
+    let input = this.get('projectPath');
 
     // Todo - remove hardcoded test project reference
     const isTestProject =
@@ -156,172 +153,169 @@ class Input {
   }
 
   public get buildName() {
-    return this.getInput('buildName') || this.targetPlatform;
+    return this.get('buildName');
   }
 
   public get buildsPath() {
-    return this.getInput('buildsPath') || 'build';
+    return this.get('buildsPath') || 'build';
   }
 
   public get buildMethod() {
-    return this.getInput('buildMethod') || ''; // Processed in docker file
+    return this.get('buildMethod') || ''; // Processed in docker file
   }
 
   public get customParameters() {
-    return this.getInput('customParameters') || '';
+    return this.get('customParameters') || '';
   }
 
   public get versioningStrategy() {
-    return this.getInput('versioning') || 'Semantic';
+    return this.get('versioning') || 'Semantic';
   }
 
   public get specifiedVersion() {
-    return this.getInput('version') || '';
+    return this.get('version') || '';
   }
 
   public get androidVersionCode() {
-    return this.getInput('androidVersionCode');
+    return this.get('androidVersionCode');
   }
 
   public get androidAppBundle() {
-    const input = this.getInput('androidAppBundle') || false;
+    const input = this.get('androidAppBundle') || false;
 
     return input === 'true';
   }
 
   public get androidKeystoreName() {
-    return this.getInput('androidKeystoreName') || '';
+    return this.get('androidKeystoreName') || '';
   }
 
   public get androidKeystoreBase64() {
-    return this.getInput('androidKeystoreBase64') || '';
+    return this.get('androidKeystoreBase64') || '';
   }
 
   public get androidKeystorePass() {
-    return this.getInput('androidKeystorePass') || '';
+    return this.get('androidKeystorePass') || '';
   }
 
   public get androidKeyaliasName() {
-    return this.getInput('androidKeyaliasName') || '';
+    return this.get('androidKeyaliasName') || '';
   }
 
   public get androidKeyaliasPass() {
-    return this.getInput('androidKeyaliasPass') || '';
+    return this.get('androidKeyaliasPass') || '';
   }
 
   public get androidTargetSdkVersion() {
-    return this.getInput('androidTargetSdkVersion') || '';
+    return this.get('androidTargetSdkVersion') || '';
   }
 
   public get sshAgent() {
-    return this.getInput('sshAgent') || '';
+    return this.get('sshAgent') || '';
   }
 
   public get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || false;
+    return this.get('gitPrivateToken') || '';
   }
 
   public get customJob() {
-    return this.getInput('customJob') || '';
+    return this.get('customJob') || '';
   }
 
   public customJobHooks() {
-    return this.getInput('customJobHooks') || '';
+    return this.get('customJobHooks') || '';
   }
 
   public cachePushOverrideCommand() {
-    return this.getInput('cachePushOverrideCommand') || '';
+    return this.get('cachePushOverrideCommand') || '';
   }
 
   public cachePullOverrideCommand() {
-    return this.getInput('cachePullOverrideCommand') || '';
+    return this.get('cachePullOverrideCommand') || '';
   }
 
   public readInputFromOverrideList() {
-    return this.getInput('readInputFromOverrideList') || '';
+    return this.get('readInputFromOverrideList') || '';
   }
 
   public readInputOverrideCommand() {
-    return this.getInput('readInputOverrideCommand') || '';
+    return this.get('readInputOverrideCommand') || '';
   }
 
   public get cloudRunnerBranch() {
-    return this.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
+    return this.get('cloudRunnerBranch') || 'cloud-runner-develop';
   }
 
   public get chownFilesTo() {
-    return this.getInput('chownFilesTo') || '';
+    return this.get('chownFilesTo') || '';
   }
 
   public get allowDirtyBuild() {
-    const input = this.getInput('allowDirtyBuild');
+    const input = this.get('allowDirtyBuild');
     log.debug('input === ', input);
 
     return input || false === true;
   }
 
   public get postBuildSteps() {
-    return this.getInput('postBuildSteps') || '';
+    return this.get('postBuildSteps') || '';
   }
 
   public get preBuildSteps() {
-    return this.getInput('preBuildSteps') || '';
+    return this.get('preBuildSteps') || '';
   }
 
   public get awsBaseStackName() {
-    return this.getInput('awsBaseStackName') || 'game-ci';
+    return this.get('awsBaseStackName') || 'game-ci';
   }
 
   public get cloudRunnerCpu() {
-    return this.getInput('cloudRunnerCpu');
+    return this.get('cloudRunnerCpu');
   }
 
   public get cloudRunnerMemory() {
-    return this.getInput('cloudRunnerMemory');
+    return this.get('cloudRunnerMemory');
   }
 
   public get kubeConfig() {
-    return this.getInput('kubeConfig') || '';
+    return this.get('kubeConfig') || '';
   }
 
   public get kubeVolume() {
-    return this.getInput('kubeVolume') || '';
+    return this.get('kubeVolume') || '';
   }
 
   public get kubeVolumeSize() {
-    return this.getInput('kubeVolumeSize') || '5Gi';
+    return this.get('kubeVolumeSize') || '5Gi';
   }
 
   public get kubeStorageClass(): string {
-    return this.getInput('kubeStorageClass') || '';
+    return this.get('kubeStorageClass') || '';
   }
 
   public get checkDependencyHealthOverride(): string {
-    return this.getInput('checkDependencyHealthOverride') || '';
+    return this.get('checkDependencyHealthOverride') || '';
   }
 
   public get startDependenciesOverride(): string {
-    return this.getInput('startDependenciesOverride') || '';
+    return this.get('startDependenciesOverride') || '';
   }
 
   public get cacheKey(): string {
-    return this.getInput('cacheKey') || Input.branch;
+    return this.get('cacheKey') || Input.branch;
   }
 
   public get cloudRunnerTests(): boolean {
-    return this.getInput(`cloudRunnerTests`) || false;
+    return this.get(`cloudRunnerTests`) || false;
   }
 
+  /**
+   * @deprecated Use Parameter.toEnvFormat
+   */
   public static toEnvVarFormat(input: string) {
-    if (input.toUpperCase() === input) {
-      return input;
-    }
+    if (input.toUpperCase() === input) return input;
 
-    return input
-      .replace(/([A-Z])/g, ' $1')
-      .trim()
-      .toUpperCase()
-      .replace(/ /g, '_');
+    return input.replace(/([\da-z])([A-Z])/g, '$1_$2').toUpperCase();
   }
 }
 

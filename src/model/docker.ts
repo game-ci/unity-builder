@@ -3,19 +3,43 @@ import { path, fsSync as fs } from '../dependencies.ts';
 import System from './system.ts';
 
 class Docker {
-  static async run(image, parameters, silent = false) {
-    log.warning('running docker process for', process.platform, silent);
+  static async run(image, parameters) {
+    log.warning('running docker process for', process.platform);
     let command = '';
-    switch (process.platform) {
+    switch (Deno.build.os) {
+      case 'windows': {
+        // Todo: check if docker daemon is set for Windows or Linux containers.
+        command = await this.getWindowsCommand(image, parameters);
+        break;
+      }
       case 'linux':
+      case 'darwin': {
         command = await this.getLinuxCommand(image, parameters);
         break;
-      case 'win32':
-        command = await this.getWindowsCommand(image, parameters);
+      }
     }
 
-    const test = await System.newRun(`docker`, command.replace(/\s\s+/, ' ').split(' '), { silent, verbose: true });
-    log.error('test', test);
+    try {
+      const test = await System.run(command, { attach: true });
+      log.warning('test', test);
+    } catch (error) {
+      if (error.message.includes('docker: image operating system "windows" cannot be used on this platform')) {
+        throw new Error(String.dedent`
+          Docker daemon is not set to run Windows containers.
+
+          To enable the Hyper-V container backend run:
+            Enable-WindowsOptionalFeature -Online -FeatureName $("Microsoft-Hyper-V", "Containers") -All
+
+          To switch the docker daemon to run Windows containers run:
+            & $Env:ProgramFiles\\Docker\\Docker\\DockerCli.exe -SwitchDaemon .
+
+          For more information see:
+            https://docs.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment?tabs=dockerce#prerequisites
+        `);
+      }
+
+      throw error;
+    }
   }
 
   static async getLinuxCommand(image, parameters): string {
@@ -28,8 +52,8 @@ class Docker {
 
     return String.dedent`
       docker run \
-        --workdir /github/workspace \
         --rm \
+        --workdir /github/workspace \
         ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
         --env UNITY_SERIAL \
         --env GITHUB_WORKSPACE=/github/workspace \
@@ -51,25 +75,23 @@ class Docker {
   static async getWindowsCommand(image: any, parameters: any): string {
     const { workspace, actionFolder, unitySerial, gitPrivateToken, cliStoragePath } = parameters;
 
-    // Todo - get this to work on a non-github runner local machine
-    // Note: difference between `docker run` and `run`
-    return String.dedent`run ${image} powershell c:/steps/entrypoint.ps1`;
+    // Note: the equals sign (=) is needed in Powershell.
     return String.dedent`
       docker run \
-        --workdir /github/workspace \
         --rm \
+        --workdir="c:/github/workspace" \
         ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
         --env UNITY_SERIAL="${unitySerial}" \
         --env GITHUB_WORKSPACE=c:/github/workspace \
-        ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
-        --volume "${workspace}":"c:/github/workspace" \
-        --volume "${cliStoragePath}/registry-keys":"c:/registry-keys" \
-        --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
-        --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
-        --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
-        --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
-        --volume "${actionFolder}/platforms/windows":"c:/steps" \
-        --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
+        --env GIT_PRIVATE_TOKEN="${gitPrivateToken}" \
+        --volume="${workspace}":"c:/github/workspace" \
+        --volume="${cliStoragePath}/registry-keys":"c:/registry-keys" \
+        --volume="C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
+        --volume="C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
+        --volume="C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
+        --volume="${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
+        --volume="${actionFolder}/platforms/windows":"c:/steps" \
+        --volume="${actionFolder}/BlankProject":"c:/BlankProject" \
         ${image} \
         powershell c:/steps/entrypoint.ps1
     `;

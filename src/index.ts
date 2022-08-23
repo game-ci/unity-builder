@@ -5,6 +5,7 @@ import { CommandFactory } from './commands/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';
 import { Environment } from './core/env/environment.ts';
 import { EngineDetector } from './core/engine/engine-detector.ts';
+import { ParameterOptions } from './model/parameter-options.ts';
 
 export class GameCI {
   private readonly env: Environment;
@@ -19,6 +20,10 @@ export class GameCI {
       // Infallible configuration
       const { commandName, subCommands, args, verbosity } = new ArgumentsParser().parse(this.args);
       await configureLogger(verbosity);
+
+      // Todo - set default values for parameters to restore functionality.
+      // Todo - investigate how fitting a CLI lib will be for us
+      //  (now that things are starting to be more separated)
 
       // Determine which command to run
       const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();

@@ -1,5 +1,6 @@
 export interface RunOptions {
   pwd: string;
+  attach: boolean;
 }
 
 class System {
@@ -7,7 +8,7 @@ class System {
    * Run any command as if you're typing in shell.
    * Make sure it's Windows/MacOS/Ubuntu compatible or has alternative commands.
    *
-   * Intended to always be silent and capture the output.
+   * Intended to always be silent and capture the output, unless attach is passed.
    *
    * @returns {string} output of the command on success or failure
    *
@@ -28,11 +29,15 @@ class System {
   }
 
   static async shellRun(command: string, options: RunOptions = {}): Promise<string> {
-    return System.newRun('sh', ['-c', command]);
+    const { attach } = options;
+
+    return attach ? System.runAndAttach('sh', ['-c', command]) : System.runAndCapture('sh', ['-c', command]);
   }
 
   static async powershellRun(command: string, options: RunOptions = {}): Promise<string> {
-    return System.newRun('powershell', [command]);
+    const { attach } = options;
+
+    return attach ? System.runAndAttach('powershell', [command]) : System.runAndCapture('powershell', [command]);
   }
 
   /**
@@ -51,7 +56,7 @@ class System {
    *
    * @deprecated not really deprecated, but please use System.run instead because this method will be made private.
    */
-  public static async newRun(command, args: string | string[] = []): Promise<string> {
+  public static async runAndCapture(command, args: string | string[] = []): Promise<string> {
     if (!Array.isArray(args)) args = [args];
 
     const argsString = args.join(' ');
@@ -91,6 +96,26 @@ class System {
     }
 
     return result;
+  }
+
+  /**
+   * Output stdout and stderr to the terminal and attach to the process.
+   *
+   * Note that the return signature is slightly different from runAndCapture, because we don't have stderrOutput.
+   *
+   * Todo - it would be nice to pipe the output to both stdout and capture it in the result object, but this doesn't seem possible yet.
+   */
+  private static async runAndAttach(command, args: string | string[] = []): Promise<string> {
+    if (!Array.isArray(args)) args = [args];
+
+    const process = Deno.run({ cmd: [command, ...args] });
+    const status = await process.status();
+
+    process.close();
+
+    if (!status.success) throw new Error(`Command failed with code ${status.code}`);
+
+    return { status, output: 'runAndAttach has access to the output stream' };
   }
 }
 

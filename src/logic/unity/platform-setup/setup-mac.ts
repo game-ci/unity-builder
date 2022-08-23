@@ -43,29 +43,29 @@ class SetupMac {
     }
   }
 
-  private static async setEnvironmentVariables(buildParameters: Parameters, actionFolder: string) {
+  private static async setEnvironmentVariables(parameters: Parameters, actionFolder: string) {
     // Need to set environment variables from here because we execute
     // the scripts on the host for mac
     Deno.env.set('ACTION_FOLDER', actionFolder);
-    Deno.env.set('UNITY_VERSION', buildParameters.editorVersion);
-    Deno.env.set('UNITY_SERIAL', buildParameters.unitySerial);
-    Deno.env.set('PROJECT_PATH', buildParameters.projectPath);
-    Deno.env.set('BUILD_TARGET', buildParameters.targetPlatform);
-    Deno.env.set('BUILD_NAME', buildParameters.buildName);
-    Deno.env.set('BUILD_PATH', buildParameters.buildPath);
-    Deno.env.set('BUILD_FILE', buildParameters.buildFile);
-    Deno.env.set('BUILD_METHOD', buildParameters.buildMethod);
-    Deno.env.set('VERSION', buildParameters.buildVersion);
-    Deno.env.set('ANDROID_VERSION_CODE', buildParameters.androidVersionCode);
-    Deno.env.set('ANDROID_KEYSTORE_NAME', buildParameters.androidKeystoreName);
-    Deno.env.set('ANDROID_KEYSTORE_BASE64', buildParameters.androidKeystoreBase64);
-    Deno.env.set('ANDROID_KEYSTORE_PASS', buildParameters.androidKeystorePass);
-    Deno.env.set('ANDROID_KEYALIAS_NAME', buildParameters.androidKeyaliasName);
-    Deno.env.set('ANDROID_KEYALIAS_PASS', buildParameters.androidKeyaliasPass);
-    Deno.env.set('ANDROID_TARGET_SDK_VERSION', buildParameters.androidTargetSdkVersion);
-    Deno.env.set('ANDROID_SDK_MANAGER_PARAMETERS', buildParameters.androidSdkManagerParameters);
-    Deno.env.set('CUSTOM_PARAMETERS', buildParameters.customParameters);
-    Deno.env.set('CHOWN_FILES_TO', buildParameters.chownFilesTo);
+    Deno.env.set('UNITY_VERSION', parameters.editorVersion);
+    Deno.env.set('UNITY_SERIAL', parameters.unitySerial);
+    Deno.env.set('PROJECT_PATH', parameters.projectPath);
+    Deno.env.set('BUILD_TARGET', parameters.targetPlatform);
+    Deno.env.set('BUILD_NAME', parameters.buildName);
+    Deno.env.set('BUILD_PATH', parameters.buildPath);
+    Deno.env.set('BUILD_FILE', parameters.buildFile);
+    Deno.env.set('BUILD_METHOD', parameters.buildMethod);
+    Deno.env.set('VERSION', parameters.buildVersion);
+    Deno.env.set('ANDROID_VERSION_CODE', parameters.androidVersionCode);
+    Deno.env.set('ANDROID_KEYSTORE_NAME', parameters.androidKeystoreName);
+    Deno.env.set('ANDROID_KEYSTORE_BASE64', parameters.androidKeystoreBase64);
+    Deno.env.set('ANDROID_KEYSTORE_PASS', parameters.androidKeystorePass);
+    Deno.env.set('ANDROID_KEYALIAS_NAME', parameters.androidKeyaliasName);
+    Deno.env.set('ANDROID_KEYALIAS_PASS', parameters.androidKeyaliasPass);
+    Deno.env.set('ANDROID_TARGET_SDK_VERSION', parameters.androidTargetSdkVersion);
+    Deno.env.set('ANDROID_SDK_MANAGER_PARAMETERS', parameters.androidSdkManagerParameters);
+    Deno.env.set('CUSTOM_PARAMETERS', parameters.customParameters);
+    Deno.env.set('CHOWN_FILES_TO', parameters.chownFilesTo);
   }
 }
 

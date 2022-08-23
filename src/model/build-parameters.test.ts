@@ -93,9 +93,7 @@ describe('BuildParameters', () => {
       async (targetPlatform) => {
         jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
         jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
-        expect(Parameters.create()).resolves.toEqual(
-          expect.objectContaining({ buildFile: `${targetPlatform}.exe` }),
-        );
+        expect(Parameters.create()).resolves.toEqual(expect.objectContaining({ buildFile: `${targetPlatform}.exe` }));
       },
     );
 
@@ -103,18 +101,14 @@ describe('BuildParameters', () => {
       jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
       jest.spyOn(Input, 'androidAppBundle', 'get').mockReturnValue(false);
-      expect(Parameters.create()).resolves.toEqual(
-        expect.objectContaining({ buildFile: `${targetPlatform}.apk` }),
-      );
+      expect(Parameters.create()).resolves.toEqual(expect.objectContaining({ buildFile: `${targetPlatform}.apk` }));
     });
 
     test.each([Platform.types.Android])('appends aab for %s', async (targetPlatform) => {
       jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
       jest.spyOn(Input, 'androidAppBundle', 'get').mockReturnValue(true);
-      expect(Parameters.create()).resolves.toEqual(
-        expect.objectContaining({ buildFile: `${targetPlatform}.aab` }),
-      );
+      expect(Parameters.create()).resolves.toEqual(expect.objectContaining({ buildFile: `${targetPlatform}.aab` }));
     });
 
     it('returns the build method', async () => {
@@ -156,9 +150,7 @@ describe('BuildParameters', () => {
     it('returns the android target sdk version', async () => {
       const mockValue = 'AndroidApiLevelAuto';
       jest.spyOn(Input, 'androidTargetSdkVersion', 'get').mockReturnValue(mockValue);
-      expect(Parameters.create()).resolves.toEqual(
-        expect.objectContaining({ androidTargetSdkVersion: mockValue }),
-      );
+      expect(Parameters.create()).resolves.toEqual(expect.objectContaining({ androidTargetSdkVersion: mockValue }));
     });
 
     it('returns the custom parameters', async () => {
