@@ -20,6 +20,8 @@ import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 import { Buffer } from 'https://deno.land/std@0.151.0/io/buffer.ts';
 import { config, configSync } from 'https://deno.land/std@0.151.0/dotenv/mod.ts';
+import yargs from 'https://deno.land/x/yargs@v17.4.0-deno/deno.ts';
+import * as yargsTypes from 'https://deno.land/x/yargs@v17.4.0-deno/deno-types.ts';
 
 // Internally managed packages
 import waitUntil from './module/wait-until.ts';
@@ -71,4 +73,6 @@ export {
   waitUntil,
   Writable,
   yaml,
+  yargs,
+  yargsTypes,
 };

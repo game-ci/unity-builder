@@ -1,41 +1,13 @@
-import { configSync } from './dependencies.ts';
-import { configureLogger } from './core/logger/index.ts';
-import { Options } from './config/options.ts';
-import { CommandFactory } from './command/command-factory.ts';
-import { ArgumentsParser } from './core/cli/arguments-parser.ts';
-import { Environment } from './core/env/environment.ts';
-import { EngineDetector } from './core/engine/engine-detector.ts';
+import { Cli } from './cli.ts';
 
-export class GameCI {
-  private readonly env: Environment;
-
-  constructor() {
-    this.env = new Environment(Deno.env, configSync());
-    this.args = Deno.args;
-  }
-
-  public async run() {
+class GameCI {
+  public static async run() {
     try {
-      // Infallible configuration
-      const { commandName, subCommands, args, verbosity } = new ArgumentsParser().parse(this.args);
-      await configureLogger(verbosity);
+      const { command, options } = await new Cli().validateAndParseArguments();
 
-      // Todo - set default values for parameters to restore functionality.
-      // Todo - investigate how fitting a CLI lib will be for us
-      //  (now that things are starting to be more separated)
+      const success = await command.execute(options);
 
-      // Determine which command to run
-      const { engine, engineVersion } = await new EngineDetector(subCommands, args).detect();
-      const command = new CommandFactory().selectEngine(engine, engineVersion).createCommand(commandName, subCommands);
-
-      // Provide the command with options
-      const options = await new Options(command, this.env).generateParameters(args);
-      await command.configure(options).validate();
-
-      // Execute
-      if (log.isVerbose) log.info('Executing', command.name);
-      const success = await command.execute();
-      if (!success) log.info(`Command ${command.name} failed.`);
+      if (!success) throw new Error(`${command.name} failed.`);
     } catch (error) {
       log.error(error);
       Deno.exit(1);
@@ -43,4 +15,4 @@ export class GameCI {
   }
 }
 
-await new GameCI().run();
+await GameCI.run();
