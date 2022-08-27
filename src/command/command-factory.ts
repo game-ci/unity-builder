@@ -1,7 +1,7 @@
-import { NonExistentCommand } from './command/non-existent-command.ts';
-import { BuildCommand } from './command/unity/build-command.ts';
-import { BuildRemoteCommand } from './command/unity/build-remote-command.ts';
-import { CommandInterface } from './command/command-interface.ts';
+import { NonExistentCommand } from './null/non-existent-command.ts';
+import { UnityBuildCommand } from './build/unity-build-command.ts';
+import { CommandInterface } from './command-interface.ts';
+import { UnityRemoteBuildCommand } from './remote/unity-remote-build-command.ts';
 
 export class CommandFactory {
   constructor() {}
@@ -25,9 +25,9 @@ export class CommandFactory {
   private createUnityCommand(commandName: string) {
     switch (commandName) {
       case 'build':
-        return new BuildCommand(commandName);
+        return new UnityBuildCommand(commandName);
       case 'build-remote':
-        return new BuildRemoteCommand(commandName);
+        return new UnityRemoteBuildCommand(commandName);
       default:
         return new NonExistentCommand(commandName);
     }

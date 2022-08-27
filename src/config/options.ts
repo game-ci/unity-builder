@@ -1,6 +1,6 @@
 import { CliArguments } from '../core/cli/cli-arguments.ts';
 import { Parameters, Input } from '../model/index.ts';
-import { CommandInterface } from '../commands/command/command-interface.ts';
+import { CommandInterface } from '../command/command-interface.ts';
 import { Environment } from '../core/env/environment.ts';
 
 export class Options {

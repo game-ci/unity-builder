@@ -1,11 +1,10 @@
 import { configSync } from './dependencies.ts';
 import { configureLogger } from './core/logger/index.ts';
 import { Options } from './config/options.ts';
-import { CommandFactory } from './commands/command-factory.ts';
+import { CommandFactory } from './command/command-factory.ts';
 import { ArgumentsParser } from './core/cli/arguments-parser.ts';
 import { Environment } from './core/env/environment.ts';
 import { EngineDetector } from './core/engine/engine-detector.ts';
-import { ParameterOptions } from './model/parameter-options.ts';
 
 export class GameCI {
   private readonly env: Environment;

@@ -5,7 +5,7 @@ import Platform from './platform.ts';
 import UnityVersioning from './unity-versioning.ts';
 import Versioning from './versioning.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
-import { CommandInterface } from '../commands/command/command-interface.ts';
+import { CommandInterface } from '../command/command-interface.ts';
 import { Environment } from '../core/env/environment.ts';
 import { Parameter } from './parameter.ts';
 
@@ -168,7 +168,7 @@ class Parameters {
     return filename;
   }
 
-  static getUnitySerial() {
+  private getUnitySerial() {
     let unitySerial = this.get('unitySerial');
 
     if (!unitySerial && this.env.getOS() === 'windows') {
@@ -180,7 +180,7 @@ class Parameters {
     return unitySerial;
   }
 
-  static getSerialFromLicense(license) {
+  private getSerialFromLicense(license) {
     if (!license) {
       throw new Error(String.dedent`
           Missing Unity License File and no Unity Serial was found. If this is a personal license,

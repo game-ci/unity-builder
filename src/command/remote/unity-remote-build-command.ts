@@ -1,17 +1,17 @@
 import { CommandInterface } from '../command-interface.ts';
-import { Options } from '../../../config/options.ts';
-import { CloudRunner, ImageTag, Input, Output } from '../../../model/index.ts';
-import { core, nanoid } from '../../../dependencies.ts';
-import Parameters from '../../../model/parameters.ts';
-import { GitRepoReader } from '../../../model/input-readers/git-repo.ts';
-import { Cli } from '../../../model/cli/cli.ts';
-import CloudRunnerConstants from '../../../model/cloud-runner/services/cloud-runner-constants.ts';
-import CloudRunnerBuildGuid from '../../../model/cloud-runner/services/cloud-runner-guid.ts';
-import { GithubCliReader } from '../../../model/input-readers/github-cli.ts';
-import { CommandBase } from './command-base.ts';
+import { Options } from '../../config/options.ts';
+import { CloudRunner, ImageTag, Input, Output } from '../../model/index.ts';
+import { core, nanoid } from '../../dependencies.ts';
+import Parameters from '../../model/parameters.ts';
+import { GitRepoReader } from '../../model/input-readers/git-repo.ts';
+import { Cli } from '../../model/cli/cli.ts';
+import CloudRunnerConstants from '../../model/cloud-runner/services/cloud-runner-constants.ts';
+import CloudRunnerBuildGuid from '../../model/cloud-runner/services/cloud-runner-guid.ts';
+import { GithubCliReader } from '../../model/input-readers/github-cli.ts';
+import { CommandBase } from '../command-base.ts';
 
 // Todo - Verify this entire flow
-export class BuildRemoteCommand extends CommandBase implements CommandInterface {
+export class UnityRemoteBuildCommand extends CommandBase implements CommandInterface {
   public async validate() {
     await super.validate();
   }

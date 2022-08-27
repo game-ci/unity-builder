@@ -1,10 +1,10 @@
 import { CommandInterface } from '../command-interface.ts';
-import { Action, Cache, Docker, ImageTag, Input, Output } from '../../../model/index.ts';
-import PlatformSetup from '../../../model/platform-setup.ts';
-import MacBuilder from '../../../model/mac-builder.ts';
-import { CommandBase } from './command-base.ts';
+import { Action, Cache, Docker, ImageTag, Input, Output } from '../../model/index.ts';
+import PlatformSetup from '../../model/platform-setup.ts';
+import MacBuilder from '../../model/mac-builder.ts';
+import { CommandBase } from '../command-base.ts';
 
-export class BuildCommand extends CommandBase implements CommandInterface {
+export class UnityBuildCommand extends CommandBase implements CommandInterface {
   public async validate() {
     await super.validate();
   }

@@ -1,6 +1,6 @@
-import { Options } from '../../../config/options.ts';
-import { Input } from '../../../model/index.ts';
-import Parameters from '../../../model/parameters.ts';
+import { Options } from '../config/options.ts';
+import { Input } from '../model/index.ts';
+import Parameters from '../model/parameters.ts';
 
 export class CommandBase {
   public readonly name: string;

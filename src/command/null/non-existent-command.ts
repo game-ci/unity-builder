@@ -1,4 +1,4 @@
-import { CommandInterface } from './command-interface.ts';
+import { CommandInterface } from '../command-interface.ts';
 import { Options } from '../../config/options.ts';
 
 export class NonExistentCommand implements CommandInterface {

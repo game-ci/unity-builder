@@ -1,6 +1,6 @@
-import { Options } from '../../config/options.ts';
-import Parameters from '../../model/parameters.ts';
-import { Input } from '../../model/index.ts';
+import { Options } from '../config/options.ts';
+import Parameters from '../model/parameters.ts';
+import { Input } from '../model/index.ts';
 
 export interface CommandInterface {
   name: string;
