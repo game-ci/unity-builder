@@ -33,7 +33,7 @@ export class CustomWorkflow {
           step['image'],
           step['commands'],
           `/${CloudRunnerFolders.buildVolumeFolder}`,
-          `/${CloudRunnerFolders.buildVolumeFolder}/`,
+          `/${CloudRunnerFolders.projectPathAbsolute}/`,
           CloudRunner.cloudRunnerEnvironmentVariables,
           [...CloudRunner.defaultSecrets, ...stepSecrets],
         );
