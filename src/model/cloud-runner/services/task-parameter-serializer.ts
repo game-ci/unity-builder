@@ -1,4 +1,5 @@
-import { CloudRunner, Input } from '../..';
+import CloudRunner from '../cloud-runner';
+import { Input } from '../..';
 import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
