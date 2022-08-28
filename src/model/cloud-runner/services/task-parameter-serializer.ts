@@ -81,7 +81,6 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
-    CloudRunner.buildParameters.projectPath = '.';
     array.push(
       ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
         .filter((x) => array.every((y) => y.ParameterKey !== x.name))
