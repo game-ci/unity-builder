@@ -82,7 +82,15 @@ class CloudRunnerOptions {
   }
 
   static readInputOverrideCommand() {
-    return CloudRunnerOptions.getInput('readInputOverrideCommand') || '';
+    const value = CloudRunnerOptions.getInput('readInputOverrideCommand');
+
+    if (value === 'gcp-secret-manager') {
+      return 'gcloud secrets versions access 1 --secret="{0}"';
+    } else if (value === 'aws-secret-manager') {
+      return 'aws secretsmanager get-secret-value --secret-id {0}';
+    }
+
+    return value || '';
   }
 
   static get cloudRunnerBranch() {
@@ -131,14 +139,6 @@ class CloudRunnerOptions {
 
   static get kubeStorageClass(): string {
     return CloudRunnerOptions.getInput('kubeStorageClass') || '';
-  }
-
-  static get checkDependencyHealthOverride(): string {
-    return CloudRunnerOptions.getInput('checkDependencyHealthOverride') || '';
-  }
-
-  static get startDependenciesOverride(): string {
-    return CloudRunnerOptions.getInput('startDependenciesOverride') || '';
   }
 
   static get cacheKey(): string {

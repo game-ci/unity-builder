@@ -48,8 +48,6 @@ class BuildParameters {
   public customJobHooks!: string;
   public readInputFromOverrideList!: string;
   public readInputOverrideCommand!: string;
-  public checkDependencyHealthOverride!: string;
-  public startDependenciesOverride!: string;
   public cacheKey!: string;
 
   public postBuildSteps!: string;
@@ -138,8 +136,6 @@ class BuildParameters {
       readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
       readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
-      checkDependencyHealthOverride: CloudRunnerOptions.checkDependencyHealthOverride,
-      startDependenciesOverride: CloudRunnerOptions.startDependenciesOverride,
       cacheKey: CloudRunnerOptions.cacheKey,
     };
   }
