@@ -1,5 +1,5 @@
 import path from 'path';
-import { CloudRunner } from '../..';
+import CloudRunner from './../cloud-runner';
 
 export class CloudRunnerFolders {
   public static readonly repositoryFolder = 'repo';
