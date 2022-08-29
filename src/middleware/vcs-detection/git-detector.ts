@@ -1,13 +1,25 @@
 import System from '../../model/system/system.ts';
 
-export class BranchDetector {
-  public static async getCurrentBranch(projectPath) {
+export class GitDetector {
+  private readonly projectPath: string;
+
+  constructor(projectPath) {
+    this.projectPath = projectPath;
+  }
+
+  public async isGitRepository() {
+    const { status } = await System.shellRun(`git -C '${this.projectPath}' rev-parse 2>/dev/null`);
+
+    return status.code === 0;
+  }
+
+  public async getCurrentBranch() {
     // GitHub pull request, GitHub non pull request
     let branchName = this.headRef || this.ref?.slice(11);
 
     // Local
     if (!branchName) {
-      const { status, output } = await System.shellRun('git branch --show-current', { cwd: projectPath });
+      const { status, output } = await System.shellRun('git branch --show-current', { cwd: this.projectPath });
       if (!status.success) throw new Error('did not expect "git branch --show-current"');
       branchName = output;
     }

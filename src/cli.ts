@@ -5,7 +5,7 @@ import { CommandInterface } from './command/command-interface.ts';
 import { configureLogger } from './middleware/logger-verbosity/index.ts';
 import { CommandFactory } from './command/command-factory.ts';
 import { Engine } from './model/engine/engine.ts';
-import { branchDetection } from './middleware/branch-detection/index.ts';
+import { vcsDetection } from './middleware/vcs-detection/index.ts';
 
 export class Cli {
   private readonly yargs: YargsInstance;
@@ -119,7 +119,7 @@ export class Cli {
         .coerce('projectPath', async (arg) => {
           return arg.replace(/^~/, getHomeDir()).replace(/\/$/, '');
         })
-        .middleware([engineDetection, branchDetection])
+        .middleware([engineDetection, vcsDetection])
 
         // Todo - remove these lines with release 3.0.0
         .option('unityVersion', {

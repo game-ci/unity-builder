@@ -13,6 +13,7 @@ export default class BuildVersionGenerator {
     this.currentBranch = currentBranch;
   }
 
+  // Todo - move more of the get detection logic to the vcs detection class
   public async determineBuildVersion(strategy: string, inputVersion: string, allowDirtyBuild: boolean) {
     log.info('Versioning strategy:', strategy);
 
@@ -116,8 +117,7 @@ export default class BuildVersionGenerator {
       const [major, minor, patch] = `${tag}.${commits}`.split('.');
       const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
 
-      const branch = await this.getCurrentBranch();
-      log.info(`Found semantic version ${threeDigitVersion} for ${branch}@${hash}`);
+      log.info(`Found semantic version ${threeDigitVersion} for ${this.currentBranch}@${hash}`);
 
       return `${threeDigitVersion}`;
     }
