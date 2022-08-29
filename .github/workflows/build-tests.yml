@@ -11,14 +11,14 @@ env:
 
 jobs:
   buildForAllPlatformsUbuntu:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.engineVersion }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         projectPath:
           - test-project
-        unityVersion:
+        engineVersion:
           - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
@@ -59,7 +59,7 @@ jobs:
       - uses: ./
         with:
           projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
 
@@ -68,6 +68,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v2
         with:
-          name: Build Ubuntu (${{ matrix.unityVersion }})
+          name: Build Ubuntu (${{ matrix.engineVersion }})
           path: build
           retention-days: 14

@@ -9,7 +9,8 @@ class GameCI {
 
       if (!success) throw new Error(`${command.name} failed.`);
     } catch (error) {
-      log.error(error);
+      // eslint-disable-next-line no-console
+      console.error(error);
       Deno.exit(1);
     }
   }

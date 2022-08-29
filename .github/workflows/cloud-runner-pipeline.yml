@@ -35,7 +35,7 @@ jobs:
       matrix:
         projectPath:
           - test-project
-        unityVersion:
+        engineVersion:
           #  - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
@@ -82,7 +82,7 @@ jobs:
           cloudRunnerCluster: aws
           versioning: None
           projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           postBuildSteps: |
@@ -118,12 +118,12 @@ jobs:
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar
           retention-days: 14
   k8sBuilds:
-    name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.engineVersion }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        unityVersion:
+        engineVersion:
           #  - 2019.2.11f1
           - 2019.3.15f1
         targetPlatform:
@@ -166,7 +166,7 @@ jobs:
           TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KUBE_CONFIG: ${{ steps.read-base64.outputs.base64 }}
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           cloudRunnerTests: true
           versioning: None
 
@@ -184,7 +184,7 @@ jobs:
           kubeConfig: ${{ steps.read-base64.outputs.base64 }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: test-project
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           versioning: None
           postBuildSteps: |
             - name: upload

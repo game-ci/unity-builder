@@ -1,6 +1,6 @@
 import { Parameters } from '../../../model/index.ts';
 import { fsSync as fs, getUnityChangeSet } from '../../../dependencies.ts';
-import System from '../../../model/system.ts';
+import System from '../../../model/system/system.ts';
 
 class SetupMac {
   static unityHubPath = `"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"`;

@@ -1,22 +1,22 @@
 import { core } from '../dependencies.ts';
 
 import Input from './input.ts';
-import Platform from './platform.ts';
+import UnityTargetPlatform from './unity/unity-target-platform.ts';
 
 afterEach(() => {
   jest.restoreAllMocks();
 });
 
 describe('Input', () => {
-  describe('unityVersion', () => {
+  describe('engineVersion', () => {
     it('returns the default value', () => {
-      expect(Input.unityVersion).toStrictEqual('auto');
+      expect(Input.engineVersion).toStrictEqual('auto');
     });
 
     it('takes input from the users workflow', () => {
       const mockValue = '2020.4.99f9';
       const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
-      expect(Input.unityVersion).toStrictEqual(mockValue);
+      expect(Input.engineVersion).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
@@ -35,7 +35,7 @@ describe('Input', () => {
 
   describe('targetPlatform', () => {
     it('returns the default value', () => {
-      expect(Input.targetPlatform).toStrictEqual(Platform.default);
+      expect(Input.targetPlatform).toStrictEqual(UnityTargetPlatform.default);
     });
 
     it('takes input from the users workflow', () => {

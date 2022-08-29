@@ -1,7 +1,7 @@
 import { fsSync as fs } from '../../../dependencies.ts';
 import { Parameters } from '../../../model/index.ts';
 import ValidateWindows from '../platform-validation/validate-windows.ts';
-import System from '../../../model/system.ts';
+import System from '../../../model/system/system.ts';
 
 class SetupWindows {
   public static async setup(parameters: Parameters) {

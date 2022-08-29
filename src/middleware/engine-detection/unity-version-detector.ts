@@ -1,16 +1,22 @@
-import { fsSync as fs, path } from '../dependencies.ts';
+import { fsSync as fs, path } from '../../dependencies.ts';
 
-export default class UnityVersioning {
+export default class UnityVersionDetector {
   static get versionPattern() {
     return /20\d{2}\.\d\.\w{3,4}|3/;
   }
 
-  static determineUnityVersion(projectPath, unityVersion) {
-    if (unityVersion === 'auto') {
-      return UnityVersioning.read(projectPath);
-    }
+  public static isUnityProject(projectPath) {
+    try {
+      UnityVersionDetector.read(projectPath);
 
-    return unityVersion;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  static getUnityVersion(projectPath) {
+    return UnityVersionDetector.read(projectPath);
   }
 
   static read(projectPath) {
@@ -19,11 +25,11 @@ export default class UnityVersioning {
       throw new Error(`Project settings file not found at "${filePath}". Have you correctly set the projectPath?`);
     }
 
-    return UnityVersioning.parse(Deno.readTextFileSync(filePath, 'utf8'));
+    return UnityVersionDetector.parse(Deno.readTextFileSync(filePath, 'utf8'));
   }
 
   static parse(projectVersionTxt) {
-    const matches = projectVersionTxt.match(UnityVersioning.versionPattern);
+    const matches = projectVersionTxt.match(UnityVersionDetector.versionPattern);
     if (!matches || matches.length === 0) {
       throw new Error(`Failed to parse version from "${projectVersionTxt}".`);
     }

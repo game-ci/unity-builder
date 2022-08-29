@@ -3,6 +3,10 @@ import { Action, Cache, Docker, ImageTag, Input, Output } from '../../model/inde
 import PlatformSetup from '../../model/platform-setup.ts';
 import MacBuilder from '../../model/mac-builder.ts';
 import { CommandBase } from '../command-base.ts';
+import { UnityOptions } from '../../command-options/unity-options.ts';
+import { YargsInstance } from '../../dependencies.ts';
+import { VersioningOptions } from '../../command-options/versioning-options.ts';
+import { BuildOptions } from '../../command-options/build-options.ts';
 
 export class UnityBuildCommand extends CommandBase implements CommandInterface {
   public async execute(options): Promise<boolean> {
@@ -32,10 +36,9 @@ export class UnityBuildCommand extends CommandBase implements CommandInterface {
     }
   }
 
-  public async configureOptions(instance): Promise<void> {
-    instance.option('buildName', {
-      description: 'Name of the build',
-      type: 'string',
-    });
+  public async configureOptions(yargs: YargsInstance): Promise<void> {
+    await UnityOptions.configure(yargs);
+    await VersioningOptions.configure(yargs);
+    await BuildOptions.configure(yargs);
   }
 }

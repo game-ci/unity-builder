@@ -1,15 +1,22 @@
-export class EngineDetector {
-  private projectPath: string;
+import UnityVersionDetector from './unity-version-detector.ts';
 
-  constructor(subCommands: string[], args: string[]) {
-    this.projectPath = subCommands[0] || args.projectPath || '.';
+export class EngineDetector {
+  private readonly projectPath: string;
+
+  constructor(projectPath) {
+    this.projectPath = projectPath;
   }
 
   public async detect(): Promise<{ engine: string; engineVersion: string }> {
-    // Todo - detect and return real versions
+    if (UnityVersionDetector.isUnityProject(this.projectPath)) {
+      const engineVersion = await UnityVersionDetector.getUnityVersion(this.projectPath);
+
+      return { engine: 'unity', engineVersion };
+    }
+
     return {
-      engine: 'unity',
-      engineVersion: '2020.1.0f1',
+      engine: 'unknown',
+      engineVersion: 'unknown',
     };
   }
 }

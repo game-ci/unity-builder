@@ -1,15 +1,7 @@
-import { semver } from '../dependencies.ts';
+import { semver } from '../../dependencies.ts';
 
-export default class AndroidVersioning {
-  static determineVersionCode(version, inputVersionCode) {
-    if (!inputVersionCode) {
-      return AndroidVersioning.versionToVersionCode(version);
-    }
-
-    return inputVersionCode;
-  }
-
-  static versionToVersionCode(version) {
+export default class AndroidBuildVersionGenerator {
+  public static determineVersionCode(version) {
     if (version === 'none') {
       log.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
 
@@ -36,11 +28,5 @@ export default class AndroidVersioning {
     log.info(`Using android versionCode ${versionCode}`);
 
     return versionCode;
-  }
-
-  static determineSdkManagerParameters(targetSdkVersion) {
-    const parsedVersion = Number.parseInt(targetSdkVersion.slice(-2), 10);
-
-    return Number.isNaN(parsedVersion) ? '' : `platforms;android-${parsedVersion}`;
   }
 }

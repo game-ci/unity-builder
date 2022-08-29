@@ -5,10 +5,10 @@ import Docker from './docker.ts';
 import Input from './input.ts';
 import ImageTag from './image-tag.ts';
 import Output from './output.ts';
-import Platform from './platform.ts';
+import UnityTargetPlatform from './unity/unity-target-platform.ts';
 import Project from './project.ts';
-import Unity from './unity.ts';
-import Versioning from './versioning.ts';
+import Unity from './unity/unity.ts';
+import BuildVersionGenerator from '../middleware/build-versioning/build-version-generator.ts';
 import CloudRunner from './cloud-runner/cloud-runner.ts';
 
 export {
@@ -19,9 +19,9 @@ export {
   Input,
   ImageTag,
   Output,
-  Platform,
+  UnityTargetPlatform,
   Project,
   Unity,
-  Versioning,
+  BuildVersionGenerator,
   CloudRunner,
 };

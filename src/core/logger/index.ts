@@ -58,6 +58,7 @@ export const configureLogger = async (verbosity: Verbosity) => {
 
   // Verbosity
   window.log.verbosity = verbosity;
+  window.log.verbosityName = Verbosity[verbosity];
   window.log.isQuiet = isQuiet;
   window.log.isVerbose = isVerbose;
   window.log.isVeryVerbose = isVeryVerbose;

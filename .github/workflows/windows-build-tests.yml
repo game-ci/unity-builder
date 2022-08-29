@@ -10,14 +10,14 @@ env:
 
 jobs:
   buildForAllPlatformsWindows:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.engineVersion }}
     runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
         projectPath:
           - test-project
-        unityVersion:
+        engineVersion:
           - 2020.3.24f1
         targetPlatform:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -61,7 +61,7 @@ jobs:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           allowDirtyBuild: true
@@ -72,6 +72,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v2
         with:
-          name: Build Windows (${{ matrix.unityVersion }})
+          name: Build Windows (${{ matrix.engineVersion }})
           path: build
           retention-days: 14

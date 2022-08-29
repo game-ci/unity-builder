@@ -1,5 +1,5 @@
 export interface RunOptions {
-  pwd: string;
+  cwd: string;
   attach: boolean;
 }
 
@@ -14,12 +14,7 @@ class System {
    *
    * @throws  {Error}  if anything was output to stderr.
    */
-  static async run(rawCommand: string, options: RunOptions = {}): Promise<string> {
-    const { pwd } = options;
-
-    let command = rawCommand;
-    if (pwd) command = `cd ${pwd} ; ${command}`;
-
+  static async run(command: string, options: RunOptions = {}): Promise<string> {
     const isWindows = Deno.build.os === 'windows';
     const shellMethod = isWindows ? System.powershellRun : System.shellRun;
 
@@ -28,14 +23,20 @@ class System {
     return shellMethod(command, options);
   }
 
-  static async shellRun(command: string, options: RunOptions = {}): Promise<string> {
-    const { attach } = options;
+  static async shellRun(rawCommand: string, options: RunOptions = {}): Promise<string> {
+    const { attach, cwd } = options;
+
+    let command = rawCommand;
+    if (cwd) command = `cd ${cwd} ; ${command}`;
 
     return attach ? System.runAndAttach('sh', ['-c', command]) : System.runAndCapture('sh', ['-c', command]);
   }
 
-  static async powershellRun(command: string, options: RunOptions = {}): Promise<string> {
-    const { attach } = options;
+  static async powershellRun(rawCommand: string, options: RunOptions = {}): Promise<string> {
+    const { attach, cwd } = options;
+
+    let command = rawCommand;
+    if (cwd) command = `cd ${cwd} ; ${command}`;
 
     return attach ? System.runAndAttach('powershell', [command]) : System.runAndCapture('powershell', [command]);
   }

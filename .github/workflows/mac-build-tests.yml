@@ -10,14 +10,14 @@ env:
 
 jobs:
   buildForAllPlatformsWindows:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.engineVersion }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         projectPath:
           - test-project
-        unityVersion:
+        engineVersion:
           - 2020.3.24f1
         targetPlatform:
           - StandaloneOSX # Build a MacOS executable
@@ -58,7 +58,7 @@ jobs:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
+          engineVersion: ${{ matrix.engineVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           # We use dirty build because we are replacing the default project settings file above
@@ -69,6 +69,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v2
         with:
-          name: Build MacOS (${{ matrix.unityVersion }})
+          name: Build MacOS (${{ matrix.engineVersion }})
           path: build
           retention-days: 14

@@ -1,102 +1,33 @@
-import NotImplementedException from './error/not-implemented-exception.ts';
-import ValidationError from './error/validation-error.ts';
-import Input from './input.ts';
-import System from './system.ts';
-import { Action } from './index.ts';
+import NotImplementedException from '../../model/error/not-implemented-exception.ts';
+import Input from '../../model/input.ts';
+import System from '../../model/system/system.ts';
+import { Action } from '../../model/index.ts';
+import { VersioningStrategy } from '../../model/versioning/versioning-strategy.ts';
 
-export default class Versioning {
-  static get projectPath() {
-    return Input.projectPath;
+export default class BuildVersionGenerator {
+  private readonly maxDiffLines: number = 60;
+  private readonly projectPath: string;
+
+  constructor(projectPath, currentBranch) {
+    this.projectPath = projectPath;
+    this.currentBranch = currentBranch;
   }
 
-  static get strategies() {
-    return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
-  }
-
-  static get grepCompatibleInputVersionRegex() {
-    return '^v?([0-9]+\\.)*[0-9]+.*';
-  }
-
-  /**
-   * Get the branch name of the (related) branch
-   */
-  static async getCurrentBranch() {
-    // GitHub pull request, GitHub non pull request
-    let branchName = this.headRef || this.ref?.slice(11);
-
-    // Local
-    if (!branchName) {
-      const { status, output } = await System.shellRun('git branch --show-current');
-      if (!status.success) throw new Error('did not expect "git branch --show-current"');
-      branchName = output;
-    }
-
-    return branchName;
-  }
-
-  /**
-   * For pull requests we can reliably use GITHUB_HEAD_REF
-   */
-  static get headRef() {
-    return Deno.env.get('GITHUB_HEAD_REF');
-  }
-
-  /**
-   * For branches GITHUB_REF will have format `refs/heads/feature-branch-1`
-   */
-  static get ref() {
-    return Deno.env.get('GITHUB_REF');
-  }
-
-  /**
-   * The commit SHA that triggered the workflow run.
-   */
-  static get sha() {
-    return Deno.env.get('GITHUB_SHA');
-  }
-
-  /**
-   * Maximum number of lines to print when logging the git diff
-   */
-  static get maxDiffLines() {
-    return 60;
-  }
-
-  /**
-   * Regex to parse version description into separate fields
-   */
-  static get descriptionRegex1() {
-    return /^v?([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
-  }
-
-  static get descriptionRegex2() {
-    return /^v?([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
-  }
-
-  static get descriptionRegex3() {
-    return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
-  }
-
-  static async determineBuildVersion(strategy: string, inputVersion: string, allowDirtyBuild: boolean) {
-    // Validate input
-    if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
-      throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
-    }
-
+  public async determineBuildVersion(strategy: string, inputVersion: string, allowDirtyBuild: boolean) {
     log.info('Versioning strategy:', strategy);
 
     let version;
     switch (strategy) {
-      case this.strategies.None:
+      case VersioningStrategy.None:
         version = 'none';
         break;
-      case this.strategies.Custom:
+      case VersioningStrategy.Custom:
         version = inputVersion;
         break;
-      case this.strategies.Semantic:
+      case VersioningStrategy.Semantic:
         version = await this.generateSemanticVersion(allowDirtyBuild);
         break;
-      case this.strategies.Tag:
+      case VersioningStrategy.Tag:
         version = await this.generateTagVersion();
         break;
       default:
@@ -106,6 +37,38 @@ export default class Versioning {
     log.info('Version of this build:', version);
 
     return version;
+  }
+
+  private get grepCompatibleInputVersionRegex() {
+    return '^v?([0-9]+\\.)*[0-9]+.*';
+  }
+
+  /**
+   * Get the branch name of the (related) branch
+   */
+  private async getCurrentBranch() {}
+
+  /**
+   * The commit SHA that triggered the workflow run.
+   * @deprecated
+   */
+  private get sha() {
+    return Deno.env.get('GITHUB_SHA');
+  }
+
+  /**
+   * Regex to parse version description into separate fields
+   */
+  private get descriptionRegex1() {
+    return /^v?([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
+  }
+
+  private get descriptionRegex2() {
+    return /^v?([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
+  }
+
+  private get descriptionRegex3() {
+    return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
   }
 
   /**
@@ -128,13 +91,13 @@ export default class Versioning {
    *
    * @See: https://semver.org/
    */
-  static async generateSemanticVersion(allowDirtyBuild) {
+  private async generateSemanticVersion(allowDirtyBuild) {
     if (await this.isShallow()) {
       await this.fetch();
     }
 
     if ((await this.isDirty()) && !allowDirtyBuild) {
-      await Versioning.logDiff();
+      await BuildVersionGenerator.logDiff();
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
     }
 
@@ -168,7 +131,7 @@ export default class Versioning {
   /**
    * Generate the proper version for unity based on an existing tag.
    */
-  static async generateTagVersion() {
+  private async generateTagVersion() {
     let tag = await this.getTag();
 
     if (tag.charAt(0) === 'v') {
@@ -181,7 +144,7 @@ export default class Versioning {
   /**
    * Parses the versionDescription into their named parts.
    */
-  static async parseSemanticVersion() {
+  private async parseSemanticVersion() {
     const description = await this.getVersionDescription();
 
     try {
@@ -225,7 +188,7 @@ export default class Versioning {
   /**
    * Returns whether the repository is shallow.
    */
-  static async isShallow() {
+  private async isShallow() {
     const output = await this.git('rev-parse --is-shallow-repository');
 
     return output !== 'false';
@@ -238,7 +201,7 @@ export default class Versioning {
    *
    * Note: `--all` should not be used, and would break fetching for push event.
    */
-  static async fetch() {
+  private async fetch() {
     try {
       await this.git('fetch --unshallow');
     } catch {
@@ -255,7 +218,7 @@ export default class Versioning {
    * In this format v0.12 is the latest tag, 24 are the number of commits since, and gd2198ab
    * identifies the current commit.
    */
-  static async getVersionDescription() {
+  private async getVersionDescription() {
     let commitIsh = '';
 
     // In CI the repo is checked out in detached head mode.
@@ -271,7 +234,7 @@ export default class Versioning {
   /**
    * Returns whether there are uncommitted changes that are not ignored.
    */
-  static async isDirty() {
+  private async isDirty() {
     const output = await this.git('status --porcelain');
     const isDirty = output !== '';
 
@@ -288,7 +251,7 @@ export default class Versioning {
   /**
    * Get the tag if there is one pointing at HEAD
    */
-  static async getTag() {
+  private async getTag() {
     return await this.git('tag --points-at HEAD');
   }
 
@@ -297,7 +260,7 @@ export default class Versioning {
    *
    * Note: Currently this is run in all OSes, so the syntax must be cross-platform.
    */
-  static async hasAnyVersionTags() {
+  private async hasAnyVersionTags() {
     const command = `git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`;
 
     // Todo - make sure this cwd is actually passed in somehow
@@ -318,7 +281,7 @@ export default class Versioning {
    *
    * Note: HEAD should not be used, as it may be detached, resulting in an additional count.
    */
-  static async getTotalNumberOfCommits() {
+  private async getTotalNumberOfCommits() {
     const numberOfCommitsAsString = await this.git(`rev-list --count ${this.sha}`);
 
     return Number.parseInt(numberOfCommitsAsString, 10);
@@ -327,7 +290,7 @@ export default class Versioning {
   /**
    * Run git in the specified project path
    */
-  static async git(arguments_, options = {}) {
+  private async git(arguments_, options = {}) {
     const result = await System.run(`git ${arguments_}`, { cwd: this.projectPath, ...options });
 
     log.warning(result);

@@ -1,7 +1,6 @@
 import { fsSync as fs, path, core } from '../dependencies.ts';
 import { Cli } from './cli/cli.ts';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override.ts';
-import Platform from './platform.ts';
 import { CliArguments } from '../core/cli/cli-arguments.ts';
 
 /**
@@ -102,40 +101,8 @@ class Input {
     return this.get('GITHUB_RUN_NUMBER') || '0';
   }
 
-  public get targetPlatform() {
-    return this.get('targetPlatform') || Platform.default;
-  }
-
-  public get unityVersion() {
-    return this.get('unityVersion') || 'auto';
-  }
-
-  public get unityEmail() {
-    return this.get('unityEmail') || '';
-  }
-
-  public get unityPassword() {
-    return this.get('unityPassword') || '';
-  }
-
-  public get unityLicense() {
-    return this.get('unityLicense') || '';
-  }
-
-  public get unityLicenseFile() {
-    return this.get('unityLicenseFile') || '';
-  }
-
   public get unitySerial() {
     return this.get('unitySerial') || '';
-  }
-
-  public get usymUploadAuthToken() {
-    return this.get('usymUploadAuthToken') || '';
-  }
-
-  public get customImage() {
-    return this.get('customImage') || '';
   }
 
   public get projectPath() {
@@ -156,24 +123,12 @@ class Input {
     return this.get('buildName');
   }
 
-  public get buildsPath() {
-    return this.get('buildsPath') || 'build';
-  }
-
   public get buildMethod() {
     return this.get('buildMethod') || ''; // Processed in docker file
   }
 
   public get customParameters() {
     return this.get('customParameters') || '';
-  }
-
-  public get versioningStrategy() {
-    return this.get('versioning') || 'Semantic';
-  }
-
-  public get specifiedVersion() {
-    return this.get('version') || '';
   }
 
   public get androidVersionCode() {
@@ -248,13 +203,6 @@ class Input {
 
   public get chownFilesTo() {
     return this.get('chownFilesTo') || '';
-  }
-
-  public get allowDirtyBuild() {
-    const input = this.get('allowDirtyBuild');
-    log.debug('input === ', input);
-
-    return input || false === true;
   }
 
   public get postBuildSteps() {

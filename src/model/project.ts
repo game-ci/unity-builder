@@ -1,5 +1,5 @@
 import Input from './input.ts';
-import Unity from './unity.ts';
+import Unity from './unity/unity.ts';
 import Action from './action.ts';
 
 class Project {

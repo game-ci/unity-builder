@@ -3,7 +3,7 @@ import CloudRunner from './cloud-runner.ts';
 import Input from '../input.ts';
 import { CloudRunnerStatics } from './cloud-runner-statics.ts';
 import { TaskParameterSerializer } from './services/task-parameter-serializer.ts';
-import UnityVersioning from '../unity-versioning.ts';
+import UnityVersionDetector from '../../middleware/engine-detection/unity-version-detector.ts';
 import { Cli } from '../cli/cli.ts';
 import CloudRunnerLogger from './services/cloud-runner-logger.ts';
 import { v4 as uuidv4 } from '../../../node_modules/uuid';
@@ -20,7 +20,7 @@ describe('Cloud Runner', () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
-        unityVersion: UnityVersioning.read('test-project'),
+        engineVersion: UnityVersionDetector.read('test-project'),
         targetPlatform: 'StandaloneLinux64',
         customJob: `
         - name: 'step 1'
@@ -68,7 +68,7 @@ describe('Cloud Runner', () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
-        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        engineVersion: UnityVersionDetector.determineUnityVersion('test-project', UnityVersionDetector.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
@@ -96,7 +96,7 @@ describe('Cloud Runner', () => {
     Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
-      unityVersion: UnityVersioning.read('test-project'),
+      engineVersion: UnityVersionDetector.read('test-project'),
       cloudRunnerCluster: 'local-system',
       targetPlatform: 'StandaloneLinux64',
       customJob: `
@@ -124,7 +124,7 @@ describe('Cloud Runner', () => {
     Cli.options = {
       versioning: 'None',
       projectPath: 'test-project',
-      unityVersion: UnityVersioning.read('test-project'),
+      engineVersion: UnityVersionDetector.read('test-project'),
       cloudRunnerCluster: 'test',
       targetPlatform: 'StandaloneLinux64',
     };

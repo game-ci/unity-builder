@@ -1,5 +1,5 @@
 import { Parameters } from './parameters.ts';
-import System from './system.ts';
+import System from './system/system.ts';
 
 class MacBuilder {
   public static async run(actionFolder) {

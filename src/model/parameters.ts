@@ -1,9 +1,9 @@
 import { default as getHomeDir } from 'https://deno.land/x/dir@1.5.1/home_dir/mod.ts';
-import AndroidVersioning from './android-versioning.ts';
+import AndroidBuildVersionGenerator from '../middleware/build-versioning/android-build-version-generator.ts';
 import Input from './input.ts';
-import Platform from './platform.ts';
-import UnityVersioning from './unity-versioning.ts';
-import Versioning from './versioning.ts';
+import UnityTargetPlatform from './unity/unity-target-platform.ts';
+import UnityVersionDetector from '../middleware/engine-detection/unity-version-detector.ts';
+import BuildVersionGenerator from '../middleware/build-versioning/build-version-generator.ts';
 import { GitRepoReader } from './input-readers/git-repo.ts';
 import { CommandInterface } from '../command/command-interface.ts';
 import { Environment } from '../core/env/environment.ts';
@@ -94,39 +94,13 @@ class Parameters {
   }
 
   public async parse(): Promise<Parameters> {
-    const cliStoragePath = `${getHomeDir()}/.game-ci`;
-    const targetPlatform = this.input.get('targetPlatform');
-    const buildsPath = this.input.get('buildsPath');
-    const projectPath = this.get('projectPath');
-    const unityVersion = this.get('unityVersion');
-    const versioningStrategy = this.get('versioningStrategy');
-    const specifiedVersion = this.get('specifiedVersion');
-    const allowDirtyBuild = this.get('allowDirtyBuild');
-    const androidTargetSdkVersion = this.get('androidTargetSdkVersion');
-
-    const buildName = this.input.get('buildName') || targetPlatform;
-    const buildFile = Parameters.parseBuildFile(buildName, targetPlatform, this.get('androidAppBundle'));
-    const buildPath = `${buildsPath}/${targetPlatform}`;
-    const editorVersion = UnityVersioning.determineUnityVersion(projectPath, unityVersion);
-    const buildVersion = await Versioning.determineBuildVersion(versioningStrategy, specifiedVersion, allowDirtyBuild);
-    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, this.get('androidVersionCode'));
-    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(androidTargetSdkVersion);
-    const branch = (await Versioning.getCurrentBranch()) || (await GitRepoReader.GetBranch());
+    const branch = (await BuildVersionGenerator.getCurrentBranch()) || (await GitRepoReader.GetBranch());
 
     const parameters = {
       branch,
-      unityEmail: this.get('unityEmail'),
-      unityPassword: this.get('unityPassword'),
-      unityLicense: this.get('unityLicense'),
-      unityLicenseFile: this.get('unityLicenseFile'),
       unitySerial: this.getUnitySerial(),
-      cliStoragePath,
-      editorVersion,
-      customImage: this.get('customImage'),
-      usymUploadAuthToken: this.get('usymUploadAuthToken'),
+      editorVersion: engineVersion,
       runnerTempPath: this.env.get('RUNNER_TEMP'),
-      targetPlatform,
-      projectPath,
       buildName,
       buildPath,
       buildFile,
@@ -154,18 +128,6 @@ class Parameters {
       ...parameters,
       ...commandParameterOverrides,
     };
-  }
-
-  static parseBuildFile(filename, platform, androidAppBundle) {
-    if (Platform.isWindows(platform)) {
-      return `${filename}.exe`;
-    }
-
-    if (Platform.isAndroid(platform)) {
-      return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
-    }
-
-    return filename;
   }
 
   private getUnitySerial() {

@@ -2,7 +2,7 @@ import { fs, uuid, path, __dirname } from '../../../dependencies.ts';
 import Parameters from '../../parameters.ts';
 import { Cli } from '../../cli/cli.ts';
 import Input from '../../input.ts';
-import UnityVersioning from '../../unity-versioning.ts';
+import UnityVersionDetector from '../../../middleware/engine-detection/unity-version-detector.ts';
 import CloudRunner from '../cloud-runner.ts';
 import { CloudRunnerSystem } from '../services/cloud-runner-system/index.ts';
 import { Caching } from './caching.ts';
@@ -16,7 +16,7 @@ describe('Cloud Runner Caching', () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
-        unityVersion: UnityVersioning.read('test-project'),
+        engineVersion: UnityVersionDetector.read('test-project'),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuid()}`,
       };

@@ -6,7 +6,7 @@ inputs:
     required: true
     default: ''
     description: 'Platform that the build should target.'
-  unityVersion:
+  engineVersion:
     required: false
     default: 'auto'
     description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
@@ -184,7 +184,8 @@ runs:
     - run: |
         deno run --allow-run ./src/index.ts build \
         --targetPlatform="${{ inputs.targetPlatform }}" \
-        --unityVersion="${{ inputs.unityVersion }}" \
+        --engineVersion="${{ inputs.engineVersion }}" \
+        --engineVersion="${{ inputs.engineVersion }}" \
         --customImage="${{ inputs.customImage }}" \
         --projectPath="${{ inputs.projectPath }}" \
         --buildName="${{ inputs.buildName }}" \

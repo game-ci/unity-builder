@@ -1,12 +1,14 @@
-import yargs from 'https://deno.land/x/yargs@v17.5.1-deno/deno.ts';
+import { yargs, YargsInstance, YargsArguments } from './dependencies.ts';
 import { default as getHomeDir } from 'https://deno.land/x/dir@1.5.1/home_dir/mod.ts';
 import { engineDetection } from './middleware/engine-detection/index.ts';
 import { CommandInterface } from './command/command-interface.ts';
 import { configureLogger } from './middleware/logger-verbosity/index.ts';
 import { CommandFactory } from './command/command-factory.ts';
+import { Engine } from './model/engine/engine.ts';
+import { branchDetection } from './middleware/branch-detection/index.ts';
 
 export class Cli {
-  private readonly yargs: yargs.Argv;
+  private readonly yargs: YargsInstance;
   private readonly cliStorageAbsolutePath: string;
   private readonly cliStorageCanonicalPath: string;
   private readonly configFileName: string;
@@ -27,6 +29,11 @@ export class Cli {
     await this.registerBuildCommand();
 
     await this.parse();
+
+    if (log.isVeryVerbose) {
+      log.debug(`Parsed command: ${this.command.name} (${this.command.constructor.name})`);
+      log.debug(`Parsed arguments: ${JSON.stringify(this.options, null, 2)}`);
+    }
 
     return {
       command: this.command,
@@ -60,35 +67,43 @@ export class Cli {
     this.yargs
       .options('quiet', {
         alias: 'q',
-        default: false,
         description: 'Suppress all output',
         type: 'boolean',
+        demandOption: false,
+        default: false,
       })
       .options('verbose', {
         alias: 'v',
-        default: false,
         description: 'Enable verbose logging',
         type: 'boolean',
+        demandOption: false,
+        default: false,
       })
       .options('veryVerbose', {
         alias: 'vv',
-        default: false,
         description: 'Enable very verbose logging',
         type: 'boolean',
+        demandOption: false,
+        default: false,
       })
       .options('maxVerbose', {
         alias: 'vvv',
-        default: false,
         description: 'Enable debug logging',
+        demandOption: false,
+        type: 'boolean',
+        default: false,
       })
+      .default([{ logLevel: 'placeholder' }, { logLevelName: 'placeholder' }])
       .middleware([configureLogger], true);
   }
 
   private globalOptions() {
     this.yargs
+      .help('help')
+      .showHelpOnFail(false, 'Specify --help for available options')
       .epilogue('for more information, find our manual at https://game.ci/docs/cli')
       .middleware([])
-      .showHelpOnFail(true)
+      .exitProcess(true) // prevents `_handle` from being lost
       .strict(true);
   }
 
@@ -98,17 +113,35 @@ export class Cli {
         .positional('projectPath', {
           describe: 'Path to the project',
           type: 'string',
+          demandOption: false,
+          default: '.',
         })
+        .coerce('projectPath', async (arg) => {
+          return arg.replace(/^~/, getHomeDir()).replace(/\/$/, '');
+        })
+        .middleware([engineDetection, branchDetection])
+
+        // Todo - remove these lines with release 3.0.0
+        .option('unityVersion', {
+          describe: 'Override the engine version to be used',
+          type: 'string',
+        })
+        .deprecateOption('unityVersion', 'This parameter will be removed. Use engineVersion instead')
         .middleware([
-          engineDetection, // Command is engine specific
           async (args) => {
-            await this.registerCommand(args, yargs);
+            if (!args.unityVersion || args.unityVersion === 'auto' || args.engine !== Engine.unity) return;
+
+            args.engineVersion = args.unityVersion;
+            args.unityVersion = undefined;
           },
-        ]);
+        ])
+
+        // End todo
+        .middleware([async (args) => this.registerCommand(args, yargs)]);
     });
   }
 
-  private async registerCommand(args: yargs.Arguments, yargs) {
+  private async registerCommand(args: YargsArguments, yargs: YargsInstance) {
     const { engine, engineVersion, _: command } = args;
 
     this.command = new CommandFactory().selectEngine(engine, engineVersion).createCommand(command);
@@ -117,6 +150,8 @@ export class Cli {
   }
 
   private async parse() {
-    this.options = await this.yargs.parseAsync();
+    const { _, $0, ...options } = await this.yargs.parseAsync();
+
+    this.options = options;
   }
 }

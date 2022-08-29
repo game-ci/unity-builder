@@ -1,6 +1,6 @@
 import ImageEnvironmentFactory from './image-environment-factory.ts';
 import { path, fsSync as fs } from '../dependencies.ts';
-import System from './system.ts';
+import System from './system/system.ts';
 
 class Docker {
   static async run(image, parameters) {

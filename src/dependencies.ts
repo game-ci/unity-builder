@@ -20,8 +20,8 @@ import { Command } from 'https://deno.land/x/cmd@v1.2.0/commander/index.ts';
 import { getUnityChangeset as getUnityChangeSet } from 'https://deno.land/x/unity_changeset@2.0.0/src/index.ts';
 import { Buffer } from 'https://deno.land/std@0.151.0/io/buffer.ts';
 import { config, configSync } from 'https://deno.land/std@0.151.0/dotenv/mod.ts';
-import yargs from 'https://deno.land/x/yargs@v17.4.0-deno/deno.ts';
-import * as yargsTypes from 'https://deno.land/x/yargs@v17.4.0-deno/deno-types.ts';
+import yargs from 'https://deno.land/x/yargs@v17.5.1-deno/deno.ts';
+import type { Arguments as YargsArguments } from 'https://deno.land/x/yargs@v17.5.1-deno/deno-types.ts';
 
 // Internally managed packages
 import waitUntil from './module/wait-until.ts';
@@ -42,6 +42,9 @@ const __dirname = path.dirname(path.fromFileUrl(import.meta.url));
 
 const { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } = k8s;
 
+type YargsInstance = yargs.Argv;
+
+export type { YargsArguments, YargsInstance };
 export {
   __dirname,
   __filename,
@@ -74,5 +77,4 @@ export {
   Writable,
   yaml,
   yargs,
-  yargsTypes,
 };

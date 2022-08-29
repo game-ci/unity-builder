@@ -2,7 +2,7 @@ import { NonExistentCommand } from './null/non-existent-command.ts';
 import { UnityBuildCommand } from './build/unity-build-command.ts';
 import { CommandInterface } from './command-interface.ts';
 import { UnityRemoteBuildCommand } from './remote/unity-remote-build-command.ts';
-import { Engine } from '../model/engine.ts';
+import { Engine } from '../model/engine/engine.ts';
 
 export class CommandFactory {
   constructor() {}

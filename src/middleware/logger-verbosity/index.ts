@@ -17,4 +17,12 @@ export const configureLogger = async (argv) => {
   }
 
   await createLoggerAndSetVerbosity(verbosity);
+
+  argv.logLevel = log.verbosity;
+  argv.logLevelName = log.verbosityName;
+
+  argv.quiet = undefined;
+  argv.verbose = undefined;
+  argv.veryVerbose = undefined;
+  argv.maxVerbose = undefined;
 };
