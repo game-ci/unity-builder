@@ -120,6 +120,8 @@ jobs:
   k8sBuilds:
     name: K8s (GKE Autopilot) build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
+    env:
+      CLOUD_RUNNER_CLUSTER: k8s
     strategy:
       fail-fast: false
       matrix:
