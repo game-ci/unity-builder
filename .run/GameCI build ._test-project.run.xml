@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GameCI build ./test-project" type="DenoConfigurationType" inputPath="$PROJECT_DIR$/src/index.ts" programParameters=" run --allow-all" workingDirectory="$PROJECT_DIR$/src">
+    <option name="applicationArguments" value="build ../test-project" />
+    <method v="2" />
+  </configuration>
+</component>
