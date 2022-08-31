@@ -7,7 +7,7 @@ class GameCI {
 
       const success = await command.execute(options);
 
-      if (!success) throw new Error(`${command.name} failed.`);
+      if (!success) log.warning(`${command.constructor.name} failed.`);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);

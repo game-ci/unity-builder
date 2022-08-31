@@ -24,25 +24,7 @@
     "test-i-aws": "cross-env cloudRunnerTests=true cloudRunnerCluster=aws yarn test -i -t \"cloud runner\"",
     "test-i-k8s": "cross-env cloudRunnerTests=true cloudRunnerCluster=k8s yarn test -i -t \"cloud runner\""
   },
-  "dependencies": {
-    "@actions/core": "^1.9.1",
-    "@actions/exec": "^1.1.0",
-    "@actions/github": "^5.0.0",
-    "@kubernetes/client-node": "^0.16.3",
-    "@octokit/core": "^3.5.1",
-    "async-wait-until": "^2.0.12",
-    "aws-sdk": "^2.1081.0",
-    "base-64": "^1.0.0",
-    "commander": "^9.0.0",
-    "commander-ts": "^0.2.0",
-    "kubernetes-client": "^9.0.0",
-    "nanoid": "^3.3.1",
-    "reflect-metadata": "^0.1.13",
-    "semver": "^7.3.5",
-    "unity-changeset": "^1.6.0",
-    "uuid": "^8.3.2",
-    "yaml": "^1.10.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
     "@types/jest": "^28.1.6",

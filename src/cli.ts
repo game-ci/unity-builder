@@ -1,5 +1,4 @@
-import { yargs, YargsInstance, YargsArguments } from './dependencies.ts';
-import { default as getHomeDir } from 'https://deno.land/x/dir@1.5.1/home_dir/mod.ts';
+import { yargs, YargsInstance, YargsArguments, getHomeDir } from './dependencies.ts';
 import { engineDetection } from './middleware/engine-detection/index.ts';
 import { CommandInterface } from './command/command-interface.ts';
 import { configureLogger } from './middleware/logger-verbosity/index.ts';
@@ -99,11 +98,13 @@ export class Cli {
 
   private globalOptions() {
     this.yargs
-      .help('help')
-      .showHelpOnFail(false, 'Specify --help for available options')
+      .fail(Cli.handleFailure)
+      .help(false) // Fixes broken `_handle` in yargs 17.0.0
+      .version(false) // Fixes broken `_handle` in yargs 17.0.0
+      .showHelpOnFail(false) // Fixes broken `_handle` in yargs 17.0.0
       .epilogue('for more information, find our manual at https://game.ci/docs/cli')
       .middleware([])
-      .exitProcess(true) // prevents `_handle` from being lost
+      .exitProcess(true) // Fixes broken `_handle` in yargs 17.0.0
       .strict(true);
   }
 
@@ -119,22 +120,30 @@ export class Cli {
         .coerce('projectPath', async (arg) => {
           return arg.replace(/^~/, getHomeDir()).replace(/\/$/, '');
         })
-        .middleware([engineDetection, vcsDetection])
+        .default('engine', '')
+        .default('engineVersion', '')
+        .middleware([engineDetection], true)
+        .default('branch', '')
+        .middleware([vcsDetection], true)
 
         // Todo - remove these lines with release 3.0.0
         .option('unityVersion', {
           describe: 'Override the engine version to be used',
           type: 'string',
+          default: '',
         })
         .deprecateOption('unityVersion', 'This parameter will be removed. Use engineVersion instead')
-        .middleware([
-          async (args) => {
-            if (!args.unityVersion || args.unityVersion === 'auto' || args.engine !== Engine.unity) return;
+        .middleware(
+          [
+            async (args) => {
+              if (!args.unityVersion || args.unityVersion === 'auto' || args.engine !== Engine.unity) return;
 
-            args.engineVersion = args.unityVersion;
-            args.unityVersion = undefined;
-          },
-        ])
+              args.engineVersion = args.unityVersion;
+              args.unityVersion = undefined;
+            },
+          ],
+          true,
+        )
 
         // End todo
         .middleware([async (args) => this.registerCommand(args, yargs)]);
@@ -153,5 +162,12 @@ export class Cli {
     const { _, $0, ...options } = await this.yargs.parseAsync();
 
     this.options = options;
+  }
+
+  private static handleFailure(message: string, error: Error, yargs: YargsInstance) {
+    if (error) throw error;
+
+    log.warning(message);
+    Deno.exit(1);
   }
 }
