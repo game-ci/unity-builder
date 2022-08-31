@@ -1,4 +1,8 @@
 {
+  "tasks": {
+    "test": "deno test -A ./src/integrity.test.ts",
+    "coverage": "rm -rf .coverage ; deno test -A ./src/integrity.test.ts --coverage=.coverage/raw ; deno coverage .coverage/raw --lcov --output=.coverage/raw/.lcov ; perl C:\\ProgramData\\chocolatey\\lib\\lcov\\tools\\bin\\genhtml -q -o .coverage/report .coverage/raw/.lcov && deno run -A .tools/open-coverage-report.ts"
+  },
   "compilerOptions": {
     "allowJs": true,
     "lib": ["deno.window"],

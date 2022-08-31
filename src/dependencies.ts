@@ -22,6 +22,7 @@ import { Buffer } from 'https://deno.land/std@0.151.0/io/buffer.ts';
 import { config, configSync } from 'https://deno.land/std@0.151.0/dotenv/mod.ts';
 import yargs from 'https://deno.land/x/yargs@v17.5.1-deno/deno.ts';
 import type { Arguments as YargsArguments } from 'https://deno.land/x/yargs@v17.5.1-deno/deno-types.ts';
+import { default as getHomeDir } from 'https://deno.land/x/dir@1.5.1/home_dir/mod.ts';
 
 // Internally managed packages
 import waitUntil from './module/wait-until.ts';
@@ -30,6 +31,9 @@ import { dedent } from './module/dedent.ts';
 
 // Polyfill for https://github.com/tc39/proposal-string-dedent
 String.dedent = dedent;
+
+// Errors from yargs can be very verbose and not very descriptive
+Error.stackTraceLimit = 15;
 
 class Writable {
   constructor() {
@@ -65,6 +69,7 @@ export {
   crypto,
   fs,
   fsSync,
+  getHomeDir,
   getUnityChangeSet,
   http,
   nanoid,
