@@ -7,10 +7,13 @@ class GameCI {
 
       const success = await command.execute(options);
 
-      if (!success) log.warning(`${command.constructor.name} failed.`);
+      if (success) {
+        log.info(`${command.name} done.`);
+      } else {
+        log.warning(`${command.constructor.name} failed.`);
+      }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      log.error(error);
       Deno.exit(1);
     }
   }

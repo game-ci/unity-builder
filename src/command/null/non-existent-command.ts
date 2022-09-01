@@ -1,16 +1,11 @@
 import { CommandInterface } from '../command-interface.ts';
-import { Options } from '../../config/options.ts';
+import { YargsInstance, YargsArguments } from '../../dependencies.ts';
+import { CommandBase } from '../command-base.ts';
 
-export class NonExistentCommand implements CommandInterface {
-  public name: string;
-
-  constructor(name: string) {
-    this.name = name;
+export class NonExistentCommand extends CommandBase implements CommandInterface {
+  public execute(options: YargsArguments): Promise<boolean> {
+    throw new Error(`Command "${this.name}" does not exist`);
   }
 
-  public async execute(options: Options): Promise<boolean> {
-    throw new Error(`Command ${this.name} does not exist`);
-  }
-
-  public async parseParameters() {}
+  public async configureOptions(yargs: YargsInstance): Promise<void> {}
 }

@@ -25,6 +25,7 @@ export class Cli {
     this.configureLogger();
     this.globalOptions();
 
+    await this.registerConfigCommand();
     await this.registerBuildCommand();
 
     await this.parse();
@@ -45,7 +46,7 @@ export class Cli {
     const defaultAbsolutePath = `${this.cliStorageAbsolutePath}/${this.configFileName}`;
 
     this.yargs
-      .config('config', `default: ${defaultCanonicalPath}`, async (override) => {
+      .config('config', `default: ${defaultCanonicalPath}`, async (override: string) => {
         const configPath = override || defaultAbsolutePath;
 
         return JSON.parse(await Deno.readTextFile(configPath));
@@ -146,6 +147,14 @@ export class Cli {
         )
 
         // End todo
+        .middleware([async (args) => this.registerCommand(args, yargs)]);
+    });
+  }
+
+  private async registerConfigCommand() {
+    this.yargs.command('config', 'GameCI CLI configuration', async (yargs) => {
+      yargs
+        .command('open', 'Opens the CLI configuration folder', async (yargs) => {})
         .middleware([async (args) => this.registerCommand(args, yargs)]);
     });
   }

@@ -1,27 +1,40 @@
 {
   "tasks": {
+    "config": "deno run -A .tools/open-config-folder.ts",
     "test": "deno test -A ./src/integrity.test.ts",
     "coverage": "rm -rf .coverage ; deno test -A ./src/integrity.test.ts --coverage=.coverage/raw ; deno coverage .coverage/raw --lcov --output=.coverage/raw/.lcov ; perl .tools/lcov/genhtml.perl -q -o .coverage/report .coverage/raw/.lcov && deno run -A .tools/open-coverage-report.ts"
   },
   "compilerOptions": {
     "allowJs": true,
-    "lib": ["deno.window"],
+    "lib": [
+      "deno.window"
+    ],
     "strict": true
   },
   "lint": {
     "files": {
-      "include": ["src/"],
+      "include": [
+        "src/"
+      ],
       "exclude": []
     },
     "rules": {
-      "tags": ["recommended"],
-      "include": ["ban-untagged-todo"],
-      "exclude": ["no-unused-vars"]
+      "tags": [
+        "recommended"
+      ],
+      "include": [
+        "ban-untagged-todo"
+      ],
+      "exclude": [
+        "no-unused-vars"
+      ]
     }
   },
   "fmt": {
     "files": {
-      "include": ["src/"],
+      "include": [
+        "src/"
+      ],
       "exclude": []
     },
     "options": {

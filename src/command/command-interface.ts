@@ -1,8 +1,7 @@
-import { Options } from '../config/options.ts';
-import { yargs } from '../dependencies.ts';
+import { YargsInstance, YargsArguments } from '../dependencies.ts';
 
 export interface CommandInterface {
   name: string;
-  execute: (options: Options) => Promise<boolean>;
-  configureOptions: (instance: yargs.Argv) => Promise<void>;
+  execute: (options: YargsArguments) => Promise<boolean>;
+  configureOptions: (instance: YargsInstance) => Promise<void>;
 }
