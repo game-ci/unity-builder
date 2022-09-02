@@ -29,6 +29,8 @@ jobs:
   awsBuild:
     name: AWS Fargate Build
     if: github.event.pull_request.draft == false
+    env:
+      CLOUD_RUNNER_CLUSTER: aws
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

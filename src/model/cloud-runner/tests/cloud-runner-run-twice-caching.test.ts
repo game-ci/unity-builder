@@ -32,7 +32,6 @@ describe('Cloud Runner', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        cloudRunnerCluster: `aws`,
       };
       const buildParameter = await CreateParameters(overrides);
       const baseImage = new ImageTag(buildParameter);
