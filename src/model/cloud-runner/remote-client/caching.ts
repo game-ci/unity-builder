@@ -60,6 +60,7 @@ export class Caching {
         );
       }
       await CloudRunnerSystem.Run(`tar -cvf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar.lz4`);
       assert(await fileExists(`${cacheArtifactName}.tar.lz4`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar.lz4 ${cacheFolder}`);
