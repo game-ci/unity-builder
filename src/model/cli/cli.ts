@@ -70,6 +70,12 @@ export class Cli {
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options.versioning = 'None';
 
+    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+    CloudRunnerLogger.log(`Build Params:
+      ${JSON.stringify(buildParameter, undefined, 4)}
+    `);
+    CloudRunner.buildParameters = buildParameter;
+
     return await results.target[results.propertyKey](Cli.options);
   }
 

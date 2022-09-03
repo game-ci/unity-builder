@@ -87,11 +87,6 @@ export class RemoteClient {
 
   @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
-    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
-    RemoteClientLogger.log(`Build Params:
-      ${JSON.stringify(buildParameter, undefined, 4)}
-    `);
-    CloudRunner.buildParameters = buildParameter;
     await RemoteClient.bootstrapRepository();
   }
 }
