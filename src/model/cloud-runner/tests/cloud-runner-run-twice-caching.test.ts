@@ -41,6 +41,9 @@ describe('Cloud Runner', () => {
 
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
+      expect(results).not.toContain('There is 0 files/dir in the source folder Library');
+      expect(results).not.toContain('There is 0 files/dir in the source folder LFS');
+
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);
@@ -49,6 +52,7 @@ describe('Cloud Runner', () => {
 
       expect(results2).toContain(buildSucceededString);
       expect(results2).not.toContain('There is 0 files/dir in the cache pulled contents for Library');
+      expect(results2).not.toContain('There is 0 files/dir in the cache pulled contents for LFS');
       expect(results2).not.toContain(libraryString);
     }, 1000000);
   }
