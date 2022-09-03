@@ -48,6 +48,7 @@ describe('Cloud Runner', () => {
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       expect(results2).toContain(buildSucceededString);
+      expect(results2).not.toContain('There is 0 files/dir in the cache pulled contents for Library');
       expect(results2).not.toContain(libraryString);
     }, 1000000);
   }
