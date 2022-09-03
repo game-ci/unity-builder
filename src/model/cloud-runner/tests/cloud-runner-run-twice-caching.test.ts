@@ -34,6 +34,8 @@ describe('Cloud Runner', () => {
         cacheKey: `test-case-${uuidv4()}`,
       };
       const buildParameter = await CreateParameters(overrides);
+      expect(buildParameter.projectPath).toEqual(overrides.projectPath);
+
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
