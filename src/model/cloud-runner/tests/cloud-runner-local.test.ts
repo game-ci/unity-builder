@@ -31,7 +31,7 @@ describe('Cloud Runner', () => {
       const buildParameter = await CreateParameters({
         versioning: 'None',
         projectPath: 'test-project',
-        unityVersion: UnityVersioning.read('test-project'),
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         customJob: `
         - name: 'step 1'
