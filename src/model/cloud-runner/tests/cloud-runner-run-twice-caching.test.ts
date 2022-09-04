@@ -29,7 +29,7 @@ describe('Cloud Runner', () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
-        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        unityVersion: UnityVersioning.read('test-project'),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
