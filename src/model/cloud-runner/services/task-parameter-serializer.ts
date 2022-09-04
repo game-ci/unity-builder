@@ -27,7 +27,6 @@ export class TaskParameterSerializer {
   }
   private static get serializeBuildParamsAndInput() {
     let array = new Array();
-    CloudRunner.buildParameters.projectPath = '.';
     array = TaskParameterSerializer.readBuildParameters(array);
     array = TaskParameterSerializer.readInput(array);
     const configurableHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks);
