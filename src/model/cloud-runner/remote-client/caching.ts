@@ -59,7 +59,7 @@ export class Caching {
           )}`,
         );
       }
-      await CloudRunnerSystem.Run(`tar -cvf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
       await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar.lz4`);
       const contents = await fs.promises.readdir(path.basename(sourceFolder));
       CloudRunnerLogger.log(
