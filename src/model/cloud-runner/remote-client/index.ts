@@ -13,12 +13,17 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 export class RemoteClient {
   public static async bootstrapRepository() {
     try {
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.repoPathAbsolute}`);
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.cacheFolderFull}`);
-      process.chdir(CloudRunnerFolders.repoPathAbsolute);
+      await CloudRunnerSystem.Run(
+        `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+      );
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
+      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderFull)}`);
+      process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
       await RemoteClient.cloneRepoWithoutLFSFiles();
-      await RemoteClient.sizeOfFolder('repo before lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
+      await RemoteClient.sizeOfFolder(
+        'repo before lfs cache pull',
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
+      );
       const lfsHashes = await LfsHashing.createLFSHashFiles();
       if (fs.existsSync(CloudRunnerFolders.libraryFolderAbsolute)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
