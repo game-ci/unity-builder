@@ -6,37 +6,38 @@ import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
+import BuildParameters from '../../build-parameters';
 
 export class TaskParameterSerializer {
-  public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
+  public static readBuildEnvironmentVariables(buildParameters: BuildParameters): CloudRunnerEnvironmentVariable[] {
     return [
       {
         name: 'ContainerMemory',
-        value: CloudRunner.buildParameters.cloudRunnerMemory,
+        value: buildParameters.cloudRunnerMemory,
       },
       {
         name: 'ContainerCpu',
-        value: CloudRunner.buildParameters.cloudRunnerCpu,
+        value: buildParameters.cloudRunnerCpu,
       },
       {
         name: 'BUILD_TARGET',
-        value: CloudRunner.buildParameters.targetPlatform,
+        value: buildParameters.targetPlatform,
       },
-      ...TaskParameterSerializer.serializeBuildParamsAndInput,
+      ...TaskParameterSerializer.serializeBuildParamsAndInput(buildParameters),
     ];
   }
-  private static get serializeBuildParamsAndInput() {
+  private static serializeBuildParamsAndInput(buildParameters: BuildParameters) {
     let array = new Array();
-    array = TaskParameterSerializer.readBuildParameters(array);
+    array = TaskParameterSerializer.readBuildParameters(array, buildParameters);
     array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks);
+    const configurableHooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
     const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
     if (secrets.length > 0) {
       // eslint-disable-next-line unicorn/no-array-reduce
       array.push(secrets.reduce((x, y) => [...x, ...y]));
     }
 
-    const blocked = new Set(['0', 'length', 'prototype', '', 'projectPath']);
+    const blocked = new Set(['0', 'length', 'prototype', '', 'projectPath', 'UNITY_VERSION']);
 
     array = array.filter((x) => !blocked.has(x.name));
     array = array.map((x) => {
@@ -49,15 +50,15 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  private static readBuildParameters(array: any[]) {
-    const keys = Object.keys(CloudRunner.buildParameters);
+  private static readBuildParameters(array: any[], buildParameters: BuildParameters) {
+    const keys = Object.keys(buildParameters);
     for (const element of keys) {
       array.push({
         name: element,
-        value: CloudRunner.buildParameters[element],
+        value: buildParameters[element],
       });
     }
-    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunner.buildParameters) });
+    array.push({ name: 'buildParameters', value: JSON.stringify(buildParameters) });
 
     return array;
   }

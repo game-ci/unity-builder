@@ -50,7 +50,7 @@ describe('Cloud Runner', () => {
       // Assert results
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
-      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
+      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');

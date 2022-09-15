@@ -51,7 +51,7 @@ describe('Cloud Runner', () => {
       // Assert results
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
-      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
+      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
@@ -66,6 +66,7 @@ describe('Cloud Runner', () => {
       for (const element of environmentVariables) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           expect(newLinePurgedFile).toContain(`${element.name}`);
+          CloudRunnerLogger.log(`Contains ${element.name}`);
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
