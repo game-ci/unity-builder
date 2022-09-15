@@ -12,7 +12,7 @@
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "cli": "yarn ts-node src/index.ts -m cli",
-    "gcp-secrets-tests": "cross-env cloudRunnerCluster=aws cloudRunnerTests=true readInputOverrideCommand=\"gcp-secret-manager\" populateOverride=true readInputFromOverrideList=UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD yarn test -i -t \"cloud runner\"",
+    "gcp-secrets-tests": "cross-env cloudRunnerCluster=aws cloudRunnerTests=true readInputOverrideCommand=\"gcp-secret-manager\" populateOverride=true readInputFromOverrideList=UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD yarn test -i -t \"cloud runner caching\"",
     "gcp-secrets-cli": "cross-env cloudRunnerTests=true readInputOverrideCommand=\"gcp-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --readInputFromOverrideList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "aws-secrets-cli": "cross-env cloudRunnerTests=true readInputOverrideCommand=\"aws-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --readInputFromOverrideList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "cli-aws": "cross-env cloudRunnerCluster=aws yarn run test-cli",

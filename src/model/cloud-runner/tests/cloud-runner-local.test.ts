@@ -21,6 +21,10 @@ async function CreateParameters(overrides) {
 
   return results;
 }
+
+describe('Cloud Runner', () => {
+  it('Responds', () => {});
+});
 describe('Cloud Runner', () => {
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
