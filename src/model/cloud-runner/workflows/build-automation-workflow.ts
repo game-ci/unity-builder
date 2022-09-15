@@ -95,9 +95,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
     mkdir -p ${BuildAutomationWorkflow.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}
-    git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
-      CloudRunnerFolders.unityBuilderRepoUrl
-    } "${BuildAutomationWorkflow.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
+    git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${BuildAutomationWorkflow.ToLinuxFolder(
+      CloudRunnerFolders.unityBuilderRepoUrl,
+    )} "${BuildAutomationWorkflow.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
     chmod +x ${builderPath}
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli`;
