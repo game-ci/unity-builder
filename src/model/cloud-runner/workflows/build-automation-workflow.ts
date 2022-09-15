@@ -127,13 +127,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.libraryFolderAbsolute
     } --artifactName lib-${guid} --cachePushTo ${linuxCacheFolder}/Library
     echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom ${
-      CloudRunnerFolders.projectBuildFolderAbsolute
-    } --artifactName build-${guid} --cachePushTo ${`${BuildAutomationWorkflow.ToLinuxFolder(linuxCacheFolder)}/build`}
+    node ${builderPath} -m cache-push --cachePushFrom ${BuildAutomationWorkflow.ToLinuxFolder(
+      CloudRunnerFolders.projectBuildFolderAbsolute,
+    )} --artifactName build-${guid} --cachePushTo ${`${BuildAutomationWorkflow.ToLinuxFolder(
+      `${linuxCacheFolder}/build`,
+    )}`}
     ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
   }
 
   private static GetCleanupCommand(cleanupPath: string) {
-    return CloudRunnerOptions.retainWorkspaces ? `` : `rm -r ${cleanupPath}`;
+    return CloudRunnerOptions.retainWorkspaces ? `` : `rm -r ${BuildAutomationWorkflow.ToLinuxFolder(cleanupPath)}`;
   }
 }

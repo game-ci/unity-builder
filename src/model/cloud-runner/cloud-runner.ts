@@ -13,6 +13,7 @@ import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/local-docker';
+import GitHub from '../github';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -26,7 +27,7 @@ class CloudRunner {
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
       TaskParameterSerializer.readBuildEnvironmentVariables(buildParameters);
-    if (!buildParameters.isCliMode) {
+    if (!buildParameters.isCliMode && GitHub.githubInputEnabled) {
       const buildParameterPropertyNames = Object.getOwnPropertyNames(buildParameters);
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
         core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
