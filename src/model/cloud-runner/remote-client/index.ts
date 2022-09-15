@@ -24,19 +24,22 @@ export class RemoteClient {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
       }
       await Caching.PullFromCache(
-        CloudRunnerFolders.lfsCacheFolderFull,
-        CloudRunnerFolders.lfsFolderAbsolute,
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
         `${lfsHashes.lfsGuidSum}`,
       );
       await RemoteClient.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
       await RemoteClient.pullLatestLFS();
       await RemoteClient.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathAbsolute);
       await Caching.PushToCache(
-        CloudRunnerFolders.lfsCacheFolderFull,
-        CloudRunnerFolders.lfsFolderAbsolute,
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
         `${lfsHashes.lfsGuidSum}`,
       );
-      await Caching.PullFromCache(CloudRunnerFolders.libraryCacheFolderFull, CloudRunnerFolders.libraryFolderAbsolute);
+      await Caching.PullFromCache(
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryCacheFolderFull),
+        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+      );
       await RemoteClient.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathAbsolute);
       await Caching.handleCachePurging();
     } catch (error) {
