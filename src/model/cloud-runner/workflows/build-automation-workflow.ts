@@ -8,6 +8,7 @@ import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
+import SharedWorkspaceLocking from '../../cli/shared-workspace-locking';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -35,6 +36,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.log(baseImage.toString());
       CloudRunnerLogger.logLine(` `);
       CloudRunnerLogger.logLine('Starting build automation job');
+
+      // eslint-disable-next-line no-unused-vars
+      const workspace = SharedWorkspaceLocking.GetLockedWorkspace() || CloudRunner.buildParameters.buildGuid;
 
       output += await CloudRunner.Provider.runTask(
         CloudRunner.buildParameters.buildGuid,

@@ -23,11 +23,10 @@ export class FollowLogStreamService {
       shouldCleanup = false;
       core.warning('cloud runner stop watching');
     }
-    message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      output += message;
+      output += `${message}\n`;
     }
-    CloudRunnerLogger.log(message);
+    CloudRunnerLogger.log(`[${CloudRunnerStatics.logPrefix}] ${message}`);
 
     return { shouldReadLogs, shouldCleanup, output };
   }
