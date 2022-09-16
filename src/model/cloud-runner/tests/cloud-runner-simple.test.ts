@@ -73,7 +73,7 @@ describe('Cloud Runner', () => {
         if (
           element.value !== undefined &&
           typeof element.value !== 'function' &&
-          !['UNITY_LICENSE'].includes(element.value)
+          !['UNITY_LICENSE'].includes(element.name)
         ) {
           expect(newLinePurgedFile).toContain(`${element.name}`);
           CloudRunnerLogger.log(`Contains ${element.name}`);
