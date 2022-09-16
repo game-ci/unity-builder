@@ -9,9 +9,6 @@ extends: {}
 pre-push:
   parallel: true
   commands:
-    packages-audit:
-      tags: security
-      run: yarn audit
 
 pre-commit:
   parallel: true

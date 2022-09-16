@@ -1,8 +1,12 @@
 import path from 'path';
-import { CloudRunner } from '../..';
+import CloudRunner from './../cloud-runner';
 
 export class CloudRunnerFolders {
   public static readonly repositoryFolder = 'repo';
+
+  public static ToLinuxFolder(folder: string) {
+    return folder.replace(/\\/g, `/`);
+  }
 
   // Only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 

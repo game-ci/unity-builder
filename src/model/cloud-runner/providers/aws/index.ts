@@ -9,6 +9,9 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSJobStack } from './aws-job-stack';
 import { AWSBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
+import { AwsCliCommands } from './commands/aws-cli-commands';
+import { TertiaryResourcesService } from './services/tertiary-resources-service';
+import { TaskService } from './services/task-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -16,6 +19,34 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
+  async inspect(): Promise<string> {
+    return await TaskService.awsDescribeJob('');
+  }
+  watch(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+
+  async listOtherResources(): Promise<string> {
+    await TertiaryResourcesService.AwsListLogGroups();
+
+    return '';
+  }
+
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+  ): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+
+  async listResources() {
+    await AwsCliCommands.awsListAll();
+
+    return '';
+  }
+
   async cleanup(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
@@ -49,6 +80,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     process.env.AWS_REGION = Input.region;
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
+    AWSTaskRunner.ECS = ECS;
+    AWSTaskRunner.Kinesis = new SDK.Kinesis();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
@@ -69,7 +102,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
+      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, environment, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
       if (shouldCleanup) {

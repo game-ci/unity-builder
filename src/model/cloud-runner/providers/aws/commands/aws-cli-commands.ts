@@ -1,181 +1,62 @@
-import AWS from 'aws-sdk';
 import { CliFunction } from '../../../../cli/cli-functions-repository';
-import Input from '../../../../input';
-import CloudRunnerLogger from '../../../services/cloud-runner-logger';
-import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
-
+import { TaskService } from '../services/task-service';
+import { GarbageCollectionService } from '../services/garbage-collection-service';
+import { TertiaryResourcesService } from '../services/tertiary-resources-service';
 export class AwsCliCommands {
   @CliFunction(`aws-list-all`, `List all resources`)
-  static async awsListAll() {
-    await AwsCliCommands.awsListStacks(undefined, true);
+  public static async awsListAll() {
+    await AwsCliCommands.awsListStacks();
     await AwsCliCommands.awsListTasks();
-    await AwsCliCommands.awsListLogGroups(undefined, true);
+    await AwsCliCommands.awsListLogGroups();
   }
   @CliFunction(`aws-garbage-collect-list`, `garbage collect aws resources not in use !WIP!`)
   static async garbageCollectAws() {
-    await AwsCliCommands.cleanup(false);
+    await GarbageCollectionService.cleanup(false);
   }
   @CliFunction(`aws-garbage-collect-all`, `garbage collect aws resources regardless of whether they are in use`)
   static async garbageCollectAwsAll() {
-    await AwsCliCommands.cleanup(true);
+    await GarbageCollectionService.cleanup(true);
   }
   @CliFunction(
     `aws-garbage-collect-all-1d-older`,
     `garbage collect aws resources created more than 1d ago (ignore if they are in use)`,
   )
   static async garbageCollectAwsAllOlderThanOneDay() {
-    await AwsCliCommands.cleanup(true, true);
+    await GarbageCollectionService.cleanup(true, true);
   }
-  static isOlderThan1day(date: any) {
-    const ageDate = new Date(date.getTime() - Date.now());
 
-    return ageDate.getDay() > 0;
-  }
   @CliFunction(`aws-list-stacks`, `List stacks`)
-  static async awsListStacks(perResultCallback: any = false, verbose: boolean = false) {
-    process.env.AWS_REGION = Input.region;
-    const CF = new AWS.CloudFormation();
-    const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
-        (_x) => _x.StackStatus !== 'DELETE_COMPLETE', // &&
-        // _x.TemplateDescription === TaskDefinitionFormation.description.replace('\n', ''),
-      ) || [];
-    CloudRunnerLogger.log(`Stacks ${stacks.length}`);
-    for (const element of stacks) {
-      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Task Stack ${element.StackName} - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-        );
-      if (perResultCallback) await perResultCallback(element);
-    }
-    const baseStacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
-        (_x) =>
-          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription === BaseStackFormation.baseStackDecription,
-      ) || [];
-    CloudRunnerLogger.log(`Base Stacks ${baseStacks.length}`);
-    for (const element of baseStacks) {
-      const ageDate = new Date(element.CreationTime.getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Base Stack ${
-            element.StackName
-          } - Age D${ageDate.getHours()} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-        );
-      if (perResultCallback) await perResultCallback(element);
-    }
-    if (stacks === undefined) {
-      return;
-    }
+  static async awsListStacks(perResultCallback: any = false) {
+    return TaskService.awsListStacks(perResultCallback);
   }
   @CliFunction(`aws-list-tasks`, `List tasks`)
   static async awsListTasks(perResultCallback: any = false) {
-    process.env.AWS_REGION = Input.region;
-    const ecs = new AWS.ECS();
-    const clusters = (await ecs.listClusters().promise()).clusterArns || [];
-    CloudRunnerLogger.log(`Clusters ${clusters.length}`);
-    for (const element of clusters) {
-      const input: AWS.ECS.ListTasksRequest = {
-        cluster: element,
-      };
-
-      const list = (await ecs.listTasks(input).promise()).taskArns || [];
-      if (list.length > 0) {
-        const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
-        const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
-        if (describeList === []) {
-          continue;
-        }
-        CloudRunnerLogger.log(`Tasks ${describeList.length}`);
-        for (const taskElement of describeList) {
-          if (taskElement === undefined) {
-            continue;
-          }
-          taskElement.overrides = {};
-          taskElement.attachments = [];
-          if (taskElement.createdAt === undefined) {
-            CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
-            continue;
-          }
-          if (perResultCallback) await perResultCallback(taskElement, element);
-        }
-      }
-    }
+    return TaskService.awsListJobs(perResultCallback);
   }
+
   @CliFunction(`aws-list-log-groups`, `List tasks`)
-  static async awsListLogGroups(perResultCallback: any = false, verbose: boolean = false) {
-    process.env.AWS_REGION = Input.region;
-    const ecs = new AWS.CloudWatchLogs();
-    let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {
-      /* logGroupNamePrefix: 'game-ci' */
-    };
-    let logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
-    const logGroups = logGroupsDescribe.logGroups || [];
-    while (logGroupsDescribe.nextToken) {
-      logStreamInput = { /* logGroupNamePrefix: 'game-ci',*/ nextToken: logGroupsDescribe.nextToken };
-      logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
-      logGroups.push(...(logGroupsDescribe?.logGroups || []));
-    }
-
-    CloudRunnerLogger.log(`Log Groups ${logGroups.length}`);
-    for (const element of logGroups) {
-      if (element.creationTime === undefined) {
-        CloudRunnerLogger.log(`Skipping ${element.logGroupName} no createdAt date`);
-        continue;
-      }
-      const ageDate = new Date(new Date(element.creationTime).getTime() - Date.now());
-      if (verbose)
-        CloudRunnerLogger.log(
-          `Log Group Name ${
-            element.logGroupName
-          } - Age D${ageDate.getDay()} H${ageDate.getHours()} M${ageDate.getMinutes()} - 1d old ${AwsCliCommands.isOlderThan1day(
-            new Date(element.creationTime),
-          )}`,
-        );
-      if (perResultCallback) await perResultCallback(element, element);
-    }
+  static async awsListLogGroups(perResultCallback: any = false) {
+    await TertiaryResourcesService.AwsListLogGroups(perResultCallback);
   }
 
-  private static async cleanup(deleteResources = false, OneDayOlderOnly: boolean = false) {
-    process.env.AWS_REGION = Input.region;
-    const CF = new AWS.CloudFormation();
-    const ecs = new AWS.ECS();
-    const cwl = new AWS.CloudWatchLogs();
-    const taskDefinitionsInUse = new Array();
-    await AwsCliCommands.awsListTasks(async (taskElement, element) => {
-      taskDefinitionsInUse.push(taskElement.taskDefinitionArn);
-      if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(taskElement.CreatedAt))) {
-        CloudRunnerLogger.log(`Stopping task ${taskElement.containers?.[0].name}`);
-        await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
-      }
-    });
-    await AwsCliCommands.awsListStacks(async (element) => {
-      if (
-        (await CF.describeStackResources({ StackName: element.StackName }).promise()).StackResources?.some(
-          (x) => x.ResourceType === 'AWS::ECS::TaskDefinition' && taskDefinitionsInUse.includes(x.PhysicalResourceId),
-        )
-      ) {
-        CloudRunnerLogger.log(`Skipping ${element.StackName} - active task was running not deleting`);
+  @CliFunction(`aws-list-jobs`, `List tasks`)
+  public static async awsListJobs(perResultCallback: any = false) {
+    return TaskService.awsListJobs(perResultCallback);
+  }
 
-        return;
-      }
-      if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(element.CreationTime))) {
-        if (element.StackName === 'game-ci' || element.TemplateDescription === 'Game-CI base stack') {
-          CloudRunnerLogger.log(`Skipping ${element.StackName} ignore list`);
+  @CliFunction(`list-tasks`, `List tasks`)
+  static async listTasks(perResultCallback: any = false) {
+    return TaskService.awsListJobs(perResultCallback);
+  }
 
-          return;
-        }
-        CloudRunnerLogger.log(`Deleting ${element.logGroupName}`);
-        const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
-        await CF.deleteStack(deleteStackInput).promise();
-      }
-    });
-    await AwsCliCommands.awsListLogGroups(async (element) => {
-      if (deleteResources && (!OneDayOlderOnly || AwsCliCommands.isOlderThan1day(new Date(element.createdAt)))) {
-        CloudRunnerLogger.log(`Deleting ${element.logGroupName}`);
-        await cwl.deleteLogGroup({ logGroupName: element.logGroupName || '' }).promise();
-      }
-    });
+  @CliFunction(`watch`, `List tasks`)
+  static async watchTasks() {
+    return TaskService.watch();
+  }
+
+  @CliFunction(`describe-resource`, `desribe tasks`)
+  static async describe(options) {
+    // return CloudRunner.Provider.inspect();
+    return await TaskService.awsDescribeJob(options.select);
   }
 }

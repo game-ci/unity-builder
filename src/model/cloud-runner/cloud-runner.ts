@@ -13,19 +13,21 @@ import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/local-docker';
+import GitHub from '../github';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
   static buildParameters: BuildParameters;
   public static defaultSecrets: CloudRunnerSecret[];
   public static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
-  private static setup(buildParameters: BuildParameters) {
+  public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
-    CloudRunner.cloudRunnerEnvironmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables();
-    if (!buildParameters.isCliMode) {
+    CloudRunner.cloudRunnerEnvironmentVariables =
+      TaskParameterSerializer.readBuildEnvironmentVariables(buildParameters);
+    if (!buildParameters.isCliMode && GitHub.githubInputEnabled) {
       const buildParameterPropertyNames = Object.getOwnPropertyNames(buildParameters);
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
         core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
@@ -48,11 +50,11 @@ class CloudRunner {
       case 'test':
         CloudRunner.Provider = new TestCloudRunner();
         break;
-      case 'local-system':
-        CloudRunner.Provider = new LocalCloudRunner();
-        break;
       case 'local-docker':
         CloudRunner.Provider = new LocalDockerCloudRunner();
+        break;
+      default:
+        CloudRunner.Provider = new LocalCloudRunner();
         break;
     }
   }

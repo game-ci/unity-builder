@@ -69,6 +69,7 @@ export class AWSJobStack {
     const secretsMappedToCloudFormationParameters = secrets.map((x) => {
       return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
     });
+    const logGroupName = `${this.baseStackName}/${taskDefStackName}`;
     const parameters = [
       {
         ParameterKey: 'EnvironmentName',
@@ -81,6 +82,10 @@ export class AWSJobStack {
       {
         ParameterKey: 'ServiceName',
         ParameterValue: taskDefStackName,
+      },
+      {
+        ParameterKey: 'LogGroupName',
+        ParameterValue: logGroupName,
       },
       {
         ParameterKey: 'Command',

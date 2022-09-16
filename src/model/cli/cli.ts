@@ -9,6 +9,8 @@ import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-c
 import { Caching } from '../cloud-runner/remote-client/caching';
 import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
+import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-options-reader';
+import GitHub from '../github';
 
 export class Cli {
   public static options;
@@ -33,7 +35,8 @@ export class Cli {
     CliFunctionsRepository.PushCliFunctionSource(RemoteClient);
     const program = new Command();
     program.version('0.0.1');
-    const properties = Object.getOwnPropertyNames(Input);
+
+    const properties = CloudRunnerOptionsReader.GetProperties();
     const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
       program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
@@ -48,6 +51,7 @@ export class Cli {
     program.option('--cachePushFrom <cachePushFrom>', 'cache push from source folder');
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
+    program.option('--select <select>', 'select a particular resource');
     program.parse(process.argv);
     Cli.options = program.opts();
 
@@ -55,23 +59,31 @@ export class Cli {
   }
 
   static async RunCli(): Promise<void> {
-    Input.githubInputEnabled = false;
+    GitHub.githubInputEnabled = false;
     if (Cli.options['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
-    Cli.logInput();
+    if (Cli.options['logInput']) {
+      Cli.logInput();
+    }
     const results = CliFunctionsRepository.GetCliFunctions(Cli.options.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options.versioning = 'None';
 
-    return await results.target[results.propertyKey]();
+    const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
+    CloudRunnerLogger.log(`Build Params:
+      ${JSON.stringify(buildParameter, undefined, 4)}
+    `);
+    CloudRunner.buildParameters = buildParameter;
+
+    return await results.target[results.propertyKey](Cli.options);
   }
 
   @CliFunction(`print-input`, `prints all input`)
   private static logInput() {
     core.info(`\n`);
     core.info(`INPUT:`);
-    const properties = Object.getOwnPropertyNames(Input);
+    const properties = CloudRunnerOptionsReader.GetProperties();
     for (const element of properties) {
       if (
         Input[element] !== undefined &&

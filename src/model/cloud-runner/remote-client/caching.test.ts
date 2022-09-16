@@ -2,12 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
-import Input from '../../input';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from './caching';
 import { v4 as uuidv4 } from 'uuid';
+import GitHub from '../../github';
 
 describe('Cloud Runner Caching', () => {
   it('responds', () => {});
@@ -22,7 +22,7 @@ describe('Cloud Runner Caching', () => {
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
-      Input.githubInputEnabled = false;
+      GitHub.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
       CloudRunner.buildParameters = buildParameter;
 
@@ -56,7 +56,7 @@ describe('Cloud Runner Caching', () => {
       fs.rmdirSync(testFolder, { recursive: true });
       fs.rmdirSync(cacheFolder, { recursive: true });
 
-      Input.githubInputEnabled = true;
+      GitHub.githubInputEnabled = true;
       delete Cli.options;
     }, 1000000);
   }
