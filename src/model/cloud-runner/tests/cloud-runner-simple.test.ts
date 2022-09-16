@@ -70,12 +70,16 @@ describe('Cloud Runner', () => {
         }
       }
       for (const element of [...environmentVariables, ...secrets]) {
-        if (element.value !== undefined && typeof element.value !== 'function') {
+        if (
+          element.value !== undefined &&
+          typeof element.value !== 'function' &&
+          !['UNITY_LICENSE'].includes(element.value)
+        ) {
           expect(newLinePurgedFile).toContain(`${element.name}`);
           CloudRunnerLogger.log(`Contains ${element.name}`);
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
-    }, 100000);
+    }, 1000000);
   }
 });
