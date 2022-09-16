@@ -1,8 +1,11 @@
+import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
+import * as fs from 'fs';
+import CloudRunner from '../cloud-runner/cloud-runner';
 export class SharedWorkspaceLocking {
-  public static GetLockedWorkspace() {
+  public static async GetLockedWorkspace() {
     const workspaces = SharedWorkspaceLocking.GetFreeWorkspaces();
     for (const element of workspaces) {
-      if (SharedWorkspaceLocking.LockWorkspace(element)) {
+      if (await SharedWorkspaceLocking.LockWorkspace(element)) {
         return element;
       }
     }
@@ -16,14 +19,22 @@ export class SharedWorkspaceLocking {
   public static GetAllWorkspaces(): string[] {
     return [];
   }
-  // eslint-disable-next-line no-unused-vars
-  public static LockWorkspace(workspace: string): boolean {
+  public static async LockWorkspace(workspace: string): Promise<boolean> {
+    // this job + date
+    const file = `_lock_${CloudRunner.buildParameters.buildGuid}_${Date.now()}`;
+    fs.writeFileSync(file, '');
+    await CloudRunnerSystem.Run(`aws s3 cp ./${file} ./game-ci-test-storage/locks/${workspace}`);
+    fs.rmSync(file);
+
+    return SharedWorkspaceLocking.HasWorkspaceLock(workspace);
+  }
+  public static async HasWorkspaceLock(workspace: string): Promise<boolean> {
+    await CloudRunnerSystem.Run(`aws s3 ls ./game-ci-test-storage/locks/${workspace}`);
+
     return true;
   }
   // eslint-disable-next-line no-unused-vars
   public static IsWorkspaceLocked(workspace: string) {}
-  // eslint-disable-next-line no-unused-vars
-  public static HasWorkspaceLock(workspace: string) {}
   // eslint-disable-next-line no-unused-vars
   public static CreateLockableWorkspace(workspace: string, locked: boolean = false) {}
   // eslint-disable-next-line no-unused-vars

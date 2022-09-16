@@ -52,6 +52,12 @@ describe('Cloud Runner', () => {
       expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
+      const secrets = TaskParameterSerializer.readDefaultSecrets().map((x) => {
+        return {
+          name: x.EnvironmentVariable,
+          value: x.ParameterValue,
+        };
+      });
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
@@ -63,7 +69,7 @@ describe('Cloud Runner', () => {
           CloudRunnerLogger.log(`checking input/build param ${element.name} ${element.value}`);
         }
       }
-      for (const element of environmentVariables) {
+      for (const element of [...environmentVariables, ...secrets]) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           expect(newLinePurgedFile).toContain(`${element.name}`);
           CloudRunnerLogger.log(`Contains ${element.name}`);
