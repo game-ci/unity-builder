@@ -107,7 +107,7 @@ export class TaskParameterSerializer {
   s;
   private static tryAddInput(array, key): CloudRunnerSecret[] {
     const value = TaskParameterSerializer.getValue(key);
-    if (value !== undefined && value !== '') {
+    if (value !== undefined && value !== '' && value !== 'null') {
       array.push({
         ParameterKey: key,
         EnvironmentVariable: key,
