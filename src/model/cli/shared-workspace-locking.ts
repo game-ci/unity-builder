@@ -14,7 +14,7 @@ export class SharedWorkspaceLocking {
   }
 
   public static GetFreeWorkspaces(): string[] {
-    return [];
+    return ['test-workspace'];
   }
   public static GetAllWorkspaces(): string[] {
     return [];
