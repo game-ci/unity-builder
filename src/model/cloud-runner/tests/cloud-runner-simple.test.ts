@@ -61,7 +61,7 @@ describe('Cloud Runner', () => {
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
-      for (const element of environmentVariables) {
+      for (const element of [...environmentVariables, ...secrets]) {
         if (element.value !== undefined && typeof element.value !== 'function') {
           if (typeof element.value === `string`) {
             element.value = element.value.replace(/\s+/g, '');
