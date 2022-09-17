@@ -1,9 +1,10 @@
 import BuildParameters from '../../../build-parameters';
-import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import Docker from '../../../docker';
+import { Action, CloudRunner } from '../../../../model';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   inspect(): Promise<string> {
@@ -43,7 +44,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  public runTask(
+  public async runTask(
     buildGuid: string,
     image: string,
     commands: string,
@@ -59,15 +60,10 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
 
-    return CloudRunnerSystem.Run(
-      `docker run \
-            --workdir /github/workspace \
-            --rm \
-            ${image} \
-            /bin/bash -c ${commands}`,
-      false,
-      false,
-    );
+    const { workspace, actionFolder } = Action;
+    await Docker.run(image, { workspace, actionFolder, ...CloudRunner.buildParameters }, false, commands);
+
+    return '';
   }
 }
 export default LocalDockerCloudRunner;

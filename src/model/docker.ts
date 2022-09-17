@@ -4,11 +4,11 @@ import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async run(image, parameters, silent = false) {
+  static async run(image, parameters, silent = false, overrideCommands = '') {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(image, parameters);
+        runCommand = this.getLinuxCommand(image, parameters, overrideCommands);
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
@@ -16,7 +16,7 @@ class Docker {
     await exec(runCommand, undefined, { silent });
   }
 
-  static getLinuxCommand(image, parameters): string {
+  static getLinuxCommand(image, parameters, overrideCommands = ''): string {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -41,7 +41,7 @@ class Docker {
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
             ${image} \
-            /bin/bash -c /entrypoint.sh`;
+            /bin/bash -c ${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}`;
   }
 
   static getWindowsCommand(image: any, parameters: any): string {
