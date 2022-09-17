@@ -27,7 +27,7 @@ export class SharedWorkspaceLocking {
   }
   public static async LockWorkspace(workspace: string): Promise<boolean> {
     // this job + date
-    const file = `_lock_${CloudRunner.buildParameters.buildGuid}_${Date.now()}`;
+    const file = `${Date.now()}_${CloudRunner.buildParameters.buildGuid}_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(`aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`);
     fs.rmSync(file);
