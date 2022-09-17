@@ -37,8 +37,6 @@ describe('Cloud Runner', () => {
 
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
-      expect(results).not.toContain('There is 0 files/dir in the source folder Library');
-      expect(results).not.toContain('There is 0 files/dir in the source folder LFS');
 
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
