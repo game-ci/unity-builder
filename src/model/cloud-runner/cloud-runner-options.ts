@@ -69,6 +69,14 @@ class CloudRunnerOptions {
     }
   }
 
+  static get customStepFiles() {
+    return CloudRunnerOptions.getInput('customStepFiles') || '';
+  }
+
+  static get customHookFiles() {
+    return CloudRunnerOptions.getInput('customHookFiles') || '';
+  }
+
   static get customJob() {
     return CloudRunnerOptions.getInput('customJob') || '';
   }
