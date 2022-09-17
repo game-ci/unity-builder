@@ -83,6 +83,7 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
 
     // array.push(
     //   ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
