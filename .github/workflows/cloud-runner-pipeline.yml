@@ -121,4 +121,3 @@ jobs:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-
