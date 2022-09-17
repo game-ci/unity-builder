@@ -44,9 +44,9 @@ class LocalDockerCloudRunner implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
   public runTask(
-    commands: string,
     buildGuid: string,
     image: string,
+    commands: string,
     // eslint-disable-next-line no-unused-vars
     mountdir: string,
     // eslint-disable-next-line no-unused-vars
