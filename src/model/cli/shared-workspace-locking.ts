@@ -1,6 +1,7 @@
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import * as fs from 'fs';
 import CloudRunner from '../cloud-runner/cloud-runner';
+import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 export class SharedWorkspaceLocking {
   public static async GetLockedWorkspace() {
     const workspaces = SharedWorkspaceLocking.GetFreeWorkspaces();
@@ -29,7 +30,14 @@ export class SharedWorkspaceLocking {
     return SharedWorkspaceLocking.HasWorkspaceLock(workspace);
   }
   public static async HasWorkspaceLock(workspace: string): Promise<boolean> {
-    await CloudRunnerSystem.Run(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}`);
+    CloudRunnerLogger.log(
+      (await CloudRunnerSystem.Run(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`))
+        .split('\n')
+        .map((x) => {
+          return x.split(' ');
+        })
+        .length.toString(),
+    );
 
     return true;
   }
