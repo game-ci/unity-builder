@@ -46,7 +46,6 @@ class LocalDockerCloudRunner implements ProviderInterface {
   public runTask(
     commands: string,
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     image: string,
     // eslint-disable-next-line no-unused-vars
     mountdir: string,
@@ -60,7 +59,15 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
 
-    return CloudRunnerSystem.Run(commands, false, false);
+    return CloudRunnerSystem.Run(
+      `docker run \
+            --workdir /github/workspace \
+            --rm \
+            ${image} \
+            /bin/bash -c ${commands}`,
+      false,
+      false,
+    );
   }
 }
 export default LocalDockerCloudRunner;
