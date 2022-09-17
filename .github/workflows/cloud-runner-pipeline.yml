@@ -62,6 +62,7 @@ jobs:
         if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
+
       - uses: google-github-actions/setup-gcloud@v0
         with:
           version: '288.0.0'
@@ -129,4 +130,3 @@ jobs:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-
