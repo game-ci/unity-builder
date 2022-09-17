@@ -87,7 +87,7 @@ export class RemoteClient {
 
   static replaceLargePackageReferencesWithSharedReferences() {
     CloudRunnerLogger.log(
-      fs.readFileSync(path.join(CloudRunnerFolders.repoPathAbsolute, `Packages/manifest.json`), 'utf8'),
+      fs.readFileSync(path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`), 'utf8'),
     );
   }
 
