@@ -7,6 +7,7 @@ import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
+import setups from './cloud-runner-suite.test';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -15,14 +16,11 @@ async function CreateParameters(overrides) {
 
   return await BuildParameters.create();
 }
-
 describe('Cloud Runner', () => {
   it('Responds', () => {});
-});
-describe('Cloud Runner', () => {
+  setups();
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
-  it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerTests) {
     it('All build parameters sent to cloud runner as env vars', async () => {
       // Setup parameters

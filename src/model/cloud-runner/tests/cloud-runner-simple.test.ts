@@ -8,6 +8,7 @@ import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
 import GitHub from '../../github';
+import setups from './cloud-runner-suite.test';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -22,6 +23,7 @@ async function CreateParameters(overrides) {
   return results;
 }
 describe('Cloud Runner', () => {
+  setups();
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
   it('Responds', () => {});

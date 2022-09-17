@@ -5,6 +5,7 @@ import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
+import setups from './cloud-runner-suite.test';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -14,10 +15,9 @@ async function CreateParameters(overrides) {
   return await BuildParameters.create();
 }
 
-describe('Cloud Runner Caching', () => {
+describe('Cloud Runner', () => {
   it('Responds', () => {});
-});
-describe('Cloud Runner Caching', () => {
+  setups();
   if (CloudRunnerOptions.cloudRunnerTests) {
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       const overrides = {

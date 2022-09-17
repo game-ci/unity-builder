@@ -16,7 +16,7 @@ export class SharedWorkspaceLocking {
       }
     }
 
-    await SharedWorkspaceLocking.CreateLockableWorkspace(CloudRunner.buildParameters.buildGuid);
+    return await SharedWorkspaceLocking.CreateLockableWorkspace(CloudRunner.buildParameters.buildGuid);
   }
 
   public static GetFreeWorkspaces(): string[] {
@@ -52,6 +52,8 @@ export class SharedWorkspaceLocking {
     const file = `${Date.now()}_${CloudRunner.buildParameters.buildGuid}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(`aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`);
+
+    return CloudRunner.buildParameters.buildGuid;
   }
   // eslint-disable-next-line no-unused-vars
   public static ReleaseLock(workspace: string) {}
