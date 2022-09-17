@@ -26,8 +26,8 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
-  cloudRunnerPipeline:
-    name: Cloud Runner Pipeline
+  ciPipeline:
+    name: CI Pipeline
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
