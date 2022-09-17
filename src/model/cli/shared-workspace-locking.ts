@@ -2,8 +2,13 @@ import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system'
 import * as fs from 'fs';
 import CloudRunner from '../cloud-runner/cloud-runner';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
+import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 export class SharedWorkspaceLocking {
   public static async GetLockedWorkspace() {
+    if (!CloudRunnerOptions.retainWorkspaces) {
+      return;
+    }
+
     const workspaces = SharedWorkspaceLocking.GetFreeWorkspaces();
     for (const element of workspaces) {
       if (await SharedWorkspaceLocking.LockWorkspace(element)) {
