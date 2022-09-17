@@ -26,8 +26,8 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
-  awsBuild:
-    name: AWS Fargate Build
+  cloudRunnerPipeline:
+    name: Cloud Runner Pipeline
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
@@ -62,6 +62,14 @@ jobs:
         if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: '288.0.0'
+          service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: Get GKE cluster credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -121,3 +129,4 @@ jobs:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
+
