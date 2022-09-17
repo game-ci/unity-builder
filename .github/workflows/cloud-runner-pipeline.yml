@@ -24,6 +24,8 @@ env:
   CLOUD_RUNNER_TESTS: true
   DEBUG: true
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: test-project
+  UNITY_VERSION: 2019.3.15f1
 
 jobs:
   ciPipeline:
@@ -33,11 +35,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - test-project
-        unityVersion:
-          #  - 2019.2.11f1
-          - 2019.3.15f1
         cloudRunnerCluster:
           - aws
           - local-docker
