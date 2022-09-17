@@ -4,7 +4,8 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
-import { Action, CloudRunner } from '../../../../model';
+import { Action } from '../../../../model';
+import CloudRunner from '../../cloud-runner';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   inspect(): Promise<string> {
