@@ -7,19 +7,13 @@ import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
-import GitHub from '../../github';
 
 async function CreateParameters(overrides) {
   if (overrides) {
     Cli.options = overrides;
   }
-  const originalValue = GitHub.githubInputEnabled;
-  GitHub.githubInputEnabled = false;
-  const results = await BuildParameters.create();
-  GitHub.githubInputEnabled = originalValue;
-  delete Cli.options;
 
-  return results;
+  return await BuildParameters.create();
 }
 
 describe('Cloud Runner', () => {

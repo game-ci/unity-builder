@@ -16,17 +16,16 @@ export class SharedWorkspaceLocking {
       }
     }
 
-    return;
+    await SharedWorkspaceLocking.CreateLockableWorkspace(CloudRunner.buildParameters.buildGuid);
   }
 
   public static GetFreeWorkspaces(): string[] {
-    return ['test-workspace'];
+    return [];
   }
   public static GetAllWorkspaces(): string[] {
     return [];
   }
   public static async LockWorkspace(workspace: string): Promise<boolean> {
-    // this job + date
     const file = `${Date.now()}_${CloudRunner.buildParameters.buildGuid}_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(`aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`);
@@ -48,8 +47,12 @@ export class SharedWorkspaceLocking {
   }
   // eslint-disable-next-line no-unused-vars
   public static IsWorkspaceLocked(workspace: string) {}
-  // eslint-disable-next-line no-unused-vars
-  public static CreateLockableWorkspace(workspace: string, locked: boolean = false) {}
+
+  public static async CreateLockableWorkspace(workspace: string) {
+    const file = `${Date.now()}_${CloudRunner.buildParameters.buildGuid}_workspace`;
+    fs.writeFileSync(file, '');
+    await CloudRunnerSystem.Run(`aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`);
+  }
   // eslint-disable-next-line no-unused-vars
   public static ReleaseLock(workspace: string) {}
 }
