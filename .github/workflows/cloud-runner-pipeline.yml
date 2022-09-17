@@ -68,7 +68,6 @@ jobs:
           aws-region: eu-west-2
       - run: yarn
       - run: yarn run cli --help
-      - run: yarn run test "caching"
       - run: yarn run test-i-aws
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -161,7 +160,6 @@ jobs:
           node-version: 12.x
       - run: yarn
       - run: yarn run cli --help
-      - run: yarn run test "caching"
       - name: Cloud Runner Test Suite
         run: yarn run test-i-k8s --detectOpenHandles --forceExit
         env:
