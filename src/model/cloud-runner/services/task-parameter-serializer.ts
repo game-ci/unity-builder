@@ -1,12 +1,13 @@
-import CloudRunner from '../cloud-runner';
 import { Input } from '../..';
-import ImageEnvironmentFactory from '../../image-environment-factory';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
 import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
+
+// import CloudRunner from '../cloud-runner';
+// import ImageEnvironmentFactory from '../../image-environment-factory';
 
 export class TaskParameterSerializer {
   public static readBuildEnvironmentVariables(buildParameters: BuildParameters): CloudRunnerEnvironmentVariable[] {
@@ -82,17 +83,18 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
-    array.push(
-      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
-        .filter((x) => array.every((y) => y.ParameterKey !== x.name))
-        .map((x) => {
-          return {
-            ParameterKey: x.name,
-            EnvironmentVariable: x.name,
-            ParameterValue: x.value,
-          };
-        }),
-    );
+
+    // array.push(
+    //   ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
+    //     .filter((x) => array.every((y) => y.ParameterKey !== x.name))
+    //     .map((x) => {
+    //       return {
+    //         ParameterKey: x.name,
+    //         EnvironmentVariable: x.name,
+    //         ParameterValue: x.value,
+    //       };
+    //     }),
+    // );
 
     return array;
   }
