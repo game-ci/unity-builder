@@ -20,6 +20,7 @@ export class RemoteClient {
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderFull)}`);
       process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
       await RemoteClient.cloneRepoWithoutLFSFiles();
+      RemoteClient.replaceLargePackageReferencesWithSharedReferences();
       await RemoteClient.sizeOfFolder(
         'repo before lfs cache pull',
         CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
@@ -82,6 +83,12 @@ export class RemoteClient {
     } catch (error) {
       throw error;
     }
+  }
+
+  static replaceLargePackageReferencesWithSharedReferences() {
+    CloudRunnerLogger.log(
+      fs.readFileSync(path.join(CloudRunnerFolders.repoPathAbsolute, `Packages/manifest.json`), 'utf8'),
+    );
   }
 
   private static async pullLatestLFS() {
