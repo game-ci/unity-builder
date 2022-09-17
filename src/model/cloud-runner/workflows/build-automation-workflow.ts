@@ -38,7 +38,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.logLine('Starting build automation job');
 
       // eslint-disable-next-line no-unused-vars
-      const workspace = SharedWorkspaceLocking.GetLockedWorkspace() || CloudRunner.buildParameters.buildGuid;
+      const workspace = (await SharedWorkspaceLocking.GetLockedWorkspace()) || CloudRunner.buildParameters.buildGuid;
 
       output += await CloudRunner.Provider.runTask(
         CloudRunner.buildParameters.buildGuid,
