@@ -33,10 +33,12 @@ describe('Cloud Runner', () => {
       const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
+      const cachePushFail = 'Did not push source folder to cache because it was empty Library';
       const buildSucceededString = 'Build succeeded';
 
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
+      expect(results).not.toContain(cachePushFail);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
