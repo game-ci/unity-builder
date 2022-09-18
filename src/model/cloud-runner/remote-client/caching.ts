@@ -65,6 +65,9 @@ export class Caching {
       );
 
       if (contents.length === 0) {
+        CloudRunnerLogger.log(
+          `Did not push source folder to cache because it was empty ${path.basename(sourceFolder)}`,
+        );
         process.chdir(`${startPath}`);
 
         return;
