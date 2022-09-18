@@ -63,7 +63,7 @@ export class Caching {
       CloudRunnerLogger.log(
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
-      await CloudRunnerSystem.Run(`tree -L 2`);
+      await CloudRunnerSystem.Run(`tree -L 3 ./..`);
 
       if (contents.length === 0) {
         CloudRunnerLogger.log(
