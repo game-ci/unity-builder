@@ -1,4 +1,5 @@
 import BuildParameters from './build-parameters';
+import { TaskParameterSerializer } from './cloud-runner/services/task-parameter-serializer';
 import { ReadLicense } from './input-readers/test-license-reader';
 
 class Parameter {
@@ -66,6 +67,17 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
+    if (parameters.cloudRunnerCluster === 'local-docker') {
+      environmentVariables.push(
+        ...TaskParameterSerializer.readBuildEnvironmentVariables(parameters),
+        ...TaskParameterSerializer.readDefaultSecrets().map((x) => {
+          return {
+            name: x.EnvironmentVariable,
+            value: x.ParameterValue,
+          };
+        }),
+      );
+    }
     if (parameters.sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
 
     return environmentVariables;
