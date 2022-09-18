@@ -68,7 +68,21 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
     if (parameters.cloudRunnerCluster === 'local-docker') {
-      environmentVariables.push(...TaskParameterSerializer.readBuildEnvironmentVariables(parameters));
+      const content = [
+        ...TaskParameterSerializer.readBuildEnvironmentVariables(parameters),
+        ...TaskParameterSerializer.readDefaultSecrets().map((x) => {
+          return {
+            name: x.EnvironmentVariable,
+            value: x.ParameterValue,
+          };
+        }),
+      ];
+
+      for (const element of content) {
+        if (environmentVariables.find((x) => x.name === element.name) === undefined) {
+          environmentVariables.push(element);
+        }
+      }
     }
     if (parameters.sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
 
