@@ -51,15 +51,23 @@ export class TaskParameterSerializer {
     return array;
   }
 
+  static readBuildParameterFromEnvironment(): BuildParameters {
+    const buildParameters = new BuildParameters();
+    const keys = Object.keys(BuildParameters);
+    for (const element of keys) {
+      buildParameters[element] = process.env[`param-${element}`];
+    }
+
+    return buildParameters;
+  }
   private static readBuildParameters(array: any[], buildParameters: BuildParameters) {
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
       array.push({
-        name: element,
+        name: `param-${element}`,
         value: buildParameters[element],
       });
     }
-    array.push({ name: 'buildParameters', value: JSON.stringify(buildParameters) });
 
     return array;
   }
