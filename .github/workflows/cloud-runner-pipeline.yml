@@ -76,7 +76,7 @@ jobs:
           aws-region: eu-west-2
       - run: yarn
       - run: yarn run cli --help
-      - run: yarn run test-i --detectOpenHandles --forceExit
+      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
