@@ -23,7 +23,7 @@ class CloudRunner {
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
-    CloudRunner.setupBuildPlatform();
+    CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
       TaskParameterSerializer.readBuildEnvironmentVariables(buildParameters);
@@ -38,7 +38,7 @@ class CloudRunner {
     }
   }
 
-  private static setupBuildPlatform() {
+  private static setupSelectedBuildPlatform() {
     CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.cloudRunnerCluster}`);
     switch (CloudRunner.buildParameters.cloudRunnerCluster) {
       case 'k8s':
