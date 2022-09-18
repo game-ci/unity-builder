@@ -54,7 +54,7 @@ describe('Cloud Runner', () => {
       // expect(file).toContain(JSON.stringify(buildParameter));
 
       for (const element of Object.keys(buildParameter)) {
-        expect(file).toContain(`param-${element}=${buildParameter[element]}`);
+        expect(file).toContain(`${element}=${buildParameter[element]}`);
       }
 
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);

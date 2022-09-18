@@ -5,6 +5,7 @@ import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 // import CloudRunner from '../cloud-runner';
 // import ImageEnvironmentFactory from '../../image-environment-factory';
@@ -55,7 +56,7 @@ export class TaskParameterSerializer {
     const buildParameters = new BuildParameters();
     const keys = Object.keys(BuildParameters);
     for (const element of keys) {
-      buildParameters[element] = process.env[`param-${element}`];
+      buildParameters[element] = process.env[CloudRunnerOptions.ToEnvVarFormat(`param-${element}`)];
     }
 
     return buildParameters;
