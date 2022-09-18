@@ -82,6 +82,6 @@ describe('Cloud Runner', () => {
           expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
         }
       }
-    }, 1000000);
+    }, 10000000);
   }
 });
