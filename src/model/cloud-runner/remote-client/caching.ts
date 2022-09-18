@@ -59,12 +59,19 @@ export class Caching {
           )}`,
         );
       }
-      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
-      await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar.lz4`);
       const contents = await fs.promises.readdir(path.basename(sourceFolder));
       CloudRunnerLogger.log(
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
+
+      if (contents.length === 0) {
+        process.chdir(`${startPath}`);
+
+        return;
+      }
+
+      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
+      await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar.lz4`);
       assert(await fileExists(`${cacheArtifactName}.tar.lz4`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
       await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar.lz4 ${cacheFolder}`);
