@@ -38,7 +38,7 @@ export class TaskParameterSerializer {
       array.push(secrets.reduce((x, y) => [...x, ...y]));
     }
 
-    const blocked = new Set(['0', 'length', 'prototype', '', 'projectPath', 'unityVersion']);
+    const blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
 
     array = array.filter((x) => !blocked.has(x.name));
     array = array.map((x) => {
