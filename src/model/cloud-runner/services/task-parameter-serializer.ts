@@ -66,7 +66,7 @@ export class TaskParameterSerializer {
     for (const element of keys) {
       array.push(
         {
-          name: `param-${element}`,
+          name: `PARAM-${CloudRunnerOptions.ToEnvVarFormat(element)}`,
           value: buildParameters[element],
         },
         {
