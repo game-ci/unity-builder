@@ -54,7 +54,7 @@ export class TaskParameterSerializer {
 
   public static readBuildParameterFromEnvironment(): BuildParameters {
     const buildParameters = new BuildParameters();
-    const keys = Object.keys(BuildParameters);
+    const keys = Object.keys(buildParameters);
     for (const element of keys) {
       buildParameters[element] = process.env[CloudRunnerOptions.ToEnvVarFormat(`param-${element}`)];
     }
