@@ -64,10 +64,16 @@ export class TaskParameterSerializer {
   private static readBuildParameters(array: any[], buildParameters: BuildParameters) {
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
-      array.push({
-        name: `param-${element}`,
-        value: buildParameters[element],
-      });
+      array.push(
+        {
+          name: `param-${element}`,
+          value: buildParameters[element],
+        },
+        {
+          name: element,
+          value: buildParameters[element],
+        },
+      );
     }
 
     return array;
