@@ -29,6 +29,26 @@ describe('Cloud Runner', () => {
   it('Responds', () => {});
 
   if (CloudRunnerOptions.cloudRunnerTests) {
+    it('Task parameters serialize correctly', async () => {
+      // Setup parameters
+      const buildParameter = await CreateParameters({
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.read('test-project'),
+        targetPlatform: 'StandaloneLinux64',
+        customJob: `
+        - name: 'step 1'
+          image: 'alpine'
+          commands: 'printenv'
+          secrets:
+            - name: '${testSecretName}'
+              value: '${testSecretValue}'
+        `,
+      });
+
+      TaskParameterSerializer.readBuildParameters([], buildParameter);
+    });
+
     it('All build parameters sent to cloud runner as env vars', async () => {
       // Setup parameters
       const buildParameter = await CreateParameters({

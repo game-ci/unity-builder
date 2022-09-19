@@ -52,7 +52,7 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  static readBuildParameterFromEnvironment(): BuildParameters {
+  public static readBuildParameterFromEnvironment(): BuildParameters {
     const buildParameters = new BuildParameters();
     const keys = Object.keys(BuildParameters);
     for (const element of keys) {
@@ -61,7 +61,7 @@ export class TaskParameterSerializer {
 
     return buildParameters;
   }
-  private static readBuildParameters(array: any[], buildParameters: BuildParameters) {
+  public static readBuildParameters(array: any[], buildParameters: BuildParameters) {
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
       array.push(
