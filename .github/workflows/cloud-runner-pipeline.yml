@@ -113,12 +113,15 @@ jobs:
       - run: |
           aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
+        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
       - run: yarn run cli -m aws-list-all
+        if: ${{ matrix.cloudRunnerCluster == 'aws' }}
       ###########################
       #          Upload         #
       ###########################
       # download from cloud storage
       - uses: actions/upload-artifact@v2
+        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
         with:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
