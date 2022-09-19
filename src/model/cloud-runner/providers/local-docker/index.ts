@@ -62,9 +62,19 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(commands);
 
     const { workspace, actionFolder } = Action;
-    await Docker.run(image, { workspace, actionFolder, ...CloudRunner.buildParameters }, false, commands);
+    let myOutput = '';
+    let myError = '';
+    await Docker.run(image, { workspace, actionFolder, ...CloudRunner.buildParameters }, false, commands, {
+      stdout: (data: Buffer) => {
+        myOutput += data.toString();
+      },
+      stderr: (data: Buffer) => {
+        myError += data.toString();
+        throw new Error(myError);
+      },
+    });
 
-    return '';
+    return myOutput;
   }
 }
 export default LocalDockerCloudRunner;

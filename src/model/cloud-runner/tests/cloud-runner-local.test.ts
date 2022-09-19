@@ -44,7 +44,9 @@ describe('Cloud Runner', () => {
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
 
       // Assert results
-      expect(file).toContain(JSON.stringify(buildParameter));
+      for (const element of Object.keys(buildParameter)) {
+        expect(file).toContain(`PARAM-${Input.ToEnvVarFormat(element)}=${buildParameter[element]}`);
+      }
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
       const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
       const newLinePurgedFile = file

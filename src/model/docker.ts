@@ -4,7 +4,7 @@ import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async run(image, parameters, silent = false, overrideCommands = '') {
+  static async run(image, parameters, silent = false, overrideCommands = '', options: any = false) {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
@@ -13,7 +13,12 @@ class Docker {
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
     }
-    await exec(runCommand, undefined, { silent });
+    if (options !== false) {
+      options.silent = silent;
+      await exec(runCommand, undefined, options);
+    } else {
+      await exec(runCommand, undefined, { silent });
+    }
   }
 
   static getLinuxCommand(image, parameters, overrideCommands = ''): string {
