@@ -48,13 +48,9 @@ class LocalDockerCloudRunner implements ProviderInterface {
     buildGuid: string,
     image: string,
     commands: string,
-    // eslint-disable-next-line no-unused-vars
     mountdir: string,
-    // eslint-disable-next-line no-unused-vars
     workingdir: string,
-    // eslint-disable-next-line no-unused-vars
     environment: CloudRunnerEnvironmentVariable[],
-    // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     CloudRunnerLogger.log(buildGuid);
@@ -62,16 +58,34 @@ class LocalDockerCloudRunner implements ProviderInterface {
 
     const { workspace, actionFolder } = Action;
     let myOutput = '';
-    await Docker.run(image, { workspace, actionFolder, ...CloudRunner.buildParameters }, false, commands, {
-      listeners: {
-        stdout: (data: Buffer) => {
-          myOutput += data.toString();
-        },
-        stderr: (data: Buffer) => {
-          myOutput += `[ERROR]${data.toString()}`;
+    const content = [
+      ...secrets.map((x) => {
+        secrets[x.EnvironmentVariable] = x.ParameterValue;
+
+        return;
+      }),
+      ...environment.map((x) => {
+        environment[x.name] = x.value;
+
+        return;
+      }),
+    ];
+    await Docker.run(
+      image,
+      { workspace, actionFolder, mountdir, workingdir, ...CloudRunner.buildParameters, ...content },
+      false,
+      commands,
+      {
+        listeners: {
+          stdout: (data: Buffer) => {
+            myOutput += data.toString();
+          },
+          stderr: (data: Buffer) => {
+            myOutput += `[ERROR]${data.toString()}`;
+          },
         },
       },
-    });
+    );
 
     return myOutput;
   }
