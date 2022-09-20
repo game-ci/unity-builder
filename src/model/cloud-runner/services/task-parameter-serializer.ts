@@ -56,18 +56,31 @@ export class TaskParameterSerializer {
     const buildParameters = new BuildParameters();
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
-      buildParameters[element] =
-        process.env[CloudRunnerOptions.ToEnvVarFormat(`PARAM-${CloudRunnerOptions.ToEnvVarFormat(element)}`)];
+      buildParameters[TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters)] =
+        process.env[
+          TaskParameterSerializer.ToEnvVarFormat(`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`)
+        ];
     }
 
     return buildParameters;
   }
+
+  public static ToEnvVarFormat(input): string {
+    return CloudRunnerOptions.ToEnvVarFormat(input);
+  }
+
+  public static UndoEnvVarFormat(element, buildParameters): string {
+    return (
+      Object.keys(buildParameters).find((x) => `GAMECI-${TaskParameterSerializer.ToEnvVarFormat(x)}` === element) || ''
+    );
+  }
+
   public static readBuildParameters(array: any[], buildParameters: BuildParameters) {
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
       array.push(
         {
-          name: `PARAM-${CloudRunnerOptions.ToEnvVarFormat(element)}`,
+          name: `GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`,
           value: buildParameters[element],
         },
         {

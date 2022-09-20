@@ -82,7 +82,7 @@ describe('Cloud Runner', () => {
       });
       const buildParametersAsEnvironmentVariables = Object.keys(buildParameter).map((x) => {
         return {
-          name: `PARAM-${Input.ToEnvVarFormat(x)}`,
+          name: `GAMECI-${Input.ToEnvVarFormat(x)}`,
           value: buildParameter[x],
         };
       });
