@@ -5,7 +5,6 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
-import CloudRunner from '../../cloud-runner';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   inspect(): Promise<string> {
@@ -49,9 +48,13 @@ class LocalDockerCloudRunner implements ProviderInterface {
     buildGuid: string,
     image: string,
     commands: string,
+    // eslint-disable-next-line no-unused-vars
     mountdir: string,
+    // eslint-disable-next-line no-unused-vars
     workingdir: string,
+    // eslint-disable-next-line no-unused-vars
     environment: CloudRunnerEnvironmentVariable[],
+    // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     CloudRunnerLogger.log(buildGuid);
@@ -59,22 +62,16 @@ class LocalDockerCloudRunner implements ProviderInterface {
 
     const { workspace, actionFolder } = Action;
     let myOutput = '';
-    await Docker.run(
-      image,
-      { workspace, actionFolder, ...CloudRunner.buildParameters, ...secrets, ...environment },
-      false,
-      commands,
-      {
-        listeners: {
-          stdout: (data: Buffer) => {
-            myOutput += data.toString();
-          },
-          stderr: (data: Buffer) => {
-            myOutput += `[ERROR]${data.toString()}`;
-          },
+    await Docker.run(image, { workspace, actionFolder }, false, commands, {
+      listeners: {
+        stdout: (data: Buffer) => {
+          myOutput += data.toString();
+        },
+        stderr: (data: Buffer) => {
+          myOutput += `[ERROR]${data.toString()}`;
         },
       },
-    );
+    });
 
     return myOutput;
   }

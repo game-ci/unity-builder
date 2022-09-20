@@ -5,7 +5,7 @@ import { Cli } from '../../cli/cli';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { Caching } from './caching';
+import { Caching } from '../remote-client/caching';
 import { v4 as uuidv4 } from 'uuid';
 import GitHub from '../../github';
 describe('Cloud Runner (Remote Client) Caching', () => {
