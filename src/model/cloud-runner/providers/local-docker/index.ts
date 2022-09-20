@@ -4,7 +4,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
-import { Action } from '../../../../model';
+import { Action, CloudRunner } from '../../../../model';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   inspect(): Promise<string> {
@@ -62,7 +62,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
 
     const { workspace, actionFolder } = Action;
     let myOutput = '';
-    await Docker.run(image, { workspace, actionFolder }, false, commands, {
+    await Docker.run(image, { workspace, actionFolder, ...CloudRunner.buildParameters }, false, commands, {
       listeners: {
         stdout: (data: Buffer) => {
           myOutput += data.toString();
