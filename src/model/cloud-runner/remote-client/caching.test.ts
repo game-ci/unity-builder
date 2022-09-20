@@ -8,11 +8,8 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from './caching';
 import { v4 as uuidv4 } from 'uuid';
 import GitHub from '../../github';
-
-describe('Cloud Runner Caching', () => {
+describe('Cloud Runner (RemoteClient) Caching', () => {
   it('responds', () => {});
-});
-describe('Cloud Runner Caching', () => {
   if (process.platform === 'linux') {
     it('Simple caching works', async () => {
       Cli.options = {

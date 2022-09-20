@@ -22,7 +22,7 @@ async function CreateParameters(overrides) {
 
   return results;
 }
-describe('Cloud Runner', () => {
+describe('Cloud Runner  Sync Environments', () => {
   setups();
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
