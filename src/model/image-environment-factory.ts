@@ -1,6 +1,7 @@
 import BuildParameters from './build-parameters';
 import { TaskParameterSerializer } from './cloud-runner/services/task-parameter-serializer';
 import { ReadLicense } from './input-readers/test-license-reader';
+import * as core from '@actions/core';
 
 class Parameter {
   public name;
@@ -68,6 +69,7 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
     if (parameters.cloudRunnerCluster === 'local-docker') {
+      core.info(JSON.stringify(parameters, undefined, 4));
       const content = [
         ...TaskParameterSerializer.readBuildEnvironmentVariables(parameters),
         ...TaskParameterSerializer.readDefaultSecrets().map((x) => {
