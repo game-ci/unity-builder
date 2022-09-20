@@ -13,13 +13,13 @@ import SharedWorkspaceLocking from '../../cli/shared-workspace-locking';
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image);
+      return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
     } catch (error) {
       throw error;
     }
   }
 
-  private static async standardBuildAutomation(baseImage: any) {
+  private static async standardBuildAutomation(baseImage: any, cloudRunnerStepState: CloudRunnerStepState) {
     // TODO accept post and pre build steps as yaml files in the repo
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
@@ -46,8 +46,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         BuildAutomationWorkflow.BuildWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        CloudRunner.cloudRunnerEnvironmentVariables,
-        CloudRunner.defaultSecrets,
+        [...CloudRunner.cloudRunnerEnvironmentVariables, ...cloudRunnerStepState.environment],
+        [...CloudRunner.defaultSecrets, ...cloudRunnerStepState.secrets],
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
