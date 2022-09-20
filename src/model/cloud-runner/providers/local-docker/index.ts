@@ -4,9 +4,11 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
-import { Action, CloudRunner } from '../../../../model';
+import { Action } from '../../../../model';
 
 class LocalDockerCloudRunner implements ProviderInterface {
+  public buildParameters: BuildParameters | undefined;
+
   inspect(): Promise<string> {
     throw new Error('Method not implemented.');
   }
@@ -35,15 +37,16 @@ class LocalDockerCloudRunner implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
   setup(
-    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {}
+  ) {
+    this.buildParameters = buildParameters;
+  }
+
   public async runTask(
     buildGuid: string,
     image: string,
@@ -70,22 +73,16 @@ class LocalDockerCloudRunner implements ProviderInterface {
         return;
       }),
     ];
-    await Docker.run(
-      image,
-      { workspace, actionFolder, mountdir, workingdir, ...CloudRunner.buildParameters, ...content },
-      false,
-      commands,
-      {
-        listeners: {
-          stdout: (data: Buffer) => {
-            myOutput += data.toString();
-          },
-          stderr: (data: Buffer) => {
-            myOutput += `[ERROR]${data.toString()}`;
-          },
+    await Docker.run(image, { workspace, actionFolder, ...this.buildParameters, ...content }, false, commands, {
+      listeners: {
+        stdout: (data: Buffer) => {
+          myOutput += data.toString();
+        },
+        stderr: (data: Buffer) => {
+          myOutput += `[ERROR]${data.toString()}`;
         },
       },
-    );
+    });
 
     return myOutput;
   }
