@@ -75,7 +75,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     ];
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
-    await Docker.run(image, { workspace, actionFolder, ...this.buildParameters, ...content }, false, commands, {
+    await Docker.run(image, { workspace, actionFolder, ...this.buildParameters }, false, commands, content, {
       listeners: {
         stdout: (data: Buffer) => {
           myOutput += data.toString();

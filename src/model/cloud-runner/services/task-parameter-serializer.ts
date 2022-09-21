@@ -33,7 +33,7 @@ export class TaskParameterSerializer {
     ]
       .filter((x) => !TaskParameterSerializer.blocked.has(x.name))
       .map((x) => {
-        x.name = Input.ToEnvVarFormat(x.name);
+        x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;
         if (buildParameters.cloudRunnerIntegrationTests) {
           if (Number(x.name) === Number.NaN) {

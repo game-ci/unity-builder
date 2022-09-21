@@ -4,11 +4,18 @@ import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async run(image, parameters, silent = false, overrideCommands = '', options: any = false) {
+  static async run(
+    image,
+    parameters,
+    silent = false,
+    overrideCommands = '',
+    additionalVariables: any[] = [],
+    options: any = false,
+  ) {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(image, parameters, overrideCommands);
+        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables);
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
@@ -21,7 +28,7 @@ class Docker {
     }
   }
 
-  static getLinuxCommand(image, parameters, overrideCommands = ''): string {
+  static getLinuxCommand(image, parameters, overrideCommands = '', additionalVariables: any[] = []): string {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -32,7 +39,7 @@ class Docker {
     return `docker run \
             --workdir /github/workspace \
             --rm \
-            ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
+            ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \

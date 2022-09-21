@@ -7,8 +7,8 @@ class Parameter {
 }
 
 class ImageEnvironmentFactory {
-  public static getEnvVarString(parameters) {
-    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters);
+  public static getEnvVarString(parameters, additionalVariables: any[] = []) {
+    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
     let string = '';
     for (const p of environmentVariables) {
       if (p.value === '' || p.value === undefined) {
@@ -24,7 +24,7 @@ class ImageEnvironmentFactory {
 
     return string;
   }
-  public static getEnvironmentVariables(parameters: BuildParameters) {
+  public static getEnvironmentVariables(parameters: BuildParameters, additionalVariables: any[] = []) {
     const environmentVariables: Parameter[] = [
       { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: process.env.UNITY_LICENSE_FILE },
@@ -67,10 +67,9 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
     if (parameters.cloudRunnerCluster === 'local-docker') {
-      for (const key of Object.keys(parameters)) {
-        const value = parameters[key];
-        if (environmentVariables.find((x) => value !== undefined && x !== undefined && x.name === key) === undefined) {
-          environmentVariables.push({ name: key, value });
+      for (const element of additionalVariables) {
+        if (environmentVariables.find((x) => x.name === element.name) === undefined) {
+          environmentVariables.push({ name: element.name, value: element.value });
         }
       }
     }
