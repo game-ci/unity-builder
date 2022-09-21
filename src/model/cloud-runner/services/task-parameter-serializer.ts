@@ -15,46 +15,59 @@ import * as core from '@actions/core';
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
   public static readBuildEnvironmentVariables(buildParameters: BuildParameters): CloudRunnerEnvironmentVariable[] {
-    return [
-      {
-        name: 'ContainerMemory',
-        value: buildParameters.cloudRunnerMemory,
-      },
-      {
-        name: 'ContainerCpu',
-        value: buildParameters.cloudRunnerCpu,
-      },
-      {
-        name: 'BUILD_TARGET',
-        value: buildParameters.targetPlatform,
-      },
-      ...TaskParameterSerializer.serializeFromObject(buildParameters),
-      ...TaskParameterSerializer.readInput(),
-      ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
-    ]
-      .filter(
-        (x) =>
-          !TaskParameterSerializer.blocked.has(x.name) &&
-          x.value !== '' &&
-          x.value !== undefined &&
-          x.value !== `undefined`,
-      )
-      .map((x) => {
-        x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
-        x.value = `${x.value}`;
-        if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
-          x.value = base64.encode(x.value);
-        }
-        if (buildParameters.cloudRunnerIntegrationTests) {
-          if (Number(x.name) === Number.NaN) {
-            core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
-          } else {
-            core.info(`${JSON.stringify(x)}`);
+    return this.uniqBy(
+      [
+        {
+          name: 'ContainerMemory',
+          value: buildParameters.cloudRunnerMemory,
+        },
+        {
+          name: 'ContainerCpu',
+          value: buildParameters.cloudRunnerCpu,
+        },
+        {
+          name: 'BUILD_TARGET',
+          value: buildParameters.targetPlatform,
+        },
+        ...TaskParameterSerializer.serializeFromObject(buildParameters),
+        ...TaskParameterSerializer.readInput(),
+        ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
+      ]
+        .filter(
+          (x) =>
+            !TaskParameterSerializer.blocked.has(x.name) &&
+            x.value !== '' &&
+            x.value !== undefined &&
+            x.value !== `undefined`,
+        )
+        .map((x) => {
+          x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
+          x.value = `${x.value}`;
+          if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
+            x.value = base64.encode(x.value);
           }
-        }
+          if (buildParameters.cloudRunnerIntegrationTests) {
+            if (Number(x.name) === Number.NaN) {
+              core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
+            } else {
+              core.info(`${JSON.stringify(x)}`);
+            }
+          }
 
-        return x;
-      });
+          return x;
+        }),
+      (item) => item.name,
+    );
+  }
+
+  static uniqBy(a, key) {
+    const seen = {};
+
+    return a.filter(function (item) {
+      const k = key(item);
+
+      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+    });
   }
 
   public static readBuildParameterFromEnvironment(): BuildParameters {
