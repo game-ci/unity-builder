@@ -32,6 +32,10 @@ export class CloudRunnerCustomHooks {
 
     return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
   }
+
+  public static getSecrets(hooks) {
+    return hooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
+  }
 }
 export class Hook {
   public commands;

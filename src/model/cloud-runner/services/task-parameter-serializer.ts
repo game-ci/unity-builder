@@ -6,6 +6,7 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
+import * as core from '@actions/core';
 
 // import CloudRunner from '../cloud-runner';
 // import ImageEnvironmentFactory from '../../image-environment-factory';
@@ -29,26 +30,30 @@ export class TaskParameterSerializer {
     ];
   }
   private static serializeBuildParamsAndInput(buildParameters: BuildParameters) {
+    core.info(`Serializing ${JSON.stringify(buildParameters, undefined, 4)}`);
     let array = [
       ...TaskParameterSerializer.serializeFromObject(buildParameters),
       ...TaskParameterSerializer.readInput(),
     ];
-    const configurableHooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
-    const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
+    core.info(`Array with object serialized build params and input ${JSON.stringify(array, undefined, 4)}`);
+    const secrets = CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks));
     if (secrets.length > 0) {
       // eslint-disable-next-line unicorn/no-array-reduce
       array.push(secrets.reduce((x, y) => [...x, ...y]));
     }
+    core.info(`Array with secrets added ${JSON.stringify(array, undefined, 4)}`);
 
     const blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
 
     array = array.filter((x) => !blocked.has(x.name));
+    core.info(`Array after blocking removed added ${JSON.stringify(array, undefined, 4)}`);
     array = array.map((x) => {
       x.name = Input.ToEnvVarFormat(x.name);
       x.value = `${x.value}`;
 
       return x;
     });
+    core.info(`Array after env var formatting ${JSON.stringify(array, undefined, 4)}`);
 
     return array;
   }
