@@ -79,9 +79,7 @@ describe('Cloud Runner Sync Environments', () => {
         expect(newLinePurgedFile).toContain(`${element.name}`);
         CloudRunnerLogger.log(`Contains ${element.name}`);
         const fullNameEqualValue = `${element.name}=${element.value}`;
-        const fullNamePrefixEqualValue = `GAMECI-${fullNameEqualValue}`;
         expect(newLinePurgedFile).toContain(fullNameEqualValue);
-        expect(newLinePurgedFile).toContain(fullNamePrefixEqualValue);
 
         // should not contain more than once
         // expect(
