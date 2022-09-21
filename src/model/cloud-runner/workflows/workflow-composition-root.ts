@@ -16,7 +16,11 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
   private static async runJob(baseImage: any) {
     try {
       if (CloudRunner.buildParameters.customJob !== '') {
-        return await CustomWorkflow.runCustomJob(CloudRunner.buildParameters.customJob);
+        return await CustomWorkflow.runCustomJob(
+          CloudRunner.buildParameters.customJob,
+          CloudRunner.cloudRunnerEnvironmentVariables,
+          CloudRunner.defaultSecrets,
+        );
       }
 
       return await new BuildAutomationWorkflow().run(

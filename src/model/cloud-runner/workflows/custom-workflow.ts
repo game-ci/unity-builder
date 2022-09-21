@@ -3,9 +3,14 @@ import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import YAML from 'yaml';
 import { CloudRunner, Input } from '../..';
+import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 
 export class CustomWorkflow {
-  public static async runCustomJob(buildSteps) {
+  public static async runCustomJob(
+    buildSteps,
+    environmentVariables: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
+  ) {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
@@ -34,8 +39,8 @@ export class CustomWorkflow {
           step['commands'],
           `/${CloudRunnerFolders.buildVolumeFolder}`,
           `/${CloudRunnerFolders.projectPathAbsolute}/`,
-          CloudRunner.cloudRunnerEnvironmentVariables,
-          [...CloudRunner.defaultSecrets, ...stepSecrets],
+          environmentVariables,
+          [...secrets, ...stepSecrets],
         );
       }
 

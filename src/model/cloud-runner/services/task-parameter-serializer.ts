@@ -35,9 +35,12 @@ export class TaskParameterSerializer {
       .map((x) => {
         x.name = Input.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;
-
-        if (Number(x.name) === Number.NaN) {
-          core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
+        if (buildParameters.cloudRunnerIntegrationTests) {
+          if (Number(x.name) === Number.NaN) {
+            core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
+          } else {
+            core.info(`${JSON.stringify(x)}`);
+          }
         }
 
         return x;
