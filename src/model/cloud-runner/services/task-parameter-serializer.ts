@@ -62,9 +62,9 @@ export class TaskParameterSerializer {
     const buildParameters = new BuildParameters();
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
-      buildParameters[TaskParameterSerializer.UndoEnvVarFormat(keys[element], buildParameters)] =
+      buildParameters[TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters)] =
         process.env[
-          TaskParameterSerializer.ToEnvVarFormat(`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(keys[element])}`)
+          TaskParameterSerializer.ToEnvVarFormat(`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`)
         ];
     }
 
