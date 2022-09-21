@@ -81,7 +81,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
           myOutput += data.toString();
         },
         stderr: (data: Buffer) => {
-          myOutput += `[ERROR]${data.toString()}`;
+          myOutput += `[LOCAL-DOCKER-ERROR]${data.toString()}`;
         },
       },
     });
