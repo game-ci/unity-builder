@@ -62,19 +62,23 @@ class LocalDockerCloudRunner implements ProviderInterface {
     const { workspace, actionFolder } = Action;
     let myOutput = '';
     const content = [
-      ...secrets.map((x, index) => {
+      ...secrets.map((x) => {
         secrets[x.EnvironmentVariable] = x.ParameterValue;
-        delete secrets[index];
 
         return;
       }),
-      ...environment.map((x, index) => {
+      ...environment.map((x) => {
         environment[x.name] = x.value;
-        delete environment[index];
 
         return;
       }),
     ];
+    // eslint-disable-next-line unicorn/no-for-loop
+    for (let index = 0; index < content.length; index++) {
+      if (content[index] === undefined) {
+        delete content[index];
+      }
+    }
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     await Docker.run(image, { workspace, actionFolder, ...this.buildParameters }, false, commands, content, {
