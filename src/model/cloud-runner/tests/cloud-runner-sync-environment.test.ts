@@ -109,10 +109,8 @@ describe('Cloud Runner  Sync Environments', () => {
           const fullNameEqualValue = `${element.name}=${element.value}`;
           expect(newLinePurgedFile).toContain(fullNameEqualValue);
 
-          const count = (
-            newLinePurgedFile.replace(/<br\/>/g, '\n').match(`/${fullNameEqualValue.replace(/<br\/>/g, '\n')}/g`) || []
-          ).length;
-          expect(count).toEqual(1);
+          // should not contain more than once
+          expect(newLinePurgedFile.replace('fullNameEqualValue', '')).not.toContain(fullNameEqualValue);
         }
       }
     }, 10000000);
