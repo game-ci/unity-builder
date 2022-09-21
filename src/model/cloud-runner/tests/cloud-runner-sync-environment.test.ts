@@ -90,7 +90,9 @@ describe('Cloud Runner Sync Environments', () => {
           expect(newLinePurgedFile).toContain(fullNameEqualValue);
 
           // should not contain more than once
-          expect(newLinePurgedFile.replace(fullNameEqualValue, '')).not.toContain(fullNameEqualValue);
+          expect(
+            newLinePurgedFile.replace(fullNameEqualValue, '').replace(`GAMECI-${fullNameEqualValue}`, ''),
+          ).not.toContain(fullNameEqualValue);
         }
       }
     }, 10000000);
