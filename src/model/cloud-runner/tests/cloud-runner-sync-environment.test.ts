@@ -80,6 +80,7 @@ describe('Cloud Runner Sync Environments', () => {
       for (const element of combined) {
         if (
           element.value !== undefined &&
+          element.value !== '' &&
           typeof element.value !== 'function' &&
           !['UNITY_LICENSE'].includes(element.name)
         ) {
