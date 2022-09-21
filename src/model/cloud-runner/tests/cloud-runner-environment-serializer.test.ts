@@ -41,6 +41,6 @@ describe('Cloud Runner Environment Serializer', () => {
 
     const result = TaskParameterSerializer.readBuildParameters([], buildParameter);
     core.info(JSON.stringify(result, undefined, 4));
-    expect(result.find((x) => Number.parseInt(x)) !== undefined).toBeFalsy;
+    expect(result.find((x) => Number.parseInt(x)) !== undefined).toBeFalsy();
   });
 });
