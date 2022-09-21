@@ -46,8 +46,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         BuildAutomationWorkflow.BuildWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        [...CloudRunner.cloudRunnerEnvironmentVariables, ...cloudRunnerStepState.environment],
-        [...CloudRunner.defaultSecrets, ...cloudRunnerStepState.secrets],
+        cloudRunnerStepState.environment,
+        cloudRunnerStepState.secrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
