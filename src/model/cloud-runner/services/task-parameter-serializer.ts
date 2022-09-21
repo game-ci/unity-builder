@@ -37,7 +37,7 @@ export class TaskParameterSerializer {
         x.value = `${x.value}`;
 
         if (Number.parseInt(x.name) !== undefined) {
-          core.info(`[ERROR] found a number in task param serializer`);
+          core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
         }
 
         return x;
