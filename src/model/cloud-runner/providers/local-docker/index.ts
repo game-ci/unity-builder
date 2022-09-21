@@ -6,6 +6,7 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
 import * as core from '@actions/core';
+import { writeFileSync } from 'fs';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -83,11 +84,15 @@ class LocalDockerCloudRunner implements ProviderInterface {
     let myOutput = '';
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
+    writeFileSync('/github/workspace/start.sh', commands.replace('\n', ' && '), {
+      flag: 'w',
+    });
+
     await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },
       false,
-      commands.replace('\n', ' && '),
+      '/github/workspace/start.sh',
       content,
       {
         listeners: {
