@@ -59,13 +59,7 @@ describe('Cloud Runner Sync Environments', () => {
           value: x.ParameterValue,
         };
       });
-      const buildParametersAsEnvironmentVariables = Object.keys(buildParameter).map((x) => {
-        return {
-          name: `GAMECI-${Input.ToEnvVarFormat(x)}`,
-          value: buildParameter[x],
-        };
-      });
-      const combined = [...environmentVariables, ...secrets, ...buildParametersAsEnvironmentVariables]
+      const combined = [...environmentVariables, ...secrets]
         .filter((element) => element.value !== undefined && element.value !== '' && typeof element.value !== 'function')
         .map((x) => {
           if (typeof x.value === `string`) {
@@ -85,7 +79,9 @@ describe('Cloud Runner Sync Environments', () => {
         expect(newLinePurgedFile).toContain(`${element.name}`);
         CloudRunnerLogger.log(`Contains ${element.name}`);
         const fullNameEqualValue = `${element.name}=${element.value}`;
+        const fullNamePrefixEqualValue = `GAMECI${fullNameEqualValue}`;
         expect(newLinePurgedFile).toContain(fullNameEqualValue);
+        expect(newLinePurgedFile).toContain(fullNamePrefixEqualValue);
 
         // should not contain more than once
         // expect(
