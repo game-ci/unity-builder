@@ -36,7 +36,7 @@ export class TaskParameterSerializer {
         x.name = Input.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;
 
-        if (Number.parseInt(x.name) !== undefined) {
+        if (Number(x.name) === Number.NaN) {
           core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
         }
 
