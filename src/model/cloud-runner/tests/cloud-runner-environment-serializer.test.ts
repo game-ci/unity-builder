@@ -4,6 +4,7 @@ import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
+import * as core from '@actions/core';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -39,6 +40,7 @@ describe('Cloud Runner Environment Serializer', () => {
     });
 
     const result = TaskParameterSerializer.readBuildParameters([], buildParameter);
-    expect(result.find((x) => Number.parseInt(x)) === undefined).toBeFalsy;
+    core.info(JSON.stringify(result, undefined, 4));
+    expect(result.find((x) => Number.parseInt(x)) !== undefined).toBeFalsy;
   });
 });
