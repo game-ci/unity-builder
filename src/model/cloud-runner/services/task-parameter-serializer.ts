@@ -6,6 +6,7 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
+import base64 from 'base-64';
 
 // import CloudRunner from '../cloud-runner';
 // import ImageEnvironmentFactory from '../../image-environment-factory';
@@ -41,6 +42,9 @@ export class TaskParameterSerializer {
       .map((x) => {
         x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;
+        if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
+          x.value = base64.encode(x.value);
+        }
         if (buildParameters.cloudRunnerIntegrationTests) {
           if (Number(x.name) === Number.NaN) {
             core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
@@ -57,10 +61,14 @@ export class TaskParameterSerializer {
     const buildParameters = new BuildParameters();
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
-      buildParameters[TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters)] =
+      const parameter = TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters);
+      buildParameters[parameter] =
         process.env[
           TaskParameterSerializer.ToEnvVarFormat(`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`)
         ];
+      if (parameter === `CUSTOM_JOB` || parameter === `GAMECI-CUSTOM_JOB`) {
+        buildParameters[parameter] = base64.decode(buildParameters[parameter]);
+      }
     }
 
     return buildParameters;
