@@ -70,16 +70,8 @@ class ImageEnvironmentFactory {
     ];
     if (parameters.cloudRunnerCluster === 'local-docker') {
       core.info(JSON.stringify(parameters, undefined, 4));
-      const content = [
-        ...TaskParameterSerializer.readBuildEnvironmentVariables(parameters),
-        ...TaskParameterSerializer.readDefaultSecrets().map((x) => {
-          return {
-            name: x.EnvironmentVariable,
-            value: x.ParameterValue,
-          };
-        }),
-      ];
-
+      const content = TaskParameterSerializer.readBuildEnvironmentVariables(parameters);
+      core.info(JSON.stringify(content, undefined, 4));
       for (const element of content) {
         if (environmentVariables.find((x) => x.name === element.name) === undefined) {
           environmentVariables.push(element);
