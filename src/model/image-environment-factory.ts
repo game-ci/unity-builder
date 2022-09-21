@@ -25,7 +25,7 @@ class ImageEnvironmentFactory {
     return string;
   }
   public static getEnvironmentVariables(parameters: BuildParameters, additionalVariables: any[] = []) {
-    const environmentVariables: Parameter[] = [
+    let environmentVariables: Parameter[] = [
       { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: process.env.UNITY_LICENSE_FILE },
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
@@ -74,6 +74,15 @@ class ImageEnvironmentFactory {
           ) === undefined
         ) {
           environmentVariables.push(element);
+        }
+      }
+      for (const variable of environmentVariables) {
+        if (
+          environmentVariables.find(
+            (x) => variable !== undefined && variable.name !== undefined && x.name === variable.name,
+          ) === undefined
+        ) {
+          environmentVariables = environmentVariables.filter((x) => x !== variable);
         }
       }
     }
