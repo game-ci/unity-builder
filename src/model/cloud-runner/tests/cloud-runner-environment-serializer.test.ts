@@ -22,7 +22,7 @@ describe('Cloud Runner Environment Serializer', () => {
   setups();
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
-  it('Task parameters serialize correctly', async () => {
+  it('Cloud Runner Parameter Serialization', async () => {
     // Setup parameters
     const buildParameter = await CreateParameters({
       versioning: 'None',
@@ -39,8 +39,8 @@ describe('Cloud Runner Environment Serializer', () => {
       `,
     });
 
-    const result = TaskParameterSerializer.readBuildParameters([], buildParameter);
+    const result = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
     core.info(JSON.stringify(result, undefined, 4));
-    expect(result.find((x) => Number.parseInt(x)) !== undefined).toBeFalsy();
+    expect(result.find((x) => Number.parseInt(x.name)) !== undefined).toBeFalsy();
   });
 });

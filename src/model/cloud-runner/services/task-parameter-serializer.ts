@@ -29,9 +29,10 @@ export class TaskParameterSerializer {
     ];
   }
   private static serializeBuildParamsAndInput(buildParameters: BuildParameters) {
-    let array = new Array();
-    array = TaskParameterSerializer.readBuildParameters(array, buildParameters);
-    array = TaskParameterSerializer.readInput(array);
+    let array = [
+      ...TaskParameterSerializer.serializeFromObject(buildParameters),
+      ...TaskParameterSerializer.readInput(),
+    ];
     const configurableHooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
     const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
     if (secrets.length > 0) {
@@ -65,6 +66,10 @@ export class TaskParameterSerializer {
     return buildParameters;
   }
 
+  private static readInput() {
+    return TaskParameterSerializer.serializeFromType(Input);
+  }
+
   public static ToEnvVarFormat(input): string {
     return CloudRunnerOptions.ToEnvVarFormat(input);
   }
@@ -75,7 +80,8 @@ export class TaskParameterSerializer {
     );
   }
 
-  public static readBuildParameters(array: any[], buildParameters: BuildParameters) {
+  private static serializeFromObject(buildParameters) {
+    const array: any[] = [];
     const keys = Object.keys(buildParameters);
     for (const element of keys) {
       array.push(
@@ -93,13 +99,14 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  private static readInput(array: any[]) {
+  private static serializeFromType(type) {
+    const array: any[] = [];
     const input = CloudRunnerOptionsReader.GetProperties();
     for (const element of input) {
-      if (typeof Input[element] !== 'function' && array.filter((x) => x.name === element).length === 0) {
+      if (typeof type[element] !== 'function' && array.filter((x) => x.name === element).length === 0) {
         array.push({
           name: element,
-          value: `${Input[element]}`,
+          value: `${type[element]}`,
         });
       }
     }
