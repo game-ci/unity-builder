@@ -61,16 +61,19 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(commands);
 
     const { workspace, actionFolder } = Action;
-    const content = [];
+    const content: any[] = [];
     for (const x of secrets) {
-      content[x.EnvironmentVariable] = x.ParameterValue;
+      content.push({ name: x.EnvironmentVariable, value: x.ParameterValue });
     }
     for (const x of environment) {
-      content[x.name] = x.value;
+      content.push({ name: x.name, value: x.value });
     }
-    core.info(JSON.stringify(content, undefined, 4));
-    core.info(JSON.stringify(secrets, undefined, 4));
-    core.info(JSON.stringify(environment, undefined, 4));
+    if (this.buildParameters?.cloudRunnerIntegrationTests) {
+      core.info(JSON.stringify(content, undefined, 4));
+      core.info(JSON.stringify(secrets, undefined, 4));
+      core.info(JSON.stringify(environment, undefined, 4));
+    }
+
     // eslint-disable-next-line unicorn/no-for-loop
     for (let index = 0; index < content.length; index++) {
       if (content[index] === undefined) {
