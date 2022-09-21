@@ -108,7 +108,10 @@ describe('Cloud Runner  Sync Environments', () => {
           CloudRunnerLogger.log(`Contains ${element.name}`);
           const fullNameEqualValue = `${element.name}=${element.value}`;
           expect(newLinePurgedFile).toContain(fullNameEqualValue);
-          const count = (newLinePurgedFile.match(`/${fullNameEqualValue}/g`) || []).length;
+
+          const count = (
+            newLinePurgedFile.replace(/<br\/>/g, '\n').match(`/${fullNameEqualValue.replace(/<br\/>/g, '\n')}/g`) || []
+          ).length;
           expect(count).toEqual(1);
         }
       }
