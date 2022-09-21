@@ -5,6 +5,7 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
+import * as core from '@actions/core';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -73,6 +74,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
         return;
       }),
     ];
+    core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     await Docker.run(image, { workspace, actionFolder, ...this.buildParameters, ...content }, false, commands, {
       listeners: {
         stdout: (data: Buffer) => {
