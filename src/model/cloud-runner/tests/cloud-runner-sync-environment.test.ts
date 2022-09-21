@@ -106,7 +106,10 @@ describe('Cloud Runner  Sync Environments', () => {
         ) {
           expect(newLinePurgedFile).toContain(`${element.name}`);
           CloudRunnerLogger.log(`Contains ${element.name}`);
-          expect(newLinePurgedFile).toContain(`${element.name}=${element.value}`);
+          const fullNameEqualValue = `${element.name}=${element.value}`;
+          expect(newLinePurgedFile).toContain(fullNameEqualValue);
+          const count = (newLinePurgedFile.match(`/${fullNameEqualValue}/g`) || []).length;
+          expect(count).toEqual(1);
         }
       }
     }, 10000000);
