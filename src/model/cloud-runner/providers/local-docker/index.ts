@@ -83,16 +83,23 @@ class LocalDockerCloudRunner implements ProviderInterface {
     let myOutput = '';
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
-    await Docker.run(image, { workspace, actionFolder, ...this.buildParameters }, false, commands, content, {
-      listeners: {
-        stdout: (data: Buffer) => {
-          myOutput += data.toString();
-        },
-        stderr: (data: Buffer) => {
-          myOutput += `[LOCAL-DOCKER-ERROR]${data.toString()}`;
+    await Docker.run(
+      image,
+      { workspace, actionFolder, ...this.buildParameters },
+      false,
+      commands.replace('\n', ' && '),
+      content,
+      {
+        listeners: {
+          stdout: (data: Buffer) => {
+            myOutput += data.toString();
+          },
+          stderr: (data: Buffer) => {
+            myOutput += `[LOCAL-DOCKER-ERROR]${data.toString()}`;
+          },
         },
       },
-    });
+    );
 
     return myOutput;
   }
