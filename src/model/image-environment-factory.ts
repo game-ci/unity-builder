@@ -69,7 +69,7 @@ class ImageEnvironmentFactory {
     if (parameters.cloudRunnerCluster === 'local-docker') {
       for (const element of additionalVariables) {
         if (environmentVariables.find((x) => x.name === element.name) === undefined) {
-          environmentVariables.push({ name: element.name, value: element.value });
+          environmentVariables.push(element.name);
         }
       }
     }
