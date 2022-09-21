@@ -16,6 +16,7 @@ class ImageEnvironmentFactory {
       }
       if (p.name !== 'ANDROID_KEYSTORE_BASE64' && p.value.toString().includes(`\n`)) {
         string += `--env ${p.name} `;
+        process.env[p.name] = p.value;
         continue;
       }
 
