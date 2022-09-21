@@ -2,7 +2,6 @@ import { BuildParameters } from '../..';
 import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
-import CloudRunnerOptions from '../cloud-runner-options';
 import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
 
@@ -22,28 +21,24 @@ describe('Cloud Runner Environment Serializer', () => {
   setups();
   const testSecretName = 'testSecretName';
   const testSecretValue = 'testSecretValue';
-  it('Responds', () => {});
-
-  if (CloudRunnerOptions.cloudRunnerTests) {
-    it('Task parameters serialize correctly', async () => {
-      // Setup parameters
-      const buildParameter = await CreateParameters({
-        versioning: 'None',
-        projectPath: 'test-project',
-        unityVersion: UnityVersioning.read('test-project'),
-        targetPlatform: 'StandaloneLinux64',
-        customJob: `
-        - name: 'step 1'
-          image: 'alpine'
-          commands: 'printenv'
-          secrets:
-            - name: '${testSecretName}'
-              value: '${testSecretValue}'
-        `,
-      });
-
-      const result = TaskParameterSerializer.readBuildParameters([], buildParameter);
-      expect(result.find((x) => Number.parseInt(x)) === undefined).toBeFalsy;
+  it('Task parameters serialize correctly', async () => {
+    // Setup parameters
+    const buildParameter = await CreateParameters({
+      versioning: 'None',
+      projectPath: 'test-project',
+      unityVersion: UnityVersioning.read('test-project'),
+      targetPlatform: 'StandaloneLinux64',
+      customJob: `
+      - name: 'step 1'
+        image: 'alpine'
+        commands: 'printenv'
+        secrets:
+          - name: '${testSecretName}'
+            value: '${testSecretValue}'
+      `,
     });
-  }
+
+    const result = TaskParameterSerializer.readBuildParameters([], buildParameter);
+    expect(result.find((x) => Number.parseInt(x)) === undefined).toBeFalsy;
+  });
 });
