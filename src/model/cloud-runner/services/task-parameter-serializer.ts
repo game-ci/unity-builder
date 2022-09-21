@@ -9,6 +9,7 @@ import CloudRunnerOptions from '../cloud-runner-options';
 
 // import CloudRunner from '../cloud-runner';
 // import ImageEnvironmentFactory from '../../image-environment-factory';
+import * as core from '@actions/core';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -34,6 +35,10 @@ export class TaskParameterSerializer {
       .map((x) => {
         x.name = Input.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;
+
+        if (Number.parseInt(x.name) !== undefined) {
+          core.info(`[ERROR] found a number in task param serializer`);
+        }
 
         return x;
       });
