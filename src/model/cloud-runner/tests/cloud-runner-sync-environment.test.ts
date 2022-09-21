@@ -65,35 +65,32 @@ describe('Cloud Runner Sync Environments', () => {
           value: buildParameter[x],
         };
       });
-      const combined = [...environmentVariables, ...secrets, ...buildParametersAsEnvironmentVariables];
+      const combined = [...environmentVariables, ...secrets, ...buildParametersAsEnvironmentVariables]
+        .filter((element) => element.value !== undefined && element.value !== '' && typeof element.value !== 'function')
+        .map((x) => {
+          if (typeof x.value === `string`) {
+            x.value = x.value.replace(/\s+/g, '');
+          }
+
+          return x;
+        })
+        .filter((element) => {
+          return !['UNITY_LICENSE'].includes(element.name);
+        });
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
       for (const element of combined) {
-        if (element.value !== undefined && typeof element.value !== 'function') {
-          if (typeof element.value === `string`) {
-            element.value = element.value.replace(/\s+/g, '');
-          }
-          CloudRunnerLogger.log(`checking input/build param ${element.name} ${element.value}`);
-        }
-      }
-      for (const element of combined) {
-        if (
-          element.value !== undefined &&
-          element.value !== '' &&
-          typeof element.value !== 'function' &&
-          !['UNITY_LICENSE'].includes(element.name)
-        ) {
-          expect(newLinePurgedFile).toContain(`${element.name}`);
-          CloudRunnerLogger.log(`Contains ${element.name}`);
-          const fullNameEqualValue = `${element.name}=${element.value}`;
-          expect(newLinePurgedFile).toContain(fullNameEqualValue);
+        CloudRunnerLogger.log(`checking input/build param ${element.name} ${element.value}`);
+        expect(newLinePurgedFile).toContain(`${element.name}`);
+        CloudRunnerLogger.log(`Contains ${element.name}`);
+        const fullNameEqualValue = `${element.name}=${element.value}`;
+        expect(newLinePurgedFile).toContain(fullNameEqualValue);
 
-          // should not contain more than once
-          // expect(
-          //   newLinePurgedFile.replace(fullNameEqualValue, '').replace(`GAMECI-${fullNameEqualValue}`, ''),
-          // ).not.toContain(fullNameEqualValue);
-        }
+        // should not contain more than once
+        // expect(
+        //   newLinePurgedFile.replace(fullNameEqualValue, '').replace(`GAMECI-${fullNameEqualValue}`, ''),
+        // ).not.toContain(fullNameEqualValue);
       }
     }, 10000000);
   }
