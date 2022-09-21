@@ -62,13 +62,15 @@ class LocalDockerCloudRunner implements ProviderInterface {
     const { workspace, actionFolder } = Action;
     let myOutput = '';
     const content = [
-      ...secrets.map((x) => {
+      ...secrets.map((x, index) => {
         secrets[x.EnvironmentVariable] = x.ParameterValue;
+        delete secrets[index];
 
         return;
       }),
-      ...environment.map((x) => {
+      ...environment.map((x, index) => {
         environment[x.name] = x.value;
+        delete environment[index];
 
         return;
       }),
