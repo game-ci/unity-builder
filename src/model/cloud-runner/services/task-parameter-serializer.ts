@@ -31,7 +31,13 @@ export class TaskParameterSerializer {
       ...TaskParameterSerializer.readInput(),
       ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
     ]
-      .filter((x) => !TaskParameterSerializer.blocked.has(x.name))
+      .filter(
+        (x) =>
+          !TaskParameterSerializer.blocked.has(x.name) &&
+          x.value !== '' &&
+          x.value !== undefined &&
+          x.value !== `undefined`,
+      )
       .map((x) => {
         x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
         x.value = `${x.value}`;

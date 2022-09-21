@@ -73,7 +73,7 @@ class ImageEnvironmentFactory {
             (x) => element !== undefined && element.name !== undefined && x.name === element.name,
           ) === undefined
         ) {
-          environmentVariables.push(element.name);
+          environmentVariables.push(element);
         }
       }
     }
