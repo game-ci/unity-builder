@@ -103,7 +103,7 @@ export class TaskParameterSerializer {
 
   private static serializeFromObject(buildParameters) {
     const array: any[] = [];
-    const keys = Object.keys(buildParameters);
+    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !TaskParameterSerializer.blocked.has(x));
     for (const element of keys) {
       array.push(
         {
