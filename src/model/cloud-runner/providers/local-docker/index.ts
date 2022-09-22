@@ -84,7 +84,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     let myOutput = '';
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
-    const entrypointFilePath = `ls && cd ./.. && ${workspace}/start.sh`;
+    const entrypointFilePath = `ls && cd ./.. && ls && ${workspace}/start.sh`;
     writeFileSync(entrypointFilePath, commands, {
       flag: 'w',
     });
