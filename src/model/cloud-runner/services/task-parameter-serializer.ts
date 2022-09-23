@@ -116,6 +116,7 @@ export class TaskParameterSerializer {
         },
       );
     }
+    core.info(JSON.stringify(array, undefined, 4));
 
     return array;
   }
