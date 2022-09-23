@@ -72,7 +72,7 @@ export class TaskParameterSerializer {
 
   public static readBuildParameterFromEnvironment(): BuildParameters {
     const buildParameters = new BuildParameters();
-    const keys = Object.keys(buildParameters);
+    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
     for (const element of keys) {
       const parameter = TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters);
       buildParameters[parameter] =
@@ -103,7 +103,7 @@ export class TaskParameterSerializer {
 
   private static serializeFromObject(buildParameters) {
     const array: any[] = [];
-    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !TaskParameterSerializer.blocked.has(x));
+    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
     for (const element of keys) {
       array.push(
         {
