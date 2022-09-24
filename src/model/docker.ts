@@ -13,7 +13,8 @@ class Docker {
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
     }
-    await exec(runCommand, undefined, { silent });
+
+    return await exec(runCommand, undefined, { silent });
   }
 
   static getLinuxCommand(image, parameters): string {

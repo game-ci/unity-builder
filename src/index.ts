@@ -24,9 +24,15 @@ async function runMain() {
       core.info('Building locally');
       await PlatformSetup.setup(buildParameters, actionFolder);
       if (process.platform === 'darwin') {
-        MacBuilder.run(actionFolder, workspace, buildParameters);
+        const exit = await MacBuilder.run(actionFolder, workspace, buildParameters);
+        if (exit !== 0) {
+          core.setFailed(`Build failed with exit code ${exit}`);
+        }
       } else {
-        await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
+        const exit = await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
+        if (exit !== 0) {
+          core.setFailed(`Build failed with exit code ${exit}`);
+        }
       }
     }
 
