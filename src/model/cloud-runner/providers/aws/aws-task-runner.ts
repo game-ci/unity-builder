@@ -30,6 +30,7 @@ class AWSTaskRunner {
     const streamName =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
 
+    core.info(`AWS Run Env ${JSON.stringify(environment)}`);
     const task = await AWSTaskRunner.ECS.runTask({
       cluster,
       taskDefinition,
