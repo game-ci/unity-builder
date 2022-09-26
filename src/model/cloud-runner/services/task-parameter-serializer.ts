@@ -6,7 +6,6 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
-import base64 from 'base-64';
 
 // import CloudRunner from '../cloud-runner';
 // import ImageEnvironmentFactory from '../../image-environment-factory';
@@ -40,14 +39,18 @@ export class TaskParameterSerializer {
             !TaskParameterSerializer.blocked.has(x.name) &&
             x.value !== '' &&
             x.value !== undefined &&
+            x.name !== `CUSTOM_JOB` &&
+            x.name !== `GAMECI-CUSTOM_JOB` &&
             x.value !== `undefined`,
         )
         .map((x) => {
           x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
           x.value = `${x.value}`;
-          if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
-            x.value = base64.encode(x.value);
-          }
+
+          // if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
+          // x.value = base64.encode(x.value);
+          // }
+
           if (buildParameters.cloudRunnerIntegrationTests) {
             if (Number(x.name) === Number.NaN) {
               core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
@@ -60,7 +63,8 @@ export class TaskParameterSerializer {
         }),
       (item) => item.name,
     );
-    core.info(`Serialized Env Vars ${JSON.stringify(result, undefined, 4)}`);
+    core.info(`Serialized Env Vars`);
+    core.info(JSON.stringify(result, undefined, 4));
 
     return result;
   }
@@ -85,9 +89,10 @@ export class TaskParameterSerializer {
       ),
     ];
     for (const element of keys) {
-      buildParameters[element] = process.env[`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`];
-      if (element === `customJob`) {
-        buildParameters[element] = base64.decode(buildParameters[element]);
+      if (element !== `customJob`) {
+        buildParameters[element] = process.env[`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`];
+
+        // buildParameters[element] = base64.decode(buildParameters[element]);
       }
     }
 
