@@ -14,8 +14,10 @@ import * as core from '@actions/core';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
-  public static readBuildEnvironmentVariables(buildParameters: BuildParameters): CloudRunnerEnvironmentVariable[] {
-    return this.uniqBy(
+  public static createCloudRunnerEnvironmentVariables(
+    buildParameters: BuildParameters,
+  ): CloudRunnerEnvironmentVariable[] {
+    const result = this.uniqBy(
       [
         {
           name: 'ContainerMemory',
@@ -58,6 +60,9 @@ export class TaskParameterSerializer {
         }),
       (item) => item.name,
     );
+    core.info(`Serialized Env Vars ${JSON.stringify(result, undefined, 4)}`);
+
+    return result;
   }
 
   static uniqBy(a, key) {
@@ -72,15 +77,17 @@ export class TaskParameterSerializer {
 
   public static readBuildParameterFromEnvironment(): BuildParameters {
     const buildParameters = new BuildParameters();
-    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
+    const keys = [
+      ...new Set(
+        Object.getOwnPropertyNames(process.env)
+          .filter((x) => !this.blocked.has(x) && x.startsWith('GAMECI-'))
+          .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
+      ),
+    ];
     for (const element of keys) {
-      const parameter = TaskParameterSerializer.UndoEnvVarFormat(element, buildParameters);
-      buildParameters[parameter] =
-        process.env[
-          TaskParameterSerializer.ToEnvVarFormat(`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`)
-        ];
-      if (parameter === `CUSTOM_JOB` || parameter === `GAMECI-CUSTOM_JOB`) {
-        buildParameters[parameter] = base64.decode(buildParameters[parameter]);
+      buildParameters[element] = process.env[`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`];
+      if (element === `customJob`) {
+        buildParameters[element] = base64.decode(buildParameters[element]);
       }
     }
 
@@ -95,10 +102,16 @@ export class TaskParameterSerializer {
     return CloudRunnerOptions.ToEnvVarFormat(input);
   }
 
-  public static UndoEnvVarFormat(element, buildParameters): string {
-    return (
-      Object.keys(buildParameters).find((x) => `GAMECI-${TaskParameterSerializer.ToEnvVarFormat(x)}` === element) || ''
-    );
+  public static UndoEnvVarFormat(element): string {
+    return this.camelize(element.replace('GAMECI-', '').replace('-', ' ').replace('_', ' '));
+  }
+
+  private static camelize(string) {
+    return string
+      .replace(/^\w|[A-Z]|\b\w/g, function (word, index) {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, '');
   }
 
   private static serializeFromObject(buildParameters) {

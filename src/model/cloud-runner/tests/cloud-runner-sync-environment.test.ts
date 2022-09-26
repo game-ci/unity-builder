@@ -52,7 +52,7 @@ describe('Cloud Runner Sync Environments', () => {
       // Assert results
       // expect(file).toContain(JSON.stringify(buildParameter));
       expect(file).toContain(`${Input.ToEnvVarFormat(testSecretName)}=${testSecretValue}`);
-      const environmentVariables = TaskParameterSerializer.readBuildEnvironmentVariables(buildParameter);
+      const environmentVariables = TaskParameterSerializer.createCloudRunnerEnvironmentVariables(buildParameter);
       const secrets = TaskParameterSerializer.readDefaultSecrets().map((x) => {
         return {
           name: x.EnvironmentVariable,
