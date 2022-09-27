@@ -5,8 +5,9 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
-import * as core from '@actions/core';
 import { writeFileSync } from 'fs';
+
+// import * as core from '@actions/core';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -69,11 +70,12 @@ class LocalDockerCloudRunner implements ProviderInterface {
     for (const x of environment) {
       content.push({ name: x.name, value: x.value });
     }
-    if (this.buildParameters?.cloudRunnerIntegrationTests) {
-      core.info(JSON.stringify(content, undefined, 4));
-      core.info(JSON.stringify(secrets, undefined, 4));
-      core.info(JSON.stringify(environment, undefined, 4));
-    }
+
+    // if (this.buildParameters?.cloudRunnerIntegrationTests) {
+    //   core.info(JSON.stringify(content, undefined, 4));
+    //   core.info(JSON.stringify(secrets, undefined, 4));
+    //   core.info(JSON.stringify(environment, undefined, 4));
+    // }
 
     // eslint-disable-next-line unicorn/no-for-loop
     for (let index = 0; index < content.length; index++) {
