@@ -84,13 +84,13 @@ export class TaskParameterSerializer {
     const keys = [
       ...new Set(
         Object.getOwnPropertyNames(process.env)
-          .filter((x) => !this.blocked.has(x) && x.startsWith('GAMECI-'))
+          .filter((x) => !this.blocked.has(x) && x.startsWith('GAMECI_'))
           .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
       ),
     ];
     for (const element of keys) {
       if (element !== `customJob`) {
-        buildParameters[element] = process.env[`GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`];
+        buildParameters[element] = process.env[`GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`];
 
         // buildParameters[element] = base64.decode(buildParameters[element]);
       }
@@ -108,7 +108,7 @@ export class TaskParameterSerializer {
   }
 
   public static UndoEnvVarFormat(element): string {
-    return this.camelize(element.replace('GAMECI-', '').replace('-', ' ').replace('_', ' '));
+    return this.camelize(element.replace('GAMECI_', '').replace('_', ' '));
   }
 
   private static camelize(string) {
