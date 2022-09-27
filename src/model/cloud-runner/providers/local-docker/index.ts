@@ -93,7 +93,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
       image,
       { workspace, actionFolder, ...this.buildParameters },
       false,
-      `chmod +x /github/workspace/${entrypointFilePath} && /github/workspace/${entrypointFilePath}`,
+      `'chmod +x /github/workspace/${entrypointFilePath} && /github/workspace/${entrypointFilePath}'`,
       content,
       {
         listeners: {
