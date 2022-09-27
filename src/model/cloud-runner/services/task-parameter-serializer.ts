@@ -63,8 +63,9 @@ export class TaskParameterSerializer {
         }),
       (item) => item.name,
     );
-    core.info(`Serialized Env Vars`);
-    core.info(JSON.stringify(result, undefined, 4));
+
+    // core.info(`Serialized Env Vars`);
+    // core.info(JSON.stringify(result, undefined, 4));
 
     return result;
   }
@@ -138,7 +139,8 @@ export class TaskParameterSerializer {
         },
       );
     }
-    core.info(JSON.stringify(array, undefined, 4));
+
+    // core.info(JSON.stringify(array, undefined, 4));
 
     return array;
   }

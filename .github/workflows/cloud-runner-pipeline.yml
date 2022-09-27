@@ -28,7 +28,7 @@ env:
   UNITY_VERSION: 2019.3.15f1
 
 jobs:
-  ciPipeline:
+  localCiPipeline:
     name: CI Pipeline
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -126,8 +126,8 @@ jobs:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-  ciPipelineStageTwo:
-    needs: ciPipeline
+  cloudCiPipeline:
+    needs: localCiPipeline
     name: CI Pipeline Stage Two
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
