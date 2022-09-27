@@ -40,7 +40,7 @@ export class TaskParameterSerializer {
             x.value !== '' &&
             x.value !== undefined &&
             x.name !== `CUSTOM_JOB` &&
-            x.name !== `GAMECI-CUSTOM_JOB` &&
+            x.name !== `GAMECI_CUSTOM_JOB` &&
             x.value !== `undefined`,
         )
         .map((x) => {
@@ -125,7 +125,7 @@ export class TaskParameterSerializer {
     for (const element of keys) {
       array.push(
         {
-          name: `GAMECI-${TaskParameterSerializer.ToEnvVarFormat(element)}`,
+          name: `GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`,
           value: buildParameters[element],
         },
         {
