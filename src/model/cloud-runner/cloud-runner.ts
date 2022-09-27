@@ -17,9 +17,9 @@ import GitHub from '../github';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
-  static buildParameters: BuildParameters;
-  public static defaultSecrets: CloudRunnerSecret[];
-  public static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
+  public static buildParameters: BuildParameters;
+  private static defaultSecrets: CloudRunnerSecret[];
+  private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;
@@ -86,7 +86,7 @@ class CloudRunner {
       return output;
     } catch (error) {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      await CloudRunnerError.handleException(error);
+      await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
     }
   }
