@@ -11,6 +11,7 @@ async function runMain() {
       return;
     }
   } catch (error) {
+    process.exitCode = 1;
     throw error;
   }
   try {
