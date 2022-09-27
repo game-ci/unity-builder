@@ -36,14 +36,14 @@ jobs:
       fail-fast: false
       matrix:
         cloudRunnerCluster:
-          - aws
+          #- aws
           - local-docker
-          - k8s
+          #- k8s
         targetPlatform:
           #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
-          - WebGL # WebGL.
+          #- WebGL # WebGL.
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
           #          - StandaloneWindows # Build a Windows standalone.

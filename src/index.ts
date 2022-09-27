@@ -4,10 +4,14 @@ import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 async function runMain() {
-  if (Cli.InitCliMode()) {
-    await Cli.RunCli();
+  try {
+    if (Cli.InitCliMode()) {
+      await Cli.RunCli();
 
-    return;
+      return;
+    }
+  } catch (error) {
+    throw error;
   }
   try {
     Action.checkCompatibility();
