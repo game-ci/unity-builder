@@ -83,7 +83,7 @@ export class TaskParameterSerializer {
     const buildParameters = new BuildParameters();
     const keys = [
       ...new Set(
-        Object.getOwnPropertyNames(process.env)
+        Object.keys(process.env)
           .filter((x) => !this.blocked.has(x) && x.startsWith('GAMECI_'))
           .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
       ),
