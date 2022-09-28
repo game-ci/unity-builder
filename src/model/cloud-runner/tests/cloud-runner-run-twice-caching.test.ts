@@ -47,11 +47,21 @@ describe('Cloud Runner Caching', () => {
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
 
-      expect(results2).toContain(buildParameter.cacheKey);
-      expect(results2).toContain(buildSucceededString);
-      expect(results2).not.toContain('There is 0 files/dir in the cache pulled contents for Library');
-      expect(results2).not.toContain('There is 0 files/dir in the cache pulled contents for LFS');
-      expect(results2).not.toContain(libraryString);
+      const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
+      const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
+      const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
+      const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
+        'There is 0 files/dir in the cache pulled contents for Library',
+      );
+      const build2NotContainsZeroLFSCacheFilesMessage = !results2.includes(
+        'There is 0 files/dir in the cache pulled contents for LFS',
+      );
+
+      expect(build2ContainsCacheKey);
+      expect(build2ContainsBuildSucceeded);
+      expect(build2NotContainsZeroLibraryCacheFilesMessage);
+      expect(build2NotContainsZeroLFSCacheFilesMessage);
+      expect(build2NotContainsNoLibraryMessage);
     }, 10000000);
   }
 });
