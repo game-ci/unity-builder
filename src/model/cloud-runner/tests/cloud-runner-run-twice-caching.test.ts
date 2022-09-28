@@ -57,11 +57,11 @@ describe('Cloud Runner Caching', () => {
         'There is 0 files/dir in the cache pulled contents for LFS',
       );
 
-      expect(build2ContainsCacheKey);
-      expect(build2ContainsBuildSucceeded);
-      expect(build2NotContainsZeroLibraryCacheFilesMessage);
-      expect(build2NotContainsZeroLFSCacheFilesMessage);
-      expect(build2NotContainsNoLibraryMessage);
+      expect(build2ContainsCacheKey).toBeTruthy();
+      expect(build2ContainsBuildSucceeded).toBeTruthy();
+      expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
+      expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
+      expect(build2NotContainsNoLibraryMessage).toBeTruthy();
     }, 10000000);
   }
 });
