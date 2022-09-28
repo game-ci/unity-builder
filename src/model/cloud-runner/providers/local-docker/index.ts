@@ -91,11 +91,11 @@ class LocalDockerCloudRunner implements ProviderInterface {
       `${workspace}/${entrypointFilePath}`,
       `#!/bin/bash
       set -e
-      mkdir -p /github/workflow/cloud-runner-cache
+      mkdir -p /github/workspace/cloud-runner-cache
       mkdir -p /data/cache
-      cp /github/workflow/cloud-runner-cache/* /data/cache
+      cp -r /github/workspace/cloud-runner-cache /data/cache
       ${commands}
-      cp /data/cache/* /github/workflow/cloud-runner-cache`,
+      cp -r /data/cache /github/workspace/cloud-runner-cache`,
       {
         flag: 'w',
       },
