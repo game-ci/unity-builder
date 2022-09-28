@@ -6,10 +6,6 @@
 color: true
 extends: {}
 
-pre-push:
-  parallel: true
-  commands:
-
 pre-commit:
   parallel: true
   commands:
