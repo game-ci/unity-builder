@@ -42,7 +42,8 @@ describe('Cloud Runner Caching', () => {
 
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
-      buildParameter2.cacheKey = buildParameter.cacheKey;
+
+      // buildParameter2.cacheKey = buildParameter.cacheKey;
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
