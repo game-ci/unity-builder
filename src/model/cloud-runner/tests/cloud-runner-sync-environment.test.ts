@@ -37,7 +37,7 @@ describe('Cloud Runner Sync Environments', () => {
         unityVersion: UnityVersioning.read('test-project'),
         customJob: `
         - name: 'step 1'
-          image: 'alpine'
+          image: 'ubuntu'
           commands: 'printenv'
           secrets:
             - name: '${testSecretName}'
