@@ -98,9 +98,9 @@ export class TaskParameterSerializer {
       }
     }
 
-    if (JSON.stringify(buildParameters) === JSON.stringify({})) {
-      throw new Error(`Build parameters from environment are empty`);
-    }
+    // if (JSON.stringify(buildParameters) === JSON.stringify({})) {
+    //   throw new Error(`Build parameters from environment are empty`);
+    // }
 
     return buildParameters;
   }
