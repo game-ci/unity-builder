@@ -90,8 +90,6 @@ export class TaskParameterSerializer {
       ),
     ];
 
-    core.info(JSON.stringify(keys, undefined, 4));
-
     for (const element of keys) {
       if (element !== `customJob`) {
         buildParameters[element] = process.env[`GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`];
