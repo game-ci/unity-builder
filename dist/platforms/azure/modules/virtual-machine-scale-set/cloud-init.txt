@@ -1,0 +1,33 @@
+#cloud-config
+users:
+  - name: vmadmin
+    gecos: VM adminsitrator
+    groups: users, admin, docker, sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
+apt:
+  primary:
+    - arches: [default]
+      uri: http://us.archive.ubuntu.com/ubuntu/
+  sources:
+    kubectl.list:
+      source: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
+      keyid: 59FE0256827269DC81578F928B57C5C2836F4BEB
+    helm.list:
+      source: deb https://baltocdn.com/helm/stable/debian/ all main
+      keyid: 81BF832E2F19CD2AA0471959294AC4827C1A168A
+package_update: true
+package_upgrade: true
+packages:
+  - kubectl
+  - wget
+  - helm
+  - htop
+  - docker.io
+  - build-essential
+  - python3-pip
+  - procps
+  - file
+  - whois
