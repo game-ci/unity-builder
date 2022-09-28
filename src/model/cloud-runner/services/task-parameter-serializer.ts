@@ -55,7 +55,7 @@ export class TaskParameterSerializer {
             if (Number(x.name) === Number.NaN) {
               core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
             } else {
-              core.info(`${JSON.stringify(x)}`);
+              // core.info(`${JSON.stringify(x)}`);
             }
           }
 
