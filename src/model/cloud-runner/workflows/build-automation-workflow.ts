@@ -55,7 +55,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         BuildAutomationWorkflow.BuildWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        cloudRunnerStepState.environment,
+        [...cloudRunnerStepState.environment, { name: `LOCKED_WORKSPACE`, value: workspace }],
         cloudRunnerStepState.secrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();

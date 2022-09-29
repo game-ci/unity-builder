@@ -47,5 +47,5 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetLockedWorkspace('test-workspace-2', uuidv4()),
       )}`,
     );
-  }, 150000);
+  }, 3000000);
 });

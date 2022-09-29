@@ -18,6 +18,10 @@ export class SharedWorkspaceLocking {
     return await SharedWorkspaceLocking.CreateLockableWorkspace(workspaceIfCreated);
   }
 
+  public static async DoesWorkspaceExist(workspace: string) {
+    return (await SharedWorkspaceLocking.GetAllWorkspaces()).includes(workspace);
+  }
+
   public static async GetFreeWorkspaces(): Promise<string[]> {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces();
@@ -35,6 +39,10 @@ export class SharedWorkspaceLocking {
     );
   }
   public static async GetAllLocks(workspace: string): Promise<string[]> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
+      throw new Error("Workspace doesn't exist, can't call get all locks");
+    }
+
     return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`)).map(
       (x) => x.replace(`/`, ``),
     );
@@ -77,6 +85,9 @@ export class SharedWorkspaceLocking {
     return !SharedWorkspaceLocking.HasWorkspaceLock(workspace);
   }
   public static async HasWorkspaceLock(workspace: string): Promise<boolean> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
+      return false;
+    }
     CloudRunnerLogger.log(
       (await CloudRunnerSystem.Run(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`, false, true))
         .split('\n')
@@ -90,6 +101,9 @@ export class SharedWorkspaceLocking {
   }
 
   public static async IsWorkspaceLocked(workspace: string): Promise<boolean> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
+      return false;
+    }
     const files = await SharedWorkspaceLocking.ReadLines(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`);
 
     // 1 Because we expect 1 workspace file to exist in every workspace folder
