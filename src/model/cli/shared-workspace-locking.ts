@@ -72,7 +72,7 @@ export class SharedWorkspaceLocking {
     );
     fs.rmSync(file);
 
-    return SharedWorkspaceLocking.HasWorkspaceLock(workspace);
+    return SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId);
   }
 
   public static async ReleaseWorkspace(workspace: string, runId: string): Promise<boolean> {
@@ -85,22 +85,14 @@ export class SharedWorkspaceLocking {
     CloudRunnerLogger.log(`aws s3 rm s3://game-ci-test-storage/locks/${workspace}/${file}`);
     await CloudRunnerSystem.Run(`aws s3 rm s3://game-ci-test-storage/locks/${workspace}/${file}`, false, true);
 
-    return !SharedWorkspaceLocking.HasWorkspaceLock(workspace);
+    return !SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId);
   }
-  public static async HasWorkspaceLock(workspace: string): Promise<boolean> {
+  public static async HasWorkspaceLock(workspace: string, runId: string): Promise<boolean> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
       return false;
     }
-    CloudRunnerLogger.log(
-      (await CloudRunnerSystem.Run(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`, false, true))
-        .split('\n')
-        .map((x) => {
-          return x.split(' ');
-        })
-        .length.toString(),
-    );
 
-    return true;
+    return (await SharedWorkspaceLocking.GetAllLocks(workspace)).filter((x) => x.includes(runId)).length > 0;
   }
 
   public static async IsWorkspaceLocked(workspace: string): Promise<boolean> {
