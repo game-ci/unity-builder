@@ -24,6 +24,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
+      const workspace =
+        (await SharedWorkspaceLocking.GetLockedWorkspace(
+          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+          CloudRunner.buildParameters.buildGuid,
+        )) || CloudRunner.buildParameters.buildGuid;
+
+      CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
+
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
       let output = '';
       if (CloudRunner.buildParameters.preBuildSteps !== '') {
@@ -40,11 +48,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.log(baseImage.toString());
       CloudRunnerLogger.logLine(` `);
       CloudRunnerLogger.logLine('Starting build automation job');
-
-      // eslint-disable-next-line no-unused-vars
-      const workspace =
-        (await SharedWorkspaceLocking.GetLockedWorkspace(`test-workspace`, CloudRunner.buildParameters.buildGuid)) ||
-        CloudRunner.buildParameters.buildGuid;
 
       output += await CloudRunner.Provider.runTask(
         CloudRunner.buildParameters.buildGuid,
@@ -68,6 +71,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       }
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
+
+      await SharedWorkspaceLocking.ReleaseWorkspace(
+        `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+        CloudRunner.buildParameters.buildGuid,
+      );
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
 
