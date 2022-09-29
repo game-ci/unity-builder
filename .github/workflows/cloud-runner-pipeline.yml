@@ -59,6 +59,12 @@ jobs:
         if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
