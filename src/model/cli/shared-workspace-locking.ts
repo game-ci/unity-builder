@@ -76,6 +76,9 @@ export class SharedWorkspaceLocking {
   }
 
   public static async ReleaseWorkspace(workspace: string, runId: string): Promise<boolean> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
+      return true;
+    }
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace)).filter((x) => x.includes(`_${runId}_lock`));
     CloudRunnerLogger.log(`${JSON.stringify(await SharedWorkspaceLocking.GetAllLocks(workspace))}`);
     CloudRunnerLogger.log(`Deleting file ${file}`);
