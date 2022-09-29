@@ -1,5 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
-import { BuildParameters, Output } from '../../..';
+import { BuildParameters } from '../../..';
 import * as core from '@actions/core';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
@@ -166,7 +166,7 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
       await new Promise((promise) => setTimeout(promise, 5000));
     } catch (error: any) {
-      if (error.response.body.message.endsWith(`not found`)) {
+      if (error.response.body.reason === `not found`) {
         return;
       }
       CloudRunnerLogger.log('Failed to cleanup, error:');
@@ -192,7 +192,9 @@ class Kubernetes implements ProviderInterface {
   }
 
   async cleanup(
+    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
+    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
@@ -204,12 +206,11 @@ class Kubernetes implements ProviderInterface {
     try {
       await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
     } catch (error: any) {
-      if (error.response.body.message.endsWith(`not found`)) {
+      if (error.response.body.reason === `not found`) {
         return;
       }
       CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
     }
-    await Output.setBuildVersion(buildParameters.buildVersion);
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
