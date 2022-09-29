@@ -174,6 +174,7 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Abandoning cleanup, build error:');
       throw error;
     }
+    CloudRunnerLogger.log('cleaning up finished');
     try {
       await waitUntil(
         async () => {
@@ -204,13 +205,17 @@ class Kubernetes implements ProviderInterface {
     CloudRunnerLogger.log(`deleting PVC`);
 
     try {
-      await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-    } catch (error: any) {
-      if (error.response.body.reason === `not found`) {
-        return;
-      }
-      CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
-    }
+      const promise = this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+      // eslint-disable-next-line github/no-then
+      promise.catch((error: any) => {
+        if (error.response.body.reason === `not found`) {
+          return;
+        }
+        CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
+      });
+      await promise;
+      // eslint-disable-next-line no-empty
+    } catch {}
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
