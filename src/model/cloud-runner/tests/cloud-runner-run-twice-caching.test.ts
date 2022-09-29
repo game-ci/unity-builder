@@ -18,7 +18,7 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner Caching', () => {
   it('Responds', () => {});
   setups();
-  if (CloudRunnerOptions.cloudRunnerTests) {
+  if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       const overrides = {
         versioning: 'None',
