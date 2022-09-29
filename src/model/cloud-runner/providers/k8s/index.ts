@@ -210,8 +210,6 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
     }
     await Output.setBuildVersion(buildParameters.buildVersion);
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(1);
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
