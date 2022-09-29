@@ -197,7 +197,12 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     CloudRunnerLogger.log(`deleting PVC`);
-    await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+
+    try {
+      await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    } catch (error) {
+      CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
+    }
     await Output.setBuildVersion(buildParameters.buildVersion);
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit();
