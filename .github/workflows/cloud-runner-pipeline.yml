@@ -156,6 +156,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - uses: ./
+        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
         id: aws-fargate-unity-build
         timeout-minutes: 25
         with:
