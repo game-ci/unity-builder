@@ -24,13 +24,19 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
-      const workspace =
-        (await SharedWorkspaceLocking.GetLockedWorkspace(
-          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
-          CloudRunner.buildParameters.buildGuid,
-        )) || CloudRunner.buildParameters.buildGuid;
+      if (CloudRunnerOptions.retainWorkspaces) {
+        const workspace =
+          (await SharedWorkspaceLocking.GetLockedWorkspace(
+            `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+            CloudRunner.buildParameters.buildGuid,
+          )) || CloudRunner.buildParameters.buildGuid;
 
-      CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
+        CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
+        cloudRunnerStepState.environment = [
+          ...cloudRunnerStepState.environment,
+          { name: `LOCKED_WORKSPACE`, value: workspace },
+        ];
+      }
 
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
       let output = '';
@@ -55,7 +61,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         BuildAutomationWorkflow.BuildWorkflow,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        [...cloudRunnerStepState.environment, { name: `LOCKED_WORKSPACE`, value: workspace }],
+        cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
@@ -72,10 +78,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
-      await SharedWorkspaceLocking.ReleaseWorkspace(
-        `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
-        CloudRunner.buildParameters.buildGuid,
-      );
+      if (CloudRunnerOptions.retainWorkspaces) {
+        await SharedWorkspaceLocking.ReleaseWorkspace(
+          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+          CloudRunner.buildParameters.buildGuid,
+        );
+      }
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
 
