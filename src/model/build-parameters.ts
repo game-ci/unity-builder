@@ -52,8 +52,6 @@ class BuildParameters {
 
   public postBuildSteps!: string;
   public preBuildSteps!: string;
-  public customStepFiles!: string;
-  public customHookFiles!: string;
   public customJob!: string;
   public runNumber!: string;
   public branch!: string;
@@ -123,8 +121,6 @@ class BuildParameters {
       kubeVolume: CloudRunnerOptions.kubeVolume,
       postBuildSteps: CloudRunnerOptions.postBuildSteps,
       preBuildSteps: CloudRunnerOptions.preBuildSteps,
-      customStepFiles: CloudRunnerOptions.customStepFiles,
-      customHookFiles: CloudRunnerOptions.customHookFiles,
       customJob: CloudRunnerOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
