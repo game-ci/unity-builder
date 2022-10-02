@@ -26,6 +26,7 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   PROJECT_PATH: test-project
   UNITY_VERSION: 2019.3.15f1
+  USE_IL2CPP: false
 
 jobs:
   localCiPipeline:
