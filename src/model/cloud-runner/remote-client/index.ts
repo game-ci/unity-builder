@@ -86,9 +86,11 @@ export class RemoteClient {
   }
 
   static replaceLargePackageReferencesWithSharedReferences() {
-    CloudRunnerLogger.log(
-      fs.readFileSync(path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`), 'utf8'),
-    );
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      CloudRunnerLogger.log(
+        fs.readFileSync(path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`), 'utf8'),
+      );
+    }
   }
 
   private static async pullLatestLFS() {
