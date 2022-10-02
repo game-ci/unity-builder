@@ -133,14 +133,14 @@ export class Cli {
     core.info(`Running POST build tasks`);
 
     Caching.PushToCache(
-      CloudRunnerFolders.libraryFolderAbsolute,
-      `${CloudRunnerFolders.cacheFolderFull}/Library`,
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/Library`),
       `lib-${buildParameter.buildGuid}`,
     );
 
     Caching.PushToCache(
-      CloudRunnerFolders.projectBuildFolderAbsolute,
-      `${CloudRunnerFolders.cacheFolderFull}/build`,
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/build`),
       `build-${buildParameter.buildGuid}`,
     );
 
