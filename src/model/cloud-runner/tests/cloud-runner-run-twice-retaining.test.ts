@@ -50,6 +50,7 @@ describe('Cloud Runner Retain Workspace', () => {
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
+      const build2ContainsBuildGuid1FromRetainedWorkspace = results2.includes(buildParameter.buildGuid);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
       const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
@@ -60,6 +61,7 @@ describe('Cloud Runner Retain Workspace', () => {
       );
 
       expect(build2ContainsCacheKey).toBeTruthy();
+      expect(build2ContainsBuildGuid1FromRetainedWorkspace).toBeTruthy();
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();

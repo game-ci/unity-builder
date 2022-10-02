@@ -107,4 +107,27 @@ export class Cli {
 
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
+
+  @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
+  public static async PostCLIBuild(): Promise<string> {
+    /*
+      # LIBRARY CACHE
+      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
+        CloudRunnerFolders.libraryFolderAbsolute,
+      )} --artifactName lib-${guid} --cachePushTo ${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/Library`)}
+
+      echo "game ci cloud runner push build to cache"
+
+      # BUILD CACHE
+      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
+        CloudRunnerFolders.projectBuildFolderAbsolute,
+      )} --artifactName build-${guid} --cachePushTo ${`${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/build`)}`}
+
+      # RETAINED WORKSPACE CLEANUP
+      ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
+    */
+    core.info(`Running POST build tasks`);
+
+    return new Promise((result) => result(``));
+  }
 }
