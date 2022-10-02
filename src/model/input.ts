@@ -69,6 +69,10 @@ class Input {
     }
   }
 
+  static get useIL2Cpp() {
+    return Input.getInput(`useIL2Cpp`) || true;
+  }
+
   static get runNumber() {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }
