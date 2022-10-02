@@ -12,6 +12,7 @@ import { RemoteClient } from '../cloud-runner/remote-client';
 import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-options-reader';
 import GitHub from '../github';
 import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
+import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folders';
 
 export class Cli {
   public static options;
@@ -110,6 +111,8 @@ export class Cli {
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async PostCLIBuild(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+
     /*
       # LIBRARY CACHE
       node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
@@ -126,7 +129,20 @@ export class Cli {
       # RETAINED WORKSPACE CLEANUP
       ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
     */
+
     core.info(`Running POST build tasks`);
+
+    Caching.PushToCache(
+      CloudRunnerFolders.libraryFolderAbsolute,
+      `${CloudRunnerFolders.cacheFolderFull}/Library`,
+      `lib-${buildParameter.buildGuid}`,
+    );
+
+    Caching.PushToCache(
+      CloudRunnerFolders.projectBuildFolderAbsolute,
+      `${CloudRunnerFolders.cacheFolderFull}/build`,
+      `build-${buildParameter.buildGuid}`,
+    );
 
     return new Promise((result) => result(``));
   }

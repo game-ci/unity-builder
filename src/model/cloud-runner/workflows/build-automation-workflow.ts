@@ -113,7 +113,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands(builderPath, CloudRunner.buildParameters.buildGuid)}
+      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
@@ -130,8 +130,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
-  private static BuildCommands(builderPath, guid) {
-    const linuxCacheFolder = CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderFull);
+  private static BuildCommands(builderPath) {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
@@ -148,13 +147,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
     node ${builderPath} -m remote-cli-post-build
-    node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.libraryFolderAbsolute,
-    )} --artifactName lib-${guid} --cachePushTo ${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/Library`)}
-    echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.projectBuildFolderAbsolute,
-    )} --artifactName build-${guid} --cachePushTo ${`${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/build`)}`}
     ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
   }
 
