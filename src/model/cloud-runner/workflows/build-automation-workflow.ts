@@ -146,7 +146,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    node ${builderPath} -m remote-cli-post
+    node ${builderPath} -m remote-cli-post-build
     ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
   }
 
