@@ -11,7 +11,9 @@ export class CloudRunnerFolders {
   // Only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 
   public static get uniqueCloudRunnerJobFolderAbsolute(): string {
-    return path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
+    return process.env.LOCKED_WORKSPACE === undefined
+      ? path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid)
+      : path.join(`/`, CloudRunnerFolders.buildVolumeFolder, process.env.LOCKED_WORKSPACE);
   }
 
   public static get cacheFolderFull(): string {
