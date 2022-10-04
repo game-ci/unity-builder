@@ -35,20 +35,24 @@ describe('Cloud Runner Locking', () => {
       CloudRunnerLogger.log(`GetAllWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetAllWorkspaces())}`);
       CloudRunnerLogger.log(`GetFreeWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetFreeWorkspaces())}`);
       CloudRunnerLogger.log(
-        `IsWorkspaceLocked ${JSON.stringify(await SharedWorkspaceLocking.IsWorkspaceLocked('test-workspace'))}`,
+        `IsWorkspaceLocked ${JSON.stringify(
+          await SharedWorkspaceLocking.IsWorkspaceLocked(`test-workspace-${uuidv4()}`),
+        )}`,
       );
       CloudRunnerLogger.log(`GetFreeWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetFreeWorkspaces())}`);
       CloudRunnerLogger.log(
-        `LockWorkspace ${JSON.stringify(await SharedWorkspaceLocking.LockWorkspace('test-workspace', uuidv4()))}`,
+        `LockWorkspace ${JSON.stringify(
+          await SharedWorkspaceLocking.LockWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
+        )}`,
       );
       CloudRunnerLogger.log(
         `CreateLockableWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.CreateLockableWorkspace('test-workspace-2'),
+          await SharedWorkspaceLocking.CreateLockableWorkspace(`test-workspace-${uuidv4()}`),
         )}`,
       );
       CloudRunnerLogger.log(
         `GetLockedWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.GetLockedWorkspace('test-workspace-2', uuidv4()),
+          await SharedWorkspaceLocking.GetLockedWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
         )}`,
       );
     }, 3000000);
