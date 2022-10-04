@@ -104,6 +104,13 @@ export class RemoteClient {
 
   @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
+    RemoteClient.handleRetainedWorkspace();
     await RemoteClient.bootstrapRepository();
+  }
+  static handleRetainedWorkspace() {
+    if (process.env.LOCKED_WORKSPACE === undefined) {
+      return;
+    }
+    RemoteClientLogger.log(`Retained Workspace: ${process.env.LOCKED_WORKSPACE}`);
   }
 }
