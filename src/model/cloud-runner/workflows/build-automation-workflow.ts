@@ -118,16 +118,17 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static setupCommands(builderPath) {
+    const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}
+    git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.unityBuilderRepoUrl,
+    )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
+    chmod +x ${builderPath}`;
+
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
     if [ -d ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
-    )} ]; then echo "Retained Workspace Already Exists!"; fi
-    mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}
-    git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.unityBuilderRepoUrl,
-    )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
-    chmod +x ${builderPath}
+    )} ]; then echo "Retained Workspace Already Exists!"; else ${commands.replace(`\n`, ` && `)} fi
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli`;
   }
