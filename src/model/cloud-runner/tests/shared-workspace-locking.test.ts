@@ -50,7 +50,7 @@ describe('Cloud Runner Locking', () => {
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedLockedAfterReleasing).toBeTruthy();
     }, 150000);
-    it('All Locking Actions', async () => {
+    it.skip('All Locking Actions', async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
