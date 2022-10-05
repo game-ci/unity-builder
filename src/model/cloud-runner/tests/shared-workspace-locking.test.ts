@@ -4,6 +4,16 @@ import setups from './cloud-runner-suite.test';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
+import UnityVersioning from '../../unity-versioning';
+import BuildParameters from '../../build-parameters';
+
+async function CreateParameters(overrides) {
+  if (overrides) {
+    Cli.options = overrides;
+  }
+
+  return await BuildParameters.create();
+}
 
 describe('Cloud Runner Locking', () => {
   setups();
@@ -11,9 +21,14 @@ describe('Cloud Runner Locking', () => {
   if (CloudRunnerOptions.cloudRunnerTests) {
     it(`Simple Locking Flow`, async () => {
       Cli.options.retainWorkspaces = true;
-      const buildParameters: any = {
-        cacheKey: `test-workspace-${uuidv4()}`,
+      const overrides: any = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
       };
+      const buildParameters = await CreateParameters(overrides);
 
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       const runId = uuidv4();
@@ -37,9 +52,15 @@ describe('Cloud Runner Locking', () => {
     }, 150000);
     it('All Locking Actions', async () => {
       Cli.options.retainWorkspaces = true;
-      const buildParameters: any = {
-        cacheKey: `test-workspace-${uuidv4()}`,
+      const overrides: any = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
       };
+      const buildParameters = await CreateParameters(overrides);
+
       CloudRunnerLogger.log(
         `GetAllWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters))}`,
       );
