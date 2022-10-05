@@ -23,14 +23,19 @@ export class SharedWorkspaceLocking {
       return;
     }
 
+    CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace`);
+
     const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces();
     for (const element of workspaces) {
       if (await SharedWorkspaceLocking.LockWorkspace(element, runId)) {
+        CloudRunnerLogger.log(`run agent ${runId} locked workspace: ${element}`);
+
         return element;
       }
     }
 
     const workspace = await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated, runId);
+    CloudRunnerLogger.log(`run agent ${runId} didn't find a free workspace so created: ${workspace}`);
 
     return workspace;
   }
