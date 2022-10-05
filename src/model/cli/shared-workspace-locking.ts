@@ -30,7 +30,10 @@ export class SharedWorkspaceLocking {
       }
     }
 
-    return await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated);
+    const workspace = await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated);
+    await SharedWorkspaceLocking.LockWorkspace(workspace, runId);
+
+    return workspace;
   }
 
   public static async DoesWorkspaceExist(workspace: string) {
