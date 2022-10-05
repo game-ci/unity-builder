@@ -95,10 +95,10 @@ class LocalDockerCloudRunner implements ProviderInterface {
       apt-get update > /dev/null && apt-get install -y tree> /dev/null
       mkdir -p /github/workspace/cloud-runner-cache
       mkdir -p /data/cache
-      cp -a /github/workspace/cloud-runner-cache/. /data/cache/
+      cp -a /github/workspace/cloud-runner-cache/. /data/
       tree -L 3 /data/
       ${commands}
-      cp -a /data/cache/. /github/workspace/cloud-runner-cache/
+      cp -a /data/. /github/workspace/cloud-runner-cache/
       tree -L 2 /github/workspace/cloud-runner-cache
       tree -L 3 /data/
       `,
