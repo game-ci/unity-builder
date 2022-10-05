@@ -29,6 +29,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
             `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
             CloudRunner.buildParameters.buildGuid,
+            CloudRunner.buildParameters,
           )) || CloudRunner.buildParameters.buildGuid;
 
         process.env.LOCKED_WORKSPACE = workspace;
@@ -84,6 +85,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         await SharedWorkspaceLocking.ReleaseWorkspace(
           `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
           CloudRunner.buildParameters.buildGuid,
+          CloudRunner.buildParameters,
         );
       }
 
