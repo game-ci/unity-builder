@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 export class SharedWorkspaceLocking {
-  private static readonly workspaceRoot = `s3://game-ci-test-storage/locks`;
+  private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
   public static async GetLockedWorkspace(workspaceIfCreated: string, runId: string) {
     if (!CloudRunnerOptions.retainWorkspaces) {
       return;
@@ -25,7 +25,7 @@ export class SharedWorkspaceLocking {
 
   public static async CleanupWorkspace(workspace: string) {
     await CloudRunnerSystem.Run(
-      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace} --recursive`,
+      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${workspace} --recursive`,
       false,
       true,
     );
@@ -53,7 +53,7 @@ export class SharedWorkspaceLocking {
     }
 
     return (
-      await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/`)
+      await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${workspace}/`)
     ).map((x) => x.replace(`/`, ``));
   }
 
@@ -75,7 +75,7 @@ export class SharedWorkspaceLocking {
     const file = `${Date.now()}_${runId}_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${workspace}/${file}`,
       false,
       true,
     );
@@ -91,8 +91,8 @@ export class SharedWorkspaceLocking {
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace)).filter((x) => x.includes(`_${runId}_lock`));
     CloudRunnerLogger.log(`${JSON.stringify(await SharedWorkspaceLocking.GetAllLocks(workspace))}`);
     CloudRunnerLogger.log(`Deleting file ${file}`);
-    CloudRunnerLogger.log(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`);
-    await CloudRunnerSystem.Run(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`, false, true);
+    CloudRunnerLogger.log(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${workspace}/${file}`);
+    await CloudRunnerSystem.Run(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${workspace}/${file}`, false, true);
 
     return !SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId);
   }
@@ -109,7 +109,7 @@ export class SharedWorkspaceLocking {
       return false;
     }
     const files = await SharedWorkspaceLocking.ReadLines(
-      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/`,
+      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${workspace}/`,
     );
 
     // 1 Because we expect 1 workspace file to exist in every workspace folder
@@ -120,7 +120,7 @@ export class SharedWorkspaceLocking {
     const file = `${Date.now()}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${workspace}/${file}`,
       false,
       true,
     );
