@@ -16,6 +16,13 @@ export class SharedWorkspaceLocking {
       )
     ).map((x) => x.replace(`/`, ``));
   }
+  public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
+    const results = (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`)).map(
+      (x) => x.replace(`/`, ``),
+    );
+
+    return results.includes(buildParametersContext.cacheKey);
+  }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
       throw new Error("Workspace doesn't exist, can't call get all locks");
@@ -38,12 +45,14 @@ export class SharedWorkspaceLocking {
 
     CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace`);
 
-    const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
-    for (const element of workspaces) {
-      if (await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext)) {
-        CloudRunnerLogger.log(`run agent ${runId} locked workspace: ${element}`);
+    if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
+      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+      for (const element of workspaces) {
+        if (await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext)) {
+          CloudRunnerLogger.log(`run agent ${runId} locked workspace: ${element}`);
 
-        return element;
+          return element;
+        }
       }
     }
 
