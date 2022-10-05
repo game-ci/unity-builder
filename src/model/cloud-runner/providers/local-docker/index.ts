@@ -6,7 +6,6 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
 import { writeFileSync } from 'fs';
-import { CloudRunnerFolders } from '../../services/cloud-runner-folders';
 
 // import * as core from '@actions/core';
 
@@ -97,11 +96,11 @@ class LocalDockerCloudRunner implements ProviderInterface {
       mkdir -p /github/workspace/cloud-runner-cache
       mkdir -p /data/cache
       cp -a /github/workspace/cloud-runner-cache/. /data/cache/
-      tree -L 2 /data/cache
-      tree -L 3 ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}
+      tree -L 3 /data/
       ${commands}
       cp -a /data/cache/. /github/workspace/cloud-runner-cache/
       tree -L 2 /github/workspace/cloud-runner-cache
+      tree -L 3 /data/
       `,
       {
         flag: 'w',
