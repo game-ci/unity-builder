@@ -8,6 +8,7 @@ import { Action } from '../../../../model';
 import { writeFileSync } from 'fs';
 
 // import * as core from '@actions/core';
+import CloudRunnerOptions from '../../cloud-runner-options';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -84,6 +85,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
       }
     }
     let myOutput = '';
+    const sharedFolder = !CloudRunnerOptions.retainWorkspaces ? `/data/cache/` : `/data/`;
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     const entrypointFilePath = `start.sh`;
@@ -95,12 +97,12 @@ class LocalDockerCloudRunner implements ProviderInterface {
       apt-get update > /dev/null && apt-get install -y tree> /dev/null
       mkdir -p /github/workspace/cloud-runner-cache
       mkdir -p /data/cache
-      cp -a /github/workspace/cloud-runner-cache/. /data/
-      tree -L 3 /data/
+      cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
+      tree -L 3 ${sharedFolder}
       ${commands}
-      cp -a /data/. /github/workspace/cloud-runner-cache/
+      cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
       tree -L 2 /github/workspace/cloud-runner-cache
-      tree -L 3 /data/
+      tree -L 3 ${sharedFolder}
       `,
       {
         flag: 'w',
