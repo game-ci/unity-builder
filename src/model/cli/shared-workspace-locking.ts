@@ -6,10 +6,6 @@ import BuildParameters from '../build-parameters';
 export class SharedWorkspaceLocking {
   private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
-    CloudRunnerLogger.log(
-      `RUN CMD: aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
-    );
-
     return (
       await SharedWorkspaceLocking.ReadLines(
         `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
