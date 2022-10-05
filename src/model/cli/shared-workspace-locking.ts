@@ -71,8 +71,17 @@ export class SharedWorkspaceLocking {
       `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${workspace}/`,
     );
 
-    // 1 Because we expect 1 workspace file to exist in every workspace folder
-    return files.length > 1;
+    const workspaceFileDoesNotExists =
+      files.filter((x) => {
+        return x.includes(`_workspace`);
+      }).length === 0;
+
+    const lockFilesExist =
+      files.filter((x) => {
+        return x.includes(`_lock`);
+      }).length > 0;
+
+    return workspaceFileDoesNotExists || lockFilesExist;
   }
 
   public static async CreateWorkspace(workspace: string, lockId: string = ``) {
