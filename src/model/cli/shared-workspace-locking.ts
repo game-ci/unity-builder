@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 export class SharedWorkspaceLocking {
+  private static readonly workspaceRoot = `s3://game-ci-test-storage/locks`;
   public static async GetLockedWorkspace(workspaceIfCreated: string, runId: string) {
     if (!CloudRunnerOptions.retainWorkspaces) {
       return;
@@ -22,6 +23,14 @@ export class SharedWorkspaceLocking {
     return (await SharedWorkspaceLocking.GetAllWorkspaces()).includes(workspace);
   }
 
+  public static async CleanupWorkspace(workspace: string) {
+    await CloudRunnerSystem.Run(
+      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace} --recursive`,
+      false,
+      true,
+    );
+  }
+
   public static async GetFreeWorkspaces(): Promise<string[]> {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces();
@@ -34,7 +43,7 @@ export class SharedWorkspaceLocking {
     return result;
   }
   public static async GetAllWorkspaces(): Promise<string[]> {
-    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls s3://game-ci-test-storage/locks/`)).map((x) =>
+    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`)).map((x) =>
       x.replace(`/`, ``),
     );
   }
@@ -43,9 +52,9 @@ export class SharedWorkspaceLocking {
       throw new Error("Workspace doesn't exist, can't call get all locks");
     }
 
-    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`)).map(
-      (x) => x.replace(`/`, ``),
-    );
+    return (
+      await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/`)
+    ).map((x) => x.replace(`/`, ``));
   }
 
   private static async ReadLines(command: string): Promise<string[]> {
@@ -66,7 +75,7 @@ export class SharedWorkspaceLocking {
     const file = `${Date.now()}_${runId}_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`,
       false,
       true,
     );
@@ -82,8 +91,8 @@ export class SharedWorkspaceLocking {
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace)).filter((x) => x.includes(`_${runId}_lock`));
     CloudRunnerLogger.log(`${JSON.stringify(await SharedWorkspaceLocking.GetAllLocks(workspace))}`);
     CloudRunnerLogger.log(`Deleting file ${file}`);
-    CloudRunnerLogger.log(`aws s3 rm s3://game-ci-test-storage/locks/${workspace}/${file}`);
-    await CloudRunnerSystem.Run(`aws s3 rm s3://game-ci-test-storage/locks/${workspace}/${file}`, false, true);
+    CloudRunnerLogger.log(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`);
+    await CloudRunnerSystem.Run(`aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`, false, true);
 
     return !SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId);
   }
@@ -99,7 +108,9 @@ export class SharedWorkspaceLocking {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace))) {
       return false;
     }
-    const files = await SharedWorkspaceLocking.ReadLines(`aws s3 ls s3://game-ci-test-storage/locks/${workspace}/`);
+    const files = await SharedWorkspaceLocking.ReadLines(
+      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/`,
+    );
 
     // 1 Because we expect 1 workspace file to exist in every workspace folder
     return files.length > 1;
@@ -109,7 +120,7 @@ export class SharedWorkspaceLocking {
     const file = `${Date.now()}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} s3://game-ci-test-storage/locks/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}/${workspace}/${file}`,
       false,
       true,
     );

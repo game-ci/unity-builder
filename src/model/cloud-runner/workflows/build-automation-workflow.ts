@@ -31,6 +31,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
             CloudRunner.buildParameters.buildGuid,
           )) || CloudRunner.buildParameters.buildGuid;
 
+        process.env.LOCKED_WORKSPACE = workspace;
+
         CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
         cloudRunnerStepState.environment = [
           ...cloudRunnerStepState.environment,
