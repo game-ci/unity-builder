@@ -30,8 +30,7 @@ export class SharedWorkspaceLocking {
       }
     }
 
-    const workspace = await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated);
-    await SharedWorkspaceLocking.LockWorkspace(workspace, runId);
+    const workspace = await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated, runId);
 
     return workspace;
   }
@@ -71,7 +70,11 @@ export class SharedWorkspaceLocking {
     return files.length > 1;
   }
 
-  public static async CreateWorkspace(workspace: string) {
+  public static async CreateWorkspace(workspace: string, lockId: string = ``) {
+    if (lockId !== ``) {
+      await SharedWorkspaceLocking.LockWorkspace(workspace, lockId);
+    }
+
     const file = `${Date.now()}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
