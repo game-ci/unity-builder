@@ -26,7 +26,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
       if (CloudRunnerOptions.retainWorkspaces) {
         const workspace =
-          (await SharedWorkspaceLocking.GetLockedWorkspace(
+          (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
             `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
             CloudRunner.buildParameters.buildGuid,
           )) || CloudRunner.buildParameters.buildGuid;

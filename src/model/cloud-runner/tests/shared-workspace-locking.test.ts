@@ -13,7 +13,7 @@ describe('Cloud Runner Locking', () => {
       Cli.options.retainWorkspaces = true;
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       const runId = uuidv4();
-      await SharedWorkspaceLocking.CreateLockableWorkspace(newWorkspaceName);
+      await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName);
       const isExpectedUnlockedBeforeLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
@@ -40,21 +40,22 @@ describe('Cloud Runner Locking', () => {
         )}`,
       );
       CloudRunnerLogger.log(`GetFreeWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetFreeWorkspaces())}`);
-      CloudRunnerLogger.log(
-        `LockWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.LockWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
-        )}`,
-      );
-      CloudRunnerLogger.log(
-        `CreateLockableWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.CreateLockableWorkspace(`test-workspace-${uuidv4()}`),
-        )}`,
-      );
-      CloudRunnerLogger.log(
-        `GetLockedWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.GetLockedWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
-        )}`,
-      );
+
+      // CloudRunnerLogger.log(
+      //   `LockWorkspace ${JSON.stringify(
+      //     await SharedWorkspaceLocking.LockWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
+      //   )}`,
+      // );
+      // CloudRunnerLogger.log(
+      //   `CreateLockableWorkspace ${JSON.stringify(
+      //     await SharedWorkspaceLocking.CreateWorkspace(`test-workspace-${uuidv4()}`),
+      //   )}`,
+      // );
+      // CloudRunnerLogger.log(
+      //   `GetLockedWorkspace ${JSON.stringify(
+      //     await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(`test-workspace-${uuidv4()}`, uuidv4()),
+      //   )}`,
+      // );
     }, 3000000);
   }
 });
