@@ -133,6 +133,8 @@ export class Cli {
       );
     }
 
+    await RemoteClient.runCustomHookFiles(`after-build`);
+
     return new Promise((result) => result(``));
   }
 }

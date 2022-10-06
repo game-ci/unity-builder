@@ -9,6 +9,7 @@ import { assert } from 'console';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import YAML from 'yaml';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
@@ -120,10 +121,23 @@ export class RemoteClient {
     assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
   }
 
-  @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
+  @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
     RemoteClient.handleRetainedWorkspace();
     await RemoteClient.bootstrapRepository();
+    await RemoteClient.runCustomHookFiles(`before-build`);
+  }
+  static async runCustomHookFiles(hookLifecycle: string) {
+    RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
+    const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
+    const files = fs.readdirSync(gameCiCustomHooksPath);
+    for (const file of files) {
+      const fileContents = fs.readFileSync(file, `utf8`);
+      const fileContentsObject = YAML.parse(fileContents.toString());
+      if (fileContentsObject.hook === hookLifecycle) {
+        RemoteClientLogger.log(`Active Hook File ${file} contents: ${fileContents}`);
+      }
+    }
   }
   static handleRetainedWorkspace() {
     if (!CloudRunner.buildParameters.retainWorkspace || !CloudRunner.lockedWorkspace) {

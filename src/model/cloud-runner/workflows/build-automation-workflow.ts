@@ -136,7 +136,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ]; then echo "Retained Workspace Already Exists!"; else ${commands}; fi
     echo "game ci cloud runner bootstrap"
-    node ${builderPath} -m remote-cli`;
+    node ${builderPath} -m remote-cli-pre-build`;
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
