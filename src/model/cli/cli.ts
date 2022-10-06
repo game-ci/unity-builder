@@ -112,40 +112,21 @@ export class Cli {
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async PostCLIBuild(): Promise<string> {
-    const buildParameter = CloudRunner.buildParameters;
-
-    /*
-      # LIBRARY CACHE
-      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-        CloudRunnerFolders.libraryFolderAbsolute,
-      )} --artifactName lib-${guid} --cachePushTo ${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/Library`)}
-
-      echo "game ci cloud runner push build to cache"
-
-      # BUILD CACHE
-      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-        CloudRunnerFolders.projectBuildFolderAbsolute,
-      )} --artifactName build-${guid} --cachePushTo ${`${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/build`)}`}
-
-      # RETAINED WORKSPACE CLEANUP
-      ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
-    */
-
     core.info(`Running POST build tasks`);
 
     await Caching.PushToCache(
       CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/Library`),
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
-      `lib-${buildParameter.buildGuid}`,
+      `lib-${CloudRunner.buildParameters.buildGuid}`,
     );
 
     await Caching.PushToCache(
       CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/build`),
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
-      `build-${buildParameter.buildGuid}`,
+      `build-${CloudRunner.buildParameters.buildGuid}`,
     );
 
-    if (!buildParameter.retainWorkspace) {
+    if (!CloudRunner.buildParameters.retainWorkspace) {
       await CloudRunnerSystem.Run(
         `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
       );
