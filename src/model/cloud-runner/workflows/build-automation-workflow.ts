@@ -42,16 +42,16 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         ];
       }
 
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
       let output = '';
       if (CloudRunner.buildParameters.preBuildSteps !== '') {
+        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
         output += await CustomWorkflow.runCustomJob(
           CloudRunner.buildParameters.preBuildSteps,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
         );
+        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
@@ -71,15 +71,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
       if (CloudRunner.buildParameters.postBuildSteps !== '') {
+        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
         output += await CustomWorkflow.runCustomJob(
           CloudRunner.buildParameters.postBuildSteps,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
         );
+        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       if (CloudRunnerOptions.retainWorkspaces) {
