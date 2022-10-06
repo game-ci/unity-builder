@@ -82,7 +82,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
       }
     }
     let myOutput = '';
-    const sharedFolder = this.buildParameters?.retainWorkspace ? `/data/` : `/data/cache/`;
+    const sharedFolder = `/data/`;
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     const entrypointFilePath = `start.sh`;
