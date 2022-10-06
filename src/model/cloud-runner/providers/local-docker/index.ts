@@ -7,9 +7,6 @@ import Docker from '../../../docker';
 import { Action } from '../../../../model';
 import { writeFileSync } from 'fs';
 
-// import * as core from '@actions/core';
-import CloudRunnerOptions from '../../cloud-runner-options';
-
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
 
@@ -85,7 +82,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
       }
     }
     let myOutput = '';
-    const sharedFolder = !CloudRunnerOptions.retainWorkspaces ? `/data/cache/` : `/data/`;
+    const sharedFolder = this.buildParameters?.retainWorkspace ? `/data/` : `/data/cache/`;
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     const entrypointFilePath = `start.sh`;
