@@ -78,6 +78,7 @@ export class Cli {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
+    CloudRunner.lockedWorkspace = process.env.LOCKED_WORKSPACE;
 
     return await results.target[results.propertyKey](Cli.options);
   }

@@ -33,6 +33,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           )) || CloudRunner.buildParameters.buildGuid;
 
         process.env.LOCKED_WORKSPACE = workspace;
+        CloudRunner.lockedWorkspace = workspace;
 
         CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
         cloudRunnerStepState.environment = [
@@ -87,6 +88,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
         );
+        CloudRunner.lockedWorkspace = undefined;
       }
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
