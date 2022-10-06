@@ -61,10 +61,11 @@ export class RemoteClient {
   }
 
   private static async cloneRepoWithoutLFSFiles() {
-    if (fs.existsSync(path.basename(CloudRunnerFolders.repoPathAbsolute))) {
+    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
       );
+      await CloudRunnerSystem.Run(`git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
       return;
     }
@@ -85,6 +86,7 @@ export class RemoteClient {
       assert(fs.existsSync(`.git`), 'git folder exists');
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
       RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
     } catch (error) {
