@@ -126,7 +126,7 @@ export class RemoteClient {
     await RemoteClient.bootstrapRepository();
   }
   static handleRetainedWorkspace() {
-    if (!CloudRunner.buildParameters.retainWorkspace) {
+    if (!CloudRunner.buildParameters.retainWorkspace && process.env.LOCKED_WORKSPACE) {
       return;
     }
     RemoteClientLogger.log(`Retained Workspace: ${process.env.LOCKED_WORKSPACE}`);
