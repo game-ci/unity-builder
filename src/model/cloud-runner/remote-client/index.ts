@@ -61,6 +61,7 @@ export class RemoteClient {
   }
 
   private static async cloneRepoWithoutLFSFiles() {
+    process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
     if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
@@ -70,7 +71,6 @@ export class RemoteClient {
       return;
     }
     try {
-      process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
@@ -95,10 +95,15 @@ export class RemoteClient {
   }
 
   static replaceLargePackageReferencesWithSharedReferences() {
+    const manifest = fs.readFileSync(
+      path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`),
+      'utf8',
+    );
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      CloudRunnerLogger.log(
-        fs.readFileSync(path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`), 'utf8'),
-      );
+      CloudRunnerLogger.log(manifest);
+    }
+    if (CloudRunner.buildParameters.useSharedLargePackages) {
+      manifest.replace(/LargePackages/g, '../../LargePackages');
     }
   }
 

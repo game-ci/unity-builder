@@ -46,6 +46,7 @@ export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
+    const compressionSuffix = CloudRunner.buildParameters.useLZ4Compression ? '.lz4' : '';
     try {
       if (!(await fileExists(cacheFolder))) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
@@ -78,14 +79,16 @@ export class Caching {
         return;
       }
 
-      await CloudRunnerSystem.Run(`tar -cf ${cacheArtifactName}.tar.lz4 ${path.basename(sourceFolder)}`);
-      await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar.lz4`);
-      assert(await fileExists(`${cacheArtifactName}.tar.lz4`), 'cache archive exists');
+      await CloudRunnerSystem.Run(
+        `tar -cf ${cacheArtifactName}.tar${compressionSuffix} ${path.basename(sourceFolder)}`,
+      );
+      await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar${compressionSuffix}`);
+      assert(await fileExists(`${cacheArtifactName}.tar${compressionSuffix}`), 'cache archive exists');
       assert(await fileExists(path.basename(sourceFolder)), 'source folder exists');
-      await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar.lz4 ${cacheFolder}`);
+      await CloudRunnerSystem.Run(`mv ${cacheArtifactName}.tar${compressionSuffix} ${cacheFolder}`);
       RemoteClientLogger.log(`moved cache entry ${cacheArtifactName} to ${cacheFolder}`);
       assert(
-        await fileExists(`${path.join(cacheFolder, cacheArtifactName)}.tar.lz4`),
+        await fileExists(`${path.join(cacheFolder, cacheArtifactName)}.tar${compressionSuffix}`),
         'cache archive exists inside cache folder',
       );
     } catch (error) {
@@ -96,6 +99,7 @@ export class Caching {
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
+    const compressionSuffix = CloudRunner.buildParameters.useLZ4Compression ? '.lz4' : '';
     const startPath = process.cwd();
     RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
     try {
@@ -107,24 +111,26 @@ export class Caching {
         await fs.promises.mkdir(destinationFolder);
       }
 
-      const latestInBranch = await (await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar.lz4$ | head -1`))
+      const latestInBranch = await (
+        await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$ | head -1`)
+      )
         .replace(/\n/g, ``)
-        .replace('.tar.lz4', '');
+        .replace(`.tar${compressionSuffix}`, '');
 
       process.chdir(cacheFolder);
 
       const cacheSelection =
-        cacheArtifactName !== `` && (await fileExists(`${cacheArtifactName}.tar.lz4`))
+        cacheArtifactName !== `` && (await fileExists(`${cacheArtifactName}.tar${compressionSuffix}`))
           ? cacheArtifactName
           : latestInBranch;
       await CloudRunnerLogger.log(`cache key ${cacheArtifactName} selection ${cacheSelection}`);
 
-      if (await fileExists(`${cacheSelection}.tar.lz4`)) {
+      if (await fileExists(`${cacheSelection}.tar${compressionSuffix}`)) {
         const resultsFolder = `results${CloudRunner.buildParameters.buildGuid}`;
         await CloudRunnerSystem.Run(`mkdir -p ${resultsFolder}`);
-        RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.tar.lz4`);
+        RemoteClientLogger.log(`cache item exists ${cacheFolder}/${cacheSelection}.tar${compressionSuffix}`);
         const fullResultsFolder = path.join(cacheFolder, resultsFolder);
-        await CloudRunnerSystem.Run(`tar -xf ${cacheSelection}.tar.lz4 -C ${fullResultsFolder}`);
+        await CloudRunnerSystem.Run(`tar -xf ${cacheSelection}.tar${compressionSuffix} -C ${fullResultsFolder}`);
         RemoteClientLogger.log(`cache item extracted to ${fullResultsFolder}`);
         assert(await fileExists(fullResultsFolder), `cache extraction results folder exists`);
         const destinationParentFolder = path.resolve(destinationFolder, '..');
@@ -144,7 +150,9 @@ export class Caching {
       } else {
         RemoteClientLogger.logWarning(`cache item ${cacheArtifactName} doesn't exist ${destinationFolder}`);
         if (cacheSelection !== ``) {
-          RemoteClientLogger.logWarning(`cache item ${cacheArtifactName}.tar.lz4 doesn't exist ${destinationFolder}`);
+          RemoteClientLogger.logWarning(
+            `cache item ${cacheArtifactName}.tar${compressionSuffix} doesn't exist ${destinationFolder}`,
+          );
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }

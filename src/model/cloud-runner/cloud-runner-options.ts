@@ -171,6 +171,14 @@ class CloudRunnerOptions {
     return Number(CloudRunnerOptions.getInput(`retainWorkspacesMax`)) || 5;
   }
 
+  public static get useSharedLargePackages(): boolean {
+    return CloudRunnerOptions.getInput(`useSharedLargePackages`) || false;
+  }
+
+  public static get useLZ4Compression(): boolean {
+    return CloudRunnerOptions.getInput(`useLZ4Compression`) || true;
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
