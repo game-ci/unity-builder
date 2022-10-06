@@ -62,6 +62,10 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      await CloudRunnerSystem.Run(`tree -L 2 ./..`);
+    }
+
     if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
