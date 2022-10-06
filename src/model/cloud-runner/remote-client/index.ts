@@ -132,7 +132,7 @@ export class RemoteClient {
     const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
     const files = fs.readdirSync(gameCiCustomHooksPath);
     for (const file of files) {
-      const fileContents = fs.readFileSync(file, `utf8`);
+      const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
       const fileContentsObject = YAML.parse(fileContents.toString());
       if (fileContentsObject.hook === hookLifecycle) {
         RemoteClientLogger.log(`Active Hook File ${file} contents: ${fileContents}`);
