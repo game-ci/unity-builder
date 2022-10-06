@@ -20,6 +20,7 @@ class CloudRunner {
   public static buildParameters: BuildParameters;
   private static defaultSecrets: CloudRunnerSecret[];
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
+  static lockedWorkspace: string | undefined;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunner.buildParameters = buildParameters;

@@ -63,6 +63,9 @@ class BuildParameters {
   public cloudRunnerIntegrationTests!: boolean;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
+  public retainWorkspace!: boolean;
+  public useSharedLargePackages!: boolean;
+  public useLZ4Compression!: boolean;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -137,6 +140,9 @@ class BuildParameters {
       readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
+      retainWorkspace: CloudRunnerOptions.retainWorkspaces,
+      useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
+      useLZ4Compression: CloudRunnerOptions.useLZ4Compression,
     };
   }
 

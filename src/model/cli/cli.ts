@@ -13,6 +13,7 @@ import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-opti
 import GitHub from '../github';
 import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folders';
+import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 
 export class Cli {
   public static options;
@@ -77,6 +78,7 @@ export class Cli {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
+    CloudRunner.lockedWorkspace = process.env.LOCKED_WORKSPACE;
 
     return await results.target[results.propertyKey](Cli.options);
   }
@@ -111,38 +113,27 @@ export class Cli {
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async PostCLIBuild(): Promise<string> {
-    const buildParameter = await BuildParameters.create();
-
-    /*
-      # LIBRARY CACHE
-      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-        CloudRunnerFolders.libraryFolderAbsolute,
-      )} --artifactName lib-${guid} --cachePushTo ${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/Library`)}
-
-      echo "game ci cloud runner push build to cache"
-
-      # BUILD CACHE
-      node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-        CloudRunnerFolders.projectBuildFolderAbsolute,
-      )} --artifactName build-${guid} --cachePushTo ${`${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/build`)}`}
-
-      # RETAINED WORKSPACE CLEANUP
-      ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
-    */
-
     core.info(`Running POST build tasks`);
 
-    Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+    await Caching.PushToCache(
       CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/Library`),
-      `lib-${buildParameter.buildGuid}`,
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+      `lib-${CloudRunner.buildParameters.buildGuid}`,
     );
 
-    Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
+    await Caching.PushToCache(
       CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/build`),
-      `build-${buildParameter.buildGuid}`,
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
+      `build-${CloudRunner.buildParameters.buildGuid}`,
     );
+
+    if (!CloudRunner.buildParameters.retainWorkspace) {
+      await CloudRunnerSystem.Run(
+        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+      );
+    }
+
+    await RemoteClient.runCustomHookFiles(`after-build`);
 
     return new Promise((result) => result(``));
   }

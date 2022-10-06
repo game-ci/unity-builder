@@ -19,7 +19,7 @@ describe('Cloud Runner Retain Workspace', () => {
   it('Responds', () => {});
   setups();
   if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
-    it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
+    it('Run one build it should not already be retained, run subsequent build which should use retained workspace', async () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -51,6 +51,8 @@ describe('Cloud Runner Retain Workspace', () => {
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
       const build2ContainsBuildGuid1FromRetainedWorkspace = results2.includes(buildParameter.buildGuid);
+      const build2ContainsRetainedWorkspacePhrase = results2.includes(`Retained Workspace:`);
+      const build2ContainsWorkspaceExistsAlreadyPhrase = results2.includes(`Retained Workspace Already Exists!`);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
       const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
@@ -61,6 +63,8 @@ describe('Cloud Runner Retain Workspace', () => {
       );
 
       expect(build2ContainsCacheKey).toBeTruthy();
+      expect(build2ContainsRetainedWorkspacePhrase).toBeTruthy();
+      expect(build2ContainsWorkspaceExistsAlreadyPhrase).toBeTruthy();
       expect(build2ContainsBuildGuid1FromRetainedWorkspace).toBeTruthy();
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();

@@ -1,0 +1,3 @@
+hook: post-build
+run: |
+  post-build test!

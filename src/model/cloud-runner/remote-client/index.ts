@@ -9,6 +9,7 @@ import { assert } from 'console';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import YAML from 'yaml';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
@@ -61,8 +62,20 @@ export class RemoteClient {
   }
 
   private static async cloneRepoWithoutLFSFiles() {
+    process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      await CloudRunnerSystem.Run(`tree -L 2 ./..`);
+    }
+
+    if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
+      RemoteClientLogger.log(
+        `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
+      );
+      await CloudRunnerSystem.Run(`git reset --hard ${CloudRunner.buildParameters.gitSha}`);
+
+      return;
+    }
     try {
-      process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
@@ -78,6 +91,7 @@ export class RemoteClient {
       assert(fs.existsSync(`.git`), 'git folder exists');
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
       RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
     } catch (error) {
@@ -86,10 +100,15 @@ export class RemoteClient {
   }
 
   static replaceLargePackageReferencesWithSharedReferences() {
+    const manifest = fs.readFileSync(
+      path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`),
+      'utf8',
+    );
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      CloudRunnerLogger.log(
-        fs.readFileSync(path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`), 'utf8'),
-      );
+      CloudRunnerLogger.log(manifest);
+    }
+    if (CloudRunner.buildParameters.useSharedLargePackages) {
+      manifest.replace(/LargePackages/g, '../../LargePackages');
     }
   }
 
@@ -102,8 +121,28 @@ export class RemoteClient {
     assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
   }
 
-  @CliFunction(`remote-cli`, `sets up a repository, usually before a game-ci build`)
+  @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
+    RemoteClient.handleRetainedWorkspace();
     await RemoteClient.bootstrapRepository();
+    await RemoteClient.runCustomHookFiles(`before-build`);
+  }
+  static async runCustomHookFiles(hookLifecycle: string) {
+    RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
+    const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
+    const files = fs.readdirSync(gameCiCustomHooksPath);
+    for (const file of files) {
+      const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
+      const fileContentsObject = YAML.parse(fileContents.toString());
+      if (fileContentsObject.hook === hookLifecycle) {
+        RemoteClientLogger.log(`Active Hook File ${file} contents: ${fileContents}`);
+      }
+    }
+  }
+  static handleRetainedWorkspace() {
+    if (!CloudRunner.buildParameters.retainWorkspace || !CloudRunner.lockedWorkspace) {
+      return;
+    }
+    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace}`);
   }
 }

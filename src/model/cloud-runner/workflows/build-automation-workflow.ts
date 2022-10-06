@@ -26,10 +26,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
       if (CloudRunnerOptions.retainWorkspaces) {
         const workspace =
-          (await SharedWorkspaceLocking.GetLockedWorkspace(
+          (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
             `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
             CloudRunner.buildParameters.buildGuid,
+            CloudRunner.buildParameters,
           )) || CloudRunner.buildParameters.buildGuid;
+
+        process.env.LOCKED_WORKSPACE = workspace;
+        CloudRunner.lockedWorkspace = workspace;
 
         CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
         cloudRunnerStepState.environment = [
@@ -38,16 +42,16 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
         ];
       }
 
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
       let output = '';
       if (CloudRunner.buildParameters.preBuildSteps !== '') {
+        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
         output += await CustomWorkflow.runCustomJob(
           CloudRunner.buildParameters.preBuildSteps,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
         );
+        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
@@ -67,22 +71,24 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
       if (CloudRunner.buildParameters.postBuildSteps !== '') {
+        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
         output += await CustomWorkflow.runCustomJob(
           CloudRunner.buildParameters.postBuildSteps,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
         );
+        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       if (CloudRunnerOptions.retainWorkspaces) {
         await SharedWorkspaceLocking.ReleaseWorkspace(
           `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
           CloudRunner.buildParameters.buildGuid,
+          CloudRunner.buildParameters,
         );
+        CloudRunner.lockedWorkspace = undefined;
       }
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
@@ -113,25 +119,28 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands(builderPath, CloudRunner.buildParameters.buildGuid)}
+      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
   private static setupCommands(builderPath) {
+    const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.builderPathAbsolute,
+    )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.unityBuilderRepoUrl,
+    )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
+
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
-    mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}
-    git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.unityBuilderRepoUrl,
-    )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
-    chmod +x ${builderPath}
+    if [ -e "${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
+    )}" ]; then echo "Retained Workspace Already Exists!"; else ${commands}; fi
     echo "game ci cloud runner bootstrap"
-    node ${builderPath} -m remote-cli`;
+    node ${builderPath} -m remote-cli-pre-build`;
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
-  private static BuildCommands(builderPath, guid) {
-    const linuxCacheFolder = CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderFull);
+  private static BuildCommands(builderPath) {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
@@ -147,18 +156,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    # node ${builderPath} -m remote-cli-post
-    node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.libraryFolderAbsolute,
-    )} --artifactName lib-${guid} --cachePushTo ${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/Library`)}
-    echo "game ci cloud runner push build to cache"
-    node ${builderPath} -m cache-push --cachePushFrom ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.projectBuildFolderAbsolute,
-    )} --artifactName build-${guid} --cachePushTo ${`${CloudRunnerFolders.ToLinuxFolder(`${linuxCacheFolder}/build`)}`}
-    ${BuildAutomationWorkflow.GetCleanupCommand(CloudRunnerFolders.projectPathAbsolute)}`;
-  }
-
-  private static GetCleanupCommand(cleanupPath: string) {
-    return CloudRunnerOptions.retainWorkspaces ? `` : `rm -r ${CloudRunnerFolders.ToLinuxFolder(cleanupPath)}`;
+    node ${builderPath} -m remote-cli-post-build`;
   }
 }
