@@ -13,6 +13,7 @@ import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-opti
 import GitHub from '../github';
 import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folders';
+import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 
 export class Cli {
   public static options;
@@ -143,6 +144,12 @@ export class Cli {
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
       `build-${buildParameter.buildGuid}`,
     );
+
+    if (!buildParameter.retainWorkspace) {
+      await CloudRunnerSystem.Run(
+        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+      );
+    }
 
     return new Promise((result) => result(``));
   }
