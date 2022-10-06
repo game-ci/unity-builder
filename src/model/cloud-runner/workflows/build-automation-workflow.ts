@@ -132,7 +132,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner clone"
     if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
-    )}" ]; then echo "Retained Workspace Already Exists!" ; else ${commands}; fi
+    )}" ]; then echo "Retained Workspace Already Exists!"; else ${commands}; fi
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli`;
   }

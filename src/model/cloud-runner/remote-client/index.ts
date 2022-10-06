@@ -61,6 +61,13 @@ export class RemoteClient {
   }
 
   private static async cloneRepoWithoutLFSFiles() {
+    if (fs.existsSync(path.basename(CloudRunnerFolders.repoPathAbsolute))) {
+      RemoteClientLogger.log(
+        `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
+      );
+
+      return;
+    }
     try {
       process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
@@ -108,7 +115,7 @@ export class RemoteClient {
     await RemoteClient.bootstrapRepository();
   }
   static handleRetainedWorkspace() {
-    if (process.env.LOCKED_WORKSPACE === undefined) {
+    if (!CloudRunner.buildParameters.retainWorkspace) {
       return;
     }
     RemoteClientLogger.log(`Retained Workspace: ${process.env.LOCKED_WORKSPACE}`);
