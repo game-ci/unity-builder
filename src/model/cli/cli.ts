@@ -112,7 +112,7 @@ export class Cli {
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async PostCLIBuild(): Promise<string> {
-    const buildParameter = await BuildParameters.create();
+    const buildParameter = CloudRunner.buildParameters;
 
     /*
       # LIBRARY CACHE
