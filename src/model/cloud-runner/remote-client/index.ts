@@ -136,6 +136,7 @@ export class RemoteClient {
       const fileContentsObject = YAML.parse(fileContents.toString());
       if (fileContentsObject.hook === hookLifecycle) {
         RemoteClientLogger.log(`Active Hook File ${file} contents: ${fileContents}`);
+        await CloudRunnerSystem.Run(fileContents);
       }
     }
   }
