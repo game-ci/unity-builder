@@ -33,12 +33,16 @@ describe('Cloud Runner Custom Hooks', () => {
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
-      const build2ContainsPreBuildHookMessage = results2.includes('pre-build test!');
-      const build2ContainsPostBuildHookMessage = results2.includes('post-build test!');
+      const build2ContainsPreBuildHookMessage = results2.includes('RunCustomHookFiles: before-build');
+      const build2ContainsPostBuildHookMessage = results2.includes('RunCustomHookFiles: after-build');
+      const build2ContainsPreBuildHookRunMessage = results2.includes('pre-build test!');
+      const build2ContainsPostBuildHookRunMessage = results2.includes('post-build test!');
 
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2ContainsPreBuildHookMessage).toBeTruthy();
       expect(build2ContainsPostBuildHookMessage).toBeTruthy();
+      expect(build2ContainsPreBuildHookRunMessage).toBeTruthy();
+      expect(build2ContainsPostBuildHookRunMessage).toBeTruthy();
     }, 10000000);
   }
 });

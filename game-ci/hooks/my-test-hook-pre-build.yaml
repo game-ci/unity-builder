@@ -1,3 +1,3 @@
-hook: pre-build
+hook: before-build
 run: |
-  pre-build test!
+  before-build test!
