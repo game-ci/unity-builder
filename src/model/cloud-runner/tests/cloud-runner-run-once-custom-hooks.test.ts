@@ -35,8 +35,8 @@ describe('Cloud Runner Custom Hooks', () => {
       const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
       const build2ContainsPreBuildHookMessage = results2.includes('RunCustomHookFiles: before-build');
       const build2ContainsPostBuildHookMessage = results2.includes('RunCustomHookFiles: after-build');
-      const build2ContainsPreBuildHookRunMessage = results2.includes('pre-build test!');
-      const build2ContainsPostBuildHookRunMessage = results2.includes('post-build test!');
+      const build2ContainsPreBuildHookRunMessage = results2.includes('before-build test!');
+      const build2ContainsPostBuildHookRunMessage = results2.includes('after-build test!');
 
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2ContainsPreBuildHookMessage).toBeTruthy();
