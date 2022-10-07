@@ -1,7 +1,6 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { CloudRunnerStepState } from '../cloud-runner-step-state';
-import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
 import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
@@ -9,6 +8,7 @@ import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
 import SharedWorkspaceLocking from '../../cli/shared-workspace-locking';
+import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -43,15 +43,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       }
 
       let output = '';
-      if (CloudRunner.buildParameters.preBuildSteps !== '') {
-        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
-        output += await CustomWorkflow.runCustomJob(
-          CloudRunner.buildParameters.preBuildSteps,
-          cloudRunnerStepState.environment,
-          cloudRunnerStepState.secrets,
-        );
-        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      }
+
+      output += CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
@@ -71,15 +64,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
-      if (CloudRunner.buildParameters.postBuildSteps !== '') {
-        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
-        output += await CustomWorkflow.runCustomJob(
-          CloudRunner.buildParameters.postBuildSteps,
-          cloudRunnerStepState.environment,
-          cloudRunnerStepState.secrets,
-        );
-        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      }
+      output += CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       if (CloudRunnerOptions.retainWorkspaces) {

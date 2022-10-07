@@ -1,3 +1,3 @@
 hook: after-build
-run: |
-  echo "after-build test!"
+commands: |
+  echo "after-build hook test!"

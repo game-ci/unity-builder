@@ -8,7 +8,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
       if (CloudRunner.buildParameters.customJob !== '') {
-        return await CustomWorkflow.runCustomJob(
+        return await CustomWorkflow.runCustomJobFromString(
           CloudRunner.buildParameters.customJob,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
