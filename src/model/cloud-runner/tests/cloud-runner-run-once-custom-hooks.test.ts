@@ -6,6 +6,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
+import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -18,6 +19,9 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner Custom Hooks', () => {
   it('Responds', () => {});
   setups();
+  it('Check for pre and post custom hooks run contents', async () => {
+    CloudRunnerLogger.log(JSON.stringify(CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`), undefined, 4));
+  });
   if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
     it('Check for pre and post custom hooks run contents', async () => {
       const overrides = {
