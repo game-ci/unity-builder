@@ -118,7 +118,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
     if [ -e "${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
+      path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute, `.git`),
     )}" ]; then echo "Retained Workspace Already Exists!"; else ${commands}; fi
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build`;
