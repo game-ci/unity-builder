@@ -1,9 +1,9 @@
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunner } from '../..';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import { CloudRunnerCustomSteps, CustomStep } from '../services/cloud-runner-custom-steps';
+import CloudRunner from '../cloud-runner';
 
 export class CustomWorkflow {
   public static async runCustomJobFromString(
