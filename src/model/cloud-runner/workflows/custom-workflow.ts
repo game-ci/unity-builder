@@ -27,6 +27,13 @@ export class CustomWorkflow {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       let output = '';
       for (const step of buildSteps) {
+        if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
+          CloudRunnerLogger.log(`Custom Job Description \n ${JSON.stringify(step, undefined, 4)}`);
+        }
+        if (step.secrets === undefined) {
+          step.secrets = [];
+        }
+
         output += await CloudRunner.Provider.runTask(
           CloudRunner.buildParameters.buildGuid,
           step['image'],
