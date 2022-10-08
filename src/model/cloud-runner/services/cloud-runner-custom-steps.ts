@@ -32,6 +32,9 @@ export class CloudRunnerCustomSteps {
   }
 
   public static ParseSteps(steps: string): CustomStep[] {
+    if (steps === '') {
+      return [];
+    }
     let object: any;
     try {
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
@@ -41,18 +44,19 @@ export class CloudRunnerCustomSteps {
       if (object === undefined) {
         throw new Error(`Failed to parse ${steps}`);
       }
-      for (const step of object) {
-        step.secrets = step.secrets.map((x) => {
-          return {
-            ParameterKey: x.name,
-            EnvironmentVariable: Input.ToEnvVarFormat(x.name),
-            ParameterValue: x.value,
-          };
-        });
-      }
     } catch (error) {
       CloudRunnerLogger.log(`failed to parse a custom job "${steps}"`);
       throw error;
+    }
+
+    for (const step of object) {
+      step.secrets = step.secrets.map((x) => {
+        return {
+          ParameterKey: x.name,
+          EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+          ParameterValue: x.value,
+        };
+      });
     }
 
     return object;
