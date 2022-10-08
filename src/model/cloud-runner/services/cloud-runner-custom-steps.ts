@@ -13,15 +13,19 @@ export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
     const results: CustomStep[] = [];
     RemoteClientLogger.log(`GetCustomStepFiles: ${hookLifecycle}`);
-    const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
-    const files = fs.readdirSync(gameCiCustomStepsPath);
-    for (const file of files) {
-      const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
-      const fileContentsObject = YAML.parse(fileContents.toString());
-      if (fileContentsObject.hook === hookLifecycle) {
-        RemoteClientLogger.log(`Active Step File ${file} contents: ${fileContents}`);
-        results.push(...CloudRunnerCustomSteps.ParseSteps(fileContents));
+    try {
+      const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
+      const files = fs.readdirSync(gameCiCustomStepsPath);
+      for (const file of files) {
+        const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
+        const fileContentsObject = YAML.parse(fileContents.toString());
+        if (fileContentsObject.hook === hookLifecycle) {
+          RemoteClientLogger.log(`Active Step File ${file} contents: ${fileContents}`);
+          results.push(...CloudRunnerCustomSteps.ParseSteps(fileContents));
+        }
       }
+    } catch (error) {
+      RemoteClientLogger.log(`Failed Getting: ${hookLifecycle} \n ${JSON.stringify(error, undefined, 4)}`);
     }
 
     return results;
