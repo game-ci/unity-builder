@@ -6,7 +6,6 @@ import { CustomWorkflow } from '../workflows/custom-workflow';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import * as fs from 'fs';
-import { CloudRunnerFolders } from './cloud-runner-folders';
 import CloudRunnerLogger from './cloud-runner-logger';
 import Input from '../../input';
 
@@ -14,7 +13,7 @@ export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
     const results: CustomStep[] = [];
     RemoteClientLogger.log(`GetCustomStepFiles: ${hookLifecycle}`);
-    const gameCiCustomStepsPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `steps`);
+    const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
     const files = fs.readdirSync(gameCiCustomStepsPath);
     for (const file of files) {
       const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
