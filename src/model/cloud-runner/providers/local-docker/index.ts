@@ -6,6 +6,7 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../../../model';
 import { writeFileSync } from 'fs';
+import CloudRunner from '../../cloud-runner';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -86,25 +87,26 @@ class LocalDockerCloudRunner implements ProviderInterface {
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     const entrypointFilePath = `start.sh`;
-    writeFileSync(
-      `${workspace}/${entrypointFilePath}`,
-      `#!/bin/bash
-      set -e
+    const fileContents = `#!/bin/bash
+set -e
 
-      apt-get update > /dev/null && apt-get install -y tree> /dev/null
-      mkdir -p /github/workspace/cloud-runner-cache
-      mkdir -p /data/cache
-      cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
-      tree -L 3 ${sharedFolder}
-      ${commands}
-      cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
-      tree -L 2 /github/workspace/cloud-runner-cache
-      tree -L 3 ${sharedFolder}
-      `,
-      {
-        flag: 'w',
-      },
-    );
+apt-get update > /dev/null && apt-get install -y tree> /dev/null
+mkdir -p /github/workspace/cloud-runner-cache
+mkdir -p /data/cache
+cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
+tree -L 3 ${sharedFolder}
+${commands}
+cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
+tree -L 2 /github/workspace/cloud-runner-cache
+tree -L 3 ${sharedFolder}
+    `;
+    writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {
+      flag: 'w',
+    });
+
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      CloudRunnerLogger.log(`Running local-docker: \n ${JSON.stringify(fileContents)}`);
+    }
 
     await Docker.run(
       image,
