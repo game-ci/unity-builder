@@ -40,7 +40,7 @@ export class CloudRunnerCustomSteps {
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
       }
-      object = YAML.parse(steps);
+      object = steps[0] === `-` ? YAML.parse(steps) : [YAML.parse(steps)];
       for (const step of object) {
         step.secrets = step.secrets.map((x) => {
           return {
