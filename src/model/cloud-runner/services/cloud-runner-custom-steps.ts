@@ -50,9 +50,12 @@ export class CloudRunnerCustomSteps {
     if (steps === '') {
       return [];
     }
-    if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
-      CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
-    }
+
+    // if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
+
+    CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+
+    // }
     const isArray = steps[0] === `-`;
     const object: CustomStep[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
     for (const step of object) {

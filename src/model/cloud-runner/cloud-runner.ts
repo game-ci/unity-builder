@@ -23,6 +23,7 @@ class CloudRunner {
   static lockedWorkspace: string | undefined;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
+    CloudRunnerLogger.log(`Setting up cloud runner`);
     CloudRunner.buildParameters = buildParameters;
     CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
