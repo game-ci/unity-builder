@@ -31,6 +31,16 @@ export class CloudRunnerCustomSteps {
     return results;
   }
 
+  private static ConvertYamlSecrets(object) {
+    object.secrets = object.secrets.map((x) => {
+      return {
+        ParameterKey: x.name,
+        EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+        ParameterValue: x.value,
+      };
+    });
+  }
+
   public static ParseSteps(steps: string): CustomStep[] {
     if (steps === '') {
       return [];
@@ -40,15 +50,14 @@ export class CloudRunnerCustomSteps {
       if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
         CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
       }
-      object = steps[0] === `-` ? YAML.parse(steps) : [YAML.parse(steps)];
-      for (const step of object) {
-        step.secrets = step.secrets.map((x) => {
-          return {
-            ParameterKey: x.name,
-            EnvironmentVariable: Input.ToEnvVarFormat(x.name),
-            ParameterValue: x.value,
-          };
-        });
+      const isArray = steps[0] === `-`;
+      object = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
+      if (isArray) {
+        for (const step of object) {
+          CloudRunnerCustomSteps.ConvertYamlSecrets(step);
+        }
+      } else {
+        CloudRunnerCustomSteps.ConvertYamlSecrets(object);
       }
       if (object === undefined) {
         throw new Error(`Failed to parse ${steps}`);
