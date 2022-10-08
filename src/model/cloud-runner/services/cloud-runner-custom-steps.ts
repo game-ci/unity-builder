@@ -48,7 +48,7 @@ export class CloudRunnerCustomSteps {
     if (steps === '') {
       return [];
     }
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+    if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
       CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
     }
     const isArray = steps[0] === `-`;
