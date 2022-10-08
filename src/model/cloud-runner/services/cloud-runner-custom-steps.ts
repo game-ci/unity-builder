@@ -60,14 +60,10 @@ export class CloudRunnerCustomSteps {
 
   static async RunPostBuildSteps(cloudRunnerStepState) {
     let output = ``;
-    let steps: CustomStep[] = [];
-    if (CloudRunner.buildParameters.postBuildSteps !== '') {
-      steps = CloudRunnerCustomSteps.ParseSteps(CloudRunner.buildParameters.postBuildSteps);
-    }
-    const fileSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`after`);
-    if (fileSteps.length > 0) {
-      steps = [...steps, ...fileSteps];
-    }
+    const steps: CustomStep[] = [
+      ...CloudRunnerCustomSteps.ParseSteps(CloudRunner.buildParameters.postBuildSteps),
+      ...CloudRunnerCustomSteps.GetCustomStepsFromFiles(`after`),
+    ];
 
     if (steps.length > 0) {
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
@@ -83,11 +79,10 @@ export class CloudRunnerCustomSteps {
   }
   static async RunPreBuildSteps(cloudRunnerStepState) {
     let output = ``;
-    let steps: CustomStep[] = [];
-    if (CloudRunner.buildParameters.preBuildSteps !== '') {
-      steps = CloudRunnerCustomSteps.ParseSteps(CloudRunner.buildParameters.preBuildSteps);
-    }
-    steps = [...steps, ...CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`)];
+    const steps: CustomStep[] = [
+      ...CloudRunnerCustomSteps.ParseSteps(CloudRunner.buildParameters.preBuildSteps),
+      ...CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`),
+    ];
 
     if (steps.length > 0) {
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');

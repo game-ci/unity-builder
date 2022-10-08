@@ -44,7 +44,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
       let output = '';
 
-      output += CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
+      output += await CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
       CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
@@ -64,7 +64,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       CloudRunnerLogger.logWithTime('Build time');
 
-      output += CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
+      output += await CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       if (CloudRunnerOptions.retainWorkspaces) {
