@@ -55,12 +55,14 @@ export class CloudRunnerCustomSteps {
     }
     const isArray = steps[0] === `-`;
     const object: CustomStep[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
-    if (isArray) {
-      for (const step of object) {
-        CloudRunnerCustomSteps.ConvertYamlSecrets(step);
+    for (const step of object) {
+      CloudRunnerCustomSteps.ConvertYamlSecrets(step);
+      if (step.secrets === undefined) {
+        step.secrets = [];
       }
-    } else {
-      CloudRunnerCustomSteps.ConvertYamlSecrets(object);
+      if (step.image === undefined) {
+        step.image = `ubuntu`;
+      }
     }
     if (object === undefined) {
       throw new Error(`Failed to parse ${steps}`);
