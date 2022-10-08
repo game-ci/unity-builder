@@ -33,6 +33,8 @@ export class CloudRunnerCustomSteps {
 
   private static ConvertYamlSecrets(object) {
     if (object.secrets === undefined) {
+      object.secrets = [];
+
       return;
     }
     object.secrets = object.secrets.map((x) => {
