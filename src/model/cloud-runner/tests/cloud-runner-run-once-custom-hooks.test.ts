@@ -22,13 +22,18 @@ describe('Cloud Runner Custom Hooks And Steps', () => {
   it('Check parsing and reading of steps', async () => {
     const yamlString = `hook: before
 commands: echo "test"`;
+    const yamlString2 = `- hook: before
+  commands: echo "test"`;
     const stringObject = CloudRunnerCustomSteps.ParseSteps(yamlString);
+    const stringObject2 = CloudRunnerCustomSteps.ParseSteps(yamlString2);
     const getCustomStepsFromFiles = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
     CloudRunnerLogger.log(yamlString);
     CloudRunnerLogger.log(JSON.stringify(stringObject, undefined, 4));
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
     expect(stringObject.length).toBe(1);
     expect(stringObject[0].hook).toBe(`before`);
+    expect(stringObject2.length).toBe(1);
+    expect(stringObject2[0].hook).toBe(`before`);
   });
   if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
     it('Run build once - check for pre and post custom hooks run contents', async () => {
