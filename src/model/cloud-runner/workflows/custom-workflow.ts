@@ -33,8 +33,8 @@ export class CustomWorkflow {
 
         output += await CloudRunner.Provider.runTask(
           CloudRunner.buildParameters.buildGuid,
-          step['image'],
-          step['commands'],
+          step.image,
+          step.commands,
           `/${CloudRunnerFolders.buildVolumeFolder}`,
           `/${CloudRunnerFolders.projectPathAbsolute}/`,
           environmentVariables,

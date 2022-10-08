@@ -18,15 +18,15 @@ export class CloudRunnerCustomSteps {
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
-        const fileContentsObject = CloudRunnerCustomSteps.ParseSteps(fileContents.toString())[0];
+        const fileContentsObject = CloudRunnerCustomSteps.ParseSteps(fileContents)[0];
         if (fileContentsObject.hook === hookLifecycle) {
-          RemoteClientLogger.log(`Active Step File ${file} contents: ${fileContents}`);
-          results.push(...CloudRunnerCustomSteps.ParseSteps(fileContents));
+          results.push(fileContentsObject);
         }
       }
     } catch (error) {
       RemoteClientLogger.log(`Failed Getting: ${hookLifecycle} \n ${JSON.stringify(error, undefined, 4)}`);
     }
+    RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
 
     return results;
   }
