@@ -16,10 +16,10 @@ async function CreateParameters(overrides) {
   return await BuildParameters.create();
 }
 
-describe('Cloud Runner Custom Hooks', () => {
+describe('Cloud Runner Custom Hooks And Steps', () => {
   it('Responds', () => {});
   setups();
-  it('Check for pre and post custom hooks run contents', async () => {
+  it('Check parsing and reading of steps', async () => {
     const yamlString = `hook: before
 commands: echo "test"`;
     const stringObject = CloudRunnerCustomSteps.ParseSteps(yamlString);
@@ -31,7 +31,7 @@ commands: echo "test"`;
     expect(stringObject[0].hook).toBe(`before`);
   });
   if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
-    it('Check for pre and post custom hooks run contents', async () => {
+    it('Run build once - check for pre and post custom hooks run contents', async () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
