@@ -32,6 +32,9 @@ export class CloudRunnerCustomSteps {
   }
 
   private static ConvertYamlSecrets(object) {
+    if (object.secrets === undefined) {
+      return;
+    }
     object.secrets = object.secrets.map((x) => {
       return {
         ParameterKey: x.name,
@@ -45,26 +48,20 @@ export class CloudRunnerCustomSteps {
     if (steps === '') {
       return [];
     }
-    let object: any;
-    try {
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-        CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+    }
+    const isArray = steps[0] === `-`;
+    const object: CustomStep[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
+    if (isArray) {
+      for (const step of object) {
+        CloudRunnerCustomSteps.ConvertYamlSecrets(step);
       }
-      const isArray = steps[0] === `-`;
-      object = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
-      if (isArray) {
-        for (const step of object) {
-          CloudRunnerCustomSteps.ConvertYamlSecrets(step);
-        }
-      } else {
-        CloudRunnerCustomSteps.ConvertYamlSecrets(object);
-      }
-      if (object === undefined) {
-        throw new Error(`Failed to parse ${steps}`);
-      }
-    } catch (error) {
-      CloudRunnerLogger.log(`failed to parse a custom job "${steps} \n ${JSON.stringify(error, undefined, 4)}"`);
-      throw error;
+    } else {
+      CloudRunnerCustomSteps.ConvertYamlSecrets(object);
+    }
+    if (object === undefined) {
+      throw new Error(`Failed to parse ${steps}`);
     }
 
     return object;
