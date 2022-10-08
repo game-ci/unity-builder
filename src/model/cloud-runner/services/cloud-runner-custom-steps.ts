@@ -41,22 +41,21 @@ export class CloudRunnerCustomSteps {
         CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
       }
       object = YAML.parse(steps);
+      for (const step of object) {
+        step.secrets = step.secrets.map((x) => {
+          return {
+            ParameterKey: x.name,
+            EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+            ParameterValue: x.value,
+          };
+        });
+      }
       if (object === undefined) {
         throw new Error(`Failed to parse ${steps}`);
       }
     } catch (error) {
-      CloudRunnerLogger.log(`failed to parse a custom job "${steps}"`);
+      CloudRunnerLogger.log(`failed to parse a custom job "${steps} \n ${JSON.stringify(error, undefined, 4)}"`);
       throw error;
-    }
-
-    for (const step of object) {
-      step.secrets = step.secrets.map((x) => {
-        return {
-          ParameterKey: x.name,
-          EnvironmentVariable: Input.ToEnvVarFormat(x.name),
-          ParameterValue: x.value,
-        };
-      });
     }
 
     return object;
