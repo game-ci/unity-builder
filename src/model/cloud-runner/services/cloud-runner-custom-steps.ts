@@ -18,7 +18,7 @@ export class CloudRunnerCustomSteps {
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
-        const fileContentsObject = YAML.parse(fileContents.toString());
+        const fileContentsObject = CloudRunnerCustomSteps.ParseSteps(fileContents.toString())[0];
         if (fileContentsObject.hook === hookLifecycle) {
           RemoteClientLogger.log(`Active Step File ${file} contents: ${fileContents}`);
           results.push(...CloudRunnerCustomSteps.ParseSteps(fileContents));
@@ -113,5 +113,5 @@ export class CustomStep {
   public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
   public name;
   public image: string = `ubuntu`;
-  public hook!: string[];
+  public hook!: string;
 }
