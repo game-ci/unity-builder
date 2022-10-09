@@ -122,7 +122,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     )}" ]; then echo "Retained Workspace Already Exists!"; fi
     if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
-    )}" && -e "${CloudRunnerFolders.ToLinuxFolder(
+    )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
     )}" ]; then echo "Builder Already Exists!"; else ${commands}; fi
     echo "game ci cloud runner bootstrap"
