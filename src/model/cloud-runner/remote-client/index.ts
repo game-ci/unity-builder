@@ -95,6 +95,7 @@ export class RemoteClient {
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
       RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
     } catch (error) {
+      await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.repoPathAbsolute}/..`);
       throw error;
     }
   }
