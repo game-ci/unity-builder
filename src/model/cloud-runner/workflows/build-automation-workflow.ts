@@ -115,16 +115,25 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.unityBuilderRepoUrl,
     )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
 
-    return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-    echo "game ci cloud runner clone"
-    if [ -e "${CloudRunnerFolders.ToLinuxFolder(
+    const retainedWorkspaceCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
-    )}" ]; then echo "Retained Workspace Already Exists!"; fi
-    if [ -e "${CloudRunnerFolders.ToLinuxFolder(
+    )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
+      path.join(CloudRunnerFolders.repoPathAbsolute, `.git`),
+    )}" ]; then echo "Retained Workspace Already Exists!"; fi`;
+
+    const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
-    )}" ]; then echo "Builder Already Exists!"; else ${commands}; fi
+    )}" ]; then echo "Builder Already Exists!"; else ${commands}; fi`;
+
+    return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+    echo "game ci cloud runner clone"
+    tree -L 2 .
+    ${retainedWorkspaceCommands}
+    tree -L 2 .
+    ${cloneBuilderCommands}
+    tree -L 2 .
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build`;
   }
