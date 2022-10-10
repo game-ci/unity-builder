@@ -129,14 +129,30 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }
     ${retainedWorkspaceCommands}
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }
     ${cloneBuilderCommands}
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}`;
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }`;
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
@@ -156,8 +172,16 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }
     node ${builderPath} -m remote-cli-post-build
-    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}`;
+    ${
+      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        : ``
+    }`;
   }
 }
