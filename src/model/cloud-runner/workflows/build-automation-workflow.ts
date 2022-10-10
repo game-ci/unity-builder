@@ -131,26 +131,26 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner clone"
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }
     ${retainedWorkspaceCommands}
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }
     ${cloneBuilderCommands}
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }`;
   }
@@ -174,13 +174,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     chmod +x ${builderPath}
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }
     node ${builderPath} -m remote-cli-post-build
     ${
       CloudRunner.buildParameters.cloudRunnerIntegrationTests
-        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}/`
+        ? `tree -L 2 /${CloudRunnerFolders.buildVolumeFolder}`
         : ``
     }`;
   }
