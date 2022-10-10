@@ -64,7 +64,7 @@ export class RemoteClient {
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
     if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      await CloudRunnerSystem.Run(`tree -L 2 ./..`);
+      await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
     }
 
     if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
@@ -124,9 +124,13 @@ export class RemoteClient {
 
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
+    await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
     RemoteClient.handleRetainedWorkspace();
+    await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
     await RemoteClient.bootstrapRepository();
+    await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
     await RemoteClient.runCustomHookFiles(`before-build`);
+    await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
   }
   static async runCustomHookFiles(hookLifecycle: string) {
     RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
