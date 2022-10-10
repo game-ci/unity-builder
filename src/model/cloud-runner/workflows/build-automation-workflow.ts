@@ -129,13 +129,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
-    tree -L 2 ./data/
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
     ${retainedWorkspaceCommands}
-    tree -L 2 ./data/
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
     ${cloneBuilderCommands}
-    tree -L 2 ./data/
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
     echo "game ci cloud runner bootstrap"
-    node ${builderPath} -m remote-cli-pre-build`;
+    node ${builderPath} -m remote-cli-pre-build
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}`;
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
@@ -155,6 +156,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    node ${builderPath} -m remote-cli-post-build`;
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}
+    node ${builderPath} -m remote-cli-post-build
+    ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? `tree -L 2 ./data/` : ``}`;
   }
 }
