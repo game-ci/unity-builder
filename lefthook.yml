@@ -6,13 +6,6 @@
 color: true
 extends: {}
 
-pre-push:
-  parallel: true
-  commands:
-    packages-audit:
-      tags: security
-      run: yarn audit
-
 pre-commit:
   parallel: true
   commands:
@@ -26,10 +19,10 @@ pre-commit:
       glob: '*.{js,jsx,ts,tsx}'
       exclude: 'dist/'
       run: yarn prettier --write {staged_files} && yarn eslint {staged_files} && git add {staged_files}
-    run tests:
-      glob: '*.{js,jsx,ts,tsx}'
-      exclude: 'dist/'
-      run: yarn jest --passWithNoTests --findRelatedTests {staged_files}
+#    run tests:
+#      glob: '*.{js,jsx,ts,tsx}'
+#      exclude: 'dist/'
+#      run: yarn jest --passWithNoTests --findRelatedTests {staged_files}
     build distributables:
       skip: ['merge', 'rebase']
       run: yarn build && git add dist

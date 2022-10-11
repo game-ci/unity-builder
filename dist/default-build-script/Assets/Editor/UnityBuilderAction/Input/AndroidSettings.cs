@@ -41,7 +41,19 @@ namespace UnityBuilderAction.Input
       if (options.TryGetValue("androidKeyaliasPass", out string keyaliasPass) && !string.IsNullOrEmpty(keyaliasPass))
         PlayerSettings.Android.keyaliasPass = keyaliasPass;
       if (options.TryGetValue("androidTargetSdkVersion", out string androidTargetSdkVersion) && !string.IsNullOrEmpty(androidTargetSdkVersion))
-        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions) Enum.Parse(typeof(AndroidSdkVersions), androidTargetSdkVersion);
+      {
+          var targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+          try
+          {
+              targetSdkVersion =
+                  (AndroidSdkVersions) Enum.Parse(typeof(AndroidSdkVersions), androidTargetSdkVersion);
+          }
+          catch
+          {
+              UnityEngine.Debug.Log("Failed to parse androidTargetSdkVersion! Fallback to AndroidApiLevelAuto");
+          }
+          PlayerSettings.Android.targetSdkVersion = targetSdkVersion;
+      }
     }
   }
 }
