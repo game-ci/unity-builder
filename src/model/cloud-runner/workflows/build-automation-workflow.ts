@@ -116,15 +116,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   private static setupCommands(builderPath) {
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
-    )} && rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.unityBuilderRepoUrl)} && git clone -q -b ${
-      CloudRunner.buildParameters.cloudRunnerBranch
-    } ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.unityBuilderRepoUrl)} "${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.builderPathAbsolute,
-    )}" && chmod +x ${builderPath}`;
+    )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
+      CloudRunnerFolders.unityBuilderRepoUrl
+    } "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
 
     const retainedWorkspaceCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
-    )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
+    )}" ] && rm -r ${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.repoPathAbsolute,
+    )} && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.repoPathAbsolute, `.git`),
     )}" ]; then echo "Retained Workspace Already Exists!"; fi`;
 
