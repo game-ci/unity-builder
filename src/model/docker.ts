@@ -46,7 +46,7 @@ class Docker {
     return `docker run \
             --workdir /github/workspace \
             --rm \
-            ${entrypointBash ? `--entrypoint /bin/bash` : ``}
+            ${entrypointBash ? `--entrypoint /bin/bash` : ``} \
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \
@@ -61,9 +61,7 @@ class Docker {
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
             ${image} \
-            ${entrypointBash ? `--entrypoint` : ``} ${
-      image === `alpine` || image === `amazon/aws-cli:latest` ? `/bin/sh -c ` : `/bin/bash -c `
-    } \
+            ${image === `alpine` || image === `amazon/aws-cli:latest` ? `/bin/sh -c ` : `/bin/bash -c `} \
             ${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}`;
   }
 
