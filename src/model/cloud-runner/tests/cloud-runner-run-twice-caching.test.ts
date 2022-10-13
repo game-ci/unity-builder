@@ -18,7 +18,7 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner Caching', () => {
   it('Responds', () => {});
   setups();
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug) {
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       const overrides = {
         versioning: 'None',
@@ -28,6 +28,9 @@ describe('Cloud Runner Caching', () => {
         cacheKey: `test-case-${uuidv4()}`,
         customStepFiles: `debug-cache`,
       };
+      if (CloudRunnerOptions.cloudRunnerCluster === `k8s`) {
+        overrides.customStepFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;
+      }
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
