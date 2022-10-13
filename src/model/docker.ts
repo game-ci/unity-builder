@@ -60,7 +60,7 @@ class Docker {
             --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
-            ${entrypointBash ? `--entrypoint "${commandPrefix} -c"` : ``} \
+            ${entrypointBash ? `--entrypoint ${commandPrefix}` : ``} \
             ${image} \
             ${!entrypointBash ? `${commandPrefix} -c ` : ``} \
             "${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}"`;
