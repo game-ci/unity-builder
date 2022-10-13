@@ -116,9 +116,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   private static setupCommands(builderPath) {
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
-    )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.unityBuilderRepoUrl,
-    )} "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
+    )} && rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.unityBuilderRepoUrl)} && git clone -q -b ${
+      CloudRunner.buildParameters.cloudRunnerBranch
+    } ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.unityBuilderRepoUrl)} "${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.builderPathAbsolute,
+    )}" && chmod +x ${builderPath}`;
 
     const retainedWorkspaceCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
