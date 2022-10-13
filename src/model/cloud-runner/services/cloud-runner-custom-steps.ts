@@ -18,7 +18,7 @@ export class CloudRunnerCustomSteps {
       const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
-        if (!CloudRunnerOptions.customStepFiles.includes(file)) {
+        if (!CloudRunnerOptions.customStepFiles.includes(file.replace(`.yaml`, ``))) {
           RemoteClientLogger.log(`Skipping CustomStepFile: ${file} (not in ${CloudRunnerOptions.customStepFiles})`);
           continue;
         }
