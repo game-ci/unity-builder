@@ -96,11 +96,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
 
     return `apt-get update > /dev/null
-      ${
-        CloudRunner.buildParameters.cloudRunnerDebug
-          ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-          : ``
-      }
       apt-get install -y tar tree npm git-lfs jq git > /dev/null
       npm install -g n > /dev/null
       n stable > /dev/null
@@ -120,11 +115,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
 
+    const TreeWorkspace = CloudRunner.buildParameters.cloudRunnerDebug
+      ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
+      : ``;
+
     const retainedWorkspaceCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.repoPathAbsolute, `.git`),
-    )}" ]; then echo "Retained Workspace Already Exists!"; fi`;
+    )}" ]; then echo "Retained Workspace Already Exists!" && ${TreeWorkspace}; fi`;
 
     const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
@@ -134,36 +133,22 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }
     ${retainedWorkspaceCommands}
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }
     ${cloneBuilderCommands}
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }
+    ${TreeWorkspace}
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }`;
+    ${TreeWorkspace}`;
   }
 
   // ToDo: Replace with a very simple "node ${builderPath} -m build-cli" to run the scripts below without enlarging the request size
   private static BuildCommands(builderPath) {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
+
+    const TreeWorkspace = CloudRunner.buildParameters.cloudRunnerDebug
+      ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
+      : ``;
 
     return `echo "game ci cloud runner init"
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
@@ -177,16 +162,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }
+    ${TreeWorkspace}
     node ${builderPath} -m remote-cli-post-build
-    ${
-      CloudRunner.buildParameters.cloudRunnerDebug
-        ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-        : ``
-    }`;
+    ${TreeWorkspace}`;
   }
 }
