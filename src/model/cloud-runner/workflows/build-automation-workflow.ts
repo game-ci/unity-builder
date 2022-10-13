@@ -96,6 +96,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
 
     return `apt-get update > /dev/null
+      ${
+        CloudRunner.buildParameters.cloudRunnerIntegrationTests
+          ? `tree -L 2 /${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
+          : ``
+      }
       apt-get install -y tar tree npm git-lfs jq git > /dev/null
       npm install -g n > /dev/null
       n stable > /dev/null
