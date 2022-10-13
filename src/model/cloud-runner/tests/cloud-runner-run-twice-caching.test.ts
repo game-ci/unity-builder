@@ -26,6 +26,7 @@ describe('Cloud Runner Caching', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
+        customStepFiles: `debug-cache`,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);

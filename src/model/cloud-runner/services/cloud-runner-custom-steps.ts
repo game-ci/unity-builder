@@ -36,6 +36,7 @@ export class CloudRunnerCustomSteps {
     const builtInCustomSteps: CustomStep[] = CloudRunnerCustomSteps.ParseSteps(
       `- name: aws-s3-upload-build
   image: amazon/aws-cli
+  hook: after
   commands: |
     printenv
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
@@ -51,6 +52,7 @@ export class CloudRunnerCustomSteps {
     value: ${process.env.AWS_REGION || ``}
 - name: aws-s3-upload-cache
   image: amazon/aws-cli
+  hook: after
   commands: |
     printenv
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
@@ -66,6 +68,7 @@ export class CloudRunnerCustomSteps {
     value: ${process.env.AWS_REGION || ``}
 - name: aws-s3-pull-cache
   image: amazon/aws-cli
+  hook: before
   commands: |
     printenv
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
@@ -74,6 +77,21 @@ export class CloudRunnerCustomSteps {
     BUCKET="game-ci-test-storage/$CACHE_KEY/"
     OBJECT="$(aws s3 ls $BUCKET --recursive | sort | tail -n 1 | awk '{print $4}')"
     aws s3 cp s3://$BUCKET/$OBJECT /data/cache/$CACHE_KEY/
+  secrets:
+  - name: awsAccessKeyId
+    value: ${process.env.AWS_ACCESS_KEY_ID || ``}
+  - name: awsSecretAccessKey
+    value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
+  - name: awsDefaultRegion
+    value: ${process.env.AWS_REGION || ``}
+- name: debug-cache
+  image: ubuntu
+  hook: after
+  commands: |
+    apt-get update > /dev/null
+    apt-get install -y tree > /dev/null
+    printenv
+    tree -L 3 /data/cache
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
