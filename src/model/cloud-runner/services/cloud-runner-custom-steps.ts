@@ -19,6 +19,7 @@ export class CloudRunnerCustomSteps {
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
         if (!CloudRunnerOptions.customStepFiles.includes(file)) {
+          RemoteClientLogger.log(`Skipping CustomStepFile: ${file} (not in ${CloudRunnerOptions.customStepFiles})`);
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
