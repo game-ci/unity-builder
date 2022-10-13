@@ -45,7 +45,7 @@ export class CloudRunnerCustomHooks {
       const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
-        if (!CloudRunnerOptions.customStepFiles.includes(file)) {
+        if (!CloudRunnerOptions.customHookFiles.includes(file)) {
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
