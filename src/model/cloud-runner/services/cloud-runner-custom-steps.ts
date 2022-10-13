@@ -56,7 +56,7 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    # upload from cache folder
+    aws s3 cp --recursive /data/cache/$CACHE_KEY/ s3://game-ci-test-storage/$CACHE_KEY/
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -71,8 +71,9 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    # determine most recent cache entry
-    # download to cache folder
+    BUCKET="game-ci-test-storage/$CACHE_KEY/"
+    OBJECT="$(aws s3 ls $BUCKET --recursive | sort | tail -n 1 | awk '{print $4}')"
+    aws s3 cp s3://$BUCKET/$OBJECT /data/cache/$CACHE_KEY/
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
