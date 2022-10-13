@@ -11,11 +11,12 @@ class Docker {
     overrideCommands = '',
     additionalVariables: any[] = [],
     options: any = false,
+    entrypointBash: boolean = false,
   ) {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables);
+        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables, entrypointBash);
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
@@ -28,7 +29,13 @@ class Docker {
     }
   }
 
-  static getLinuxCommand(image, parameters, overrideCommands = '', additionalVariables: any[] = []): string {
+  static getLinuxCommand(
+    image,
+    parameters,
+    overrideCommands = '',
+    additionalVariables: any[] = [],
+    entrypointBash: boolean = false,
+  ): string {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -39,6 +46,7 @@ class Docker {
     return `docker run \
             --workdir /github/workspace \
             --rm \
+            ${entrypointBash ? `--entrypoint /bin/bash` : ``}
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \

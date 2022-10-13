@@ -124,6 +124,7 @@ tree -L 3 ${sharedFolder}
           },
         },
       },
+      true,
     );
 
     return myOutput;
