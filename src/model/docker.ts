@@ -42,11 +42,11 @@ class Docker {
     if (!existsSync(githubHome)) mkdirSync(githubHome);
     const githubWorkflow = path.join(runnerTempPath, '_github_workflow');
     if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
+    const commandPrefix = image === `alpine` ? `/bin/sh` : `/bin/bash`;
 
     return `docker run \
             --workdir /github/workspace \
             --rm \
-            ${entrypointBash ? `--entrypoint /bin/bash` : ``} \
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \
@@ -61,7 +61,7 @@ class Docker {
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
             ${image} \
-            ${image === `alpine` ? `/bin/sh -c ` : `/bin/bash -c `} \
+            ${entrypointBash ? `--entrypoint ${commandPrefix} ` : `${commandPrefix} -c `} \
             ${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}`;
   }
 
