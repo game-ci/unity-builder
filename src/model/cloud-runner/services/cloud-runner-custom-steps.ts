@@ -33,7 +33,7 @@ export class CloudRunnerCustomSteps {
     RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
 
     const builtInCustomSteps: CustomStep[] = CloudRunnerCustomSteps.ParseSteps(
-      `- name: aws-upload
+      `- name: aws-s3-upload-build
   image: amazon/aws-cli
   commands: |
     printenv
@@ -41,6 +41,37 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/$CACHE_KEY/build-$BUILD_GUID.tar.lz4
+  secrets:
+  - name: awsAccessKeyId
+    value: ${process.env.AWS_ACCESS_KEY_ID || ``}
+  - name: awsSecretAccessKey
+    value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
+  - name: awsDefaultRegion
+    value: ${process.env.AWS_REGION || ``}
+- name: aws-s3-upload-cache
+  image: amazon/aws-cli
+  commands: |
+    printenv
+    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $AWS_DEFAULT_REGION --profile default
+    # upload from cache folder
+  secrets:
+  - name: awsAccessKeyId
+    value: ${process.env.AWS_ACCESS_KEY_ID || ``}
+  - name: awsSecretAccessKey
+    value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
+  - name: awsDefaultRegion
+    value: ${process.env.AWS_REGION || ``}
+- name: aws-s3-pull-cache
+  image: amazon/aws-cli
+  commands: |
+    printenv
+    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $AWS_DEFAULT_REGION --profile default
+    # determine most recent cache entry
+    # download to cache folder
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
