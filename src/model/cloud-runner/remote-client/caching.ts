@@ -53,7 +53,7 @@ export class Caching {
       }
       process.chdir(path.resolve(sourceFolder, '..'));
 
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      if (CloudRunner.buildParameters.cloudRunnerDebug) {
         CloudRunnerLogger.log(
           `Hashed cache folder ${await LfsHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
             sourceFolder,
@@ -65,7 +65,7 @@ export class Caching {
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
 
-      if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+      if (CloudRunner.buildParameters.cloudRunnerDebug) {
         // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
         await CloudRunnerSystem.Run(`tree -L 2`);
       }

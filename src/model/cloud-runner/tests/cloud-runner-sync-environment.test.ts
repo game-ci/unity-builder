@@ -28,7 +28,7 @@ describe('Cloud Runner Sync Environments', () => {
   const testSecretValue = 'testSecretValue';
   it('Responds', () => {});
 
-  if (CloudRunnerOptions.cloudRunnerTests) {
+  if (CloudRunnerOptions.cloudRunnerDebug) {
     it('All build parameters sent to cloud runner as env vars', async () => {
       // Setup parameters
       const buildParameter = await CreateParameters({

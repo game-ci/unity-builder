@@ -55,7 +55,7 @@ export class RemoteClient {
   }
 
   private static async sizeOfFolder(message: string, folder: string) {
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+    if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(`Size of ${message}`);
       await CloudRunnerSystem.Run(`du -sh ${folder}`);
     }
@@ -63,7 +63,7 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+    if (CloudRunner.buildParameters.cloudRunnerDebug) {
       await CloudRunnerSystem.Run(`tree -L 3 ${CloudRunnerFolders.repoPathAbsolute}/..`);
     }
 
@@ -108,7 +108,7 @@ export class RemoteClient {
       path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`),
       'utf8',
     );
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+    if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(manifest);
     }
     if (CloudRunner.buildParameters.useSharedLargePackages) {

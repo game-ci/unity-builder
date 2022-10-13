@@ -8,6 +8,7 @@ import path from 'path';
 import * as fs from 'fs';
 import CloudRunnerLogger from './cloud-runner-logger';
 import Input from '../../input';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
@@ -17,6 +18,9 @@ export class CloudRunnerCustomSteps {
       const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
+        if (!CloudRunnerOptions.customStepFiles.includes(file)) {
+          continue;
+        }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
         const fileContentsObject = CloudRunnerCustomSteps.ParseSteps(fileContents)[0];
         if (fileContentsObject.hook === hookLifecycle) {
@@ -27,6 +31,26 @@ export class CloudRunnerCustomSteps {
       RemoteClientLogger.log(`Failed Getting: ${hookLifecycle} \n ${JSON.stringify(error, undefined, 4)}`);
     }
     RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
+
+    const builtInCustomSteps: CustomStep[] = [
+      {
+        name: 'aws-upload',
+        commands: '',
+        secrets: [],
+        image: '',
+        hook: '',
+      },
+      {
+        name: 'steam-upload',
+        commands: '',
+        secrets: [],
+        image: '',
+        hook: '',
+      },
+    ].filter((x) => CloudRunnerOptions.customStepFiles.includes(x.name));
+    if (builtInCustomSteps.length > 0) {
+      results.push(...builtInCustomSteps);
+    }
 
     return results;
   }

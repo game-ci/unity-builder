@@ -60,7 +60,7 @@ class BuildParameters {
   public logId!: string;
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
-  public cloudRunnerIntegrationTests!: boolean;
+  public cloudRunnerDebug!: boolean;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
   public retainWorkspace!: boolean;
@@ -128,7 +128,7 @@ class BuildParameters {
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerIntegrationTests: CloudRunnerOptions.cloudRunnerTests,
+      cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsBaseStackName,

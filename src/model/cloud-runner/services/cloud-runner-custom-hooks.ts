@@ -1,7 +1,12 @@
-import { BuildParameters } from '../..';
+import { BuildParameters, Input } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunner from '../cloud-runner';
+import { RemoteClientLogger } from '../remote-client/remote-client-logger';
+import path from 'path';
+import CloudRunnerOptions from '../cloud-runner-options';
+import * as fs from 'fs';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
   // TODO also accept hooks as yaml files in the repo
@@ -10,7 +15,7 @@ export class CloudRunnerCustomHooks {
 
     return `echo "---"
       echo "start cloud runner init"
-      ${CloudRunner.buildParameters.cloudRunnerIntegrationTests ? '' : '#'} printenv
+      ${CloudRunner.buildParameters.cloudRunnerDebug ? '' : '#'} printenv
       echo "start of cloud runner job"
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${commands}
@@ -31,6 +36,70 @@ export class CloudRunnerCustomHooks {
     }
 
     return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
+  }
+
+  static GetCustomHooksFromFiles(hookLifecycle: string): Hook[] {
+    const results: Hook[] = [];
+    RemoteClientLogger.log(`GetCustomStepFiles: ${hookLifecycle}`);
+    try {
+      const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
+      const files = fs.readdirSync(gameCiCustomStepsPath);
+      for (const file of files) {
+        if (!CloudRunnerOptions.customStepFiles.includes(file)) {
+          continue;
+        }
+        const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
+        const fileContentsObject = CloudRunnerCustomHooks.ParseSteps(fileContents)[0];
+        if (fileContentsObject.hook.includes(hookLifecycle)) {
+          results.push(fileContentsObject);
+        }
+      }
+    } catch (error) {
+      RemoteClientLogger.log(`Failed Getting: ${hookLifecycle} \n ${JSON.stringify(error, undefined, 4)}`);
+    }
+    RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
+
+    return results;
+  }
+
+  private static ConvertYamlSecrets(object) {
+    if (object.secrets === undefined) {
+      object.secrets = [];
+
+      return;
+    }
+    object.secrets = object.secrets.map((x) => {
+      return {
+        ParameterKey: x.name,
+        EnvironmentVariable: Input.ToEnvVarFormat(x.name),
+        ParameterValue: x.value,
+      };
+    });
+  }
+
+  public static ParseSteps(steps: string): Hook[] {
+    if (steps === '') {
+      return [];
+    }
+
+    // if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
+
+    CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+
+    // }
+    const isArray = steps.replace(/\s/g, ``)[0] === `-`;
+    const object: Hook[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
+    for (const step of object) {
+      CloudRunnerCustomHooks.ConvertYamlSecrets(step);
+      if (step.secrets === undefined) {
+        step.secrets = [];
+      }
+    }
+    if (object === undefined) {
+      throw new Error(`Failed to parse ${steps}`);
+    }
+
+    return object;
   }
 
   public static getSecrets(hooks) {

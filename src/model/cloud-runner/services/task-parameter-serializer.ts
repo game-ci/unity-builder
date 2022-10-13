@@ -51,7 +51,7 @@ export class TaskParameterSerializer {
           // x.value = base64.encode(x.value);
           // }
 
-          if (buildParameters.cloudRunnerIntegrationTests) {
+          if (buildParameters.cloudRunnerDebug) {
             if (Number(x.name) === Number.NaN) {
               core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
             } else {

@@ -35,7 +35,7 @@ commands: echo "test"`;
     expect(stringObject2.length).toBe(1);
     expect(stringObject2[0].hook).toBe(`before`);
   });
-  if (CloudRunnerOptions.cloudRunnerTests && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
     it('Run build once - check for pre and post custom hooks run contents', async () => {
       const overrides = {
         versioning: 'None',

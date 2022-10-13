@@ -26,7 +26,7 @@ export class CustomWorkflow {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       let output = '';
-      if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
+      if (CloudRunner.buildParameters?.cloudRunnerDebug) {
         CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
       }
       for (const step of buildSteps) {

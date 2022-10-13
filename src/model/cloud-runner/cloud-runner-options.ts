@@ -4,6 +4,9 @@ import GitHub from '../github';
 const core = require('@actions/core');
 
 class CloudRunnerOptions {
+  // ### ### ###
+  // Input Handling
+  // ### ### ###
   public static getInput(query) {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
@@ -33,9 +36,29 @@ class CloudRunnerOptions {
     return;
   }
 
+  public static ToEnvVarFormat(input: string) {
+    if (input.toUpperCase() === input) {
+      return input;
+    }
+
+    return input
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .toUpperCase()
+      .replace(/ /g, '_');
+  }
+
+  // ### ### ###
+  // Provider parameters
+  // ### ### ###
+
   static get region(): string {
     return CloudRunnerOptions.getInput('region') || 'eu-west-2';
   }
+
+  // ### ### ###
+  // Git syncronization parameters
+  // ### ### ###
 
   static get githubRepo() {
     return CloudRunnerOptions.getInput('GITHUB_REPOSITORY') || CloudRunnerOptions.getInput('GITHUB_REPO') || undefined;
@@ -49,6 +72,19 @@ class CloudRunnerOptions {
       return '';
     }
   }
+
+  static get gitSha() {
+    if (CloudRunnerOptions.getInput(`GITHUB_SHA`)) {
+      return CloudRunnerOptions.getInput(`GITHUB_SHA`);
+    } else if (CloudRunnerOptions.getInput(`GitSHA`)) {
+      return CloudRunnerOptions.getInput(`GitSHA`);
+    }
+  }
+
+  // ### ### ###
+  // Cloud Runner parameters
+  // ### ### ###
+
   static get cloudRunnerBuilderPlatform() {
     const input = CloudRunnerOptions.getInput('cloudRunnerBuilderPlatform');
     if (input) {
@@ -61,60 +97,8 @@ class CloudRunnerOptions {
     return;
   }
 
-  static get gitSha() {
-    if (CloudRunnerOptions.getInput(`GITHUB_SHA`)) {
-      return CloudRunnerOptions.getInput(`GITHUB_SHA`);
-    } else if (CloudRunnerOptions.getInput(`GitSHA`)) {
-      return CloudRunnerOptions.getInput(`GitSHA`);
-    }
-  }
-
-  static get customStepFiles() {
-    return CloudRunnerOptions.getInput('customStepFiles') || '';
-  }
-
-  static get customHookFiles() {
-    return CloudRunnerOptions.getInput('customHookFiles') || '';
-  }
-
-  static get customJob() {
-    return CloudRunnerOptions.getInput('customJob') || '';
-  }
-
-  static customJobHooks() {
-    return CloudRunnerOptions.getInput('customJobHooks') || '';
-  }
-
-  static readInputFromOverrideList() {
-    return CloudRunnerOptions.getInput('readInputFromOverrideList') || '';
-  }
-
-  static readInputOverrideCommand() {
-    const value = CloudRunnerOptions.getInput('readInputOverrideCommand');
-
-    if (value === 'gcp-secret-manager') {
-      return 'gcloud secrets versions access 1 --secret="{0}"';
-    } else if (value === 'aws-secret-manager') {
-      return 'aws secretsmanager get-secret-value --secret-id {0}';
-    }
-
-    return value || '';
-  }
-
   static get cloudRunnerBranch() {
     return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
-  }
-
-  static get postBuildSteps() {
-    return CloudRunnerOptions.getInput('postBuildSteps') || '';
-  }
-
-  static get preBuildSteps() {
-    return CloudRunnerOptions.getInput('preBuildSteps') || '';
-  }
-
-  static get awsBaseStackName() {
-    return CloudRunnerOptions.getInput('awsBaseStackName') || 'game-ci';
   }
 
   static get cloudRunnerCluster() {
@@ -133,6 +117,70 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('cloudRunnerMemory');
   }
 
+  static get customJob() {
+    return CloudRunnerOptions.getInput('customJob') || '';
+  }
+
+  // ### ### ###
+  // Custom commands from files parameters
+  // ### ### ###
+
+  static get customStepFiles() {
+    return CloudRunnerOptions.getInput('customStepFiles')?.split(`,`) || [];
+  }
+
+  static get customHookFiles() {
+    return CloudRunnerOptions.getInput('customHookFiles')?.split(`,`) || [];
+  }
+
+  // ### ### ###
+  // Custom commands from yaml parameters
+  // ### ### ###
+
+  static customJobHooks() {
+    return CloudRunnerOptions.getInput('customJobHooks') || '';
+  }
+
+  static get postBuildSteps() {
+    return CloudRunnerOptions.getInput('postBuildSteps') || '';
+  }
+
+  static get preBuildSteps() {
+    return CloudRunnerOptions.getInput('preBuildSteps') || '';
+  }
+
+  // ### ### ###
+  // Input override handling
+  // ### ### ###
+
+  static readInputFromOverrideList() {
+    return CloudRunnerOptions.getInput('readInputFromOverrideList') || '';
+  }
+
+  static readInputOverrideCommand() {
+    const value = CloudRunnerOptions.getInput('readInputOverrideCommand');
+
+    if (value === 'gcp-secret-manager') {
+      return 'gcloud secrets versions access 1 --secret="{0}"';
+    } else if (value === 'aws-secret-manager') {
+      return 'aws secretsmanager get-secret-value --secret-id {0}';
+    }
+
+    return value || '';
+  }
+
+  // ### ### ###
+  // Aws
+  // ### ### ###
+
+  static get awsBaseStackName() {
+    return CloudRunnerOptions.getInput('awsBaseStackName') || 'game-ci';
+  }
+
+  // ### ### ###
+  // K8s
+  // ### ### ###
+
   static get kubeConfig() {
     return CloudRunnerOptions.getInput('kubeConfig') || '';
   }
@@ -149,26 +197,26 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('kubeStorageClass') || '';
   }
 
+  // ### ### ###
+  // Caching
+  // ### ### ###
+
   static get cacheKey(): string {
     return CloudRunnerOptions.getInput('cacheKey') || CloudRunnerOptions.branch;
   }
 
-  static get cloudRunnerTests(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerTests`) || false;
+  // ### ### ###
+  // Utility Parameters
+  // ### ### ###
+
+  static get cloudRunnerDebug(): boolean {
+    return CloudRunnerOptions.getInput(`cloudRunnerTests`) || CloudRunnerOptions.getInput(`cloudRunnerDebug`) || false;
   }
 
   static get watchCloudRunnerToEnd(): boolean {
     const input = CloudRunnerOptions.getInput(`watchToEnd`);
 
     return !input || input === 'true';
-  }
-
-  public static get retainWorkspaces(): boolean {
-    return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
-  }
-
-  static get retainWorkspacesMax(): number {
-    return Number(CloudRunnerOptions.getInput(`retainWorkspacesMax`)) || 5;
   }
 
   public static get useSharedLargePackages(): boolean {
@@ -179,16 +227,16 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`useLZ4Compression`) || true;
   }
 
-  public static ToEnvVarFormat(input: string) {
-    if (input.toUpperCase() === input) {
-      return input;
-    }
+  // ### ### ###
+  // Retained Workspace
+  // ### ### ###
 
-    return input
-      .replace(/([A-Z])/g, ' $1')
-      .trim()
-      .toUpperCase()
-      .replace(/ /g, '_');
+  public static get retainWorkspaces(): boolean {
+    return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
+  }
+
+  static get retainWorkspacesMax(): number {
+    return Number(CloudRunnerOptions.getInput(`retainWorkspacesMax`)) || 5;
   }
 }
 

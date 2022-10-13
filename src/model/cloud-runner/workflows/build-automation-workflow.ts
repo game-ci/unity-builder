@@ -97,7 +97,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `apt-get update > /dev/null
       ${
-        CloudRunner.buildParameters.cloudRunnerIntegrationTests
+        CloudRunner.buildParameters.cloudRunnerDebug
           ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
           : ``
       }
@@ -135,26 +135,26 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "game ci cloud runner clone"
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }
     ${retainedWorkspaceCommands}
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }
     ${cloneBuilderCommands}
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }
     echo "game ci cloud runner bootstrap"
     node ${builderPath} -m remote-cli-pre-build
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }`;
@@ -178,13 +178,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }
     node ${builderPath} -m remote-cli-post-build
     ${
-      CloudRunner.buildParameters.cloudRunnerIntegrationTests
+      CloudRunner.buildParameters.cloudRunnerDebug
         ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
         : ``
     }`;

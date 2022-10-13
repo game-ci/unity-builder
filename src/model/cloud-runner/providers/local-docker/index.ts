@@ -104,7 +104,7 @@ tree -L 3 ${sharedFolder}
       flag: 'w',
     });
 
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
+    if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(`Running local-docker: \n ${fileContents}`);
     }
 
