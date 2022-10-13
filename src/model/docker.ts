@@ -62,7 +62,7 @@ class Docker {
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
             ${entrypointBash ? `--entrypoint ${commandPrefix}` : ``} \
             ${image} \
-            ${!entrypointBash ? `${commandPrefix} -c ` : ``} \
+            ${`${commandPrefix} -c `} \
             "${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}"`;
   }
 
