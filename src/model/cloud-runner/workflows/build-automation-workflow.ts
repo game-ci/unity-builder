@@ -99,13 +99,16 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       apt-get install -y tar tree npm git-lfs jq git > /dev/null
       npm install -g n > /dev/null
       n stable > /dev/null
+      ${BuildAutomationWorkflow.TreeCommand}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${BuildAutomationWorkflow.TreeCommand}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.BuildCommands(builderPath)}
-      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
+      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${BuildAutomationWorkflow.TreeCommand}`;
   }
 
   private static setupCommands(builderPath) {
@@ -119,7 +122,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.repoPathAbsolute, `.git`),
-    )}" ]; then echo "Retained Workspace Already Exists!" && ${BuildAutomationWorkflow.TreeCommand} ; fi`;
+    )}" ]; then echo "Retained Workspace Already Exists!" ; fi`;
 
     const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
@@ -131,10 +134,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     echo "game ci cloud runner clone"
     ${retainedWorkspaceCommands}
     ${cloneBuilderCommands}
-    ${BuildAutomationWorkflow.TreeCommand}
     echo "game ci cloud runner bootstrap"
-    node ${builderPath} -m remote-cli-pre-build
-    ${BuildAutomationWorkflow.TreeCommand}`;
+    node ${builderPath} -m remote-cli-pre-build`;
   }
 
   private static BuildCommands(builderPath) {
@@ -153,9 +154,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     /entrypoint.sh
     echo "game ci cloud runner push library to cache"
     chmod +x ${builderPath}
-    ${BuildAutomationWorkflow.TreeCommand}
-    node ${builderPath} -m remote-cli-post-build
-    ${BuildAutomationWorkflow.TreeCommand}`;
+    node ${builderPath} -m remote-cli-post-build`;
   }
 
   private static get TreeCommand(): string {
