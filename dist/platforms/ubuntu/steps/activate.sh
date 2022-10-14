@@ -74,6 +74,23 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
 
+elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
+  #
+  # Custom Unity License Server
+  #
+  echo "Adding licensing server config"
+  #C:\Program Files\Unity\Hub\Editor\2022.1.16f1\Editor\Data\Resources\Licensing\Client
+
+  cat ../../../resources/services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
+  mv services-config.json /usr/share/unity3d/config/
+  cat /usr/share/unity3d/config/services-config.json
+  # Activate license
+  unity-editor \
+    -logFile /dev/stdout \
+    -quit
+
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
 else
   #
   # NO LICENSE ACTIVATION STRATEGY MATCHED
