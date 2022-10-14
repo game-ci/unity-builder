@@ -4,17 +4,8 @@
 echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
 pushd "$ACTIVATE_LICENSE_PATH"
 
-if [[ -n "$UNITY_SERIAL" ]]; then
-  #
-  # PROFESSIONAL (SERIAL) LICENSE MODE
-  #
-  # This will return the license that is currently in use.
-  #
-  unity-editor \
-    -logFile /dev/stdout \
-    -quit \
-    -returnlicense
-elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
+
+if [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
   #
   # Return any floating license used.
   #
@@ -27,7 +18,16 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
       echo "status $status"
       echo "Returned $token"
   done
-
+elif [[ -n "$UNITY_SERIAL" ]]; then
+  #
+  # PROFESSIONAL (SERIAL) LICENSE MODE
+  #
+  # This will return the license that is currently in use.
+  #
+  unity-editor \
+    -logFile /dev/stdout \
+    -quit \
+    -returnlicense
 fi
 
 # Return to previous working directory
