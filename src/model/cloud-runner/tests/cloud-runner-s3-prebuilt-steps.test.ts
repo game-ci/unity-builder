@@ -54,10 +54,6 @@ commands: echo "test"`;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
-      for (const customStep of overrides.customStepFiles.split(`,`)) {
-        const build2ContainsRunCustomStepFilesMessage = results2.includes(`RunCustomStepFiles: ${customStep}`);
-        expect(build2ContainsRunCustomStepFilesMessage).toBeTruthy();
-      }
       expect(build2ContainsBuildSucceeded).toBeTruthy();
     }, 10000000);
   }
