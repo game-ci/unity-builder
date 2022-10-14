@@ -1,4 +1,4 @@
-import SharedWorkspaceLocking from '../../cli/shared-workspace-locking';
+import SharedWorkspaceLocking from '../services/shared-workspace-locking';
 import { Cli } from '../../cli/cli';
 import setups from './cloud-runner-suite.test';
 import CloudRunnerLogger from '../services/cloud-runner-logger';

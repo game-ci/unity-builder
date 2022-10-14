@@ -7,7 +7,7 @@ import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
-import SharedWorkspaceLocking from '../../cli/shared-workspace-locking';
+import SharedWorkspaceLocking from '../services/shared-workspace-locking';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {

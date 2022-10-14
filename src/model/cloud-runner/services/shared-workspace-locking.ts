@@ -1,8 +1,8 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
+import { CloudRunnerSystem } from './cloud-runner-system';
 import * as fs from 'fs';
-import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
-import BuildParameters from '../build-parameters';
+import CloudRunnerLogger from './cloud-runner-logger';
+import CloudRunnerOptions from '../cloud-runner-options';
+import BuildParameters from '../../build-parameters';
 export class SharedWorkspaceLocking {
   private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
