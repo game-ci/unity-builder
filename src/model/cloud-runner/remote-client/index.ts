@@ -63,7 +63,7 @@ export class RemoteClient {
   }
 
   private static async cloneRepoWithoutLFSFiles() {
-    process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
+    process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     if (CloudRunnerOptions.cloudRunnerDebugTree) {
       await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     }
@@ -90,6 +90,7 @@ export class RemoteClient {
       await CloudRunnerSystem.Run(
         `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
       );
+      process.chdir(CloudRunnerFolders.repoPathAbsolute);
       await CloudRunnerSystem.Run(`git lfs install`);
       assert(fs.existsSync(`.git`), 'git folder exists');
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
