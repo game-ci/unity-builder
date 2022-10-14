@@ -14,7 +14,7 @@ export class CloudRunnerCustomHooks {
 
     return `echo "---"
       echo "start cloud runner init"
-      ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : ``}
+      ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
       echo "start of cloud runner job"
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${commands}

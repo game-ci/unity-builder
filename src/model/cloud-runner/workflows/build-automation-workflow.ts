@@ -117,7 +117,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     const TreeWorkspace = CloudRunnerOptions.cloudRunnerDebugTree
       ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-      : ``;
+      : `#`;
 
     const retainedWorkspaceCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
@@ -148,7 +148,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     const TreeWorkspace = CloudRunnerOptions.cloudRunnerDebugTree
       ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
-      : ``;
+      : `#`;
 
     return `echo "game ci cloud runner init"
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
