@@ -75,6 +75,7 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
     BUCKET1="game-ci-test-storage/$CACHE_KEY/Library"
+    aws s3 ls s3://$BUCKET1/ || exit 0
     OBJECT1="$(aws s3 ls $BUCKET1 --recursive | sort | tail -n 1 | awk '{print $4}')"
     aws s3 cp s3://$BUCKET1/$OBJECT1 /data/cache/$CACHE_KEY/Library/
     BUCKET2="game-ci-test-storage/$CACHE_KEY/lfs"
