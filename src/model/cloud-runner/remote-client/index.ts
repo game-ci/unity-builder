@@ -10,6 +10,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import YAML from 'yaml';
+import CloudRunnerOptions from '../cloud-runner-options';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
@@ -63,7 +64,7 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.repoPathAbsolute}`);
-    if (CloudRunner.buildParameters.cloudRunnerDebug) {
+    if (CloudRunnerOptions.cloudRunnerDebugTree) {
       await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     }
 
@@ -75,20 +76,19 @@ export class RemoteClient {
 
       return;
     }
+
+    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute) && !CloudRunner.buildParameters.retainWorkspace) {
+      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
+    }
+
     try {
       RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
       await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
       RemoteClientLogger.log(`Cloning the repository being built:`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
       await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
-      if (!CloudRunner.buildParameters.retainWorkspace) {
-        await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-      }
       await CloudRunnerSystem.Run(
-        `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.resolve(
-          `..`,
-          path.basename(CloudRunnerFolders.repoPathAbsolute),
-        )}`,
+        `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
       );
       await CloudRunnerSystem.Run(`git lfs install`);
       assert(fs.existsSync(`.git`), 'git folder exists');
