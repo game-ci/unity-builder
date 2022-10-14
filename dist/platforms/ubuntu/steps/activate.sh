@@ -79,10 +79,9 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   # Custom Unity License Server
   #
   echo "Adding licensing server config"
+  echo "folder $(pwd) action $(ACTION_FOLDER)"
 
-  popd # Jump out of activate license folder 
-  pwd
-  cat ../../../resources/services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
+  cat $ACTION_FOLDER/resources/services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
   mv services-config.json /usr/share/unity3d/config/
   cat /usr/share/unity3d/config/services-config.json
   # Activate license
