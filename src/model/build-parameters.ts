@@ -65,7 +65,7 @@ class BuildParameters {
   public isCliMode!: boolean;
   public retainWorkspace!: boolean;
   public useSharedLargePackages!: boolean;
-  public useLZ4Compression!: boolean;
+  public useLz4Compression!: boolean;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -142,7 +142,7 @@ class BuildParameters {
       cacheKey: CloudRunnerOptions.cacheKey,
       retainWorkspace: CloudRunnerOptions.retainWorkspaces,
       useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
-      useLZ4Compression: CloudRunnerOptions.useLZ4Compression,
+      useLz4Compression: CloudRunnerOptions.useLz4Compression,
     };
   }
 

@@ -8,6 +8,7 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from '../remote-client/caching';
 import { v4 as uuidv4 } from 'uuid';
 import GitHub from '../../github';
+import CloudRunnerOptions from '../cloud-runner-options';
 describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
   if (process.platform === 'linux') {
@@ -43,8 +44,11 @@ describe('Cloud Runner (Remote Client) Caching', () => {
         `${Cli.options.cacheKey}`,
       );
       await CloudRunnerSystem.Run(`du -h ${__dirname}`);
-      await CloudRunnerSystem.Run(`tree ${testFolder}`);
-      await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
+
+      if (CloudRunnerOptions.cloudRunnerDebugTree) {
+        await CloudRunnerSystem.Run(`tree ${testFolder}`);
+        await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
+      }
 
       // Compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(

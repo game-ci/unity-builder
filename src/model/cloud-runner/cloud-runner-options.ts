@@ -212,6 +212,12 @@ class CloudRunnerOptions {
   static get cloudRunnerDebug(): boolean {
     return CloudRunnerOptions.getInput(`cloudRunnerTests`) || CloudRunnerOptions.getInput(`cloudRunnerDebug`) || false;
   }
+  static get cloudRunnerDebugTree(): boolean {
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) || false;
+  }
+  static get cloudRunnerDebugEnv(): boolean {
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) || false;
+  }
 
   static get watchCloudRunnerToEnd(): boolean {
     const input = CloudRunnerOptions.getInput(`watchToEnd`);
@@ -223,8 +229,8 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`useSharedLargePackages`) || false;
   }
 
-  public static get useLZ4Compression(): boolean {
-    return CloudRunnerOptions.getInput(`useLZ4Compression`) || true;
+  public static get useLz4Compression(): boolean {
+    return CloudRunnerOptions.getInput(`useLz4Compression`) || true;
   }
 
   // ### ### ###

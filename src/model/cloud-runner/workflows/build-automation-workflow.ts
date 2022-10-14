@@ -115,7 +115,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
 
-    const TreeWorkspace = CloudRunner.buildParameters.cloudRunnerDebug
+    const TreeWorkspace = CloudRunnerOptions.cloudRunnerDebugTree
       ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
       : ``;
 
@@ -146,7 +146,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
-    const TreeWorkspace = CloudRunner.buildParameters.cloudRunnerDebug
+    const TreeWorkspace = CloudRunnerOptions.cloudRunnerDebugTree
       ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`
       : ``;
 

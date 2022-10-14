@@ -1,7 +1,6 @@
 import { BuildParameters, Input } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
-import CloudRunner from '../cloud-runner';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import CloudRunnerOptions from '../cloud-runner-options';
@@ -15,7 +14,7 @@ export class CloudRunnerCustomHooks {
 
     return `echo "---"
       echo "start cloud runner init"
-      ${CloudRunner.buildParameters.cloudRunnerDebug ? '' : '#'} printenv
+      ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : ``}
       echo "start of cloud runner job"
       ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${commands}
