@@ -79,9 +79,10 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   # Custom Unity License Server
   #
   echo "Adding licensing server config"
-  echo "folder $(pwd) action $(ACTION_FOLDER)"
-
-  cat $ACTION_FOLDER/resources/services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
+  pwd
+  pushd /resources
+  pwd
+  cat services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
   mv services-config.json /usr/share/unity3d/config/
   cat /usr/share/unity3d/config/services-config.json
   # Activate license
@@ -91,6 +92,7 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
 
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
+  popd
 else
   #
   # NO LICENSE ACTIVATION STRATEGY MATCHED
