@@ -131,10 +131,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     )}" ]; then echo "Builder Already Exists!"; else ${commands}; fi`;
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-    echo "game ci cloud runner clone"
+    echo "downloading game-ci..."
     ${retainedWorkspaceCommands}
     ${cloneBuilderCommands}
-    echo "game ci cloud runner bootstrap"
+    echo "bootstrap game ci cloud runner..."
     node ${builderPath} -m remote-cli-pre-build`;
   }
 
@@ -142,7 +142,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
-    return `echo "game ci cloud runner init"
+    return `echo "game ci cloud runner initalized"
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
@@ -150,9 +150,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
-    echo "game ci cloud runner start"
+    echo "game ci start"
     /entrypoint.sh
-    echo "game ci cloud runner push library to cache"
+    echo "game ci caching results"
     chmod +x ${builderPath}
     node ${builderPath} -m remote-cli-post-build`;
   }

@@ -6,7 +6,6 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -19,27 +18,8 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner pre-built S3 steps', () => {
   it('Responds', () => {});
   setups();
-  it('Check pre-built S3 steps', async () => {
-    const yamlString = `hook: before
-commands: echo "test"`;
-    const yamlString2 = `- hook: before
-  commands: echo "test"`;
-    const stringObject = CloudRunnerCustomSteps.ParseSteps(yamlString);
-    const stringObject2 = CloudRunnerCustomSteps.ParseSteps(yamlString2);
-
-    CloudRunnerLogger.log(yamlString);
-    CloudRunnerLogger.log(JSON.stringify(stringObject, undefined, 4));
-
-    expect(stringObject.length).toBe(1);
-    expect(stringObject[0].hook).toBe(`before`);
-    expect(stringObject2.length).toBe(1);
-    expect(stringObject2[0].hook).toBe(`before`);
-
-    const getCustomStepsFromFiles = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
-    CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
-  });
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
-    it('Run build once - check for pre and post custom hooks run contents', async () => {
+    it('Run build and prebuilt s3 cache pull, cache push and upload build', async () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',

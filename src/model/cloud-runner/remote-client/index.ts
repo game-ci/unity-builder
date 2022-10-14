@@ -69,6 +69,7 @@ export class RemoteClient {
     }
 
     if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
+      process.chdir(CloudRunnerFolders.repoPathAbsolute);
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
       );
@@ -144,7 +145,7 @@ export class RemoteClient {
       const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
       const fileContentsObject = YAML.parse(fileContents.toString());
       if (fileContentsObject.hook === hookLifecycle) {
-        RemoteClientLogger.log(`Active Hook File ${file} contents: ${fileContents}`);
+        RemoteClientLogger.log(`Active Hook File ${file} \n \n file contents: \n ${fileContents}`);
         await CloudRunnerSystem.Run(fileContentsObject.commands);
       }
     }
