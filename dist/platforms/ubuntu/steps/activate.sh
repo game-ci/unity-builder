@@ -82,7 +82,10 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   pwd
   pushd /resources
   pwd
-  cat services-config.json.template | tr -d '\r' | sed -e "s/%URL%/$UNITY_LICENSING_SERVER/" > services-config.json
+  cat services-config.json.template
+  echo "s/%URL%/$UNITY_LICENSING_SERVER/"
+  cat services-config.json.template | tr -d '\r' | awk "{sub(/%URL%/,\"$UNITY_LICENSING_SERVER\")}1" > services-config.json
+  cat services-config.json
   mv services-config.json /usr/share/unity3d/config/
   cat /usr/share/unity3d/config/services-config.json
   # Activate license
