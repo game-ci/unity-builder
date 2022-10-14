@@ -186,17 +186,7 @@ export class SharedWorkspaceLocking {
   }
 
   private static async ReadLines(command: string): Promise<string[]> {
-    const result = await CloudRunnerSystem.Run(command, false, true);
-
-    return result
-      .split(`\n`)
-      .map((x) => x.replace(`\r`, ``))
-      .filter((x) => x !== ``)
-      .map((x) => {
-        const lineValues = x.split(` `);
-
-        return lineValues[lineValues.length - 1];
-      });
+    return CloudRunnerSystem.RunAndReadLines(command);
   }
 }
 

@@ -6,6 +6,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
+import { CloudRunnerSystem } from '../services/cloud-runner-system';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -35,6 +36,11 @@ describe('Cloud Runner pre-built S3 steps', () => {
 
       const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
       expect(build2ContainsBuildSucceeded).toBeTruthy();
+
+      const results = await CloudRunnerSystem.RunAndReadLines(
+        `aws ls s3://game-ci-test-storage/${buildParameter2.cacheKey}/`,
+      );
+      CloudRunnerLogger.log(results.join(`,`));
     }, 10000000);
   }
 });
