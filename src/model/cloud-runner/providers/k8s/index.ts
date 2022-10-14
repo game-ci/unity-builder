@@ -1,5 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
-import { BuildParameters } from '../../..';
+import { BuildParameters, CloudRunner } from '../../..';
 import * as core from '@actions/core';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
@@ -64,9 +64,13 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.pvcName = `unity-builder-pvc-${buildGuid}`;
-      this.cleanupCronJobName = `unity-builder-cronjob-${buildGuid}`;
-      this.serviceAccountName = `service-account-${buildGuid}`;
+      const id =
+        buildParameters.retainWorkspace && CloudRunner.lockedWorkspace
+          ? CloudRunner.lockedWorkspace
+          : buildParameters.buildGuid;
+      this.pvcName = `unity-builder-pvc-${id}`;
+      this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
+      this.serviceAccountName = `service-account-${id}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,
