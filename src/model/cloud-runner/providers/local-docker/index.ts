@@ -90,15 +90,11 @@ class LocalDockerCloudRunner implements ProviderInterface {
     const fileContents = `#!/bin/bash
 set -e
 
-apt-get update > /dev/null && apt-get install -y tree> /dev/null
 mkdir -p /github/workspace/cloud-runner-cache
 mkdir -p /data/cache
 cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
-tree -L 3 ${sharedFolder}
 ${commands}
 cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
-tree -L 2 /github/workspace/cloud-runner-cache
-tree -L 3 ${sharedFolder}
     `;
     writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {
       flag: 'w',
