@@ -69,11 +69,12 @@ export class SharedWorkspaceLocking {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
       return false;
     }
+    CloudRunnerLogger.log(`Checking has workspace ${workspace} was locked`);
+    const locks = await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext);
+    const includesRunLock = locks.filter((x) => x.includes(runId)).length > 0;
+    CloudRunnerLogger.log(`Locks ${locks}, includes ${includesRunLock}`);
 
-    return (
-      (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext)).filter((x) => x.includes(runId))
-        .length > 0
-    );
+    return includesRunLock;
   }
 
   public static async GetFreeWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
@@ -122,6 +123,12 @@ export class SharedWorkspaceLocking {
       true,
     );
     fs.rmSync(file);
+
+    const workspaces = await SharedWorkspaceLocking.ReadLines(
+      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
+    );
+
+    CloudRunnerLogger.log(`All workspaces ${workspaces}`);
 
     return workspace;
   }
