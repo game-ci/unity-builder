@@ -6,7 +6,6 @@ import { CustomWorkflow } from '../workflows/custom-workflow';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import * as fs from 'fs';
-import CloudRunnerLogger from './cloud-runner-logger';
 import Input from '../../input';
 import CloudRunnerOptions from '../cloud-runner-options';
 
@@ -38,7 +37,6 @@ export class CloudRunnerCustomSteps {
   image: amazon/aws-cli
   hook: after
   commands: |
-    ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
@@ -54,7 +52,6 @@ export class CloudRunnerCustomSteps {
   image: amazon/aws-cli
   hook: after
   commands: |
-    ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
@@ -70,7 +67,6 @@ export class CloudRunnerCustomSteps {
   image: amazon/aws-cli
   hook: before
   commands: |
-    ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
@@ -94,8 +90,7 @@ export class CloudRunnerCustomSteps {
   commands: |
     apt-get update > /dev/null
     apt-get install -y tree > /dev/null
-    ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
-    tree -L 3 /data/cache
+    ${CloudRunnerOptions.cloudRunnerDebugTree ? `tree -L 3 /data/cache` : `#`}
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -133,7 +128,7 @@ export class CloudRunnerCustomSteps {
 
     // if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
 
-    CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+    // CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
 
     // }
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;
