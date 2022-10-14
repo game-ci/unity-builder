@@ -54,8 +54,6 @@ commands: echo "test"`;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
-      const build2ContainsPreBuildHookMessage = results2.includes('RunCustomHookFiles: before-build');
-      const build2ContainsPostBuildHookMessage = results2.includes('RunCustomHookFiles: after-build');
       const build2ContainsPreBuildHookRunMessage = results2.includes('before-build hook test!');
       const build2ContainsPostBuildHookRunMessage = results2.includes('after-build hook test!');
 
@@ -63,8 +61,6 @@ commands: echo "test"`;
       const build2ContainsPostBuildStepMessage = results2.includes('after-build step test!');
 
       expect(build2ContainsBuildSucceeded).toBeTruthy();
-      expect(build2ContainsPreBuildHookMessage).toBeTruthy();
-      expect(build2ContainsPostBuildHookMessage).toBeTruthy();
       expect(build2ContainsPreBuildHookRunMessage).toBeTruthy();
       expect(build2ContainsPostBuildHookRunMessage).toBeTruthy();
       expect(build2ContainsPreBuildStepMessage).toBeTruthy();
