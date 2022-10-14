@@ -86,7 +86,7 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   echo "s/%URL%/$UNITY_LICENSING_SERVER/"
   cat services-config.json.template | tr -d '\r' | awk "{sub(/%URL%/,\"$UNITY_LICENSING_SERVER\")}1" > services-config.json
   cat services-config.json
-  mkdir /usr/share/unity3d/config/
+  mkdir -p /usr/share/unity3d/config/
   mv services-config.json /usr/share/unity3d/config/
   cat /usr/share/unity3d/config/services-config.json
   # Activate license
