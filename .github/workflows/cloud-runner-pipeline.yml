@@ -170,7 +170,7 @@ jobs:
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           customStepFiles: aws-s3-upload-build
       - run: |
-          aws s3 cp s3://game-ci-test-storage/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
+          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
         if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
       - run: yarn run cli -m aws-list-all
