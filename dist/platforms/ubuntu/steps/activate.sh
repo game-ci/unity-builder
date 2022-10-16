@@ -79,21 +79,18 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   # Custom Unity License Server
   #
   echo "Adding licensing server config"
-  pwd
   pushd /resources
-  pwd
-  cat services-config.json.template
-  echo "s/%URL%/$UNITY_LICENSING_SERVER/"
   cat services-config.json.template | tr -d '\r' | awk "{sub(/%URL%/,\"$UNITY_LICENSING_SERVER\")}1" > services-config.json
-  cat services-config.json
   mkdir -p /usr/share/unity3d/config/
   mv services-config.json /usr/share/unity3d/config/
-  cat /usr/share/unity3d/config/services-config.json
   # Activate license
-  unity-editor \
-    -logFile /dev/stdout \
-    -quit
+  /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --acquire-floating > license.txt
+  # shellcheck disable=SC2002
+  export FLOATING_LICENSE
+  FLOATING_LICENSE=$(grep -oP '\".*?\"' < license.txt | tr -d '"' | sed -n 2p)
+  FLOATING_LICENSE_TIMEOUT=$(grep -oP '\".*?\"' < license.txt | tr -d '"' | sed -n 4p)
 
+  echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
   popd

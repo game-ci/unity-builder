@@ -9,15 +9,8 @@ if [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
   #
   # Return any floating license used.
   #
-  echo "Returning floating licenses"
-  for file in ~/.config/unity3d/Unity/licenses/*.xml; do
-      echo "$file"
-      token=$(basename $file .xml)
-      /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --return-floating $token
-      status=$?
-      echo "status $status"
-      echo "Returned $token"
-  done
+  echo "Returning floating license: \"$FLOATING_LICENSE\""
+  /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --return-floating "$FLOATING_LICENSE"
 elif [[ -n "$UNITY_SERIAL" ]]; then
   #
   # PROFESSIONAL (SERIAL) LICENSE MODE
