@@ -41,14 +41,14 @@ export class CloudRunnerCustomHooks {
     const results: Hook[] = [];
     RemoteClientLogger.log(`GetCustomStepFiles: ${hookLifecycle}`);
     try {
-      const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
+      const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `hooks`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
         if (!CloudRunnerOptions.customHookFiles.includes(file.replace(`.yaml`, ``))) {
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
-        const fileContentsObject = CloudRunnerCustomHooks.ParseSteps(fileContents)[0];
+        const fileContentsObject = CloudRunnerCustomHooks.ParseHooks(fileContents)[0];
         if (fileContentsObject.hook.includes(hookLifecycle)) {
           results.push(fileContentsObject);
         }
@@ -76,22 +76,22 @@ export class CloudRunnerCustomHooks {
     });
   }
 
-  public static ParseSteps(steps: string): Hook[] {
+  public static ParseHooks(steps: string): Hook[] {
     if (steps === '') {
       return [];
     }
 
     // if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
 
-    CloudRunnerLogger.log(`Parsing build steps: ${steps}`);
+    CloudRunnerLogger.log(`Parsing build hooks: ${steps}`);
 
     // }
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;
     const object: Hook[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
-    for (const step of object) {
-      CloudRunnerCustomHooks.ConvertYamlSecrets(step);
-      if (step.secrets === undefined) {
-        step.secrets = [];
+    for (const hook of object) {
+      CloudRunnerCustomHooks.ConvertYamlSecrets(hook);
+      if (hook.secrets === undefined) {
+        hook.secrets = [];
       }
     }
     if (object === undefined) {

@@ -68,7 +68,10 @@ export class RemoteClient {
       await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     }
 
-    if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
+    if (
+      CloudRunner.buildParameters.retainWorkspace &&
+      fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+    ) {
       process.chdir(CloudRunnerFolders.repoPathAbsolute);
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
@@ -78,7 +81,7 @@ export class RemoteClient {
       return;
     }
 
-    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute) && !CloudRunner.buildParameters.retainWorkspace) {
+    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
       await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }
 
