@@ -99,7 +99,6 @@ class Kubernetes implements ProviderInterface {
       this.secretName = `build-credentials-${buildGuid}`;
       this.jobName = `unity-builder-job-${buildGuid}`;
       this.containerName = `main`;
-      CloudRunnerLogger.log(`Creating build Secret ${JSON.stringify(this.secretName, undefined, 4)}`);
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       const jobSpec = KubernetesJobSpecFactory.getJobSpec(
         commands,
@@ -115,11 +114,10 @@ class Kubernetes implements ProviderInterface {
         this.jobName,
         k8s,
       );
-      CloudRunnerLogger.log(`Creating build job ${JSON.stringify(jobSpec, undefined, 4)}`);
+      CloudRunnerLogger.log(`Build job secret created ${JSON.stringify(this.secretName, undefined, 4)}`);
 
-      // Run
       const jobResult = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      CloudRunnerLogger.log(`Created build job ${JSON.stringify(jobResult.body.metadata, undefined, 4)}`);
+      CloudRunnerLogger.log(`Build job created ${JSON.stringify(jobResult.body.metadata, undefined, 4)}`);
 
       await new Promise((promise) => setTimeout(promise, 5000));
       CloudRunnerLogger.log('Job created');
