@@ -83,12 +83,12 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   cat services-config.json.template | tr -d '\r' | awk "{sub(/%URL%/,\"$UNITY_LICENSING_SERVER\")}1" > services-config.json
   mkdir -p /usr/share/unity3d/config/
   mv services-config.json /usr/share/unity3d/config/
-  # Activate license
-  /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --acquire-floating > license.txt
-  # shellcheck disable=SC2002
+
+  /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
+  PARSEDFILE=$(grep -oP '\".*?\"' < license.txt | tr -d '"')
   export FLOATING_LICENSE
-  FLOATING_LICENSE=$(grep -oP '\".*?\"' < license.txt | tr -d '"' | sed -n 2p)
-  FLOATING_LICENSE_TIMEOUT=$(grep -oP '\".*?\"' < license.txt | tr -d '"' | sed -n 4p)
+  FLOATING_LICENSE=$("$PARSEDFILE" | sed -n 2p)
+  FLOATING_LICENSE_TIMEOUT=$("$PARSEDFILE" | sed -n 4p)
 
   echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
   # Store the exit code from the verify command
