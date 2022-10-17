@@ -18,7 +18,7 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner Retain Workspace', () => {
   it('Responds', () => {});
   setups();
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug) {
     it('Run one build it should not already be retained, run subsequent build which should use retained workspace', async () => {
       const overrides = {
         versioning: 'None',

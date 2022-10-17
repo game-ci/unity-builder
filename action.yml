@@ -9,7 +9,8 @@ inputs:
   unityVersion:
     required: false
     default: 'auto'
-    description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
+    description:
+      'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
   customImage:
     required: false
     default: ''
@@ -85,7 +86,8 @@ inputs:
   chownFilesTo:
     required: false
     default: ''
-    description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
+    description:
+      'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
   allowDirtyBuild:
     required: false
     default: ''
@@ -93,19 +95,26 @@ inputs:
   postBuildSteps:
     required: false
     default: ''
-    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
+    description:
+      'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
   preBuildSteps:
     required: false
     default: ''
-    description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+    description:
+      'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image,
+      secrets (name, value object array), command line string)'
   customStepFiles:
     required: false
     default: ''
-    description: 'Specify the names (by file name) of custom steps to run before or after cloud runner jobs, must match a yaml step file inside your repo in the folder .game-ci/steps/'
+    description:
+      'Specify the names (by file name) of custom steps to run before or after cloud runner jobs, must match a yaml step
+      file inside your repo in the folder .game-ci/steps/'
   customHookFiles:
     required: false
     default: ''
-    description: 'Specify the names (by file name) of custom hooks to run before or after cloud runner jobs, must match a yaml step file inside your repo in the folder .game-ci/hooks/'
+    description:
+      'Specify the names (by file name) of custom hooks to run before or after cloud runner jobs, must match a yaml step
+      file inside your repo in the folder .game-ci/hooks/'
   customJobHooks:
     required: false
     default: ''
@@ -113,7 +122,9 @@ inputs:
   customJob:
     required: false
     default: ''
-    description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
+    description:
+      'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image,
+      secrets (name, value object array), command line string)'
   awsBaseStackName:
     default: 'game-ci'
     required: false
@@ -121,7 +132,8 @@ inputs:
   cloudRunnerCluster:
     default: 'local'
     required: false
-    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+    description:
+      'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
   cloudRunnerCpu:
     default: ''
     required: false
@@ -137,11 +149,14 @@ inputs:
   readInputOverrideCommand:
     default: ''
     required: false
-    description: 'Extend game ci by specifying a command to execute to pull input from external source e.g cloud provider secret managers'
+    description:
+      'Extend game ci by specifying a command to execute to pull input from external source e.g cloud provider secret
+      managers'
   kubeConfig:
     default: ''
     required: false
-    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+    description:
+      'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
   kubeVolume:
     default: ''
     required: false
