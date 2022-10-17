@@ -99,28 +99,8 @@ class Kubernetes implements ProviderInterface {
       this.secretName = `build-credentials-${buildGuid}`;
       this.jobName = `unity-builder-job-${buildGuid}`;
       this.containerName = `main`;
-      await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      const jobSpec = KubernetesJobSpecFactory.getJobSpec(
-        commands,
-        image,
-        mountdir,
-        workingdir,
-        environment,
-        secrets,
-        this.buildGuid,
-        this.buildParameters,
-        this.secretName,
-        this.pvcName,
-        this.jobName,
-        k8s,
-      );
-      CloudRunnerLogger.log(`Build job secret created ${JSON.stringify(this.secretName, undefined, 4)}`);
-
-      const jobResult = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      CloudRunnerLogger.log(`Build job created ${JSON.stringify(jobResult.body.metadata, undefined, 4)}`);
-
-      await new Promise((promise) => setTimeout(promise, 5000));
-      CloudRunnerLogger.log('Job created');
+      await this.createSecret(secrets);
+      await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
       this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
       CloudRunnerLogger.log('Watching pod until running');
       let output = '';
@@ -155,6 +135,39 @@ class Kubernetes implements ProviderInterface {
       await this.cleanupTaskResources();
       throw error;
     }
+  }
+
+  private async createSecret(secrets: CloudRunnerSecret[]) {
+    await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
+    CloudRunnerLogger.log(`Secret created`);
+  }
+
+  private async createNamespacedJob(
+    commands: string,
+    image: string,
+    mountdir: string,
+    workingdir: string,
+    environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
+  ) {
+    const jobSpec = KubernetesJobSpecFactory.getJobSpec(
+      commands,
+      image,
+      mountdir,
+      workingdir,
+      environment,
+      secrets,
+      this.buildGuid,
+      this.buildParameters,
+      this.secretName,
+      this.pvcName,
+      this.jobName,
+      k8s,
+    );
+    await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+    CloudRunnerLogger.log(`Build job created`);
+    await new Promise((promise) => setTimeout(promise, 5000));
+    CloudRunnerLogger.log('Job created');
   }
 
   setPodNameAndContainerName(pod: k8s.V1Pod) {
