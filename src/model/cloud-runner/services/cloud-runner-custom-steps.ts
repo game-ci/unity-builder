@@ -72,14 +72,14 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    BUCKET1="game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/Library"
+    BUCKET1="game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/Library/"
     aws s3 ls $BUCKET1 || true
     OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET1/$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
-    BUCKET2="game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/lfs"
+    aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
+    BUCKET2="game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/lfs/"
     aws s3 ls $BUCKET2 || true
     OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET2/$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+    aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
