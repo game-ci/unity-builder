@@ -1,5 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
-import { BuildParameters, CloudRunner } from '../../..';
+import { BuildParameters } from '../../..';
 import * as core from '@actions/core';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
@@ -12,6 +12,7 @@ import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
+import CloudRunner from '../../cloud-runner';
 
 class Kubernetes implements ProviderInterface {
   private kubeConfig: k8s.KubeConfig;

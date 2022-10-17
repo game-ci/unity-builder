@@ -7,7 +7,6 @@ import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
-import SharedWorkspaceLocking from '../services/shared-workspace-locking';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
@@ -23,24 +22,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     // TODO accept post and pre build steps as yaml files in the repo
     try {
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
-
-      if (CloudRunnerOptions.retainWorkspaces) {
-        const workspace =
-          (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
-            `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
-            CloudRunner.buildParameters.buildGuid,
-            CloudRunner.buildParameters,
-          )) || CloudRunner.buildParameters.buildGuid;
-
-        process.env.LOCKED_WORKSPACE = workspace;
-        CloudRunner.lockedWorkspace = workspace;
-
-        CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
-        cloudRunnerStepState.environment = [
-          ...cloudRunnerStepState.environment,
-          { name: `LOCKED_WORKSPACE`, value: workspace },
-        ];
-      }
 
       let output = '';
 
@@ -66,15 +47,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
       output += await CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
-
-      if (CloudRunnerOptions.retainWorkspaces) {
-        await SharedWorkspaceLocking.ReleaseWorkspace(
-          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
-          CloudRunner.buildParameters.buildGuid,
-          CloudRunner.buildParameters,
-        );
-        CloudRunner.lockedWorkspace = undefined;
-      }
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
 

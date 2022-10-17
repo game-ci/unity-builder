@@ -14,6 +14,8 @@ import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/local-docker';
 import GitHub from '../github';
+import CloudRunnerOptions from './cloud-runner-options';
+import SharedWorkspaceLocking from './services/shared-workspace-locking';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -64,6 +66,23 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
+      if (CloudRunnerOptions.retainWorkspaces) {
+        const workspace =
+          (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
+            `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+            CloudRunner.buildParameters.buildGuid,
+            CloudRunner.buildParameters,
+          )) || CloudRunner.buildParameters.buildGuid;
+
+        process.env.LOCKED_WORKSPACE = workspace;
+        CloudRunner.lockedWorkspace = workspace;
+
+        CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
+        CloudRunner.cloudRunnerEnvironmentVariables = [
+          ...CloudRunner.cloudRunnerEnvironmentVariables,
+          { name: `LOCKED_WORKSPACE`, value: workspace },
+        ];
+      }
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
       await CloudRunner.Provider.setup(
         CloudRunner.buildParameters.buildGuid,
@@ -84,6 +103,15 @@ class CloudRunner {
       );
       CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+
+      if (CloudRunnerOptions.retainWorkspaces) {
+        await SharedWorkspaceLocking.ReleaseWorkspace(
+          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+          CloudRunner.buildParameters.buildGuid,
+          CloudRunner.buildParameters,
+        );
+        CloudRunner.lockedWorkspace = undefined;
+      }
 
       return output;
     } catch (error) {
