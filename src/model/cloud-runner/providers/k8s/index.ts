@@ -71,7 +71,7 @@ class Kubernetes implements ProviderInterface {
           : buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
-      this.serviceAccountName = `service-account-${id}`;
+      this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         buildParameters,
         this.pvcName,
