@@ -3,8 +3,8 @@ import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import YAML from 'yaml';
 import { IncomingMessage } from 'http';
+import GitHub from '../../../github';
 
 class KubernetesStorage {
   public static async createPersistentVolumeClaim(
@@ -13,8 +13,8 @@ class KubernetesStorage {
     kubeClient: k8s.CoreV1Api,
     namespace: string,
   ) {
-    if (buildParameters.kubeVolume) {
-      CloudRunnerLogger.log(buildParameters.kubeVolume);
+    if (buildParameters.kubeVolume !== ``) {
+      CloudRunnerLogger.log(`Kube Volume was input was set ${buildParameters.kubeVolume} overriding ${pvcName}`);
       pvcName = buildParameters.kubeVolume;
 
       return;
@@ -26,7 +26,7 @@ class KubernetesStorage {
     CloudRunnerLogger.log(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
       CloudRunnerLogger.log(`pvc ${pvcName} already exists`);
-      if (!buildParameters.isCliMode) {
+      if (GitHub.githubInputEnabled) {
         core.setOutput('volume', pvcName);
       }
 
@@ -95,9 +95,6 @@ class KubernetesStorage {
         },
       },
     };
-    if (process.env.K8s_STORAGE_PVC_SPEC) {
-      YAML.parse(process.env.K8s_STORAGE_PVC_SPEC);
-    }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
 
     return result;
