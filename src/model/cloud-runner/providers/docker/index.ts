@@ -4,7 +4,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
-import { Action } from '../../../../model';
+import { Action } from '../../..';
 import { writeFileSync } from 'fs';
 import CloudRunner from '../../cloud-runner';
 
@@ -25,6 +25,12 @@ class LocalDockerCloudRunner implements ProviderInterface {
     filter: string,
     // eslint-disable-next-line no-unused-vars
     previewOnly: boolean,
+    // eslint-disable-next-line no-unused-vars
+    olderThan: Number,
+    // eslint-disable-next-line no-unused-vars
+    fullCache: boolean,
+    // eslint-disable-next-line no-unused-vars
+    baseDependencies: boolean,
   ): Promise<string> {
     throw new Error('Method not implemented.');
   }

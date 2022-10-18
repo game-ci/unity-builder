@@ -45,6 +45,12 @@ export interface ProviderInterface {
     filter: string,
     // eslint-disable-next-line no-unused-vars
     previewOnly: boolean,
+    // eslint-disable-next-line no-unused-vars
+    olderThan: Number,
+    // eslint-disable-next-line no-unused-vars
+    fullCache: boolean,
+    // eslint-disable-next-line no-unused-vars
+    baseDependencies: boolean,
   ): Promise<string>;
   inspect(): Promise<string>;
   watch(): Promise<string>;

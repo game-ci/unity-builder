@@ -12,7 +12,7 @@ import { ProviderInterface } from './providers/provider-interface';
 import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
-import LocalDockerCloudRunner from './providers/local-docker';
+import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
 
