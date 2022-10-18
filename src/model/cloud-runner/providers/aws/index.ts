@@ -20,6 +20,12 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
+  listWorkflow(): Promise<string[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
   async inspectResources(): Promise<string> {
     return await TaskService.awsDescribeJob('');
   }
@@ -60,7 +66,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     await AwsCliCommands.awsListTasks();
     await AwsCliCommands.awsListLogGroups();
 
-    return '';
+    return [];
   }
 
   async cleanupWorkflow(

@@ -111,6 +111,60 @@ export class Cli {
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
 
+  @CliFunction(`gc`, `runs garbage collection`)
+  public static async GarbageCollect(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.garbageCollect(``, false, 0, false, false);
+  }
+
+  @CliFunction(`list-resources`, `runs garbage collection`)
+  public static async ListResources(): Promise<string[]> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.listResources();
+  }
+
+  @CliFunction(`list-worfklow`, `runs garbage collection`)
+  public static async ListWorfklow(): Promise<string[]> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.listWorkflow();
+  }
+
+  @CliFunction(`watch`, `runs garbage collection`)
+  public static async Watch(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.watchWorkflow();
+  }
+
+  @CliFunction(`inspect-resource`, `runs garbage collection`)
+  public static async InspectResource(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.inspectResources();
+  }
+
+  @CliFunction(`inspect-workflow`, `runs garbage collection`)
+  public static async InspectWorkflow(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
+
+    return await CloudRunner.Provider.inspectWorkflow();
+  }
+
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async PostCLIBuild(): Promise<string> {
     core.info(`Running POST build tasks`);

@@ -11,13 +11,19 @@ import CloudRunner from '../../cloud-runner';
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
 
+  listWorkflow(): Promise<string[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
   inspectResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  listResources(): Promise<string> {
+  listResources(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(

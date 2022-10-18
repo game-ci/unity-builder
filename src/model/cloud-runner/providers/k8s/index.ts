@@ -39,13 +39,19 @@ class Kubernetes implements ProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
+  listWorkflow(): Promise<string[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
   inspectResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  listResources(): Promise<string> {
+  listResources(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(
