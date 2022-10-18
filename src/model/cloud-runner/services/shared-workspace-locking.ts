@@ -6,6 +6,10 @@ import BuildParameters from '../../build-parameters';
 export class SharedWorkspaceLocking {
   private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
+      return [];
+    }
+
     return (
       await SharedWorkspaceLocking.ReadLines(
         `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
@@ -13,11 +17,9 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    const results = (
-      await SharedWorkspaceLocking.ReadLines(
-        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}`,
-      )
-    ).map((x) => x.replace(`/`, ``));
+    const results = (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`)).map(
+      (x) => x.replace(`/`, ``),
+    );
 
     return results.includes(buildParametersContext.cacheKey);
   }
