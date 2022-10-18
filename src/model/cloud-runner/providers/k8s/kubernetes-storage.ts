@@ -19,10 +19,10 @@ class KubernetesStorage {
 
       return;
     }
-    const pvcList = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items.map(
-      (x) => x.metadata?.name,
-    );
+    const allPvc = (await kubeClient.listNamespacedPersistentVolumeClaim(namespace)).body.items;
+    const pvcList = allPvc.map((x) => x.metadata?.name);
     CloudRunnerLogger.log(`Current PVCs in namespace ${namespace}`);
+    CloudRunnerLogger.log(JSON.stringify(allPvc, undefined, 4));
     CloudRunnerLogger.log(JSON.stringify(pvcList, undefined, 4));
     if (pvcList.includes(pvcName)) {
       CloudRunnerLogger.log(`pvc ${pvcName} already exists`);

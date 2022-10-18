@@ -65,10 +65,7 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      const id =
-        buildParameters.retainWorkspace && CloudRunner.lockedWorkspace
-          ? CloudRunner.lockedWorkspace
-          : buildParameters.buildGuid;
+      const id = buildParameters.retainWorkspace ? CloudRunner.lockedWorkspace : buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
       this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
@@ -211,15 +208,16 @@ class Kubernetes implements ProviderInterface {
   }
 
   async cleanup(
-    // eslint-disable-next-line no-unused-vars
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
+    if (buildParameters.retainWorkspace) {
+      return;
+    }
     CloudRunnerLogger.log(`deleting PVC`);
 
     try {
