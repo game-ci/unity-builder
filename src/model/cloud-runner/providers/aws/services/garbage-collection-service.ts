@@ -1,26 +1,10 @@
 import AWS from 'aws-sdk';
-import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { TaskService } from './task-service';
 import { TertiaryResourcesService } from './tertiary-resources-service';
 
 export class GarbageCollectionService {
-  @CliFunction(`aws-garbage-collect-list`, `garbage collect aws resources not in use !WIP!`)
-  static async garbageCollectAws() {
-    await GarbageCollectionService.cleanup(false);
-  }
-  @CliFunction(`aws-garbage-collect-all`, `garbage collect aws resources regardless of whether they are in use`)
-  static async garbageCollectAwsAll() {
-    await GarbageCollectionService.cleanup(true);
-  }
-  @CliFunction(
-    `aws-garbage-collect-all-1d-older`,
-    `garbage collect aws resources created more than 1d ago (ignore if they are in use)`,
-  )
-  static async garbageCollectAwsAllOlderThanOneDay() {
-    await GarbageCollectionService.cleanup(true, true);
-  }
   static isOlderThan1day(date: any) {
     const ageDate = new Date(date.getTime() - Date.now());
 
