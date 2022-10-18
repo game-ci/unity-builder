@@ -95,7 +95,7 @@ mkdir -p /data/cache
 cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
 ${commands}
 cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
-    `;
+`;
     writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {
       flag: 'w',
     });
