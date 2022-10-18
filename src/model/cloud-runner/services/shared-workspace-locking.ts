@@ -45,17 +45,14 @@ export class SharedWorkspaceLocking {
       return;
     }
 
-    CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace`);
+    const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+    CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
+    for (const element of workspaces) {
+      const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
+      CloudRunnerLogger.log(`run agent ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-    if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
-      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
-      for (const element of workspaces) {
-        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-        CloudRunnerLogger.log(`run agent ${runId} try lock workspace: ${element} result: ${lockResult}`);
-
-        if (lockResult) {
-          return true;
-        }
+      if (lockResult) {
+        return true;
       }
     }
 
@@ -89,9 +86,9 @@ export class SharedWorkspaceLocking {
     const lockMatches = locks.filter((x) => x.name.includes(runId));
     const includesRunLock = lockMatches.length > 0 && locks.indexOf(lockMatches[0]) === 0;
     CloudRunnerLogger.log(
-      `Checking has workspace lock, runId: ${runId} workspace: ${workspace} success: ${includesRunLock} \n Num of LockMatches for Run Agent: ${
+      `Checking has workspace lock, runId: ${runId} workspace: ${workspace} success: ${includesRunLock} \n- Num of LockMatches for Run Agent: ${
         lockMatches.length
-      } Num of Locks ${locks.length} orderedLockIndex for Run Agent ${locks.indexOf(lockMatches[0])}`,
+      } Num of Locks ${locks.length} orderedLockIndex for Run Agent ${locks.indexOf(lockMatches[0])} \n \n`,
     );
 
     return includesRunLock;
@@ -132,7 +129,7 @@ export class SharedWorkspaceLocking {
     const isWorkspaceBelowMax =
       matches.length > 0 && ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces;
     CloudRunnerLogger.log(
-      `isWorkspaceBelowMax ${isWorkspaceBelowMax} = ${matches} > 0 && ${ordered.indexOf(matches[0])} < ${
+      `isWorkspaceBelowMax ${isWorkspaceBelowMax} = ${matches.length} > 0 && ${ordered.indexOf(matches[0])} < ${
         buildParametersContext.maxRetainedWorkspaces
       }`,
     );
@@ -202,7 +199,7 @@ export class SharedWorkspaceLocking {
     );
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
-    if (await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext)) {
+    if (!(await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext))) {
       CloudRunnerLogger.log(`Workspace is below max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
       await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
