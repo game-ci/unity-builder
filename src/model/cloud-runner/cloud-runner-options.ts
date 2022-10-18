@@ -241,8 +241,8 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
   }
 
-  static get retainWorkspacesMax(): number {
-    return Number(CloudRunnerOptions.getInput(`retainWorkspacesMax`)) || 5;
+  static get maxRetainedWorkspaces(): number {
+    return Number(CloudRunnerOptions.getInput(`maxRetainedWorkspaces`)) || 3;
   }
 }
 

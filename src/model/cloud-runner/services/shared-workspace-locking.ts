@@ -31,7 +31,7 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async GetOrCreateLockedWorkspace(
-    workspaceIfCreated: string,
+    workspace: string,
     runId: string,
     buildParametersContext: BuildParameters,
   ) {
@@ -47,15 +47,17 @@ export class SharedWorkspaceLocking {
         if (await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext)) {
           CloudRunnerLogger.log(`run agent ${runId} locked workspace: ${element}`);
 
-          return element;
+          return true;
         }
       }
     }
 
-    const workspace = await SharedWorkspaceLocking.CreateWorkspace(workspaceIfCreated, buildParametersContext, runId);
-    CloudRunnerLogger.log(`run agent ${runId} didn't find a free workspace so created: ${workspace}`);
+    const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
+    CloudRunnerLogger.log(
+      `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${createResult}`,
+    );
 
-    return workspace;
+    return createResult;
   }
 
   public static async DoesWorkspaceExist(workspace: string, buildParametersContext: BuildParameters) {
@@ -69,10 +71,24 @@ export class SharedWorkspaceLocking {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
       return false;
     }
-    CloudRunnerLogger.log(`Checking has workspace ${workspace} was locked`);
-    const locks = await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext);
-    const includesRunLock = locks.filter((x) => x.includes(runId)).length > 0;
-    CloudRunnerLogger.log(`Locks ${locks}, includes ${includesRunLock}`);
+    const locks = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
+      .filter((x) => x.includes(`_lock`))
+      .map((x) => {
+        return {
+          name: x,
+          timestamp: Number(x.split(`_`)[0]),
+        };
+      })
+      .sort((x) => x.timestamp);
+    const lockMatches = locks.filter((x) => x.name.includes(runId));
+    const includesRunLock = lockMatches.length > 0 && locks.indexOf(lockMatches[0]) === 0;
+    CloudRunnerLogger.log(
+      `Checking has workspace lock, workspace: ${workspace} \n success: ${includesRunLock} \n locks: ${JSON.stringify(
+        locks,
+        undefined,
+        4,
+      )}`,
+    );
 
     return includesRunLock;
   }
@@ -81,12 +97,53 @@ export class SharedWorkspaceLocking {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     for (const element of workspaces) {
-      if (!(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext))) {
+      if (
+        !(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext)) &&
+        (await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParametersContext))
+      ) {
         result.push(element);
       }
     }
 
     return result;
+  }
+
+  public static async IsWorkspaceBelowMax(
+    workspace: string,
+    buildParametersContext: BuildParameters,
+  ): Promise<boolean> {
+    const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
+    const ordered: any[] = [];
+    for (const ws of workspaces) {
+      ordered.push({
+        name: ws,
+        timestamp: await SharedWorkspaceLocking.GetWorkspaceTimestamp(ws, buildParametersContext),
+      });
+    }
+    ordered.sort((x) => x.timestamp);
+    const matches = ordered.filter((x) => x.name.includes(workspace));
+    const isWorkspaceBelowMax =
+      matches.length > 0 && ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces;
+
+    return isWorkspaceBelowMax;
+  }
+
+  public static async GetWorkspaceTimestamp(
+    workspace: string,
+    buildParametersContext: BuildParameters,
+  ): Promise<Number> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
+      throw new Error("Workspace doesn't exist, can't call get all locks");
+    }
+
+    return (
+      await SharedWorkspaceLocking.ReadLines(
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/`,
+      )
+    )
+      .map((x) => x.replace(`/`, ``))
+      .filter((x) => x.includes(`_workspace`))
+      .map((x) => Number(x))[0];
   }
 
   public static async IsWorkspaceLocked(workspace: string, buildParametersContext: BuildParameters): Promise<boolean> {
@@ -110,7 +167,11 @@ export class SharedWorkspaceLocking {
     return workspaceFileDoesNotExists || lockFilesExist;
   }
 
-  public static async CreateWorkspace(workspace: string, buildParametersContext: BuildParameters, lockId: string = ``) {
+  public static async CreateWorkspace(
+    workspace: string,
+    buildParametersContext: BuildParameters,
+    lockId: string = ``,
+  ): Promise<boolean> {
     if (lockId !== ``) {
       await SharedWorkspaceLocking.LockWorkspace(workspace, lockId, buildParametersContext);
     }
@@ -129,8 +190,13 @@ export class SharedWorkspaceLocking {
     );
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
+    if (await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext)) {
+      await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
-    return workspace;
+      return false;
+    }
+
+    return true;
   }
 
   public static async LockWorkspace(

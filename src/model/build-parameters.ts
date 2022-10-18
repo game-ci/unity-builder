@@ -64,6 +64,7 @@ class BuildParameters {
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
   public retainWorkspace!: boolean;
+  public maxRetainedWorkspaces!: number;
   public useSharedLargePackages!: boolean;
   public useLz4Compression!: boolean;
 
@@ -143,6 +144,7 @@ class BuildParameters {
       retainWorkspace: CloudRunnerOptions.retainWorkspaces,
       useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
       useLz4Compression: CloudRunnerOptions.useLz4Compression,
+      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
     };
   }
 

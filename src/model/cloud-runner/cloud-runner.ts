@@ -67,21 +67,23 @@ class CloudRunner {
     CloudRunner.setup(buildParameters);
     try {
       if (CloudRunnerOptions.retainWorkspaces) {
-        const workspace =
+        const workspace = `test-workspace-${CloudRunner.buildParameters.buildGuid}`;
+        const result =
           (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
-            `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+            workspace,
             CloudRunner.buildParameters.buildGuid,
             CloudRunner.buildParameters,
           )) || CloudRunner.buildParameters.buildGuid;
 
-        process.env.LOCKED_WORKSPACE = workspace;
-        CloudRunner.lockedWorkspace = workspace;
+        if (result) {
+          CloudRunner.lockedWorkspace = workspace;
 
-        CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
-        CloudRunner.cloudRunnerEnvironmentVariables = [
-          ...CloudRunner.cloudRunnerEnvironmentVariables,
-          { name: `LOCKED_WORKSPACE`, value: workspace },
-        ];
+          CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
+          CloudRunner.cloudRunnerEnvironmentVariables = [
+            ...CloudRunner.cloudRunnerEnvironmentVariables,
+            { name: `LOCKED_WORKSPACE`, value: workspace },
+          ];
+        }
       }
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
       await CloudRunner.Provider.setup(
