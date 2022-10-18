@@ -30,7 +30,7 @@ export class CustomWorkflow {
         CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
       }
       for (const step of buildSteps) {
-        output += await CloudRunner.Provider.runTask(
+        output += await CloudRunner.Provider.runTaskInWorkflow(
           CloudRunner.buildParameters.buildGuid,
           step.image,
           step.commands,

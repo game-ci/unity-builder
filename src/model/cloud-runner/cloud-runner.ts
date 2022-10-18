@@ -87,7 +87,7 @@ class CloudRunner {
         }
       }
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
-      await CloudRunner.Provider.setup(
+      await CloudRunner.Provider.setupWorkflow(
         CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
         CloudRunner.buildParameters.branch,
@@ -98,7 +98,7 @@ class CloudRunner {
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
-      await CloudRunner.Provider.cleanup(
+      await CloudRunner.Provider.cleanupWorkflow(
         CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
         CloudRunner.buildParameters.branch,

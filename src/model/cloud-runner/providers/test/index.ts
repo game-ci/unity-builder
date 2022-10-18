@@ -5,10 +5,10 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 
 class TestCloudRunner implements ProviderInterface {
-  inspect(): Promise<string> {
+  inspectResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  watch(): Promise<string> {
+  watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   listResources(): Promise<string> {
@@ -22,7 +22,7 @@ class TestCloudRunner implements ProviderInterface {
   ): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  cleanup(
+  cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -32,7 +32,7 @@ class TestCloudRunner implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  setup(
+  setupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -42,7 +42,7 @@ class TestCloudRunner implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  public async runTask(
+  public async runTaskInWorkflow(
     commands: string,
     buildGuid: string,
     image: string,

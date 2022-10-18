@@ -12,6 +12,7 @@ import { Input } from '../../..';
 import { AwsCliCommands } from './commands/aws-cli-commands';
 import { TertiaryResourcesService } from './services/tertiary-resources-service';
 import { TaskService } from './services/task-service';
+import { GarbageCollectionService } from './services/garbage-collection-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -19,10 +20,10 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  async inspect(): Promise<string> {
+  async inspectResources(): Promise<string> {
     return await TaskService.awsDescribeJob('');
   }
-  watch(): Promise<string> {
+  watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
 
@@ -32,10 +33,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     return '';
   }
 
-  garbageCollect(
-    // eslint-disable-next-line no-unused-vars
+  async garbageCollect(
     filter: string,
-    // eslint-disable-next-line no-unused-vars
     previewOnly: boolean,
     // eslint-disable-next-line no-unused-vars
     olderThan: Number,
@@ -44,16 +43,20 @@ class AWSBuildEnvironment implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     baseDependencies: boolean,
   ): Promise<string> {
-    throw new Error('Method not implemented.');
+    await GarbageCollectionService.cleanup(!previewOnly);
+
+    return ``;
   }
 
   async listResources() {
-    await AwsCliCommands.awsListAll();
+    await AwsCliCommands.awsListStacks();
+    await AwsCliCommands.awsListTasks();
+    await AwsCliCommands.awsListLogGroups();
 
     return '';
   }
 
-  async cleanup(
+  async cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -63,7 +66,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  async setup(
+  async setupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -74,7 +77,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
 
-  async runTask(
+  async runTaskInWorkflow(
     buildGuid: string,
     image: string,
     commands: string,

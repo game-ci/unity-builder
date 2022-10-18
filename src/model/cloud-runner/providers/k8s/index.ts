@@ -39,10 +39,10 @@ class Kubernetes implements ProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
-  inspect(): Promise<string> {
+  inspectResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  watch(): Promise<string> {
+  watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   listResources(): Promise<string> {
@@ -62,7 +62,7 @@ class Kubernetes implements ProviderInterface {
   ): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  public async setup(
+  public async setupWorkflow(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -88,7 +88,7 @@ class Kubernetes implements ProviderInterface {
     }
   }
 
-  async runTask(
+  async runTaskInWorkflow(
     buildGuid: string,
     image: string,
     commands: string,
@@ -213,7 +213,7 @@ class Kubernetes implements ProviderInterface {
     } catch {}
   }
 
-  async cleanup(
+  async cleanupWorkflow(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars

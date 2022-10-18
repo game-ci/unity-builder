@@ -11,10 +11,10 @@ import CloudRunner from '../../cloud-runner';
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
 
-  inspect(): Promise<string> {
+  inspectResources(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  watch(): Promise<string> {
+  watchWorkflow(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   listResources(): Promise<string> {
@@ -34,7 +34,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
   ): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  cleanup(
+  cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -44,7 +44,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  setup(
+  setupWorkflow(
     buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
@@ -55,7 +55,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     this.buildParameters = buildParameters;
   }
 
-  public async runTask(
+  public async runTaskInWorkflow(
     buildGuid: string,
     image: string,
     commands: string,

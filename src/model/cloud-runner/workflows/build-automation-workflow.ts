@@ -33,7 +33,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.logLine(` `);
       CloudRunnerLogger.logLine('Starting build automation job');
 
-      output += await CloudRunner.Provider.runTask(
+      output += await CloudRunner.Provider.runTaskInWorkflow(
         CloudRunner.buildParameters.buildGuid,
         baseImage.toString(),
         BuildAutomationWorkflow.BuildWorkflow,
