@@ -111,7 +111,7 @@ export class Cli {
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
 
-  @CliFunction(`gc`, `runs garbage collection`)
+  @CliFunction(`garbage-collect`, `runs garbage collection`)
   public static async GarbageCollect(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
@@ -120,7 +120,7 @@ export class Cli {
     return await CloudRunner.Provider.garbageCollect(``, false, 0, false, false);
   }
 
-  @CliFunction(`list-resources`, `runs garbage collection`)
+  @CliFunction(`list-resources`, `lists active resources`)
   public static async ListResources(): Promise<string[]> {
     const buildParameter = await BuildParameters.create();
 
@@ -129,7 +129,7 @@ export class Cli {
     return await CloudRunner.Provider.listResources();
   }
 
-  @CliFunction(`list-worfklow`, `runs garbage collection`)
+  @CliFunction(`list-worfklow`, `lists running workflows`)
   public static async ListWorfklow(): Promise<string[]> {
     const buildParameter = await BuildParameters.create();
 
@@ -138,7 +138,7 @@ export class Cli {
     return await CloudRunner.Provider.listWorkflow();
   }
 
-  @CliFunction(`watch`, `runs garbage collection`)
+  @CliFunction(`watch`, `follows logs of a running workflow`)
   public static async Watch(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
@@ -147,7 +147,7 @@ export class Cli {
     return await CloudRunner.Provider.watchWorkflow();
   }
 
-  @CliFunction(`inspect-resource`, `runs garbage collection`)
+  @CliFunction(`inspect-resource`, `inspects details of an active resource`)
   public static async InspectResource(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
@@ -156,7 +156,7 @@ export class Cli {
     return await CloudRunner.Provider.inspectResources();
   }
 
-  @CliFunction(`inspect-workflow`, `runs garbage collection`)
+  @CliFunction(`inspect-workflow`, `inspects details of a running workflow`)
   public static async InspectWorkflow(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
