@@ -94,7 +94,7 @@ export class CloudRunnerCustomSteps {
   hook: after
   commands: |
     apt-get update > /dev/null
-    apt-get install -y tree > /dev/null
+    ${CloudRunnerOptions.cloudRunnerDebugTree ? `apt-get install -y tree > /dev/null` : `#`}
     ${CloudRunnerOptions.cloudRunnerDebugTree ? `tree -L 3 /data/cache` : `#`}
   secrets:
   - name: awsAccessKeyId

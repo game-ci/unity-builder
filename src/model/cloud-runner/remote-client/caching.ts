@@ -67,7 +67,7 @@ export class Caching {
 
       if (CloudRunner.buildParameters.cloudRunnerDebug) {
         // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
-        await CloudRunnerSystem.Run(`tree -L 2`);
+        // await CloudRunnerSystem.Run(`tree -L 2`);
       }
 
       if (contents.length === 0) {
