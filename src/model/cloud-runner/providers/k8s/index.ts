@@ -13,6 +13,8 @@ import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
+import { ProviderResource } from '../provider-resource';
+import { ProviderWorkflow } from '../provider-workflow';
 
 class Kubernetes implements ProviderInterface {
   private kubeConfig: k8s.KubeConfig;
@@ -39,19 +41,19 @@ class Kubernetes implements ProviderInterface {
     this.namespace = 'default';
     this.buildParameters = buildParameters;
   }
-  listWorkflow(): Promise<string[]> {
+  listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
   }
-  inspectWorkflow(): Promise<string> {
+  inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
   }
-  inspectResources(): Promise<string> {
+  listWorkflow(): Promise<ProviderWorkflow[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<ProviderWorkflow> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  listResources(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(

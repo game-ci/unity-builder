@@ -2,7 +2,8 @@ import AWS from 'aws-sdk';
 import { CliFunction } from '../../../../cli/cli-functions-repository';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
-import { AwsCliCommands } from '../commands/aws-cli-commands';
+import { TaskService } from './task-service';
+import { TertiaryResourcesService } from './tertiary-resources-service';
 
 export class GarbageCollectionService {
   @CliFunction(`aws-garbage-collect-list`, `garbage collect aws resources not in use !WIP!`)
@@ -32,14 +33,14 @@ export class GarbageCollectionService {
     const ecs = new AWS.ECS();
     const cwl = new AWS.CloudWatchLogs();
     const taskDefinitionsInUse = new Array();
-    await AwsCliCommands.awsListTasks(async (taskElement, element) => {
+    await TaskService.awsListTasks(async (taskElement, element) => {
       taskDefinitionsInUse.push(taskElement.taskDefinitionArn);
       if (deleteResources && (!OneDayOlderOnly || GarbageCollectionService.isOlderThan1day(taskElement.CreatedAt))) {
         CloudRunnerLogger.log(`Stopping task ${taskElement.containers?.[0].name}`);
         await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
       }
     });
-    await AwsCliCommands.awsListStacks(async (element) => {
+    await TaskService.awsListStacks(async (element) => {
       if (
         (await CF.describeStackResources({ StackName: element.StackName }).promise()).StackResources?.some(
           (x) => x.ResourceType === 'AWS::ECS::TaskDefinition' && taskDefinitionsInUse.includes(x.PhysicalResourceId),
@@ -60,7 +61,7 @@ export class GarbageCollectionService {
         await CF.deleteStack(deleteStackInput).promise();
       }
     });
-    await AwsCliCommands.awsListLogGroups(async (element) => {
+    await TertiaryResourcesService.awsListLogGroups(async (element) => {
       if (
         deleteResources &&
         (!OneDayOlderOnly || GarbageCollectionService.isOlderThan1day(new Date(element.createdAt)))

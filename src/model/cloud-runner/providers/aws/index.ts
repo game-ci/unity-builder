@@ -9,10 +9,11 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSJobStack as AwsJobStack } from './aws-job-stack';
 import { AWSBaseStack as AwsBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
-import { AwsCliCommands } from './commands/aws-cli-commands';
 import { TertiaryResourcesService } from './services/tertiary-resources-service';
-import { TaskService } from './services/task-service';
 import { GarbageCollectionService } from './services/garbage-collection-service';
+import { ProviderResource } from '../provider-resource';
+import { ProviderWorkflow } from '../provider-workflow';
+import { TaskService } from './services/task-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -20,28 +21,37 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  listWorkflow(): Promise<string[]> {
+  async listResources(): Promise<ProviderResource[]> {
+    await TaskService.awsListJobs();
+    await TertiaryResourcesService.awsListLogGroups();
+    await TaskService.awsListTasks();
+    await TaskService.awsListStacks();
+
+    return [];
+  }
+  async inspectResources(): Promise<ProviderResource> {
+    await new Promise((result) => result);
+
+    return {
+      Name: await TaskService.awsDescribeJob(``),
+    };
+  }
+  listWorkflow(): Promise<ProviderWorkflow[]> {
     throw new Error('Method not implemented.');
   }
-  inspectWorkflow(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  async inspectResources(): Promise<string> {
-    return await TaskService.awsDescribeJob('');
+  async inspectWorkflow(): Promise<ProviderWorkflow> {
+    await new Promise((result) => result);
+
+    return {
+      Name: await TaskService.awsDescribeJob(``),
+    };
   }
   async watchWorkflow(): Promise<string> {
-    // eslint-disable-next-line no-unused-vars
-    const { output, shouldCleanup } = await AwsTaskRunner.streamLogsUntilTaskStops(
-      process.env.cluster || ``,
-      process.env.taskArn || ``,
-      process.env.streamName || ``,
-    );
-
-    return output;
+    return await TaskService.watch();
   }
 
   async listOtherResources(): Promise<string> {
-    await TertiaryResourcesService.AwsListLogGroups();
+    await TertiaryResourcesService.awsListLogGroups();
 
     return '';
   }
@@ -59,14 +69,6 @@ class AWSBuildEnvironment implements ProviderInterface {
     await GarbageCollectionService.cleanup(!previewOnly);
 
     return ``;
-  }
-
-  async listResources() {
-    await AwsCliCommands.awsListStacks();
-    await AwsCliCommands.awsListTasks();
-    await AwsCliCommands.awsListLogGroups();
-
-    return [];
   }
 
   async cleanupWorkflow(

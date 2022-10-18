@@ -3,7 +3,7 @@ import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 
 export class TertiaryResourcesService {
-  public static async AwsListLogGroups(perResultCallback: any = false) {
+  public static async awsListLogGroups(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;
     const ecs = new AWS.CloudWatchLogs();
     let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {

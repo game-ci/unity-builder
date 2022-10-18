@@ -7,23 +7,25 @@ import Docker from '../../../docker';
 import { Action } from '../../..';
 import { writeFileSync } from 'fs';
 import CloudRunner from '../../cloud-runner';
+import { ProviderResource } from '../provider-resource';
+import { ProviderWorkflow } from '../provider-workflow';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
 
-  listWorkflow(): Promise<string[]> {
+  listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
   }
-  inspectWorkflow(): Promise<string> {
+  inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
   }
-  inspectResources(): Promise<string> {
+  listWorkflow(): Promise<ProviderWorkflow[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<ProviderWorkflow> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  listResources(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(

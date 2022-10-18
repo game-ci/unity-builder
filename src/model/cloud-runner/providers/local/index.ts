@@ -4,21 +4,23 @@ import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environm
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import { ProviderResource } from '../provider-resource';
+import { ProviderWorkflow } from '../provider-workflow';
 
 class LocalCloudRunner implements ProviderInterface {
-  listWorkflow(): Promise<string[]> {
+  listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
   }
-  inspectWorkflow(): Promise<string> {
+  inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
   }
-  inspectResources(): Promise<string> {
+  listWorkflow(): Promise<ProviderWorkflow[]> {
+    throw new Error('Method not implemented.');
+  }
+  inspectWorkflow(): Promise<ProviderWorkflow> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  listResources(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
   garbageCollect(

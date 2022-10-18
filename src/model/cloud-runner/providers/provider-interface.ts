@@ -1,6 +1,8 @@
 import BuildParameters from '../../build-parameters';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
+import { ProviderResource } from './provider-resource';
+import { ProviderWorkflow } from './provider-workflow';
 
 export interface ProviderInterface {
   cleanupWorkflow(
@@ -51,9 +53,9 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     baseDependencies: boolean,
   ): Promise<string>;
-  listResources(): Promise<string[]>;
-  inspectResources(): Promise<string>;
-  listWorkflow(): Promise<string[]>;
-  inspectWorkflow(): Promise<string>;
+  listResources(): Promise<ProviderResource[]>;
+  inspectResources(): Promise<ProviderResource>;
+  listWorkflow(): Promise<ProviderWorkflow[]>;
+  inspectWorkflow(): Promise<ProviderWorkflow>;
   watchWorkflow(): Promise<string>;
 }

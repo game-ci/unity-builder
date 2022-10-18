@@ -2,10 +2,18 @@ import AWS from 'aws-sdk';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
+import AwsTaskRunner from '../aws-task-runner';
 
 export class TaskService {
-  static watch() {
-    throw new Error('Method not implemented.');
+  static async watch() {
+    // eslint-disable-next-line no-unused-vars
+    const { output, shouldCleanup } = await AwsTaskRunner.streamLogsUntilTaskStops(
+      process.env.cluster || ``,
+      process.env.taskArn || ``,
+      process.env.streamName || ``,
+    );
+
+    return output;
   }
   public static async awsListStacks(perResultCallback: any = false) {
     process.env.AWS_REGION = Input.region;

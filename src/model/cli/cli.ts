@@ -5,7 +5,6 @@ import { ActionYamlReader } from '../input-readers/action-yaml';
 import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
 import CloudRunnerQueryOverride from '../cloud-runner/services/cloud-runner-query-override';
 import { CliFunction, CliFunctionsRepository } from './cli-functions-repository';
-import { AwsCliCommands } from '../cloud-runner/providers/aws/commands/aws-cli-commands';
 import { Caching } from '../cloud-runner/remote-client/caching';
 import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
@@ -32,10 +31,9 @@ export class Cli {
   }
 
   public static InitCliMode() {
-    CliFunctionsRepository.PushCliFunctionSource(AwsCliCommands);
+    CliFunctionsRepository.PushCliFunctionSource(RemoteClient);
     CliFunctionsRepository.PushCliFunctionSource(Caching);
     CliFunctionsRepository.PushCliFunctionSource(LfsHashing);
-    CliFunctionsRepository.PushCliFunctionSource(RemoteClient);
     const program = new Command();
     program.version('0.0.1');
 
@@ -103,7 +101,7 @@ export class Cli {
     core.info(`\n`);
   }
 
-  @CliFunction(`cli`, `runs a cloud runner build`)
+  @CliFunction(`cli-build`, `runs a cloud runner build`)
   public static async CLIBuild(): Promise<string> {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
@@ -126,7 +124,7 @@ export class Cli {
 
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.Provider.listResources();
+    return (await CloudRunner.Provider.listResources()).map((x) => x.Name);
   }
 
   @CliFunction(`list-worfklow`, `lists running workflows`)
@@ -135,7 +133,7 @@ export class Cli {
 
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.Provider.listWorkflow();
+    return (await CloudRunner.Provider.listWorkflow()).map((x) => x.Name);
   }
 
   @CliFunction(`watch`, `follows logs of a running workflow`)
@@ -153,7 +151,7 @@ export class Cli {
 
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.Provider.inspectResources();
+    return (await CloudRunner.Provider.inspectResources()).Name;
   }
 
   @CliFunction(`inspect-workflow`, `inspects details of a running workflow`)
@@ -162,7 +160,7 @@ export class Cli {
 
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.Provider.inspectWorkflow();
+    return (await CloudRunner.Provider.inspectWorkflow()).Name;
   }
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
