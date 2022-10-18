@@ -75,7 +75,7 @@ describe('Cloud Runner Sync Environments', () => {
         .replace(/\s+/g, '')
         .replace(new RegExp(`\\[${CloudRunnerStatics.logPrefix}\\]`, 'g'), '');
       for (const element of combined) {
-        CloudRunnerLogger.log(`checking input/build param ${element.name} ${element.value}`);
+        // CloudRunnerLogger.log(`checking input/build param ${element.name} ${element.value}`);
         expect(newLinePurgedFile).toContain(`${element.name}`);
         CloudRunnerLogger.log(`Contains ${element.name}`);
         const fullNameEqualValue = `${element.name}=${element.value}`;
