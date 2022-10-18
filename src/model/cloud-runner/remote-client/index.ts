@@ -10,7 +10,6 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import YAML from 'yaml';
-import CloudRunnerOptions from '../cloud-runner-options';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
@@ -64,9 +63,6 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    if (CloudRunnerOptions.cloudRunnerDebugTree) {
-      await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    }
 
     if (
       CloudRunner.buildParameters.retainWorkspace &&
@@ -132,13 +128,16 @@ export class RemoteClient {
 
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
-    await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     RemoteClient.handleRetainedWorkspace();
-    await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+
+    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     await RemoteClient.bootstrapRepository();
-    await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+
+    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     await RemoteClient.runCustomHookFiles(`before-build`);
-    await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+
+    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
   }
   static async runCustomHookFiles(hookLifecycle: string) {
     RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);

@@ -50,9 +50,10 @@ export class SharedWorkspaceLocking {
     if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
       const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
       for (const element of workspaces) {
-        if (await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext)) {
-          CloudRunnerLogger.log(`run agent ${runId} locked workspace: ${element}`);
+        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
+        CloudRunnerLogger.log(`run agent ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
+        if (lockResult) {
           return true;
         }
       }
@@ -78,7 +79,6 @@ export class SharedWorkspaceLocking {
       return false;
     }
     const locks = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
-      .filter((x) => x.includes(`_lock`))
       .map((x) => {
         return {
           name: x,

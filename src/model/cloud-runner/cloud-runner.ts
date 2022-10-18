@@ -76,14 +76,14 @@ class CloudRunner {
           )) || CloudRunner.buildParameters.buildGuid;
 
         if (result) {
+          CloudRunnerLogger.logLine(`Using retained workspace ${workspace}`);
           CloudRunner.lockedWorkspace = workspace;
-
-          CloudRunnerLogger.logLine(`Using workspace ${workspace}`);
           CloudRunner.cloudRunnerEnvironmentVariables = [
             ...CloudRunner.cloudRunnerEnvironmentVariables,
             { name: `LOCKED_WORKSPACE`, value: workspace },
           ];
         } else {
+          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
           buildParameters.retainWorkspace = false;
         }
       }
