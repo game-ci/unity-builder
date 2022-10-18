@@ -13,9 +13,11 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    const results = (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`)).map(
-      (x) => x.replace(`/`, ``),
-    );
+    const results = (
+      await SharedWorkspaceLocking.ReadLines(
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}`,
+      )
+    ).map((x) => x.replace(`/`, ``));
 
     return results.includes(buildParametersContext.cacheKey);
   }
