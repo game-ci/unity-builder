@@ -28,7 +28,9 @@ export class SharedWorkspaceLocking {
       await SharedWorkspaceLocking.ReadLines(
         `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/`,
       )
-    ).map((x) => x.replace(`/`, ``));
+    )
+      .map((x) => x.replace(`/`, ``))
+      .filter((x) => x.includes(`_lock`));
   }
   public static async GetOrCreateLockedWorkspace(
     workspace: string,
@@ -112,6 +114,9 @@ export class SharedWorkspaceLocking {
     workspace: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
+    if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
+      return true;
+    }
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     const ordered: any[] = [];
     for (const ws of workspaces) {
