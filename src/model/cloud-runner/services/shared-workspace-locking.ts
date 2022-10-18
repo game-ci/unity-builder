@@ -89,11 +89,9 @@ export class SharedWorkspaceLocking {
     const lockMatches = locks.filter((x) => x.name.includes(runId));
     const includesRunLock = lockMatches.length > 0 && locks.indexOf(lockMatches[0]) === 0;
     CloudRunnerLogger.log(
-      `Checking has workspace lock, workspace: ${workspace} \n success: ${includesRunLock} \n locks: ${JSON.stringify(
-        locks,
-        undefined,
-        4,
-      )}`,
+      `Checking has workspace lock, runId: ${runId} workspace: ${workspace} success: ${includesRunLock} \n Num of LockMatches for Run Agent: ${
+        lockMatches.length
+      } Num of Locks ${locks.length} orderedLockIndex for Run Agent ${locks.indexOf(lockMatches[0])}`,
     );
 
     return includesRunLock;
@@ -200,6 +198,7 @@ export class SharedWorkspaceLocking {
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
     if (await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext)) {
+      CloudRunnerLogger.log(`Workspace is below max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
       await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
       return false;

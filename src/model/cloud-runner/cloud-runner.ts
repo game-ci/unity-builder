@@ -14,7 +14,6 @@ import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/local-docker';
 import GitHub from '../github';
-import CloudRunnerOptions from './cloud-runner-options';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
 
 class CloudRunner {
@@ -67,24 +66,24 @@ class CloudRunner {
     CloudRunner.setup(buildParameters);
     try {
       if (buildParameters.retainWorkspace) {
-        const workspace = `test-workspace-${CloudRunner.buildParameters.buildGuid}`;
-        const result =
-          (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
-            workspace,
-            CloudRunner.buildParameters.buildGuid,
-            CloudRunner.buildParameters,
-          )) || CloudRunner.buildParameters.buildGuid;
+        CloudRunner.lockedWorkspace = `retained-workspace-${CloudRunner.buildParameters.buildGuid}`;
+
+        const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
+          CloudRunner.lockedWorkspace,
+          CloudRunner.buildParameters.buildGuid,
+          CloudRunner.buildParameters,
+        );
 
         if (result) {
-          CloudRunnerLogger.logLine(`Using retained workspace ${workspace}`);
-          CloudRunner.lockedWorkspace = workspace;
+          CloudRunnerLogger.logLine(`Using retained workspace ${CloudRunner.lockedWorkspace}`);
           CloudRunner.cloudRunnerEnvironmentVariables = [
             ...CloudRunner.cloudRunnerEnvironmentVariables,
-            { name: `LOCKED_WORKSPACE`, value: workspace },
+            { name: `LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
           ];
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
           buildParameters.retainWorkspace = false;
+          CloudRunner.lockedWorkspace = undefined;
         }
       }
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
@@ -108,9 +107,9 @@ class CloudRunner {
       CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
 
-      if (CloudRunnerOptions.retainWorkspaces) {
+      if (CloudRunner.buildParameters.retainWorkspace) {
         await SharedWorkspaceLocking.ReleaseWorkspace(
-          `test-workspace-${CloudRunner.buildParameters.buildGuid}`,
+          CloudRunner.lockedWorkspace || ``,
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
         );
