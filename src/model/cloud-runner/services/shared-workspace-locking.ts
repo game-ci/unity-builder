@@ -25,7 +25,7 @@ export class SharedWorkspaceLocking {
   }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
-      throw new Error("Workspace doesn't exist, can't call get all locks");
+      return [];
     }
 
     return (

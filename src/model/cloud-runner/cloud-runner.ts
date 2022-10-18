@@ -66,7 +66,7 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      if (CloudRunnerOptions.retainWorkspaces) {
+      if (buildParameters.retainWorkspace) {
         const workspace = `test-workspace-${CloudRunner.buildParameters.buildGuid}`;
         const result =
           (await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
@@ -83,6 +83,8 @@ class CloudRunner {
             ...CloudRunner.cloudRunnerEnvironmentVariables,
             { name: `LOCKED_WORKSPACE`, value: workspace },
           ];
+        } else {
+          buildParameters.retainWorkspace = false;
         }
       }
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
