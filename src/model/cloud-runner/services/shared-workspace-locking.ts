@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import CloudRunnerLogger from './cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
+import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
   private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
@@ -52,6 +53,8 @@ export class SharedWorkspaceLocking {
       CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
       if (lockResult) {
+        CloudRunner.lockedWorkspace = element;
+
         return true;
       }
     }
