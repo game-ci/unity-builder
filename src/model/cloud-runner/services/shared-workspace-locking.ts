@@ -86,9 +86,9 @@ export class SharedWorkspaceLocking {
     const lockMatches = locks.filter((x) => x.name.includes(runId));
     const includesRunLock = lockMatches.length > 0 && locks.indexOf(lockMatches[0]) === 0;
     CloudRunnerLogger.log(
-      `Checking has workspace lock, runId: ${runId} workspace: ${workspace} success: ${includesRunLock} \n- Num of LockMatches for Run Agent: ${
+      `Checking has workspace lock, runId: ${runId}, workspace: ${workspace}, success: ${includesRunLock} \n- Num of locks created by Run Agent: ${
         lockMatches.length
-      } Num of Locks ${locks.length} orderedLockIndex for Run Agent ${locks.indexOf(lockMatches[0])} \n \n`,
+      } Num of Locks: ${locks.length}, Time ordered index for Run Agent: ${locks.indexOf(lockMatches[0])} \n \n`,
     );
 
     return includesRunLock;
