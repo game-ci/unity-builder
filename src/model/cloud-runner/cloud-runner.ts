@@ -33,9 +33,11 @@ class CloudRunner {
     if (GitHub.githubInputEnabled) {
       const buildParameterPropertyNames = Object.getOwnPropertyNames(buildParameters);
       for (const element of CloudRunner.cloudRunnerEnvironmentVariables) {
+        CloudRunnerLogger.log(`Cloud Runner output ${Input.ToEnvVarFormat(element.name)} = ${element.value}`);
         core.setOutput(Input.ToEnvVarFormat(element.name), element.value);
       }
       for (const element of buildParameterPropertyNames) {
+        CloudRunnerLogger.log(`Cloud Runner output ${Input.ToEnvVarFormat(element)} = ${buildParameters[element]}`);
         core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
     }
