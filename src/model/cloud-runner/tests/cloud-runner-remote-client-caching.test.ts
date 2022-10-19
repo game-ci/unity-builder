@@ -11,7 +11,7 @@ import GitHub from '../../github';
 describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
   if (process.platform === 'linux') {
-    it('Simple caching works', async () => {
+    it.skip('Simple caching works', async () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
