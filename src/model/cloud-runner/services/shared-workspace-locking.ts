@@ -49,7 +49,7 @@ export class SharedWorkspaceLocking {
     CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
     for (const element of workspaces) {
       const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-      CloudRunnerLogger.log(`run agent ${runId} try lock workspace: ${element} result: ${lockResult}`);
+      CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
       if (lockResult) {
         return true;
@@ -100,7 +100,7 @@ export class SharedWorkspaceLocking {
     for (const element of workspaces) {
       if (
         !(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext)) &&
-        (await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParametersContext))
+        (await SharedWorkspaceLocking.IsWorkspaceBelowMax(``, buildParametersContext))
       ) {
         result.push(element);
       }
@@ -117,6 +117,12 @@ export class SharedWorkspaceLocking {
       return true;
     }
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
+    if (workspace === ``) {
+      return (
+        workspaces.length < buildParametersContext.maxRetainedWorkspaces ||
+        buildParametersContext.maxRetainedWorkspaces === 0
+      );
+    }
     const ordered: any[] = [];
     for (const ws of workspaces) {
       ordered.push({
@@ -127,7 +133,9 @@ export class SharedWorkspaceLocking {
     ordered.sort((x) => x.timestamp);
     const matches = ordered.filter((x) => x.name.includes(workspace));
     const isWorkspaceBelowMax =
-      matches.length > 0 && ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces;
+      matches.length > 0 &&
+      (ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces ||
+        buildParametersContext.maxRetainedWorkspaces === 0);
     CloudRunnerLogger.log(
       `isWorkspaceBelowMax ${isWorkspaceBelowMax} = ${matches.length} > 0 && ${ordered.indexOf(matches[0])} < ${
         buildParametersContext.maxRetainedWorkspaces
