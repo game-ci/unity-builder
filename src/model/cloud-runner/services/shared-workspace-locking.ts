@@ -139,11 +139,6 @@ export class SharedWorkspaceLocking {
       matches.length > 0 &&
       (ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces ||
         buildParametersContext.maxRetainedWorkspaces === 0);
-    CloudRunnerLogger.log(
-      `isWorkspaceBelowMax ${isWorkspaceBelowMax} = ${matches.length} > 0 && ${ordered.indexOf(matches[0])} < ${
-        buildParametersContext.maxRetainedWorkspaces
-      }`,
-    );
 
     return isWorkspaceBelowMax;
   }
