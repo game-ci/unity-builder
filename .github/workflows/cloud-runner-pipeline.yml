@@ -31,7 +31,7 @@ env:
 
 jobs:
   localCiPipeline:
-    name: CI Pipeline
+    name: CI Pipeline - Local Stage
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
@@ -79,7 +79,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - uses: ./
-        id: aws-fargate-unity-build
+        id: local-unity-build
         timeout-minutes: 25
         with:
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
@@ -101,7 +101,7 @@ jobs:
       #     retention-days: 14
   cloudCiPipeline:
     needs: localCiPipeline
-    name: CI Pipeline Stage Two
+    name: CI Pipeline - Cloud Stage
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
@@ -158,8 +158,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - uses: ./
-        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
-        id: aws-fargate-unity-build
+        id: unity-build
         timeout-minutes: 25
         with:
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
@@ -168,20 +167,17 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
-          customStepFiles: aws-s3-upload-build
+          customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
       - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.aws-fargate-unity-build.outputs.CACHE_KEY }}/build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
+          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
-        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
-      - run: yarn run cli -m aws-list-all
-        if: ${{ matrix.cloudRunnerCluster == 'aws' }}
+      - run: yarn run cli -m list-resources
       ###########################
       #          Upload         #
       ###########################
       # download from cloud storage
       - uses: actions/upload-artifact@v2
-        if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
         with:
           name: AWS Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
+          path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
