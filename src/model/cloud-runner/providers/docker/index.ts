@@ -41,7 +41,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     baseDependencies: boolean,
   ): Promise<string> {
-    throw new Error('Method not implemented.');
+    return new Promise((result) => result(``));
   }
   cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars

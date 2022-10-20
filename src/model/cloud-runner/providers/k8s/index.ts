@@ -68,7 +68,7 @@ class Kubernetes implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     baseDependencies: boolean,
   ): Promise<string> {
-    throw new Error('Method not implemented.');
+    return new Promise((result) => result(``));
   }
   public async setupWorkflow(
     buildGuid: string,
