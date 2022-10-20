@@ -191,7 +191,7 @@ export class Cli {
     CloudRunner.setup(parameters);
     if (parameters.constantGarbageCollection) {
       await CloudRunnerSystem.Run(
-        `find ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.buildVolumeFolder)} -name '*.*' -mmin +${
+        `find /${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.buildVolumeFolder)}/ -name '*.*' -mmin +${
           parameters.garbageCollectionMaxAge * 60
         } -delete`,
       );
