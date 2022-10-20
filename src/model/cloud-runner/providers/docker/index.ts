@@ -5,11 +5,13 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../..';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readdirSync } from 'fs';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
+import path from 'path';
+import { CloudRunnerFolders } from '../../services/cloud-runner-folders';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -118,7 +120,17 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
     if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(`Running local-docker: \n ${fileContents}`);
     }
-    await CloudRunnerSystem.Run(`ls ${workspace} && du -sh ${workspace}`);
+    const directories = readdirSync(`${workspace}/cloud-runner-cache`);
+    for (const directory of directories) {
+      if (
+        !directory.includes(CloudRunner.retainedWorkspacePrefix) ||
+        path.basename(directory) === CloudRunnerFolders.cacheFolder
+      ) {
+        await CloudRunnerSystem.Run(`rm -r ${workspace}/cloud-runner-cache/${path.basename(directory)}`);
+        CloudRunnerLogger.log(`rm ${workspace}/cloud-runner-cache/${path.basename(directory)}`);
+      }
+    }
+    await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache && du -sh ${workspace}/cloud-runner-cache`);
     await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },
