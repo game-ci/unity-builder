@@ -118,8 +118,7 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
     if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(`Running local-docker: \n ${fileContents}`);
     }
-    await CloudRunnerSystem.Run(`ls ${workspace}`);
-    await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache`);
+    await CloudRunnerSystem.Run(`ls ${workspace} && du -sh ${workspace}`);
     await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },
