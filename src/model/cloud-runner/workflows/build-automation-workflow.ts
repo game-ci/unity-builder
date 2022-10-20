@@ -131,7 +131,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
   private static get TreeCommand(): string {
     return CloudRunnerOptions.cloudRunnerDebugTree
-      ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute} && tree -L 2 ${CloudRunnerFolders.cacheFolderFull}`
+      ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute} && tree -L 2 ${CloudRunnerFolders.cacheFolderForCacheKeyFull} && du -h -s ${CloudRunnerFolders.buildVolumeFolder} && du -h -s ${CloudRunnerFolders.cacheFolderForCacheKeyFull}`
       : `#`;
   }
 }

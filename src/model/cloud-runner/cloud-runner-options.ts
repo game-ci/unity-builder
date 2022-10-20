@@ -244,6 +244,18 @@ class CloudRunnerOptions {
   static get maxRetainedWorkspaces(): number {
     return Number(CloudRunnerOptions.getInput(`maxRetainedWorkspaces`)) || 3;
   }
+
+  // ### ### ###
+  // Garbage Collection
+  // ### ### ###
+
+  static get constantGarbageCollection(): boolean {
+    return CloudRunnerOptions.getInput(`constantGarbageCollection`) || true;
+  }
+
+  static get garbageCollectionMaxAge(): number {
+    return Number(CloudRunnerOptions.getInput(`garbageCollectionMaxAge`)) || 24;
+  }
 }
 
 export default CloudRunnerOptions;

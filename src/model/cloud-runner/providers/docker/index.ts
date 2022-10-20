@@ -9,6 +9,7 @@ import { writeFileSync } from 'fs';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -117,7 +118,8 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
     if (CloudRunner.buildParameters.cloudRunnerDebug) {
       CloudRunnerLogger.log(`Running local-docker: \n ${fileContents}`);
     }
-
+    await CloudRunnerSystem.Run(`ls /github/workspace/`);
+    await CloudRunnerSystem.Run(`ls /github/workspace/cloud-runner-cache`);
     await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },

@@ -14,11 +14,10 @@ import YAML from 'yaml';
 export class RemoteClient {
   public static async bootstrapRepository() {
     try {
-      await CloudRunnerSystem.Run(
-        `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      );
       await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderFull)}`);
+      await CloudRunnerSystem.Run(
+        `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
+      );
       process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
       await RemoteClient.cloneRepoWithoutLFSFiles();
       RemoteClient.replaceLargePackageReferencesWithSharedReferences();

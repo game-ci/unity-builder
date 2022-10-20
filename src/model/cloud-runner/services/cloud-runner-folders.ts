@@ -16,7 +16,11 @@ export class CloudRunnerFolders {
       : path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
   }
 
-  public static get cacheFolderFull(): string {
+  public static get cacheFolderForAllFull(): string {
+    return path.join('/', CloudRunnerFolders.buildVolumeFolder, CloudRunnerFolders.cacheFolder);
+  }
+
+  public static get cacheFolderForCacheKeyFull(): string {
     return path.join(
       '/',
       CloudRunnerFolders.buildVolumeFolder,
@@ -54,11 +58,11 @@ export class CloudRunnerFolders {
   }
 
   public static get lfsCacheFolderFull() {
-    return path.join(CloudRunnerFolders.cacheFolderFull, `lfs`);
+    return path.join(CloudRunnerFolders.cacheFolderForCacheKeyFull, `lfs`);
   }
 
   public static get libraryCacheFolderFull() {
-    return path.join(CloudRunnerFolders.cacheFolderFull, `Library`);
+    return path.join(CloudRunnerFolders.cacheFolderForCacheKeyFull, `Library`);
   }
 
   public static get unityBuilderRepoUrl(): string {

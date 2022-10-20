@@ -168,13 +168,13 @@ export class Cli {
     core.info(`Running POST build tasks`);
 
     await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/Library`),
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
       `lib-${CloudRunner.buildParameters.buildGuid}`,
     );
 
     await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderFull}/build`),
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
       `build-${CloudRunner.buildParameters.buildGuid}`,
     );
@@ -186,6 +186,21 @@ export class Cli {
     }
 
     await RemoteClient.runCustomHookFiles(`after-build`);
+
+    const parameters = await BuildParameters.create();
+    CloudRunner.setup(parameters);
+    if (parameters.constantGarbageCollection) {
+      await CloudRunnerSystem.Run(
+        `find ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.buildVolumeFolder)} -name '*.*' -mmin +${
+          parameters.garbageCollectionMaxAge * 60
+        } -delete`,
+      );
+      await CloudRunnerSystem.Run(
+        `find ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForAllFull)} -name '*.*' -mmin +${
+          parameters.garbageCollectionMaxAge * 60
+        } -delete`,
+      );
+    }
 
     return new Promise((result) => result(``));
   }

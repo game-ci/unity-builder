@@ -118,6 +118,10 @@ class CloudRunner {
         CloudRunner.lockedWorkspace = undefined;
       }
 
+      if (buildParameters.constantGarbageCollection) {
+        CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
+      }
+
       return output;
     } catch (error) {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
