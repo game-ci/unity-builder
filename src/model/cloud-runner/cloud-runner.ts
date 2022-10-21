@@ -59,7 +59,7 @@ class CloudRunner {
       case 'local-docker':
         CloudRunner.Provider = new LocalDockerCloudRunner();
         break;
-      default:
+      case 'local-system':
         CloudRunner.Provider = new LocalCloudRunner();
         break;
     }

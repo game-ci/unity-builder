@@ -16,6 +16,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        cloudRunnerCluster:
+          - local-docker
+          - local
         projectPath:
           - test-project
         unityVersion:
@@ -62,6 +65,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
 
       ###########################
       #          Upload         #
