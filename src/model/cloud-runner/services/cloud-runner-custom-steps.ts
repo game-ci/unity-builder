@@ -42,7 +42,7 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build-$BUILD_GUID.tar.lz4
+    aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4
     rm /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4
   secrets:
   - name: awsAccessKeyId
