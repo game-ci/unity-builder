@@ -76,7 +76,7 @@ jobs:
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
       - run: |
           ls $GITHUB_WORKSPACE/cloud-runner-cache/
-          mv $GITHUB_WORKSPACE/cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          cp $GITHUB_WORKSPACE/cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
       - run: yarn run cli -m list-resources
       ###########################
       #          Upload         #
