@@ -1,7 +1,7 @@
 name: Cloud Runner Local
 
 on:
-  push:
+  push: { branches: [!cloud-runner-develop, !cloud-runner-preview, !main] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
