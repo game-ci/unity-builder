@@ -79,10 +79,6 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   # Custom Unity License Server
   #
   echo "Adding licensing server config"
-  pushd /resources
-  cat services-config.json.template | tr -d '\r' | awk "{sub(/%URL%/,\"$UNITY_LICENSING_SERVER\")}1" > services-config.json
-  mkdir -p /usr/share/unity3d/config/
-  mv services-config.json /usr/share/unity3d/config/
 
   /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
   PARSEDFILE=$(grep -oP '\".*?\"' < license.txt | tr -d '"')
@@ -93,7 +89,6 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
-  popd
 else
   #
   # NO LICENSE ACTIVATION STRATEGY MATCHED
