@@ -32,6 +32,7 @@ env:
 jobs:
   localCiPipeline:
     name: CI Pipeline - Local Stage
+    if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -108,7 +109,7 @@ jobs:
   cloudCiPipeline:
     needs: localCiPipeline
     name: CI Pipeline - Cloud Stage
-    if: github.event.pull_request.draft == false
+    if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
