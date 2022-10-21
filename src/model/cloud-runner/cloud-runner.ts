@@ -22,7 +22,7 @@ class CloudRunner {
   private static defaultSecrets: CloudRunnerSecret[];
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
-  static retainedWorkspacePrefix: string;
+  public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
@@ -69,7 +69,7 @@ class CloudRunner {
     CloudRunner.setup(buildParameters);
     try {
       if (buildParameters.retainWorkspace) {
-        CloudRunner.lockedWorkspace = `retained-workspace-${CloudRunner.buildParameters.buildGuid}`;
+        CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 
         const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
           CloudRunner.lockedWorkspace,
