@@ -144,17 +144,6 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
       true,
     );
 
-    if (
-      !this.buildParameters?.retainWorkspace &&
-      fs.existsSync(
-        `${workspace}/cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      )
-    ) {
-      await CloudRunnerSystem.Run(
-        `rm -r ${workspace}/cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      );
-    }
-
     return myOutput;
   }
 }
