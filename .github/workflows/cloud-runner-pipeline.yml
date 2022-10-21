@@ -32,7 +32,6 @@ env:
 jobs:
   localCiPipeline:
     name: CI Pipeline - Local Stage
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -58,15 +57,8 @@ jobs:
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
-        if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
       - run: yarn
       - run: yarn run cli --help
       - uses: ./
@@ -81,9 +73,8 @@ jobs:
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-          customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
       - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          mv ./cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       - run: yarn run cli -m list-resources
       ###########################
@@ -143,7 +134,6 @@ jobs:
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
-        if: github.event.event_type != 'pull_request_target'
         with:
           lfs: true
 

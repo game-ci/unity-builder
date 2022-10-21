@@ -19,7 +19,7 @@ async function CreateParameters(overrides) {
 describe('Cloud Runner pre-built S3 steps', () => {
   it('Responds', () => {});
   setups();
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `local-docker`) {
     it('Run build and prebuilt s3 cache pull, cache push and upload build', async () => {
       const overrides = {
         versioning: 'None',
