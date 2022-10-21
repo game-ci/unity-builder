@@ -25,7 +25,6 @@ export class TertiaryResourcesService {
       }
       const ageDate: Date = new Date(Date.now() - element.creationTime);
 
-      // if (verbose)
       CloudRunnerLogger.log(
         `Task Stack ${element.logGroupName} - Age D${Math.floor(
           ageDate.getHours() / 24,

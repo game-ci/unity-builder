@@ -44,11 +44,6 @@ describe('Cloud Runner (Remote Client) Caching', () => {
       );
       await CloudRunnerSystem.Run(`du -h ${__dirname}`);
 
-      // if (CloudRunnerOptions.cloudRunnerDebugTree) {
-      //   await CloudRunnerSystem.Run(`tree ${testFolder}`);
-      //   await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
-      // }
-
       // Compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
         Cli.options.cacheKey,

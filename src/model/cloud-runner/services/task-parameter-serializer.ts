@@ -6,9 +6,6 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
-
-// import CloudRunner from '../cloud-runner';
-// import ImageEnvironmentFactory from '../../image-environment-factory';
 import * as core from '@actions/core';
 
 export class TaskParameterSerializer {
@@ -47,25 +44,14 @@ export class TaskParameterSerializer {
           x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
           x.value = `${x.value}`;
 
-          // if (x.name === `CUSTOM_JOB` || x.name === `GAMECI-CUSTOM_JOB`) {
-          // x.value = base64.encode(x.value);
-          // }
-
-          if (buildParameters.cloudRunnerDebug) {
-            if (Number(x.name) === Number.NaN) {
-              core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
-            } else {
-              // core.info(`${JSON.stringify(x)}`);
-            }
+          if (buildParameters.cloudRunnerDebug && Number(x.name) === Number.NaN) {
+            core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
           }
 
           return x;
         }),
       (item) => item.name,
     );
-
-    // core.info(`Serialized Env Vars`);
-    // core.info(JSON.stringify(result, undefined, 4));
 
     return result;
   }
@@ -93,14 +79,8 @@ export class TaskParameterSerializer {
     for (const element of keys) {
       if (element !== `customJob`) {
         buildParameters[element] = process.env[`GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`];
-
-        // buildParameters[element] = base64.decode(buildParameters[element]);
       }
     }
-
-    // if (JSON.stringify(buildParameters) === JSON.stringify({})) {
-    //   throw new Error(`Build parameters from environment are empty`);
-    // }
 
     return buildParameters;
   }
@@ -141,8 +121,6 @@ export class TaskParameterSerializer {
       );
     }
 
-    // core.info(JSON.stringify(array, undefined, 4));
-
     return array;
   }
 
@@ -167,18 +145,6 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
-
-    // array.push(
-    //   ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
-    //     .filter((x) => array.every((y) => y.ParameterKey !== x.name))
-    //     .map((x) => {
-    //       return {
-    //         ParameterKey: x.name,
-    //         EnvironmentVariable: x.name,
-    //         ParameterValue: x.value,
-    //       };
-    //     }),
-    // );
 
     return array;
   }

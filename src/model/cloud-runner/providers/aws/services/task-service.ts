@@ -27,7 +27,6 @@ export class TaskService {
     for (const element of stacks) {
       const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
 
-      // if (verbose)
       CloudRunnerLogger.log(
         `Task Stack ${element.StackName} - Age D${Math.floor(
           ageDate.getHours() / 24,
@@ -44,7 +43,6 @@ export class TaskService {
     for (const element of baseStacks) {
       const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
 
-      // if (verbose)
       CloudRunnerLogger.log(
         `Task Stack ${element.StackName} - Age D${Math.floor(
           ageDate.getHours() / 24,
@@ -101,7 +99,6 @@ export class TaskService {
     for (const element of stacks) {
       const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
 
-      // if (verbose)
       CloudRunnerLogger.log(
         `Task Stack ${element.StackName} - Age D${Math.floor(
           ageDate.getHours() / 24,

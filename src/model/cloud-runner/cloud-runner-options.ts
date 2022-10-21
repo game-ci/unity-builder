@@ -222,7 +222,7 @@ class CloudRunnerOptions {
   static get watchCloudRunnerToEnd(): boolean {
     const input = CloudRunnerOptions.getInput(`watchToEnd`);
 
-    return !input || input === 'true';
+    return input === 'true';
   }
 
   public static get useSharedLargePackages(): boolean {
