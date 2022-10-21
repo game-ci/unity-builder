@@ -40,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         cloudRunnerCluster:
-          - local-docker
+          # - local-docker
           - local
         projectPath:
           - test-project
