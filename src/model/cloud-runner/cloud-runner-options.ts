@@ -229,6 +229,10 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`useSharedLargePackages`) || false;
   }
 
+  public static get useSharedBuilder(): boolean {
+    return CloudRunnerOptions.getInput(`useSharedBuilder`) || true;
+  }
+
   public static get useLz4Compression(): boolean {
     return CloudRunnerOptions.getInput(`useLz4Compression`) || true;
   }

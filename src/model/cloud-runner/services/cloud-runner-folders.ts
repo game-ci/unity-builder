@@ -1,4 +1,5 @@
 import path from 'path';
+import CloudRunnerOptions from '../cloud-runner-options';
 import CloudRunner from './../cloud-runner';
 
 export class CloudRunnerFolders {
@@ -30,7 +31,12 @@ export class CloudRunnerFolders {
   }
 
   public static get builderPathAbsolute(): string {
-    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute, `builder`);
+    return path.join(
+      CloudRunnerOptions.useSharedBuilder
+        ? `/${CloudRunnerFolders.buildVolumeFolder}`
+        : CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
+      `builder`,
+    );
   }
 
   public static get repoPathAbsolute(): string {
