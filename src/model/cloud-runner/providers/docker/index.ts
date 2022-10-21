@@ -44,16 +44,22 @@ class LocalDockerCloudRunner implements ProviderInterface {
   ): Promise<string> {
     return new Promise((result) => result(``));
   }
-  cleanupWorkflow(
-    // eslint-disable-next-line no-unused-vars
+  async cleanupWorkflow(
     buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {}
+  ) {
+    const { workspace } = Action;
+    if (fs.existsSync(`${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar.lz4`)) {
+      await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache/cache/build/`);
+      await CloudRunnerSystem.Run(
+        `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar.lz4`,
+      );
+    }
+  }
   setupWorkflow(
     buildGuid: string,
     buildParameters: BuildParameters,
