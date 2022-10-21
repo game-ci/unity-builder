@@ -126,7 +126,7 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
       const directories = readdirSync(`${workspace}/cloud-runner-cache`);
       for (const directory of directories) {
         if (
-          !directory.includes(CloudRunner.retainedWorkspacePrefix) ||
+          !directory.includes(CloudRunner.retainedWorkspacePrefix) &&
           path.basename(directory) !== CloudRunnerFolders.cacheFolder
         ) {
           await CloudRunnerSystem.Run(`rm -r ${workspace}/cloud-runner-cache/${path.basename(directory)}`);
