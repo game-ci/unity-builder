@@ -11,8 +11,6 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import * as fs from 'fs';
-import { CloudRunnerFolders } from '../../services/cloud-runner-folders';
-import path from 'path';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -143,17 +141,6 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
       },
       true,
     );
-
-    if (
-      !this.buildParameters?.retainWorkspace &&
-      fs.existsSync(
-        `${workspace}/cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      )
-    ) {
-      await CloudRunnerSystem.Run(
-        `rm -r ${workspace}/cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      );
-    }
 
     return myOutput;
   }
