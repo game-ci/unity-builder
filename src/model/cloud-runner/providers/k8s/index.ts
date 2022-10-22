@@ -153,6 +153,7 @@ class Kubernetes implements ProviderInterface {
   }
 
   private async createSecret(secrets: CloudRunnerSecret[]) {
+    CloudRunnerLogger.log(`Secret creating`);
     await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
     CloudRunnerLogger.log(`Secret created`);
   }
