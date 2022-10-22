@@ -133,6 +133,7 @@ class Kubernetes implements ProviderInterface {
           );
           break;
         } catch (error: any) {
+          CloudRunnerLogger.log('error running k8s workflow');
           if (error.message.includes(`HTTP`)) {
             continue;
           } else {
