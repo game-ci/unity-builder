@@ -6,7 +6,7 @@ import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
   private static readonly workspaceBucketRoot = `s3://game-ci-test-storage/`;
-  private static readonly workspaceRoot = `${SharedWorkspaceLocking.workspaceBucketRoot}/locks/`;
+  private static readonly workspaceRoot = `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
       return [];
