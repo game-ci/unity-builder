@@ -182,6 +182,7 @@ class Kubernetes implements ProviderInterface {
           k8s,
         );
         CloudRunnerLogger.log(`Job spec created`);
+        await new Promise((promise) => setTimeout(promise, 5000));
         await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
@@ -205,7 +206,7 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-      await new Promise((promise) => setTimeout(promise, 5000));
+      await new Promise((promise) => setTimeout(promise, 15000));
     } catch (error: any) {
       if (error.response.body.reason === `not found`) {
         return;
