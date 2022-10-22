@@ -49,17 +49,19 @@ export class SharedWorkspaceLocking {
     if (!CloudRunnerOptions.retainWorkspaces) {
       return;
     }
+    if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
+      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+      CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
+      for (const element of workspaces) {
+        await new Promise((promise) => setTimeout(promise, 1000));
+        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
+        CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-    const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
-    CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
-    for (const element of workspaces) {
-      const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-      CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
+        if (lockResult) {
+          CloudRunner.lockedWorkspace = element;
 
-      if (lockResult) {
-        CloudRunner.lockedWorkspace = element;
-
-        return true;
+          return true;
+        }
       }
     }
 
@@ -105,7 +107,7 @@ export class SharedWorkspaceLocking {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     for (const element of workspaces) {
-      await new Promise((promise) => setTimeout(promise, 1000));
+      await new Promise((promise) => setTimeout(promise, 1500));
       if (
         !(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext)) &&
         (await SharedWorkspaceLocking.IsWorkspaceBelowMax(``, buildParametersContext))
@@ -121,9 +123,6 @@ export class SharedWorkspaceLocking {
     workspace: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
-      return true;
-    }
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     if (workspace === ``) {
       return (
