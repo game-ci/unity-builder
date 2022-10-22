@@ -22,7 +22,7 @@ class PlatformSetup {
   }
 
   private static SetupShared(buildParameters: BuildParameters, actionFolder: string) {
-    const servicesConfigPath = `${actionFolder}/dist/resources/services-config.json`;
+    const servicesConfigPath = `${actionFolder}/unity-config/services-config.json`;
     const servicesConfigPathTemplate = `${servicesConfigPath}.template`;
     if (!fs.existsSync(servicesConfigPathTemplate)) {
       core.error(`Missing services config ${servicesConfigPathTemplate}`);
