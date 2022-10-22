@@ -106,6 +106,8 @@ class Kubernetes implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     try {
+      CloudRunnerLogger.log('Cloud Runner K8s workflow!');
+
       // Setup
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${buildGuid}`;
