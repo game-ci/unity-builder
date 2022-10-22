@@ -10,6 +10,7 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import * as fs from 'fs';
 import path from 'path';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
+import SharedWorkspaceLocking from '../services/shared-workspace-locking';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -76,6 +77,7 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(build2NotContainsNoLibraryMessage).toBeTruthy();
     }, 10000000);
     afterAll(async () => {
+      await SharedWorkspaceLocking.CleanupWorkspace(CloudRunner.lockedWorkspace || ``, CloudRunner.buildParameters);
       if (
         fs.existsSync(`./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`)
       ) {
