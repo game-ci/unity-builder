@@ -67,6 +67,6 @@ describe('Cloud Runner Caching', () => {
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsNoLibraryMessage).toBeTruthy();
-    }, 10000000);
+    }, 1_000_000_000_000);
   }
 });

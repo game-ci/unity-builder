@@ -80,6 +80,6 @@ describe('Cloud Runner Sync Environments', () => {
         const fullNameEqualValue = `${element.name}=${element.value}`;
         expect(newLinePurgedFile).toContain(fullNameEqualValue);
       }
-    }, 10000000);
+    }, 1_000_000_000_000);
   }
 });

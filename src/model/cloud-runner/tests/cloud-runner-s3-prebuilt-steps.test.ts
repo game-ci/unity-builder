@@ -41,6 +41,6 @@ describe('Cloud Runner pre-built S3 steps', () => {
         `aws s3 ls s3://game-ci-test-storage/cloud-runner-cache/${buildParameter2.cacheKey}/`,
       );
       CloudRunnerLogger.log(results.join(`,`));
-    }, 10000000);
+    }, 1_000_000_000_000);
   }
 });

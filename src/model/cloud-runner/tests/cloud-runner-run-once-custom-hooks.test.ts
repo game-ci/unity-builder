@@ -65,6 +65,6 @@ commands: echo "test"`;
       expect(build2ContainsPostBuildHookRunMessage).toBeTruthy();
       expect(build2ContainsPreBuildStepMessage).toBeTruthy();
       expect(build2ContainsPostBuildStepMessage).toBeTruthy();
-    }, 10000000);
+    }, 1_000_000_000_000);
   }
 });
