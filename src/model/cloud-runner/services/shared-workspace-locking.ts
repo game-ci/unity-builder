@@ -152,6 +152,10 @@ export class SharedWorkspaceLocking {
     workspace: string,
     buildParametersContext: BuildParameters,
   ): Promise<Number> {
+    if (workspace.split(`_`).length > 0) {
+      return Number(workspace.split(`_`)[1]);
+    }
+
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
       throw new Error("Workspace doesn't exist, can't call get all locks");
     }
@@ -195,11 +199,11 @@ export class SharedWorkspaceLocking {
     if (lockId !== ``) {
       await SharedWorkspaceLocking.LockWorkspace(workspace, lockId, buildParametersContext);
     }
-
-    const file = `${Date.now()}_workspace`;
+    const timestamp = Date.now();
+    const file = `${timestamp}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}_${timestamp}/${workspace}/${file}`,
       false,
       true,
     );
