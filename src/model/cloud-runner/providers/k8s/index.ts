@@ -109,9 +109,9 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
-      this.buildGuid = buildGuid;
-      this.secretName = `build-credentials-${buildGuid}`;
-      this.jobName = `unity-builder-job-${buildGuid}`;
+      this.buildGuid = buildGuid + Date.now();
+      this.secretName = `build-credentials-${this.buildGuid}`;
+      this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
       await this.createSecret(secrets);
       await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
