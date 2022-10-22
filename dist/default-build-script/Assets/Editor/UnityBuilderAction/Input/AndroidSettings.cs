@@ -9,11 +9,13 @@ namespace UnityBuilderAction.Input
     public static void Apply(Dictionary<string, string> options)
     {
       EditorUserBuildSettings.buildAppBundle = options["customBuildPath"].EndsWith(".aab");
+#if UNITY_2019_1_OR_NEWER
       if (options.TryGetValue("androidKeystoreName", out string keystoreName) && !string.IsNullOrEmpty(keystoreName))
       {
         PlayerSettings.Android.useCustomKeystore = true;
         PlayerSettings.Android.keystoreName = keystoreName;
       }
+#endif
       if (options.TryGetValue("androidKeystorePass", out string keystorePass) && !string.IsNullOrEmpty(keystorePass))
         PlayerSettings.Android.keystorePass = keystorePass;
       if (options.TryGetValue("androidKeyaliasName", out string keyaliasName) && !string.IsNullOrEmpty(keyaliasName))
