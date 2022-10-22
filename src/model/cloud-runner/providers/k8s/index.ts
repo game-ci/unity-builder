@@ -162,28 +162,31 @@ class Kubernetes implements ProviderInterface {
     environment: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
-    try {
-      const jobSpec = KubernetesJobSpecFactory.getJobSpec(
-        commands,
-        image,
-        mountdir,
-        workingdir,
-        environment,
-        secrets,
-        this.buildGuid,
-        this.buildParameters,
-        this.secretName,
-        this.pvcName,
-        this.jobName,
-        k8s,
-      );
-      await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
-      CloudRunnerLogger.log(`Build job created`);
-      await new Promise((promise) => setTimeout(promise, 5000));
-      CloudRunnerLogger.log('Job created');
-    } catch (error) {
-      CloudRunnerLogger.log(`Error occured creating job: ${error}`);
-      throw error;
+    for (let index = 0; index < 3; index++) {
+      try {
+        const jobSpec = KubernetesJobSpecFactory.getJobSpec(
+          commands,
+          image,
+          mountdir,
+          workingdir,
+          environment,
+          secrets,
+          this.buildGuid,
+          this.buildParameters,
+          this.secretName,
+          this.pvcName,
+          this.jobName,
+          k8s,
+        );
+        await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+        CloudRunnerLogger.log(`Build job created`);
+        await new Promise((promise) => setTimeout(promise, 5000));
+        CloudRunnerLogger.log('Job created');
+
+        return;
+      } catch (error) {
+        CloudRunnerLogger.log(`Error occured creating job: ${error}`);
+      }
     }
   }
 
