@@ -7,7 +7,6 @@ import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
-import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
 
 async function CreateParameters(overrides) {
@@ -73,6 +72,6 @@ describe('Cloud Runner Sync Environments', () => {
         const fullNameEqualValue = `${element.name}=${element.value}`;
         expect(newLinePurgedFile).toContain(fullNameEqualValue);
       }
-    }, 1_000_000_000_000);
+    }, 1_000_000_000);
   }
 });
