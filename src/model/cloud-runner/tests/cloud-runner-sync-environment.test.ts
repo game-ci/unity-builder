@@ -11,16 +11,9 @@ import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
 
 async function CreateParameters(overrides) {
-  if (overrides) {
-    Cli.options = overrides;
-  }
-  const originalValue = GitHub.githubInputEnabled;
-  GitHub.githubInputEnabled = false;
-  const results = await BuildParameters.create();
-  GitHub.githubInputEnabled = originalValue;
-  delete Cli.options;
+  if (overrides) Cli.options = overrides;
 
-  return results;
+  return BuildParameters.create();
 }
 describe('Cloud Runner Sync Environments', () => {
   setups();
