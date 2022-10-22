@@ -14,7 +14,7 @@ Parameters:
   LogGroupName:
     Type: String
     Default: example
-    Description: A name for the log groups in cloud watch
+    Description: Name to use for the log group created for this task
   ImageUrl:
     Type: String
     Default: nginx
