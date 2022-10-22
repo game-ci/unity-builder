@@ -5,7 +5,8 @@ import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
-  private static readonly workspaceRoot = `s3://game-ci-test-storage/locks/`;
+  private static readonly workspaceBucketRoot = `s3://game-ci-test-storage/`;
+  private static readonly workspaceRoot = `${SharedWorkspaceLocking.workspaceBucketRoot}/locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
       return [];
@@ -18,11 +19,14 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    const results = (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`)).map(
-      (x) => x.replace(`/`, ``),
+    return (
+      (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`))
+        .map((x) => x.replace(`/`, ``))
+        .includes(`locks`) &&
+      (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
+        .map((x) => x.replace(`/`, ``))
+        .includes(buildParametersContext.cacheKey)
     );
-
-    return results.includes(buildParametersContext.cacheKey);
   }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
