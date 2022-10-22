@@ -1,0 +1,7 @@
+{
+  "licensingServiceBaseUrl": "%URL%",
+  "enableEntitlementLicensing": true,
+  "enableFloatingApi": true,
+  "clientConnectTimeoutSec": 5,
+  "clientHandshakeTimeoutSec": 10
+}

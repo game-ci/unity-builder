@@ -91,6 +91,7 @@ describe('Cloud Runner', () => {
       delete Cli.options;
     }, 1000000);
   }
+
   it('Local cloud runner returns commands', async () => {
     // Build parameters
     Cli.options = {
@@ -119,6 +120,7 @@ describe('Cloud Runner', () => {
     Input.githubInputEnabled = true;
     delete Cli.options;
   }, 1000000);
+
   it('Test cloud runner returns commands', async () => {
     // Build parameters
     Cli.options = {

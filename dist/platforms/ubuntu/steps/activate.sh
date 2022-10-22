@@ -74,6 +74,21 @@ elif [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
 
+elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
+  #
+  # Custom Unity License Server
+  #
+  echo "Adding licensing server config"
+
+  /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
+  PARSEDFILE=$(grep -oP '\".*?\"' < license.txt | tr -d '"')
+  export FLOATING_LICENSE
+  FLOATING_LICENSE=$(sed -n 2p <<< "$PARSEDFILE")
+  FLOATING_LICENSE_TIMEOUT=$(sed -n 4p <<< "$PARSEDFILE")
+
+  echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
 else
   #
   # NO LICENSE ACTIVATION STRATEGY MATCHED

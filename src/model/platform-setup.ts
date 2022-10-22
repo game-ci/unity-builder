@@ -1,9 +1,13 @@
+import fs from 'fs';
+import * as core from '@actions/core';
 import { BuildParameters } from '.';
 import { SetupMac, SetupWindows } from './platform-setup/';
 import ValidateWindows from './platform-validation/validate-windows';
 
 class PlatformSetup {
   static async setup(buildParameters: BuildParameters, actionFolder: string) {
+    PlatformSetup.SetupShared(buildParameters, actionFolder);
+
     switch (process.platform) {
       case 'win32':
         ValidateWindows.validate(buildParameters);
@@ -15,6 +19,20 @@ class PlatformSetup {
 
       // Add other baseOS's here
     }
+  }
+
+  private static SetupShared(buildParameters: BuildParameters, actionFolder: string) {
+    const servicesConfigPath = `${actionFolder}/unity-config/services-config.json`;
+    const servicesConfigPathTemplate = `${servicesConfigPath}.template`;
+    if (!fs.existsSync(servicesConfigPathTemplate)) {
+      core.error(`Missing services config ${servicesConfigPathTemplate}`);
+
+      return;
+    }
+
+    let servicesConfig = fs.readFileSync(servicesConfigPathTemplate).toString();
+    servicesConfig = servicesConfig.replace('%URL%', buildParameters.unityLicensingServer);
+    fs.writeFileSync(servicesConfigPath, servicesConfig);
   }
 }
 

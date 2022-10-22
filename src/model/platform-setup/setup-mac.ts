@@ -52,6 +52,7 @@ class SetupMac {
     process.env.ACTION_FOLDER = actionFolder;
     process.env.UNITY_VERSION = buildParameters.editorVersion;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
+    process.env.UNITY_LICENSING_SERVER = buildParameters.unityLicensingServer;
     process.env.PROJECT_PATH = buildParameters.projectPath;
     process.env.BUILD_TARGET = buildParameters.targetPlatform;
     process.env.BUILD_NAME = buildParameters.buildName;

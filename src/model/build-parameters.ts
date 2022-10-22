@@ -14,6 +14,7 @@ class BuildParameters {
   public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
+  public unityLicensingServer!: string;
   public runnerTempPath: string | undefined;
   public targetPlatform!: string;
   public projectPath!: string;
@@ -76,24 +77,26 @@ class BuildParameters {
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
-    if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
-      // No serial was present, so it is a personal license that we need to convert
-      if (!process.env.UNITY_LICENSE) {
-        throw new Error(`Missing Unity License File and no Serial was found. If this
+    if (Input.unityLicensingServer === '') {
+      if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
+        // No serial was present, so it is a personal license that we need to convert
+        if (!process.env.UNITY_LICENSE) {
+          throw new Error(`Missing Unity License File and no Serial was found. If this
                           is a personal license, make sure to follow the activation
                           steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                           serial number inside the UNITY_SERIAL GitHub secret.`);
+        }
+        unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+      } else {
+        unitySerial = process.env.UNITY_SERIAL!;
       }
-      unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
-    } else {
-      unitySerial = process.env.UNITY_SERIAL!;
     }
 
     return {
       editorVersion,
       customImage: Input.customImage,
       unitySerial,
-
+      unityLicensingServer: Input.unityLicensingServer,
       runnerTempPath: process.env.RUNNER_TEMP,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,

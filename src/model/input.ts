@@ -117,6 +117,10 @@ class Input {
     return Input.getInput('buildsPath') || 'build';
   }
 
+  static get unityLicensingServer() {
+    return Input.getInput('unityLicensingServer') || '';
+  }
+
   static get buildMethod() {
     return Input.getInput('buildMethod') || ''; // Processed in docker file
   }
