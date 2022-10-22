@@ -166,6 +166,7 @@ class Kubernetes implements ProviderInterface {
   ) {
     for (let index = 0; index < 3; index++) {
       try {
+        await new Promise((promise) => setTimeout(promise, 5000));
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
           image,
@@ -180,6 +181,7 @@ class Kubernetes implements ProviderInterface {
           this.jobName,
           k8s,
         );
+        CloudRunnerLogger.log(`Job spec created`);
         await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));

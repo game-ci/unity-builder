@@ -89,6 +89,7 @@ jobs:
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
         if: github.ref != 'refs/heads/cloud-runner-develop' && github.ref != 'refs/heads/cloud-runner-preview'
+        timeout-minutes: 90
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
@@ -157,7 +158,7 @@ jobs:
       - run: yarn run cli --help
       - uses: ./
         id: unity-build
-        timeout-minutes: 25
+        timeout-minutes: 90
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -183,6 +184,7 @@ jobs:
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
         if: ${{ matrix.targetPlatform == 'StandaloneWindows64' }}
+        timeout-minutes: 90
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
