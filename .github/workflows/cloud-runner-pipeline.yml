@@ -88,6 +88,7 @@ jobs:
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        if: github.ref != 'refs/heads/cloud-runner-develop' && github.ref != 'refs/heads/cloud-runner-preview'
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: ${{ matrix.projectPath }}
