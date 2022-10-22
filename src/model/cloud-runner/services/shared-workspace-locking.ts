@@ -105,6 +105,7 @@ export class SharedWorkspaceLocking {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     for (const element of workspaces) {
+      await new Promise((promise) => setTimeout(promise, 1000));
       if (
         !(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext)) &&
         (await SharedWorkspaceLocking.IsWorkspaceBelowMax(``, buildParametersContext))
