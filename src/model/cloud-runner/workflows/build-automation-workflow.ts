@@ -67,8 +67,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
     );
 
-    return `apt-get update > /dev/null
-      apt-get install -y tar tree npm git-lfs jq git > /dev/null
+    return `apt-get update && apt-get upgrade > /dev/null
+      apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
+      curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+      apt-get install -y nodejs > /dev/null
       npm install -g n > /dev/null
       npm --version
       nodejs --version
