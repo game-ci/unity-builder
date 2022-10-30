@@ -135,7 +135,6 @@ jobs:
           #          - Switch # Build a Nintendo Switch player
     # steps
     steps:
-
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
