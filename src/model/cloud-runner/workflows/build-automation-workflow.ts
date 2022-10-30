@@ -70,6 +70,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `apt-get update > /dev/null
       apt-get install -y tar tree npm git-lfs jq git > /dev/null
       npm install -g n > /dev/null
+      npm --version
+      nodejs --version
       n stable > /dev/null
       ${BuildAutomationWorkflow.TreeCommand}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
