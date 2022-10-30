@@ -72,6 +72,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
       apt-get install -y nodejs > /dev/null
       npm install -g n > /dev/null
+      ldd --version ldd
       npm --version
       nodejs --version
       n stable > /dev/null
