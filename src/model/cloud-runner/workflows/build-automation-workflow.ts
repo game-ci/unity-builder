@@ -70,7 +70,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
       curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      source ~/.bashrc
       nvm install 18.0.0
       nvm use 18.0.0
       ldd --version
