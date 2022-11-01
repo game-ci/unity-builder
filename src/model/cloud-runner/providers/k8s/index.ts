@@ -155,12 +155,7 @@ class Kubernetes implements ProviderInterface {
         } catch (error: any) {
           CloudRunnerLogger.log('error running k8s workflow');
           CloudRunnerLogger.log(error.message);
-          if (error.message.includes(`HTTP disabled for now`)) {
-            CloudRunnerLogger.log('retrying watch because error includes HTTP ignore code');
-            continue;
-          } else {
-            throw error;
-          }
+          throw error;
         }
       }
       await this.cleanupTaskResources();
