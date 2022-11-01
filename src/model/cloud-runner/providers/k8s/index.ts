@@ -219,7 +219,6 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-      await new Promise((promise) => setTimeout(promise, 15000));
       CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     } catch (error: any) {
       if (error.response.body.reason === `not found`) {
@@ -247,17 +246,11 @@ class Kubernetes implements ProviderInterface {
     CloudRunnerLogger.log(`deleting PVC`);
 
     try {
-      const promise = this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
-      // eslint-disable-next-line github/no-then
-      promise.catch((error: any) => {
-        if (error.response.body.reason === `not found`) {
-          return;
-        }
-        CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
-      });
-      await promise;
-      // eslint-disable-next-line no-empty
-    } catch {}
+      await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+    } catch (error: any) {
+      CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
+      throw error;
+    }
   }
 
   static async findPodFromJob(kubeClient: CoreV1Api, jobName: string, namespace: string) {
