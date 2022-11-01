@@ -7,7 +7,6 @@ import KubernetesStorage from './kubernetes-storage';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import KubernetesTaskRunner from './kubernetes-task-runner';
 import KubernetesSecret from './kubernetes-secret';
-import waitUntil from 'async-wait-until';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
@@ -31,10 +30,14 @@ class Kubernetes implements ProviderInterface {
   private cleanupCronJobName: string = '';
   private serviceAccountName: string = '';
 
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    buildParameters: BuildParameters,
-  ) {}
+  // eslint-disable-next-line no-unused-vars
+  constructor(buildParameters: BuildParameters) {
+    this.kubeConfig = new k8s.KubeConfig();
+    this.kubeConfig.loadFromDefault();
+    this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+    this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+    CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
+  }
 
   listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
@@ -74,12 +77,6 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.kubeConfig = new k8s.KubeConfig();
-      this.kubeConfig.loadFromDefault();
-      this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
-      this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
-      CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
-
       this.namespace = 'default';
       this.buildParameters = buildParameters;
       const id = buildParameters.retainWorkspace ? CloudRunner.lockedWorkspace : buildParameters.buildGuid;
@@ -112,7 +109,7 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
-      this.buildGuid = buildGuid + Date.now();
+      this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
@@ -219,21 +216,6 @@ class Kubernetes implements ProviderInterface {
       throw error;
     }
     CloudRunnerLogger.log('cleaning up finished');
-    try {
-      await waitUntil(
-        async () => {
-          const jobBody = (await this.kubeClientBatch.readNamespacedJob(this.jobName, this.namespace)).body;
-          const podBody = (await this.kubeClient.readNamespacedPod(this.podName, this.namespace)).body;
-
-          return (jobBody === null || jobBody.status?.active === 0) && podBody === null;
-        },
-        {
-          timeout: 500000,
-          intervalBetweenAttempts: 15000,
-        },
-      );
-      // eslint-disable-next-line no-empty
-    } catch {}
   }
 
   async cleanupWorkflow(
