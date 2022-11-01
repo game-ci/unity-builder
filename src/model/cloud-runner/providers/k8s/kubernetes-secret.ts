@@ -11,19 +11,26 @@ class KubernetesSecret {
     namespace: string,
     kubeClient: CoreV1Api,
   ) {
-    const secret = new k8s.V1Secret();
-    secret.apiVersion = 'v1';
-    secret.kind = 'Secret';
-    secret.type = 'Opaque';
-    secret.metadata = {
-      name: secretName,
-    };
-    secret.data = {};
-    for (const buildSecret of secrets) {
-      secret.data[buildSecret.ParameterKey] = base64.encode(buildSecret.ParameterValue);
+    try {
+      const secret = new k8s.V1Secret();
+      secret.apiVersion = 'v1';
+      secret.kind = 'Secret';
+      secret.type = 'Opaque';
+      secret.metadata = {
+        name: secretName,
+      };
+      secret.data = {};
+      for (const buildSecret of secrets) {
+        secret.data[buildSecret.ParameterKey] = base64.encode(buildSecret.ParameterValue);
+      }
+      CloudRunnerLogger.log('Creating secret');
+      await kubeClient.createNamespacedSecret(namespace, secret, undefined, `true`);
+      await kubeClient.createNamespacedSecret(namespace, secret);
+      CloudRunnerLogger.log('Created secret');
+    } catch (error) {
+      CloudRunnerLogger.log(`Created secret failed ${error}`);
+      throw new Error(`Failed to create kubernetes secret`);
     }
-    CloudRunnerLogger.log('Creating secret');
-    await kubeClient.createNamespacedSecret(namespace, secret);
   }
 }
 
