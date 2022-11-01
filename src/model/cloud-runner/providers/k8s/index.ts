@@ -247,6 +247,8 @@ class Kubernetes implements ProviderInterface {
 
     try {
       await this.kubeClient.deleteNamespacedPersistentVolumeClaim(this.pvcName, this.namespace);
+      await this.kubeClient.deleteNamespacedServiceAccount(this.serviceAccountName, this.namespace);
+      CloudRunnerLogger.log('cleaned up PVC and Service Account');
     } catch (error: any) {
       CloudRunnerLogger.log(`Cleanup failed ${JSON.stringify(error, undefined, 4)}`);
       throw error;
