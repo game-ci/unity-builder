@@ -41,12 +41,25 @@ class Kubernetes implements ProviderInterface {
   }
 
   async listResources(): Promise<ProviderResource[]> {
-    await this.kubeClient.listNamespacedPod(this.namespace);
-    await this.kubeClient.listNamespacedServiceAccount(this.namespace);
-    await this.kubeClient.listNamespacedSecret(this.namespace);
-    await this.kubeClientBatch.listNamespacedJob(this.namespace);
+    const pods = await this.kubeClient.listNamespacedPod(this.namespace);
+    const serviceAccounts = await this.kubeClient.listNamespacedServiceAccount(this.namespace);
+    const secrets = await this.kubeClient.listNamespacedSecret(this.namespace);
+    const jobs = await this.kubeClientBatch.listNamespacedJob(this.namespace);
 
-    return [];
+    return [
+      ...pods.body.items.map((x) => {
+        return { Name: x.metadata?.name || `` };
+      }),
+      ...serviceAccounts.body.items.map((x) => {
+        return { Name: x.metadata?.name || `` };
+      }),
+      ...secrets.body.items.map((x) => {
+        return { Name: x.metadata?.name || `` };
+      }),
+      ...jobs.body.items.map((x) => {
+        return { Name: x.metadata?.name || `` };
+      }),
+    ];
   }
   inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
@@ -141,7 +154,9 @@ class Kubernetes implements ProviderInterface {
           break;
         } catch (error: any) {
           CloudRunnerLogger.log('error running k8s workflow');
-          if (error.message.includes(`HTTP`)) {
+          CloudRunnerLogger.log(error.message);
+          if (error.message.includes(`HTTP disabled for now`)) {
+            CloudRunnerLogger.log('retrying watch because error includes HTTP ignore code');
             continue;
           } else {
             throw error;
