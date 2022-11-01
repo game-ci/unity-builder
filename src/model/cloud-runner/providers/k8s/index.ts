@@ -36,11 +36,17 @@ class Kubernetes implements ProviderInterface {
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+    this.namespace = 'default';
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
   }
 
-  listResources(): Promise<ProviderResource[]> {
-    throw new Error('Method not implemented.');
+  async listResources(): Promise<ProviderResource[]> {
+    await this.kubeClient.listNamespacedPod(this.namespace);
+    await this.kubeClient.listNamespacedServiceAccount(this.namespace);
+    await this.kubeClient.listNamespacedSecret(this.namespace);
+    await this.kubeClientBatch.listNamespacedJob(this.namespace);
+
+    return [];
   }
   inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
@@ -77,7 +83,6 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
-      this.namespace = 'default';
       this.buildParameters = buildParameters;
       const id = buildParameters.retainWorkspace ? CloudRunner.lockedWorkspace : buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
