@@ -73,7 +73,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"  # This loads nvm
         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-      source ~/.bash_profile
+      source ~/.profile
       command -v nvm
       nvm install 16.0.0
       nvm use 16.0.0
