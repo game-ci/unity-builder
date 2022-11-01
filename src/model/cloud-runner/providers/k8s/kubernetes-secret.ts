@@ -23,8 +23,7 @@ class KubernetesSecret {
       secret.data[buildSecret.ParameterKey] = base64.encode(buildSecret.ParameterValue);
     }
     CloudRunnerLogger.log('Creating secret');
-
-    return await kubeClient.createNamespacedSecret(namespace, secret);
+    await kubeClient.createNamespacedSecret(namespace, secret);
   }
 }
 
