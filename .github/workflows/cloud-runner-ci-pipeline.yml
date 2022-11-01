@@ -1,7 +1,7 @@
-name: Cloud Runner
+name: Cloud Runner CI
 
 on:
-  push: { branches: [cloud-runner-develop, cloud-runner-preview, main] }
+  push: { branches: [main] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
@@ -31,7 +31,7 @@ env:
 
 jobs:
   localCiPipeline:
-    name: CI Pipeline - Local Stage
+    name: CI Pipeline - Local Stage - Smoke Test
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
