@@ -98,8 +98,6 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-      - name: Docker Layer Caching
-        uses: satackey/action-docker-layer-caching@v0.0.11
       ###########################
       #          Upload         #
       ###########################
