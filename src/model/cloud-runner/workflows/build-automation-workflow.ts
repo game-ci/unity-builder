@@ -69,17 +69,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
-      curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"  # This loads nvm
-        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-      source ~/.profile
-      command -v nvm
-      nvm install 16.0.0
-      nvm use 16.0.0
-      ldd --version
+      npm install -g n > /dev/null
+      n stable > /dev/null
       npm --version
-      nodejs --version
+      node --version
       ${BuildAutomationWorkflow.TreeCommand}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
