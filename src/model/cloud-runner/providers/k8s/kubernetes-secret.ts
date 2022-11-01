@@ -24,9 +24,14 @@ class KubernetesSecret {
         secret.data[buildSecret.ParameterKey] = base64.encode(buildSecret.ParameterValue);
       }
       CloudRunnerLogger.log(`Creating secret: ${secretName}`);
-      CloudRunnerLogger.log(
-        `Secrets: ${JSON.stringify(await kubeClient.listNamespacedSecret(namespace), undefined, 4)}`,
-      );
+      const existingSecrets = await kubeClient.listNamespacedSecret(namespace);
+      const mappedSecrets = existingSecrets.body.items.map((x) => {
+        return {
+          name: x.metadata?.name || `no name`,
+        };
+      });
+
+      CloudRunnerLogger.log(`Secrets: ${JSON.stringify(mappedSecrets, undefined, 4)}`);
       await kubeClient.createNamespacedSecret(namespace, secret);
       CloudRunnerLogger.log('Created secret');
     } catch (error) {
