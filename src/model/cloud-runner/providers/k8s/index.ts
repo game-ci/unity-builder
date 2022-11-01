@@ -162,7 +162,11 @@ class Kubernetes implements ProviderInterface {
   ) {
     for (let index = 0; index < 3; index++) {
       try {
-        CloudRunnerLogger.log(`Job spec creating`);
+        CloudRunnerLogger.log(`Job spec creating 1`);
+        await new Promise((promise) => setTimeout(promise, 5000));
+        CloudRunnerLogger.log(`Job spec creating 2`);
+        await new Promise((promise) => setTimeout(promise, 5000));
+        CloudRunnerLogger.log(`Job spec creating 3`);
         await new Promise((promise) => setTimeout(promise, 5000));
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
