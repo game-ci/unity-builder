@@ -215,20 +215,19 @@ class Kubernetes implements ProviderInterface {
 
   async cleanupTaskResources() {
     CloudRunnerLogger.log('cleaning up');
+    await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
     try {
-      await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
-      await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
-      CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     } catch (error: any) {
-      if (error.response.body.reason === `not found`) {
-        return;
+      if (error.response.body.reason !== `NotFound`) {
+        CloudRunnerLogger.log('Failed to cleanup, error:');
+        core.error(JSON.stringify(error, undefined, 4));
+        CloudRunnerLogger.log('Abandoning cleanup, build error:');
+        throw error;
       }
-      CloudRunnerLogger.log('Failed to cleanup, error:');
-      core.error(JSON.stringify(error, undefined, 4));
-      CloudRunnerLogger.log('Abandoning cleanup, build error:');
-      throw error;
     }
+    await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     CloudRunnerLogger.log('cleaning up finished');
   }
 
