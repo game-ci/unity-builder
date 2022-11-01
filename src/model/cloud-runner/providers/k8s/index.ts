@@ -113,6 +113,8 @@ class Kubernetes implements ProviderInterface {
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
+      const namespaceListTest = await this.kubeClient.listNamespace();
+      CloudRunnerLogger.log(`Init test ${namespaceListTest.body.items.length}`);
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
       this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
