@@ -163,11 +163,11 @@ class Kubernetes implements ProviderInterface {
     for (let index = 0; index < 3; index++) {
       try {
         CloudRunnerLogger.log(`Job spec creating 1`);
-        await new Promise((promise) => setTimeout(promise, 5000));
+        await new Promise((promise) => setTimeout(promise, 15000));
         CloudRunnerLogger.log(`Job spec creating 2`);
-        await new Promise((promise) => setTimeout(promise, 5000));
+        await new Promise((promise) => setTimeout(promise, 15000));
         CloudRunnerLogger.log(`Job spec creating 3`);
-        await new Promise((promise) => setTimeout(promise, 5000));
+        await new Promise((promise) => setTimeout(promise, 15000));
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
           image,
@@ -208,6 +208,7 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
       await new Promise((promise) => setTimeout(promise, 15000));
+      CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     } catch (error: any) {
       if (error.response.body.reason === `not found`) {
         return;
