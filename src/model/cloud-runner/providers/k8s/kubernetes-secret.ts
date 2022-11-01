@@ -26,12 +26,13 @@ class KubernetesSecret {
       CloudRunnerLogger.log(`Creating secret: ${secretName}`);
       const existingSecrets = await kubeClient.listNamespacedSecret(namespace);
       const mappedSecrets = existingSecrets.body.items.map((x) => {
-        return {
-          name: x.metadata?.name || `no name`,
-        };
+        return x.metadata?.name || `no name`;
       });
 
-      CloudRunnerLogger.log(`Secrets: ${JSON.stringify(mappedSecrets, undefined, 4)}`);
+      CloudRunnerLogger.log(
+        `ExistsAlready: ${mappedSecrets.includes(secretName)} SecretsCount: ${mappedSecrets.length}`,
+      );
+      await new Promise((promise) => setTimeout(promise, 15000));
       await kubeClient.createNamespacedSecret(namespace, secret);
       CloudRunnerLogger.log('Created secret');
     } catch (error) {
