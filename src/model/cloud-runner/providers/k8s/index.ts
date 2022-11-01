@@ -17,30 +17,25 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 
 class Kubernetes implements ProviderInterface {
-  private kubeConfig: k8s.KubeConfig;
-  private kubeClient: k8s.CoreV1Api;
-  private kubeClientBatch: k8s.BatchV1Api;
+  private kubeConfig!: k8s.KubeConfig;
+  private kubeClient!: k8s.CoreV1Api;
+  private kubeClientBatch!: k8s.BatchV1Api;
   private buildGuid: string = '';
-  private buildParameters: BuildParameters;
+  private buildParameters!: BuildParameters;
   private pvcName: string = '';
   private secretName: string = '';
   private jobName: string = '';
-  private namespace: string;
+  private namespace!: string;
   private podName: string = '';
   private containerName: string = '';
   private cleanupCronJobName: string = '';
   private serviceAccountName: string = '';
 
-  constructor(buildParameters: BuildParameters) {
-    this.kubeConfig = new k8s.KubeConfig();
-    this.kubeConfig.loadFromDefault();
-    this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
-    this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
-    CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    buildParameters: BuildParameters,
+  ) {}
 
-    this.namespace = 'default';
-    this.buildParameters = buildParameters;
-  }
   listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
   }
@@ -79,6 +74,14 @@ class Kubernetes implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     try {
+      this.kubeConfig = new k8s.KubeConfig();
+      this.kubeConfig.loadFromDefault();
+      this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+      this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+      CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
+
+      this.namespace = 'default';
+      this.buildParameters = buildParameters;
       const id = buildParameters.retainWorkspace ? CloudRunner.lockedWorkspace : buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
