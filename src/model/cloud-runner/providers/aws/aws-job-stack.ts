@@ -120,6 +120,7 @@ export class AWSJobStack {
         if (element.StackName === taskDefStackName && element.StackStatus !== 'DELETE_COMPLETE') {
           previousStackExists = true;
           CloudRunnerLogger.log(`Previous stack still exists: ${JSON.stringify(element)}`);
+          await new Promise((promise) => setTimeout(promise, 5000));
         }
       }
     }
