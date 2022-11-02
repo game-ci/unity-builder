@@ -236,7 +236,11 @@ class Kubernetes implements ProviderInterface {
         throw error;
       }
     }
-    await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    try {
+      await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
+    } catch (error: any) {
+      CloudRunnerLogger.log(`Failed to cleanup secret, error: ${error.response.body.reason}`);
+    }
     CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     CloudRunnerLogger.log('cleaning up finished');
   }
