@@ -30,8 +30,35 @@ env:
   USE_IL2CPP: false
 
 jobs:
-  developmentCiPipeline:
-    name: CI Pipeline - Development
+  integrationTests:
+    name: Dev Pipeline - Integration Tests
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 180
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: local-docker
+  buildTests:
+    name: Dev Pipeline - Builds
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -76,7 +103,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - run: yarn run cli --help
       - uses: ./
         id: unity-build
         timeout-minutes: 90
@@ -85,7 +111,7 @@ jobs:
         with:
           cloudRunnerTests: true
           versioning: None
-          projectPath: ${{ matrix.projectPath }}
+          projectPath: test-project
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
@@ -94,6 +120,8 @@ jobs:
           aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       - run: yarn run cli -m list-resources
+        with:
+          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
       ###########################
       #          Upload         #
       ###########################
