@@ -212,7 +212,9 @@ jobs:
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: ${{ matrix.targetPlatform == 'StandaloneWindows64' && startsWith(github.ref, 'refs/tags/v') && matrix.cloudRunnerCluster != 'local-docker' }}
+        if:
+          ${{ matrix.targetPlatform == 'StandaloneWindows64' && startsWith(github.ref, 'refs/tags/v') &&
+          matrix.cloudRunnerCluster != 'local-docker' }}
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
