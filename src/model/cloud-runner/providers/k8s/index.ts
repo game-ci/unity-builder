@@ -152,7 +152,8 @@ class Kubernetes implements ProviderInterface {
           const pods = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.filter(
             (x) => this.podName === x.metadata?.name,
           );
-          const running = pods.length > 0 && pods[0].status?.phase !== `Running` && pods[0].status?.phase !== `Pending`;
+          const running =
+            pods.length > 0 && (pods[0].status?.phase === `Running` || pods[0].status?.phase === `Pending`);
 
           if (!running) {
             CloudRunnerLogger.log('Pod not found, assumed ended!');
