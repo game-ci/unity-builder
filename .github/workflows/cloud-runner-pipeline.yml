@@ -31,9 +31,16 @@ env:
 
 jobs:
   integrationTests:
-    name: Integration Tests (Local Only)
+    name: Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cloudRunnerCluster:
+          #- aws
+          - local-docker
+          #- k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -56,7 +63,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          CLOUD_RUNNER_CLUSTER: local-docker
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
 
   buildTargetTests:
     name: Build Target Tests (Local Only)
