@@ -131,8 +131,6 @@ class Kubernetes implements ProviderInterface {
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
-      const namespaceListTest = await this.kubeClient.listNamespace();
-      CloudRunnerLogger.log(`Init test ${namespaceListTest.body.items.length}`);
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
       this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
@@ -189,7 +187,6 @@ class Kubernetes implements ProviderInterface {
   ) {
     for (let index = 0; index < 3; index++) {
       try {
-        CloudRunnerLogger.log(`Job spec creating`);
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
           image,
@@ -204,7 +201,6 @@ class Kubernetes implements ProviderInterface {
           this.jobName,
           k8s,
         );
-        CloudRunnerLogger.log(`Job spec created`);
         await new Promise((promise) => setTimeout(promise, 15000));
         await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
@@ -214,6 +210,7 @@ class Kubernetes implements ProviderInterface {
         return;
       } catch (error) {
         CloudRunnerLogger.log(`Error occured creating job: ${error}`);
+        throw error;
       }
     }
   }
