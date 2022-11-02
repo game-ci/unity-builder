@@ -108,11 +108,13 @@ export class SharedWorkspaceLocking {
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     for (const element of workspaces) {
       await new Promise((promise) => setTimeout(promise, 1500));
-      if (
-        !(await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext)) &&
-        (await SharedWorkspaceLocking.IsWorkspaceBelowMax(``, buildParametersContext))
-      ) {
+      const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext);
+      const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParametersContext);
+      if (!isLocked && isBelowMax) {
         result.push(element);
+        CloudRunnerLogger.log(`workspace ${element} is free`);
+      } else {
+        CloudRunnerLogger.log(`workspace ${element} is NOT free ${!isLocked} ${isBelowMax}`);
       }
     }
 
@@ -245,16 +247,10 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
-      return true;
-    }
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext)).filter((x) =>
       x.includes(`_${runId}_lock`),
     );
-    CloudRunnerLogger.log(
-      `${JSON.stringify(await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))}`,
-    );
-    CloudRunnerLogger.log(`Deleting file ${file}`);
+    CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
     CloudRunnerLogger.log(
       `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
     );
