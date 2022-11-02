@@ -77,6 +77,7 @@ export class RemoteClient {
     }
 
     if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
+      RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists cleaning up`);
       await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }
 
