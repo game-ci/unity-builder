@@ -162,8 +162,13 @@ class Kubernetes implements ProviderInterface {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
         } catch (error: any) {
-          CloudRunnerLogger.log(`error running k8s workflow ${error}`);
-          throw error;
+          const reason = error.response?.body?.reason || ``;
+          if (reason === `NotFound`) {
+            CloudRunnerLogger.log('Log Stream Container Not Found');
+          } else {
+            CloudRunnerLogger.log(`error running k8s workflow ${error}`);
+            throw error;
+          }
         }
       }
       await this.cleanupTaskResources();
