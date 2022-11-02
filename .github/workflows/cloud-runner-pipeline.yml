@@ -1,7 +1,7 @@
-name: Cloud Runner CI
+name: Cloud Runner CI Pipeline
 
 on:
-  push: { branches: [main] }
+  push: { branches: [cloud-runner-develop, cloud-runner-preview] }
 #  push: { branches: [main] }
 #  pull_request:
 #    paths-ignore:
@@ -30,8 +30,36 @@ env:
   USE_IL2CPP: false
 
 jobs:
-  localCiPipeline:
-    name: CI Pipeline - Local Stage - Smoke Test
+  integrationTests:
+    name: Integration Tests (Local Only)
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 180
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: local-docker
+
+  buildTargetTests:
+    name: Build Target Tests (Local Only)
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -42,75 +70,63 @@ jobs:
           - local-docker
           #- k8s
         targetPlatform:
-          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          # - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - WebGL # WebGL.
-          #- iOS # Build an iOS player.
-          #- Android # Build an Android .apk.
-          #          - StandaloneWindows # Build a Windows standalone.
-          #          - WSAPlayer # Build an Windows Store Apps player.
-          #          - PS4 # Build a PS4 Standalone.
-          #          - XboxOne # Build a Xbox One Standalone.
-          #          - tvOS # Build to Apple's tvOS platform.
-          #          - Switch # Build a Nintendo Switch player
-    # steps
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk.
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
           lfs: true
+
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: '288.0.0'
+          service_account_email: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: Get GKE cluster credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
       - run: yarn
-      - run: yarn run cli --help
       - uses: ./
         id: unity-build
-        timeout-minutes: 25
+        timeout-minutes: 90
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           cloudRunnerTests: true
           versioning: None
-          projectPath: ${{ matrix.projectPath }}
+          projectPath: test-project
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+          customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
       - run: |
-          ls $GITHUB_WORKSPACE/cloud-runner-cache/
-          cp $GITHUB_WORKSPACE/cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          ls
       - run: yarn run cli -m list-resources
+        env:
+          cloudRunnerTests: true
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       ###########################
       #          Upload         #
       ###########################
       # download from cloud storage
       - uses: actions/upload-artifact@v2
         with:
-          name: AWS Build (${{ matrix.targetPlatform }})
+          name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: github.ref != 'refs/heads/cloud-runner-develop' && github.ref != 'refs/heads/cloud-runner-preview'
-        timeout-minutes: 180
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: ${{ matrix.projectPath }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-      ###########################
-      #          Upload         #
-      ###########################
-      # download from cloud storage
-      # - uses: actions/upload-artifact@v2
-      #   if: ${{ matrix.cloudRunnerCluster != 'k8s' }}
-      #   with:
-      #     name: AWS Build (${{ matrix.targetPlatform }})
-      #     path: build-${{ steps.aws-fargate-unity-build.outputs.BUILD_GUID }}.tar.lz4
-      #     retention-days: 14
-  cloudCiPipeline:
-    needs: localCiPipeline
-    name: CI Pipeline - Cloud Stage
+  buildTests:
+    name: Cloud Provider Build Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -118,21 +134,15 @@ jobs:
       matrix:
         cloudRunnerCluster:
           - aws
-          #- local-docker
+          - local-docker
           - k8s
         targetPlatform:
           #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneLinux64 # Build a Linux 64-bit standalone.
-          - WebGL # WebGL.
+          #- StandaloneLinux64 # Build a Linux 64-bit standalone.
+          #- WebGL # WebGL.
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
-          #          - StandaloneWindows # Build a Windows standalone.
-          #          - WSAPlayer # Build an Windows Store Apps player.
-          #          - PS4 # Build a PS4 Standalone.
-          #          - XboxOne # Build a Xbox One Standalone.
-          #          - tvOS # Build to Apple's tvOS platform.
-          #          - Switch # Build a Nintendo Switch player
     # steps
     steps:
       - name: Checkout (default)
@@ -155,7 +165,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - run: yarn run cli --help
       - uses: ./
         id: unity-build
         timeout-minutes: 90
@@ -164,7 +173,7 @@ jobs:
         with:
           cloudRunnerTests: true
           versioning: None
-          projectPath: ${{ matrix.projectPath }}
+          projectPath: test-project
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
@@ -173,17 +182,20 @@ jobs:
           aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       - run: yarn run cli -m list-resources
+        env:
+          cloudRunnerTests: true
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       ###########################
       #          Upload         #
       ###########################
       # download from cloud storage
       - uses: actions/upload-artifact@v2
         with:
-          name: AWS Build (${{ matrix.targetPlatform }})
+          name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: ${{ matrix.targetPlatform == 'StandaloneWindows64' }}
+        if: ${{ matrix.targetPlatform == 'StandaloneWindows64' && startsWith(github.ref, 'refs/tags/v') && matrix.cloudRunnerCluster != 'local-docker' }}
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
