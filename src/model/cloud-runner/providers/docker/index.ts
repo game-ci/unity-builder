@@ -16,7 +16,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
 
   listResources(): Promise<ProviderResource[]> {
-    throw new Error('Method not implemented.');
+    return new Promise((resolve) => resolve([]));
   }
   inspectResources(): Promise<ProviderResource> {
     throw new Error('Method not implemented.');
