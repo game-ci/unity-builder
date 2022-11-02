@@ -120,8 +120,9 @@ jobs:
           aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
       - run: yarn run cli -m list-resources
-        with:
-          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+        env:
+          cloudRunnerTests: true
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       ###########################
       #          Upload         #
       ###########################
@@ -131,14 +132,3 @@ jobs:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: ${{ matrix.targetPlatform == 'StandaloneWindows64' }}
-        timeout-minutes: 180
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: ${{ matrix.projectPath }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
