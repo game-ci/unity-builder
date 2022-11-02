@@ -151,7 +151,17 @@ class Kubernetes implements ProviderInterface {
             'main',
             this.namespace,
           );
-          break;
+          if (
+            !(await this.kubeClientBatch.listNamespacedJob(this.namespace)).body.items
+              .map((x) => x.metadata?.name || undefined)
+              .filter((x) => x !== undefined)
+              .includes(this.jobName)
+          ) {
+            CloudRunnerLogger.log('Job not found, assumed ended!');
+            break;
+          } else {
+            CloudRunnerLogger.log('Job still running, recovering stream...');
+          }
         } catch (error: any) {
           CloudRunnerLogger.log('error running k8s workflow');
           CloudRunnerLogger.log(error.message);

@@ -100,7 +100,7 @@ jobs:
       # download from cloud storage
       - uses: actions/upload-artifact@v2
         with:
-          name: AWS Build (${{ matrix.targetPlatform }})
+          name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
