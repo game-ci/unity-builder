@@ -2,10 +2,6 @@ name: Cloud Runner CI Pipeline
 
 on:
   push: { branches: [cloud-runner-develop, cloud-runner-preview] }
-#  push: { branches: [main] }
-#  pull_request:
-#    paths-ignore:
-#      - '.github/**'
 
 env:
   GKE_ZONE: 'us-central1'
@@ -135,10 +131,6 @@ jobs:
         env:
           cloudRunnerTests: true
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-      ###########################
-      #          Upload         #
-      ###########################
-      # download from cloud storage
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
@@ -204,10 +196,6 @@ jobs:
         env:
           cloudRunnerTests: true
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-      ###########################
-      #          Upload         #
-      ###########################
-      # download from cloud storage
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
