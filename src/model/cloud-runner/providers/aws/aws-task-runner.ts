@@ -116,6 +116,8 @@ class AWSTaskRunner {
   }
 
   static async streamLogsUntilTaskStops(clusterName: string, taskArn: string, kinesisStreamName: string) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    CloudRunnerLogger.log(`Streaming...`);
     const stream = await AWSTaskRunner.getLogStream(kinesisStreamName);
     let iterator = await AWSTaskRunner.getLogIterator(stream);
 
