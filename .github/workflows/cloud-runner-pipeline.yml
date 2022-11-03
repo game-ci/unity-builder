@@ -38,9 +38,9 @@ jobs:
       fail-fast: false
       matrix:
         cloudRunnerCluster:
-          #- aws
+          - aws
           - local-docker
-          #- k8s
+          - k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -55,6 +55,7 @@ jobs:
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
+        if: ${{ matrix.CloudRunnerCluster == "aws" || matrix.CloudRunnerCluster == "k8s" }}
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -65,6 +66,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        if: ${{ matrix.CloudRunnerCluster == "local-docker" }}
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -211,16 +213,3 @@ jobs:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if:
-          ${{ matrix.targetPlatform == 'StandaloneWindows64' && startsWith(github.ref, 'refs/tags/v') &&
-          matrix.cloudRunnerCluster != 'local-docker' }}
-        timeout-minutes: 180
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: ${{ matrix.projectPath }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
