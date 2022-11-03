@@ -165,6 +165,8 @@ class Kubernetes implements ProviderInterface {
           const reason = error.response?.body?.reason || ``;
           if (reason === `NotFound`) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
+            await new Promise((resolve) => resolve(5000));
+            continue;
           } else {
             CloudRunnerLogger.log(`error running k8s workflow ${error}`);
             throw error;
