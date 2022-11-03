@@ -138,6 +138,7 @@ class AWSBuildEnvironment implements ProviderInterface {
 
       return output;
     } catch (error) {
+      CloudRunnerLogger.log(`error running task ${error}`);
       await this.cleanupResources(CF, taskDef);
       throw error;
     }

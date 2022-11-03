@@ -66,7 +66,9 @@ class AWSTaskRunner {
     }
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
     const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
-    const exitCode = taskData.containers?.[0].exitCode;
+    const containerState = taskData.containers?.[0];
+    const exitCode = containerState?.exitCode || undefined;
+    CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
     const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
