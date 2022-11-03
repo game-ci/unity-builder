@@ -55,7 +55,7 @@ jobs:
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
-        if: ${{ matrix.CloudRunnerCluster}} == "aws" || ${{ matrix.CloudRunnerCluster }} == "k8s"
+        if: matrix.CloudRunnerCluster == 'aws' || matrix.CloudRunnerCluster == 'k8s'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -66,7 +66,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: ${{ matrix.CloudRunnerCluster == "local-docker" }}
+        if: matrix.CloudRunnerCluster == 'local-docker'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
