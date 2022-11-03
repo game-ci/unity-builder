@@ -8,8 +8,36 @@ on:
 #      - '.github/**'
 
 jobs:
-  localCiPipeline:
-    name: CI Pipeline - Local Stage
+  integrationTests:
+    name: Integration Tests
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cloudRunnerCluster:
+          - local-docker
+        targetPlatform:
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+    # steps
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: ${{ matrix.projectPath }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+  buildTests:
+    name: Build Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -36,8 +64,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
-      - run: yarn
-      - run: yarn run cli --help
       - uses: ./
         id: unity-build
         timeout-minutes: 25
@@ -68,12 +94,3 @@ jobs:
           name: AWS Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
-      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: ${{ matrix.projectPath }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}

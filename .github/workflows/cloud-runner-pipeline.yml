@@ -81,7 +81,7 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
 
   buildTargetTests:
-    name: Build Target Tests (Local Only)
+    name: Build Tests - Targets
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -144,7 +144,7 @@ jobs:
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
   buildTests:
-    name: Cloud Provider Build Tests
+    name: Build Tests - Providers
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
