@@ -63,7 +63,7 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
-          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PRIVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
