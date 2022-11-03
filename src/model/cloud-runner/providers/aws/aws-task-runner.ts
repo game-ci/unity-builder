@@ -64,6 +64,8 @@ class AWSTaskRunner {
 
       return { output, shouldCleanup };
     }
+
+    CloudRunnerLogger.log(`Streaming...`);
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
     const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
     const containerState = taskData.containers?.[0];
