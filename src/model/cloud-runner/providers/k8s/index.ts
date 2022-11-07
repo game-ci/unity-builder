@@ -161,7 +161,7 @@ class Kubernetes implements ProviderInterface {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
         } catch (error: any) {
-          const reason = error.response?.body?.reason || ``;
+          const reason = error.response?.body?.reason || error.reason || ``;
           const errorMessage = error.message || ``;
 
           const continueStreaming = reason === `NotFound` || errorMessage.includes(`dial timeout, backstop`);
