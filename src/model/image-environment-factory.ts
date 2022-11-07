@@ -32,6 +32,7 @@ class ImageEnvironmentFactory {
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
       { name: 'UNITY_PASSWORD', value: process.env.UNITY_PASSWORD },
       { name: 'UNITY_SERIAL', value: parameters.unitySerial },
+      { name: 'UNITY_LICENSING_SERVER', value: parameters.unityLicensingServer },
       { name: 'UNITY_VERSION', value: parameters.editorVersion },
       { name: 'USYM_UPLOAD_AUTH_TOKEN', value: process.env.USYM_UPLOAD_AUTH_TOKEN },
       { name: 'PROJECT_PATH', value: parameters.projectPath },

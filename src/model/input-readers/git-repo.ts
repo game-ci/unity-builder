@@ -18,7 +18,7 @@ export class GitRepoReader {
     CloudRunnerLogger.log(`value ${value}`);
     assert(value.includes('github.com'));
 
-    return value.split('github.com/')[1].split('.git')[0];
+    return value.split('github.com')[1].split('.git')[0].slice(1);
   }
 
   public static async GetBranch() {
