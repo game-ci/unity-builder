@@ -61,6 +61,7 @@ class AWSTaskRunner {
     if (!CloudRunnerOptions.watchCloudRunnerToEnd) {
       const shouldCleanup: boolean = false;
       const output: string = '';
+      CloudRunnerLogger.log(`Watch Cloud Runner To End: false`);
 
       return { output, shouldCleanup };
     }
