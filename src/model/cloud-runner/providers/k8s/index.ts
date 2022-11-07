@@ -14,24 +14,27 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+import KubernetesPods from './kubernetes-pods';
 
 class Kubernetes implements ProviderInterface {
-  private kubeConfig!: k8s.KubeConfig;
-  private kubeClient!: k8s.CoreV1Api;
-  private kubeClientBatch!: k8s.BatchV1Api;
-  private buildGuid: string = '';
-  private buildParameters!: BuildParameters;
-  private pvcName: string = '';
-  private secretName: string = '';
-  private jobName: string = '';
-  private namespace!: string;
-  private podName: string = '';
-  private containerName: string = '';
-  private cleanupCronJobName: string = '';
-  private serviceAccountName: string = '';
+  public static Instance: Kubernetes;
+  public kubeConfig!: k8s.KubeConfig;
+  public kubeClient!: k8s.CoreV1Api;
+  public kubeClientBatch!: k8s.BatchV1Api;
+  public buildGuid: string = '';
+  public buildParameters!: BuildParameters;
+  public pvcName: string = '';
+  public secretName: string = '';
+  public jobName: string = '';
+  public namespace!: string;
+  public podName: string = '';
+  public containerName: string = '';
+  public cleanupCronJobName: string = '';
+  public serviceAccountName: string = '';
 
   // eslint-disable-next-line no-unused-vars
   constructor(buildParameters: BuildParameters) {
+    Kubernetes.Instance = this;
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
@@ -149,21 +152,20 @@ class Kubernetes implements ProviderInterface {
             'main',
             this.namespace,
           );
-          const pods = (await this.kubeClient.listNamespacedPod(this.namespace)).body.items.filter(
-            (x) => this.podName === x.metadata?.name,
-          );
-          const running =
-            pods.length > 0 && (pods[0].status?.phase === `Running` || pods[0].status?.phase === `Pending`);
+          const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
 
           if (!running) {
-            CloudRunnerLogger.log(`Pod not found, assumed ended! ${pods[0].status?.phase || 'undefined status'}`);
+            CloudRunnerLogger.log(`Pod not found, assumed ended!`);
             break;
           } else {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
         } catch (error: any) {
           const reason = error.response?.body?.reason || ``;
-          if (reason === `NotFound`) {
+          const errorMessage = error.message || ``;
+
+          const continueStreaming = reason === `NotFound` || errorMessage.includes(`dial timeout, backstop`);
+          if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
             await new Promise((resolve) => resolve(5000));
             continue;
