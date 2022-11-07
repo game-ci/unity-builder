@@ -138,11 +138,11 @@ class Kubernetes implements ProviderInterface {
       await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
       this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
       CloudRunnerLogger.log('Watching pod until running');
+      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       let output = '';
       // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
-          await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
           CloudRunnerLogger.log('Pod running, streaming logs');
           output = await KubernetesTaskRunner.runTask(
             this.kubeConfig,
