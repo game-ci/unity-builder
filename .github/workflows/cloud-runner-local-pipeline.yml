@@ -85,12 +85,11 @@ jobs:
       - run: |
           mv ./cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           ls
-      - run: yarn run cli -m list-resources
       ###########################
       #          Upload         #
       ###########################
       - uses: actions/upload-artifact@v2
         with:
-          name: AWS Build (${{ matrix.targetPlatform }})
+          name: Local Build (${{ matrix.targetPlatform }})
           path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
           retention-days: 14
