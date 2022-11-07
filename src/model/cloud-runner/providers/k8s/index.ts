@@ -156,7 +156,7 @@ class Kubernetes implements ProviderInterface {
             pods.length > 0 && (pods[0].status?.phase === `Running` || pods[0].status?.phase === `Pending`);
 
           if (!running) {
-            CloudRunnerLogger.log('Pod not found, assumed ended!');
+            CloudRunnerLogger.log(`Pod not found, assumed ended! ${pods[0].status?.phase || 'undefined status'}`);
             break;
           } else {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
@@ -233,15 +233,17 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
     } catch (error: any) {
+      CloudRunnerLogger.log(`Failed to cleanup`);
       if (error.response.body.reason !== `NotFound`) {
-        CloudRunnerLogger.log(`Failed to cleanup, error: ${error.response.body.reason}`);
+        CloudRunnerLogger.log(`Wasn't a not found error: ${error.response.body.reason}`);
         throw error;
       }
     }
     try {
       await this.kubeClient.deleteNamespacedSecret(this.secretName, this.namespace);
     } catch (error: any) {
-      CloudRunnerLogger.log(`Failed to cleanup secret, error: ${error.response.body.reason}`);
+      CloudRunnerLogger.log(`Failed to cleanup secret`);
+      CloudRunnerLogger.log(error.response.body.reason);
     }
     CloudRunnerLogger.log('cleaned up Secret, Job and Pod');
     CloudRunnerLogger.log('cleaning up finished');
