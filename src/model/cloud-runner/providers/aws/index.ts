@@ -29,22 +29,8 @@ class AWSBuildEnvironment implements ProviderInterface {
 
     return [];
   }
-  async inspectResources(): Promise<ProviderResource> {
-    await new Promise((result) => result);
-
-    return {
-      Name: await TaskService.awsDescribeJob(``),
-    };
-  }
   listWorkflow(): Promise<ProviderWorkflow[]> {
     throw new Error('Method not implemented.');
-  }
-  async inspectWorkflow(): Promise<ProviderWorkflow> {
-    await new Promise((result) => result);
-
-    return {
-      Name: await TaskService.awsDescribeJob(``),
-    };
   }
   async watchWorkflow(): Promise<string> {
     return await TaskService.watch();

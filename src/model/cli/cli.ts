@@ -123,8 +123,10 @@ export class Cli {
     const buildParameter = await BuildParameters.create();
 
     await CloudRunner.setup(buildParameter);
+    const result = await CloudRunner.Provider.listResources();
+    CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
 
-    return (await CloudRunner.Provider.listResources()).map((x) => x.Name);
+    return result.map((x) => x.Name);
   }
 
   @CliFunction(`list-worfklow`, `lists running workflows`)
@@ -143,24 +145,6 @@ export class Cli {
     await CloudRunner.setup(buildParameter);
 
     return await CloudRunner.Provider.watchWorkflow();
-  }
-
-  @CliFunction(`inspect-resource`, `inspects details of an active resource`)
-  public static async InspectResource(): Promise<string> {
-    const buildParameter = await BuildParameters.create();
-
-    await CloudRunner.setup(buildParameter);
-
-    return (await CloudRunner.Provider.inspectResources()).Name;
-  }
-
-  @CliFunction(`inspect-workflow`, `inspects details of a running workflow`)
-  public static async InspectWorkflow(): Promise<string> {
-    const buildParameter = await BuildParameters.create();
-
-    await CloudRunner.setup(buildParameter);
-
-    return (await CloudRunner.Provider.inspectWorkflow()).Name;
   }
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)

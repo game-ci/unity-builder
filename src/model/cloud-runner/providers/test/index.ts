@@ -10,13 +10,7 @@ class TestCloudRunner implements ProviderInterface {
   listResources(): Promise<ProviderResource[]> {
     throw new Error('Method not implemented.');
   }
-  inspectResources(): Promise<ProviderResource> {
-    throw new Error('Method not implemented.');
-  }
   listWorkflow(): Promise<ProviderWorkflow[]> {
-    throw new Error('Method not implemented.');
-  }
-  inspectWorkflow(): Promise<ProviderWorkflow> {
     throw new Error('Method not implemented.');
   }
   watchWorkflow(): Promise<string> {

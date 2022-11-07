@@ -54,8 +54,6 @@ export interface ProviderInterface {
     baseDependencies: boolean,
   ): Promise<string>;
   listResources(): Promise<ProviderResource[]>;
-  inspectResources(): Promise<ProviderResource>;
   listWorkflow(): Promise<ProviderWorkflow[]>;
-  inspectWorkflow(): Promise<ProviderWorkflow>;
   watchWorkflow(): Promise<string>;
 }
