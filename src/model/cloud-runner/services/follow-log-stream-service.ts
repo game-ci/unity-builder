@@ -17,17 +17,16 @@ export class FollowLogStreamService {
       core.setOutput('build-result', 'failed');
       core.setFailed('unity build failed');
       core.error('BUILD FAILED!');
-    } else if (CloudRunner.buildParameters.cloudRunnerIntegrationTests && message.includes(': Listening for Jobs')) {
+    } else if (CloudRunner.buildParameters.cloudRunnerDebug && message.includes(': Listening for Jobs')) {
       core.setOutput('cloud runner stop watching', 'true');
       shouldReadLogs = false;
       shouldCleanup = false;
       core.warning('cloud runner stop watching');
     }
-    message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
-    if (CloudRunner.buildParameters.cloudRunnerIntegrationTests) {
-      output += message;
+    if (CloudRunner.buildParameters.cloudRunnerDebug) {
+      output += `${message}\n`;
     }
-    CloudRunnerLogger.log(message);
+    CloudRunnerLogger.log(`[${CloudRunnerStatics.logPrefix}] ${message}`);
 
     return { shouldReadLogs, shouldCleanup, output };
   }

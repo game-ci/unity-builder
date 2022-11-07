@@ -2,19 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
-import Input from '../../input';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { Caching } from './caching';
+import { Caching } from '../remote-client/caching';
 import { v4 as uuidv4 } from 'uuid';
-
-describe('Cloud Runner Caching', () => {
+import GitHub from '../../github';
+describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
-});
-describe('Cloud Runner Caching', () => {
   if (process.platform === 'linux') {
-    it('Simple caching works', async () => {
+    it.skip('Simple caching works', async () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -22,7 +19,7 @@ describe('Cloud Runner Caching', () => {
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
       };
-      Input.githubInputEnabled = false;
+      GitHub.githubInputEnabled = false;
       const buildParameter = await BuildParameters.create();
       CloudRunner.buildParameters = buildParameter;
 
@@ -46,8 +43,6 @@ describe('Cloud Runner Caching', () => {
         `${Cli.options.cacheKey}`,
       );
       await CloudRunnerSystem.Run(`du -h ${__dirname}`);
-      await CloudRunnerSystem.Run(`tree ${testFolder}`);
-      await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
 
       // Compare validity to original hash
       expect(fs.readFileSync(path.resolve(testFolder, 'test.txt'), { encoding: 'utf8' }).toString()).toContain(
@@ -56,7 +51,7 @@ describe('Cloud Runner Caching', () => {
       fs.rmdirSync(testFolder, { recursive: true });
       fs.rmdirSync(cacheFolder, { recursive: true });
 
-      Input.githubInputEnabled = true;
+      GitHub.githubInputEnabled = true;
       delete Cli.options;
     }, 1000000);
   }

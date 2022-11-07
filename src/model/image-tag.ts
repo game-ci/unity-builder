@@ -1,6 +1,7 @@
 import Platform from './platform';
 
 import BuildParameters from './build-parameters';
+import Input from './input';
 
 class ImageTag {
   public repository: string;
@@ -83,7 +84,7 @@ class ImageTag {
       case Platform.types.StandaloneWindows:
       case Platform.types.StandaloneWindows64:
         // Can only build windows-il2cpp on a windows based system
-        if (process.platform === 'win32') {
+        if (Input.useIL2Cpp && process.platform === 'win32') {
           // Unity versions before 2019.3 do not support il2cpp
           if (major >= 2020 || (major === 2019 && minor >= 3)) {
             return windowsIl2cpp;
@@ -96,7 +97,7 @@ class ImageTag {
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
-        if (major >= 2020 || (major === 2019 && minor >= 3)) {
+        if ((Input.useIL2Cpp && major >= 2020) || (major === 2019 && minor >= 3)) {
           return linuxIl2cpp;
         }
 

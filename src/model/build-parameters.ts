@@ -9,6 +9,8 @@ import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
+import GitHub from './github';
+import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class BuildParameters {
   public editorVersion!: string;
@@ -45,12 +47,8 @@ class BuildParameters {
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
   public customJobHooks!: string;
-  public cachePushOverrideCommand!: string;
-  public cachePullOverrideCommand!: string;
   public readInputFromOverrideList!: string;
   public readInputOverrideCommand!: string;
-  public checkDependencyHealthOverride!: string;
-  public startDependenciesOverride!: string;
   public cacheKey!: string;
 
   public postBuildSteps!: string;
@@ -63,9 +61,15 @@ class BuildParameters {
   public logId!: string;
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
-  public cloudRunnerIntegrationTests!: boolean;
+  public cloudRunnerDebug!: boolean;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
+  public retainWorkspace!: boolean;
+  public maxRetainedWorkspaces!: number;
+  public useSharedLargePackages!: boolean;
+  public useLz4Compression!: boolean;
+  public garbageCollectionMaxAge!: number;
+  public constantGarbageCollection!: boolean;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -78,13 +82,13 @@ class BuildParameters {
     // ---
     let unitySerial = '';
     if (Input.unityLicensingServer === '') {
-      if (!process.env.UNITY_SERIAL && Input.githubInputEnabled) {
+      if (!process.env.UNITY_SERIAL && GitHub.githubInputEnabled) {
         // No serial was present, so it is a personal license that we need to convert
         if (!process.env.UNITY_LICENSE) {
           throw new Error(`Missing Unity License File and no Serial was found. If this
-                          is a personal license, make sure to follow the activation
-                          steps and set the UNITY_LICENSE GitHub secret or enter a Unity
-                          serial number inside the UNITY_SERIAL GitHub secret.`);
+                            is a personal license, make sure to follow the activation
+                            steps and set the UNITY_LICENSE GitHub secret or enter a Unity
+                            serial number inside the UNITY_SERIAL GitHub secret.`);
         }
         unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
       } else {
@@ -117,36 +121,38 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
-      cloudRunnerCluster: Input.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: Input.cloudRunnerBuilderPlatform,
-      awsBaseStackName: Input.awsBaseStackName,
-      kubeConfig: Input.kubeConfig,
-      cloudRunnerMemory: Input.cloudRunnerMemory,
-      cloudRunnerCpu: Input.cloudRunnerCpu,
-      kubeVolumeSize: Input.kubeVolumeSize,
-      kubeVolume: Input.kubeVolume,
-      postBuildSteps: Input.postBuildSteps,
-      preBuildSteps: Input.preBuildSteps,
-      customJob: Input.customJob,
+      cloudRunnerCluster: CloudRunnerOptions.cloudRunnerCluster,
+      cloudRunnerBuilderPlatform: CloudRunnerOptions.cloudRunnerBuilderPlatform,
+      awsBaseStackName: CloudRunnerOptions.awsBaseStackName,
+      kubeConfig: CloudRunnerOptions.kubeConfig,
+      cloudRunnerMemory: CloudRunnerOptions.cloudRunnerMemory,
+      cloudRunnerCpu: CloudRunnerOptions.cloudRunnerCpu,
+      kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
+      kubeVolume: CloudRunnerOptions.kubeVolume,
+      postBuildSteps: CloudRunnerOptions.postBuildSteps,
+      preBuildSteps: CloudRunnerOptions.preBuildSteps,
+      customJob: CloudRunnerOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: Input.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerIntegrationTests: Input.cloudRunnerTests,
+      cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
+      cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
-      awsStackName: Input.awsBaseStackName,
+      awsStackName: CloudRunnerOptions.awsBaseStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customJobHooks: Input.customJobHooks(),
-      cachePullOverrideCommand: Input.cachePullOverrideCommand(),
-      cachePushOverrideCommand: Input.cachePushOverrideCommand(),
-      readInputOverrideCommand: Input.readInputOverrideCommand(),
-      readInputFromOverrideList: Input.readInputFromOverrideList(),
-      kubeStorageClass: Input.kubeStorageClass,
-      checkDependencyHealthOverride: Input.checkDependencyHealthOverride,
-      startDependenciesOverride: Input.startDependenciesOverride,
-      cacheKey: Input.cacheKey,
+      customJobHooks: CloudRunnerOptions.customJobHooks(),
+      readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
+      readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
+      kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
+      cacheKey: CloudRunnerOptions.cacheKey,
+      retainWorkspace: CloudRunnerOptions.retainWorkspaces,
+      useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
+      useLz4Compression: CloudRunnerOptions.useLz4Compression,
+      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
+      constantGarbageCollection: CloudRunnerOptions.constantGarbageCollection,
+      garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
     };
   }
 

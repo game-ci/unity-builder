@@ -4,30 +4,50 @@ import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 
 class Docker {
-  static async run(image, parameters, silent = false) {
+  static async run(
+    image,
+    parameters,
+    silent = false,
+    overrideCommands = '',
+    additionalVariables: any[] = [],
+    options: any = false,
+    entrypointBash: boolean = false,
+  ) {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(image, parameters);
+        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables, entrypointBash);
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
     }
-    await exec(runCommand, undefined, { silent });
+    if (options !== false) {
+      options.silent = silent;
+      await exec(runCommand, undefined, options);
+    } else {
+      await exec(runCommand, undefined, { silent });
+    }
   }
 
-  static getLinuxCommand(image, parameters): string {
+  static getLinuxCommand(
+    image,
+    parameters,
+    overrideCommands = '',
+    additionalVariables: any[] = [],
+    entrypointBash: boolean = false,
+  ): string {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
     const githubWorkflow = path.join(runnerTempPath, '_github_workflow');
     if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
+    const commandPrefix = image === `alpine` ? `/bin/sh` : `/bin/bash`;
 
     return `docker run \
             --workdir /github/workspace \
             --rm \
-            ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
+            ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=/github/workspace \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
@@ -41,8 +61,10 @@ class Docker {
             --volume "${actionFolder}/unity-config:/usr/share/unity3d/config/:z" \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro' : ''} \
+            ${entrypointBash ? `--entrypoint ${commandPrefix}` : ``} \
             ${image} \
-            /bin/bash -c /entrypoint.sh`;
+            ${entrypointBash ? `-c` : `${commandPrefix} -c`} \
+            "${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}"`;
   }
 
   static getWindowsCommand(image: any, parameters: any): string {

@@ -9,7 +9,8 @@ inputs:
   unityVersion:
     required: false
     default: 'auto'
-    description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
+    description:
+      'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
   customImage:
     required: false
     default: ''
@@ -81,91 +82,107 @@ inputs:
   gitPrivateToken:
     required: false
     default: ''
-    description: 'Github private token to pull from github'
+    description: '[CloudRunner] Github private token to pull from github'
   chownFilesTo:
     required: false
     default: ''
-    description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
+    description:
+      'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
   allowDirtyBuild:
     required: false
     default: ''
-    description: 'Allows the branch of the build to be dirty, and still generate the build.'
+    description: '[CloudRunner] Allows the branch of the build to be dirty, and still generate the build.'
   postBuildSteps:
     required: false
     default: ''
-    description: 'run a post build job in yaml format with the keys image, secrets (name, value object array), command string'
+    description:
+      '[CloudRunner] run a post build job in yaml format with the keys image, secrets (name, value object array),
+      command string'
   preBuildSteps:
     required: false
     default: ''
-    description: 'Run a pre build job after the repository setup but before the build job (in yaml format with the keys image, secrets (name, value object array), command line string)'
+    description:
+      '[CloudRunner] Run a pre build job after the repository setup but before the build job (in yaml format with the
+      keys image, secrets (name, value object array), command line string)'
+  customStepFiles:
+    required: false
+    default: ''
+    description:
+      '[CloudRunner] Specify the names (by file name) of custom steps to run before or after cloud runner jobs, must
+      match a yaml step file inside your repo in the folder .game-ci/steps/'
+  customHookFiles:
+    required: false
+    default: ''
+    description:
+      '[CloudRunner] Specify the names (by file name) of custom hooks to run before or after cloud runner jobs, must
+      match a yaml step file inside your repo in the folder .game-ci/hooks/'
   customJobHooks:
     required: false
     default: ''
-    description: 'Specify custom commands and trigger hooks (injects commands into jobs)'
+    description: '[CloudRunner] Specify custom commands and trigger hooks (injects commands into jobs)'
   customJob:
     required: false
     default: ''
-    description: 'Run a custom job instead of the standard build automation for cloud runner (in yaml format with the keys image, secrets (name, value object array), command line string)'
+    description:
+      '[CloudRunner] Run a custom job instead of the standard build automation for cloud runner (in yaml format with the
+      keys image, secrets (name, value object array), command line string)'
   awsBaseStackName:
     default: 'game-ci'
     required: false
-    description: 'The Cloud Formation stack name that must be setup before using this option.'
+    description: '[CloudRunner] The Cloud Formation stack name that must be setup before using this option.'
   cloudRunnerCluster:
     default: 'local'
     required: false
-    description: 'Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must be configured.'
+    description:
+      '[CloudRunner] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
+      be configured.'
   cloudRunnerCpu:
     default: ''
     required: false
-    description: 'Amount of CPU time to assign the remote build container'
+    description: '[CloudRunner] Amount of CPU time to assign the remote build container'
   cloudRunnerMemory:
     default: ''
     required: false
-    description: 'Amount of memory to assign the remote build container'
-  cachePushOverrideCommand:
-    default: ''
-    required: false
-    description: 'A command run every time a file is pushed to cache, formatted with input file path and remote cache path'
-  cachePullOverrideCommand:
-    default: ''
-    required: false
-    description: 'A command run every time before a file is being pulled from cache, formatted with request cache file and destination path'
+    description: '[CloudRunner] Amount of memory to assign the remote build container'
   readInputFromOverrideList:
     default: ''
     required: false
-    description: 'Comma separated list of input value names to read from "input override command"'
+    description: '[CloudRunner] Comma separated list of input value names to read from "input override command"'
   readInputOverrideCommand:
     default: ''
     required: false
-    description: 'Extend game ci by specifying a command to execute to pull input from external source e.g cloud provider secret managers'
+    description:
+      '[CloudRunner] Extend game ci by specifying a command to execute to pull input from external source e.g cloud
+      provider secret managers'
   kubeConfig:
     default: ''
     required: false
-    description: 'Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until completion.'
+    description:
+      '[CloudRunner] Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until
+      completion.'
   kubeVolume:
     default: ''
     required: false
-    description: 'Supply a Persistent Volume Claim name to use for the Unity build.'
+    description: '[CloudRunner] Supply a Persistent Volume Claim name to use for the Unity build.'
   kubeStorageClass:
     default: ''
     required: false
-    description: 'Kubernetes storage class to use for cloud runner jobs, leave empty to install rook cluster.'
+    description:
+      '[CloudRunner] Kubernetes storage class to use for cloud runner jobs, leave empty to install rook cluster.'
   kubeVolumeSize:
     default: '5Gi'
     required: false
-    description: 'Amount of disc space to assign the Kubernetes Persistent Volume'
+    description: '[CloudRunner] Amount of disc space to assign the Kubernetes Persistent Volume'
   cacheKey:
     default: ''
     required: false
-    description: 'Cache key to indicate bucket for cache'
-  checkDependencyHealthOverride:
-    default: ''
+    description: '[CloudRunner] Cache key to indicate bucket for cache'
+  watchToEnd:
+    default: 'true'
     required: false
-    description: 'Use to specify a way to check depdency services health to enable resilient self-starting jobs'
-  startDependenciesOverride:
-    default: ''
-    required: false
-    description: 'Use to specify a way to start depdency services health to enable resilient self-starting jobs'
+    description:
+      '[CloudRunner] Whether or not to watch the build to the end. Can be used for especially long running jobs e.g
+      imports or self-hosted ephemeral runners.'
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

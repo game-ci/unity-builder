@@ -1,9 +1,11 @@
 import BuildParameters from '../../build-parameters';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
+import { ProviderResource } from './provider-resource';
+import { ProviderWorkflow } from './provider-workflow';
 
 export interface ProviderInterface {
-  cleanup(
+  cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -13,7 +15,7 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
-  setup(
+  setupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -23,7 +25,7 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   );
-  runTask(
+  runTaskInWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -39,4 +41,19 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     secrets: CloudRunnerSecret[],
   ): Promise<string>;
+  garbageCollect(
+    // eslint-disable-next-line no-unused-vars
+    filter: string,
+    // eslint-disable-next-line no-unused-vars
+    previewOnly: boolean,
+    // eslint-disable-next-line no-unused-vars
+    olderThan: Number,
+    // eslint-disable-next-line no-unused-vars
+    fullCache: boolean,
+    // eslint-disable-next-line no-unused-vars
+    baseDependencies: boolean,
+  ): Promise<string>;
+  listResources(): Promise<ProviderResource[]>;
+  listWorkflow(): Promise<ProviderWorkflow[]>;
+  watchWorkflow(): Promise<string>;
 }

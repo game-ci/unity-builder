@@ -7,20 +7,20 @@ import CloudRunner from '../cloud-runner';
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      return await WorkflowCompositionRoot.runJob(cloudRunnerStepState.image.toString());
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  private static async runJob(baseImage: any) {
-    try {
       if (CloudRunner.buildParameters.customJob !== '') {
-        return await CustomWorkflow.runCustomJob(CloudRunner.buildParameters.customJob);
+        return await CustomWorkflow.runCustomJobFromString(
+          CloudRunner.buildParameters.customJob,
+          cloudRunnerStepState.environment,
+          cloudRunnerStepState.secrets,
+        );
       }
 
       return await new BuildAutomationWorkflow().run(
-        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
+        new CloudRunnerStepState(
+          cloudRunnerStepState.image.toString(),
+          cloudRunnerStepState.environment,
+          cloudRunnerStepState.secrets,
+        ),
       );
     } catch (error) {
       throw error;

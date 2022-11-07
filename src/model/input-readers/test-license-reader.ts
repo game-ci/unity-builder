@@ -1,10 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import YAML from 'yaml';
-import Input from '../input';
+import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export function ReadLicense() {
-  if (Input.cloudRunnerCluster === 'local') {
+  if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
     return '';
   }
   const pipelineFile = path.join(__dirname, `.github`, `workflows`, `cloud-runner-k8s-pipeline.yml`);
