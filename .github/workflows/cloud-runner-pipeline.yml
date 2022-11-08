@@ -1,7 +1,7 @@
 name: Cloud Runner CI Pipeline
 
 on:
-  push: { branches: [cloud-runner-develop, cloud-runner-preview] }
+  push: { branches: [cloud-runner-develop, cloud-runner-preview, main] }
 
 env:
   GKE_ZONE: 'us-central1'

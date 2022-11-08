@@ -16,6 +16,7 @@ export class TaskService {
     return output;
   }
   public static async awsListStacks(perResultCallback: any = false) {
+    CloudRunnerLogger.log(`List Stacks`);
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
@@ -55,6 +56,7 @@ export class TaskService {
     }
   }
   public static async awsListTasks(perResultCallback: any = false) {
+    CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
     const ecs = new AWS.ECS();
     const clusters = (await ecs.listClusters().promise()).clusterArns || [];
@@ -88,6 +90,7 @@ export class TaskService {
     }
   }
   public static async awsListJobs(perResultCallback: any = false) {
+    CloudRunnerLogger.log(`List Jobs`);
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
