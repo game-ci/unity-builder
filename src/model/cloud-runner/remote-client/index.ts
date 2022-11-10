@@ -105,15 +105,14 @@ export class RemoteClient {
   }
 
   static replaceLargePackageReferencesWithSharedReferences() {
-    const manifest = fs.readFileSync(
-      path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`),
-      'utf8',
-    );
-    if (CloudRunner.buildParameters.cloudRunnerDebug) {
-      CloudRunnerLogger.log(manifest);
-    }
     if (CloudRunner.buildParameters.useSharedLargePackages) {
-      manifest.replace(/LargePackages/g, '../../LargePackages');
+      const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
+      let manifest = fs.readFileSync(filePath, 'utf8');
+      if (CloudRunner.buildParameters.cloudRunnerDebug) {
+        CloudRunnerLogger.log(manifest);
+      }
+      manifest = manifest.replace(/LargePackages/g, '../../LargePackages');
+      fs.writeFileSync(filePath, manifest);
     }
   }
 

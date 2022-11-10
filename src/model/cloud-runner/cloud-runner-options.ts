@@ -98,7 +98,7 @@ class CloudRunnerOptions {
   }
 
   static get cloudRunnerBranch() {
-    return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'cloud-runner-develop';
+    return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'main';
   }
 
   static get cloudRunnerCluster() {
