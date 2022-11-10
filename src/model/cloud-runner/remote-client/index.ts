@@ -111,7 +111,7 @@ export class RemoteClient {
       if (CloudRunner.buildParameters.cloudRunnerDebug) {
         CloudRunnerLogger.log(manifest);
       }
-      manifest = manifest.replace(/LargePackages/g, '../../LargePackages');
+      manifest = manifest.replace(/LargeContent/g, '../../LargeContent');
       fs.writeFileSync(filePath, manifest);
     }
   }
