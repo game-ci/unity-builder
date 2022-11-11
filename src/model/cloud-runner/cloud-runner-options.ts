@@ -220,21 +220,19 @@ class CloudRunnerOptions {
   }
 
   static get watchCloudRunnerToEnd(): boolean {
-    const input = CloudRunnerOptions.getInput(`watchToEnd`);
-
-    return input !== 'false';
+    return (CloudRunnerOptions.getInput(`watchToEnd`) || true) !== 'false';
   }
 
   public static get useSharedLargePackages(): boolean {
-    return CloudRunnerOptions.getInput(`useSharedLargePackages`) || false;
+    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || false) !== 'false';
   }
 
   public static get useSharedBuilder(): boolean {
-    return CloudRunnerOptions.getInput(`useSharedBuilder`) || true;
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || true) !== 'false';
   }
 
   public static get useLz4Compression(): boolean {
-    return CloudRunnerOptions.getInput(`useLz4Compression`) || true;
+    return (CloudRunnerOptions.getInput(`useLz4Compression`) || true) !== false;
   }
 
   // ### ### ###
