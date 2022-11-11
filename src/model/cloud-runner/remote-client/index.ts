@@ -108,7 +108,7 @@ export class RemoteClient {
     if (CloudRunner.buildParameters.useSharedLargePackages) {
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
-      manifest = manifest.replace('LargeContent', '../../LargeContent');
+      manifest = manifest.replace(/LargeContent/g, '../../LargeContent');
       fs.writeFileSync(filePath, manifest);
       if (CloudRunner.buildParameters.cloudRunnerDebug) {
         CloudRunnerLogger.log(manifest);
