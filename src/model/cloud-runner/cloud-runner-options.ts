@@ -224,7 +224,7 @@ class CloudRunnerOptions {
   }
 
   public static get useSharedLargePackages(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || false) !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') !== 'false';
   }
 
   public static get useSharedBuilder(): boolean {
