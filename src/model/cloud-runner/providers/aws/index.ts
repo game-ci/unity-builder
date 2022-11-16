@@ -9,7 +9,6 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSJobStack as AwsJobStack } from './aws-job-stack';
 import { AWSBaseStack as AwsBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
-import { TertiaryResourcesService } from './services/tertiary-resources-service';
 import { GarbageCollectionService } from './services/garbage-collection-service';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
@@ -22,10 +21,9 @@ class AWSBuildEnvironment implements ProviderInterface {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
   async listResources(): Promise<ProviderResource[]> {
-    await TaskService.awsListJobs();
-    await TertiaryResourcesService.awsListLogGroups();
-    await TaskService.awsListTasks();
-    await TaskService.awsListStacks();
+    await TaskService.getCloudFormationJobStacks();
+    await TaskService.getLogGroups();
+    await TaskService.getTasks();
 
     return [];
   }
@@ -37,7 +35,7 @@ class AWSBuildEnvironment implements ProviderInterface {
   }
 
   async listOtherResources(): Promise<string> {
-    await TertiaryResourcesService.awsListLogGroups();
+    await TaskService.getLogGroups();
 
     return '';
   }

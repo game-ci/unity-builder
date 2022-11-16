@@ -3,6 +3,7 @@ import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
+import { ListObjectsRequest } from 'aws-sdk/clients/s3';
 
 export class TaskService {
   static async watch() {
@@ -15,16 +16,19 @@ export class TaskService {
 
     return output;
   }
-  public static async awsListStacks(perResultCallback: any = false) {
-    CloudRunnerLogger.log(`List Stacks`);
+  public static async getCloudFormationJobStacks() {
+    const result: any[] = [];
+    CloudRunnerLogger.log(``);
+    CloudRunnerLogger.log(`List Cloud Formation Stacks`);
     process.env.AWS_REGION = Input.region;
     const CF = new AWS.CloudFormation();
     const stacks =
       (await CF.listStacks().promise()).StackSummaries?.filter(
-        (_x) => _x.StackStatus !== 'DELETE_COMPLETE', // &&
-        // _x.TemplateDescription === TaskDefinitionFormation.description.replace('\n', ''),
+        (_x) =>
+          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
       ) || [];
-    CloudRunnerLogger.log(`Stacks ${stacks.length}`);
+    CloudRunnerLogger.log(``);
+    CloudRunnerLogger.log(`Cloud Formation Stacks ${stacks.length}`);
     for (const element of stacks) {
       const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
 
@@ -33,13 +37,14 @@ export class TaskService {
           ageDate.getHours() / 24,
         )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
       );
-      if (perResultCallback) await perResultCallback(element);
+      result.push(element);
     }
     const baseStacks =
       (await CF.listStacks().promise()).StackSummaries?.filter(
         (_x) =>
           _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription === BaseStackFormation.baseStackDecription,
       ) || [];
+    CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`Base Stacks ${baseStacks.length}`);
     for (const element of baseStacks) {
       const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
@@ -49,18 +54,20 @@ export class TaskService {
           ageDate.getHours() / 24,
         )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
       );
-      if (perResultCallback) await perResultCallback(element);
+      result.push(element);
     }
-    if (stacks === undefined) {
-      return;
-    }
+    CloudRunnerLogger.log(``);
+
+    return result;
   }
-  public static async awsListTasks(perResultCallback: any = false) {
+  public static async getTasks() {
+    const result: any[] = [];
+    CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
     const ecs = new AWS.ECS();
     const clusters = (await ecs.listClusters().promise()).clusterArns || [];
-    CloudRunnerLogger.log(`Clusters ${clusters.length}`);
+    CloudRunnerLogger.log(`Task Clusters ${clusters.length}`);
     for (const element of clusters) {
       const input: AWS.ECS.ListTasksRequest = {
         cluster: element,
@@ -71,6 +78,7 @@ export class TaskService {
         const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
         const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
         if (describeList.length === 0) {
+          CloudRunnerLogger.log(`No Tasks`);
           continue;
         }
         CloudRunnerLogger.log(`Tasks ${describeList.length}`);
@@ -84,31 +92,13 @@ export class TaskService {
             CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
             continue;
           }
-          if (perResultCallback) await perResultCallback(taskElement, element);
+          result.push({ taskElement, element });
         }
       }
     }
-  }
-  public static async awsListJobs(perResultCallback: any = false) {
-    CloudRunnerLogger.log(`List Jobs`);
-    process.env.AWS_REGION = Input.region;
-    const CF = new AWS.CloudFormation();
-    const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
-        (_x) =>
-          _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
-      ) || [];
-    CloudRunnerLogger.log(`Stacks ${stacks.length}`);
-    for (const element of stacks) {
-      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+    CloudRunnerLogger.log(``);
 
-      CloudRunnerLogger.log(
-        `Task Stack ${element.StackName} - Age D${Math.floor(
-          ageDate.getHours() / 24,
-        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
-      );
-      if (perResultCallback) await perResultCallback(element);
-    }
+    return result;
   }
   public static async awsDescribeJob(job: string) {
     process.env.AWS_REGION = Input.region;
@@ -130,5 +120,48 @@ export class TaskService {
     CloudRunnerLogger.log(message);
 
     return message;
+  }
+  public static async getLogGroups() {
+    const result: any[] = [];
+    process.env.AWS_REGION = Input.region;
+    const ecs = new AWS.CloudWatchLogs();
+    let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {
+      /* logGroupNamePrefix: 'game-ci' */
+    };
+    let logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
+    const logGroups = logGroupsDescribe.logGroups || [];
+    while (logGroupsDescribe.nextToken) {
+      logStreamInput = { /* logGroupNamePrefix: 'game-ci',*/ nextToken: logGroupsDescribe.nextToken };
+      logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
+      logGroups.push(...(logGroupsDescribe?.logGroups || []));
+    }
+
+    CloudRunnerLogger.log(`Log Groups ${logGroups.length}`);
+    for (const element of logGroups) {
+      if (element.creationTime === undefined) {
+        CloudRunnerLogger.log(`Skipping ${element.logGroupName} no createdAt date`);
+        continue;
+      }
+      const ageDate: Date = new Date(Date.now() - element.creationTime);
+
+      CloudRunnerLogger.log(
+        `Task Stack ${element.logGroupName} - Age D${Math.floor(
+          ageDate.getHours() / 24,
+        )} H${ageDate.getHours()} M${ageDate.getMinutes()}`,
+      );
+      result.push(element);
+    }
+
+    return result;
+  }
+  public static async getLocks() {
+    process.env.AWS_REGION = Input.region;
+    const s3 = new AWS.S3();
+    const listRequest: ListObjectsRequest = {
+      Bucket: `game-ci-test-storage`,
+    };
+    const results = await s3.listObjects(listRequest).promise();
+
+    return results.Contents || [];
   }
 }

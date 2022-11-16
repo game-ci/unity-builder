@@ -2,7 +2,6 @@ import AWS from 'aws-sdk';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { TaskService } from './task-service';
-import { TertiaryResourcesService } from './tertiary-resources-service';
 
 export class GarbageCollectionService {
   static isOlderThan1day(date: any) {
@@ -17,14 +16,17 @@ export class GarbageCollectionService {
     const ecs = new AWS.ECS();
     const cwl = new AWS.CloudWatchLogs();
     const taskDefinitionsInUse = new Array();
-    await TaskService.awsListTasks(async (taskElement, element) => {
+    const tasks = await TaskService.getTasks();
+    for (const task of tasks) {
+      const { taskElement, element } = task;
       taskDefinitionsInUse.push(taskElement.taskDefinitionArn);
       if (deleteResources && (!OneDayOlderOnly || GarbageCollectionService.isOlderThan1day(taskElement.CreatedAt))) {
         CloudRunnerLogger.log(`Stopping task ${taskElement.containers?.[0].name}`);
         await ecs.stopTask({ task: taskElement.taskArn || '', cluster: element }).promise();
       }
-    });
-    await TaskService.awsListStacks(async (element) => {
+    }
+    const jobStacks = await TaskService.getCloudFormationJobStacks();
+    for (const element of jobStacks) {
       if (
         (await CF.describeStackResources({ StackName: element.StackName }).promise()).StackResources?.some(
           (x) => x.ResourceType === 'AWS::ECS::TaskDefinition' && taskDefinitionsInUse.includes(x.PhysicalResourceId),
@@ -44,8 +46,9 @@ export class GarbageCollectionService {
         const deleteStackInput: AWS.CloudFormation.DeleteStackInput = { StackName: element.StackName };
         await CF.deleteStack(deleteStackInput).promise();
       }
-    });
-    await TertiaryResourcesService.awsListLogGroups(async (element) => {
+    }
+    const logGroups = await TaskService.getLogGroups();
+    for (const element of logGroups) {
       if (
         deleteResources &&
         (!OneDayOlderOnly || GarbageCollectionService.isOlderThan1day(new Date(element.createdAt)))
@@ -53,6 +56,11 @@ export class GarbageCollectionService {
         CloudRunnerLogger.log(`Deleting ${element.logGroupName}`);
         await cwl.deleteLogGroup({ logGroupName: element.logGroupName || '' }).promise();
       }
-    });
+    }
+
+    const locks = await TaskService.getLocks();
+    for (const element of locks) {
+      CloudRunnerLogger.log(`Lock: ${element.Key}`);
+    }
   }
 }
