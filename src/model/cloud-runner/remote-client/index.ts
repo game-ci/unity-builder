@@ -71,7 +71,7 @@ export class RemoteClient {
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
       );
-      await CloudRunnerSystem.Run(`git reset --hard ${CloudRunner.buildParameters.gitSha}`);
+      await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
       return;
     }
