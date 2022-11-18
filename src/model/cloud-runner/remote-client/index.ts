@@ -71,7 +71,7 @@ export class RemoteClient {
       RemoteClientLogger.log(
         `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
       );
-      await CloudRunnerSystem.Run(`git reset --hard ${CloudRunner.buildParameters.gitSha}`);
+      await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
       return;
     }
@@ -108,7 +108,7 @@ export class RemoteClient {
     if (CloudRunner.buildParameters.useSharedLargePackages) {
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
-      manifest = manifest.replace(/LargeContent/g, '../../LargeContent');
+      manifest = manifest.replace(/LargeContent/g, '../../../LargeContent');
       fs.writeFileSync(filePath, manifest);
       if (CloudRunner.buildParameters.cloudRunnerDebug) {
         CloudRunnerLogger.log(`Package Manifest`);

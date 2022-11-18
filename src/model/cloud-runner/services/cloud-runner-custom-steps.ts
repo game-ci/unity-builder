@@ -8,6 +8,7 @@ import path from 'path';
 import * as fs from 'fs';
 import Input from '../../input';
 import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
@@ -141,6 +142,9 @@ export class CloudRunnerCustomSteps {
 
     // }
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;
+    if (CloudRunner.buildParameters?.cloudRunnerDebug) {
+      CloudRunnerLogger.log(`Parsing: ${steps}`);
+    }
     const object: CustomStep[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
     for (const step of object) {
       CloudRunnerCustomSteps.ConvertYamlSecrets(step);
