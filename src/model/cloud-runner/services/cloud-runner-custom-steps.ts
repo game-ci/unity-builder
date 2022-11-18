@@ -1,5 +1,4 @@
 import YAML from 'yaml';
-import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunner from '../cloud-runner';
 import * as core from '@actions/core';
 import { CustomWorkflow } from '../workflows/custom-workflow';
@@ -9,6 +8,7 @@ import * as fs from 'fs';
 import Input from '../../input';
 import CloudRunnerOptions from '../cloud-runner-options';
 import CloudRunnerLogger from './cloud-runner-logger';
+import { CustomStep } from './custom-step';
 
 export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
@@ -153,7 +153,10 @@ export class CloudRunnerCustomSteps {
       } else {
         for (const secret of step.secrets) {
           if (secret.ParameterValue === undefined && process.env[secret.EnvironmentVariable] !== undefined) {
-            secret.ParameterValue === process.env[secret.EnvironmentVariable];
+            if (CloudRunner.buildParameters?.cloudRunnerDebug) {
+              CloudRunnerLogger.log(`Injecting custom step ${step.name} from env var ${secret.ParameterKey}`);
+            }
+            secret.ParameterValue === process.env[secret.ParameterKey];
           }
         }
       }
@@ -206,11 +209,4 @@ export class CloudRunnerCustomSteps {
 
     return output;
   }
-}
-export class CustomStep {
-  public commands;
-  public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
-  public name;
-  public image: string = `ubuntu`;
-  public hook!: string;
 }
