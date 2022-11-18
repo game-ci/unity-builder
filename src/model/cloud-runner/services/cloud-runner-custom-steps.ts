@@ -106,25 +106,7 @@ export class CloudRunnerCustomSteps {
   - name: awsSecretAccessKey
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
-    value: ${process.env.AWS_REGION || ``}
-- name: steam-deploy
-  image: cm2network/steamcmd
-  hook: after
-  commands: |
-    /home/steam/steamcmd/steamcmd.sh
-  secrets:
-  - name: STEAM_USERNAME
-    value: ${process.env.STEAM_USERNAME || ``}
-  - name: STEAM_PASSWORD
-    value: ${process.env.STEAM_PASSWORD || ``}
-  - name: STEAM_APPID
-    value: ${process.env.STEAM_APPID || ``}
-  - name: STEAM_CONFIG_VDF
-    value: ${process.env.STEAM_CONFIG_VDF || ``}
-  - name: STEAM_SSFN_FILE_NAME
-    value: ${process.env.STEAM_SSFN_FILE_NAME || ``}
-  - name: STEAM_SSFN_FILE_CONTENTS
-    value: ${process.env.STEAM_SSFN_FILE_CONTENTS || ``}`,
+    value: ${process.env.AWS_REGION || ``}`,
     ).filter((x) => CloudRunnerOptions.customStepFiles.includes(x.name) && x.hook === hookLifecycle);
     if (builtInCustomSteps.length > 0) {
       results.push(...builtInCustomSteps);
