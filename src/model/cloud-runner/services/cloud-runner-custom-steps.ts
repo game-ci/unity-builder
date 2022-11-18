@@ -124,7 +124,7 @@ export class CloudRunnerCustomSteps {
   - name: STEAM_SSFN_FILE_NAME
     value: ${process.env.STEAM_SSFN_FILE_NAME || ``}
   - name: STEAM_SSFN_FILE_CONTENTS
-    value: ${process.env.STEAM_APPID || ``}`,
+    value: ${process.env.STEAM_SSFN_FILE_CONTENTS || ``}`,
     ).filter((x) => CloudRunnerOptions.customStepFiles.includes(x.name) && x.hook === hookLifecycle);
     if (builtInCustomSteps.length > 0) {
       results.push(...builtInCustomSteps);
