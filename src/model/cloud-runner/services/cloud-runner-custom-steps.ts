@@ -150,6 +150,12 @@ export class CloudRunnerCustomSteps {
       CloudRunnerCustomSteps.ConvertYamlSecrets(step);
       if (step.secrets === undefined) {
         step.secrets = [];
+      } else {
+        for (const secret of step.secrets) {
+          if (secret.ParameterValue === undefined && process.env[secret.EnvironmentVariable] !== undefined) {
+            secret.ParameterValue === process.env[secret.EnvironmentVariable];
+          }
+        }
       }
       if (step.image === undefined) {
         step.image = `ubuntu`;
