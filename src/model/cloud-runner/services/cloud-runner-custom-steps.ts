@@ -156,7 +156,7 @@ export class CloudRunnerCustomSteps {
             if (CloudRunner.buildParameters?.cloudRunnerDebug) {
               CloudRunnerLogger.log(`Injecting custom step ${step.name} from env var ${secret.ParameterKey}`);
             }
-            secret.ParameterValue === process.env[secret.ParameterKey];
+            secret.ParameterValue = process.env[secret.ParameterKey] || ``;
           }
         }
       }
