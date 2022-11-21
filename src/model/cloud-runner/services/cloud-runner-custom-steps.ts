@@ -52,6 +52,56 @@ export class CloudRunnerCustomSteps {
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
     value: ${process.env.AWS_REGION || ``}
+- name: aws-s3-pull-build
+  image: amazon/aws-cli
+  commands: |
+    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $AWS_DEFAULT_REGION --profile default
+    aws s3 ls game-ci-test-storage/cloud-runner-cache/ || true
+    aws s3 ls game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build || true
+    aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/$BUILD_GUID_2.tar.lz4 /data/cache/$CACHE_KEY/build/$BUILD_GUID_2.tar.lz4
+  secrets:
+    - name: awsAccessKeyId
+    - name: awsSecretAccessKey
+    - name: awsDefaultRegion
+    - name: BUILD_GUID_2
+- name: steam-deploy-client
+  image: steamcmd/steamcmd
+  commands: |
+    apt-get update
+    apt-get install -y curl tar coreutils git tree > /dev/null
+    curl -s https://gist.githubusercontent.com/frostebite/1d56f5505b36b403b64193b7a6e54cdc/raw/fa6639ed4ef750c4268ea319d63aa80f52712ffb/deploy-client-steam.sh | bash
+  secrets:
+    - name: STEAM_USERNAME
+    - name: STEAM_PASSWORD
+    - name: STEAM_APPID
+    - name: STEAM_SSFN_FILE_NAME
+    - name: STEAM_SSFN_FILE_CONTENTS
+    - name: STEAM_CONFIG_VDF_1
+    - name: STEAM_CONFIG_VDF_2
+    - name: STEAM_CONFIG_VDF_3
+    - name: STEAM_CONFIG_VDF_4
+    - name: BUILD_GUID_2
+    - name: RELEASE_BRANCH
+- name: steam-deploy-project
+  image: steamcmd/steamcmd
+  commands: |
+    apt-get update
+    apt-get install -y curl tar coreutils git tree > /dev/null
+    curl -s https://gist.githubusercontent.com/frostebite/969da6a41002a0e901174124b643709f/raw/02403e53fb292026cba81ddcf4ff35fc1eba111d/steam-deploy-project.sh | bash
+  secrets:
+    - name: STEAM_USERNAME
+    - name: STEAM_PASSWORD
+    - name: STEAM_APPID
+    - name: STEAM_SSFN_FILE_NAME
+    - name: STEAM_SSFN_FILE_CONTENTS
+    - name: STEAM_CONFIG_VDF_1
+    - name: STEAM_CONFIG_VDF_2
+    - name: STEAM_CONFIG_VDF_3
+    - name: STEAM_CONFIG_VDF_4
+    - name: BUILD_GUID_2
+    - name: RELEASE_BRANCH
 - name: aws-s3-upload-cache
   image: amazon/aws-cli
   hook: after
