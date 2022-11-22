@@ -60,7 +60,6 @@ class ImageEnvironmentFactory {
       { name: 'GITHUB_HEAD_REF', value: process.env.GITHUB_HEAD_REF },
       { name: 'GITHUB_BASE_REF', value: process.env.GITHUB_BASE_REF },
       { name: 'GITHUB_EVENT_NAME', value: process.env.GITHUB_EVENT_NAME },
-      { name: 'GITHUB_WORKSPACE', value: '/github/workspace' },
       { name: 'GITHUB_ACTION', value: process.env.GITHUB_ACTION },
       { name: 'GITHUB_EVENT_PATH', value: process.env.GITHUB_EVENT_PATH },
       { name: 'RUNNER_OS', value: process.env.RUNNER_OS },
