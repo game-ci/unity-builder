@@ -67,6 +67,21 @@ else
 }
 
 #
+# Create Android Keystore if available
+#
+
+if ( "$Env:BUILD_TARGET" -eq "Android" -and -not ([string]::IsNullOrEmpty("$Env:ANDROID_KEYSTORE_NAME")) -and -not ([string]::IsNullOrEmpty("$Env:ANDROID_KEYSTORE_BASE64")) )
+{
+    Write-Output "Creating Android keystore."
+    $keystorePath = "$Env:GITHUB_WORKSPACE\$Env:ANDROID_KEYSTORE_NAME"
+    [System.IO.File]::WriteAllBytes($keystorePath, [System.Convert]::FromBase64String($Env:ANDROID_KEYSTORE_BASE64))
+    Write-Output "Created Android keystore."
+}
+else {
+    Write-Output "Not creating Android keystore."
+}
+
+#
 # Pre-build debug information
 #
 
