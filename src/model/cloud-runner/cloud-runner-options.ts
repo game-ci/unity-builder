@@ -57,6 +57,13 @@ class CloudRunnerOptions {
   }
 
   // ### ### ###
+  // GitHub  parameters
+  // ### ### ###
+  static get githubChecksEnabled() {
+    return CloudRunnerOptions.getInput('githubChecksEnabled') || false;
+  }
+
+  // ### ### ###
   // Git syncronization parameters
   // ### ### ###
 
@@ -221,6 +228,10 @@ class CloudRunnerOptions {
 
   static get watchCloudRunnerToEnd(): boolean {
     return (CloudRunnerOptions.getInput(`watchToEnd`) || true) !== 'false';
+  }
+
+  static get asyncCloudRunner() {
+    return CloudRunnerOptions.getInput('asyncCloudRunner') || false;
   }
 
   public static get useSharedLargePackages(): boolean {
