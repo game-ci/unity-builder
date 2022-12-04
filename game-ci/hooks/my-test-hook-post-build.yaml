@@ -1,0 +1,3 @@
+hook: after-build
+commands: |
+  echo "after-build hook test!"

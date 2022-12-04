@@ -1,9 +1,9 @@
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
-import Input from '../input';
+import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export class GenericInputReader {
   public static async Run(command) {
-    if (Input.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
       return '';
     }
 

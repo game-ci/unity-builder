@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Default: example
     Description: A name for the service
+  LogGroupName:
+    Type: String
+    Default: example
+    Description: Name to use for the log group created for this task
   ImageUrl:
     Type: String
     Default: nginx
@@ -68,7 +72,7 @@ Resources:
   LogGroup:
     Type: 'AWS::Logs::LogGroup'
     Properties:
-      LogGroupName: !Ref ServiceName
+      LogGroupName: !Ref LogGroupName
     Metadata:
       'AWS::CloudFormation::Designer':
         id: aece53ae-b82d-4267-bc16-ed964b05db27
@@ -78,7 +82,7 @@ Resources:
       FilterPattern: ''
       RoleArn:
         'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:CloudWatchIAMRole'
-      LogGroupName: !Ref ServiceName
+      LogGroupName: !Ref LogGroupName
       DestinationArn:
         'Fn::GetAtt':
           - KinesisStream
@@ -147,7 +151,7 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref ServiceName
+              awslogs-group: !Ref LogGroupName
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: !Ref ServiceName
     DependsOn:

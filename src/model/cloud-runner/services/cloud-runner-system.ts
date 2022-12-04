@@ -2,6 +2,20 @@ import { exec } from 'child_process';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 
 export class CloudRunnerSystem {
+  public static async RunAndReadLines(command: string): Promise<string[]> {
+    const result = await CloudRunnerSystem.Run(command, false, true);
+
+    return result
+      .split(`\n`)
+      .map((x) => x.replace(`\r`, ``))
+      .filter((x) => x !== ``)
+      .map((x) => {
+        const lineValues = x.split(` `);
+
+        return lineValues[lineValues.length - 1];
+      });
+  }
+
   public static async Run(command: string, suppressError = false, suppressLogs = false) {
     for (const element of command.split(`\n`)) {
       if (!suppressLogs) {

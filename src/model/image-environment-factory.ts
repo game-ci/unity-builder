@@ -7,8 +7,8 @@ class Parameter {
 }
 
 class ImageEnvironmentFactory {
-  public static getEnvVarString(parameters) {
-    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters);
+  public static getEnvVarString(parameters, additionalVariables: any[] = []) {
+    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
     let string = '';
     for (const p of environmentVariables) {
       if (p.value === '' || p.value === undefined) {
@@ -16,6 +16,7 @@ class ImageEnvironmentFactory {
       }
       if (p.name !== 'ANDROID_KEYSTORE_BASE64' && p.value.toString().includes(`\n`)) {
         string += `--env ${p.name} `;
+        process.env[p.name] = p.value.toString();
         continue;
       }
 
@@ -24,8 +25,8 @@ class ImageEnvironmentFactory {
 
     return string;
   }
-  public static getEnvironmentVariables(parameters: BuildParameters) {
-    const environmentVariables: Parameter[] = [
+  public static getEnvironmentVariables(parameters: BuildParameters, additionalVariables: any[] = []) {
+    let environmentVariables: Parameter[] = [
       { name: 'UNITY_LICENSE', value: process.env.UNITY_LICENSE || ReadLicense() },
       { name: 'UNITY_LICENSE_FILE', value: process.env.UNITY_LICENSE_FILE },
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
@@ -59,7 +60,6 @@ class ImageEnvironmentFactory {
       { name: 'GITHUB_HEAD_REF', value: process.env.GITHUB_HEAD_REF },
       { name: 'GITHUB_BASE_REF', value: process.env.GITHUB_BASE_REF },
       { name: 'GITHUB_EVENT_NAME', value: process.env.GITHUB_EVENT_NAME },
-      { name: 'GITHUB_WORKSPACE', value: '/github/workspace' },
       { name: 'GITHUB_ACTION', value: process.env.GITHUB_ACTION },
       { name: 'GITHUB_EVENT_PATH', value: process.env.GITHUB_EVENT_PATH },
       { name: 'RUNNER_OS', value: process.env.RUNNER_OS },
@@ -67,6 +67,26 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
+    if (parameters.cloudRunnerCluster === 'local-docker') {
+      for (const element of additionalVariables) {
+        if (
+          environmentVariables.find(
+            (x) => element !== undefined && element.name !== undefined && x.name === element.name,
+          ) === undefined
+        ) {
+          environmentVariables.push(element);
+        }
+      }
+      for (const variable of environmentVariables) {
+        if (
+          environmentVariables.find(
+            (x) => variable !== undefined && variable.name !== undefined && x.name === variable.name,
+          ) === undefined
+        ) {
+          environmentVariables = environmentVariables.filter((x) => x !== variable);
+        }
+      }
+    }
     if (parameters.sshAgent) environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
 
     return environmentVariables;

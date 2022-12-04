@@ -1,72 +1,137 @@
-import { CloudRunner, Input } from '../..';
-import ImageEnvironmentFactory from '../../image-environment-factory';
+import { Input } from '../..';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerBuildCommandProcessor } from './cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
+import CloudRunnerOptionsReader from './cloud-runner-options-reader';
+import BuildParameters from '../../build-parameters';
+import CloudRunnerOptions from '../cloud-runner-options';
+import * as core from '@actions/core';
 
 export class TaskParameterSerializer {
-  public static readBuildEnvironmentVariables(): CloudRunnerEnvironmentVariable[] {
-    return [
-      {
-        name: 'ContainerMemory',
-        value: CloudRunner.buildParameters.cloudRunnerMemory,
-      },
-      {
-        name: 'ContainerCpu',
-        value: CloudRunner.buildParameters.cloudRunnerCpu,
-      },
-      {
-        name: 'BUILD_TARGET',
-        value: CloudRunner.buildParameters.targetPlatform,
-      },
-      ...TaskParameterSerializer.serializeBuildParamsAndInput,
-    ];
-  }
-  private static get serializeBuildParamsAndInput() {
-    let array = new Array();
-    array = TaskParameterSerializer.readBuildParameters(array);
-    array = TaskParameterSerializer.readInput(array);
-    const configurableHooks = CloudRunnerBuildCommandProcessor.getHooks(CloudRunner.buildParameters.customJobHooks);
-    const secrets = configurableHooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
-    if (secrets.length > 0) {
-      // eslint-disable-next-line unicorn/no-array-reduce
-      array.push(secrets.reduce((x, y) => [...x, ...y]));
-    }
+  static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
+  public static createCloudRunnerEnvironmentVariables(
+    buildParameters: BuildParameters,
+  ): CloudRunnerEnvironmentVariable[] {
+    const result = this.uniqBy(
+      [
+        {
+          name: 'ContainerMemory',
+          value: buildParameters.cloudRunnerMemory,
+        },
+        {
+          name: 'ContainerCpu',
+          value: buildParameters.cloudRunnerCpu,
+        },
+        {
+          name: 'BUILD_TARGET',
+          value: buildParameters.targetPlatform,
+        },
+        ...TaskParameterSerializer.serializeFromObject(buildParameters),
+        ...TaskParameterSerializer.readInput(),
+        ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
+      ]
+        .filter(
+          (x) =>
+            !TaskParameterSerializer.blocked.has(x.name) &&
+            x.value !== '' &&
+            x.value !== undefined &&
+            x.name !== `CUSTOM_JOB` &&
+            x.name !== `GAMECI_CUSTOM_JOB` &&
+            x.value !== `undefined`,
+        )
+        .map((x) => {
+          x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
+          x.value = `${x.value}`;
 
-    array = array.filter(
-      (x) => x.value !== undefined && x.name !== '0' && x.value !== '' && x.name !== 'prototype' && x.name !== 'length',
+          if (buildParameters.cloudRunnerDebug && Number(x.name) === Number.NaN) {
+            core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
+          }
+
+          return x;
+        }),
+      (item) => item.name,
     );
-    array = array.map((x) => {
-      x.name = Input.ToEnvVarFormat(x.name);
-      x.value = `${x.value}`;
 
-      return x;
+    return result;
+  }
+
+  static uniqBy(a, key) {
+    const seen = {};
+
+    return a.filter(function (item) {
+      const k = key(item);
+
+      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
     });
-
-    return array;
   }
 
-  private static readBuildParameters(array: any[]) {
-    const keys = Object.keys(CloudRunner.buildParameters);
+  public static readBuildParameterFromEnvironment(): BuildParameters {
+    const buildParameters = new BuildParameters();
+    const keys = [
+      ...new Set(
+        Object.getOwnPropertyNames(process.env)
+          .filter((x) => !this.blocked.has(x) && x.startsWith('GAMECI_'))
+          .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
+      ),
+    ];
+
     for (const element of keys) {
-      array.push({
-        name: element,
-        value: CloudRunner.buildParameters[element],
-      });
+      if (element !== `customJob`) {
+        buildParameters[element] = process.env[`GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`];
+      }
     }
-    array.push({ name: 'buildParameters', value: JSON.stringify(CloudRunner.buildParameters) });
+
+    return buildParameters;
+  }
+
+  private static readInput() {
+    return TaskParameterSerializer.serializeFromType(Input);
+  }
+
+  public static ToEnvVarFormat(input): string {
+    return CloudRunnerOptions.ToEnvVarFormat(input);
+  }
+
+  public static UndoEnvVarFormat(element): string {
+    return this.camelize(element.replace('GAMECI_', '').toLowerCase().replace(/_+/g, ' '));
+  }
+
+  private static camelize(string) {
+    return string
+      .replace(/^\w|[A-Z]|\b\w/g, function (word, index) {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, '');
+  }
+
+  private static serializeFromObject(buildParameters) {
+    const array: any[] = [];
+    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
+    for (const element of keys) {
+      array.push(
+        {
+          name: `GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`,
+          value: buildParameters[element],
+        },
+        {
+          name: element,
+          value: buildParameters[element],
+        },
+      );
+    }
 
     return array;
   }
 
-  private static readInput(array: any[]) {
-    const input = Object.getOwnPropertyNames(Input);
+  private static serializeFromType(type) {
+    const array: any[] = [];
+    const input = CloudRunnerOptionsReader.GetProperties();
     for (const element of input) {
-      if (typeof Input[element] !== 'function' && array.filter((x) => x.name === element).length === 0) {
+      if (typeof type[element] !== 'function' && array.filter((x) => x.name === element).length === 0) {
         array.push({
           name: element,
-          value: `${Input[element]}`,
+          value: `${type[element]}`,
         });
       }
     }
@@ -79,17 +144,7 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
-    array.push(
-      ...ImageEnvironmentFactory.getEnvironmentVariables(CloudRunner.buildParameters)
-        .filter((x) => array.every((y) => y.ParameterKey !== x.name))
-        .map((x) => {
-          return {
-            ParameterKey: x.name,
-            EnvironmentVariable: x.name,
-            ParameterValue: x.value,
-          };
-        }),
-    );
+    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
 
     return array;
   }
@@ -102,7 +157,7 @@ export class TaskParameterSerializer {
   s;
   private static tryAddInput(array, key): CloudRunnerSecret[] {
     const value = TaskParameterSerializer.getValue(key);
-    if (value !== undefined && value !== '') {
+    if (value !== undefined && value !== '' && value !== 'null') {
       array.push({
         ParameterKey: key,
         EnvironmentVariable: key,

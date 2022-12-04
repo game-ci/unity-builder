@@ -69,6 +69,7 @@ export class AWSJobStack {
     const secretsMappedToCloudFormationParameters = secrets.map((x) => {
       return { ParameterKey: x.ParameterKey.replace(/[^\dA-Za-z]/g, ''), ParameterValue: x.ParameterValue };
     });
+    const logGroupName = `${this.baseStackName}/${taskDefStackName}`;
     const parameters = [
       {
         ParameterKey: 'EnvironmentName',
@@ -81,6 +82,10 @@ export class AWSJobStack {
       {
         ParameterKey: 'ServiceName',
         ParameterValue: taskDefStackName,
+      },
+      {
+        ParameterKey: 'LogGroupName',
+        ParameterValue: logGroupName,
       },
       {
         ParameterKey: 'Command',
@@ -115,6 +120,7 @@ export class AWSJobStack {
         if (element.StackName === taskDefStackName && element.StackStatus !== 'DELETE_COMPLETE') {
           previousStackExists = true;
           CloudRunnerLogger.log(`Previous stack still exists: ${JSON.stringify(element)}`);
+          await new Promise((promise) => setTimeout(promise, 5000));
         }
       }
     }

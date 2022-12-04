@@ -6,18 +6,18 @@ import * as zlib from 'zlib';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
-import { CloudRunnerBuildCommandProcessor } from '../../services/cloud-runner-build-command-process';
+import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
+import CloudRunnerOptions from '../../cloud-runner-options';
 
 class AWSTaskRunner {
+  public static ECS: AWS.ECS;
+  public static Kinesis: AWS.Kinesis;
   static async runTask(
     taskDef: CloudRunnerAWSTaskDef,
-    ECS: AWS.ECS,
-    CF: AWS.CloudFormation,
     environment: CloudRunnerEnvironmentVariable[],
-    buildGuid: string,
     commands: string,
-  ) {
+  ): Promise<{ output: string; shouldCleanup: boolean }> {
     const cluster = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
     const taskDefinition =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId || '';
@@ -30,7 +30,7 @@ class AWSTaskRunner {
     const streamName =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
 
-    const task = await ECS.runTask({
+    const task = await AWSTaskRunner.ECS.runTask({
       cluster,
       taskDefinition,
       platformVersion: '1.4.0',
@@ -39,7 +39,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment,
-            command: ['-c', CloudRunnerBuildCommandProcessor.ProcessCommands(commands, CloudRunner.buildParameters)],
+            command: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
           },
         ],
       },
@@ -54,20 +54,25 @@ class AWSTaskRunner {
     }).promise();
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
-    await AWSTaskRunner.waitUntilTaskRunning(ECS, taskArn, cluster);
+    await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
     CloudRunnerLogger.log(
-      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(ECS, cluster, taskArn))?.lastStatus}`,
+      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus}`,
     );
-    const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(
-      ECS,
-      CF,
-      taskDef,
-      cluster,
-      taskArn,
-      streamName,
-    );
-    const taskData = await AWSTaskRunner.describeTasks(ECS, cluster, taskArn);
-    const exitCode = taskData.containers?.[0].exitCode;
+    if (!CloudRunnerOptions.watchCloudRunnerToEnd) {
+      const shouldCleanup: boolean = false;
+      const output: string = '';
+      CloudRunnerLogger.log(`Watch Cloud Runner To End: false`);
+
+      return { output, shouldCleanup };
+    }
+
+    CloudRunnerLogger.log(`Streaming...`);
+    const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
+    await new Promise((resolve) => resolve(5000));
+    const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
+    const containerState = taskData.containers?.[0];
+    const exitCode = containerState?.exitCode || undefined;
+    CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
     const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
@@ -85,15 +90,15 @@ class AWSTaskRunner {
     }
   }
 
-  private static async waitUntilTaskRunning(ECS: AWS.ECS, taskArn: string, cluster: string) {
+  private static async waitUntilTaskRunning(taskArn: string, cluster: string) {
     try {
-      await ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
+      await AWSTaskRunner.ECS.waitFor('tasksRunning', { tasks: [taskArn], cluster }).promise();
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
       CloudRunnerLogger.log(
         `Cloud runner job has ended ${
-          (await AWSTaskRunner.describeTasks(ECS, cluster, taskArn)).containers?.[0].lastStatus
+          (await AWSTaskRunner.describeTasks(cluster, taskArn)).containers?.[0].lastStatus
         }`,
       );
 
@@ -102,8 +107,8 @@ class AWSTaskRunner {
     }
   }
 
-  static async describeTasks(ECS: AWS.ECS, clusterName: string, taskArn: string) {
-    const tasks = await ECS.describeTasks({
+  static async describeTasks(clusterName: string, taskArn: string) {
+    const tasks = await AWSTaskRunner.ECS.describeTasks({
       cluster: clusterName,
       tasks: [taskArn],
     }).promise();
@@ -114,17 +119,11 @@ class AWSTaskRunner {
     }
   }
 
-  static async streamLogsUntilTaskStops(
-    ECS: AWS.ECS,
-    CF: AWS.CloudFormation,
-    taskDef: CloudRunnerAWSTaskDef,
-    clusterName: string,
-    taskArn: string,
-    kinesisStreamName: string,
-  ) {
-    const kinesis = new AWS.Kinesis();
-    const stream = await AWSTaskRunner.getLogStream(kinesis, kinesisStreamName);
-    let iterator = await AWSTaskRunner.getLogIterator(kinesis, stream);
+  static async streamLogsUntilTaskStops(clusterName: string, taskArn: string, kinesisStreamName: string) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    CloudRunnerLogger.log(`Streaming...`);
+    const stream = await AWSTaskRunner.getLogStream(kinesisStreamName);
+    let iterator = await AWSTaskRunner.getLogIterator(stream);
 
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
     CloudRunnerLogger.log(`You view the log stream on AWS Cloud Watch: ${logBaseUrl}`);
@@ -134,13 +133,11 @@ class AWSTaskRunner {
     let output = '';
     while (shouldReadLogs) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      const taskData = await AWSTaskRunner.describeTasks(ECS, clusterName, taskArn);
+      const taskData = await AWSTaskRunner.describeTasks(clusterName, taskArn);
       ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
       ({ iterator, shouldReadLogs, output, shouldCleanup } = await AWSTaskRunner.handleLogStreamIteration(
-        kinesis,
         iterator,
         shouldReadLogs,
-        taskDef,
         output,
         shouldCleanup,
       ));
@@ -150,23 +147,18 @@ class AWSTaskRunner {
   }
 
   private static async handleLogStreamIteration(
-    kinesis: AWS.Kinesis,
     iterator: string,
     shouldReadLogs: boolean,
-    taskDef: CloudRunnerAWSTaskDef,
     output: string,
     shouldCleanup: boolean,
   ) {
-    const records = await kinesis
-      .getRecords({
-        ShardIterator: iterator,
-      })
-      .promise();
+    const records = await AWSTaskRunner.Kinesis.getRecords({
+      ShardIterator: iterator,
+    }).promise();
     iterator = records.NextShardIterator || '';
     ({ shouldReadLogs, output, shouldCleanup } = AWSTaskRunner.logRecords(
       records,
       iterator,
-      taskDef,
       shouldReadLogs,
       output,
       shouldCleanup,
@@ -197,7 +189,6 @@ class AWSTaskRunner {
   private static logRecords(
     records,
     iterator: string,
-    taskDef: CloudRunnerAWSTaskDef,
     shouldReadLogs: boolean,
     output: string,
     shouldCleanup: boolean,
@@ -224,24 +215,20 @@ class AWSTaskRunner {
     return { shouldReadLogs, output, shouldCleanup };
   }
 
-  private static async getLogStream(kinesis: AWS.Kinesis, kinesisStreamName: string) {
-    return await kinesis
-      .describeStream({
-        StreamName: kinesisStreamName,
-      })
-      .promise();
+  private static async getLogStream(kinesisStreamName: string) {
+    return await AWSTaskRunner.Kinesis.describeStream({
+      StreamName: kinesisStreamName,
+    }).promise();
   }
 
-  private static async getLogIterator(kinesis: AWS.Kinesis, stream) {
+  private static async getLogIterator(stream) {
     return (
       (
-        await kinesis
-          .getShardIterator({
-            ShardIteratorType: 'TRIM_HORIZON',
-            StreamName: stream.StreamDescription.StreamName,
-            ShardId: stream.StreamDescription.Shards[0].ShardId,
-          })
-          .promise()
+        await AWSTaskRunner.Kinesis.getShardIterator({
+          ShardIteratorType: 'TRIM_HORIZON',
+          StreamName: stream.StreamDescription.StreamName,
+          ShardId: stream.StreamDescription.Shards[0].ShardId,
+        }).promise()
       ).ShardIterator || ''
     );
   }

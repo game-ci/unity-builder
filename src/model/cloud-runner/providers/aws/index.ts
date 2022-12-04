@@ -2,13 +2,17 @@ import * as SDK from 'aws-sdk';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import AWSTaskRunner from './aws-task-runner';
+import AwsTaskRunner from './aws-task-runner';
 import { ProviderInterface } from '../provider-interface';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { AWSJobStack } from './aws-job-stack';
-import { AWSBaseStack } from './aws-base-stack';
+import { AWSJobStack as AwsJobStack } from './aws-job-stack';
+import { AWSBaseStack as AwsBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
+import { GarbageCollectionService } from './services/garbage-collection-service';
+import { ProviderResource } from '../provider-resource';
+import { ProviderWorkflow } from '../provider-workflow';
+import { TaskService } from './services/task-service';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -16,7 +20,42 @@ class AWSBuildEnvironment implements ProviderInterface {
   constructor(buildParameters: BuildParameters) {
     this.baseStackName = buildParameters.awsBaseStackName;
   }
-  async cleanup(
+  async listResources(): Promise<ProviderResource[]> {
+    await TaskService.getCloudFormationJobStacks();
+    await TaskService.getLogGroups();
+    await TaskService.getTasks();
+
+    return [];
+  }
+  listWorkflow(): Promise<ProviderWorkflow[]> {
+    throw new Error('Method not implemented.');
+  }
+  async watchWorkflow(): Promise<string> {
+    return await TaskService.watch();
+  }
+
+  async listOtherResources(): Promise<string> {
+    await TaskService.getLogGroups();
+
+    return '';
+  }
+
+  async garbageCollect(
+    filter: string,
+    previewOnly: boolean,
+    // eslint-disable-next-line no-unused-vars
+    olderThan: Number,
+    // eslint-disable-next-line no-unused-vars
+    fullCache: boolean,
+    // eslint-disable-next-line no-unused-vars
+    baseDependencies: boolean,
+  ): Promise<string> {
+    await GarbageCollectionService.cleanup(!previewOnly);
+
+    return ``;
+  }
+
+  async cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -26,7 +65,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
-  async setup(
+  async setupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
     // eslint-disable-next-line no-unused-vars
@@ -37,7 +76,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {}
 
-  async runTask(
+  async runTaskInWorkflow(
     buildGuid: string,
     image: string,
     commands: string,
@@ -49,12 +88,14 @@ class AWSBuildEnvironment implements ProviderInterface {
     process.env.AWS_REGION = Input.region;
     const ECS = new SDK.ECS();
     const CF = new SDK.CloudFormation();
+    AwsTaskRunner.ECS = ECS;
+    AwsTaskRunner.Kinesis = new SDK.Kinesis();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
 
-    await new AWSBaseStack(this.baseStackName).setupBaseStack(CF);
-    const taskDef = await new AWSJobStack(this.baseStackName).setupCloudFormations(
+    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
+    const taskDef = await new AwsJobStack(this.baseStackName).setupCloudFormations(
       CF,
       buildGuid,
       image,
@@ -69,7 +110,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     try {
       const postSetupStacksTimeMs = Date.now();
       CloudRunnerLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      const { output, shouldCleanup } = await AWSTaskRunner.runTask(taskDef, ECS, CF, environment, buildGuid, commands);
+      const { output, shouldCleanup } = await AwsTaskRunner.runTask(taskDef, environment, commands);
       postRunTaskTimeMs = Date.now();
       CloudRunnerLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
       if (shouldCleanup) {
@@ -81,6 +122,7 @@ class AWSBuildEnvironment implements ProviderInterface {
 
       return output;
     } catch (error) {
+      CloudRunnerLogger.log(`error running task ${error}`);
       await this.cleanupResources(CF, taskDef);
       throw error;
     }
