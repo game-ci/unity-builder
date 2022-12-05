@@ -109,6 +109,14 @@ export class Cli {
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
 
+  @CliFunction(`async-workflow`, `runs a cloud runner build`)
+  public static async asyncronousWorkflow(): Promise<string> {
+    const buildParameter = await BuildParameters.create();
+    const baseImage = new ImageTag(buildParameter);
+
+    return await CloudRunner.run(buildParameter, baseImage.toString());
+  }
+
   @CliFunction(`garbage-collect`, `runs garbage collection`)
   public static async GarbageCollect(): Promise<string> {
     const buildParameter = await BuildParameters.create();
