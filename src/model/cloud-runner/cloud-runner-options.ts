@@ -60,7 +60,11 @@ class CloudRunnerOptions {
   // GitHub  parameters
   // ### ### ###
   static get githubChecksEnabled() {
-    return CloudRunnerOptions.getInput('githubChecksEnabled') || false;
+    return CloudRunnerOptions.getInput('githubChecks') || false;
+  }
+
+  static get githubOwner() {
+    return CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
   }
 
   // ### ### ###
