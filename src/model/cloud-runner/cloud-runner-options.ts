@@ -64,7 +64,7 @@ class CloudRunnerOptions {
   }
 
   static get githubOwner() {
-    return CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+    return CloudRunnerOptions.githubRepo.split(`github.com/`)[1] || false;
   }
 
   // ### ### ###

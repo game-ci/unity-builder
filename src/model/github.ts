@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/core';
+import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
 
 class GitHub {
   public static githubInputEnabled: boolean = true;
@@ -8,11 +9,13 @@ class GitHub {
       auth: token,
     });
 
+    const checkRunId = 0;
+
     const data: any = {
       owner,
       repo,
       // eslint-disable-next-line camelcase
-      check_run_id: 0,
+      check_run_id: checkRunId,
       name,
       // eslint-disable-next-line camelcase
       head_sha: sha,
@@ -37,7 +40,7 @@ class GitHub {
       },
     };
 
-    await octokit.request('PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}', data);
+    await octokit.request(`PATCH /repos/${owner}/${repo}/check-runs/${checkRunId}`, data);
   }
 
   public static async createGitHubCheck(owner, repo, token, name, sha, nameReadable, summary) {
@@ -45,6 +48,8 @@ class GitHub {
     const octokit = new Octokit({
       auth: token,
     });
+
+    CloudRunnerLogger.log(`POST /repos/${owner}/${repo}/check-runs`);
 
     await octokit.request(`POST /repos/${owner}/${repo}/check-runs`, {
       owner,

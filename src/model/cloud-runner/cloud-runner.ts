@@ -70,7 +70,7 @@ class CloudRunner {
     CloudRunner.setup(buildParameters);
     try {
       if (CloudRunnerOptions.githubChecksEnabled) {
-        GitHub.createGitHubCheck(
+        await GitHub.createGitHubCheck(
           CloudRunnerOptions.githubOwner,
           buildParameters.githubRepo,
           buildParameters.gitPrivateToken,
