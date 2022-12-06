@@ -16,7 +16,7 @@ class GitHub {
     longDescription,
   ) {
     const octokit = new Octokit({
-      auth: token,
+      auth: process.env.GITHUB_CHECK_TOKEN || token,
     });
 
     const data: any = {
@@ -54,7 +54,7 @@ class GitHub {
   public static async createGitHubCheck(owner, repo, token, name, sha, nameReadable, summary) {
     // call github api to create a check
     const octokit = new Octokit({
-      auth: token,
+      auth: process.env.CHECKS_API_TOKEN || token,
     });
 
     CloudRunnerLogger.log(`POST /repos/${owner}/${repo}/check-runs`);
