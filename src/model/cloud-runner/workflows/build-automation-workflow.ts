@@ -8,6 +8,7 @@ import path from 'path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
+import GitHub from '../../github';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -21,6 +22,17 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   private static async standardBuildAutomation(baseImage: any, cloudRunnerStepState: CloudRunnerStepState) {
     // TODO accept post and pre build steps as yaml files in the repo
     try {
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        await GitHub.createGitHubCheck(
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          'test-check-name',
+          CloudRunner.buildParameters.gitSha,
+          'A check test',
+          CloudRunner.buildParameters.buildGuid,
+        );
+      }
       CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
       let output = '';
@@ -49,9 +61,33 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        await GitHub.updateGitHubCheck(
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          'test-check-name',
+          CloudRunner.buildParameters.gitSha,
+          'A check test',
+          CloudRunner.buildParameters.buildGuid,
+          '',
+        );
+      }
 
       return output;
     } catch (error) {
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        await GitHub.updateGitHubCheck(
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          'test-check-name',
+          CloudRunner.buildParameters.gitSha,
+          'A check test',
+          CloudRunner.buildParameters.buildGuid,
+          '',
+        );
+      }
       throw error;
     }
   }

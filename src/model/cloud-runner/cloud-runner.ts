@@ -15,7 +15,6 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
-import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -69,17 +68,6 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      if (CloudRunnerOptions.githubChecksEnabled) {
-        await GitHub.createGitHubCheck(
-          CloudRunnerOptions.githubOwner,
-          CloudRunnerOptions.githubRepoName,
-          buildParameters.gitPrivateToken,
-          'test-check-name',
-          buildParameters.gitSha,
-          'A check test',
-          buildParameters.buildGuid,
-        );
-      }
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 
