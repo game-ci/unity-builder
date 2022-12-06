@@ -11,6 +11,7 @@ import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 import GitHub from '../../github';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
+  static githubCheckId;
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
       return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
@@ -23,7 +24,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     // TODO accept post and pre build steps as yaml files in the repo
     try {
       if (CloudRunnerOptions.githubChecksEnabled) {
-        await GitHub.createGitHubCheck(
+        BuildAutomationWorkflow.githubCheckId = await GitHub.createGitHubCheck(
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,
@@ -63,6 +64,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
       if (CloudRunnerOptions.githubChecksEnabled) {
         await GitHub.updateGitHubCheck(
+          BuildAutomationWorkflow.githubCheckId,
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,
@@ -78,6 +80,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     } catch (error) {
       if (CloudRunnerOptions.githubChecksEnabled) {
         await GitHub.updateGitHubCheck(
+          BuildAutomationWorkflow.githubCheckId,
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,

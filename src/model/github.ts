@@ -4,12 +4,20 @@ import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
 class GitHub {
   public static githubInputEnabled: boolean = true;
 
-  public static async updateGitHubCheck(owner, repo, token, name, sha, nameReadable, summary, longDescription) {
+  public static async updateGitHubCheck(
+    checkRunId,
+    owner,
+    repo,
+    token,
+    name,
+    sha,
+    nameReadable,
+    summary,
+    longDescription,
+  ) {
     const octokit = new Octokit({
       auth: token,
     });
-
-    const checkRunId = 0;
 
     const data: any = {
       owner,
@@ -51,7 +59,7 @@ class GitHub {
 
     CloudRunnerLogger.log(`POST /repos/${owner}/${repo}/check-runs`);
 
-    await octokit.request(`POST /repos/${owner}/${repo}/check-runs`, {
+    const result = await octokit.request(`POST /repos/${owner}/${repo}/check-runs`, {
       owner,
       repo,
       name,
@@ -68,6 +76,8 @@ class GitHub {
         text: '',
       },
     });
+
+    return result.data.id;
   }
 }
 
