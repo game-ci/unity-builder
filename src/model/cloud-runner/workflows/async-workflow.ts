@@ -25,12 +25,30 @@ git config --global filter.lfs.process "git-lfs filter-process --skip
 git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.unityBuilderRepoUrl} /builder
 git clone -q -b ${CloudRunner.buildParameters.branch} ${CloudRunnerFolders.targetBuildRepoUrl} /repo
 cd /repo
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+aws --version
 node /builder/dist/index.js -m async-workflow
         `,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
         environmentVariables,
-        secrets,
+        [
+          ...secrets,
+          ...[
+            {
+              ParameterKey: `AWS_ACCESS_KEY_ID`,
+              EnvironmentVariable: `AWS_ACCESS_KEY_ID`,
+              ParameterValue: process.env.AWS_ACCESS_KEY_ID || ``,
+            },
+            {
+              ParameterKey: `AWS_SECRET_ACCESS_KEY`,
+              EnvironmentVariable: `AWS_SECRET_ACCESS_KEY`,
+              ParameterValue: process.env.AWS_SECRET_ACCESS_KEY || ``,
+            },
+          ],
+        ],
       );
 
       return output;
