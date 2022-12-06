@@ -20,8 +20,8 @@ export class AsyncWorkflow {
         `apt-get update > /dev/null
 apt-get install -y curl tar tree npm git git-lfs jq git > /dev/null
 mkdir /builder
-git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} /builder "builder"
-node "builder/dist/index.js" -m async-workflow
+git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.unityBuilderRepoUrl} /builder
+node /builder/dist/index.js -m async-workflow
         `,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,

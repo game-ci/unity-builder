@@ -15,6 +15,7 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
+import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -23,6 +24,7 @@ class CloudRunner {
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
+  static githubCheckId;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
@@ -68,6 +70,17 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        CloudRunner.githubCheckId = await GitHub.createGitHubCheck(
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.gitSha,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.buildGuid,
+        );
+      }
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 
@@ -123,8 +136,35 @@ class CloudRunner {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
       }
 
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        await GitHub.updateGitHubCheck(
+          CloudRunner.githubCheckId,
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.gitSha,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.buildGuid,
+          `success`,
+        );
+      }
+
       return output;
     } catch (error) {
+      if (CloudRunnerOptions.githubChecksEnabled) {
+        await GitHub.updateGitHubCheck(
+          CloudRunner.githubCheckId,
+          CloudRunnerOptions.githubOwner,
+          CloudRunnerOptions.githubRepoName,
+          CloudRunner.buildParameters.gitPrivateToken,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.gitSha,
+          `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`,
+          CloudRunner.buildParameters.buildGuid,
+          error,
+        );
+      }
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
