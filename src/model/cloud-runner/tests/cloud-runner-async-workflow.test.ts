@@ -27,7 +27,7 @@ describe('Cloud Runner Async Workflows', () => {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
-        asyncCloudRunner: true,
+        asyncCloudRunner: `true`,
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
