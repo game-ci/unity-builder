@@ -20,7 +20,11 @@ export class AsyncWorkflow {
         `apt-get update > /dev/null
 apt-get install -y curl tar tree npm git git-lfs jq git > /dev/null
 mkdir /builder
+git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f
+git config --global filter.lfs.process "git-lfs filter-process --skip
 git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.unityBuilderRepoUrl} /builder
+git clone -q -b ${CloudRunner.buildParameters.branch} ${CloudRunnerFolders.targetBuildRepoUrl} /repo
+cd /repo
 node /builder/dist/index.js -m async-workflow
         `,
         `/${CloudRunnerFolders.buildVolumeFolder}`,

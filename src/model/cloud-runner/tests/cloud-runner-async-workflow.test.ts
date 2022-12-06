@@ -20,7 +20,11 @@ describe('Cloud Runner Async Workflows', () => {
   const testSecretValue = 'testSecretValue';
   it('Responds', () => {});
 
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (
+    CloudRunnerOptions.cloudRunnerDebug &&
+    CloudRunnerOptions.cloudRunnerCluster !== `k8s` &&
+    CloudRunnerOptions.cloudRunnerCluster !== `local-docker`
+  ) {
     it('Async Workflows', async () => {
       // Setup parameters
       const buildParameter = await CreateParameters({
