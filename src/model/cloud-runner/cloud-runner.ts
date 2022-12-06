@@ -72,7 +72,7 @@ class CloudRunner {
       if (CloudRunnerOptions.githubChecksEnabled) {
         await GitHub.createGitHubCheck(
           CloudRunnerOptions.githubOwner,
-          buildParameters.githubRepo,
+          CloudRunnerOptions.githubRepoName,
           buildParameters.gitPrivateToken,
           'test-check-name',
           buildParameters.gitSha,
