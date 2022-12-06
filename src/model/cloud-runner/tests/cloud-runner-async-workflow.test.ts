@@ -21,7 +21,7 @@ describe('Cloud Runner Async Workflows', () => {
   it('Responds', () => {});
 
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
-    it('All build parameters sent to cloud runner as env vars', async () => {
+    it('Async Workflows', async () => {
       // Setup parameters
       const buildParameter = await CreateParameters({
         versioning: 'None',
