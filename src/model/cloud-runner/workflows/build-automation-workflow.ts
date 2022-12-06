@@ -12,6 +12,7 @@ import GitHub from '../../github';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   static githubCheckId;
+  static readonly checkNamePrefix = `Cloud-Runner`;
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
       return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
@@ -28,9 +29,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,
-          'test-check-name',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.gitSha,
-          'A check test',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.buildGuid,
         );
       }
@@ -68,9 +69,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,
-          'test-check-name',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.gitSha,
-          'A check test',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.buildGuid,
           '',
         );
@@ -84,11 +85,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           CloudRunnerOptions.githubOwner,
           CloudRunnerOptions.githubRepoName,
           CloudRunner.buildParameters.gitPrivateToken,
-          'test-check-name',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.gitSha,
-          'A check test',
+          `${BuildAutomationWorkflow.checkNamePrefix}-${CloudRunner.buildParameters.buildGuid}-${CloudRunner.buildParameters.targetPlatform}`,
           CloudRunner.buildParameters.buildGuid,
-          '',
+          error,
         );
       }
       throw error;
