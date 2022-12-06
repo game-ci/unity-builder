@@ -56,7 +56,7 @@ jobs:
       - run: yarn
       - run: yarn run cli --help
       - run: yarn run test "cloud-runner-async-workflow" --detectOpenHandles --forceExit --runInBand
-        if: matrix.CloudRunnerCluster != 'aws' && matrix.CloudRunnerCluster != 'k8s'
+        if: matrix.CloudRunnerCluster == 'aws'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
