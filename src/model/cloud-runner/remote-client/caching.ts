@@ -47,6 +47,7 @@ export class Caching {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
+    CloudRunnerLogger.log(`Compression: ${compressionSuffix}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
