@@ -243,15 +243,15 @@ class CloudRunnerOptions {
   }
 
   public static get useSharedLargePackages(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') === 'true';
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') === 'true';
   }
 
   public static get useLz4Compression(): boolean {
-    return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') !== 'false';
+    return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') === 'true';
   }
 
   // ### ### ###
