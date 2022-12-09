@@ -5,7 +5,8 @@ import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import CloudRunnerOptions from '../cloud-runner-options';
 import * as fs from 'fs';
-import CloudRunnerLogger from './cloud-runner-logger';
+
+// import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
   // TODO also accept hooks as yaml files in the repo
@@ -83,7 +84,7 @@ export class CloudRunnerCustomHooks {
 
     // if (CloudRunner.buildParameters?.cloudRunnerIntegrationTests) {
 
-    CloudRunnerLogger.log(`Parsing build hooks: ${steps}`);
+    // CloudRunnerLogger.log(`Parsing build hooks: ${steps}`);
 
     // }
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;

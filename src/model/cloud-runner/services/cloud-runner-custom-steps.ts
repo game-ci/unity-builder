@@ -192,9 +192,10 @@ export class CloudRunnerCustomSteps {
 
     // }
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;
-    if (CloudRunner.buildParameters?.cloudRunnerDebug) {
-      CloudRunnerLogger.log(`Parsing: ${steps}`);
-    }
+
+    // if (CloudRunner.buildParameters?.cloudRunnerDebug) {
+    //   CloudRunnerLogger.log(`Parsing: ${steps}`);
+    // }
     const object: CustomStep[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
     for (const step of object) {
       CloudRunnerCustomSteps.ConvertYamlSecrets(step);
