@@ -43,6 +43,12 @@ class CloudRunner {
         // CloudRunnerLogger.log(`Cloud Runner output ${Input.ToEnvVarFormat(element)} = ${buildParameters[element]}`);
         core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
+      core.setOutput(
+        Input.ToEnvVarFormat(`buildArtifact`),
+        `build-${CloudRunner.buildParameters.buildGuid}.tar${
+          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        }`,
+      );
     }
   }
 

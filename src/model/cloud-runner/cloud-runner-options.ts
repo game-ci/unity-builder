@@ -247,11 +247,11 @@ class CloudRunnerOptions {
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || true) !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') !== 'false';
   }
 
   public static get useLz4Compression(): boolean {
-    return (CloudRunnerOptions.getInput(`useLz4Compression`) || true) !== false;
+    return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') !== 'false';
   }
 
   // ### ### ###

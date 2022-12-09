@@ -24,6 +24,14 @@ describe('Cloud Runner Custom Hooks And Steps', () => {
 commands: echo "test"`;
     const yamlString2 = `- hook: before
   commands: echo "test"`;
+    const overrides = {
+      versioning: 'None',
+      projectPath: 'test-project',
+      unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+      targetPlatform: 'StandaloneLinux64',
+      cacheKey: `test-case-${uuidv4()}`,
+    };
+    CloudRunner.setup(await CreateParameters(overrides));
     const stringObject = CloudRunnerCustomSteps.ParseSteps(yamlString);
     const stringObject2 = CloudRunnerCustomSteps.ParseSteps(yamlString2);
 

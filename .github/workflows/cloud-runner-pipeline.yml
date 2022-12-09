@@ -140,7 +140,7 @@ jobs:
           customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
           githubChecks: true
       - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           ls
       - run: yarn run cli -m list-resources
         env:
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           retention-days: 14
   buildTests:
     name: Build Tests - Providers
@@ -204,7 +204,7 @@ jobs:
           customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
           githubChecks: true
       - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4 build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           ls
       - run: yarn run cli -m list-resources
         if: always()
@@ -214,5 +214,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
-          path: build-${{ steps.unity-build.outputs.BUILD_GUID }}.tar.lz4
+          path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           retention-days: 14

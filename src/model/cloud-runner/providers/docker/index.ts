@@ -47,10 +47,18 @@ class LocalDockerCloudRunner implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     const { workspace } = Action;
-    if (fs.existsSync(`${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar.lz4`)) {
+    if (
+      fs.existsSync(
+        `${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
+          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        }`,
+      )
+    ) {
       await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache/cache/build/`);
       await CloudRunnerSystem.Run(
-        `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar.lz4`,
+        `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
+          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        }`,
       );
     }
   }

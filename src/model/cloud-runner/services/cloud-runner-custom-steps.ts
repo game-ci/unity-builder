@@ -43,8 +43,12 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4 s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4
-    rm /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4
+    aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+      } s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
+        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+      }
+    rm /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''}
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -60,12 +64,16 @@ export class CloudRunnerCustomSteps {
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 ls game-ci-test-storage/cloud-runner-cache/ || true
     aws s3 ls game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build || true
-    aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/$BUILD_GUID_2.tar.lz4 /data/cache/$CACHE_KEY/build/$BUILD_GUID_2.tar.lz4
+    aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+      CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+    } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+      }
   secrets:
     - name: awsAccessKeyId
     - name: awsSecretAccessKey
     - name: awsDefaultRegion
-    - name: BUILD_GUID_2
+    - name: BUILD_GUID_TARGET
 - name: steam-deploy-client
   image: steamcmd/steamcmd
   commands: |
@@ -82,7 +90,7 @@ export class CloudRunnerCustomSteps {
     - name: STEAM_CONFIG_VDF_2
     - name: STEAM_CONFIG_VDF_3
     - name: STEAM_CONFIG_VDF_4
-    - name: BUILD_GUID_2
+    - name: BUILD_GUID_TARGET
     - name: RELEASE_BRANCH
 - name: steam-deploy-project
   image: steamcmd/steamcmd
