@@ -118,7 +118,7 @@ export class Caching {
       }
 
       const latestInBranch = await (
-        await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix} | head -1`)
+        await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$ | head -1`)
       )
         .replace(/\n/g, ``)
         .replace(`.tar${compressionSuffix}`, '');
