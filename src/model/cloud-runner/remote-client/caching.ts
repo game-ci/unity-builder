@@ -102,7 +102,9 @@ export class Caching {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
     const startPath = process.cwd();
-    RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
+    RemoteClientLogger.log(
+      `Caching for ${CloudRunner.buildParameters.useLz4Compression} ${path.basename(destinationFolder)}`,
+    );
     try {
       if (!(await fileExists(cacheFolder))) {
         await fs.promises.mkdir(cacheFolder);
@@ -113,7 +115,7 @@ export class Caching {
       }
 
       const latestInBranch = await (
-        await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$ | head -1`)
+        await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix} | head -1`)
       )
         .replace(/\n/g, ``)
         .replace(`.tar${compressionSuffix}`, '');
