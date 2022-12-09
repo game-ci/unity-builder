@@ -89,7 +89,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
 
-  buildTargetTests:
+  localBuildTargetTests:
     name: Build Tests - Targets
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
@@ -112,18 +112,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
-
-      - uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: Get GKE cluster credentials
-        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
       - run: yarn
       - uses: ./
         id: unity-build
@@ -137,15 +125,10 @@ jobs:
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-          customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
           githubChecks: true
       - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
+          mv ./cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           ls
-      - run: yarn run cli -m list-resources
-        env:
-          cloudRunnerTests: true
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
