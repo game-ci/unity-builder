@@ -48,7 +48,9 @@ export class CloudRunnerCustomSteps {
       } s3://game-ci-test-storage/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
       }
-    rm /data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''}
+    rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+      }
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
