@@ -7,6 +7,7 @@ import { AWSError } from './aws-error';
 import CloudRunner from '../../cloud-runner';
 import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
 import CloudRunnerOptions from '../../cloud-runner-options';
+import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -59,9 +60,16 @@ export class AWSJobStack {
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        'p2 - secret',
+        '#template resources',
         AWSCloudFormationTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
+      if (CloudRunnerOptions.watchCloudRunnerToEnd) {
+        taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
+          taskDefCloudFormation,
+          '#template resources',
+          TaskDefinitionFormation.streamLogs,
+        );
+      }
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p3 - container def',
