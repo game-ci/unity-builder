@@ -18,7 +18,7 @@ class GitHub {
     const token = CloudRunner.buildParameters.gitPrivateToken;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
-    GitHub.startedDate = Date.now();
+    GitHub.startedDate = Date.now().toString();
 
     // call github api to create a check
     const octokit = new Octokit({
@@ -37,7 +37,7 @@ class GitHub {
       // eslint-disable-next-line camelcase
       external_id: CloudRunner.buildParameters.buildGuid,
       // eslint-disable-next-line camelcase
-      started_at: '2018-05-04T01:14:52Z',
+      started_at: GitHub.startedDate,
       output: {
         title: nameReadable,
         summary,
