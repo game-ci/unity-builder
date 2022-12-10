@@ -41,6 +41,13 @@ export class AWSJobStack {
       `ContainerMemory:
     Default: ${Number.parseInt(memory)}`,
     );
+    if (CloudRunnerOptions.watchCloudRunnerToEnd) {
+      taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
+        taskDefCloudFormation,
+        '#template resources logstream',
+        TaskDefinitionFormation.streamLogs,
+      );
+    }
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -60,16 +67,9 @@ export class AWSJobStack {
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        '#template resources',
+        '#template resources secrets',
         AWSCloudFormationTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
-      if (CloudRunnerOptions.watchCloudRunnerToEnd) {
-        taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
-          taskDefCloudFormation,
-          '#template resources',
-          TaskDefinitionFormation.streamLogs,
-        );
-      }
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         'p3 - container def',

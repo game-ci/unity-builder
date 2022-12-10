@@ -76,7 +76,10 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: aece53ae-b82d-4267-bc16-ed964b05db27
-  # template resources
+  # template resources secrets
+
+  # template resources logstream
+
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -132,7 +135,8 @@ Resources:
     DependsOn:
       - LogGroup
 `;
-  public static streamLogs = `  SubscriptionFilter:
+  public static streamLogs = `
+  SubscriptionFilter:
     Type: 'AWS::Logs::SubscriptionFilter'
     Properties:
       FilterPattern: ''
