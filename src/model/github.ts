@@ -65,10 +65,6 @@ class GitHub {
       auth: process.env.GITHUB_CHECK_TOKEN || token,
     });
 
-    if (status === `completed` && GitHub.endedDate !== undefined) {
-      GitHub.endedDate = new Date().toISOString();
-    }
-
     const data: any = {
       owner,
       repo,
@@ -80,9 +76,6 @@ class GitHub {
       // eslint-disable-next-line camelcase
       started_at: GitHub.startedDate,
       status,
-      conclusion: result,
-      // eslint-disable-next-line camelcase
-      completed_at: GitHub.endedDate || GitHub.startedDate,
       output: {
         title: nameReadable,
         summary,
@@ -97,6 +90,13 @@ class GitHub {
         ],
       },
     };
+
+    if (status === `completed` && GitHub.endedDate !== undefined) {
+      GitHub.endedDate = new Date().toISOString();
+      data.conclusion = result;
+      // eslint-disable-next-line camelcase
+      data.completed_at = GitHub.endedDate || GitHub.startedDate;
+    }
 
     await octokit.request(`PATCH /repos/${owner}/${repo}/check-runs/${checkRunId}`, data);
   }
