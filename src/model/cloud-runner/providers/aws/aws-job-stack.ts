@@ -160,7 +160,11 @@ export class AWSJobStack {
         },
         {
           ParameterKey: 'BUILDGUID',
-          ParameterValue: mountdir,
+          ParameterValue: CloudRunner.buildParameters.buildGuid,
+        },
+        {
+          ParameterKey: 'EnvironmentName',
+          ParameterValue: this.baseStackName,
         },
       ],
     };
