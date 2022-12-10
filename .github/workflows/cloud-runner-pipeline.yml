@@ -131,7 +131,7 @@ jobs:
           githubChecks: true
       - run: |
           tree ./cloud-runner-cache
-          mv ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
+          cp ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
