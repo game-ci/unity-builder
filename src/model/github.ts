@@ -5,8 +5,9 @@ import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class GitHub {
   public static githubInputEnabled: boolean = true;
-  private static longDescriptionContent = ``;
-  private static startedDate;
+  private static longDescriptionContent: string = ``;
+  private static startedDate: string;
+  private static endedDate: string;
 
   public static async createGitHubCheck(summary) {
     if (!CloudRunnerOptions.githubChecksEnabled) {
@@ -64,6 +65,10 @@ class GitHub {
       auth: process.env.GITHUB_CHECK_TOKEN || token,
     });
 
+    if (status === `completed` && GitHub.endedDate !== undefined) {
+      GitHub.endedDate = new Date().toISOString();
+    }
+
     const data: any = {
       owner,
       repo,
@@ -77,7 +82,7 @@ class GitHub {
       status,
       conclusion: result,
       // eslint-disable-next-line camelcase
-      completed_at: '2018-05-04T01:14:52Z',
+      completed_at: GitHub.endedDate || GitHub.startedDate,
       output: {
         title: nameReadable,
         summary,
