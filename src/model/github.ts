@@ -18,7 +18,7 @@ class GitHub {
     const token = CloudRunner.buildParameters.gitPrivateToken;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
-    GitHub.startedDate = Date.now().toString();
+    GitHub.startedDate = new Date().toISOString();
 
     // call github api to create a check
     const octokit = new Octokit({
