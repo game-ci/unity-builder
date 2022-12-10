@@ -157,5 +157,6 @@ Resources:
       ShardCount: 1
     Metadata:
       'AWS::CloudFormation::Designer':
-        id: c6f18447-b879-4696-8873-f981b2cedd2b`;
+        id: c6f18447-b879-4696-8873-f981b2cedd2b
+`;
 }
