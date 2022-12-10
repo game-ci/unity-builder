@@ -132,8 +132,7 @@ Resources:
     DependsOn:
       - LogGroup
 `;
-  public static streamLogs = `
-  SubscriptionFilter:
+  public static streamLogs = `  SubscriptionFilter:
     Type: 'AWS::Logs::SubscriptionFilter'
     Properties:
       FilterPattern: ''
