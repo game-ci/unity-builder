@@ -43,6 +43,13 @@ class GitHub {
         title: nameReadable,
         summary,
         text: '',
+        images: [
+          {
+            alt: 'Game-CI',
+            // eslint-disable-next-line camelcase
+            image_url: 'https://game.ci/assets/images/game-ci-brand-logo-wordmark.svg',
+          },
+        ],
       },
     });
 
@@ -81,13 +88,6 @@ class GitHub {
         summary,
         text: GitHub.longDescriptionContent,
         annotations: [],
-        images: [
-          {
-            alt: 'Game-CI',
-            // eslint-disable-next-line camelcase
-            image_url: 'https://game.ci/assets/images/game-ci-brand-logo-wordmark.svg',
-          },
-        ],
       },
     };
 
