@@ -33,7 +33,7 @@ class GitHub {
       name,
       // eslint-disable-next-line camelcase
       head_sha: sha,
-      status: 'in_progress',
+      status: 'queued',
       // eslint-disable-next-line camelcase
       external_id: CloudRunner.buildParameters.buildGuid,
       // eslint-disable-next-line camelcase
@@ -48,7 +48,7 @@ class GitHub {
     return result.data.id;
   }
 
-  public static async updateGitHubCheck(summary, longDescription, result = `in_progress`, status = `completed`) {
+  public static async updateGitHubCheck(summary, longDescription, result = `neutral`, status = `in_progress`) {
     if (!CloudRunnerOptions.githubChecksEnabled) {
       return;
     }

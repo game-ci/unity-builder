@@ -106,6 +106,7 @@ class CloudRunner {
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, ``);
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
@@ -132,11 +133,11 @@ class CloudRunner {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
       }
 
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `completed`);
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
       return output;
     } catch (error) {
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, error, `failed`, `completed`);
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, error, `failure`, `completed`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
