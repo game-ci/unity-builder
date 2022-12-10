@@ -37,7 +37,7 @@ class GitHub {
       // eslint-disable-next-line camelcase
       external_id: CloudRunner.buildParameters.buildGuid,
       // eslint-disable-next-line camelcase
-      started_at: GitHub.startedDate,
+      started_at: '2018-05-04T01:14:52Z',
       output: {
         title: nameReadable,
         summary,
