@@ -1,20 +1,25 @@
 import { Octokit } from '@octokit/core';
 import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
+import CloudRunner from './cloud-runner/cloud-runner';
+import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class GitHub {
   public static githubInputEnabled: boolean = true;
+  private static longDescriptionContent = ``;
+  static startedDate = Date.now();
 
-  public static async updateGitHubCheck(
-    checkRunId,
-    owner,
-    repo,
-    token,
-    name,
-    sha,
-    nameReadable,
-    summary,
-    longDescription,
-  ) {
+  public static async updateGitHubCheck(summary, longDescription, result = `in_progress`, status = `completed`) {
+    if (!CloudRunnerOptions.githubChecksEnabled) {
+      return;
+    }
+    GitHub.longDescriptionContent += `\n${longDescription}`;
+    const sha = CloudRunner.buildParameters.gitSha;
+    const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
+    const nameReadable = name;
+    const token = CloudRunner.buildParameters.gitPrivateToken;
+    const checkRunId = CloudRunner.githubCheckId;
+    const owner = CloudRunnerOptions.githubOwner;
+    const repo = CloudRunnerOptions.githubRepoName;
     const octokit = new Octokit({
       auth: process.env.GITHUB_CHECK_TOKEN || token,
     });
@@ -28,21 +33,21 @@ class GitHub {
       // eslint-disable-next-line camelcase
       head_sha: sha,
       // eslint-disable-next-line camelcase
-      started_at: '2018-05-04T01:14:52Z',
-      status: `completed`,
-      conclusion: 'success',
+      started_at: GitHub.startedDate,
+      status,
+      conclusion: result,
       // eslint-disable-next-line camelcase
       completed_at: '2018-05-04T01:14:52Z',
       output: {
         title: nameReadable,
         summary,
-        text: longDescription,
+        text: GitHub.longDescriptionContent,
         annotations: [],
         images: [
           {
-            alt: 'Super bananas',
+            alt: 'Game-CI',
             // eslint-disable-next-line camelcase
-            image_url: 'http://example.com/images/42',
+            image_url: 'https://game.ci/assets/images/game-ci-brand-logo-wordmark.svg',
           },
         ],
       },
@@ -51,7 +56,17 @@ class GitHub {
     await octokit.request(`PATCH /repos/${owner}/${repo}/check-runs/${checkRunId}`, data);
   }
 
-  public static async createGitHubCheck(owner, repo, token, name, sha, nameReadable, summary) {
+  public static async createGitHubCheck(summary) {
+    if (!CloudRunnerOptions.githubChecksEnabled) {
+      return;
+    }
+    const sha = CloudRunner.buildParameters.gitSha;
+    const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
+    const nameReadable = name;
+    const token = CloudRunner.buildParameters.gitPrivateToken;
+    const owner = CloudRunnerOptions.githubOwner;
+    const repo = CloudRunnerOptions.githubRepoName;
+
     // call github api to create a check
     const octokit = new Octokit({
       auth: process.env.CHECKS_API_TOKEN || token,
@@ -69,7 +84,7 @@ class GitHub {
       // eslint-disable-next-line camelcase
       external_id: '42',
       // eslint-disable-next-line camelcase
-      started_at: '2018-05-04T01:14:52Z',
+      started_at: GitHub.startedDate,
       output: {
         title: nameReadable,
         summary,

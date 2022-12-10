@@ -9,6 +9,7 @@ import CloudRunner from '../../cloud-runner';
 import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 import CloudRunnerOptions from '../../cloud-runner-options';
+import GitHub from '../../../github';
 
 class AWSTaskRunner {
   public static ECS: AWS.ECS;
@@ -127,6 +128,7 @@ class AWSTaskRunner {
 
     const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
     CloudRunnerLogger.log(`You view the log stream on AWS Cloud Watch: ${logBaseUrl}`);
+    GitHub.updateGitHubCheck(`You view the log stream on AWS Cloud Watch:  ${logBaseUrl}`, ``);
     let shouldReadLogs = true;
     let shouldCleanup = true;
     let timestamp: number = 0;
