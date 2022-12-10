@@ -65,7 +65,7 @@ Resources:
           stackName: !Ref 'StackName'
           deleteStackName: !Ref 'DeleteStackName'
       Handler: "index.handler"
-      Runtime: "python3.6"
+      Runtime: "python3.9"
       Timeout: "5"
       Role:
        'Fn::ImportValue': !Sub '\${EnvironmentName}:DeleteCFNLambdaExecutionRole'
@@ -131,7 +131,7 @@ Resources:
                 status = cfnresponse.FAILED
                 cfnresponse.send(event, context, status, {}, None)
       Handler: "index.handler"
-      Runtime: "python3.6"
+      Runtime: "python3.9"
       Timeout: "5"
       Role:
        'Fn::ImportValue': !Sub '\${EnvironmentName}:DeleteCFNLambdaExecutionRole'
