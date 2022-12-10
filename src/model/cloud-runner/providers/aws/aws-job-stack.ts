@@ -5,6 +5,7 @@ import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
 import CloudRunner from '../../cloud-runner';
+import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -133,8 +134,39 @@ export class AWSJobStack {
 
     try {
       await CF.createStack(createStackInput).promise();
-      CloudRunnerLogger.log('Creating cloud runner job');
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+    } catch (error) {
+      await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
+      throw error;
+    }
+
+    const createCleanupStackInput: SDK.CloudFormation.CreateStackInput = {
+      StackName: `${taskDefStackName}-cleanup`,
+      TemplateBody: CleanupCronFormation.formation,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: [
+        {
+          ParameterKey: 'StackName',
+          ParameterValue: taskDefStackName,
+        },
+        {
+          ParameterKey: 'DeleteStackName',
+          ParameterValue: `${taskDefStackName}-cleanup`,
+        },
+        {
+          ParameterKey: 'TTL',
+          ParameterValue: `1080`,
+        },
+        {
+          ParameterKey: 'BUILDGUID',
+          ParameterValue: mountdir,
+        },
+      ],
+    };
+
+    try {
+      await CF.createStack(createCleanupStackInput).promise();
+      await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
     } catch (error) {
       await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
       throw error;

@@ -1,4 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
+export class CleanupCronFormation {
+  public static readonly formation: string = `AWSTemplateFormatVersion: '2010-09-09'
 Description: Schedule automatic deletion of CloudFormation stacks
 Metadata:
   AWS::CloudFormation::Interface:
@@ -67,7 +68,7 @@ Resources:
       Runtime: "python3.6"
       Timeout: "5"
       Role:
-       'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
+       'Fn::ImportValue': !Sub '\${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   DeleteStackEventRule:
      DependsOn:
        - DeleteCFNLambda
@@ -133,7 +134,7 @@ Resources:
       Runtime: "python3.6"
       Timeout: "5"
       Role:
-       'Fn::ImportValue': !Sub '${EnvironmentName}:DeleteCFNLambdaExecutionRole'
+       'Fn::ImportValue': !Sub '\${EnvironmentName}:DeleteCFNLambdaExecutionRole'
   GenerateCronExpression:
     Type: "Custom::GenerateCronExpression"
     Version: "1.0"
@@ -141,3 +142,5 @@ Resources:
       Name: !Join [ "", [ 'GenerateCronExpression', !Ref BUILDGUID ] ]
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
+`;
+}
