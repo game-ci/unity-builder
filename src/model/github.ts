@@ -56,7 +56,7 @@ class GitHub {
     return result.data.id;
   }
 
-  public static async updateGitHubCheck(summary, longDescription, result = `neutral`, status = `in_progress`) {
+  public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
     if (!CloudRunnerOptions.githubChecksEnabled) {
       return;
     }
