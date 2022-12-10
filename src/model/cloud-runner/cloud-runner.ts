@@ -23,7 +23,7 @@ class CloudRunner {
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
-  static githubCheckId;
+  public static githubCheckId;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
