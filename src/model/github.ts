@@ -91,11 +91,13 @@ class GitHub {
       },
     };
 
-    if (status === `completed` && GitHub.endedDate !== undefined) {
-      GitHub.endedDate = new Date().toISOString();
-      data.conclusion = result;
+    if (status === `completed`) {
+      if (GitHub.endedDate !== undefined) {
+        GitHub.endedDate = new Date().toISOString();
+      }
       // eslint-disable-next-line camelcase
       data.completed_at = GitHub.endedDate || GitHub.startedDate;
+      data.conclusion = result;
     }
 
     await octokit.request(`PATCH /repos/${owner}/${repo}/check-runs/${checkRunId}`, data);

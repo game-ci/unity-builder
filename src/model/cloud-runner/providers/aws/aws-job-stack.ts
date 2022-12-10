@@ -6,6 +6,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
 import CloudRunner from '../../cloud-runner';
 import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
+import CloudRunnerOptions from '../../cloud-runner-options';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -163,13 +164,14 @@ export class AWSJobStack {
         },
       ],
     };
-
-    try {
-      await CF.createStack(createCleanupStackInput).promise();
-      await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
-    } catch (error) {
-      await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
-      throw error;
+    if (CloudRunnerOptions.useCleanupCron) {
+      try {
+        await CF.createStack(createCleanupStackInput).promise();
+        await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
+      } catch (error) {
+        await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
+        throw error;
+      }
     }
 
     const taskDefResources = (

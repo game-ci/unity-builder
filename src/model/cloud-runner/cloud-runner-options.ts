@@ -254,6 +254,10 @@ class CloudRunnerOptions {
     return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') === 'true';
   }
 
+  public static get useCleanupCron(): boolean {
+    return (CloudRunnerOptions.getInput(`useCleanupCron`) || 'true') === 'true';
+  }
+
   // ### ### ###
   // Retained Workspace
   // ### ### ###
