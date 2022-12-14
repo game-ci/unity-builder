@@ -130,6 +130,7 @@ jobs:
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
           githubChecks: true
           asyncCloudRunner: true
+          watchCloudRunnerToEnd: false
   localBuildTests:
     name: Local Build Target Tests
     runs-on: ubuntu-latest
