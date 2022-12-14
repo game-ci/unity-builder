@@ -235,9 +235,7 @@ class CloudRunnerOptions {
   }
 
   static get watchCloudRunnerToEnd(): boolean {
-    return (
-      (CloudRunnerOptions.getInput(`watchToEnd`) || CloudRunnerOptions.asyncCloudRunner !== true || true) !== false
-    );
+    return (CloudRunnerOptions.getInput(`watchToEnd`) || !CloudRunnerOptions.asyncCloudRunner || true) !== false;
   }
 
   static get asyncCloudRunner(): boolean {
