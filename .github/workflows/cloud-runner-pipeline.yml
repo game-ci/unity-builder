@@ -110,26 +110,26 @@ jobs:
           #- WebGL # WebGL.
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
-      steps:
-        - name: Checkout (default)
-          uses: actions/checkout@v2
-          with:
-            lfs: true
-        - run: yarn
-        - uses: ./
-          id: unity-build
-          timeout-minutes: 90
-          env:
-            UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          with:
-            cloudRunnerTests: true
-            versioning: None
-            projectPath: test-project
-            gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
-            targetPlatform: ${{ matrix.targetPlatform }}
-            cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-            githubChecks: true
-            asyncCloudRunner: true
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: yarn
+      - uses: ./
+        id: unity-build
+        timeout-minutes: 90
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          cloudRunnerTests: true
+          versioning: None
+          projectPath: test-project
+          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+          githubChecks: true
+          asyncCloudRunner: true
   localBuildTests:
     name: Local Build Target Tests
     runs-on: ubuntu-latest
