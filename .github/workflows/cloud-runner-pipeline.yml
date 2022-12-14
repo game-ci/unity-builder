@@ -93,7 +93,7 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
   asyncBuildTest:
-    name: Build Tests - Targets
+    name: Async Build Test
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
