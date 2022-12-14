@@ -32,11 +32,23 @@ class SetupMac {
 
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
-    const command = `${this.unityHubPath} -- --headless install \
+    let command = `${this.unityHubPath} -- --headless install \
                                           --version ${buildParameters.editorVersion} \
-                                          --changeset ${unityChangeset.changeset} \
-                                          --module mac-il2cpp \
-                                          --childModules`;
+                                          --changeset ${unityChangeset.changeset} `;
+
+    switch (buildParameters.targetPlatform) {
+      case 'iOS':
+        command += `--module ios `;
+        break;
+      case 'StandaloneOSX':
+        command += `--module mac-il2cpp `;
+        break;
+      case 'android':
+        command += `--module android `;
+        break;
+    }
+
+    command += `--childModules`;
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
