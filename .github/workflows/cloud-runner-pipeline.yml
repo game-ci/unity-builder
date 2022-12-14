@@ -42,7 +42,7 @@ jobs:
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
-          lfs: true
+          lfs: false
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
@@ -114,7 +114,7 @@ jobs:
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
-          lfs: true
+          lfs: false
       - run: yarn
       - uses: ./
         id: unity-build
@@ -151,7 +151,7 @@ jobs:
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
-          lfs: true
+          lfs: false
       - run: yarn
       - uses: ./
         id: unity-build
