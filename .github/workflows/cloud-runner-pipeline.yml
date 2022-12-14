@@ -24,11 +24,12 @@ env:
   PROJECT_PATH: test-project
   UNITY_VERSION: 2019.3.15f1
   USE_IL2CPP: false
+  RUN_ALL: 
 
 jobs:
   integrationTests:
     name: Integration Tests
-    if: github.event.event_type != 'pull_request_target' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloud-runner-develop' || github.ref == 'refs/heads/cloud-runner-preview')
+    if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -91,10 +92,9 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
-
   asyncBuildTest:
     name: Build Tests - Targets
-    if: github.event.event_type != 'pull_request_target' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloud-runner-develop' || github.ref == 'refs/heads/cloud-runner-preview')
+    if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -111,28 +111,27 @@ jobs:
           #- iOS # Build an iOS player.
           #- Android # Build an Android .apk.
       steps:
-      - name: Checkout (default)
-        uses: actions/checkout@v2
-        with:
-          lfs: true
-      - run: yarn
-      - uses: ./
-        id: unity-build
-        timeout-minutes: 90
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          cloudRunnerTests: true
-          versioning: None
-          projectPath: test-project
-          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-          githubChecks: true
-          asyncCloudRunner: true
-  buildTests:
-    name: Build Tests - Targets
-    if: github.event.event_type != 'pull_request_target'
+        - name: Checkout (default)
+          uses: actions/checkout@v2
+          with:
+            lfs: true
+        - run: yarn
+        - uses: ./
+          id: unity-build
+          timeout-minutes: 90
+          env:
+            UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          with:
+            cloudRunnerTests: true
+            versioning: None
+            projectPath: test-project
+            gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
+            targetPlatform: ${{ matrix.targetPlatform }}
+            cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+            githubChecks: true
+            asyncCloudRunner: true
+  localBuildTests:
+    name: Local Build Target Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
