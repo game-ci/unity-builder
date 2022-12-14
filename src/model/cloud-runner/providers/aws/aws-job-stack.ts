@@ -142,7 +142,7 @@ export class AWSJobStack {
     };
 
     try {
-      CloudRunnerLogger.log(`Creating job aws formation`);
+      CloudRunnerLogger.log(`Creating job aws formation ${taskDefCloudFormation}`);
       await CF.createStack(createStackInput).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
@@ -179,7 +179,7 @@ export class AWSJobStack {
     };
     if (CloudRunnerOptions.useCleanupCron) {
       try {
-        CloudRunnerLogger.log(`Creating job cleanup formation`);
+        CloudRunnerLogger.log(`Creating job cleanup formation ${CleanupCronFormation.formation}`);
         await CF.createStack(createCleanupStackInput).promise();
         await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
       } catch (error) {

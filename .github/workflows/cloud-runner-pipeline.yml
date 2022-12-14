@@ -28,7 +28,7 @@ env:
 jobs:
   integrationTests:
     name: Integration Tests
-    if: github.event.event_type != 'pull_request_target'
+    if: github.event.event_type != 'pull_request_target' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloud-runner-develop' || github.ref == 'refs/heads/cloud-runner-preview')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -92,7 +92,45 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
 
-  localBuildTargetTests:
+  asyncBuildTest:
+    name: Build Tests - Targets
+    if: github.event.event_type != 'pull_request_target' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cloud-runner-develop' || github.ref == 'refs/heads/cloud-runner-preview')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cloudRunnerCluster:
+          - aws
+          #- local-docker
+          #- k8s
+        targetPlatform:
+          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          #- StandaloneLinux64 # Build a Linux 64-bit standalone.
+          #- WebGL # WebGL.
+          #- iOS # Build an iOS player.
+          #- Android # Build an Android .apk.
+      steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: yarn
+      - uses: ./
+        id: unity-build
+        timeout-minutes: 90
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          cloudRunnerTests: true
+          versioning: None
+          projectPath: test-project
+          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+          githubChecks: true
+          asyncCloudRunner: true
+  buildTests:
     name: Build Tests - Targets
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
@@ -105,7 +143,7 @@ jobs:
           #- k8s
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          # - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - WebGL # WebGL.
           - iOS # Build an iOS player.
@@ -128,75 +166,9 @@ jobs:
           gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-          githubChecks: true
       - run: |
           tree ./cloud-runner-cache
           cp ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
-          path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
-          retention-days: 14
-  buildTests:
-    name: Build Tests - Providers
-    if: github.event.event_type != 'pull_request_target'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        cloudRunnerCluster:
-          - aws
-          - local-docker
-          - k8s
-        targetPlatform:
-          #- StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          #- StandaloneLinux64 # Build a Linux 64-bit standalone.
-          #- WebGL # WebGL.
-          #- iOS # Build an iOS player.
-          #- Android # Build an Android .apk.
-    # steps
-    steps:
-      - name: Checkout (default)
-        uses: actions/checkout@v2
-        with:
-          lfs: true
-
-      - uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: Get GKE cluster credentials
-        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-      - run: yarn
-      - uses: ./
-        id: unity-build
-        timeout-minutes: 90
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          cloudRunnerTests: true
-          versioning: None
-          projectPath: test-project
-          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
-          customStepFiles: aws-s3-upload-build,aws-s3-pull-cache,aws-s3-upload-cache
-          githubChecks: true
-      - run: |
-          aws s3 cp s3://game-ci-test-storage/cloud-runner-cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
-          ls
-      - run: yarn run cli -m list-resources
-        if: always()
-        env:
-          cloudRunnerTests: true
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
