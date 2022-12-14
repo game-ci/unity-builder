@@ -44,7 +44,7 @@ export class AWSJobStack {
     if (CloudRunnerOptions.watchCloudRunnerToEnd) {
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        '#template resources logstream',
+        '# template resources logstream',
         TaskDefinitionFormation.streamLogs,
       );
     }
@@ -67,7 +67,7 @@ export class AWSJobStack {
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        '#template resources secrets',
+        '# template resources secrets',
         AWSCloudFormationTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
