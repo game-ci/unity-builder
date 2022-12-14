@@ -240,8 +240,8 @@ class CloudRunnerOptions {
     );
   }
 
-  static get asyncCloudRunner() {
-    return CloudRunnerOptions.getInput('asyncCloudRunner') || false;
+  static get asyncCloudRunner(): boolean {
+    return CloudRunnerOptions.getInput('asyncCloudRunner') === 'true' || false;
   }
 
   public static get useSharedLargePackages(): boolean {
