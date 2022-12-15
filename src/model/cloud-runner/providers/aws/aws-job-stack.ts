@@ -180,7 +180,7 @@ export class AWSJobStack {
     if (CloudRunnerOptions.useCleanupCron) {
       try {
         CloudRunnerLogger.log(`Creating job cleanup formation`);
-        await CF.createStack(createCleanupStackInput).promise();
+        CF.createStack(createCleanupStackInput).promise();
         await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
       } catch (error) {
         await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
