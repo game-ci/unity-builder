@@ -57,7 +57,9 @@ class AWSTaskRunner {
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
     CloudRunnerLogger.log(
-      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus}`,
+      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus} Watch:${
+        CloudRunnerOptions.watchCloudRunnerToEnd
+      } Async:${CloudRunnerOptions.asyncCloudRunner}`,
     );
     if (!CloudRunnerOptions.watchCloudRunnerToEnd) {
       const shouldCleanup: boolean = false;
