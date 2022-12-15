@@ -59,7 +59,7 @@ class CloudRunnerOptions {
   // ### ### ###
   // GitHub  parameters
   // ### ### ###
-  static get githubChecksEnabled() {
+  static get githubChecks() {
     return CloudRunnerOptions.getInput('githubChecks') || false;
   }
 
