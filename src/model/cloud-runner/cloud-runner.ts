@@ -76,7 +76,9 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+      if (!CloudRunnerOptions.asyncCloudRunner) {
+        CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+      }
 
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
@@ -121,6 +123,7 @@ class CloudRunner {
         );
         CloudRunnerLogger.log(`Cleanup complete`);
         if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+        await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
       }
 
       if (CloudRunner.buildParameters.retainWorkspace) {
@@ -135,8 +138,6 @@ class CloudRunner {
       if (buildParameters.constantGarbageCollection) {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
       }
-
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
       return output;
     } catch (error) {
