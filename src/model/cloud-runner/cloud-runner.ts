@@ -15,7 +15,6 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
-import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -76,9 +75,7 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
-      if (!CloudRunnerOptions.asyncCloudRunner) {
-        CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
-      }
+      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
 
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
@@ -113,18 +110,16 @@ class CloudRunner {
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
-      if (!CloudRunnerOptions.asyncCloudRunner) {
-        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
-        await CloudRunner.Provider.cleanupWorkflow(
-          CloudRunner.buildParameters.buildGuid,
-          CloudRunner.buildParameters,
-          CloudRunner.buildParameters.branch,
-          CloudRunner.defaultSecrets,
-        );
-        CloudRunnerLogger.log(`Cleanup complete`);
-        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-        await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
-      }
+      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
+      await CloudRunner.Provider.cleanupWorkflow(
+        CloudRunner.buildParameters.buildGuid,
+        CloudRunner.buildParameters,
+        CloudRunner.buildParameters.branch,
+        CloudRunner.defaultSecrets,
+      );
+      CloudRunnerLogger.log(`Cleanup complete`);
+      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
       if (CloudRunner.buildParameters.retainWorkspace) {
         await SharedWorkspaceLocking.ReleaseWorkspace(
