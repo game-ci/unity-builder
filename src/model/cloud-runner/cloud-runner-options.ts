@@ -239,7 +239,7 @@ class CloudRunnerOptions {
   }
 
   static get asyncCloudRunner(): boolean {
-    return CloudRunnerOptions.getInput('asyncCloudRunner') === true || false;
+    return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
   }
 
   public static get useSharedLargePackages(): boolean {
