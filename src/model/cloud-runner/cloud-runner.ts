@@ -15,6 +15,7 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
+import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -110,15 +111,17 @@ class CloudRunner {
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
-      await CloudRunner.Provider.cleanupWorkflow(
-        CloudRunner.buildParameters.buildGuid,
-        CloudRunner.buildParameters,
-        CloudRunner.buildParameters.branch,
-        CloudRunner.defaultSecrets,
-      );
-      CloudRunnerLogger.log(`Cleanup complete`);
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      if (!CloudRunnerOptions.asyncCloudRunner) {
+        if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
+        await CloudRunner.Provider.cleanupWorkflow(
+          CloudRunner.buildParameters.buildGuid,
+          CloudRunner.buildParameters,
+          CloudRunner.buildParameters.branch,
+          CloudRunner.defaultSecrets,
+        );
+        CloudRunnerLogger.log(`Cleanup complete`);
+        if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      }
 
       if (CloudRunner.buildParameters.retainWorkspace) {
         await SharedWorkspaceLocking.ReleaseWorkspace(
