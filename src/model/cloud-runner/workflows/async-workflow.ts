@@ -22,8 +22,8 @@ apt-get install -y curl tar tree npm git git-lfs jq git > /dev/null
 mkdir /builder
 printenv
 git config --global advice.detachedHead false
-git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f
-git config --global filter.lfs.process "git-lfs filter-process --skip
+git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
+git config --global filter.lfs.process "git-lfs filter-process --skip"
 git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.unityBuilderRepoUrl} /builder
 git clone -q -b ${CloudRunner.buildParameters.branch} ${CloudRunnerFolders.targetBuildRepoUrl} /repo
 cd /repo
