@@ -2,7 +2,7 @@ import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
 import CloudRunner from './cloud-runner/cloud-runner';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 import { Octokit } from '@octokit/core';
-
+import { createAppAuth } from '@octokit/auth-app';
 class GitHub {
   public static githubInputEnabled: boolean = true;
   private static longDescriptionContent: string = ``;
@@ -16,14 +16,29 @@ class GitHub {
     const sha = CloudRunner.buildParameters.gitSha;
     const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
     const nameReadable = name;
-    const token = CloudRunner.buildParameters.gitPrivateToken;
+    let token = CloudRunner.buildParameters.gitPrivateToken;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
     GitHub.startedDate = new Date().toISOString();
 
+    if (process.env.CHECKS_API_TOKEN) {
+      const splitSecrets = process.env.CHECKS_API_TOKEN.split(`:`) || [];
+      const data = {
+        appId: 1,
+        clientSecret: splitSecrets[1],
+        privateKey: splitSecrets[2],
+        clientId: splitSecrets[0],
+      };
+      const auth = createAppAuth(data);
+
+      // Retrieve an oauth-access token
+      const userAuthentication = await auth({ type: `app` });
+      token = userAuthentication.token;
+    }
+
     // call github api to create a check
     const octokit = new Octokit({
-      auth: process.env.CHECKS_API_TOKEN || token,
+      auth: token,
     });
 
     CloudRunnerLogger.log(`POST /repos/${owner}/${repo}/check-runs`);
@@ -64,12 +79,27 @@ class GitHub {
     const sha = CloudRunner.buildParameters.gitSha;
     const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
     const nameReadable = name;
-    const token = CloudRunner.buildParameters.gitPrivateToken;
+    let token = CloudRunner.buildParameters.gitPrivateToken;
     const checkRunId = CloudRunner.githubCheckId;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
+
+    if (process.env.CHECKS_API_TOKEN) {
+      const splitSecrets = process.env.CHECKS_API_TOKEN.split(`:`);
+      const auth = createAppAuth({
+        appId: 1,
+        privateKey: splitSecrets[2],
+        clientId: splitSecrets[0],
+        clientSecret: splitSecrets[1],
+      });
+
+      // Retrieve an oauth-access token
+      const userAuthentication = await auth({ type: `app` });
+      token = userAuthentication.token;
+    }
+
     const octokit = new Octokit({
-      auth: process.env.GITHUB_CHECK_TOKEN || token,
+      auth: token,
     });
 
     const data: any = {
