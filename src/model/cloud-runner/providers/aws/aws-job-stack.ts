@@ -142,7 +142,7 @@ export class AWSJobStack {
     };
 
     try {
-      CloudRunnerLogger.log(`Creating job aws formation`);
+      CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
       await CF.createStack(createStackInput).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
