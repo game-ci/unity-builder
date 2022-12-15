@@ -146,6 +146,7 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
     array = TaskParameterSerializer.tryAddInput(array, 'GIT_PRIVATE_TOKEN');
+    array = TaskParameterSerializer.tryAddInput(array, 'CHECKS_API_TOKEN');
 
     return array;
   }

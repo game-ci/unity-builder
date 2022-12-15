@@ -20,6 +20,8 @@ export class AsyncWorkflow {
         `apt-get update > /dev/null
 apt-get install -y curl tar tree npm git git-lfs jq git > /dev/null
 mkdir /builder
+printenv
+git config --global advice.detachedHead false
 git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f
 git config --global filter.lfs.process "git-lfs filter-process --skip
 git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${CloudRunnerFolders.unityBuilderRepoUrl} /builder
@@ -29,8 +31,7 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 unzip awscliv2.zip
 ./aws/install
 aws --version
-node /builder/dist/index.js -m async-workflow
-        `,
+node /builder/dist/index.js -m async-workflow`,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
         environmentVariables,

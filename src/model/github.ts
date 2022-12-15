@@ -1,7 +1,7 @@
-import { Octokit } from '@octokit/core';
 import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
 import CloudRunner from './cloud-runner/cloud-runner';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import { Octokit } from '@octokit/core';
 
 class GitHub {
   public static githubInputEnabled: boolean = true;
