@@ -181,7 +181,8 @@ export class AWSJobStack {
       try {
         CloudRunnerLogger.log(`Creating job cleanup formation`);
         CF.createStack(createCleanupStackInput).promise();
-        await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
+
+        // await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
       } catch (error) {
         await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
         throw error;
