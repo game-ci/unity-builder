@@ -26,7 +26,6 @@ describe('Cloud Runner Async Workflows', () => {
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
         asyncCloudRunner: `true`,
-        githubChecks: `true`,
       });
       const baseImage = new ImageTag(buildParameter);
 
