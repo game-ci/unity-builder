@@ -119,7 +119,13 @@ export class Cli {
 
   @CliFunction(`checks-update`, `runs a cloud runner build`)
   public static async checksUpdate() {
-    core.info(`Checks Update`);
+    const input = JSON.parse(process.env.CHECKS_UPDATE || ``);
+    core.info(`Checks Update ${input}`);
+    if (input.mode === `create`) {
+      await GitHub.createGitHubCheckRequest(input.data);
+    } else if (input.mode === `update`) {
+      await GitHub.updateGitHubCheckRequest(input.data);
+    }
   }
 
   @CliFunction(`garbage-collect`, `runs garbage collection`)

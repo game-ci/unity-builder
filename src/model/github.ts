@@ -75,40 +75,9 @@ class GitHub {
 
       return;
     }
-    const result = await GitHub.octokit.request(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`, data);
+    const result = await GitHub.createGitHubCheckRequest(data);
 
     return result.data.id;
-  }
-
-  public static async runUpdateAsyncChecksWorkflow(data, mode) {
-    const workflowsResult = await GitHub.octokit.request(
-      `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
-      {
-        owner: GitHub.owner,
-        repo: GitHub.repo,
-      },
-    );
-    const workflows = workflowsResult.data.workflows;
-    let selectedId = ``;
-    for (let index = 0; index < workflowsResult.data.total_count; index++) {
-      if (workflows[index].name === `Async Checks API`) {
-        selectedId = workflows[index].id;
-      }
-    }
-    if (selectedId === ``) {
-      core.info(JSON.stringify(workflows));
-      throw new Error(`no workflow with name "Async Checks API"`);
-    }
-    await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
-      owner: GitHub.owner,
-      repo: GitHub.repo,
-      // eslint-disable-next-line camelcase
-      workflow_id: selectedId,
-      ref: CloudRunnerOptions.branch,
-      inputs: {
-        checksObject: JSON.stringify({ data, mode }),
-      },
-    });
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
@@ -150,7 +119,49 @@ class GitHub {
 
       return;
     }
-    await GitHub.octokit.request(`PATCH /repos/${GitHub.owner}/${GitHub.repo}/check-runs/${GitHub.checkRunId}`, data);
+    await GitHub.updateGitHubCheckRequest(data);
+  }
+
+  public static async updateGitHubCheckRequest(data) {
+    return await GitHub.octokit.request(
+      `PATCH /repos/${GitHub.owner}/${GitHub.repo}/check-runs/${GitHub.checkRunId}`,
+      data,
+    );
+  }
+
+  public static async createGitHubCheckRequest(data) {
+    return await GitHub.octokit.request(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`, data);
+  }
+
+  public static async runUpdateAsyncChecksWorkflow(data, mode) {
+    const workflowsResult = await GitHub.octokit.request(
+      `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
+      {
+        owner: GitHub.owner,
+        repo: GitHub.repo,
+      },
+    );
+    const workflows = workflowsResult.data.workflows;
+    let selectedId = ``;
+    for (let index = 0; index < workflowsResult.data.total_count; index++) {
+      if (workflows[index].name === `Async Checks API`) {
+        selectedId = workflows[index].id;
+      }
+    }
+    if (selectedId === ``) {
+      core.info(JSON.stringify(workflows));
+      throw new Error(`no workflow with name "Async Checks API"`);
+    }
+    await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
+      owner: GitHub.owner,
+      repo: GitHub.repo,
+      // eslint-disable-next-line camelcase
+      workflow_id: selectedId,
+      ref: CloudRunnerOptions.branch,
+      inputs: {
+        checksObject: JSON.stringify({ data, mode }),
+      },
+    });
   }
 }
 
