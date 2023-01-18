@@ -9,7 +9,7 @@ class GitHub {
   private static endedDate: string;
 
   public static async createGitHubCheck(summary) {
-    if (!CloudRunnerOptions.githubChecks || CloudRunnerOptions.asyncCloudRunner) {
+    if (!CloudRunnerOptions.githubChecks) {
       return ``;
     }
     const sha = CloudRunner.buildParameters.gitSha;
@@ -56,7 +56,7 @@ class GitHub {
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
-    if (!CloudRunnerOptions.githubChecks || CloudRunnerOptions.asyncCloudRunner) {
+    if (!CloudRunnerOptions.githubChecks) {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
