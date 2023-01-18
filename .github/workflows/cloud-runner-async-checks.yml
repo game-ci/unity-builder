@@ -6,7 +6,7 @@ on:
       checksObject:
         description: ''
         required: false
-        default: ""
+        default: ''
 
 permissions: write-all
 

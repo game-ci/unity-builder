@@ -104,7 +104,7 @@ class GitHub {
       repo: GitHub.repo,
       // eslint-disable-next-line camelcase
       workflow_id: selectedId,
-      ref: 'topic-branch',
+      ref: CloudRunnerOptions.branch,
       inputs: {
         checksObject: JSON.stringify({ data, mode }),
       },
