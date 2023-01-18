@@ -44,7 +44,7 @@ jobs:
           lfs: false
       - run: yarn
       - run: yarn run cli --help
-      - run: yarn run cli --m checks-update
+      - run: yarn run cli -m checks-update
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
