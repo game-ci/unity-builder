@@ -83,6 +83,10 @@ inputs:
     required: false
     default: ''
     description: '[CloudRunner] Github private token to pull from github'
+  githubOwner:
+    required: false
+    default: ''
+    description: '[CloudRunner] GitHub owner name or organization/team name'
   chownFilesTo:
     required: false
     default: ''

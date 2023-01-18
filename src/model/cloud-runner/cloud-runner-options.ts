@@ -64,11 +64,11 @@ class CloudRunnerOptions {
   }
 
   static get githubOwner() {
-    return CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
+    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
   }
 
   static get githubRepoName() {
-    return CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
   }
 
   // ### ### ###
