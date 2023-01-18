@@ -5,7 +5,7 @@ on:
     inputs:
       checksObject:
         description: ''
-        required: true
+        required: false
         default: ''
 
 permissions: write-all
@@ -37,11 +37,6 @@ jobs:
     name: Async Checks
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        cloudRunnerCluster:
-          - local-docker
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -58,6 +53,6 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+          CLOUD_RUNNER_CLUSTER: local-docker
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
           CHECKS_UPDATE: ${{ github.event.inputs.checksObject }}
