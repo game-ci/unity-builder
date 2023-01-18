@@ -117,6 +117,11 @@ export class Cli {
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
 
+  @CliFunction(`checks-update`, `runs a cloud runner build`)
+  public static async checksUpdate() {
+    core.info(`Checks Update`);
+  }
+
   @CliFunction(`garbage-collect`, `runs garbage collection`)
   public static async GarbageCollect(): Promise<string> {
     const buildParameter = await BuildParameters.create();

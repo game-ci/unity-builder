@@ -4,6 +4,8 @@ on:
   push: { branches: [cloud-runner-develop, cloud-runner-preview, main] }
   workflow_dispatch:
 
+permissions: write-all
+
 env:
   GKE_ZONE: 'us-central1'
   GKE_REGION: 'us-central1'

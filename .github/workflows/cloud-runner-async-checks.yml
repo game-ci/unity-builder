@@ -1,0 +1,63 @@
+name: Async Checks API
+
+on:
+  workflow_dispatch:
+    inputs:
+      checksObject:
+        description: ''
+        required: true
+        default: ''
+
+permissions: write-all
+
+env:
+  GKE_ZONE: 'us-central1'
+  GKE_REGION: 'us-central1'
+  GKE_PROJECT: 'unitykubernetesbuilder'
+  GKE_CLUSTER: 'game-ci-github-pipelines'
+  GCP_LOGGING: true
+  GCP_PROJECT: unitykubernetesbuilder
+  GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
+  AWS_REGION: eu-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-west-2
+  AWS_BASE_STACK_NAME: game-ci-github-pipelines
+  CLOUD_RUNNER_BRANCH: ${{ github.ref }}
+  CLOUD_RUNNER_DEBUG: true
+  CLOUD_RUNNER_DEBUG_TREE: true
+  DEBUG: true
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: test-project
+  UNITY_VERSION: 2019.3.15f1
+  USE_IL2CPP: false
+
+jobs:
+  asyncChecks:
+    name: Async Checks
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cloudRunnerCluster:
+          - local-docker
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: false
+      - run: yarn
+      - run: yarn run cli --help
+      - run: yarn run cli --m checks-update
+        timeout-minutes: 180
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+          AWS_BASE_STACK_NAME: game-ci-github-pipelines
+          CHECKS_UPDATE: ${{ github.event.inputs.checksObject }}
