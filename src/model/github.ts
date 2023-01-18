@@ -15,7 +15,7 @@ class GitHub {
     const sha = CloudRunner.buildParameters.gitSha;
     const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
     const nameReadable = name;
-    const token = CloudRunner.buildParameters.gitPrivateToken;
+    const token = process.env.GITHUB_TOKEN;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
     GitHub.startedDate = new Date().toISOString();
@@ -63,7 +63,7 @@ class GitHub {
     const sha = CloudRunner.buildParameters.gitSha;
     const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
     const nameReadable = name;
-    const token = CloudRunner.buildParameters.gitPrivateToken;
+    const token = process.env.GITHUB_TOKEN;
     const checkRunId = CloudRunner.githubCheckId;
     const owner = CloudRunnerOptions.githubOwner;
     const repo = CloudRunnerOptions.githubRepoName;
