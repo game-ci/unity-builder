@@ -1,6 +1,7 @@
 import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
 import CloudRunner from './cloud-runner/cloud-runner';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import * as core from '@actions/core';
 import { Octokit } from '@octokit/core';
 class GitHub {
   public static githubInputEnabled: boolean = true;
@@ -95,6 +96,7 @@ class GitHub {
       }
     }
     if (selectedId === ``) {
+      core.info(JSON.stringify(workflows));
       throw new Error(`no workflow with name "Async Checks API"`);
     }
     await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
