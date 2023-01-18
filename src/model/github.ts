@@ -7,39 +7,56 @@ class GitHub {
   private static longDescriptionContent: string = ``;
   private static startedDate: string;
   private static endedDate: string;
+  private static get octokit() {
+    return new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    });
+  }
+  private static get sha() {
+    return CloudRunner.buildParameters.gitSha;
+  }
+
+  private static get checkName() {
+    return `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
+  }
+
+  private static get nameReadable() {
+    return GitHub.checkName;
+  }
+
+  private static get checkRunId() {
+    return CloudRunner.githubCheckId;
+  }
+
+  private static get owner() {
+    return CloudRunnerOptions.githubOwner;
+  }
+
+  private static get repo() {
+    return CloudRunnerOptions.githubRepoName;
+  }
 
   public static async createGitHubCheck(summary) {
     if (!CloudRunnerOptions.githubChecks) {
       return ``;
     }
-    const sha = CloudRunner.buildParameters.gitSha;
-    const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
-    const nameReadable = name;
-    const token = process.env.GITHUB_TOKEN;
-    const owner = CloudRunnerOptions.githubOwner;
-    const repo = CloudRunnerOptions.githubRepoName;
     GitHub.startedDate = new Date().toISOString();
 
-    // call github api to create a check
-    const octokit = new Octokit({
-      auth: token,
-    });
+    CloudRunnerLogger.log(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`);
 
-    CloudRunnerLogger.log(`POST /repos/${owner}/${repo}/check-runs`);
-
-    const result = await octokit.request(`POST /repos/${owner}/${repo}/check-runs`, {
-      owner,
-      repo,
-      name,
+    const data = {
+      owner: GitHub.owner,
+      repo: GitHub.repo,
+      name: GitHub.checkName,
       // eslint-disable-next-line camelcase
-      head_sha: sha,
+      head_sha: GitHub.sha,
       status: 'queued',
       // eslint-disable-next-line camelcase
       external_id: CloudRunner.buildParameters.buildGuid,
       // eslint-disable-next-line camelcase
       started_at: GitHub.startedDate,
       output: {
-        title: nameReadable,
+        title: GitHub.nameReadable,
         summary,
         text: '',
         images: [
@@ -50,9 +67,46 @@ class GitHub {
           },
         ],
       },
-    });
+    };
+
+    if (await CloudRunnerOptions.asyncCloudRunner) {
+      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
+
+      return;
+    }
+    const result = await GitHub.octokit.request(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`, data);
 
     return result.data.id;
+  }
+
+  public static async runUpdateAsyncChecksWorkflow(data, mode) {
+    const workflowsResult = await GitHub.octokit.request(
+      `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
+      {
+        owner: GitHub.owner,
+        repo: GitHub.repo,
+      },
+    );
+    const workflows = workflowsResult.data.workflows;
+    let selectedId = ``;
+    for (let index = 0; index < workflowsResult.data.total_count; index++) {
+      if (workflows[index].name === `Async Checks API`) {
+        selectedId = workflows[index].id;
+      }
+    }
+    if (selectedId === ``) {
+      throw new Error(`no workflow with name "Async Checks API"`);
+    }
+    await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
+      owner: GitHub.owner,
+      repo: GitHub.repo,
+      // eslint-disable-next-line camelcase
+      workflow_id: selectedId,
+      ref: 'topic-branch',
+      inputs: {
+        checksObject: JSON.stringify({ data, mode }),
+      },
+    });
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
@@ -60,31 +114,20 @@ class GitHub {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
-    const sha = CloudRunner.buildParameters.gitSha;
-    const name = `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
-    const nameReadable = name;
-    const token = process.env.GITHUB_TOKEN;
-    const checkRunId = CloudRunner.githubCheckId;
-    const owner = CloudRunnerOptions.githubOwner;
-    const repo = CloudRunnerOptions.githubRepoName;
-
-    const octokit = new Octokit({
-      auth: token,
-    });
 
     const data: any = {
-      owner,
-      repo,
+      owner: GitHub.owner,
+      repo: GitHub.owner,
       // eslint-disable-next-line camelcase
-      check_run_id: checkRunId,
-      name,
+      check_run_id: GitHub.checkRunId,
+      name: GitHub.checkName,
       // eslint-disable-next-line camelcase
-      head_sha: sha,
+      head_sha: GitHub.sha,
       // eslint-disable-next-line camelcase
       started_at: GitHub.startedDate,
       status,
       output: {
-        title: nameReadable,
+        title: GitHub.nameReadable,
         summary,
         text: GitHub.longDescriptionContent,
         annotations: [],
@@ -100,7 +143,12 @@ class GitHub {
       data.conclusion = result;
     }
 
-    await octokit.request(`PATCH /repos/${owner}/${repo}/check-runs/${checkRunId}`, data);
+    if (await CloudRunnerOptions.asyncCloudRunner) {
+      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
+
+      return;
+    }
+    await GitHub.octokit.request(`PATCH /repos/${GitHub.owner}/${GitHub.repo}/check-runs/${GitHub.checkRunId}`, data);
   }
 }
 
