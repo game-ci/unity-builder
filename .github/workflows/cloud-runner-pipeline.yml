@@ -71,7 +71,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
-          CHECKS_API_TOKEN: ${{ secrets.CHECKS_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
         if: matrix.CloudRunnerCluster == 'aws' || matrix.CloudRunnerCluster == 'k8s'
         timeout-minutes: 180
@@ -169,6 +169,7 @@ jobs:
         timeout-minutes: 90
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           cloudRunnerTests: true
           versioning: None
