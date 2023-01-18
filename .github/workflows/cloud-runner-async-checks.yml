@@ -1,13 +1,12 @@
 name: Async Checks API
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       checksObject:
         description: ''
         required: false
-        default: ''
+        default: ""
 
 permissions: write-all
 
