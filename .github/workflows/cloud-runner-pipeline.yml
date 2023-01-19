@@ -52,9 +52,15 @@ jobs:
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+          && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg > /usr/share/keyrings/cloud.google.gpg \
+          && apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
       - name: Get GKE cluster credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+        with:
+          use_auth_provider: true
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
