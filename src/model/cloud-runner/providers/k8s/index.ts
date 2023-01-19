@@ -162,10 +162,12 @@ class Kubernetes implements ProviderInterface {
           } catch {
             errorParsed = error;
           }
-          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
+
+          // const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
           const errorMessage = errorParsed.message || ``;
 
-          const continueStreaming = errorMessage.includes(`dial timeout, backstop`);
+          const continueStreaming =
+            errorMessage.includes(`dial timeout, backstop`) || errorMessage.includes(`HttpError: HTTP request failed`);
           if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
             await new Promise((resolve) => resolve(5000));
