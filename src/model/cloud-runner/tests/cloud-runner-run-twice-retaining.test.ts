@@ -88,9 +88,10 @@ describe('Cloud Runner Retain Workspace', () => {
         CloudRunnerLogger.log(
           `Cleaning up ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
         );
-        await CloudRunnerSystem.Run(
-          `rm -r ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-        );
+
+        // await CloudRunnerSystem.Run(
+        //   `rm -r ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+        // );
       }
     });
   }
