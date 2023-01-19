@@ -1,7 +1,7 @@
 import fs from 'fs';
 import * as core from '@actions/core';
 import { BuildParameters } from '.';
-import { SetupMac, SetupWindows } from './platform-setup/';
+import { SetupMac, SetupWindows, SetupAndroid } from './platform-setup/';
 import ValidateWindows from './platform-validation/validate-windows';
 
 class PlatformSetup {
@@ -33,6 +33,8 @@ class PlatformSetup {
     let servicesConfig = fs.readFileSync(servicesConfigPathTemplate).toString();
     servicesConfig = servicesConfig.replace('%URL%', buildParameters.unityLicensingServer);
     fs.writeFileSync(servicesConfigPath, servicesConfig);
+
+    SetupAndroid.setup(buildParameters);
   }
 }
 

@@ -7,3 +7,11 @@ describe('Output', () => {
     });
   });
 });
+
+describe('Output', () => {
+  describe('setAndroidVersionCode', () => {
+    it('does not throw', async () => {
+      await expect(Output.setAndroidVersionCode('1000')).resolves.not.toThrow();
+    });
+  });
+});

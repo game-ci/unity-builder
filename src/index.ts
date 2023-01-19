@@ -32,6 +32,7 @@ async function runMain() {
 
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
+    await Output.setAndroidVersionCode(buildParameters.androidVersionCode);
   } catch (error) {
     core.setFailed((error as Error).message);
   }
