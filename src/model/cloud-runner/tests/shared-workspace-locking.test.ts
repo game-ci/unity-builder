@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import UnityVersioning from '../../unity-versioning';
 import BuildParameters from '../../build-parameters';
+import CloudRunner from '../cloud-runner';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -32,6 +33,7 @@ describe('Cloud Runner Locking', () => {
 
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       const runId = uuidv4();
+      CloudRunner.buildParameters = buildParameters;
       await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters);
       const isExpectedUnlockedBeforeLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
