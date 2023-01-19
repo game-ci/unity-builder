@@ -170,6 +170,7 @@ class Kubernetes implements ProviderInterface {
             errorMessage.includes(`dial timeout, backstop`) ||
             errorMessage.includes(`HttpError: HTTP request failed`) ||
             errorMessage.includes(`an error occurred when try to find container`) ||
+            errorMessage.includes(`not found`) ||
             errorMessage.includes(`Not Found`);
           if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
