@@ -52,10 +52,11 @@ jobs:
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
       - name: Get GKE cluster credentials
-        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-        env:
-          use_auth_provider: true
+        run: |
+            gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
