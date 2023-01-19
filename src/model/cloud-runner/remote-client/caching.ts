@@ -105,9 +105,7 @@ export class Caching {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
     const startPath = process.cwd();
-    RemoteClientLogger.log(
-      `Caching for (lz4 ${CloudRunner.buildParameters.useLz4Compression}) ${path.basename(destinationFolder)}`,
-    );
+    RemoteClientLogger.log(`Caching for (lz4 ${compressionSuffix}) ${path.basename(destinationFolder)}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await fs.promises.mkdir(cacheFolder);
