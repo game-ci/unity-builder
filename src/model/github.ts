@@ -9,9 +9,14 @@ class GitHub {
   private static longDescriptionContent: string = ``;
   private static startedDate: string;
   private static endedDate: string;
-  private static get octokit() {
+  private static get octokitDefaultToken() {
     return new Octokit({
       auth: process.env.GITHUB_TOKEN,
+    });
+  }
+  private static get octokitPAT() {
+    return new Octokit({
+      auth: CloudRunner.buildParameters.gitPrivateToken,
     });
   }
   private static get sha() {
@@ -118,18 +123,18 @@ class GitHub {
   }
 
   public static async updateGitHubCheckRequest(data) {
-    return await GitHub.octokit.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
+    return await GitHub.octokitDefaultToken.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
   }
 
   public static async createGitHubCheckRequest(data) {
-    return await GitHub.octokit.request(`POST /repos/{owner}/{repo}/check-runs`, data);
+    return await GitHub.octokitDefaultToken.request(`POST /repos/{owner}/{repo}/check-runs`, data);
   }
 
   public static async runUpdateAsyncChecksWorkflow(data, mode) {
     if (mode === `create`) {
       throw new Error(`Not supported: only use update`);
     }
-    const workflowsResult = await GitHub.octokit.request(
+    const workflowsResult = await GitHub.octokitDefaultToken.request(
       `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
       {
         owner: GitHub.owner,
@@ -147,7 +152,7 @@ class GitHub {
       core.info(JSON.stringify(workflows));
       throw new Error(`no workflow with name "${GitHub.asyncChecksApiWorkflowName}"`);
     }
-    await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
+    await GitHub.octokitPAT.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
       owner: GitHub.owner,
       repo: GitHub.repo,
       // eslint-disable-next-line camelcase
