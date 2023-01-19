@@ -47,6 +47,11 @@ Resources:
       EnableDnsHostnames: true
       CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
 
+  MainBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref EnvironmentName
+
   EFSServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

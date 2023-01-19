@@ -4,6 +4,7 @@ import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 import * as core from '@actions/core';
 import { Octokit } from '@octokit/core';
 class GitHub {
+  private static readonly asyncChecksApiWorkflowName = `Async Checks API`;
   public static githubInputEnabled: boolean = true;
   private static longDescriptionContent: string = ``;
   private static startedDate: string;
@@ -138,13 +139,13 @@ class GitHub {
     const workflows = workflowsResult.data.workflows;
     let selectedId = ``;
     for (let index = 0; index < workflowsResult.data.total_count; index++) {
-      if (workflows[index].name === `Async Checks API`) {
+      if (workflows[index].name === GitHub.asyncChecksApiWorkflowName) {
         selectedId = workflows[index].id;
       }
     }
     if (selectedId === ``) {
       core.info(JSON.stringify(workflows));
-      throw new Error(`no workflow with name "Async Checks API"`);
+      throw new Error(`no workflow with name "${GitHub.asyncChecksApiWorkflowName}"`);
     }
     await GitHub.octokit.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
       owner: GitHub.owner,
