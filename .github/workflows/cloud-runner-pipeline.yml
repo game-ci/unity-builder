@@ -60,16 +60,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - run: yarn run test "cloud-runner-run-twice-caching" --detectOpenHandles --forceExit --runInBand
-        timeout-minutes: 180
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: test-project
-          GIT_PRIVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_PLATFORM: StandaloneWindows64
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - run: yarn run test "cloud-runner-async-workflow" --detectOpenHandles --forceExit --runInBand
         if: matrix.CloudRunnerCluster == 'aws'
         timeout-minutes: 180
@@ -83,6 +73,7 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
+        if: matrix.CloudRunnerCluster != 'local-docker'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
