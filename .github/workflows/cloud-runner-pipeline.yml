@@ -52,7 +52,7 @@ jobs:
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - run: apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - run: gcloud components install gke-gcloud-auth-plugin
       - name: Get GKE cluster credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - name: Configure AWS Credentials
