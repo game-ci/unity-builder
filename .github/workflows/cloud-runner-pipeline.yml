@@ -72,7 +72,6 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-          AWS_BASE_STACK_NAME: game-ci-github-pipelines
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
         if: matrix.CloudRunnerCluster == 'aws' || matrix.CloudRunnerCluster == 'k8s'
@@ -85,7 +84,6 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-          AWS_BASE_STACK_NAME: game-ci-github-pipelines
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
         if: matrix.CloudRunnerCluster == 'local-docker'
         timeout-minutes: 180
@@ -97,7 +95,6 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-          AWS_BASE_STACK_NAME: game-ci-github-pipelines
   localBuildTests:
     name: Local Build Target Tests
     runs-on: ubuntu-latest
