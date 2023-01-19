@@ -6,6 +6,8 @@ on:
 
 permissions:
   checks: write
+  content: read
+  actions: write
 
 env:
   GKE_ZONE: 'us-central1'
