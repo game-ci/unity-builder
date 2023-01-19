@@ -165,7 +165,7 @@ class Kubernetes implements ProviderInterface {
           const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
           const errorMessage = errorParsed.message || ``;
 
-          const continueStreaming = reason === `NotFound` || errorMessage.includes(`dial timeout, backstop`);
+          const continueStreaming = errorMessage.includes(`dial timeout, backstop`);
           if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
             await new Promise((resolve) => resolve(5000));
