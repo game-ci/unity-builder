@@ -154,6 +154,7 @@ class Kubernetes implements ProviderInterface {
           } else {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
+          await this.cleanupTaskResources();
         } catch (error: any) {
           let errorParsed;
           try {
@@ -175,7 +176,6 @@ class Kubernetes implements ProviderInterface {
           }
         }
       }
-      await this.cleanupTaskResources();
 
       return output;
     } catch (error) {
