@@ -6,7 +6,7 @@ on:
 
 permissions:
   checks: write
-  content: read
+  contents: read
   actions: write
 
 env:
