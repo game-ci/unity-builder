@@ -14,6 +14,7 @@ import GitHub from '../../../github';
 class AWSTaskRunner {
   public static ECS: AWS.ECS;
   public static Kinesis: AWS.Kinesis;
+  private static readonly encodedUnderscore = `$252F`;
   static async runTask(
     taskDef: CloudRunnerAWSTaskDef,
     environment: CloudRunnerEnvironmentVariable[],
@@ -128,7 +129,7 @@ class AWSTaskRunner {
     const stream = await AWSTaskRunner.getLogStream(kinesisStreamName);
     let iterator = await AWSTaskRunner.getLogIterator(stream);
 
-    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}$252F${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
+    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}${AWSTaskRunner.encodedUnderscore}${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
     CloudRunnerLogger.log(`You view the log stream on AWS Cloud Watch: ${logBaseUrl}`);
     await GitHub.updateGitHubCheck(`You view the log stream on AWS Cloud Watch:  ${logBaseUrl}`, ``);
     let shouldReadLogs = true;
