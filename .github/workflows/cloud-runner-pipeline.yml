@@ -56,7 +56,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: Get GKE cluster credentials
         run: |
-            gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
