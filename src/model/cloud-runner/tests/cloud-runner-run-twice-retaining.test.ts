@@ -47,7 +47,7 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(results).not.toContain(cachePushFail);
 
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
-        CloudRunnerSystem.Run(`tree`);
+        CloudRunnerSystem.Run(`tree -L 2`);
       }
 
       CloudRunnerLogger.log(`run 1 succeeded`);
