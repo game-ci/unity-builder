@@ -59,7 +59,7 @@ jobs:
           sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
       - name: Get GKE cluster credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-        with:
+        env:
           use_auth_provider: true
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
