@@ -122,7 +122,7 @@ export class Cli {
     const input = JSON.parse(process.env.CHECKS_UPDATE || ``);
     core.info(`Checks Update ${process.env.CHECKS_UPDATE}`);
     if (input.mode === `create`) {
-      await GitHub.createGitHubCheckRequest(input.data);
+      throw new Error(`Not supported: only use update`);
     } else if (input.mode === `update`) {
       await GitHub.updateGitHubCheckRequest(input.data);
     }

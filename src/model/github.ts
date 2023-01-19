@@ -69,12 +69,6 @@ class GitHub {
         ],
       },
     };
-
-    if (await CloudRunnerOptions.asyncCloudRunner) {
-      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
-
-      return;
-    }
     const result = await GitHub.createGitHubCheckRequest(data);
 
     return result.data.id;
@@ -134,6 +128,9 @@ class GitHub {
   }
 
   public static async runUpdateAsyncChecksWorkflow(data, mode) {
+    if (mode === `create`) {
+      throw new Error(`Not supported: only use update`);
+    }
     const workflowsResult = await GitHub.octokit.request(
       `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
       {
