@@ -8,7 +8,8 @@ on:
         required: false
         default: ''
 
-permissions: write-all
+permissions:
+  checks: write
 
 env:
   GKE_ZONE: 'us-central1'

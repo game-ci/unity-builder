@@ -117,14 +117,11 @@ class GitHub {
   }
 
   public static async updateGitHubCheckRequest(data) {
-    return await GitHub.octokit.request(
-      `PATCH /repos/${GitHub.owner}/${GitHub.repo}/check-runs/${GitHub.checkRunId}`,
-      data,
-    );
+    return await GitHub.octokit.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
   }
 
   public static async createGitHubCheckRequest(data) {
-    return await GitHub.octokit.request(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`, data);
+    return await GitHub.octokit.request(`POST /repos/{owner}/{repo}/check-runs`, data);
   }
 
   public static async runUpdateAsyncChecksWorkflow(data, mode) {
