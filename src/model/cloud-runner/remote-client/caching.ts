@@ -106,7 +106,7 @@ export class Caching {
     const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
     const startPath = process.cwd();
     RemoteClientLogger.log(
-      `Caching for ${CloudRunner.buildParameters.useLz4Compression} ${path.basename(destinationFolder)}`,
+      `Caching for (lz4 ${CloudRunner.buildParameters.useLz4Compression}) ${path.basename(destinationFolder)}`,
     );
     try {
       if (!(await fileExists(cacheFolder))) {
@@ -159,6 +159,7 @@ export class Caching {
           RemoteClientLogger.logWarning(
             `cache item ${cacheArtifactName}.tar${compressionSuffix} doesn't exist ${destinationFolder}`,
           );
+          await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
