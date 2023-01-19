@@ -6,7 +6,7 @@ on:
 
 permissions:
   checks: write
-  workflows: write
+  actions: write
 
 env:
   GKE_ZONE: 'us-central1'
