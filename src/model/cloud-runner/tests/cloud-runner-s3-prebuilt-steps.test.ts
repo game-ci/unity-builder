@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import AWSBuildEnvironment from '../providers/aws';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -39,7 +38,7 @@ describe('Cloud Runner pre-built S3 steps', () => {
       expect(build2ContainsBuildSucceeded).toBeTruthy();
 
       const results = await CloudRunnerSystem.RunAndReadLines(
-        `aws s3 ls s3://${AWSBuildEnvironment.baseStackName}/cloud-runner-cache/${buildParameter2.cacheKey}/`,
+        `aws s3 ls s3://${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/${buildParameter2.cacheKey}/`,
       );
       CloudRunnerLogger.log(results.join(`,`));
     }, 1_000_000_000);

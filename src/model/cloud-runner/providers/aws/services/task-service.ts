@@ -4,7 +4,7 @@ import CloudRunnerLogger from '../../../services/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
 import { ListObjectsRequest } from 'aws-sdk/clients/s3';
-import AWSBuildEnvironment from '..';
+import CloudRunner from '../../../cloud-runner';
 
 export class TaskService {
   static async watch() {
@@ -159,7 +159,7 @@ export class TaskService {
     process.env.AWS_REGION = Input.region;
     const s3 = new AWS.S3();
     const listRequest: ListObjectsRequest = {
-      Bucket: AWSBuildEnvironment.baseStackName,
+      Bucket: CloudRunner.buildParameters.awsBaseStackName,
     };
     const results = await s3.listObjects(listRequest).promise();
 
