@@ -74,7 +74,6 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run test "cloud-runner-run-twice-retaining" --detectOpenHandles --forceExit --runInBand
-        if: matrix.CloudRunnerCluster == 'aws' || matrix.CloudRunnerCluster == 'k8s'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
