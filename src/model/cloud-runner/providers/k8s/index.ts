@@ -163,8 +163,8 @@ class Kubernetes implements ProviderInterface {
             errorParsed = error;
           }
 
-          // const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
-          const errorMessage = errorParsed.message || ``;
+          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
+          const errorMessage = errorParsed.message || reason;
 
           const continueStreaming =
             errorMessage.includes(`dial timeout, backstop`) ||
