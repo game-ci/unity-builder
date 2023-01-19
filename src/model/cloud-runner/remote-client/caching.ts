@@ -46,10 +46,7 @@ export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
-    let compressionSuffix = '';
-    if (CloudRunner.buildParameters.useLz4Compression === true) {
-      compressionSuffix = `.lz4`;
-    }
+    const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
     CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.useLz4Compression} ${compressionSuffix}`);
     try {
       if (!(await fileExists(cacheFolder))) {
