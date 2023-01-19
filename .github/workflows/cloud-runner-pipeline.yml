@@ -30,6 +30,7 @@ env:
   UNITY_VERSION: 2019.3.15f1
   USE_IL2CPP: false
   RUN_ALL:
+  USE_GKE_GCLOUD_AUTH_PLUGIN: true
 
 jobs:
   integrationTests:
