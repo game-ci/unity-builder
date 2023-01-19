@@ -82,7 +82,7 @@ class GitHub {
 
     const data: any = {
       owner: GitHub.owner,
-      repo: GitHub.owner,
+      repo: GitHub.repo,
       // eslint-disable-next-line camelcase
       check_run_id: GitHub.checkRunId,
       name: GitHub.checkName,
