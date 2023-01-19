@@ -46,6 +46,10 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
 
+      if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+        CloudRunnerSystem.Run(`tree`);
+      }
+
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
 
