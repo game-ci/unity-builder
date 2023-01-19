@@ -4,8 +4,9 @@ import CloudRunnerLogger from './cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
+import AWSBuildEnvironment from '../providers/aws';
 export class SharedWorkspaceLocking {
-  private static readonly workspaceBucketRoot = `s3://game-ci-test-storage/`;
+  private static readonly workspaceBucketRoot = `s3://${AWSBuildEnvironment.baseStackName}/`;
   private static readonly workspaceRoot = `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {

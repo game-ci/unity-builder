@@ -16,10 +16,10 @@ import { TaskService } from './services/task-service';
 import CloudRunnerOptions from '../../cloud-runner-options';
 
 class AWSBuildEnvironment implements ProviderInterface {
-  private baseStackName: string;
+  public static baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
-    this.baseStackName = buildParameters.awsBaseStackName;
+    AWSBuildEnvironment.baseStackName = buildParameters.awsBaseStackName;
   }
   async listResources(): Promise<ProviderResource[]> {
     await TaskService.getCloudFormationJobStacks();
@@ -95,8 +95,8 @@ class AWSBuildEnvironment implements ProviderInterface {
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
 
-    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
-    const taskDef = await new AwsJobStack(this.baseStackName).setupCloudFormations(
+    await new AwsBaseStack(AWSBuildEnvironment.baseStackName).setupBaseStack(CF);
+    const taskDef = await new AwsJobStack(AWSBuildEnvironment.baseStackName).setupCloudFormations(
       CF,
       buildGuid,
       image,
