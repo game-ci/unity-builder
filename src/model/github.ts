@@ -44,7 +44,7 @@ class GitHub {
   }
 
   public static async createGitHubCheck(summary) {
-    if (!CloudRunnerOptions.githubChecks) {
+    if (!CloudRunnerOptions.githubChecks || !CloudRunner.isCloudRunnerEnvironment) {
       return ``;
     }
     GitHub.startedDate = new Date().toISOString();
@@ -114,7 +114,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (await CloudRunnerOptions.asyncCloudRunner) {
+    if (CloudRunner.isCloudRunnerEnvironment || CloudRunner.isCloudRunnerAsyncEnvironment) {
       await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
 
       return;

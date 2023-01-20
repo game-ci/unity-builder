@@ -15,6 +15,7 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
+import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -24,6 +25,12 @@ class CloudRunner {
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static githubCheckId;
+  public static get isCloudRunnerEnvironment() {
+    return process.env.cloudRunnerCluster !== undefined && process.env.cloudRunnerCluster !== `local`;
+  }
+  public static get isCloudRunnerAsyncEnvironment() {
+    return CloudRunner.isCloudRunnerEnvironment && CloudRunnerOptions.asyncCloudRunner;
+  }
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
