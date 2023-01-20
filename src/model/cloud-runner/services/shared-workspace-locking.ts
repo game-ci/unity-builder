@@ -23,15 +23,11 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    try {
-      await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
+    await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
 
-      return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
-        .map((x) => x.replace(`/`, ``))
-        .includes(buildParametersContext.cacheKey);
-    } catch {
-      return false;
-    }
+    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
+      .map((x) => x.replace(`/`, ``))
+      .includes(buildParametersContext.cacheKey);
   }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
@@ -54,20 +50,27 @@ export class SharedWorkspaceLocking {
     if (!CloudRunnerOptions.retainWorkspaces) {
       return;
     }
-    if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
-      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
-      CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
-      for (const element of workspaces) {
-        await new Promise((promise) => setTimeout(promise, 1000));
-        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-        CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-        if (lockResult) {
-          CloudRunner.lockedWorkspace = element;
+    try {
+      if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
+        const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+        CloudRunnerLogger.log(
+          `run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`,
+        );
+        for (const element of workspaces) {
+          await new Promise((promise) => setTimeout(promise, 1000));
+          const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
+          CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-          return true;
+          if (lockResult) {
+            CloudRunner.lockedWorkspace = element;
+
+            return true;
+          }
         }
       }
+    } catch {
+      return;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
