@@ -26,7 +26,7 @@ class CloudRunner {
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static githubCheckId;
   public static get isCloudRunnerEnvironment() {
-    return process.env.cloudRunnerCluster !== undefined && process.env.cloudRunnerCluster !== `local`;
+    return process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== undefined && process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== `local`;
   }
   public static get isCloudRunnerAsyncEnvironment() {
     return CloudRunner.isCloudRunnerEnvironment && CloudRunnerOptions.asyncCloudRunner;

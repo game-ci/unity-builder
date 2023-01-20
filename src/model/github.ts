@@ -114,7 +114,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (CloudRunner.isCloudRunnerEnvironment) {
+    if (CloudRunner.isCloudRunnerEnvironment && CloudRunnerOptions.asyncCloudRunner) {
       await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
 
       return;
