@@ -44,12 +44,12 @@ class GitHub {
   }
 
   public static async createGitHubCheck(summary) {
-    if (!CloudRunnerOptions.githubChecks || !CloudRunner.isCloudRunnerEnvironment) {
+    if (!CloudRunnerOptions.githubChecks || CloudRunner.isCloudRunnerEnvironment) {
       return ``;
     }
     GitHub.startedDate = new Date().toISOString();
 
-    CloudRunnerLogger.log(`POST /repos/${GitHub.owner}/${GitHub.repo}/check-runs`);
+    CloudRunnerLogger.log(`POST /repos/{owner}/{repo}/check-runs`);
 
     const data = {
       owner: GitHub.owner,
@@ -134,18 +134,15 @@ class GitHub {
     if (mode === `create`) {
       throw new Error(`Not supported: only use update`);
     }
-    const workflowsResult = await GitHub.octokitPAT.request(
-      `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
-      {
-        owner: GitHub.owner,
-        repo: GitHub.repo,
-      },
-    );
+    const workflowsResult = await GitHub.octokitPAT.request(`GET /repos/{owner}/{repo}/actions/workflows`, {
+      owner: GitHub.owner,
+      repo: GitHub.repo,
+    });
     const workflows = workflowsResult.data.workflows;
     let selectedId = ``;
     for (let index = 0; index < workflowsResult.data.total_count; index++) {
       if (workflows[index].name === GitHub.asyncChecksApiWorkflowName) {
-        selectedId = workflows[index].id;
+        selectedId = workflows[index].id.toString();
       }
     }
     if (selectedId === ``) {
