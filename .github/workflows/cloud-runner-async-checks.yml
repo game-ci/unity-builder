@@ -8,7 +8,7 @@ on:
         required: false
         default: ''
 
-permissions: 
+permissions:
   checks: write
 
 env:
@@ -44,7 +44,6 @@ jobs:
         with:
           lfs: false
       - run: yarn
-      - run: yarn run cli --help
       - run: yarn run cli -m checks-update
         timeout-minutes: 180
         env:

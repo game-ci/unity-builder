@@ -5,8 +5,12 @@ import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
-  private static readonly workspaceBucketRoot = `s3://game-ci-test-storage/`;
-  private static readonly workspaceRoot = `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
+  private static get workspaceBucketRoot() {
+    return `s3://${CloudRunner.buildParameters.awsBaseStackName}/`;
+  }
+  private static get workspaceRoot() {
+    return `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
+  }
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
       return [];
@@ -19,14 +23,11 @@ export class SharedWorkspaceLocking {
     ).map((x) => x.replace(`/`, ``));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    return (
-      (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`))
-        .map((x) => x.replace(`/`, ``))
-        .includes(`locks`) &&
-      (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
-        .map((x) => x.replace(`/`, ``))
-        .includes(buildParametersContext.cacheKey)
-    );
+    await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
+
+    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
+      .map((x) => x.replace(`/`, ``))
+      .includes(buildParametersContext.cacheKey);
   }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
@@ -49,20 +50,27 @@ export class SharedWorkspaceLocking {
     if (!CloudRunnerOptions.retainWorkspaces) {
       return;
     }
-    if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
-      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
-      CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
-      for (const element of workspaces) {
-        await new Promise((promise) => setTimeout(promise, 1000));
-        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-        CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-        if (lockResult) {
-          CloudRunner.lockedWorkspace = element;
+    try {
+      if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
+        const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+        CloudRunnerLogger.log(
+          `run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`,
+        );
+        for (const element of workspaces) {
+          await new Promise((promise) => setTimeout(promise, 1000));
+          const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
+          CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
-          return true;
+          if (lockResult) {
+            CloudRunner.lockedWorkspace = element;
+
+            return true;
+          }
         }
       }
+    } catch {
+      return;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);

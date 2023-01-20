@@ -5,6 +5,9 @@ import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { AWSError } from './aws-error';
 import CloudRunner from '../../cloud-runner';
+import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
+import CloudRunnerOptions from '../../cloud-runner-options';
+import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -38,6 +41,13 @@ export class AWSJobStack {
       `ContainerMemory:
     Default: ${Number.parseInt(memory)}`,
     );
+    if (CloudRunnerOptions.watchCloudRunnerToEnd) {
+      taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
+        taskDefCloudFormation,
+        '# template resources logstream',
+        TaskDefinitionFormation.streamLogs,
+      );
+    }
     for (const secret of secrets) {
       secret.ParameterKey = `${buildGuid.replace(/[^\dA-Za-z]/g, '')}${secret.ParameterKey.replace(
         /[^\dA-Za-z]/g,
@@ -57,7 +67,7 @@ export class AWSJobStack {
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        'p2 - secret',
+        '# template resources secrets',
         AWSCloudFormationTemplates.getSecretTemplate(`${secret.ParameterKey}`),
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
@@ -132,12 +142,51 @@ export class AWSJobStack {
     };
 
     try {
+      CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
       await CF.createStack(createStackInput).promise();
-      CloudRunnerLogger.log('Creating cloud runner job');
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
     } catch (error) {
       await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
       throw error;
+    }
+
+    const createCleanupStackInput: SDK.CloudFormation.CreateStackInput = {
+      StackName: `${taskDefStackName}-cleanup`,
+      TemplateBody: CleanupCronFormation.formation,
+      Capabilities: ['CAPABILITY_IAM'],
+      Parameters: [
+        {
+          ParameterKey: 'StackName',
+          ParameterValue: taskDefStackName,
+        },
+        {
+          ParameterKey: 'DeleteStackName',
+          ParameterValue: `${taskDefStackName}-cleanup`,
+        },
+        {
+          ParameterKey: 'TTL',
+          ParameterValue: `1080`,
+        },
+        {
+          ParameterKey: 'BUILDGUID',
+          ParameterValue: CloudRunner.buildParameters.buildGuid,
+        },
+        {
+          ParameterKey: 'EnvironmentName',
+          ParameterValue: this.baseStackName,
+        },
+      ],
+    };
+    if (CloudRunnerOptions.useCleanupCron) {
+      try {
+        CloudRunnerLogger.log(`Creating job cleanup formation`);
+        CF.createStack(createCleanupStackInput).promise();
+
+        // await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
+      } catch (error) {
+        await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
+        throw error;
+      }
     }
 
     const taskDefResources = (

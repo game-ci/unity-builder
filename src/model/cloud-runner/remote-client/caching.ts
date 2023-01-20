@@ -46,7 +46,11 @@ export class Caching {
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
-    const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
+    let compressionSuffix = '';
+    if (CloudRunner.buildParameters.useLz4Compression === true) {
+      compressionSuffix = `.lz4`;
+    }
+    CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.useLz4Compression} ${compressionSuffix}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
@@ -99,9 +103,12 @@ export class Caching {
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
-    const compressionSuffix = CloudRunner.buildParameters.useLz4Compression ? '.lz4' : '';
+    let compressionSuffix = '';
+    if (CloudRunner.buildParameters.useLz4Compression === true) {
+      compressionSuffix = `.lz4`;
+    }
     const startPath = process.cwd();
-    RemoteClientLogger.log(`Caching for ${path.basename(destinationFolder)}`);
+    RemoteClientLogger.log(`Caching for (lz4 ${compressionSuffix}) ${path.basename(destinationFolder)}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await fs.promises.mkdir(cacheFolder);
@@ -153,6 +160,7 @@ export class Caching {
           RemoteClientLogger.logWarning(
             `cache item ${cacheArtifactName}.tar${compressionSuffix} doesn't exist ${destinationFolder}`,
           );
+          await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }

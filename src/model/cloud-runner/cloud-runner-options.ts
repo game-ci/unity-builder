@@ -57,6 +57,21 @@ class CloudRunnerOptions {
   }
 
   // ### ### ###
+  // GitHub  parameters
+  // ### ### ###
+  static get githubChecks(): boolean {
+    return CloudRunnerOptions.getInput('githubChecks') || false;
+  }
+
+  static get githubOwner() {
+    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
+  }
+
+  static get githubRepoName() {
+    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+  }
+
+  // ### ### ###
   // Git syncronization parameters
   // ### ### ###
 
@@ -220,19 +235,31 @@ class CloudRunnerOptions {
   }
 
   static get watchCloudRunnerToEnd(): boolean {
-    return (CloudRunnerOptions.getInput(`watchToEnd`) || true) !== 'false';
+    if (CloudRunnerOptions.asyncCloudRunner) {
+      return false;
+    }
+
+    return CloudRunnerOptions.getInput(`watchToEnd`) || true;
+  }
+
+  static get asyncCloudRunner(): boolean {
+    return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
   }
 
   public static get useSharedLargePackages(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') === 'true';
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || true) !== 'false';
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') === 'true';
   }
 
   public static get useLz4Compression(): boolean {
-    return (CloudRunnerOptions.getInput(`useLz4Compression`) || true) !== false;
+    return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') === 'true';
+  }
+
+  public static get useCleanupCron(): boolean {
+    return (CloudRunnerOptions.getInput(`useCleanupCron`) || 'true') === 'true';
   }
 
   // ### ### ###

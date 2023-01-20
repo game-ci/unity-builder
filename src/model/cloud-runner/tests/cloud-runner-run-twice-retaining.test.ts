@@ -6,7 +6,6 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import * as fs from 'fs';
 import path from 'path';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
@@ -46,6 +45,11 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
 
+      if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+        const cacheFolderExists = fs.existsSync(`cloud-runner-cache/cache/${overrides.cacheKey}`);
+        expect(cacheFolderExists).toBeTruthy();
+      }
+
       CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
 
@@ -83,9 +87,6 @@ describe('Cloud Runner Retain Workspace', () => {
       ) {
         CloudRunnerLogger.log(
           `Cleaning up ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-        );
-        await CloudRunnerSystem.Run(
-          `rm -r ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
         );
       }
     });

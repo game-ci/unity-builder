@@ -154,6 +154,7 @@ class Kubernetes implements ProviderInterface {
           } else {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
+          await this.cleanupTaskResources();
         } catch (error: any) {
           let errorParsed;
           try {
@@ -161,10 +162,16 @@ class Kubernetes implements ProviderInterface {
           } catch {
             errorParsed = error;
           }
-          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
-          const errorMessage = errorParsed.message || ``;
 
-          const continueStreaming = reason === `NotFound` || errorMessage.includes(`dial timeout, backstop`);
+          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
+          const errorMessage = errorParsed.message || reason;
+
+          const continueStreaming =
+            errorMessage.includes(`dial timeout, backstop`) ||
+            errorMessage.includes(`HttpError: HTTP request failed`) ||
+            errorMessage.includes(`an error occurred when try to find container`) ||
+            errorMessage.includes(`not found`) ||
+            errorMessage.includes(`Not Found`);
           if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
             await new Promise((resolve) => resolve(5000));
@@ -175,7 +182,6 @@ class Kubernetes implements ProviderInterface {
           }
         }
       }
-      await this.cleanupTaskResources();
 
       return output;
     } catch (error) {

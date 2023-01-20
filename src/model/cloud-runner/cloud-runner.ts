@@ -23,6 +23,7 @@ class CloudRunner {
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
+  public static githubCheckId;
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
@@ -41,6 +42,12 @@ class CloudRunner {
         // CloudRunnerLogger.log(`Cloud Runner output ${Input.ToEnvVarFormat(element)} = ${buildParameters[element]}`);
         core.setOutput(Input.ToEnvVarFormat(element), buildParameters[element]);
       }
+      core.setOutput(
+        Input.ToEnvVarFormat(`buildArtifact`),
+        `build-${CloudRunner.buildParameters.buildGuid}.tar${
+          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        }`,
+      );
     }
   }
 
@@ -68,6 +75,8 @@ class CloudRunner {
   static async run(buildParameters: BuildParameters, baseImage: string) {
     CloudRunner.setup(buildParameters);
     try {
+      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 
@@ -97,6 +106,7 @@ class CloudRunner {
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, CloudRunner.buildParameters.buildGuid);
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
@@ -109,6 +119,7 @@ class CloudRunner {
       );
       CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
       if (CloudRunner.buildParameters.retainWorkspace) {
         await SharedWorkspaceLocking.ReleaseWorkspace(
@@ -125,6 +136,7 @@ class CloudRunner {
 
       return output;
     } catch (error) {
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, error, `failure`, `completed`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;

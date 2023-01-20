@@ -2,7 +2,8 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import CloudRunnerSecret from '../services/cloud-runner-secret';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import { CloudRunnerCustomSteps, CustomStep } from '../services/cloud-runner-custom-steps';
+import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
+import { CustomStep } from '../services/custom-step';
 import CloudRunner from '../cloud-runner';
 
 export class CustomWorkflow {
@@ -26,9 +27,10 @@ export class CustomWorkflow {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       let output = '';
-      if (CloudRunner.buildParameters?.cloudRunnerDebug) {
-        CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
-      }
+
+      // if (CloudRunner.buildParameters?.cloudRunnerDebug) {
+      //   CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
+      // }
       for (const step of buildSteps) {
         output += await CloudRunner.Provider.runTaskInWorkflow(
           CloudRunner.buildParameters.buildGuid,

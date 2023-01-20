@@ -13,6 +13,7 @@ import { GarbageCollectionService } from './services/garbage-collection-service'
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { TaskService } from './services/task-service';
+import CloudRunnerOptions from '../../cloud-runner-options';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -133,6 +134,11 @@ class AWSBuildEnvironment implements ProviderInterface {
     await CF.deleteStack({
       StackName: taskDef.taskDefStackName,
     }).promise();
+    if (CloudRunnerOptions.useCleanupCron) {
+      await CF.deleteStack({
+        StackName: `${taskDef.taskDefStackName}-cleanup`,
+      }).promise();
+    }
 
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackName,

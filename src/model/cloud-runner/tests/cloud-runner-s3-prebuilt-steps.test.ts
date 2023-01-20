@@ -38,7 +38,7 @@ describe('Cloud Runner pre-built S3 steps', () => {
       expect(build2ContainsBuildSucceeded).toBeTruthy();
 
       const results = await CloudRunnerSystem.RunAndReadLines(
-        `aws s3 ls s3://game-ci-test-storage/cloud-runner-cache/${buildParameter2.cacheKey}/`,
+        `aws s3 ls s3://${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/${buildParameter2.cacheKey}/`,
       );
       CloudRunnerLogger.log(results.join(`,`));
     }, 1_000_000_000);

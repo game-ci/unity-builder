@@ -76,32 +76,10 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: aece53ae-b82d-4267-bc16-ed964b05db27
-  SubscriptionFilter:
-    Type: 'AWS::Logs::SubscriptionFilter'
-    Properties:
-      FilterPattern: ''
-      RoleArn:
-        'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:CloudWatchIAMRole'
-      LogGroupName: !Ref LogGroupName
-      DestinationArn:
-        'Fn::GetAtt':
-          - KinesisStream
-          - Arn
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 7f809e91-9e5d-4678-98c1-c5085956c480
-    DependsOn:
-      - LogGroup
-      - KinesisStream
-  KinesisStream:
-    Type: 'AWS::Kinesis::Stream'
-    Properties:
-      Name: !Ref ServiceName
-      ShardCount: 1
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: c6f18447-b879-4696-8873-f981b2cedd2b
-  # template secrets p2 - secret
+  # template resources secrets
+
+  # template resources logstream
+
   TaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -156,5 +134,32 @@ Resources:
               awslogs-stream-prefix: !Ref ServiceName
     DependsOn:
       - LogGroup
+`;
+  public static streamLogs = `
+  SubscriptionFilter:
+    Type: 'AWS::Logs::SubscriptionFilter'
+    Properties:
+      FilterPattern: ''
+      RoleArn:
+        'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:CloudWatchIAMRole'
+      LogGroupName: !Ref LogGroupName
+      DestinationArn:
+        'Fn::GetAtt':
+          - KinesisStream
+          - Arn
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7f809e91-9e5d-4678-98c1-c5085956c480
+    DependsOn:
+      - LogGroup
+      - KinesisStream
+  KinesisStream:
+    Type: 'AWS::Kinesis::Stream'
+    Properties:
+      Name: !Ref ServiceName
+      ShardCount: 1
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: c6f18447-b879-4696-8873-f981b2cedd2b
 `;
 }

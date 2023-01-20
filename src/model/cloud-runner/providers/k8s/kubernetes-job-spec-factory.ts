@@ -158,6 +158,8 @@ class KubernetesJobSpecFactory {
       },
     };
 
+    job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '5Gi';
+
     return job;
   }
 }
