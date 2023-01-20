@@ -114,7 +114,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (CloudRunner.isCloudRunnerEnvironment || CloudRunner.isCloudRunnerAsyncEnvironment) {
+    if (CloudRunner.isCloudRunnerEnvironment) {
       await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
 
       return;
@@ -134,7 +134,7 @@ class GitHub {
     if (mode === `create`) {
       throw new Error(`Not supported: only use update`);
     }
-    const workflowsResult = await GitHub.octokitDefaultToken.request(
+    const workflowsResult = await GitHub.octokitPAT.request(
       `GET /repos/${GitHub.owner}/${GitHub.repo}/actions/workflows`,
       {
         owner: GitHub.owner,
