@@ -25,12 +25,10 @@ class CloudRunner {
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static githubCheckId;
   public static get isCloudRunnerEnvironment() {
-    return (
-      process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== undefined && process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== `local`
-    );
+    return process.env[`GITHUB_ACTIONS`] !== `true`;
   }
   public static get isCloudRunnerAsyncEnvironment() {
-    return process.env[`GAMECI_ASYNC`] !== undefined && process.env[`GAMECI_ASYNC`] === `true`;
+    return process.env[`GAMECI_ASYNC_WORKFLOW`] === `true`;
   }
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
