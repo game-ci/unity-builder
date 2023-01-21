@@ -15,7 +15,6 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
-import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -26,10 +25,12 @@ class CloudRunner {
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static githubCheckId;
   public static get isCloudRunnerEnvironment() {
-    return process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== undefined && process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== `local`;
+    return (
+      process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== undefined && process.env[`GAMECI_CLOUD_RUNNER_CLUSTER`] !== `local`
+    );
   }
   public static get isCloudRunnerAsyncEnvironment() {
-    return CloudRunner.isCloudRunnerEnvironment && CloudRunnerOptions.asyncCloudRunner;
+    return process.env[`GAMECI_ASYNC`] !== undefined && process.env[`GAMECI_ASYNC`] === `true`;
   }
   public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
