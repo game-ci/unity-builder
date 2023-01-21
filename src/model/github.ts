@@ -49,7 +49,7 @@ class GitHub {
     }
     GitHub.startedDate = new Date().toISOString();
 
-    CloudRunnerLogger.log(`POST /repos/{owner}/{repo}/check-runs`);
+    CloudRunnerLogger.log(`Creating inital github check`);
 
     const data = {
       owner: GitHub.owner,
@@ -114,11 +114,13 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (CloudRunner.isCloudRunnerEnvironment && CloudRunner.isCloudRunnerAsyncEnvironment) {
+    if (CloudRunner.isCloudRunnerEnvironment && !CloudRunner.isCloudRunnerAsyncEnvironment) {
       await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
+      CloudRunnerLogger.log(`Updating check via async update workflow`);
 
       return;
     }
+    CloudRunnerLogger.log(`Updating check via direct call`);
     await GitHub.updateGitHubCheckRequest(data);
   }
 
