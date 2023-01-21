@@ -5,20 +5,12 @@ import { BuildAutomationWorkflow } from './build-automation-workflow';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { AsyncWorkflow } from './async-workflow';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
       if (CloudRunnerOptions.asyncCloudRunner) {
-        const asyncEnvironmentVariable = new CloudRunnerEnvironmentVariable();
-        asyncEnvironmentVariable.name = `GAMECI_ASYNC`;
-        asyncEnvironmentVariable.value = `true`;
-
-        return await AsyncWorkflow.runAsyncWorkflow(
-          [...cloudRunnerStepState.environment, asyncEnvironmentVariable],
-          cloudRunnerStepState.secrets,
-        );
+        return await AsyncWorkflow.runAsyncWorkflow(cloudRunnerStepState.environment, cloudRunnerStepState.secrets);
       }
 
       if (CloudRunner.buildParameters.customJob !== '') {
