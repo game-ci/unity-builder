@@ -81,7 +81,10 @@ class GitHub {
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
-    if (!CloudRunnerOptions.githubChecks) {
+    if (
+      !CloudRunnerOptions.githubChecks ||
+      (!CloudRunner.isCloudRunnerEnvironment && CloudRunnerOptions.asyncCloudRunner)
+    ) {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
@@ -114,7 +117,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (CloudRunner.isCloudRunnerEnvironment && !CloudRunner.isCloudRunnerAsyncEnvironment) {
+    if (CloudRunner.isCloudRunnerAsyncEnvironment) {
       await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
       CloudRunnerLogger.log(`Updating check via async update workflow`);
 
