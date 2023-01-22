@@ -116,8 +116,8 @@ class GitHub {
     }
 
     if (CloudRunner.isCloudRunnerAsyncEnvironment) {
-      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
       CloudRunnerLogger.log(`Updating check via async update workflow`);
+      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
 
       return;
     }
@@ -137,7 +137,7 @@ class GitHub {
     if (mode === `create`) {
       throw new Error(`Not supported: only use update`);
     }
-    const workflowsResult = await GitHub.octokitPAT.request(`GET /repos/{owner}/{repo}/actions/workflows`, {
+    const workflowsResult = await GitHub.octokitDefaultToken.request(`GET /repos/{owner}/{repo}/actions/workflows`, {
       owner: GitHub.owner,
       repo: GitHub.repo,
     });
@@ -152,7 +152,7 @@ class GitHub {
       core.info(JSON.stringify(workflows));
       throw new Error(`no workflow with name "${GitHub.asyncChecksApiWorkflowName}"`);
     }
-    await GitHub.octokitPAT.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
+    await GitHub.octokitDefaultToken.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
       owner: GitHub.owner,
       repo: GitHub.repo,
       // eslint-disable-next-line camelcase
