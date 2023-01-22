@@ -142,6 +142,7 @@ class GitHub {
       repo: GitHub.repo,
     });
     const workflows = workflowsResult.data.workflows;
+    CloudRunnerLogger.log(`Got ${workflows} workflows`);
     let selectedId = ``;
     for (let index = 0; index < workflowsResult.data.total_count; index++) {
       if (workflows[index].name === GitHub.asyncChecksApiWorkflowName) {
