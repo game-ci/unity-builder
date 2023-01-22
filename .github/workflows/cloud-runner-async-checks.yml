@@ -39,10 +39,8 @@ jobs:
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (default)
-        uses: actions/checkout@v2
-        with:
-          lfs: false
+      - run: git clone -b cloud-runner-develop https://github.com/game-ci/unity-builder
+      - run: cd unity-builder
       - run: yarn
       - run: yarn run cli -m checks-update
         timeout-minutes: 180

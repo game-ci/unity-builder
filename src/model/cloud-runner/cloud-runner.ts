@@ -23,17 +23,17 @@ class CloudRunner {
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
-  public static githubCheckId;
   public static get isCloudRunnerEnvironment() {
     return process.env[`GITHUB_ACTIONS`] !== `true`;
   }
   public static get isCloudRunnerAsyncEnvironment() {
     return process.env[`GAMECI_ASYNC_WORKFLOW`] === `true`;
   }
-  public static setup(buildParameters: BuildParameters) {
+  public static async setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
     CloudRunner.buildParameters = buildParameters;
+    CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
     CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
@@ -79,10 +79,8 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
-    CloudRunner.setup(buildParameters);
+    await CloudRunner.setup(buildParameters);
     try {
-      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
-
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 

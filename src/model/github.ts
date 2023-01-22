@@ -32,7 +32,7 @@ class GitHub {
   }
 
   private static get checkRunId() {
-    return CloudRunner.githubCheckId;
+    return CloudRunner.buildParameters.githubCheckId;
   }
 
   private static get owner() {
@@ -77,7 +77,7 @@ class GitHub {
     };
     const result = await GitHub.createGitHubCheckRequest(data);
 
-    return result.data.id;
+    return result.data.id.toString();
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
@@ -126,11 +126,11 @@ class GitHub {
   }
 
   public static async updateGitHubCheckRequest(data) {
-    return await GitHub.octokitPAT.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
+    return await GitHub.octokitDefaultToken.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
   }
 
   public static async createGitHubCheckRequest(data) {
-    return await GitHub.octokitPAT.request(`POST /repos/{owner}/{repo}/check-runs`, data);
+    return await GitHub.octokitDefaultToken.request(`POST /repos/{owner}/{repo}/check-runs`, data);
   }
 
   public static async runUpdateAsyncChecksWorkflow(data, mode) {
