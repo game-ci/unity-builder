@@ -31,6 +31,8 @@ env:
   UNITY_VERSION: 2019.3.15f1
   USE_IL2CPP: false
   USE_GKE_GCLOUD_AUTH_PLUGIN: true
+  GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   integrationTests:
@@ -72,19 +74,16 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
-          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
         if: matrix.CloudRunnerCluster == 'local-docker'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
@@ -121,7 +120,7 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           projectPath: test-project
-          gitPrivateToken: ${{ secrets.GITHUB_TOKEN }}
+          gitPrivateToken: ${{ secrets.GIT_PRIVATE_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
       - run: |
