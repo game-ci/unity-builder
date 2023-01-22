@@ -62,6 +62,9 @@ class CloudRunnerOptions {
   static get githubChecks(): boolean {
     return CloudRunnerOptions.getInput('githubChecks') || false;
   }
+  static get githubCheckId(): string {
+    return CloudRunnerOptions.getInput('githubCheckId') || ``;
+  }
 
   static get githubOwner() {
     return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;

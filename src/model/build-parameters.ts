@@ -158,7 +158,7 @@ class BuildParameters {
       garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
-      githubCheckId: ``,
+      githubCheckId: CloudRunnerOptions.githubCheckId,
     };
   }
 
