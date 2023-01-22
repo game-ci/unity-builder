@@ -39,12 +39,7 @@ jobs:
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
-      - run: git clone -b cloud-runner-develop https://github.com/game-ci/unity-builder
-      - run: tree -L 2
-      - run: cd unity-builder
-      - run: yarn
-      - run: yarn run cli -m checks-update
-        timeout-minutes: 180
+      - timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
@@ -56,3 +51,9 @@ jobs:
           CLOUD_RUNNER_CLUSTER: local-docker
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
           CHECKS_UPDATE: ${{ github.event.inputs.checksObject }}
+        run: | 
+          git clone -b cloud-runner-develop https://github.com/game-ci/unity-builder
+          cd unity-builder
+          yarn
+          ls
+          yarn run cli -m checks-update
