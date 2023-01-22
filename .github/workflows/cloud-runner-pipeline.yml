@@ -76,7 +76,6 @@ jobs:
         if: matrix.CloudRunnerCluster != 'local-docker'
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
@@ -122,8 +121,6 @@ jobs:
         with:
           cloudRunnerTests: true
           versioning: None
-          projectPath: test-project
-          gitPrivateToken: ${{ secrets.GIT_PRIVATE_TOKEN }}
           targetPlatform: ${{ matrix.targetPlatform }}
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
       - run: |

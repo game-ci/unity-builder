@@ -168,7 +168,7 @@ class Input {
   }
 
   static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || false;
+    return Input.getInput('gitPrivateToken') || false;
   }
 
   static get chownFilesTo() {
