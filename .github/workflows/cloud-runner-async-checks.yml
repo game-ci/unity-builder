@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: git clone -b cloud-runner-develop https://github.com/game-ci/unity-builder
+      - run: tree -L 2
       - run: cd unity-builder
       - run: yarn
       - run: yarn run cli -m checks-update
