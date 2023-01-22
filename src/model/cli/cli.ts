@@ -113,6 +113,7 @@ export class Cli {
   public static async asyncronousWorkflow(): Promise<string> {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
+    await CloudRunner.setup(buildParameter);
 
     return await CloudRunner.run(buildParameter, baseImage.toString());
   }
