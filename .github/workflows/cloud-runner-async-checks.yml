@@ -51,7 +51,7 @@ jobs:
           CLOUD_RUNNER_CLUSTER: local-docker
           AWS_BASE_STACK_NAME: game-ci-github-pipelines
           CHECKS_UPDATE: ${{ github.event.inputs.checksObject }}
-        run: | 
+        run: |
           git clone -b cloud-runner-develop https://github.com/game-ci/unity-builder
           cd unity-builder
           yarn

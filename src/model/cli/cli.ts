@@ -119,6 +119,9 @@ export class Cli {
 
   @CliFunction(`checks-update`, `runs a cloud runner build`)
   public static async checksUpdate() {
+    const buildParameter = await BuildParameters.create();
+
+    await CloudRunner.setup(buildParameter);
     const input = JSON.parse(process.env.CHECKS_UPDATE || ``);
     core.info(`Checks Update ${process.env.CHECKS_UPDATE}`);
     if (input.mode === `create`) {
