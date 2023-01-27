@@ -21,6 +21,8 @@ export class FollowLogStreamService {
       core.setOutput('build-result', 'failed');
       core.setFailed('unity build failed');
       core.error('BUILD FAILED!');
+    } else if (message.toLowerCase().includes('error ')) {
+      GitHub.updateGitHubCheck(message, ``);
     } else if (CloudRunner.buildParameters.cloudRunnerDebug && message.includes(': Listening for Jobs')) {
       core.setOutput('cloud runner stop watching', 'true');
       shouldReadLogs = false;
