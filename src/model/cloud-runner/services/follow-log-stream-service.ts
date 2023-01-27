@@ -23,6 +23,12 @@ export class FollowLogStreamService {
       core.error('BUILD FAILED!');
     } else if (message.toLowerCase().includes('error ')) {
       GitHub.updateGitHubCheck(message, ``);
+    } else if (message.toLowerCase().includes('invalid ')) {
+      GitHub.updateGitHubCheck(message, ``);
+    } else if (message.toLowerCase().includes('incompatible  ')) {
+      GitHub.updateGitHubCheck(message, ``);
+    } else if (message.toLowerCase().includes('cannot be found')) {
+      GitHub.updateGitHubCheck(message, ``);
     } else if (CloudRunner.buildParameters.cloudRunnerDebug && message.includes(': Listening for Jobs')) {
       core.setOutput('cloud runner stop watching', 'true');
       shouldReadLogs = false;
