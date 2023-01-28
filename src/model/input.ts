@@ -74,7 +74,7 @@ class Input {
   }
 
   static get runNumber() {
-    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+    return Input.getInput('GITHUB_RUN_NUMBER') || Input.getInput('runNumber') || '0';
   }
 
   static get targetPlatform() {
