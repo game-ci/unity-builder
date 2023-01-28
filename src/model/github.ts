@@ -9,6 +9,7 @@ class GitHub {
   private static longDescriptionContent: string = ``;
   private static startedDate: string;
   private static endedDate: string;
+  static result: string = ``;
   private static get octokitDefaultToken() {
     return new Octokit({
       auth: process.env.GITHUB_TOKEN,
@@ -85,7 +86,11 @@ class GitHub {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
-
+    if (GitHub.result === ``) {
+      GitHub.result = result;
+    } else {
+      result = GitHub.result;
+    }
     const data: any = {
       owner: GitHub.owner,
       repo: GitHub.repo,

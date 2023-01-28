@@ -64,8 +64,8 @@ class Input {
   static get gitSha() {
     if (Input.getInput(`GITHUB_SHA`)) {
       return Input.getInput(`GITHUB_SHA`);
-    } else if (Input.getInput(`GitSHA`)) {
-      return Input.getInput(`GitSHA`);
+    } else if (Input.getInput(`GitSha`)) {
+      return Input.getInput(`GitSha`);
     }
   }
 

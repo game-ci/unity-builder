@@ -10,6 +10,7 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import YAML from 'yaml';
+import GitHub from '../../github';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
@@ -95,7 +96,12 @@ export class RemoteClient {
       assert(fs.existsSync(`.git`), 'git folder exists');
       RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+      if (CloudRunner.buildParameters.gitSha !== undefined) {
+        await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+      } else {
+        RemoteClientLogger.log(`buildParameter Git Sha is empty`);
+      }
+
       assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
       RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
     } catch (error) {
@@ -106,14 +112,15 @@ export class RemoteClient {
 
   static async replaceLargePackageReferencesWithSharedReferences() {
     CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useSharedLargePackages}`);
+    GitHub.updateGitHubCheck(`Use Shared Pkgs ${CloudRunner.buildParameters.useSharedLargePackages}`, ``);
     if (CloudRunner.buildParameters.useSharedLargePackages) {
       await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.projectPathAbsolute}`);
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
       manifest = manifest.replace(/LargeContent/g, '../../../LargeContent');
       fs.writeFileSync(filePath, manifest);
-      CloudRunnerLogger.log(`Package Manifest`);
-      CloudRunnerLogger.log(manifest);
+      CloudRunnerLogger.log(`Package Manifest \n ${manifest}`);
+      GitHub.updateGitHubCheck(`Package Manifest \n ${manifest}`, ``);
     }
   }
 

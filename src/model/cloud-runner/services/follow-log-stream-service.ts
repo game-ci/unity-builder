@@ -29,6 +29,10 @@ export class FollowLogStreamService {
       core.error('BUILD FAILED!');
     } else if (message.toLowerCase().includes('error ')) {
       FollowLogStreamService.errors += `\n${message}`;
+    } else if (message.toLowerCase().includes('command failed: ')) {
+      FollowLogStreamService.errors += `\n${message}`;
+    } else if (message.toLowerCase().includes('error: ')) {
+      FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('invalid ')) {
       FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('incompatible  ')) {
