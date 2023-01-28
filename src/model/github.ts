@@ -50,7 +50,7 @@ class GitHub {
     GitHub.startedDate = new Date().toISOString();
 
     CloudRunnerLogger.log(`Creating inital github check`);
-
+    GitHub.longDescriptionContent = JSON.stringify(CloudRunner.buildParameters, undefined, 4);
     const data = {
       owner: GitHub.owner,
       repo: GitHub.repo,
