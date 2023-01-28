@@ -254,7 +254,7 @@ class CloudRunnerOptions {
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') === 'true';
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'false') === 'true';
   }
 
   public static get useLz4Compression(): boolean {
