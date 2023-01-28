@@ -163,6 +163,6 @@ export class RemoteClient {
     if (!CloudRunner.buildParameters.retainWorkspace) {
       return;
     }
-    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace}`);
+    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);
   }
 }
