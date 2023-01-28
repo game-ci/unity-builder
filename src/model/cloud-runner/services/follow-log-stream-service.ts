@@ -5,6 +5,7 @@ import { CloudRunnerStatics } from '../cloud-runner-statics';
 import GitHub from '../../github';
 
 export class FollowLogStreamService {
+  static errors = ``;
   public static handleIteration(message, shouldReadLogs, shouldCleanup, output) {
     if (message.includes(`---${CloudRunner.buildParameters.logId}`)) {
       CloudRunnerLogger.log('End of log transmission received');
@@ -17,18 +18,23 @@ export class FollowLogStreamService {
       GitHub.updateGitHubCheck(`Build succeeded`, `Build succeeded`);
       core.setOutput('build-result', 'success');
     } else if (message.includes('Build fail')) {
-      GitHub.updateGitHubCheck(`Build failed`, `Build failed`);
+      GitHub.updateGitHubCheck(
+        `Build failed\n${FollowLogStreamService.errors}`,
+        `Build failed`,
+        `failure`,
+        `completed`,
+      );
       core.setOutput('build-result', 'failed');
       core.setFailed('unity build failed');
       core.error('BUILD FAILED!');
     } else if (message.toLowerCase().includes('error ')) {
-      GitHub.updateGitHubCheck(message, ``);
+      FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('invalid ')) {
-      GitHub.updateGitHubCheck(message, ``);
+      FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('incompatible  ')) {
-      GitHub.updateGitHubCheck(message, ``);
+      FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('cannot be found')) {
-      GitHub.updateGitHubCheck(message, ``);
+      FollowLogStreamService.errors += `\n${message}`;
     } else if (CloudRunner.buildParameters.cloudRunnerDebug && message.includes(': Listening for Jobs')) {
       core.setOutput('cloud runner stop watching', 'true');
       shouldReadLogs = false;

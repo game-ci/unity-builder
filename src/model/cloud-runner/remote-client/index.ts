@@ -20,7 +20,7 @@ export class RemoteClient {
       );
       process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
       await RemoteClient.cloneRepoWithoutLFSFiles();
-      RemoteClient.replaceLargePackageReferencesWithSharedReferences();
+      await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
       await RemoteClient.sizeOfFolder(
         'repo before lfs cache pull',
         CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
@@ -104,16 +104,16 @@ export class RemoteClient {
     }
   }
 
-  static replaceLargePackageReferencesWithSharedReferences() {
+  static async replaceLargePackageReferencesWithSharedReferences() {
+    CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useSharedLargePackages}`);
     if (CloudRunner.buildParameters.useSharedLargePackages) {
+      await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.projectPathAbsolute}`);
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
       manifest = manifest.replace(/LargeContent/g, '../../../LargeContent');
       fs.writeFileSync(filePath, manifest);
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
-        CloudRunnerLogger.log(`Package Manifest`);
-        CloudRunnerLogger.log(manifest);
-      }
+      CloudRunnerLogger.log(`Package Manifest`);
+      CloudRunnerLogger.log(manifest);
     }
   }
 
