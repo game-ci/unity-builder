@@ -112,7 +112,8 @@ class CloudRunner {
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, CloudRunner.buildParameters.buildGuid);
+      const jsonContent = JSON.stringify(CloudRunner.buildParameters, undefined, 4);
+      await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
