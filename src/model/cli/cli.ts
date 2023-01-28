@@ -56,7 +56,7 @@ export class Cli {
     program.parse(process.argv);
     Cli.options = program.opts();
 
-    return Cli.isCliMode;
+    return Cli.isCliMode || process.env.GAMECI_CLI;
   }
 
   static async RunCli(): Promise<void> {
