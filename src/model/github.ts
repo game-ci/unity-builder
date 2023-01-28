@@ -86,7 +86,7 @@ class GitHub {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
-    if (GitHub.result === ``) {
+    if (GitHub.result !== `success` && GitHub.result !== `failure`) {
       GitHub.result = result;
     } else {
       result = GitHub.result;
