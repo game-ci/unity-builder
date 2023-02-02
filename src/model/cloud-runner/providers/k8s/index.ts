@@ -129,18 +129,17 @@ class Kubernetes implements ProviderInterface {
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
-      this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
-      CloudRunnerLogger.log('Watching pod until running');
-      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       let output = '';
       // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
           const existsAlready = await this.doesJobExist(this.jobName);
-          if (!existsAlready) {
+          const existsFailedAlready = await this.doesFailedJobExist();
+          if (!existsAlready || existsFailedAlready) {
             CloudRunnerLogger.log('Job does not exist');
             await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
+            const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
+            this.setPodNameAndContainerName(find);
             CloudRunnerLogger.log('Watching pod until running');
             await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
           }
@@ -206,6 +205,12 @@ class Kubernetes implements ProviderInterface {
     return jobs.body.items.some((x) => x.metadata?.name === name);
   }
 
+  private async doesFailedJobExist() {
+    const podStatus = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
+
+    return podStatus.body.status?.phase === `Failed`;
+  }
+
   private async createNamespacedJob(
     commands: string,
     image: string,
@@ -235,6 +240,7 @@ class Kubernetes implements ProviderInterface {
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
+        this.podName;
 
         return result.body.metadata?.name;
       } catch (error) {
