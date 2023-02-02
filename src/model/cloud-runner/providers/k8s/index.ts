@@ -168,6 +168,7 @@ class Kubernetes implements ProviderInterface {
 
           const continueStreaming =
             errorMessage.includes(`dial timeout, backstop`) ||
+            errorMessage.includes(`HttpError`) ||
             errorMessage.includes(`HttpError: HTTP request failed`) ||
             errorMessage.includes(`an error occurred when try to find container`) ||
             errorMessage.includes(`not found`) ||
