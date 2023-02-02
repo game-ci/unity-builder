@@ -137,6 +137,13 @@ class Kubernetes implements ProviderInterface {
       // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
+          const existsAlready = await this.doesJobExist(this.jobName);
+          if (!existsAlready) {
+            CloudRunnerLogger.log('Job does not exist');
+            await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
+            CloudRunnerLogger.log('Watching pod until running');
+            await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
+          }
           CloudRunnerLogger.log('Pod running, streaming logs');
           output = await KubernetesTaskRunner.runTask(
             this.kubeConfig,
@@ -193,6 +200,12 @@ class Kubernetes implements ProviderInterface {
     }
   }
 
+  private async doesJobExist(name) {
+    const jobs = await this.kubeClientBatch.listNamespacedJob(this.namespace);
+
+    return jobs.body.items.some((x) => x.metadata?.name === name);
+  }
+
   private async createNamespacedJob(
     commands: string,
     image: string,
@@ -218,12 +231,12 @@ class Kubernetes implements ProviderInterface {
           k8s,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
-        await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+        const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
 
-        return;
+        return result.body.metadata?.name;
       } catch (error) {
         CloudRunnerLogger.log(`Error occured creating job: ${error}`);
         throw error;
