@@ -134,14 +134,15 @@ class Kubernetes implements ProviderInterface {
       while (true) {
         try {
           let existsAlready = false;
+          let status;
           try {
-            const status = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
+            status = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
             CloudRunnerLogger.log(JSON.stringify(status.body.status?.containerStatuses, undefined, 4));
             existsAlready = true;
           } catch {
             // empty
           }
-          if (!existsAlready) {
+          if (!existsAlready || status.state.terminated !== undefined) {
             CloudRunnerLogger.log('Job does not exist');
             await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
             const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
