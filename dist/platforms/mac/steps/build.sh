@@ -79,7 +79,7 @@ if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; t
   ANDROID_INSTALL_LOCATION="/Applications/Unity/Hub/Editor/$UNITY_VERSION/PlaybackEngines/AndroidPlayer"
   export JAVA_HOME="$ANDROID_INSTALL_LOCATION/OpenJDK"
   export ANDROID_HOME="$ANDROID_INSTALL_LOCATION/SDK"
-  "$ANDROID_HOME/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
+  yes | "$ANDROID_HOME/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
   echo "Updated Android SDK."
 else
   echo "Not updating Android SDK."
