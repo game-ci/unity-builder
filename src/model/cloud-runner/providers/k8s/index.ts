@@ -136,7 +136,7 @@ class Kubernetes implements ProviderInterface {
           let existsAlready = false;
           try {
             const status = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
-            CloudRunnerLogger.log(JSON.stringify(status, undefined, 4));
+            CloudRunnerLogger.log(JSON.stringify(status.body.status?.containerStatuses, undefined, 4));
             existsAlready = true;
           } catch {
             // empty
