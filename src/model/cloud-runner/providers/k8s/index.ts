@@ -240,7 +240,6 @@ class Kubernetes implements ProviderInterface {
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
-        this.podName;
 
         return result.body.metadata?.name;
       } catch (error) {
