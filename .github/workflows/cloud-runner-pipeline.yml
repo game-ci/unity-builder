@@ -71,17 +71,7 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - run: yarn
-      - run: yarn run test "cloud-runner-async-workflow" --detectOpenHandles --forceExit --runInBand
-        timeout-minutes: 10
-        if: matrix.CloudRunnerCluster != 'local-docker' && github.ref != 'refs/heads/main'
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          TARGET_PLATFORM: StandaloneWindows64
-          cloudRunnerTests: true
-          versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
       - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        if: matrix.CloudRunnerCluster == 'local-docker' || github.ref == 'refs/heads/main'
         timeout-minutes: 180
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
