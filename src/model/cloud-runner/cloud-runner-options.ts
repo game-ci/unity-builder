@@ -74,6 +74,10 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
   }
 
+  static get triggerWorkflowOnComplete() {
+    return CloudRunnerOptions.getInput('triggerWorkflowOnComplete') || [];
+  }
+
   // ### ### ###
   // Git syncronization parameters
   // ### ### ###

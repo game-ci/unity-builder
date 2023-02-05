@@ -168,6 +168,37 @@ class GitHub {
       },
     });
   }
+
+  static async triggerWorkflowOnComplete(triggerWorkflowOnComplete: string[]) {
+    const workflowsResult = await GitHub.octokitPAT.request(`GET /repos/{owner}/{repo}/actions/workflows`, {
+      owner: GitHub.owner,
+      repo: GitHub.repo,
+    });
+    const workflows = workflowsResult.data.workflows;
+    CloudRunnerLogger.log(`Got ${workflows.length} workflows`);
+    for (const element of triggerWorkflowOnComplete) {
+      let selectedId = ``;
+      for (let index = 0; index < workflowsResult.data.total_count; index++) {
+        if (workflows[index].name === element) {
+          selectedId = workflows[index].id.toString();
+        }
+      }
+      if (selectedId === ``) {
+        core.info(JSON.stringify(workflows));
+        throw new Error(`no workflow with name "${GitHub.asyncChecksApiWorkflowName}"`);
+      }
+      await GitHub.octokitPAT.request(`POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches`, {
+        owner: GitHub.owner,
+        repo: GitHub.repo,
+        // eslint-disable-next-line camelcase
+        workflow_id: selectedId,
+        ref: CloudRunnerOptions.branch,
+        inputs: {
+          buildGuid: CloudRunner.buildParameters.buildGuid,
+        },
+      });
+    }
+  }
 }
 
 export default GitHub;

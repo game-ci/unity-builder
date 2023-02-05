@@ -140,6 +140,8 @@ class CloudRunner {
         CloudRunner.lockedWorkspace = undefined;
       }
 
+      await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.triggerWorkflowOnComplete);
+
       if (buildParameters.constantGarbageCollection) {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
       }

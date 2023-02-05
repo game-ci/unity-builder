@@ -73,6 +73,7 @@ class BuildParameters {
   public githubChecks!: boolean;
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
+  public triggerWorkflowOnComplete!: string[];
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -159,6 +160,7 @@ class BuildParameters {
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
+      triggerWorkflowOnComplete: CloudRunnerOptions.triggerWorkflowOnComplete,
     };
   }
 
