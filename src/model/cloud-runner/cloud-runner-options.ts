@@ -75,7 +75,7 @@ class CloudRunnerOptions {
   }
 
   static get triggerWorkflowOnComplete() {
-    return CloudRunnerOptions.getInput('triggerWorkflowOnComplete') || [];
+    return CloudRunnerOptions.getInput('triggerWorkflowOnComplete')?.split(',') || [];
   }
 
   // ### ### ###
