@@ -170,6 +170,10 @@ class GitHub {
   }
 
   static async triggerWorkflowOnComplete(triggerWorkflowOnComplete: string[]) {
+    const isLocalAsync = CloudRunner.buildParameters.asyncWorkflow && !CloudRunner.isCloudRunnerAsyncEnvironment;
+    if (isLocalAsync) {
+      return;
+    }
     const workflowsResult = await GitHub.octokitPAT.request(`GET /repos/{owner}/{repo}/actions/workflows`, {
       owner: GitHub.owner,
       repo: GitHub.repo,
