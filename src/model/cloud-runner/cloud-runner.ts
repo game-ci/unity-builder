@@ -23,19 +23,11 @@ class CloudRunner {
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
   static lockedWorkspace: string | undefined;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
-  public static get isCloudRunnerEnvironment() {
-    return process.env[`GITHUB_ACTIONS`] !== `true`;
-  }
-  public static get isCloudRunnerAsyncEnvironment() {
-    return process.env[`GAMECI_ASYNC_WORKFLOW`] === `true`;
-  }
-  public static async setup(buildParameters: BuildParameters) {
+  public static githubCheckId;
+  public static setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
     CloudRunner.buildParameters = buildParameters;
-    if (CloudRunner.buildParameters.githubCheckId === ``) {
-      CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
-    }
     CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
@@ -81,8 +73,10 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
-    await CloudRunner.setup(buildParameters);
+    CloudRunner.setup(buildParameters);
     try {
+      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
 
@@ -112,11 +106,7 @@ class CloudRunner {
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      const content = { ...CloudRunner.buildParameters };
-      content.gitPrivateToken = ``;
-      content.unitySerial = ``;
-      const jsonContent = JSON.stringify(content, undefined, 4);
-      await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
+      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, CloudRunner.buildParameters.buildGuid);
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
       );
@@ -139,8 +129,6 @@ class CloudRunner {
         );
         CloudRunner.lockedWorkspace = undefined;
       }
-
-      await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.triggerWorkflowOnComplete);
 
       if (buildParameters.constantGarbageCollection) {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);

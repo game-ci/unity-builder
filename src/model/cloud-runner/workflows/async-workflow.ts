@@ -11,9 +11,6 @@ export class AsyncWorkflow {
   ): Promise<string> {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running async mode`);
-      const asyncEnvironmentVariable = new CloudRunnerEnvironmentVariable();
-      asyncEnvironmentVariable.name = `GAMECI_ASYNC_WORKFLOW`;
-      asyncEnvironmentVariable.value = `true`;
 
       let output = '';
 
@@ -37,7 +34,7 @@ aws --version
 node /builder/dist/index.js -m async-workflow`,
         `/${CloudRunnerFolders.buildVolumeFolder}`,
         `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        [...environmentVariables, asyncEnvironmentVariable],
+        environmentVariables,
         [
           ...secrets,
           ...[

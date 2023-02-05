@@ -9,11 +9,7 @@ import { AsyncWorkflow } from './async-workflow';
 export class WorkflowCompositionRoot implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
     try {
-      if (
-        CloudRunnerOptions.asyncCloudRunner &&
-        !CloudRunner.isCloudRunnerAsyncEnvironment &&
-        !CloudRunner.isCloudRunnerEnvironment
-      ) {
+      if (CloudRunnerOptions.asyncCloudRunner) {
         return await AsyncWorkflow.runAsyncWorkflow(cloudRunnerStepState.environment, cloudRunnerStepState.secrets);
       }
 
