@@ -62,6 +62,9 @@ class CloudRunnerOptions {
   static get githubChecks(): boolean {
     return CloudRunnerOptions.getInput('githubChecks') || false;
   }
+  static get githubCheckId(): string {
+    return CloudRunnerOptions.getInput('githubCheckId') || ``;
+  }
 
   static get githubOwner() {
     return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
@@ -69,6 +72,10 @@ class CloudRunnerOptions {
 
   static get githubRepoName() {
     return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+  }
+
+  static get triggerWorkflowOnComplete() {
+    return CloudRunnerOptions.getInput('triggerWorkflowOnComplete')?.split(',') || [];
   }
 
   // ### ### ###
@@ -242,7 +249,7 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`watchToEnd`) || true;
   }
 
-  static get asyncCloudRunner(): boolean {
+  public static get asyncCloudRunner(): boolean {
     return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
   }
 
@@ -251,7 +258,7 @@ class CloudRunnerOptions {
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'true') === 'true';
+    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'false') === 'true';
   }
 
   public static get useLz4Compression(): boolean {

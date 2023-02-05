@@ -77,6 +77,9 @@ class AWSTaskRunner {
     const containerState = taskData.containers?.[0];
     const exitCode = containerState?.exitCode || undefined;
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
+    if (exitCode === undefined) {
+      CloudRunnerLogger.logWarning(`No exitcode for container`);
+    }
     const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);

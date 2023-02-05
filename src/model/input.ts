@@ -64,8 +64,8 @@ class Input {
   static get gitSha() {
     if (Input.getInput(`GITHUB_SHA`)) {
       return Input.getInput(`GITHUB_SHA`);
-    } else if (Input.getInput(`GitSHA`)) {
-      return Input.getInput(`GitSHA`);
+    } else if (Input.getInput(`GitSha`)) {
+      return Input.getInput(`GitSha`);
     }
   }
 
@@ -74,7 +74,7 @@ class Input {
   }
 
   static get runNumber() {
-    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+    return Input.getInput('GITHUB_RUN_NUMBER') || Input.getInput('runNumber') || '0';
   }
 
   static get targetPlatform() {
@@ -168,7 +168,7 @@ class Input {
   }
 
   static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || false;
+    return Input.getInput('gitPrivateToken') || false;
   }
 
   static get chownFilesTo() {

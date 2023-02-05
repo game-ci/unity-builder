@@ -129,14 +129,27 @@ class Kubernetes implements ProviderInterface {
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
-      this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
-      CloudRunnerLogger.log('Watching pod until running');
-      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       let output = '';
       // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
+          let existsAlready = false;
+          let status;
+          try {
+            status = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
+            CloudRunnerLogger.log(JSON.stringify(status.body.status?.containerStatuses, undefined, 4));
+            existsAlready = true;
+          } catch {
+            // empty
+          }
+          if (!existsAlready || status.state?.terminated !== undefined) {
+            CloudRunnerLogger.log('Job does not exist');
+            await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
+            const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
+            this.setPodNameAndContainerName(find);
+            CloudRunnerLogger.log('Watching pod until running');
+            await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
+          }
           CloudRunnerLogger.log('Pod running, streaming logs');
           output = await KubernetesTaskRunner.runTask(
             this.kubeConfig,
@@ -163,11 +176,12 @@ class Kubernetes implements ProviderInterface {
             errorParsed = error;
           }
 
-          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
-          const errorMessage = errorParsed.message || reason;
+          const errorMessage =
+            errorParsed.name || errorParsed.reason || errorParsed.response?.body?.reason || errorParsed.message;
 
           const continueStreaming =
             errorMessage.includes(`dial timeout, backstop`) ||
+            errorMessage.includes(`HttpError`) ||
             errorMessage.includes(`HttpError: HTTP request failed`) ||
             errorMessage.includes(`an error occurred when try to find container`) ||
             errorMessage.includes(`not found`) ||
@@ -190,6 +204,18 @@ class Kubernetes implements ProviderInterface {
       await this.cleanupTaskResources();
       throw error;
     }
+  }
+
+  private async doesJobExist(name) {
+    const jobs = await this.kubeClientBatch.listNamespacedJob(this.namespace);
+
+    return jobs.body.items.some((x) => x.metadata?.name === name);
+  }
+
+  private async doesFailedJobExist() {
+    const podStatus = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
+
+    return podStatus.body.status?.phase === `Failed`;
   }
 
   private async createNamespacedJob(
@@ -217,12 +243,12 @@ class Kubernetes implements ProviderInterface {
           k8s,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
-        await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+        const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
 
-        return;
+        return result.body.metadata?.name;
       } catch (error) {
         CloudRunnerLogger.log(`Error occured creating job: ${error}`);
         throw error;
