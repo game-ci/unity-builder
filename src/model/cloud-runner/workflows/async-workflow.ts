@@ -46,21 +46,6 @@ node /builder/dist/index.js -m async-workflow`,
               EnvironmentVariable: `AWS_ACCESS_KEY_ID`,
               ParameterValue: process.env.AWS_ACCESS_KEY_ID || ``,
             },
-            {
-              ParameterKey: `UNITY_SERIAL`,
-              EnvironmentVariable: `UNITY_SERIAL`,
-              ParameterValue: process.env.UNITY_SERIAL || ``,
-            },
-            {
-              ParameterKey: `UNITY_EMAIL`,
-              EnvironmentVariable: `UNITY_EMAIL`,
-              ParameterValue: process.env.UNITY_EMAIL || ``,
-            },
-            {
-              ParameterKey: `UNITY_PASSWORD`,
-              EnvironmentVariable: `UNITY_PASSWORD`,
-              ParameterValue: process.env.UNITY_PASSWORD || ``,
-            },
           ],
         ],
       );
