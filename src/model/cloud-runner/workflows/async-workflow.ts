@@ -46,6 +46,11 @@ node /builder/dist/index.js -m async-workflow`,
               EnvironmentVariable: `AWS_ACCESS_KEY_ID`,
               ParameterValue: process.env.AWS_ACCESS_KEY_ID || ``,
             },
+            {
+              ParameterKey: `AWS_SECRET_ACCESS_KEY`,
+              EnvironmentVariable: `AWS_SECRET_ACCESS_KEY`,
+              ParameterValue: process.env.AWS_SECRET_ACCESS_KEY || ``,
+            },
           ],
         ],
       );
