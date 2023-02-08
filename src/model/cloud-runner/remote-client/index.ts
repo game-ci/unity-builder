@@ -128,9 +128,11 @@ export class RemoteClient {
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
-    await CloudRunnerSystem.Run(`git lfs pull`);
-    RemoteClientLogger.log(`pulled latest LFS files`);
-    assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
+    if (!CloudRunner.buildParameters.cloudRunnerDebugSkipLFS) {
+      await CloudRunnerSystem.Run(`git lfs pull`);
+      RemoteClientLogger.log(`pulled latest LFS files`);
+      assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
+    }
   }
 
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)

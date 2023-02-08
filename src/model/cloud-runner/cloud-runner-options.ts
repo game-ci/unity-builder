@@ -240,6 +240,12 @@ class CloudRunnerOptions {
   static get cloudRunnerDebugEnv(): boolean {
     return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) || false;
   }
+  static get cloudRunnerDebugSkipLFS(): boolean {
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipLFS`) || false;
+  }
+  static get cloudRunnerDebugSkipCache(): boolean {
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipCache`) || false;
+  }
 
   static get watchCloudRunnerToEnd(): boolean {
     if (CloudRunnerOptions.asyncCloudRunner) {

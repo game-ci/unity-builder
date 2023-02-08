@@ -74,6 +74,8 @@ class BuildParameters {
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
   public triggerWorkflowOnComplete!: string[];
+  public cloudRunnerDebugSkipLFS!: boolean;
+  public cloudRunnerDebugSkipCache!: boolean;
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
@@ -161,6 +163,8 @@ class BuildParameters {
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
       triggerWorkflowOnComplete: CloudRunnerOptions.triggerWorkflowOnComplete,
+      cloudRunnerDebugSkipLFS: CloudRunnerOptions.cloudRunnerDebugSkipLFS,
+      cloudRunnerDebugSkipCache: CloudRunnerOptions.cloudRunnerDebugSkipCache,
     };
   }
 

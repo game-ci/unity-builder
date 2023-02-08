@@ -102,6 +102,9 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
+    if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache) {
+      return;
+    }
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     let compressionSuffix = '';
     if (CloudRunner.buildParameters.useLz4Compression === true) {
