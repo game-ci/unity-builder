@@ -73,7 +73,7 @@ class KubernetesTaskRunner {
     const logOptions = {
       follow: true,
       pretty: false,
-      previous: true,
+      previous: false,
       timestamps: true,
       sinceSeconds: KubernetesTaskRunner.lastReceivedTimestamp,
     };
