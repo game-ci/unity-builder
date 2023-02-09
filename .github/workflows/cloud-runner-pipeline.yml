@@ -80,9 +80,6 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-      - name: Jest Github Action Reporter
-        if: always()
-        uses: IgnusG/jest-report-action@v2.3.3
   localBuildTests:
     name: Local Build Target Tests
     runs-on: ubuntu-latest
