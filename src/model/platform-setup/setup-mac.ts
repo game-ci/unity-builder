@@ -9,9 +9,11 @@ class SetupMac {
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
 
-    // Only install unity if the editor doesn't already exist
+    if (!fs.existsSync(this.unityHubPath)) {
+      await SetupMac.installUnityHub(true);
+    }
+
     if (!fs.existsSync(unityEditorPath)) {
-      await SetupMac.installUnityHub();
       await SetupMac.installUnity(buildParameters);
     }
 
@@ -40,12 +42,20 @@ class SetupMac {
       case 'iOS':
         command += `--module ios `;
         break;
+      case 'tvOS':
+        command += '--module tvos ';
+        break;
       case 'StandaloneOSX':
         command += `--module mac-il2cpp `;
         break;
-      case 'android':
+      case 'Android':
         command += `--module android `;
         break;
+      case 'WebGL':
+        command += '--module webgl ';
+        break;
+      default:
+        throw new Error(`Unsupported module for target platform: ${buildParameters.targetPlatform}.`);
     }
 
     command += `--childModules`;
