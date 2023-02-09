@@ -170,11 +170,11 @@ class Kubernetes implements ProviderInterface {
           await this.cleanupTaskResources();
         } catch (error: any) {
           // let errorParsed;
-          try {
-            // errorParsed = JSON.parse(error);
-          } catch {
-            // errorParsed = error;
-          }
+          // try {
+          //   // errorParsed = JSON.parse(error);
+          // } catch {
+          //   // errorParsed = error;
+          // }
 
           // const errorMessage =
           //   errorParsed.name || errorParsed.reason || errorParsed.response?.body?.reason || errorParsed.message;
