@@ -73,10 +73,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       n 16.15.1 > /dev/null
       npm --version
       node --version
+      echo "test 1"
       ${BuildAutomationWorkflow.TreeCommand}
+      echo "test 2"
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+      echo "test 3"
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
+      echo "test 4"
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.TreeCommand}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
