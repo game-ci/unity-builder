@@ -10,7 +10,7 @@ class SetupMac {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
 
     if (!fs.existsSync(this.unityHubPath)) {
-      await SetupMac.installUnityHub(true);
+      await SetupMac.installUnityHub();
     }
 
     if (!fs.existsSync(unityEditorPath)) {
