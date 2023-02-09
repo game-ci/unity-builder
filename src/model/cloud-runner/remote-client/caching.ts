@@ -103,7 +103,9 @@ export class Caching {
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache) {
-      return new Promise((resolve) => resolve);
+      await new Promise((resolve) => resolve);
+
+      return;
     }
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     let compressionSuffix = '';
