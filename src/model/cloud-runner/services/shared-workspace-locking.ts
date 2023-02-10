@@ -36,11 +36,11 @@ export class SharedWorkspaceLocking {
 
     return (
       await SharedWorkspaceLocking.ReadLines(
-        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/`,
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`_lock`));
+      .filter((x) => x.includes(`_${workspace}_lock`));
   }
   public static async GetOrCreateLockedWorkspace(
     workspace: string,
@@ -171,11 +171,11 @@ export class SharedWorkspaceLocking {
 
     return (
       await SharedWorkspaceLocking.ReadLines(
-        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/`,
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`_workspace`))
+      .filter((x) => x.includes(`_${workspace}_workspace`))
       .map((x) => Number(x))[0];
   }
 
@@ -184,17 +184,17 @@ export class SharedWorkspaceLocking {
       return false;
     }
     const files = await SharedWorkspaceLocking.ReadLines(
-      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/`,
+      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
     );
 
     const workspaceFileDoesNotExists =
       files.filter((x) => {
-        return x.includes(`_workspace`);
+        return x.includes(`${workspace}_workspace`);
       }).length === 0;
 
     const lockFilesExist =
       files.filter((x) => {
-        return x.includes(`_lock`);
+        return x.includes(`${workspace}_lock`);
       }).length > 0;
 
     return workspaceFileDoesNotExists || lockFilesExist;
@@ -209,10 +209,10 @@ export class SharedWorkspaceLocking {
       await SharedWorkspaceLocking.LockWorkspace(workspace, lockId, buildParametersContext);
     }
     const timestamp = Date.now();
-    const file = `${timestamp}_workspace`;
+    const file = `${timestamp}_${workspace}_workspace`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
       false,
       true,
     );
@@ -238,10 +238,10 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    const file = `${Date.now()}_${runId}_lock`;
+    const file = `${Date.now()}_${runId}_${workspace}_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
-      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
+      `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
       false,
       true,
     );
@@ -256,14 +256,14 @@ export class SharedWorkspaceLocking {
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext)).filter((x) =>
-      x.includes(`_${runId}_lock`),
+      x.includes(`_${runId}_${workspace}_lock`),
     );
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
     CloudRunnerLogger.log(
-      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
+      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
     );
     await CloudRunnerSystem.Run(
-      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace}/${file}`,
+      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
       false,
       true,
     );
@@ -273,7 +273,7 @@ export class SharedWorkspaceLocking {
 
   public static async CleanupWorkspace(workspace: string, buildParametersContext: BuildParameters) {
     await CloudRunnerSystem.Run(
-      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${workspace} --recursive`,
+      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey} --exclude "*" --include "*_${workspace}_*"`,
       false,
       true,
     );
