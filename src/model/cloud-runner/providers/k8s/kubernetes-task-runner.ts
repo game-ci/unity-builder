@@ -106,13 +106,11 @@ class KubernetesTaskRunner {
         );
         throw new Error(`No logs streamed from k8s`);
       }
-    } catch (error) {
+    } catch {
       if (stream) {
         stream.destroy();
       }
-      CloudRunnerLogger.log(JSON.stringify(error));
       CloudRunnerLogger.log('k8s task runner failed');
-      throw error;
     }
     CloudRunnerLogger.log('end of log stream');
 
