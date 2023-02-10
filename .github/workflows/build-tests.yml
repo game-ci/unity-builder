@@ -64,14 +64,14 @@ jobs:
       ###########################
       #         Checkout        #
       ###########################
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
 
       ###########################
       #          Cache          #
       ###########################
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ matrix.projectPath }}/Library
           key: Library-${{ matrix.projectPath }}-ubuntu-${{ matrix.targetPlatform }}
@@ -93,7 +93,7 @@ jobs:
       ###########################
       #          Upload         #
       ###########################
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: Build Ubuntu (${{ matrix.unityVersion }})
           path: build
