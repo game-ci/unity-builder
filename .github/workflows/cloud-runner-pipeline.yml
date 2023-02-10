@@ -35,7 +35,51 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  integrationTests:
+  localIntegrationTests:
+    name: Integration Tests
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cloudRunnerCluster:
+          - local-docker
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: false
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - uses: google-github-actions/auth@v1
+        if: matrix.CloudRunnerCluster == 'k8s'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: 'Set up Cloud SDK'
+        if: matrix.CloudRunnerCluster == 'k8s'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: Get GKE cluster credentials
+        if: matrix.CloudRunnerCluster == 'k8s'
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+      - run: yarn
+      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 180
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+  cloudRunnerIntegrationTests:
+    needs: localIntegrationTests
     name: Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
@@ -44,7 +88,6 @@ jobs:
       matrix:
         cloudRunnerCluster:
           - aws
-          - local-docker
           - k8s
     steps:
       - name: Checkout (default)
