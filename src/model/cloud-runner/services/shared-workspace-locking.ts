@@ -20,7 +20,9 @@ export class SharedWorkspaceLocking {
       await SharedWorkspaceLocking.ReadLines(
         `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
       )
-    ).map((x) => x.replace(`/`, ``));
+    )
+      .map((x) => x.replace(`/`, ``))
+      .filter((x) => x.includes(`_workspace`));
   }
   public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
     await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
