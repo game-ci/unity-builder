@@ -12,7 +12,7 @@ export class SharedWorkspaceLocking {
     return `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
   }
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
-    if (!(await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext))) {
+    if (!(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParametersContext))) {
       return [];
     }
 
@@ -24,12 +24,10 @@ export class SharedWorkspaceLocking {
       .map((x) => x.replace(`/`, ``))
       .filter((x) => x.includes(`_workspace`));
   }
-  public static async DoesWorkspaceTopLevelExist(buildParametersContext: BuildParameters) {
-    await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
+  public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
+    const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
 
-    return (await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`))
-      .map((x) => x.replace(`/`, ``))
-      .includes(buildParametersContext.cacheKey);
+    return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
   }
   public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
@@ -54,7 +52,7 @@ export class SharedWorkspaceLocking {
     }
 
     try {
-      if (await SharedWorkspaceLocking.DoesWorkspaceTopLevelExist(buildParametersContext)) {
+      if (await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParametersContext)) {
         const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
         CloudRunnerLogger.log(
           `run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`,
@@ -261,9 +259,7 @@ export class SharedWorkspaceLocking {
       x.includes(`_${runId}_${workspace}_lock`),
     );
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
-    CloudRunnerLogger.log(
-      `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
-    );
+    CloudRunnerLogger.log(`rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`);
     await CloudRunnerSystem.Run(
       `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
       false,
