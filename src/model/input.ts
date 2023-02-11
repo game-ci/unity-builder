@@ -181,6 +181,18 @@ class Input {
     return input === 'true';
   }
 
+  static get cacheUnityInstallationOnMac() {
+    const input = Input.getInput('cacheUnityInstallationOnMac') || false;
+
+    return input === 'true';
+  }
+
+  static get unityHubVersionOnMac() {
+    const input = Input.getInput('unityHubVersionOnMac') || '';
+
+    return input !== '' ? input : '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

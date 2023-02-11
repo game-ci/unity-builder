@@ -24,7 +24,7 @@ async function runMain() {
       core.info('Building locally');
       await PlatformSetup.setup(buildParameters, actionFolder);
       if (process.platform === 'darwin') {
-        MacBuilder.run(actionFolder, workspace, buildParameters);
+        MacBuilder.run(actionFolder);
       } else {
         await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
       }

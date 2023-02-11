@@ -128,6 +128,7 @@ echo ""
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+  -logFile - \
   -quit \
   -batchmode \
   -nographics \
@@ -146,8 +147,7 @@ echo ""
   -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
   -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
   -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
-  $CUSTOM_PARAMETERS \
-  > "$UNITY_PROJECT_PATH/out.log" 2>&1
+  $CUSTOM_PARAMETERS
 
 # Catch exit code
 BUILD_EXIT_CODE=$?

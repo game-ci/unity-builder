@@ -1,11 +1,9 @@
-import { exec } from '@actions/exec';
-import { BuildParameters } from '.';
+import { execWithErrorCheck } from './exec-with-error-check';
 
 class MacBuilder {
-  public static async run(actionFolder, workspace, buildParameters: BuildParameters, silent = false) {
-    await exec('bash', [`${actionFolder}/platforms/mac/entrypoint.sh`], {
+  public static async run(actionFolder, silent = false) {
+    await execWithErrorCheck('bash', [`${actionFolder}/platforms/mac/entrypoint.sh`], {
       silent,
-      ignoreReturnCode: true,
     });
   }
 }

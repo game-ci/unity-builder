@@ -187,6 +187,17 @@ inputs:
     description:
       '[CloudRunner] Whether or not to watch the build to the end. Can be used for especially long running jobs e.g
       imports or self-hosted ephemeral runners.'
+  cacheUnityInstallationOnMac:
+    default: 'false'
+    required: false
+    description: 'Whether to cache the Unity hub and editor installation on MacOS'
+  unityHubVersionOnMac:
+    default: ''
+    required: false
+    description:
+      'The version of Unity Hub to install on MacOS (e.g. 3.4.0). Defaults to latest available on brew if empty string
+      or nothing is specified.'
+
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'
