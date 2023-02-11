@@ -33,7 +33,7 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
-  public exportAsGoogleAndroidProject!: string;
+  public androidExportType!: string;
 
   public customParameters!: string;
   public sshAgent!: string;
@@ -77,12 +77,7 @@ class BuildParameters {
   public unityHubVersionOnMac!: string;
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(
-      Input.buildName,
-      Input.targetPlatform,
-      Input.androidAppBundle,
-      Input.exportAsGoogleAndroidProject,
-    );
+    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
@@ -127,7 +122,7 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
-      exportAsGoogleAndroidProject: Input.exportAsGoogleAndroidProject,
+      androidExportType: Input.androidExportType,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -170,18 +165,20 @@ class BuildParameters {
     };
   }
 
-  static parseBuildFile(
-    filename: string,
-    platform: string,
-    androidAppBundle: boolean,
-    exportAsGoogleAndroidProject: string,
-  ) {
+  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
 
-    if (Platform.isAndroid(platform) && exportAsGoogleAndroidProject !== 'true') {
-      return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
+    if (Platform.isAndroid(platform)) {
+      switch (androidExportType) {
+        case `androidPackage`:
+          return `${filename}.apk`;
+        case `androidAppBundle`:
+          return `${filename}.aab`;
+        case `androidStudioProject`:
+          return filename;
+      }
     }
 
     return filename;

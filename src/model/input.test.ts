@@ -161,6 +161,65 @@ describe('Input', () => {
     });
   });
 
+  describe('androidExportType', () => {
+    it('returns the default value', () => {
+      expect(Input.androidExportType).toStrictEqual('androidPackage');
+    });
+
+    // TODO: Remove "and androidAppBundle is not set" in v3
+    test.each`
+      input                     | expected
+      ${'androidPackage'}       | ${'androidPackage'}
+      ${'androidAppBundle'}     | ${'androidAppBundle'}
+      ${'androidStudioProject'} | ${'androidStudioProject'}
+    `('returns $expected when $input is passed and androidAppBundle is not set', (exportType) => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(exportType);
+      expect(Input.androidExportType).toStrictEqual(exportType);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    // TODO: Remove in v3
+    test.each`
+      input                     | expected
+      ${'androidPackage'}       | ${'androidPackage'}
+      ${'androidAppBundle'}     | ${'androidAppBundle'}
+      ${'androidStudioProject'} | ${'androidStudioProject'}
+    `('returns $expected when $input is passed and overrides androidAppBundle if it is set', (exportType) => {
+      const spy = jest.spyOn(Input, 'getInput');
+      spy.mockImplementationOnce(() => {
+        return exportType;
+      });
+
+      spy.mockImplementationOnce(() => {
+        return true;
+      });
+      expect(Input.androidExportType).toStrictEqual(exportType);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    // TODO: Remove in v3
+    test.each`
+      input      | expected
+      ${'true'}  | ${'androidAppBundle'}
+      ${'false'} | ${'androidPackage'}
+    `(
+      'returns $expected when androidExportType is undefined and androidAppBundle is set to $input',
+      ({ input, expected }) => {
+        const spy = jest.spyOn(Input, 'getInput');
+        spy.mockImplementationOnce(() => {
+          return;
+        });
+
+        spy.mockImplementationOnce(() => {
+          return input;
+        });
+
+        expect(Input.androidExportType).toStrictEqual(expected);
+        expect(spy).toHaveBeenCalledTimes(2);
+      },
+    );
+  });
+
   describe('androidKeystoreName', () => {
     it('returns the default value', () => {
       expect(Input.androidKeystoreName).toStrictEqual('');

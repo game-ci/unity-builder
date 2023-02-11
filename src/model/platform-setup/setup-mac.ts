@@ -152,7 +152,7 @@ class SetupMac {
     process.env.ANDROID_KEYALIAS_PASS = buildParameters.androidKeyaliasPass;
     process.env.ANDROID_TARGET_SDK_VERSION = buildParameters.androidTargetSdkVersion;
     process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
-    process.env.EXPORT_AS_GOOGLE_ANDROID_PROJECT = buildParameters.exportAsGoogleAndroidProject;
+    process.env.ANDROID_EXPORT_TYPE = buildParameters.androidExportType;
     process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
   }

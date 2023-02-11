@@ -7,7 +7,7 @@ class Parameter {
 }
 
 class ImageEnvironmentFactory {
-  public static getEnvVarString(parameters, additionalVariables: any[] = []) {
+  public static getEnvVarString(parameters: BuildParameters, additionalVariables: any[] = []) {
     const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
     let string = '';
     for (const p of environmentVariables) {
@@ -50,7 +50,7 @@ class ImageEnvironmentFactory {
       { name: 'ANDROID_KEYALIAS_PASS', value: parameters.androidKeyaliasPass },
       { name: 'ANDROID_TARGET_SDK_VERSION', value: parameters.androidTargetSdkVersion },
       { name: 'ANDROID_SDK_MANAGER_PARAMETERS', value: parameters.androidSdkManagerParameters },
-      { name: 'EXPORT_AS_GOOGLE_ANDROID_PROJECT', value: parameters.exportAsGoogleAndroidProject },
+      { name: 'ANDROID_EXPORT_TYPE', value: parameters.androidExportType },
       { name: 'CUSTOM_PARAMETERS', value: parameters.customParameters },
       { name: 'CHOWN_FILES_TO', value: parameters.chownFilesTo },
       { name: 'GITHUB_REF', value: process.env.GITHUB_REF },

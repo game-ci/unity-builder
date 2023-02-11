@@ -22,7 +22,7 @@ inputs:
   buildName:
     required: false
     default: ''
-    description: 'Name of the build.'
+    description: 'Name of the build. Should not include a file extension.'
   buildsPath:
     required: false
     default: ''
@@ -50,7 +50,13 @@ inputs:
   androidAppBundle:
     required: false
     default: 'false'
-    description: 'Whether to build .aab instead of .apk'
+    description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
+  androidExportType:
+    required: false
+    default: 'androidPackage'
+    description: 
+      'The android export type. Should be androidPackage for apk, 
+      androidAppBundle for aab, or androidStudioProject for an android studio project.'
   androidKeystoreName:
     required: false
     default: ''
@@ -75,10 +81,6 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
-  exportAsGoogleAndroidProject:
-    required: false
-    default: 'false'
-    description: 'To export Google Android Studio project.'
   sshAgent:
     required: false
     default: ''
