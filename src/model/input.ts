@@ -163,6 +163,10 @@ class Input {
     return Input.getInput('androidTargetSdkVersion') || '';
   }
 
+  static get exportAsGoogleAndroidProject() {
+    return Input.getInput('exportAsGoogleAndroidProject') || 'false';
+  }
+
   static get sshAgent() {
     return Input.getInput('sshAgent') || '';
   }

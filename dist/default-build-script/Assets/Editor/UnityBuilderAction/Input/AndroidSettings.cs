@@ -36,6 +36,11 @@ namespace UnityBuilderAction.Input
           }
           PlayerSettings.Android.targetSdkVersion = targetSdkVersion;
       }
+      if (options.TryGetValue("exportAsGoogleAndroidProject", out string exportAsGoogleAndroidProject) && 
+          !string.IsNullOrEmpty(exportAsGoogleAndroidProject))
+      {
+        EditorUserBuildSettings.exportAsGoogleAndroidProject = bool.Parse(exportAsGoogleAndroidProject);
+      }
     }
   }
 }

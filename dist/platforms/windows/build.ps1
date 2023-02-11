@@ -126,6 +126,7 @@ $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUST
                                                                           -androidKeyaliasName $Env:ANDROID_KEYALIAS_NAME `
                                                                           -androidKeyaliasPass $Env:ANDROID_KEYALIAS_PASS `
                                                                           -androidTargetSdkVersion $Env:ANDROID_TARGET_SDK_VERSION `
+                                                                          -exportAsGoogleAndroidProject $Env:EXPORT_AS_GOOGLE_ANDROID_PROJECT `
                                                                           $customParametersArray `
                                                                           -logfile | Out-Host
 

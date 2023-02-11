@@ -33,6 +33,8 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
+  public exportAsGoogleAndroidProject!: string;
+
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
@@ -75,7 +77,12 @@ class BuildParameters {
   public unityHubVersionOnMac!: string;
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+    const buildFile = this.parseBuildFile(
+      Input.buildName,
+      Input.targetPlatform,
+      Input.androidAppBundle,
+      Input.exportAsGoogleAndroidProject,
+    );
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
@@ -120,6 +127,7 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
+      exportAsGoogleAndroidProject: Input.exportAsGoogleAndroidProject,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -162,19 +170,24 @@ class BuildParameters {
     };
   }
 
-  static parseBuildFile(filename, platform, androidAppBundle) {
+  static parseBuildFile(
+    filename: string,
+    platform: string,
+    androidAppBundle: boolean,
+    exportAsGoogleAndroidProject: string,
+  ) {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
 
-    if (Platform.isAndroid(platform)) {
+    if (Platform.isAndroid(platform) && exportAsGoogleAndroidProject !== 'true') {
       return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
     }
 
     return filename;
   }
 
-  static getSerialFromLicenseFile(license) {
+  static getSerialFromLicenseFile(license: string) {
     const startKey = `<DeveloperData Value="`;
     const endKey = `"/>`;
     const startIndex = license.indexOf(startKey) + startKey.length;

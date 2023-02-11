@@ -72,6 +72,31 @@ class SetupMac {
     return '';
   }
 
+  private static getModuleParametersForTargetPlatform(targetPlatform: string): string {
+    let moduleArgument = '';
+    switch (targetPlatform) {
+      case 'iOS':
+        moduleArgument += `--module ios `;
+        break;
+      case 'tvOS':
+        moduleArgument += '--module tvos ';
+        break;
+      case 'StandaloneOSX':
+        moduleArgument += `--module mac-il2cpp `;
+        break;
+      case 'Android':
+        moduleArgument += `--module android `;
+        break;
+      case 'WebGL':
+        moduleArgument += '--module webgl ';
+        break;
+      default:
+        throw new Error(`Unsupported module for target platform: ${targetPlatform}.`);
+    }
+
+    return moduleArgument;
+  }
+
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}`;
     const key = `Cache-MacOS-UnityEditor-With-Module-${buildParameters.targetPlatform}@${buildParameters.editorVersion}`;
@@ -85,31 +110,13 @@ class SetupMac {
     }
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
-    let command = `${this.unityHubExecPath} -- --headless install \
+    const moduleArgument = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+
+    const command = `${this.unityHubExecPath} -- --headless install \
                                           --version ${buildParameters.editorVersion} \
-                                          --changeset ${unityChangeset.changeset} `;
-
-    switch (buildParameters.targetPlatform) {
-      case 'iOS':
-        command += `--module ios `;
-        break;
-      case 'tvOS':
-        command += '--module tvos ';
-        break;
-      case 'StandaloneOSX':
-        command += `--module mac-il2cpp `;
-        break;
-      case 'Android':
-        command += `--module android `;
-        break;
-      case 'WebGL':
-        command += '--module webgl ';
-        break;
-      default:
-        throw new Error(`Unsupported module for target platform: ${buildParameters.targetPlatform}.`);
-    }
-
-    command += `--childModules`;
+                                          --changeset ${unityChangeset.changeset} \
+                                          ${moduleArgument} \
+                                          --childModules `;
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
@@ -145,6 +152,7 @@ class SetupMac {
     process.env.ANDROID_KEYALIAS_PASS = buildParameters.androidKeyaliasPass;
     process.env.ANDROID_TARGET_SDK_VERSION = buildParameters.androidTargetSdkVersion;
     process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
+    process.env.EXPORT_AS_GOOGLE_ANDROID_PROJECT = buildParameters.exportAsGoogleAndroidProject;
     process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
   }

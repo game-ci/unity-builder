@@ -50,6 +50,7 @@ class ImageEnvironmentFactory {
       { name: 'ANDROID_KEYALIAS_PASS', value: parameters.androidKeyaliasPass },
       { name: 'ANDROID_TARGET_SDK_VERSION', value: parameters.androidTargetSdkVersion },
       { name: 'ANDROID_SDK_MANAGER_PARAMETERS', value: parameters.androidSdkManagerParameters },
+      { name: 'EXPORT_AS_GOOGLE_ANDROID_PROJECT', value: parameters.exportAsGoogleAndroidProject },
       { name: 'CUSTOM_PARAMETERS', value: parameters.customParameters },
       { name: 'CHOWN_FILES_TO', value: parameters.chownFilesTo },
       { name: 'GITHUB_REF', value: process.env.GITHUB_REF },
