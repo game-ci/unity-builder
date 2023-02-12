@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../../cloud-runner-options';
 import setups from '../cloud-runner-suite.test';
 import * as fs from 'fs';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -47,6 +48,7 @@ describe('Cloud Runner Caching', () => {
 
       CloudRunnerLogger.log(`run 1 succeeded`);
 
+      await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache`);
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
         const cacheFolderExists = fs.existsSync(`cloud-runner-cache/cache/${overrides.cacheKey}`);
         expect(cacheFolderExists).toBeTruthy();
