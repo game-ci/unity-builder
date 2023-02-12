@@ -47,7 +47,6 @@ describe('Cloud Runner Caching', () => {
       expect(results).not.toContain(cachePushFail);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
-      CloudRunnerLogger.log(`\n\n\n\n`);
 
       await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
@@ -56,6 +55,7 @@ describe('Cloud Runner Caching', () => {
       }
       const buildParameter2 = await CreateParameters(overrides);
 
+      CloudRunnerLogger.log(`\n\n\n\n`);
       buildParameter2.cacheKey = buildParameter.cacheKey;
       const baseImage2 = new ImageTag(buildParameter2);
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
