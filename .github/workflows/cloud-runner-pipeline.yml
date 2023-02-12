@@ -34,7 +34,7 @@ env:
 
 jobs:
   smokeTests:
-    name: Local Smoke Tests
+    name: Smoke Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -70,7 +70,7 @@ jobs:
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
   tests:
     needs: smokeTests
-    name: Cloud Integration Tests
+    name: Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
