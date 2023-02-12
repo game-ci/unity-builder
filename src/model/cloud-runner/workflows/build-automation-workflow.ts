@@ -58,10 +58,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
   private static get BuildWorkflow() {
     const setupHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks).filter((x) =>
-      x.step.includes(`setup`),
+      x.step?.includes(`setup`),
     );
     const buildHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.customJobHooks).filter((x) =>
-      x.step.includes(`build`),
+      x.step?.includes(`build`),
     );
     const builderPath = CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
