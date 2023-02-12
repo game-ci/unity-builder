@@ -222,9 +222,7 @@ export class SharedWorkspaceLocking {
     );
     fs.rmSync(file);
 
-    const workspaces = await SharedWorkspaceLocking.ReadLines(
-      `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
-    );
+    const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
     if (!(await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext))) {
