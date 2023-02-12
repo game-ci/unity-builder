@@ -2,7 +2,6 @@ import path from 'path';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
-import { assert } from 'console';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 import CloudRunnerLogger from './cloud-runner-logger';
