@@ -1,19 +1,26 @@
-import { BuildParameters, ImageTag } from '../..';
-import CloudRunner from '../cloud-runner';
-import Input from '../../input';
-import { CloudRunnerStatics } from '../cloud-runner-statics';
+import { BuildParameters, CloudRunner, ImageTag, Input } from '../..';
 import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import CloudRunnerOptions from '../cloud-runner-options';
+import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
+import { CloudRunnerStatics } from '../cloud-runner-statics';
+import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 
 async function CreateParameters(overrides) {
-  if (overrides) Cli.options = overrides;
+  if (overrides) {
+    Cli.options = overrides;
+  }
+  const originalValue = GitHub.githubInputEnabled;
+  GitHub.githubInputEnabled = false;
+  const results = await BuildParameters.create();
+  GitHub.githubInputEnabled = originalValue;
+  delete Cli.options;
 
-  return BuildParameters.create();
+  return results;
 }
+
 describe('Cloud Runner Sync Environments', () => {
   setups();
   const testSecretName = 'testSecretName';
@@ -74,4 +81,31 @@ describe('Cloud Runner Sync Environments', () => {
       }
     }, 1_000_000_000);
   }
+});
+
+describe('Cloud Runner Environment Serializer', () => {
+  setups();
+  const testSecretName = 'testSecretName';
+  const testSecretValue = 'testSecretValue';
+  it('Cloud Runner Parameter Serialization', async () => {
+    // Setup parameters
+    const buildParameter = await CreateParameters({
+      versioning: 'None',
+      projectPath: 'test-project',
+      unityVersion: UnityVersioning.read('test-project'),
+      customJob: `
+      - name: 'step 1'
+        image: 'alpine'
+        commands: 'printenv'
+        secrets:
+          - name: '${testSecretName}'
+            value: '${testSecretValue}'
+      `,
+    });
+
+    const result = TaskParameterSerializer.createCloudRunnerEnvironmentVariables(buildParameter);
+    expect(result.find((x) => Number.parseInt(x.name)) !== undefined).toBeFalsy();
+    const result2 = TaskParameterSerializer.createCloudRunnerEnvironmentVariables(buildParameter);
+    expect(result2.find((x) => Number.parseInt(x.name)) !== undefined).toBeFalsy();
+  });
 });

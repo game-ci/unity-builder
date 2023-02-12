@@ -1,29 +1,37 @@
-import CloudRunner from '../cloud-runner';
-import { ImageTag } from '../..';
-import UnityVersioning from '../../unity-versioning';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunner from '../../cloud-runner';
+import { BuildParameters, ImageTag } from '../../..';
+import UnityVersioning from '../../../unity-versioning';
+import { Cli } from '../../../cli/cli';
+import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
-import CloudRunnerOptions from '../cloud-runner-options';
-import setups from './cloud-runner-suite.test';
+import CloudRunnerOptions from '../../cloud-runner-options';
+import setups from '../cloud-runner-suite.test';
 import * as fs from 'fs';
-import path from 'path';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import SharedWorkspaceLocking from '../services/shared-workspace-locking';
-import { CreateParameters } from './create-test-parameter';
 
-describe('Cloud Runner Retain Workspace', () => {
+async function CreateParameters(overrides) {
+  if (overrides) {
+    Cli.options = overrides;
+  }
+
+  return await BuildParameters.create();
+}
+
+describe('Cloud Runner Caching', () => {
   it('Responds', () => {});
   setups();
   if (CloudRunnerOptions.cloudRunnerDebug) {
-    it('Run one build it should not already be retained, run subsequent build which should use retained workspace', async () => {
+    it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        customStepFiles: `debug-cache`,
       };
+      if (CloudRunnerOptions.cloudRunnerCluster === `k8s`) {
+        overrides.customStepFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;
+      }
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
@@ -37,12 +45,12 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
 
+      CloudRunnerLogger.log(`run 1 succeeded`);
+
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
         const cacheFolderExists = fs.existsSync(`cloud-runner-cache/cache/${overrides.cacheKey}`);
         expect(cacheFolderExists).toBeTruthy();
       }
-
-      CloudRunnerLogger.log(`run 1 succeeded`);
       const buildParameter2 = await CreateParameters(overrides);
 
       buildParameter2.cacheKey = buildParameter.cacheKey;
@@ -51,9 +59,6 @@ describe('Cloud Runner Retain Workspace', () => {
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
-      const build2ContainsBuildGuid1FromRetainedWorkspace = results2.includes(buildParameter.buildGuid);
-      const build2ContainsRetainedWorkspacePhrase = results2.includes(`Retained Workspace:`);
-      const build2ContainsWorkspaceExistsAlreadyPhrase = results2.includes(`Retained Workspace Already Exists!`);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
       const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
@@ -64,23 +69,10 @@ describe('Cloud Runner Retain Workspace', () => {
       );
 
       expect(build2ContainsCacheKey).toBeTruthy();
-      expect(build2ContainsRetainedWorkspacePhrase).toBeTruthy();
-      expect(build2ContainsWorkspaceExistsAlreadyPhrase).toBeTruthy();
-      expect(build2ContainsBuildGuid1FromRetainedWorkspace).toBeTruthy();
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsNoLibraryMessage).toBeTruthy();
     }, 1_000_000_000);
-    afterAll(async () => {
-      await SharedWorkspaceLocking.CleanupWorkspace(CloudRunner.lockedWorkspace || ``, CloudRunner.buildParameters);
-      if (
-        fs.existsSync(`./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`)
-      ) {
-        CloudRunnerLogger.log(
-          `Cleaning up ./cloud-runner-cache/${path.basename(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-        );
-      }
-    });
   }
 });
