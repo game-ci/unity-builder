@@ -49,12 +49,34 @@ commands: echo "test"`;
   });
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
     it('Should be 1 before and 1 after hook', async () => {
+      const overrides = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+      };
+      const buildParameter2 = await CreateParameters(overrides);
+      await CloudRunner.setup(buildParameter2);
       const beforeHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`before`);
       const afterHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`after`);
       expect(beforeHooks).toHaveLength(1);
       expect(afterHooks).toHaveLength(1);
     });
     it('Should be 1 before and 1 after step', async () => {
+      const overrides = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+      };
+      const buildParameter2 = await CreateParameters(overrides);
+      await CloudRunner.setup(buildParameter2);
       const beforeSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
       const afterSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`after`);
       expect(beforeSteps).toHaveLength(1);

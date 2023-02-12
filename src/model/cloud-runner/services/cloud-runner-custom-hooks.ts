@@ -46,13 +46,13 @@ export class CloudRunnerCustomHooks {
     const results: Hook[] = [];
     RemoteClientLogger.log(`GetCustomHookFiles: ${hookLifecycle}`);
     try {
-      const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `hooks`);
-      const files = fs.readdirSync(gameCiCustomStepsPath);
+      const gameCiCustomHooksPath = path.join(process.cwd(), `game-ci`, `hooks`);
+      const files = fs.readdirSync(gameCiCustomHooksPath);
       for (const file of files) {
         if (!CloudRunnerOptions.customHookFiles.includes(file.replace(`.yaml`, ``))) {
           continue;
         }
-        const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
+        const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
         const fileContentsObject = CloudRunnerCustomHooks.ParseHooks(fileContents)[0];
         if (fileContentsObject.hook.includes(hookLifecycle)) {
           results.push(fileContentsObject);
