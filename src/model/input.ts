@@ -134,7 +134,7 @@ class Input {
   }
 
   static get androidAppBundle() {
-    core.warning('androidAppBundle is deprecated, please use androidExportType instead in the Unity-Build-Action');
+    core.warning('androidAppBundle is deprecated, please use androidExportType instead');
     const input = Input.getInput('androidAppBundle') || false;
 
     return input === 'true';
@@ -178,6 +178,10 @@ class Input {
 
   static get androidTargetSdkVersion() {
     return Input.getInput('androidTargetSdkVersion') || '';
+  }
+
+  static get androidSymbolType() {
+    return Input.getInput('androidSymbolType') || 'none';
   }
 
   static get sshAgent() {

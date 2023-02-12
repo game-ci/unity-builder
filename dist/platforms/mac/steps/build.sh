@@ -148,6 +148,7 @@ echo ""
   -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
   -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
   -androidExportType "$ANDROID_EXPORT_TYPE" \
+  -androidSymbolType "$ANDROID_SYMBOL_TYPE" \
   $CUSTOM_PARAMETERS
 
 # Catch exit code

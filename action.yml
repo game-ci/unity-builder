@@ -53,7 +53,6 @@ inputs:
     description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
   androidExportType:
     required: false
-    default: 'androidPackage'
     description:
       'The android export type. Should be androidPackage for apk, androidAppBundle for aab, or androidStudioProject for
       an android studio project.'
@@ -81,6 +80,10 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
+  androidSymbolType:
+    required: false
+    default: 'none'
+    description: 'The android symbol type to export. Should be "none", "public" or "debugging".'
   sshAgent:
     required: false
     default: ''

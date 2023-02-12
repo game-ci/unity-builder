@@ -54,6 +54,22 @@ namespace UnityBuilderAction.Input
             break;
         }
       }
+
+      if (options.TryGetValue("androidSymbolType", out string symbolType) && !string.IsNullOrEmpty(symbolType))
+      {
+        switch(symbolType)
+        {
+          case "public":
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
+            break;
+          case "debugging":
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Debugging;
+            break;
+          case "none":
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
+            break;
+        }
+      }
     }
   }
 }

@@ -34,6 +34,7 @@ class BuildParameters {
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
   public androidExportType!: string;
+  public androidSymbolType!: string;
 
   public customParameters!: string;
   public sshAgent!: string;
@@ -83,6 +84,20 @@ class BuildParameters {
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
 
+    const androidSymbolExportType = Input.androidSymbolType;
+    if (Platform.isAndroid(Input.targetPlatform)) {
+      switch (androidSymbolExportType) {
+        case 'none':
+        case 'public':
+        case 'debugging':
+          break;
+        default:
+          throw new Error(
+            `Invalid androidSymbolType: ${Input.androidSymbolType}. Must be one of: none, public, debugging`,
+          );
+      }
+    }
+
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
     let unitySerial = '';
@@ -123,6 +138,7 @@ class BuildParameters {
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
       androidExportType: Input.androidExportType,
+      androidSymbolType: androidSymbolExportType,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -178,6 +194,10 @@ class BuildParameters {
           return `${filename}.aab`;
         case `androidStudioProject`:
           return filename;
+        default:
+          throw new Error(
+            `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
+          );
       }
     }
 

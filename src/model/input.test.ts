@@ -172,9 +172,9 @@ describe('Input', () => {
       ${'androidPackage'}       | ${'androidPackage'}
       ${'androidAppBundle'}     | ${'androidAppBundle'}
       ${'androidStudioProject'} | ${'androidStudioProject'}
-    `('returns $expected when $input is passed and androidAppBundle is not set', (exportType) => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(exportType);
-      expect(Input.androidExportType).toStrictEqual(exportType);
+    `('returns $expected when $input is passed and androidAppBundle is not set', ({ input, expected }) => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(input);
+      expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
@@ -184,16 +184,16 @@ describe('Input', () => {
       ${'androidPackage'}       | ${'androidPackage'}
       ${'androidAppBundle'}     | ${'androidAppBundle'}
       ${'androidStudioProject'} | ${'androidStudioProject'}
-    `('returns $expected when $input is passed and overrides androidAppBundle if it is set', (exportType) => {
+    `('returns $expected when $input is passed and overrides androidAppBundle if it is set', ({ input, expected }) => {
       const spy = jest.spyOn(Input, 'getInput');
       spy.mockImplementationOnce(() => {
-        return exportType;
+        return input;
       });
 
       spy.mockImplementationOnce(() => {
         return true;
       });
-      expect(Input.androidExportType).toStrictEqual(exportType);
+      expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
@@ -218,6 +218,23 @@ describe('Input', () => {
         expect(spy).toHaveBeenCalledTimes(2);
       },
     );
+  });
+
+  describe('androidSymbolType', () => {
+    it('returns the default value', () => {
+      expect(Input.androidSymbolType).toStrictEqual('none');
+    });
+
+    test.each`
+      input          | expected
+      ${'none'}      | ${'none'}
+      ${'public'}    | ${'public'}
+      ${'debugging'} | ${'debugging'}
+    `('returns $expected when $input is passed', ({ input, expected }) => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(input);
+      expect(Input.androidExportType).toStrictEqual(expected);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('androidKeystoreName', () => {

@@ -153,6 +153,7 @@ class SetupMac {
     process.env.ANDROID_TARGET_SDK_VERSION = buildParameters.androidTargetSdkVersion;
     process.env.ANDROID_SDK_MANAGER_PARAMETERS = buildParameters.androidSdkManagerParameters;
     process.env.ANDROID_EXPORT_TYPE = buildParameters.androidExportType;
+    process.env.ANDROID_SYMBOL_TYPE = buildParameters.androidSymbolType;
     process.env.CUSTOM_PARAMETERS = buildParameters.customParameters;
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
   }
