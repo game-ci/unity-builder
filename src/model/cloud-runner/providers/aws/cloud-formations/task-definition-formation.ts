@@ -30,7 +30,7 @@ Parameters:
     Type: Number
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
-    Default: 2048
+    Default: 4096
     Type: Number
     Description: How much memory in megabytes to give the container
   BUILDGUID:
