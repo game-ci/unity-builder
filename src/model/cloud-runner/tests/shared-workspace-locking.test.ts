@@ -35,6 +35,8 @@ describe('Cloud Runner Locking', () => {
       const runId = uuidv4();
       CloudRunner.buildParameters = buildParameters;
       await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters);
+      expect(SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
+      expect(SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       const isExpectedUnlockedBeforeLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
