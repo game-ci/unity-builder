@@ -61,18 +61,18 @@ commands: echo "test"`;
       const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
       CloudRunnerLogger.log(`run 2 succeeded`);
 
-      const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
-      const build2ContainsPreBuildHookRunMessage = results2.includes('before-build hook test!');
-      const build2ContainsPostBuildHookRunMessage = results2.includes('after-build hook test!');
+      const buildContainsBuildSucceeded = results2.includes('Build succeeded');
+      const buildContainsPreBuildHookRunMessage = results2.includes('before-build hook test!');
+      const buildContainsPostBuildHookRunMessage = results2.includes('after-build hook test!');
 
-      const build2ContainsPreBuildStepMessage = results2.includes('before-build step test!');
-      const build2ContainsPostBuildStepMessage = results2.includes('after-build step test!');
+      const buildContainsPreBuildStepMessage = results2.includes('before-build step test!');
+      const buildContainsPostBuildStepMessage = results2.includes('after-build step test!');
 
-      expect(build2ContainsBuildSucceeded).toBeTruthy();
-      expect(build2ContainsPreBuildHookRunMessage).toBeTruthy();
-      expect(build2ContainsPostBuildHookRunMessage).toBeTruthy();
-      expect(build2ContainsPreBuildStepMessage).toBeTruthy();
-      expect(build2ContainsPostBuildStepMessage).toBeTruthy();
+      expect(buildContainsBuildSucceeded).toBeTruthy();
+      expect(buildContainsPreBuildHookRunMessage).toBeTruthy();
+      expect(buildContainsPostBuildHookRunMessage).toBeTruthy();
+      expect(buildContainsPreBuildStepMessage).toBeTruthy();
+      expect(buildContainsPostBuildStepMessage).toBeTruthy();
     }, 1_000_000_000);
   }
 });
