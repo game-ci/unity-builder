@@ -35,7 +35,7 @@ export class CloudRunnerCustomHooks {
       }
     }
 
-    return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
+    return output.filter((x) => x.hook !== undefined && x.hook.length > 0);
   }
 
   static GetCustomHooksFromFiles(hookLifecycle: string): Hook[] {
@@ -77,8 +77,8 @@ export class CloudRunnerCustomHooks {
     });
   }
 
-  public static ParseHooks(steps: string): Hook[] {
-    if (steps === '') {
+  public static ParseHooks(hooks: string): Hook[] {
+    if (hooks === '') {
       return [];
     }
 
@@ -87,8 +87,8 @@ export class CloudRunnerCustomHooks {
     // CloudRunnerLogger.log(`Parsing build hooks: ${steps}`);
 
     // }
-    const isArray = steps.replace(/\s/g, ``)[0] === `-`;
-    const object: Hook[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
+    const isArray = hooks.replace(/\s/g, ``)[0] === `-`;
+    const object: Hook[] = isArray ? YAML.parse(hooks) : [YAML.parse(hooks)];
     for (const hook of object) {
       CloudRunnerCustomHooks.ConvertYamlSecrets(hook);
       if (hook.secrets === undefined) {
@@ -96,7 +96,7 @@ export class CloudRunnerCustomHooks {
       }
     }
     if (object === undefined) {
-      throw new Error(`Failed to parse ${steps}`);
+      throw new Error(`Failed to parse ${hooks}`);
     }
 
     return object;
