@@ -14,6 +14,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
   if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
     it('inspect stateful folder of Workflows', async () => {
       const testValue = `the state in a job exits in the expected local-docker folder`;
+      fs.writeFileSync(`./cloud-runner-cache/test-in-state.txt`, testValue);
 
       // Setup parameters
       const buildParameter = await CreateParameters({
@@ -23,7 +24,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'ls /data/ && echo "${testValue}" >> /data/state.txt'
+          commands: 'ls /data/ && cat /data/test-in-state.txt >> /data/test-out-state.txt'
         `,
       });
       const baseImage = new ImageTag(buildParameter);
