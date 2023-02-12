@@ -44,7 +44,7 @@ export class CloudRunnerCustomHooks {
 
   static GetCustomHooksFromFiles(hookLifecycle: string): Hook[] {
     const results: Hook[] = [];
-    RemoteClientLogger.log(`GetCustomStepFiles: ${hookLifecycle}`);
+    RemoteClientLogger.log(`GetCustomHookFiles: ${hookLifecycle}`);
     try {
       const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `hooks`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
