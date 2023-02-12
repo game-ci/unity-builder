@@ -5,12 +5,14 @@ import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import CloudRunnerOptions from '../cloud-runner-options';
 import * as fs from 'fs';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 // import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
     const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
+    CloudRunnerLogger.log(`Applying hooks ${hooks.length}`);
 
     return `echo "---"
 echo "start cloud runner init"
