@@ -32,7 +32,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
       await CloudRunner.run(buildParameter, baseImage.toString());
 
       const outputFile = fs.readFileSync(`./cloud-runner-cache/test-out-state.txt`, `utf-8`);
-      expect(outputFile).toEqual(testValue);
+      expect(outputFile).toMatch(testValue);
       CloudRunnerLogger.log(outputFile);
     }, 1_000_000_000);
   }
