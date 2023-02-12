@@ -35,7 +35,11 @@ export class CloudRunnerCustomHooks {
       }
     }
 
-    return output.filter((x) => x.hook !== undefined && x.hook.length > 0);
+    return [
+      ...output.filter((x) => x.hook !== undefined && x.hook.length > 0),
+      ...CloudRunnerCustomHooks.GetCustomHooksFromFiles(`before`),
+      ...CloudRunnerCustomHooks.GetCustomHooksFromFiles(`after`),
+    ];
   }
 
   static GetCustomHooksFromFiles(hookLifecycle: string): Hook[] {
