@@ -27,7 +27,6 @@ export class RemoteClient {
         CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
       );
       const lfsHashes = await LfsHashing.createLFSHashFiles();
-      CloudRunnerLogger.log(`lfs hash completion: ${lfsHashes.lfsGuid} ${lfsHashes.lfsGuidSum}`);
       if (fs.existsSync(CloudRunnerFolders.libraryFolderAbsolute)) {
         RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
       }

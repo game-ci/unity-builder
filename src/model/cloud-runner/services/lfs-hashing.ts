@@ -5,13 +5,12 @@ import fs from 'fs';
 import { assert } from 'console';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 export class LfsHashing {
   public static async createLFSHashFiles() {
     await CloudRunnerSystem.Run(`git lfs ls-files -l | cut -d ' ' -f1 | sort > .lfs-assets-guid`);
     await CloudRunnerSystem.Run(`md5sum .lfs-assets-guid > .lfs-assets-guid-sum`);
-    assert(fs.existsSync(`.lfs-assets-guid-sum`));
-    assert(fs.existsSync(`.lfs-assets-guid`));
     const lfsHashes = {
       lfsGuid: fs
         .readFileSync(`${path.join(CloudRunnerFolders.repoPathAbsolute, `.lfs-assets-guid`)}`, 'utf8')
@@ -21,6 +20,7 @@ export class LfsHashing {
         .replace('  .lfs-assets-guid', '')
         .replace(/\n/g, ``),
     };
+    CloudRunnerLogger.log(`lfs hash completion: ${lfsHashes.lfsGuid} ${lfsHashes.lfsGuidSum}`);
 
     return lfsHashes;
   }
