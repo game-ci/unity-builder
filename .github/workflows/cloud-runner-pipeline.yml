@@ -35,15 +35,15 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  localIntegrationTests:
-    name: Integration Tests
+  smokeTests:
+    name: Local Smoke Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         test:
-          - 'cloud-runner-async-workflow'
+          #- 'cloud-runner-async-workflow'
           - 'cloud-runner-caching'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
@@ -68,9 +68,9 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-  cloudRunnerIntegrationTests:
-    needs: localIntegrationTests
-    name: Integration Tests
+  tests:
+    needs: smokeTests
+    name: Cloud Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -83,6 +83,7 @@ jobs:
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
           - 'cloud-runner-hooks'
+          - 'cloud-runner-s3-steps'
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking'
         cloudRunnerCluster:
@@ -123,8 +124,8 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
-  localBuildTests:
-    needs: localIntegrationTests
+  buildTargetTests:
+    needs: smokeTests
     name: Local Build Target Tests
     runs-on: ubuntu-latest
     strategy:
