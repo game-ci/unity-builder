@@ -57,7 +57,8 @@ namespace UnityBuilderAction.Input
 
       if (options.TryGetValue("androidSymbolType", out string symbolType) && !string.IsNullOrEmpty(symbolType))
       {
-        switch(symbolType)
+#if UNITY_2021_1_OR_NEWER
+        switch (symbolType)
         {
           case "public":
             EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
@@ -69,6 +70,18 @@ namespace UnityBuilderAction.Input
             EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
             break;
         }
+#elif UNITY_2019_2_OR_NEWER
+        switch (symbolType)
+        {
+          case "public":
+          case "debugging":
+            EditorUserBuildSettings.androidCreateSymbolsZip = true;
+            break;
+          case "none":
+            EditorUserBuildSettings.androidCreateSymbolsZip = false;
+            break;
+        }
+#endif
       }
     }
   }

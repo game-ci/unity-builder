@@ -86,7 +86,7 @@ inputs:
     description: 'The android symbol type to export. Should be "none", "public" or "debugging".'
   sshAgent:
     required: false
-    default: ''
+    default: 'public'
     description: 'SSH Agent path to forward to the container'
   gitPrivateToken:
     required: false
