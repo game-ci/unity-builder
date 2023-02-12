@@ -41,6 +41,8 @@ describe('Cloud Runner Locking', () => {
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
       await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
+      const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
+      expect(lines.map((x) => x.replace(`/`, ``)).includes(buildParameters.cacheKey));
       expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       const allLocks = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);

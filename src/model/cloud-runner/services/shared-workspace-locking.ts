@@ -25,7 +25,7 @@ export class SharedWorkspaceLocking {
       .filter((x) => x.includes(`_workspace`));
   }
   public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
-    const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
+    const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
 
     return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
   }
