@@ -46,7 +46,6 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2018.1.8f1
           - 2018.2.21f1
           - 2018.3.14f1
           - 2018.4.36f1
