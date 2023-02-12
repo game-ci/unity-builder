@@ -51,16 +51,16 @@ describe('Cloud Runner Locking', () => {
           await SharedWorkspaceLocking.ReadLines(
             `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParameters.cacheKey}/`,
           )
-        ).filter((x) => x.includes(`${newWorkspaceName}_lock`)),
+        ).filter((x) => x.includes(`${newWorkspaceName}_lock`)).length,
       ).toBeGreaterThan(0);
       expect(
         (
           await SharedWorkspaceLocking.ReadLines(
             `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParameters.cacheKey}/`,
           )
-        ).filter((x) => x.includes(`${newWorkspaceName}_workspace`)),
+        ).filter((x) => x.includes(`${newWorkspaceName}_workspace`)).length,
       ).toBeGreaterThan(0);
-      expect(allLocks.filter((x) => x.includes(`${newWorkspaceName}_lock`))).toBeGreaterThan(0);
+      expect(allLocks.filter((x) => x.includes(`${newWorkspaceName}_lock`)).length).toBeGreaterThan(0);
       const isExpectedLockedAfterLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === true;
       expect(isExpectedLockedAfterLocking).toBeTruthy();
