@@ -50,6 +50,7 @@ export class RemoteClient {
       await RemoteClient.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathAbsolute);
       await Caching.handleCachePurging();
     } catch (error) {
+      RemoteClientLogger.logWarning(`!Warning!: Failed setting up repo`);
       throw error;
     }
   }
