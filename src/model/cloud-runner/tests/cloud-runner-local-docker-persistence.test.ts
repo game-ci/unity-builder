@@ -4,6 +4,8 @@ import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
+import fs from 'fs';
+import CloudRunnerLogger from '../services/cloud-runner-logger';
 
 async function CreateParameters(overrides) {
   if (overrides) Cli.options = overrides;
@@ -24,13 +26,15 @@ describe('Cloud Runner Local Docker Workflows', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'ls /data/'
+          commands: 'ls /data/ && echo "test" >> /data/state.txt'
         `,
       });
       const baseImage = new ImageTag(buildParameter);
 
       // Run the job
       await CloudRunner.run(buildParameter, baseImage.toString());
+
+      CloudRunnerLogger.log(fs.readFileSync(`./cloud-runner-cache/state.txt`, `utf-8`));
     }, 1_000_000_000);
   }
 });
