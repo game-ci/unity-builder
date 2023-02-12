@@ -9,19 +9,18 @@ import * as fs from 'fs';
 // import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
-  // TODO also accept hooks as yaml files in the repo
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
     const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
 
     return `echo "---"
-      echo "start cloud runner init"
-      ${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
-      echo "start of cloud runner job"
-      ${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${commands}
-      ${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      echo "end of cloud runner job"
-      echo "---${buildParameters.logId}"`;
+echo "start cloud runner init"
+${CloudRunnerOptions.cloudRunnerDebugEnv ? `printenv` : `#`}
+echo "start of cloud runner job"
+${hooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
+${commands}
+${hooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+echo "end of cloud runner job"
+echo "---${buildParameters.logId}"`;
   }
 
   public static getHooks(customJobHooks): Hook[] {
