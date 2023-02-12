@@ -23,8 +23,6 @@ env:
   AWS_DEFAULT_REGION: eu-west-2
   AWS_BASE_STACK_NAME: game-ci-team-pipelines
   CLOUD_RUNNER_BRANCH: ${{ github.ref }}
-  CLOUD_RUNNER_DEBUG: true
-  CLOUD_RUNNER_DEBUG_TREE: true
   DEBUG: true
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   PROJECT_PATH: test-project
@@ -62,6 +60,8 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 15
         env:
+          CLOUD_RUNNER_DEBUG: true
+          CLOUD_RUNNER_DEBUG_TREE: true
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
