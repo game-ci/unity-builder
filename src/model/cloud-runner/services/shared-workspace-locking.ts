@@ -40,7 +40,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`_${workspace}_lock`));
+      .filter((x) => x.includes(`${workspace}_lock`));
   }
   public static async GetOrCreateLockedWorkspace(
     workspace: string,

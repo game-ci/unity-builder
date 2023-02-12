@@ -41,8 +41,9 @@ describe('Cloud Runner Locking', () => {
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
       await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
+      expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       const allLocks = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);
-      expect(allLocks.filter((x) => x.includes(`${newWorkspaceName}_lock`))).toBeGreaterThan(0);
       expect(
         (
           await SharedWorkspaceLocking.ReadLines(
@@ -57,8 +58,7 @@ describe('Cloud Runner Locking', () => {
           )
         ).filter((x) => x.includes(`${newWorkspaceName}_workspace`)),
       ).toBeGreaterThan(0);
-      expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
-      expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(allLocks.filter((x) => x.includes(`${newWorkspaceName}_lock`))).toBeGreaterThan(0);
       const isExpectedLockedAfterLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === true;
       expect(isExpectedLockedAfterLocking).toBeTruthy();
