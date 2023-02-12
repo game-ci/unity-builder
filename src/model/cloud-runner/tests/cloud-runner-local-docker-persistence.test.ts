@@ -1,23 +1,20 @@
-import { BuildParameters, ImageTag } from '../..';
+import { ImageTag } from '../..';
 import CloudRunner from '../cloud-runner';
 import UnityVersioning from '../../unity-versioning';
-import { Cli } from '../../cli/cli';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import fs from 'fs';
+import { CreateParameters } from './create-test-parameter';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 
-async function CreateParameters(overrides) {
-  if (overrides) Cli.options = overrides;
-
-  return BuildParameters.create();
-}
 describe('Cloud Runner Local Docker Workflows', () => {
   setups();
   it('Responds', () => {});
 
   if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
     it('inspect stateful folder of Workflows', async () => {
+      const testValue = `the state in a job exits in the expected local-docker folder`;
+
       // Setup parameters
       const buildParameter = await CreateParameters({
         versioning: 'None',
@@ -26,7 +23,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'ls /data/ && echo "test" >> /data/state.txt'
+          commands: 'ls /data/ && echo "${testValue}" >> /data/state.txt'
         `,
       });
       const baseImage = new ImageTag(buildParameter);
@@ -34,7 +31,9 @@ describe('Cloud Runner Local Docker Workflows', () => {
       // Run the job
       await CloudRunner.run(buildParameter, baseImage.toString());
 
-      CloudRunnerLogger.log(fs.readFileSync(`./cloud-runner-cache/state.txt`, `utf-8`));
+      const outputFile = fs.readFileSync(`./cloud-runner-cache/state.txt`, `utf-8`);
+      expect(outputFile).toEqual(testValue);
+      CloudRunnerLogger.log(outputFile);
     }, 1_000_000_000);
   }
 });

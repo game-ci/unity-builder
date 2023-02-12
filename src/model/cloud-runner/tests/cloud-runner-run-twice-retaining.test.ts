@@ -1,7 +1,6 @@
 import CloudRunner from '../cloud-runner';
-import { BuildParameters, ImageTag } from '../..';
+import { ImageTag } from '../..';
 import UnityVersioning from '../../unity-versioning';
-import { Cli } from '../../cli/cli';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
@@ -10,14 +9,7 @@ import * as fs from 'fs';
 import path from 'path';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import SharedWorkspaceLocking from '../services/shared-workspace-locking';
-
-async function CreateParameters(overrides) {
-  if (overrides) {
-    Cli.options = overrides;
-  }
-
-  return await BuildParameters.create();
-}
+import { CreateParameters } from './create-test-parameter';
 
 describe('Cloud Runner Retain Workspace', () => {
   it('Responds', () => {});

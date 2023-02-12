@@ -192,12 +192,16 @@ export class SharedWorkspaceLocking {
         return x.includes(`${workspace}_workspace`);
       }).length === 0;
 
+    if (workspaceFileDoesNotExists) {
+      throw new Error(`Workspace file doesn't exist`);
+    }
+
     const lockFilesExist =
       files.filter((x) => {
         return x.includes(`${workspace}_lock`);
       }).length > 0;
 
-    return workspaceFileDoesNotExists || lockFilesExist;
+    return lockFilesExist;
   }
 
   public static async CreateWorkspace(
