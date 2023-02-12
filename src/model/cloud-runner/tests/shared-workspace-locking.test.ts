@@ -41,9 +41,7 @@ describe('Cloud Runner Locking', () => {
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
       await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
-      CloudRunnerLogger.log(
-        await (await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).join(`,`),
-      );
+      CloudRunnerLogger.log((await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).join(`,`));
       CloudRunnerLogger.log(
         (
           await SharedWorkspaceLocking.ReadLines(
