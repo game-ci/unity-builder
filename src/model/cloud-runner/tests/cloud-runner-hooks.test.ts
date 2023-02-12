@@ -54,6 +54,12 @@ commands: echo "test"`;
       expect(beforeHooks).toHaveLength(1);
       expect(afterHooks).toHaveLength(1);
     });
+    it('Should be 1 before and 1 after step', async () => {
+      const beforeSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
+      const afterSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`after`);
+      expect(beforeSteps).toHaveLength(1);
+      expect(afterSteps).toHaveLength(1);
+    });
     it('Run build once - check for pre and post custom hooks run contents', async () => {
       const overrides = {
         versioning: 'None',
