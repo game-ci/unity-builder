@@ -11,7 +11,7 @@ import * as fs from 'fs';
 export class CloudRunnerCustomHooks {
   // TODO also accept hooks as yaml files in the repo
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks).filter((x) => x.step.includes(`all`));
+    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
 
     return `echo "---"
       echo "start cloud runner init"
