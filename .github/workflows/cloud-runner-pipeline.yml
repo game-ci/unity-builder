@@ -42,6 +42,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        test:
+          - "cloud-runner-async-workflow"
+          - "cloud-runner-local-docker-persistence"
         cloudRunnerCluster:
           - local-docker
     steps:
@@ -69,8 +72,8 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - run: yarn
-      - run: yarn run test-i --detectOpenHandles --forceExit --runInBand
-        timeout-minutes: 180
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 15
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
@@ -88,6 +91,7 @@ jobs:
       matrix:
         cloudRunnerCluster:
           - aws
+          - local-docker
           - k8s
     steps:
       - name: Checkout (default)
@@ -124,6 +128,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
   localBuildTests:
+    needs: localIntegrationTests
     name: Local Build Target Tests
     runs-on: ubuntu-latest
     strategy:
