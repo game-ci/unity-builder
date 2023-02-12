@@ -60,8 +60,6 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 15
         env:
-          CLOUD_RUNNER_DEBUG: true
-          CLOUD_RUNNER_DEBUG_TREE: true
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
