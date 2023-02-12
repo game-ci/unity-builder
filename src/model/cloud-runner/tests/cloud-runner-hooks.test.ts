@@ -55,6 +55,7 @@ commands: echo "test"`;
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
         customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);
