@@ -202,11 +202,12 @@ export class Cli {
           parameters.garbageCollectionMaxAge * 60
         } -delete`,
       );
-      await CloudRunnerSystem.Run(
-        `find ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForAllFull)} -name '*.*' -mmin +${
-          parameters.garbageCollectionMaxAge * 60
-        } -delete`,
-      );
+
+      // await CloudRunnerSystem.Run(
+      //   `find ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForAllFull)} -name '*.*' -mmin +${
+      //     parameters.garbageCollectionMaxAge * 60
+      //   } -delete`,
+      // );
     }
 
     return new Promise((result) => result(``));
