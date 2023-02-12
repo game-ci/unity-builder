@@ -24,7 +24,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'ls /data/'
+          commands: 'ls /data/'s
         `,
       });
       const baseImage = new ImageTag(buildParameter);
