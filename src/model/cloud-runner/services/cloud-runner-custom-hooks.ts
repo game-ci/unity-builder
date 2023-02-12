@@ -116,7 +116,7 @@ export class CloudRunnerCustomHooks {
 export class Hook {
   public commands;
   public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
-  public name;
+  public name!: string;
   public hook!: string[];
   public step!: string[];
 }

@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
+import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 
 async function CreateParameters(overrides) {
   if (overrides) {
@@ -47,6 +48,12 @@ commands: echo "test"`;
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
   });
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+    it('Should be 1 before and 1 after hook', async () => {
+      const beforeHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`before`);
+      const afterHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`after`);
+      expect(beforeHooks).toHaveLength(1);
+      expect(afterHooks).toHaveLength(1);
+    });
     it('Run build once - check for pre and post custom hooks run contents', async () => {
       const overrides = {
         versioning: 'None',
