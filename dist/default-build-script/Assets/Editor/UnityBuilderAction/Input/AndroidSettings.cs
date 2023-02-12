@@ -20,7 +20,7 @@ namespace UnityBuilderAction.Input
       if (options.TryGetValue("androidKeystorePass", out keystorePass) && !string.IsNullOrEmpty(keystorePass))
         PlayerSettings.Android.keystorePass = keystorePass;
       
-      string keyAliasName;
+      string keyaliasName;
       if (options.TryGetValue("androidKeyaliasName", out keyaliasName) && !string.IsNullOrEmpty(keyaliasName))
         PlayerSettings.Android.keyaliasName = keyaliasName;
 
@@ -47,19 +47,25 @@ namespace UnityBuilderAction.Input
       string androidExportType;
       if (options.TryGetValue("androidExportType", out androidExportType) && !string.IsNullOrEmpty(androidExportType))
       {
+        // Only exists in 2018.3 and above
+        FieldInfo buildAppBundle = typeof(EditorUserBuildSettings)
+              .GetField("buildAppBundle", System.Reflection.BindingFlags.Public | BindingFlags.Instance);
         switch (androidExportType)
         {
           case "androidStudioProject":
             EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
-            EditorUserBuildSettings.buildAppBundle = false;
+            if (buildAppBundle != null)
+              buildAppBundle.SetValue(null, false);
             break;
           case "androidAppBundle":
-            EditorUserBuildSettings.buildAppBundle = true;
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
+            if (buildAppBundle != null)
+              buildAppBundle.SetValue(null, true);
             break;
-          default:
+          case "androidPackage":
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-            EditorUserBuildSettings.buildAppBundle = false;
+            if (buildAppBundle != null)
+              buildAppBundle.SetValue(null, false);
             break;
         }
       }
