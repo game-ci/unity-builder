@@ -15,13 +15,21 @@ namespace UnityBuilderAction.Input
         PlayerSettings.Android.keystoreName = keystoreName;
       }
 #endif
-      if (options.TryGetValue("androidKeystorePass", out string keystorePass) && !string.IsNullOrEmpty(keystorePass))
+      // Can't use out variable declaration as Unity 2018 doesn't support it
+      string keystorePass;
+      if (options.TryGetValue("androidKeystorePass", out keystorePass) && !string.IsNullOrEmpty(keystorePass))
         PlayerSettings.Android.keystorePass = keystorePass;
-      if (options.TryGetValue("androidKeyaliasName", out string keyaliasName) && !string.IsNullOrEmpty(keyaliasName))
+      
+      string keyAliasName;
+      if (options.TryGetValue("androidKeyaliasName", out keyaliasName) && !string.IsNullOrEmpty(keyaliasName))
         PlayerSettings.Android.keyaliasName = keyaliasName;
-      if (options.TryGetValue("androidKeyaliasPass", out string keyaliasPass) && !string.IsNullOrEmpty(keyaliasPass))
+
+      string keyaliasPass;
+      if (options.TryGetValue("androidKeyaliasPass", out keyaliasPass) && !string.IsNullOrEmpty(keyaliasPass))
         PlayerSettings.Android.keyaliasPass = keyaliasPass;
-      if (options.TryGetValue("androidTargetSdkVersion", out string androidTargetSdkVersion) && !string.IsNullOrEmpty(androidTargetSdkVersion))
+      
+      string androidTargetSdkVersion;
+      if (options.TryGetValue("androidTargetSdkVersion", out androidTargetSdkVersion) && !string.IsNullOrEmpty(androidTargetSdkVersion))
       {
           var targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
           try
@@ -36,7 +44,8 @@ namespace UnityBuilderAction.Input
           PlayerSettings.Android.targetSdkVersion = targetSdkVersion;
       }
 
-      if (options.TryGetValue("androidExportType", out string androidExportType) && !string.IsNullOrEmpty(androidExportType))
+      string androidExportType;
+      if (options.TryGetValue("androidExportType", out androidExportType) && !string.IsNullOrEmpty(androidExportType))
       {
         switch (androidExportType)
         {
@@ -55,7 +64,8 @@ namespace UnityBuilderAction.Input
         }
       }
 
-      if (options.TryGetValue("androidSymbolType", out string symbolType) && !string.IsNullOrEmpty(symbolType))
+      string symbolType;
+      if (options.TryGetValue("androidSymbolType", out symbolType) && !string.IsNullOrEmpty(symbolType))
       {
 #if UNITY_2021_1_OR_NEWER
         switch (symbolType)
