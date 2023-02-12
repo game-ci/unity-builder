@@ -5,10 +5,10 @@ import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
-  private static get workspaceBucketRoot() {
+  public static get workspaceBucketRoot() {
     return `s3://${CloudRunner.buildParameters.awsBaseStackName}/`;
   }
-  private static get workspaceRoot() {
+  public static get workspaceRoot() {
     return `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
   }
   public static async GetAllWorkspaces(buildParametersContext: BuildParameters): Promise<string[]> {
@@ -281,7 +281,7 @@ export class SharedWorkspaceLocking {
     );
   }
 
-  private static async ReadLines(command: string): Promise<string[]> {
+  public static async ReadLines(command: string): Promise<string[]> {
     return CloudRunnerSystem.RunAndReadLines(command);
   }
 }

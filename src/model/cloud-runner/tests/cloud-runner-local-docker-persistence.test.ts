@@ -6,7 +6,6 @@ import setups from './cloud-runner-suite.test';
 import fs from 'fs';
 import { CreateParameters } from './create-test-parameter';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
 
 describe('Cloud Runner Local Docker Workflows', () => {
   setups();
@@ -15,7 +14,6 @@ describe('Cloud Runner Local Docker Workflows', () => {
   if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
     it('inspect stateful folder of Workflows', async () => {
       const testValue = `the state in a job exits in the expected local-docker folder`;
-      await CloudRunnerSystem.Run(`echo "${testValue}" >> ./cloud-runner-cache/test-in-state.txt`);
 
       // Setup parameters
       const buildParameter = await CreateParameters({
@@ -25,7 +23,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'ls /data/ && cat /data/test-in-state.txt >> /data/test-out-state.txt'
+          commands: 'echo "${testValue}" >> /data/test-out-state.txt'
         `,
       });
       const baseImage = new ImageTag(buildParameter);
