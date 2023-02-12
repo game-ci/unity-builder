@@ -44,6 +44,7 @@ export class Caching {
   }
 
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
+    CloudRunnerLogger.log(`Pushing to cache ${sourceFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     let compressionSuffix = '';
@@ -102,6 +103,7 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
+    CloudRunnerLogger.log(`Pulling from cache ${destinationFolder}`);
     if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache) {
       await new Promise((resolve) => resolve);
 
