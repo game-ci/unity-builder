@@ -26,13 +26,27 @@ describe('Cloud Runner Local Docker Workflows', () => {
           commands: 'echo "${testValue}" >> /data/test-out-state.txt'
         `,
       });
+      const buildParameter2 = await CreateParameters({
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.read('test-project'),
+        customJob: `
+        - name: 'step 1'
+          image: 'ubuntu'
+          commands: 'cat /data/test-out-state.txt >> /data/test-out-state-2.txt'
+        `,
+      });
       const baseImage = new ImageTag(buildParameter);
 
       // Run the job
       await CloudRunner.run(buildParameter, baseImage.toString());
+      await CloudRunner.run(buildParameter2, baseImage.toString());
 
       const outputFile = fs.readFileSync(`./cloud-runner-cache/test-out-state.txt`, `utf-8`);
       expect(outputFile).toMatch(testValue);
+
+      const outputFile2 = fs.readFileSync(`./cloud-runner-cache/test-out-state-2.txt`, `utf-8`);
+      expect(outputFile2).toMatch(testValue);
       CloudRunnerLogger.log(outputFile);
     }, 1_000_000_000);
   }
