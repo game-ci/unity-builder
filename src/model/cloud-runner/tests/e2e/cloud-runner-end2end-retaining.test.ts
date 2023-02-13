@@ -10,6 +10,7 @@ import path from 'path';
 import { CloudRunnerFolders } from '../../services/cloud-runner-folders';
 import SharedWorkspaceLocking from '../../services/shared-workspace-locking';
 import { CreateParameters } from '../create-test-parameter';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 describe('Cloud Runner Retain Workspace', () => {
   it('Responds', () => {});
@@ -43,6 +44,9 @@ describe('Cloud Runner Retain Workspace', () => {
       }
 
       CloudRunnerLogger.log(`run 1 succeeded`);
+      await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
+
+      // await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache/${}`);
       const buildParameter2 = await CreateParameters(overrides);
 
       buildParameter2.cacheKey = buildParameter.cacheKey;
