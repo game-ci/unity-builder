@@ -42,14 +42,12 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2019.3.15f1
+          - 2019.3.15f1 # Minimum version for IL2CPP
           - 2019.4.40f1
           - 2020.1.17f1
           - 2020.2.7f1
           - 2020.3.44f1
-          - 2021.1.28f1
-          - 2021.2.19f1
-          - 2021.3.18f1
+          - 2021.3.18f1 # 2021.1 and 2021.2 seem to have IL2CPP issues
           - 2022.1.24f1
           - 2022.2.6f1
         targetPlatform:
@@ -88,6 +86,47 @@ jobs:
       #          Build          #
       ###########################
       - uses: ./
+        id: build-1
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          allowDirtyBuild: true
+      # We use dirty build because we are replacing the default project settings file above
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        run: |
+          Start-Sleep -s 120
+
+      - uses: ./
+        id: build-2
+        if: steps.build-1.outcome == 'failure'
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          allowDirtyBuild: true
+      # We use dirty build because we are replacing the default project settings file above
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
+        run: |
+          Start-Sleep -s 240
+
+      - uses: ./
+        id: build-3
+        if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
