@@ -85,8 +85,11 @@ jobs:
       ###########################
       #          Build          #
       ###########################
-      - uses: ./
+      - name: Build
+        uses: ./
         id: build-1
+        continue-on-error: true
+        timeout-minutes: 60
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -104,8 +107,11 @@ jobs:
         run: |
           Start-Sleep -s 120
 
-      - uses: ./
+      - name: Build Retry 1
+        uses: ./
         id: build-2
+        continue-on-error: true
+        timeout-minutes: 60
         if: steps.build-1.outcome == 'failure'
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -124,8 +130,10 @@ jobs:
         run: |
           Start-Sleep -s 240
 
-      - uses: ./
+      - name: Build Retry 2
+        uses: ./
         id: build-3
+        timeout-minutes: 60
         if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
