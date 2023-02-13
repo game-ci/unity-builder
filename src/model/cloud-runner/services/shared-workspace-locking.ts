@@ -22,7 +22,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`_workspace`));
+      .filter((x) => x.endsWith(`_workspace`));
   }
   public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
     const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
@@ -40,7 +40,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`${workspace}_workspace_lock`));
+      .filter((x) => x.endsWith(`${workspace}_workspace_lock`));
   }
   public static async GetOrCreateLockedWorkspace(
     workspace: string,
@@ -84,7 +84,7 @@ export class SharedWorkspaceLocking {
   public static async DoesWorkspaceExist(workspace: string, buildParametersContext: BuildParameters) {
     return (
       (await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext)).filter((x) =>
-        x.includes(`${workspace}_workspace`),
+        x.endsWith(`${workspace}_workspace`),
       ).length > 0
     );
   }
@@ -179,7 +179,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`_${workspace}_workspace`))
+      .filter((x) => x.endsWith(`_${workspace}_workspace`))
       .map((x) => Number(x))[0];
   }
 
@@ -193,7 +193,7 @@ export class SharedWorkspaceLocking {
 
     const workspaceFileDoesNotExists =
       files.filter((x) => {
-        return x.includes(`${workspace}_workspace`);
+        return x.endsWith(`${workspace}_workspace`);
       }).length === 0;
 
     if (workspaceFileDoesNotExists) {
@@ -202,7 +202,7 @@ export class SharedWorkspaceLocking {
 
     const lockFilesExist =
       files.filter((x) => {
-        return x.includes(`${workspace}_workspace_lock`);
+        return x.endsWith(`${workspace}_workspace_lock`);
       }).length > 0;
 
     return lockFilesExist;
@@ -262,7 +262,7 @@ export class SharedWorkspaceLocking {
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext)).filter((x) =>
-      x.includes(`_${runId}_${workspace}_workspace_lock`),
+      x.endsWith(`_${runId}_${workspace}_workspace_lock`),
     );
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
     CloudRunnerLogger.log(`rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`);
