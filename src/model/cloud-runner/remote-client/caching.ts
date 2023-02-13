@@ -105,6 +105,8 @@ export class Caching {
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
     CloudRunnerLogger.log(`Pulling from cache ${destinationFolder}`);
     if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache) {
+      CloudRunnerLogger.log(`Skipping cache debugSkipCache is true`);
+
       return;
     }
     cacheArtifactName = cacheArtifactName.replace(' ', '');
