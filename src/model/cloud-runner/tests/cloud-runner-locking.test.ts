@@ -71,9 +71,14 @@ describe('Cloud Runner Locking', () => {
       await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters);
       const locks = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);
       expect(locks.length).toBe(0);
-      const isExpectedLockedAfterReleasing =
+      const isExpectedNotLockedAfterReleasing =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
-      expect(isExpectedLockedAfterReleasing).toBeTruthy();
+      expect(isExpectedNotLockedAfterReleasing).toBeTruthy();
+      const lockingResult2 = await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
+      expect(lockingResult2).toBeTruthy();
+      const isExpectedLockedAgainAfterReleasing =
+        (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
+      expect(isExpectedLockedAgainAfterReleasing).toBeTruthy();
     }, 150000);
     it.skip('All Locking Actions', async () => {
       Cli.options.retainWorkspaces = true;
