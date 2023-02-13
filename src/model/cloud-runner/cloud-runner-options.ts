@@ -232,19 +232,23 @@ class CloudRunnerOptions {
   // ### ### ###
 
   static get cloudRunnerDebug(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerTests`) || CloudRunnerOptions.getInput(`cloudRunnerDebug`) || false;
+    return (
+      CloudRunnerOptions.getInput(`cloudRunnerTests`) === `true` ||
+      CloudRunnerOptions.getInput(`cloudRunnerDebug`) === `true` ||
+      false
+    );
   }
   static get cloudRunnerDebugTree(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) || false;
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) === `true` || false;
   }
   static get cloudRunnerDebugEnv(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) || false;
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) === `true` || false;
   }
   static get cloudRunnerDebugSkipLFS(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipLFS`) || false;
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipLFS`) === `true` || false;
   }
   static get cloudRunnerDebugSkipCache(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipCache`) || false;
+    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipCache`) === `true` || false;
   }
 
   static get watchCloudRunnerToEnd(): boolean {
