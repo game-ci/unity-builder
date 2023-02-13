@@ -93,9 +93,6 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
-      return false;
-    }
     const locks = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
       .map((x) => {
         return {
