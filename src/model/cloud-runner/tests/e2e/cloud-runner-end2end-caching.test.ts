@@ -50,7 +50,7 @@ describe('Cloud Runner Caching', () => {
 
       await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
       await CloudRunnerSystem.Run(
-        `cp ./cloud-runner-cache/cache/${buildParameter.cacheKey}/Library/lib-${buildParameter.buildGuid}.tar .`,
+        `cp ./cloud-runner-cache/cache/${buildParameter.cacheKey}/Library/lib-${buildParameter.buildGuid}.tar ./`,
       );
       await CloudRunnerSystem.Run(`tar -xf lib-${buildParameter.buildGuid}.tar -C ./results`);
       await CloudRunnerSystem.Run(`tree ./results`);
