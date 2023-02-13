@@ -275,6 +275,19 @@ export class SharedWorkspaceLocking {
       false,
       true,
     );
+    CloudRunnerLogger.log(
+      `Release Lock ${!SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext)}`,
+    );
+    CloudRunnerLogger.log(
+      `Release Lock ${(await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
+        .map((x) => {
+          return {
+            name: x,
+            timestamp: Number(x.split(`_`)[0]),
+          };
+        })
+        .sort((x) => x.timestamp)}`,
+    );
 
     return !SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext);
   }
