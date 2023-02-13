@@ -178,6 +178,7 @@ export class Caching {
       process.chdir(startPath);
       throw error;
     }
+    await CloudRunnerSystem.Run(`tree ${destinationFolder}`);
     process.chdir(startPath);
   }
 
