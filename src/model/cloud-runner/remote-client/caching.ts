@@ -58,7 +58,7 @@ export class Caching {
       }
       process.chdir(path.resolve(sourceFolder, '..'));
 
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
+      if (CloudRunner.buildParameters.cloudRunnerDebug === true) {
         CloudRunnerLogger.log(
           `Hashed cache folder ${await LfsHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
             sourceFolder,
@@ -70,9 +70,9 @@ export class Caching {
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
 
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
-        // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
-        // await CloudRunnerSystem.Run(`tree -L 2`);
+      if (CloudRunner.buildParameters.cloudRunnerDebug === true) {
+        await CloudRunnerSystem.Run(`tree -L 2 ./..`);
+        await CloudRunnerSystem.Run(`tree -L 2`);
       }
 
       if (contents.length === 0) {
@@ -106,7 +106,7 @@ export class Caching {
     CloudRunnerLogger.log(
       `Pulling from cache ${destinationFolder} ${CloudRunner.buildParameters.cloudRunnerDebugSkipCache}`,
     );
-    if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache) {
+    if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache === true) {
       CloudRunnerLogger.log(`Skipping cache debugSkipCache is true`);
 
       return;
