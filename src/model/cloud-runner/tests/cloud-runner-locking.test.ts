@@ -82,6 +82,7 @@ describe('Cloud Runner Locking', () => {
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false,
       ).toBeTruthy();
       await SharedWorkspaceLocking.CleanupWorkspace(newWorkspaceName, buildParameters);
+      CloudRunnerLogger.log(`Starting get or create`);
       expect(
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
       ).toBeTruthy();
