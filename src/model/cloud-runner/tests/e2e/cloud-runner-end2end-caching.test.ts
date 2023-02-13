@@ -49,6 +49,10 @@ describe('Cloud Runner Caching', () => {
       CloudRunnerLogger.log(`run 1 succeeded`);
 
       await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
+      await CloudRunnerSystem.Run(
+        `tar -xf ./cloud-runner-cache/cache/${buildParameter.buildGuid}/Library/lib-${buildParameter.buildGuid}.tar -C ./results`,
+      );
+      await CloudRunnerSystem.Run(`tree ./results`);
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
         const cacheFolderExists = fs.existsSync(`cloud-runner-cache/cache/${overrides.cacheKey}`);
         expect(cacheFolderExists).toBeTruthy();
