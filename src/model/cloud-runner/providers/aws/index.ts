@@ -143,6 +143,9 @@ class AWSBuildEnvironment implements ProviderInterface {
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackName,
     }).promise();
+    await CF.waitFor('stackDeleteComplete', {
+      StackName: `${taskDef.taskDefStackName}-cleanup`,
+    }).promise();
     CloudRunnerLogger.log(`Deleted Stack: ${taskDef.taskDefStackName}`);
     CloudRunnerLogger.log('Cleanup complete');
   }

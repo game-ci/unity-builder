@@ -75,26 +75,23 @@ class AWSTaskRunner {
     await new Promise((resolve) => resolve(10000));
     const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
     const containerState = taskData.containers?.[0];
-    const exitCode = containerState?.exitCode || undefined;
+    const exitCode = containerState?.exitCode;
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
     if (exitCode === undefined) {
-      CloudRunnerLogger.logWarning(`No exitcode for container`);
+      CloudRunnerLogger.logWarning(`Undefined exitcode for container`);
     }
-    const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
+    const wasSuccessful = exitCode === 0;
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
 
       return { output, shouldCleanup };
-    } else {
-      if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
-        throw new Error('Container exited with code 1');
-      }
-      const message = `Cloud runner job exit code ${exitCode}`;
-      taskData.overrides = undefined;
-      taskData.attachments = undefined;
-      CloudRunnerLogger.log(`${message} ${JSON.stringify(taskData, undefined, 4)}`);
-      throw new Error(message);
     }
+
+    if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
+      throw new Error('Container exited with code 1');
+    }
+
+    throw new Error(`K8s task failed`);
   }
 
   private static async waitUntilTaskRunning(taskArn: string, cluster: string) {
