@@ -244,7 +244,7 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    const file = `${Date.now()}_${runId}_${workspace}_lock`;
+    const file = `${Date.now()}_${runId}_${workspace}_workspace_lock`;
     fs.writeFileSync(file, '');
     await CloudRunnerSystem.Run(
       `aws s3 cp ./${file} ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
