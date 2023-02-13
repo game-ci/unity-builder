@@ -20,7 +20,7 @@ describe('Cloud Runner Locking', () => {
   setups();
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
-    it(`Simple Locking Flow`, async () => {
+    it(`Simple Locking End2End Flow`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
