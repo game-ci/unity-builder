@@ -69,16 +69,21 @@ export class SharedWorkspaceLocking {
           }
         }
       }
-    } catch {
+    } catch (error) {
+      CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
+
       return false;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
+    const lockResult = await SharedWorkspaceLocking.LockWorkspace(workspace, runId, buildParametersContext);
     CloudRunnerLogger.log(
-      `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${createResult}`,
+      `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${
+        createResult && lockResult
+      }`,
     );
 
-    return createResult;
+    return createResult && lockResult;
   }
 
   public static async DoesWorkspaceExist(workspace: string, buildParametersContext: BuildParameters) {
