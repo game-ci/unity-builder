@@ -40,7 +40,8 @@ describe('Cloud Runner Locking', () => {
       const isExpectedUnlockedBeforeLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
-      await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
+      const result = await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
+      expect(result).toBeTruthy();
       const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
       expect(lines.map((x) => x.replace(`/`, ``)).includes(buildParameters.cacheKey));
       expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
@@ -51,15 +52,15 @@ describe('Cloud Runner Locking', () => {
           await SharedWorkspaceLocking.ReadLines(
             `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParameters.cacheKey}/`,
           )
-        ).filter((x) => x.includes(`${newWorkspaceName}_workspace_lock`)).length,
-      ).toBeGreaterThan(0);
+        ).filter((x) => x.includes(`${newWorkspaceName}_workspace_lock`)),
+      ).toHaveLength(1);
       expect(
         (
           await SharedWorkspaceLocking.ReadLines(
             `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParameters.cacheKey}/`,
           )
-        ).filter((x) => x.includes(`${newWorkspaceName}_workspace`)).length,
-      ).toBeGreaterThan(0);
+        ).filter((x) => x.includes(`${newWorkspaceName}_workspace`)),
+      ).toHaveLength(1);
       expect(allLocks.filter((x) => x.includes(`${newWorkspaceName}_workspace_lock`)).length).toBeGreaterThan(0);
       const isExpectedLockedAfterLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === true;
