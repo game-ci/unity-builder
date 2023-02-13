@@ -127,8 +127,8 @@ export class Caching {
         await fs.promises.mkdir(destinationFolder);
       }
 
-      CloudRunnerLogger.log(await CloudRunnerSystem.Run(`ls -t "${cacheFolder}"`));
-      CloudRunnerLogger.log(await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$`));
+      // CloudRunnerLogger.log(await CloudRunnerSystem.Run(`ls -t "${cacheFolder}"`));
+      // CloudRunnerLogger.log(await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$`));
 
       const latestInBranch = await (
         await CloudRunnerSystem.Run(`ls -t "${cacheFolder}" | grep .tar${compressionSuffix}$ | head -1`)
