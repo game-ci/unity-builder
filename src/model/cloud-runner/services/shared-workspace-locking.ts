@@ -276,20 +276,24 @@ export class SharedWorkspaceLocking {
       true,
     );
     CloudRunnerLogger.log(
-      `Release Lock ${!SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext)}`,
+      `!Has Lock ${!(await SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext))}`,
     );
     CloudRunnerLogger.log(
-      `Release Lock ${(await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
-        .map((x) => {
-          return {
-            name: x,
-            timestamp: Number(x.split(`_`)[0]),
-          };
-        })
-        .sort((x) => x.timestamp)}`,
+      `All Lock ${JSON.stringify(
+        (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
+          .map((x) => {
+            return {
+              name: x,
+              timestamp: Number(x.split(`_`)[0]),
+            };
+          })
+          .sort((x) => x.timestamp),
+        undefined,
+        4,
+      )}`,
     );
 
-    return !SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext);
+    return !(await SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext));
   }
 
   public static async CleanupWorkspace(workspace: string, buildParametersContext: BuildParameters) {
