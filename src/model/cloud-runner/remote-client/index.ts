@@ -65,21 +65,18 @@ export class RemoteClient {
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
 
-    if (
-      CloudRunner.buildParameters.retainWorkspace &&
-      fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
-    ) {
-      process.chdir(CloudRunnerFolders.repoPathAbsolute);
-      RemoteClientLogger.log(
-        `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
-      );
-      await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
+    if (CloudRunner.buildParameters.retainWorkspace) {
+      if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
+        process.chdir(CloudRunnerFolders.repoPathAbsolute);
+        RemoteClientLogger.log(
+          `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
+        );
+        await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
-      return;
-    }
-
-    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
-      RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists cleaning up`);
+        return;
+      }
+      await CloudRunnerSystem.Run(`tree -d ${CloudRunnerFolders.repoPathAbsolute}`);
+      RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
       await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }
 
