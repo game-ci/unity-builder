@@ -50,7 +50,7 @@ describe('Cloud Runner Caching', () => {
 
       await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
       await CloudRunnerSystem.Run(
-        `tar -xf ./cloud-runner-cache/cache/${buildParameter.buildGuid}/Library/lib-${buildParameter.buildGuid}.tar -C ./results`,
+        `tar -xf ./cloud-runner-cache/cache/${buildParameter.cacheKey}/Library/lib-${buildParameter.buildGuid}.tar -C ./results`,
       );
       await CloudRunnerSystem.Run(`tree ./results`);
       if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
