@@ -267,6 +267,7 @@ export class SharedWorkspaceLocking {
   ): Promise<boolean> {
     const files = await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext);
     const file = files.find((x) => x.endsWith(`${workspace}_workspace_lock`) && x.includes(runId));
+    CloudRunnerLogger.log(`All Locks ${files} ${workspace} ${runId}`);
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
     CloudRunnerLogger.log(`rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`);
     await CloudRunnerSystem.Run(
