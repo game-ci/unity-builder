@@ -40,7 +40,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.includes(`${workspace}_lock`));
+      .filter((x) => x.includes(`${workspace}_workspace_lock`));
   }
   public static async GetOrCreateLockedWorkspace(
     workspace: string,
@@ -202,7 +202,7 @@ export class SharedWorkspaceLocking {
 
     const lockFilesExist =
       files.filter((x) => {
-        return x.includes(`${workspace}_lock`);
+        return x.includes(`${workspace}_workspace_lock`);
       }).length > 0;
 
     return lockFilesExist;
@@ -262,7 +262,7 @@ export class SharedWorkspaceLocking {
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
     const file = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext)).filter((x) =>
-      x.includes(`_${runId}_${workspace}_lock`),
+      x.includes(`_${runId}_${workspace}_workspace_lock`),
     );
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);
     CloudRunnerLogger.log(`rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`);
