@@ -71,8 +71,8 @@ export class Caching {
       );
 
       if (CloudRunner.buildParameters.cloudRunnerDebug === true) {
-        await CloudRunnerSystem.Run(`tree -L 2 ./..`);
-        await CloudRunnerSystem.Run(`tree -L 2`);
+        // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
+        // await CloudRunnerSystem.Run(`tree -L 2`);
       }
 
       if (contents.length === 0) {
@@ -106,7 +106,7 @@ export class Caching {
     CloudRunnerLogger.log(
       `Pulling from cache ${destinationFolder} ${CloudRunner.buildParameters.cloudRunnerDebugSkipCache}`,
     );
-    if (CloudRunner.buildParameters.cloudRunnerDebugSkipCache === true) {
+    if (`${CloudRunner.buildParameters.cloudRunnerDebugSkipCache}` === `true`) {
       CloudRunnerLogger.log(`Skipping cache debugSkipCache is true`);
 
       return;
