@@ -96,13 +96,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.repoPathAbsolute, `.git`),
-    )}" ]; then echo "Retained Workspace Already Exists!" ; fi`;
+    )}" ] ; then echo "Retained Workspace Already Exists!" ; fi`;
 
     const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
-    )}" ]; then echo "Builder Already Exists!"; else ${commands}; fi`;
+    )}" ] ; then echo "Builder Already Exists!"; else ${commands} ; fi`;
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
     echo "downloading game-ci..."
