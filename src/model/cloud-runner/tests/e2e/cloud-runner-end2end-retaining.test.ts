@@ -44,7 +44,7 @@ describe('Cloud Runner Retain Workspace', () => {
       }
 
       CloudRunnerLogger.log(`run 1 succeeded`);
-      await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
+      await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache`);
 
       // await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache/${}`);
       const buildParameter2 = await CreateParameters(overrides);
