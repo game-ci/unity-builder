@@ -48,7 +48,7 @@ export class SharedWorkspaceLocking {
     buildParametersContext: BuildParameters,
   ) {
     if (!CloudRunnerOptions.retainWorkspaces) {
-      return;
+      return false;
     }
 
     try {
@@ -70,7 +70,7 @@ export class SharedWorkspaceLocking {
         }
       }
     } catch {
-      return;
+      return false;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
