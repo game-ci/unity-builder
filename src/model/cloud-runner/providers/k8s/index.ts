@@ -192,7 +192,7 @@ class Kubernetes implements ProviderInterface {
             await new Promise((resolve) => resolve(5000));
             continue;
           } else {
-            CloudRunnerLogger.log(`error running k8s workflow ${JSON.parse(error)}`);
+            CloudRunnerLogger.log(`error running k8s workflow ${error}`);
             throw error;
           }
         }

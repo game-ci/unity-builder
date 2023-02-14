@@ -91,7 +91,7 @@ class AWSTaskRunner {
       throw new Error('Container exited with code 1');
     }
 
-    throw new Error(`K8s task failed`);
+    throw new Error(`Task failed`);
   }
 
   private static async waitUntilTaskRunning(taskArn: string, cluster: string) {
