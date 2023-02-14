@@ -123,12 +123,13 @@ class KubernetesTaskRunner {
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
+        const events = await kubeClient.readNamespacedEvent(podName, namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
         CloudRunnerLogger.log(
           `${status.body.status?.phase} ${status.body.status?.conditions?.[0].reason || ''} ${
             status.body.status?.conditions?.[0].message || ''
-          }`,
+          } \n ${events}`,
         );
         if (success || phase !== 'Pending') return true;
 
