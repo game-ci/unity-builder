@@ -53,7 +53,6 @@ inputs:
     description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
   androidExportType:
     required: false
-    default: 'androidPackage'
     description:
       'The android export type. Should be androidPackage for apk, androidAppBundle for aab, or androidStudioProject for
       an android studio project.'
