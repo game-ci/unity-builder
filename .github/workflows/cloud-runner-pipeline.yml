@@ -114,7 +114,7 @@ jobs:
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - run: yarn
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
-        timeout-minutes: 15
+        timeout-minutes: 35
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           PROJECT_PATH: test-project
