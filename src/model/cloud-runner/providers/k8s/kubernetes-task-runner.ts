@@ -144,7 +144,11 @@ class KubernetesTaskRunner {
     CloudRunnerLogger.log(
       JSON.stringify(
         events.body.items.map((x) => {
-          x.message, x.metadata.name, x.reason;
+          return {
+            message: x.message || ``,
+            name: x.metadata.name || ``,
+            reason: x.reason || ``,
+          };
         }),
         undefined,
         4,
