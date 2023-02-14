@@ -62,10 +62,15 @@ export default class Versioning {
    */
   static async logDiff() {
     const diffCommand = `git --no-pager diff | head -n ${this.maxDiffLines.toString()}`;
-    await System.run('sh', undefined, {
-      input: Buffer.from(diffCommand),
-      silent: true,
-    });
+    await System.run(
+      'sh',
+      undefined,
+      {
+        input: Buffer.from(diffCommand),
+        silent: true,
+      },
+      false,
+    );
   }
 
   /**
@@ -307,6 +312,6 @@ export default class Versioning {
    * Run git in the specified project path
    */
   static async git(arguments_, options = {}) {
-    return System.run('git', arguments_, { cwd: this.projectPath, ...options });
+    return System.run('git', arguments_, { cwd: this.projectPath, ...options }, false);
   }
 }

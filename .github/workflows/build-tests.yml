@@ -1,6 +1,7 @@
 name: Builds
 
 on:
+  workflow_dispatch:
   push: { branches: [main] }
   pull_request:
     paths-ignore:
@@ -45,12 +46,24 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2019.2.11f1
+          - 2018.3.14f1
+          - 2018.4.36f1
+          - 2019.1.14f1
+          - 2019.2.21f1
           - 2019.3.15f1
+          - 2019.4.40f1
+          - 2020.1.17f1
+          - 2020.2.7f1
+          - 2020.3.44f1
+          - 2021.1.28f1
+          - 2021.2.19f1
+          - 2021.3.18f1
+          - 2022.1.24f1
+          - 2022.2.6f1
         targetPlatform:
-          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone with mono backend.
           - iOS # Build an iOS player.
           - Android # Build an Android .apk.
           - WebGL # WebGL.

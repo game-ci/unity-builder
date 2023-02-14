@@ -126,11 +126,13 @@ $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUST
                                                                           -androidKeyaliasName $Env:ANDROID_KEYALIAS_NAME `
                                                                           -androidKeyaliasPass $Env:ANDROID_KEYALIAS_PASS `
                                                                           -androidTargetSdkVersion $Env:ANDROID_TARGET_SDK_VERSION `
+                                                                          -androidExportType $Env:ANDROID_EXPORT_TYPE `
+                                                                          -androidSymbolType $Env:ANDROID_SYMBOL_TYPE `
                                                                           $customParametersArray `
                                                                           -logfile | Out-Host
 
 # Catch exit code
-$Env:BUILD_EXIT_CODE=$?
+$Env:BUILD_EXIT_CODE=$LastExitCode
 
 # Display results
 if ($Env:BUILD_EXIT_CODE -eq 0)

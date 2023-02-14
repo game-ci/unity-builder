@@ -33,6 +33,9 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
+  public androidExportType!: string;
+  public androidSymbolType!: string;
+
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
@@ -71,13 +74,29 @@ class BuildParameters {
   public garbageCollectionMaxAge!: number;
   public constantGarbageCollection!: boolean;
   public githubChecks!: boolean;
+  public cacheUnityInstallationOnMac!: boolean;
+  public unityHubVersionOnMac!: string;
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+
+    const androidSymbolExportType = Input.androidSymbolType;
+    if (Platform.isAndroid(Input.targetPlatform)) {
+      switch (androidSymbolExportType) {
+        case 'none':
+        case 'public':
+        case 'debugging':
+          break;
+        default:
+          throw new Error(
+            `Invalid androidSymbolType: ${Input.androidSymbolType}. Must be one of: none, public, debugging`,
+          );
+      }
+    }
 
     // Todo - Don't use process.env directly, that's what the input model class is for.
     // ---
@@ -118,6 +137,8 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
+      androidExportType: Input.androidExportType,
+      androidSymbolType: androidSymbolExportType,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -155,22 +176,35 @@ class BuildParameters {
       constantGarbageCollection: CloudRunnerOptions.constantGarbageCollection,
       garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
+      cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
+      unityHubVersionOnMac: Input.unityHubVersionOnMac,
     };
   }
 
-  static parseBuildFile(filename, platform, androidAppBundle) {
+  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
 
     if (Platform.isAndroid(platform)) {
-      return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
+      switch (androidExportType) {
+        case `androidPackage`:
+          return `${filename}.apk`;
+        case `androidAppBundle`:
+          return `${filename}.aab`;
+        case `androidStudioProject`:
+          return filename;
+        default:
+          throw new Error(
+            `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
+          );
+      }
     }
 
     return filename;
   }
 
-  static getSerialFromLicenseFile(license) {
+  static getSerialFromLicenseFile(license: string) {
     const startKey = `<DeveloperData Value="`;
     const endKey = `"/>`;
     const startIndex = license.indexOf(startKey) + startKey.length;

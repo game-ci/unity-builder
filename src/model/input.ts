@@ -134,9 +134,26 @@ class Input {
   }
 
   static get androidAppBundle() {
+    core.warning('androidAppBundle is deprecated, please use androidExportType instead');
     const input = Input.getInput('androidAppBundle') || false;
 
     return input === 'true';
+  }
+
+  static get androidExportType() {
+    // TODO: remove this in V3
+    const exportType = Input.getInput('androidExportType');
+
+    if (exportType) {
+      return exportType || 'androidPackage';
+    }
+
+    return Input.androidAppBundle ? 'androidAppBundle' : 'androidPackage';
+
+    // End TODO
+
+    // Use this in V3 when androidAppBundle is removed
+    // return Input.getInput('androidExportType') || 'androidPackage';
   }
 
   static get androidKeystoreName() {
@@ -163,6 +180,10 @@ class Input {
     return Input.getInput('androidTargetSdkVersion') || '';
   }
 
+  static get androidSymbolType() {
+    return Input.getInput('androidSymbolType') || 'none';
+  }
+
   static get sshAgent() {
     return Input.getInput('sshAgent') || '';
   }
@@ -179,6 +200,18 @@ class Input {
     const input = Input.getInput('allowDirtyBuild') || false;
 
     return input === 'true';
+  }
+
+  static get cacheUnityInstallationOnMac() {
+    const input = Input.getInput('cacheUnityInstallationOnMac') || false;
+
+    return input === 'true';
+  }
+
+  static get unityHubVersionOnMac() {
+    const input = Input.getInput('unityHubVersionOnMac') || '';
+
+    return input !== '' ? input : '';
   }
 
   public static ToEnvVarFormat(input: string) {
