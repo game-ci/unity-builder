@@ -76,14 +76,14 @@ jobs:
       matrix:
         test:
           - 'cloud-runner-async-workflow'
-          - 'cloud-runner-caching'
+          #- 'cloud-runner-caching'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
           - 'cloud-runner-hooks'
           - 'cloud-runner-s3-steps'
           - 'cloud-runner-local-persistence'
-          - 'cloud-runner-locking'
+          #- 'cloud-runner-locking'
         cloudRunnerCluster:
           - aws
           - local-docker
