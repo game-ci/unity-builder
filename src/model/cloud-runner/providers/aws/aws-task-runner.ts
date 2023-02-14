@@ -72,10 +72,15 @@ class AWSTaskRunner {
 
     CloudRunnerLogger.log(`Streaming...`);
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
-    await new Promise((resolve) => resolve(10000));
-    const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
-    const containerState = taskData.containers?.[0];
-    const exitCode = containerState?.exitCode;
+    let exitCode;
+    let containerState;
+    let taskData;
+    while (exitCode === undefined) {
+      await new Promise((resolve) => resolve(10000));
+      taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
+      containerState = taskData.containers?.[0];
+      exitCode = containerState?.exitCode;
+    }
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
     if (exitCode === undefined) {
       CloudRunnerLogger.logWarning(`Undefined exitcode for container`);
