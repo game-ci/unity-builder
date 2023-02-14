@@ -141,7 +141,15 @@ class KubernetesTaskRunner {
     );
 
     const events = await kubeClient.listNamespacedEvent(namespace);
-    CloudRunnerLogger.log(JSON.stringify(events, undefined, 4));
+    CloudRunnerLogger.log(
+      JSON.stringify(
+        events.body.items.map((x) => {
+          x.message, x.metadata.name, x.reason;
+        }),
+        undefined,
+        4,
+      ),
+    );
 
     return success;
   }
