@@ -169,24 +169,23 @@ class Kubernetes implements ProviderInterface {
           }
           await this.cleanupTaskResources();
         } catch (error: any) {
-          // let errorParsed;
-          // try {
-          //   // errorParsed = JSON.parse(error);
-          // } catch {
-          //   // errorParsed = error;
-          // }
+          let errorParsed;
+          try {
+            errorParsed = JSON.parse(error);
+          } catch {
+            errorParsed = error;
+          }
 
-          // const errorMessage =
-          //   errorParsed.name || errorParsed.reason || errorParsed.response?.body?.reason || errorParsed.message;
+          const errorMessage =
+            errorParsed.name || errorParsed.reason || errorParsed.response?.body?.reason || errorParsed.message;
 
-          const continueStreaming = false;
-
-          // errorMessage.includes(`dial timeout, backstop`) ||
-          // errorMessage.includes(`HttpError`) ||
-          // errorMessage.includes(`HttpError: HTTP request failed`) ||
-          // errorMessage.includes(`an error occurred when try to find container`) ||
-          // errorMessage.includes(`not found`) ||
-          // errorMessage.includes(`Not Found`);
+          const continueStreaming =
+            errorMessage.includes(`dial timeout, backstop`) ||
+            errorMessage.includes(`HttpError`) ||
+            errorMessage.includes(`HttpError: HTTP request failed`) ||
+            errorMessage.includes(`an error occurred when try to find container`) ||
+            errorMessage.includes(`not found`) ||
+            errorMessage.includes(`Not Found`);
           if (continueStreaming) {
             CloudRunnerLogger.log('Log Stream Container Not Found');
             await new Promise((resolve) => resolve(5000));

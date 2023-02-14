@@ -123,7 +123,7 @@ class KubernetesTaskRunner {
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
-        const events = await kubeClient.readNamespacedEvent(podName, namespace);
+        const events = await kubeClient.listNamespacedEvent(namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
         CloudRunnerLogger.log(
