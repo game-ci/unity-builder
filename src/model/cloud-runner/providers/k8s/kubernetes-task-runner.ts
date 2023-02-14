@@ -143,13 +143,15 @@ class KubernetesTaskRunner {
     const events = await kubeClient.listNamespacedEvent(namespace);
     CloudRunnerLogger.log(
       JSON.stringify(
-        events.body.items.map((x) => {
-          return {
-            message: x.message || ``,
-            name: x.metadata.name || ``,
-            reason: x.reason || ``,
-          };
-        }),
+        events.body.items
+          .map((x) => {
+            return {
+              message: x.message || ``,
+              name: x.metadata.name || ``,
+              reason: x.reason || ``,
+            };
+          })
+          .filter((x) => x.name.includes(podName)),
         undefined,
         4,
       ),
