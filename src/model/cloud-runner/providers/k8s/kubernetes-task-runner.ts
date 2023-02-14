@@ -129,7 +129,7 @@ class KubernetesTaskRunner {
         CloudRunnerLogger.log(
           `${status.body.status?.phase} ${status.body.status?.conditions?.[0].reason || ''} ${
             status.body.status?.conditions?.[0].message || ''
-          } \n ${events}`,
+          } \n ${JSON.stringify(events, undefined, 4)}`,
         );
         if (success || phase !== 'Pending') return true;
 
