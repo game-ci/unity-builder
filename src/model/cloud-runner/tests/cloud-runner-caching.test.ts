@@ -8,10 +8,11 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import { Caching } from '../remote-client/caching';
 import { v4 as uuidv4 } from 'uuid';
 import GitHub from '../../github';
+import CloudRunnerOptions from '../cloud-runner-options';
 describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
-  if (process.platform === 'linux') {
-    it.skip('Simple caching works', async () => {
+  if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+    it('Simple caching works', async () => {
       Cli.options = {
         versioning: 'None',
         projectPath: 'test-project',
