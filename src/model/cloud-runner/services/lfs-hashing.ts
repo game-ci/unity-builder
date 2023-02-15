@@ -4,7 +4,6 @@ import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'fs';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
-import CloudRunnerLogger from './cloud-runner-logger';
 
 export class LfsHashing {
   public static async createLFSHashFiles() {
@@ -19,7 +18,6 @@ export class LfsHashing {
         .replace('  .lfs-assets-guid', '')
         .replace(/\n/g, ``),
     };
-    CloudRunnerLogger.log(`lfs hash completion: ${lfsHashes.lfsGuid} ${lfsHashes.lfsGuidSum}`);
 
     return lfsHashes;
   }
