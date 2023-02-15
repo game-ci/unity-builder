@@ -120,6 +120,21 @@ class KubernetesTaskRunner {
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
     let success: boolean = false;
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
+    CloudRunnerLogger.log(
+      JSON.stringify(
+        (await kubeClient.listNamespacedEvent(namespace)).body.items
+          .map((x) => {
+            return {
+              message: x.message || ``,
+              name: x.metadata.name || ``,
+              reason: x.reason || ``,
+            };
+          })
+          .filter((x) => x.name.includes(podName)),
+        undefined,
+        4,
+      ),
+    );
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
