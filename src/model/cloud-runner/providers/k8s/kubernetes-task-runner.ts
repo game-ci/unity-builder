@@ -15,6 +15,7 @@ class KubernetesTaskRunner {
     podName: string,
     containerName: string,
     namespace: string,
+    alreadyFinished: boolean = false,
   ) {
     CloudRunnerLogger.log(`Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace}`);
     const stream = new Writable();
@@ -73,7 +74,7 @@ class KubernetesTaskRunner {
     const logOptions = {
       follow: true,
       pretty: false,
-      previous: false,
+      previous: alreadyFinished,
       timestamps: true,
       sinceSeconds: KubernetesTaskRunner.lastReceivedTimestamp,
     };

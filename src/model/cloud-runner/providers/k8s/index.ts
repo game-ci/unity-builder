@@ -152,7 +152,7 @@ class Kubernetes implements ProviderInterface {
             await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
           }
           CloudRunnerLogger.log('Pod running, streaming logs');
-          output = await KubernetesTaskRunner.runTask(
+          output += await KubernetesTaskRunner.runTask(
             this.kubeConfig,
             this.kubeClient,
             this.jobName,
@@ -166,6 +166,15 @@ class Kubernetes implements ProviderInterface {
             const podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
             CloudRunnerLogger.log(`Pod not found, assumed ended!`);
             if (FollowLogStreamService.DidReceiveEndOfTransmission && podStatus === `Succeeded`) {
+              output += await KubernetesTaskRunner.runTask(
+                this.kubeConfig,
+                this.kubeClient,
+                this.jobName,
+                this.podName,
+                'main',
+                this.namespace,
+                true,
+              );
               break;
             }
           } else {
