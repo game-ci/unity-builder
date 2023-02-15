@@ -12,6 +12,12 @@ class KubernetesPods {
 
     return running;
   }
+  public static async GetPodStatus(podName: string, namespace: string, kubeClient: CoreV1Api) {
+    const pods = (await kubeClient.listNamespacedPod(namespace)).body.items.find((x) => podName === x.metadata?.name);
+    const phase = pods?.status?.phase || 'undefined status';
+
+    return phase;
+  }
 }
 
 export default KubernetesPods;

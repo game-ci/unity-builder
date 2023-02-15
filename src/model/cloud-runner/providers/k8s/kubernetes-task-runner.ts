@@ -127,9 +127,9 @@ class KubernetesTaskRunner {
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
         CloudRunnerLogger.log(
-          `Phase:${status.body.status?.phase} Reason:${status.body.status?.conditions?.[0].reason || ''} Message:${
-            status.body.status?.conditions?.[0].message || ''
-          }`,
+          `Phase:${status.body.status?.phase} \n Reason:${
+            status.body.status?.conditions?.[0].reason || ''
+          } \n Message:${status.body.status?.conditions?.[0].message || ''}`,
         );
         CloudRunnerLogger.log(
           JSON.stringify(

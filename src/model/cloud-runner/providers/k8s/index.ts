@@ -15,6 +15,7 @@ import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import KubernetesPods from './kubernetes-pods';
+import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
@@ -162,12 +163,14 @@ class Kubernetes implements ProviderInterface {
           const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
 
           if (!running) {
+            const podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
             CloudRunnerLogger.log(`Pod not found, assumed ended!`);
-            break;
+            if (FollowLogStreamService.DidReceiveEndOfTransmission && podStatus === `Succeeded`) {
+              break;
+            }
           } else {
             CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
-          await this.cleanupTaskResources();
         } catch (error: any) {
           let errorParsed;
           try {
@@ -196,6 +199,7 @@ class Kubernetes implements ProviderInterface {
           }
         }
       }
+      await this.cleanupTaskResources();
 
       return output;
     } catch (error) {
