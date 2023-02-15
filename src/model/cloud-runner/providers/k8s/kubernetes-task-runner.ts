@@ -120,30 +120,30 @@ class KubernetesTaskRunner {
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
     let success: boolean = false;
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
-    CloudRunnerLogger.log(
-      JSON.stringify(
-        (await kubeClient.listNamespacedEvent(namespace)).body.items
-          .map((x) => {
-            return {
-              message: x.message || ``,
-              name: x.metadata.name || ``,
-              reason: x.reason || ``,
-            };
-          })
-          .filter((x) => x.name.includes(podName)),
-        undefined,
-        4,
-      ),
-    );
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
         CloudRunnerLogger.log(
-          `${status.body.status?.phase} ${status.body.status?.conditions?.[0].reason || ''} ${
+          `Phase:${status.body.status?.phase} Reason:${status.body.status?.conditions?.[0].reason || ''} Message:${
             status.body.status?.conditions?.[0].message || ''
           }`,
+        );
+        CloudRunnerLogger.log(
+          JSON.stringify(
+            (await kubeClient.listNamespacedEvent(namespace)).body.items
+              .map((x) => {
+                return {
+                  message: x.message || ``,
+                  name: x.metadata.name || ``,
+                  reason: x.reason || ``,
+                };
+              })
+              .filter((x) => x.name.includes(podName)),
+            undefined,
+            4,
+          ),
         );
         if (success || phase !== 'Pending') return true;
 
@@ -153,22 +153,6 @@ class KubernetesTaskRunner {
         timeout: 2000000,
         intervalBetweenAttempts: 15000,
       },
-    );
-
-    CloudRunnerLogger.log(
-      JSON.stringify(
-        (await kubeClient.listNamespacedEvent(namespace)).body.items
-          .map((x) => {
-            return {
-              message: x.message || ``,
-              name: x.metadata.name || ``,
-              reason: x.reason || ``,
-            };
-          })
-          .filter((x) => x.name.includes(podName)),
-        undefined,
-        4,
-      ),
     );
 
     return success;
