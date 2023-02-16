@@ -29,7 +29,10 @@ export class SharedWorkspaceLocking {
 
     return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
   }
-  public static async GetAllLocks(workspace: string, buildParametersContext: BuildParameters): Promise<string[]> {
+  public static async GetAllLocksForWorkspace(
+    workspace: string,
+    buildParametersContext: BuildParameters,
+  ): Promise<string[]> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
       return [];
     }
@@ -86,8 +89,8 @@ export class SharedWorkspaceLocking {
 
   public static async DoesWorkspaceExist(workspace: string, buildParametersContext: BuildParameters) {
     return (
-      (await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext)).filter((x) =>
-        x.endsWith(`${workspace}_workspace`),
+      (await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext)).filter(
+        (x) => x.includes(workspace) && x.endsWith(`_workspace`),
       ).length > 0
     );
   }
@@ -96,7 +99,7 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    const locks = (await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext))
+    const locks = (await SharedWorkspaceLocking.GetAllLocksForWorkspace(workspace, buildParametersContext))
       .map((x) => {
         return {
           name: x,
@@ -189,15 +192,6 @@ export class SharedWorkspaceLocking {
       `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
     );
 
-    const workspaceFileDoesNotExists =
-      files.filter((x) => {
-        return x.endsWith(`${workspace}_workspace`);
-      }).length === 0;
-
-    if (workspaceFileDoesNotExists) {
-      throw new Error(`Workspace file doesn't exist`);
-    }
-
     const lockFilesExist =
       files.filter((x) => {
         return x.includes(workspace) && x.includes(`_lock`);
@@ -267,7 +261,7 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
-    const files = await SharedWorkspaceLocking.GetAllLocks(workspace, buildParametersContext);
+    const files = await SharedWorkspaceLocking.GetAllLocksForWorkspace(workspace, buildParametersContext);
     const file = files.find((x) => x.endsWith(`${workspace}_workspace_lock`) && x.includes(runId));
     CloudRunnerLogger.log(`All Locks ${files} ${workspace} ${runId}`);
     CloudRunnerLogger.log(`Deleting lock ${workspace}/${file}`);

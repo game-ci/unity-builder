@@ -47,7 +47,7 @@ describe('Cloud Runner Locking', () => {
       expect(lines.map((x) => x.replace(`/`, ``)).includes(buildParameters.cacheKey));
       expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
-      const allLocks = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);
+      const allLocks = await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters);
       expect(
         (
           await SharedWorkspaceLocking.ReadLines(
@@ -66,11 +66,14 @@ describe('Cloud Runner Locking', () => {
       const isExpectedLockedAfterLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === true;
       expect(isExpectedLockedAfterLocking).toBeTruthy();
-      const locksBeforeRelease = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);
+      const locksBeforeRelease = await SharedWorkspaceLocking.GetAllLocksForWorkspace(
+        newWorkspaceName,
+        buildParameters,
+      );
       CloudRunnerLogger.log(JSON.stringify(locksBeforeRelease, undefined, 4));
       expect(locksBeforeRelease.length).toBe(1);
       await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters);
-      const locks = await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters);
+      const locks = await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters);
       expect(locks.length).toBe(0);
       const isExpectedNotLockedAfterReleasing =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
@@ -175,7 +178,7 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.HasWorkspaceLock(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toHaveLength(1);
-      expect(await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).toHaveLength(1);
+      expect(await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
     }, 150000);
