@@ -228,7 +228,7 @@ export class SharedWorkspaceLocking {
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
     if (!(await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext))) {
-      CloudRunnerLogger.log(`Workspace is below max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
+      CloudRunnerLogger.log(`Workspace is above max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
       await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
       return false;
