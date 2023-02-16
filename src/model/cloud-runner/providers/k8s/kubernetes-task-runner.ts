@@ -114,7 +114,8 @@ class KubernetesTaskRunner {
         stream.destroy();
       }
       CloudRunnerLogger.log('k8s task runner failed');
-      CloudRunnerLogger.log(JSON.stringify(error?.response?.body || error, undefined, 4));
+      CloudRunnerLogger.log(JSON.stringify(error?.response?.body, undefined, 4));
+      CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
     }
     CloudRunnerLogger.log('end of log stream');
 

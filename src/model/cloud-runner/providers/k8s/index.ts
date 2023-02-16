@@ -145,13 +145,12 @@ class Kubernetes implements ProviderInterface {
           }
           if (!existsAlready || status.state?.terminated !== undefined) {
             CloudRunnerLogger.log('Job does not exist');
-            await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
-            const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
-            this.setPodNameAndContainerName(find);
+            await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
             CloudRunnerLogger.log('Watching pod until running');
             await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
           }
           CloudRunnerLogger.log('Pod running, streaming logs');
+          const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
           output += await KubernetesTaskRunner.runTask(
             this.kubeConfig,
             this.kubeClient,
@@ -159,12 +158,11 @@ class Kubernetes implements ProviderInterface {
             this.podName,
             'main',
             this.namespace,
+            running,
           );
-          const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
+          status = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
 
           if (!running) {
-            status = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
-            CloudRunnerLogger.log(`Pod not found, assumed ended!`);
             if (!FollowLogStreamService.DidReceiveEndOfTransmission && status === `Succeeded`) {
               output += await KubernetesTaskRunner.runTask(
                 this.kubeConfig,
@@ -181,9 +179,8 @@ class Kubernetes implements ProviderInterface {
             if (FollowLogStreamService.DidReceiveEndOfTransmission) {
               break;
             }
-          } else {
-            CloudRunnerLogger.log('Pod still running, recovering stream...');
           }
+          CloudRunnerLogger.log(`Pod status ${status}, retrying log stream...`);
         } catch (error: any) {
           let errorParsed;
           try {
@@ -221,6 +218,19 @@ class Kubernetes implements ProviderInterface {
       await this.cleanupTaskResources();
       throw error;
     }
+  }
+
+  private async createJob(
+    commands: string,
+    image: string,
+    mountdir: string,
+    workingdir: string,
+    environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
+  ) {
+    await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
+    const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
+    this.setPodNameAndContainerName(find);
   }
 
   private async doesJobExist(name) {
