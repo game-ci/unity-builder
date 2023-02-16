@@ -60,7 +60,9 @@ export class SharedWorkspaceLocking {
         for (const element of workspaces) {
           await new Promise((promise) => setTimeout(promise, 1000));
           const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-          CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
+          CloudRunnerLogger.log(
+            `run agent: ${runId} try lock workspace: ${element} locking attempt result: ${lockResult}`,
+          );
 
           if (lockResult) {
             return true;
