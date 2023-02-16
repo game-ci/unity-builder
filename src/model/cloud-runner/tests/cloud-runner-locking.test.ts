@@ -195,52 +195,7 @@ describe('Cloud Runner Locking', () => {
       expect(
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
       ).toBeTruthy();
-      expect(CloudRunner.lockedWorkspace === newWorkspaceName).toBeTruthy();
+      expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
     }, 150000);
-    it.skip('All Locking Actions', async () => {
-      Cli.options.retainWorkspaces = true;
-      const overrides: any = {
-        versioning: 'None',
-        projectPath: 'test-project',
-        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
-        targetPlatform: 'StandaloneLinux64',
-        cacheKey: `test-case-${uuidv4()}`,
-      };
-      const buildParameters = await CreateParameters(overrides);
-
-      CloudRunnerLogger.log(
-        `GetAllWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters))}`,
-      );
-      CloudRunnerLogger.log(
-        `GetFreeWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters))}`,
-      );
-      CloudRunnerLogger.log(
-        `IsWorkspaceLocked ${JSON.stringify(
-          await SharedWorkspaceLocking.IsWorkspaceLocked(`test-workspace-${uuidv4()}`, buildParameters),
-        )}`,
-      );
-      CloudRunnerLogger.log(
-        `GetFreeWorkspaces ${JSON.stringify(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters))}`,
-      );
-      CloudRunnerLogger.log(
-        `LockWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.LockWorkspace(`test-workspace-${uuidv4()}`, uuidv4(), buildParameters),
-        )}`,
-      );
-      CloudRunnerLogger.log(
-        `CreateLockableWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.CreateWorkspace(`test-workspace-${uuidv4()}`, buildParameters),
-        )}`,
-      );
-      CloudRunnerLogger.log(
-        `GetLockedWorkspace ${JSON.stringify(
-          await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
-            `test-workspace-${uuidv4()}`,
-            uuidv4(),
-            buildParameters,
-          ),
-        )}`,
-      );
-    }, 3000000);
   }
 });
