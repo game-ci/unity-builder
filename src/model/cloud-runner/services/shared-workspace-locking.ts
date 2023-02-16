@@ -63,8 +63,6 @@ export class SharedWorkspaceLocking {
           CloudRunnerLogger.log(`run agent: ${runId} try lock workspace: ${element} result: ${lockResult}`);
 
           if (lockResult) {
-            CloudRunner.lockedWorkspace = element;
-
             return true;
           }
         }
@@ -257,7 +255,13 @@ export class SharedWorkspaceLocking {
     );
     fs.rmSync(file);
 
-    return SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext);
+    const hasLock = await SharedWorkspaceLocking.HasWorkspaceLock(workspace, runId, buildParametersContext);
+
+    if (hasLock) {
+      CloudRunner.lockedWorkspace = workspace;
+    }
+
+    return hasLock;
   }
 
   public static async ReleaseWorkspace(
