@@ -5,6 +5,7 @@ import * as core from '@actions/core';
 import { CloudRunnerStatics } from '../../cloud-runner-statics';
 import waitUntil from 'async-wait-until';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
+import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number;
@@ -73,18 +74,24 @@ class KubernetesTaskRunner {
     // timestamps?: boolean;
     // }
 
-    const logOptions = {
-      follow: !alreadyFinished,
-      pretty: false,
-      previous: alreadyFinished,
-      timestamps: true,
-    };
+    // const logOptions = {
+    //   follow: !alreadyFinished,
+    //   pretty: false,
+    //   previous: alreadyFinished,
+    //   timestamps: true,
+    //   sinceSeconds: KubernetesTaskRunner.lastReceivedTimestamp,
+    // };
     try {
-      const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
+      // const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
+
+      await CloudRunnerSystem.Run(`kubectl logs ${podName} -c ${containerName} > app.log`);
+      output += await CloudRunnerSystem.Run(`cat app.log`);
+
       stream.destroy();
-      if (resultError) {
-        throw resultError;
-      }
+
+      // if (resultError) {
+      //   throw resultError;
+      // }
       if (!didStreamAnyLogs) {
         core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
         core.error(
