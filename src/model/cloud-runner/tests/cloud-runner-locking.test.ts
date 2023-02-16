@@ -172,9 +172,9 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.HasWorkspaceLock(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toBe(1);
-      expect(await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).toBe(1);
-      expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toBe(0);
+      expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toHaveLength(1);
+      expect(await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).toHaveLength(1);
+      expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
     }, 150000);
     it(`Get Or Create From Unlocked Was Locked`, async () => {
       Cli.options.retainWorkspaces = true;
