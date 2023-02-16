@@ -124,11 +124,9 @@ export class SharedWorkspaceLocking {
       await new Promise((promise) => setTimeout(promise, 1500));
       const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext);
       const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParametersContext);
+      CloudRunnerLogger.log(`workspace ${element} locked:${isLocked} below max:${isBelowMax}`);
       if (!isLocked && isBelowMax) {
         result.push(element);
-        CloudRunnerLogger.log(`workspace ${element} is free`);
-      } else {
-        CloudRunnerLogger.log(`workspace ${element} is NOT free ${!isLocked} ${isBelowMax}`);
       }
     }
 
