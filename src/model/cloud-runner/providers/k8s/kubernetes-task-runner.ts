@@ -78,7 +78,6 @@ class KubernetesTaskRunner {
       pretty: false,
       previous: alreadyFinished,
       timestamps: true,
-      sinceSeconds: KubernetesTaskRunner.lastReceivedTimestamp,
     };
     try {
       const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
