@@ -156,7 +156,7 @@ class Kubernetes implements ProviderInterface {
             this.kubeClient,
             this.jobName,
             this.podName,
-            'main',
+            KubernetesJobSpecFactory.MainContainerName,
             this.namespace,
             running,
           );
@@ -173,6 +173,30 @@ class Kubernetes implements ProviderInterface {
                 this.namespace,
                 true,
               );
+              output += await KubernetesTaskRunner.runTask(
+                this.kubeConfig,
+                this.kubeClient,
+                this.jobName,
+                this.podName,
+                ``,
+                this.namespace,
+                true,
+              );
+              CloudRunnerLogger.log(
+                JSON.stringify(
+                  (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
+                    .map((x) => {
+                      return {
+                        message: x.message || ``,
+                        name: x.metadata.name || ``,
+                        reason: x.reason || ``,
+                      };
+                    })
+                    .filter((x) => x.name.includes(this.podName)),
+                  undefined,
+                  4,
+                ),
+              );
               break;
             }
 
@@ -180,6 +204,7 @@ class Kubernetes implements ProviderInterface {
               break;
             }
           }
+          status = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
           CloudRunnerLogger.log(`Pod status ${status}, retrying log stream...`);
         } catch (error: any) {
           let errorParsed;

@@ -6,6 +6,7 @@ import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import CloudRunner from '../../cloud-runner';
 
 class KubernetesJobSpecFactory {
+  public static readonly MainContainerName = 'main';
   static getJobSpec(
     command: string,
     image: string,
@@ -101,7 +102,7 @@ class KubernetesJobSpecFactory {
           ],
           containers: [
             {
-              name: 'main',
+              name: KubernetesJobSpecFactory.MainContainerName,
               image,
               command: ['/bin/sh'],
               args: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)],
