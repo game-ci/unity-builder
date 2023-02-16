@@ -202,7 +202,7 @@ export class SharedWorkspaceLocking {
 
     const lockFilesExist =
       files.filter((x) => {
-        return x.includes(workspace) && x.includes(`_workspace_lock`);
+        return x.includes(workspace) && x.includes(`_lock`);
       }).length > 0;
 
     return lockFilesExist;
