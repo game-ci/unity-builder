@@ -194,7 +194,7 @@ export class SharedWorkspaceLocking {
 
     const lockFilesExist =
       files.filter((x) => {
-        return x.includes(workspace) && x.includes(`_lock`);
+        return x.includes(workspace) && x.endsWith(`_lock`);
       }).length > 0;
 
     return lockFilesExist;
