@@ -78,9 +78,7 @@ export class SharedWorkspaceLocking {
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
     const lockResult = await SharedWorkspaceLocking.LockWorkspace(workspace, runId, buildParametersContext);
     CloudRunnerLogger.log(
-      `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${
-        createResult && lockResult
-      }`,
+      `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${createResult} Lock:${lockResult}`,
     );
 
     return createResult && lockResult;
