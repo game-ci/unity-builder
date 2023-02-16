@@ -176,6 +176,7 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.GetAllLocks(newWorkspaceName, buildParameters)).toHaveLength(1);
+      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
     }, 150000);
     it(`Get Or Create From Unlocked Was Locked`, async () => {
