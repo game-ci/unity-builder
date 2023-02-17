@@ -158,6 +158,38 @@ describe('Cloud Runner Locking', () => {
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
     }, 150000);
+    it(`Get Or Create After Double Lock And Unlock`, async () => {
+      Cli.options.retainWorkspaces = true;
+      const overrides: any = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        retainWorkspaces: true,
+      };
+      const buildParameters = await CreateParameters(overrides);
+
+      const newWorkspaceName = `test-workspace-${uuidv4()}`;
+      const runId = uuidv4();
+      const runId2 = uuidv4();
+      CloudRunner.buildParameters = buildParameters;
+      expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeFalsy();
+      expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.HasWorkspaceLock(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.IsWorkspaceBelowMax(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(
+        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
+      ).toBeTruthy();
+      expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
+    }, 150000);
     it(`0 free workspaces after locking`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
