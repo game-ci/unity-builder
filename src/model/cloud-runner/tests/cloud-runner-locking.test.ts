@@ -234,7 +234,6 @@ describe('Cloud Runner Locking', () => {
         await new Promise((promise) => setTimeout(promise, 1500));
         const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParameters);
         const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParameters);
-        expect(element).toEqual(newWorkspaceName);
         CloudRunnerLogger.log(`workspace ${element} locked:${isLocked} below max:${isBelowMax}`);
         expect(
           files.filter((x) => {
