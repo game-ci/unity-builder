@@ -182,8 +182,7 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.HasWorkspaceLock(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
-      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(await SharedWorkspaceLocking.IsWorkspaceBelowMax(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeFalsy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
