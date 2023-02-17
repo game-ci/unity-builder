@@ -211,6 +211,23 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
+
+      const files = await SharedWorkspaceLocking.ReadLines(
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParameters.cacheKey}/`,
+      );
+
+      const lockFilesExist =
+        files.filter((x) => {
+          return x.includes(newWorkspaceName) && x.endsWith(`_lock`);
+        }).length > 0;
+
+      expect(files).toHaveLength(1);
+      expect(
+        files.filter((x) => {
+          return x.includes(newWorkspaceName) && x.endsWith(`_lock`);
+        }),
+      ).toHaveLength(1);
+      expect(lockFilesExist).toBeTruthy();
       const result: string[] = [];
       const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters);
       for (const element of workspaces) {
