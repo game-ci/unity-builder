@@ -22,8 +22,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.endsWith(`_workspace`))
-      .map((x) => x.split(`_`)[1]);
+      .filter((x) => x.endsWith(`_workspace`));
   }
   public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
     const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
@@ -192,6 +191,10 @@ export class SharedWorkspaceLocking {
     const files = await SharedWorkspaceLocking.ReadLines(
       `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
     );
+
+    if (workspace.includes(`_`)) {
+      workspace = workspace.split(`_`)[1];
+    }
 
     const lockFilesExist =
       files.filter((x) => {
