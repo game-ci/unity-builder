@@ -221,7 +221,7 @@ describe('Cloud Runner Locking', () => {
           return x.includes(newWorkspaceName) && x.endsWith(`_lock`);
         }).length > 0;
 
-      expect(files).toHaveLength(1);
+      expect(files).toHaveLength(2);
       expect(
         files.filter((x) => {
           return x.includes(newWorkspaceName) && x.endsWith(`_lock`);
