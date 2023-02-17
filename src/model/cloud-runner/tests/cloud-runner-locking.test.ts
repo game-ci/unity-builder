@@ -211,6 +211,20 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters)).toHaveLength(1);
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
+      const result: string[] = [];
+      const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters);
+      for (const element of workspaces) {
+        await new Promise((promise) => setTimeout(promise, 1500));
+        const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParameters);
+        const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParameters);
+        CloudRunnerLogger.log(`workspace ${element} locked:${isLocked} below max:${isBelowMax}`);
+        expect(isLocked).toBeTruthy();
+        expect(isBelowMax).toBeTruthy();
+        if (!isLocked && isBelowMax) {
+          result.push(element);
+        }
+      }
+      expect(result).toHaveLength(0);
       expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
     }, 150000);
     it(`Get Or Create From Unlocked Was Locked`, async () => {
