@@ -1,7 +1,7 @@
 import ImageTag from './image-tag';
 
 describe('ImageTag', () => {
-  const some = {
+  const testImageParameters = {
     editorVersion: '2099.9.f9f9',
     targetPlatform: 'Test',
     builderPlatform: '',
@@ -15,38 +15,38 @@ describe('ImageTag', () => {
 
   describe('constructor', () => {
     it('can be called', () => {
-      const { targetPlatform } = some;
-
-      expect(() => new ImageTag({ targetPlatform })).not.toThrow();
+      expect(() => new ImageTag(testImageParameters)).not.toThrow();
     });
 
     it('accepts parameters and sets the right properties', () => {
-      const image = new ImageTag(some);
+      const image = new ImageTag(testImageParameters);
 
       expect(image.repository).toStrictEqual('unityci');
       expect(image.name).toStrictEqual('editor');
-      expect(image.editorVersion).toStrictEqual(some.editorVersion);
-      expect(image.targetPlatform).toStrictEqual(some.targetPlatform);
-      expect(image.builderPlatform).toStrictEqual(some.builderPlatform);
+      expect(image.editorVersion).toStrictEqual(testImageParameters.editorVersion);
+      expect(image.targetPlatform).toStrictEqual(testImageParameters.targetPlatform);
+      expect(image.builderPlatform).toStrictEqual(testImageParameters.builderPlatform);
     });
 
     test.each(['2000.0.0f0', '2011.1.11f1'])('accepts %p version format', (version) => {
-      expect(() => new ImageTag({ editorVersion: version, targetPlatform: some.targetPlatform })).not.toThrow();
+      expect(
+        () => new ImageTag({ editorVersion: version, targetPlatform: testImageParameters.targetPlatform }),
+      ).not.toThrow();
     });
 
     test.each(['some version', ''])('throws for incorrect version %p', (editorVersion) => {
-      const { targetPlatform } = some;
+      const { targetPlatform } = testImageParameters;
       expect(() => new ImageTag({ editorVersion, targetPlatform })).toThrow();
     });
 
-    test.each([undefined, 'nonExisting'])('throws for unsupported target %p', (targetPlatform) => {
+    test.each(['nonExisting'])('throws for unsupported target %p', (targetPlatform) => {
       expect(() => new ImageTag({ targetPlatform })).toThrow();
     });
   });
 
   describe('toString', () => {
     it('returns the correct version', () => {
-      const image = new ImageTag({ editorVersion: '2099.1.1111', targetPlatform: some.targetPlatform });
+      const image = new ImageTag({ editorVersion: '2099.1.1111', targetPlatform: testImageParameters.targetPlatform });
       switch (process.platform) {
         case 'win32':
           expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2099.1.1111-1`);
@@ -59,7 +59,7 @@ describe('ImageTag', () => {
     it('returns customImage if given', () => {
       const image = new ImageTag({
         editorVersion: '2099.1.1111',
-        targetPlatform: some.targetPlatform,
+        targetPlatform: testImageParameters.targetPlatform,
         customImage: `${defaults.image}:2099.1.1111@347598437689743986`,
       });
 
@@ -80,7 +80,7 @@ describe('ImageTag', () => {
     });
 
     it('returns no specific build platform for generic targetPlatforms', () => {
-      const image = new ImageTag({ targetPlatform: 'NoTarget' });
+      const image = new ImageTag({ editorVersion: '2019.2.11f1', targetPlatform: 'NoTarget' });
 
       switch (process.platform) {
         case 'win32':

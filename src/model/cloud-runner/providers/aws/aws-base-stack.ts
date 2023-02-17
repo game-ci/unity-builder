@@ -2,7 +2,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
 import * as SDK from 'aws-sdk';
 import { BaseStackFormation } from './cloud-formations/base-stack-formation';
-const crypto = require('crypto');
+import crypto from 'node:crypto';
 
 export class AWSBaseStack {
   constructor(baseStackName: string) {

@@ -2,9 +2,9 @@ import { BuildParameters, Input } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
-import path from 'path';
+import path from 'node:path';
 import CloudRunnerOptions from '../cloud-runner-options';
-import * as fs from 'fs';
+import fs from 'node:fs';
 
 // import CloudRunnerLogger from './cloud-runner-logger';
 
@@ -24,15 +24,11 @@ export class CloudRunnerCustomHooks {
       echo "---${buildParameters.logId}"`;
   }
 
-  public static getHooks(customJobHooks): Hook[] {
+  public static getHooks(customJobHooks: string): Hook[] {
     const experimentHooks = customJobHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
-      try {
-        output = YAML.parse(experimentHooks);
-      } catch (error) {
-        throw error;
-      }
+      output = YAML.parse(experimentHooks);
     }
 
     return output.filter((x) => x.step !== undefined && x.hook !== undefined && x.hook.length > 0);
@@ -62,7 +58,7 @@ export class CloudRunnerCustomHooks {
     return results;
   }
 
-  private static ConvertYamlSecrets(object) {
+  private static ConvertYamlSecrets(object: Hook) {
     if (object.secrets === undefined) {
       object.secrets = [];
 
@@ -70,9 +66,9 @@ export class CloudRunnerCustomHooks {
     }
     object.secrets = object.secrets.map((x) => {
       return {
-        ParameterKey: x.name,
-        EnvironmentVariable: Input.ToEnvVarFormat(x.name),
-        ParameterValue: x.value,
+        ParameterKey: x.ParameterKey,
+        EnvironmentVariable: Input.ToEnvVarFormat(x.ParameterKey),
+        ParameterValue: x.ParameterValue,
       };
     });
   }
@@ -102,7 +98,7 @@ export class CloudRunnerCustomHooks {
     return object;
   }
 
-  public static getSecrets(hooks) {
+  public static getSecrets(hooks: Hook[]) {
     const secrets = hooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
@@ -110,9 +106,9 @@ export class CloudRunnerCustomHooks {
   }
 }
 export class Hook {
-  public commands;
+  public commands!: string[];
   public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
-  public name;
+  public name!: string;
   public hook!: string[];
   public step!: string[];
 }

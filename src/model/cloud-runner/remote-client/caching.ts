@@ -1,6 +1,6 @@
-import { assert } from 'console';
-import fs from 'fs';
-import path from 'path';
+import { assert } from 'node:console';
+import fs from 'node:fs';
+import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
@@ -10,7 +10,7 @@ import { RemoteClientLogger } from './remote-client-logger';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 // eslint-disable-next-line github/no-then
-const fileExists = async (fpath) => !!(await fs.promises.stat(fpath).catch(() => false));
+const fileExists = async (fpath: fs.PathLike) => !!(await fs.promises.stat(fpath).catch(() => false));
 
 export class Caching {
   @CliFunction(`cache-push`, `push to cache`)
@@ -19,9 +19,9 @@ export class Caching {
       const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PushToCache(
-        Cli.options['cachePushTo'],
-        Cli.options['cachePushFrom'],
-        Cli.options['artifactName'] || '',
+        Cli.options!['cachePushTo'],
+        Cli.options!['cachePushFrom'],
+        Cli.options!['artifactName'] || '',
       );
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);
@@ -34,9 +34,9 @@ export class Caching {
       const buildParameter = JSON.parse(process.env.BUILD_PARAMETERS || '{}');
       CloudRunner.buildParameters = buildParameter;
       await Caching.PullFromCache(
-        Cli.options['cachePushFrom'],
-        Cli.options['cachePushTo'],
-        Cli.options['artifactName'] || '',
+        Cli.options!['cachePushFrom'],
+        Cli.options!['cachePushTo'],
+        Cli.options!['artifactName'] || '',
       );
     } catch (error: any) {
       CloudRunnerLogger.log(`${error}`);

@@ -2,7 +2,7 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import * as k8s from '@kubernetes/client-node';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-const base64 = require('base-64');
+import * as base64 from 'base-64';
 
 class KubernetesSecret {
   static async createSecret(

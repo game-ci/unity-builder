@@ -2,19 +2,19 @@ import * as core from '@actions/core';
 import * as semver from 'semver';
 
 export default class AndroidVersioning {
-  static determineVersionCode(version, inputVersionCode) {
-    if (!inputVersionCode) {
+  static determineVersionCode(version: string, inputVersionCode: string): string {
+    if (inputVersionCode === '') {
       return AndroidVersioning.versionToVersionCode(version);
     }
 
     return inputVersionCode;
   }
 
-  static versionToVersionCode(version) {
+  static versionToVersionCode(version: string): string {
     if (version === 'none') {
       core.info(`Versioning strategy is set to ${version}, so android version code should not be applied.`);
 
-      return 0;
+      return '0';
     }
 
     const parsedVersion = semver.parse(version);
@@ -22,7 +22,7 @@ export default class AndroidVersioning {
     if (!parsedVersion) {
       core.warning(`Could not parse "${version}" to semver, defaulting android version code to 1`);
 
-      return 1;
+      return '1';
     }
 
     // The greatest value Google Plays allows is 2100000000.
@@ -36,10 +36,10 @@ export default class AndroidVersioning {
     }
     core.info(`Using android versionCode ${versionCode}`);
 
-    return versionCode;
+    return versionCode.toString();
   }
 
-  static determineSdkManagerParameters(targetSdkVersion) {
+  static determineSdkManagerParameters(targetSdkVersion: string) {
     const parsedVersion = Number.parseInt(targetSdkVersion.slice(-2), 10);
 
     return Number.isNaN(parsedVersion) ? '' : `platforms;android-${parsedVersion}`;

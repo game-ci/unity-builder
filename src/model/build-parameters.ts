@@ -13,11 +13,14 @@ import GitHub from './github';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class BuildParameters {
+  // eslint-disable-next-line no-undef
+  [key: string]: any;
+
   public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
   public unityLicensingServer!: string;
-  public runnerTempPath: string | undefined;
+  public runnerTempPath!: string;
   public targetPlatform!: string;
   public projectPath!: string;
   public buildName!: string;
@@ -43,8 +46,8 @@ class BuildParameters {
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public cloudRunnerMemory!: string;
-  public cloudRunnerCpu!: string;
+  public cloudRunnerMemory!: string | undefined;
+  public cloudRunnerCpu!: string | undefined;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
@@ -64,7 +67,7 @@ class BuildParameters {
   public logId!: string;
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
-  public cloudRunnerDebug!: boolean;
+  public cloudRunnerDebug!: boolean | undefined;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
   public retainWorkspace!: boolean;
@@ -98,21 +101,19 @@ class BuildParameters {
       }
     }
 
-    // Todo - Don't use process.env directly, that's what the input model class is for.
-    // ---
     let unitySerial = '';
     if (Input.unityLicensingServer === '') {
-      if (!process.env.UNITY_SERIAL && GitHub.githubInputEnabled) {
+      if (!Input.unitySerial && GitHub.githubInputEnabled) {
         // No serial was present, so it is a personal license that we need to convert
-        if (!process.env.UNITY_LICENSE) {
+        if (!Input.unityLicense) {
           throw new Error(`Missing Unity License File and no Serial was found. If this
                             is a personal license, make sure to follow the activation
                             steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                             serial number inside the UNITY_SERIAL GitHub secret.`);
         }
-        unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+        unitySerial = this.getSerialFromLicenseFile(Input.unityLicense);
       } else {
-        unitySerial = process.env.UNITY_SERIAL!;
+        unitySerial = Input.unitySerial!;
       }
     }
 
@@ -121,7 +122,7 @@ class BuildParameters {
       customImage: Input.customImage,
       unitySerial,
       unityLicensingServer: Input.unityLicensingServer,
-      runnerTempPath: process.env.RUNNER_TEMP,
+      runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
       buildName: Input.buildName,

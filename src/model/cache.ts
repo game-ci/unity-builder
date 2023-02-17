@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import fs from 'fs';
+import fs from 'node:fs';
 import Action from './action';
 import Project from './project';
 

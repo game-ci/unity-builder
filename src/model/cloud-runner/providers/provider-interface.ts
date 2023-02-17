@@ -14,7 +14,7 @@ export interface ProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  );
+  ): any;
   setupWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,
@@ -24,7 +24,7 @@ export interface ProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  );
+  ): any;
   runTaskInWorkflow(
     // eslint-disable-next-line no-unused-vars
     buildGuid: string,

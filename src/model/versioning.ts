@@ -5,14 +5,6 @@ import Input from './input';
 import System from './system';
 
 export default class Versioning {
-  static get projectPath() {
-    return Input.projectPath;
-  }
-
-  static get isDirtyAllowed() {
-    return Input.allowDirtyBuild;
-  }
-
   static get strategies() {
     return { None: 'None', Semantic: 'Semantic', Tag: 'Tag', Custom: 'Custom' };
   }
@@ -25,8 +17,7 @@ export default class Versioning {
    * Get the branch name of the (related) branch
    */
   static get branch() {
-    // Todo - use optional chaining (https://github.com/zeit/ncc/issues/534)
-    return this.headRef || (this.ref && this.ref.slice(11));
+    return this.headRef || this.ref?.slice(11);
   }
 
   /**
@@ -76,43 +67,32 @@ export default class Versioning {
   /**
    * Regex to parse version description into separate fields
    */
-  static get descriptionRegex1() {
-    return /^v?([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g;
+  static get descriptionRegexes(): RegExp[] {
+    return [
+      /^v?([\d.]+)-(\d+)-g(\w+)-?(\w+)*/g,
+      /^v?([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g,
+      /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g,
+    ];
   }
 
-  static get descriptionRegex2() {
-    return /^v?([\d.]+-\w+)-(\d+)-g(\w+)-?(\w+)*/g;
-  }
-
-  static get descriptionRegex3() {
-    return /^v?([\d.]+-\w+\.\d+)-(\d+)-g(\w+)-?(\w+)*/g;
-  }
-
-  static async determineBuildVersion(strategy: string, inputVersion: string) {
+  static async determineBuildVersion(strategy: string, inputVersion: string): Promise<string> {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
       throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
     }
 
-    let version;
     switch (strategy) {
       case this.strategies.None:
-        version = 'none';
-        break;
+        return 'none';
       case this.strategies.Custom:
-        version = inputVersion;
-        break;
+        return inputVersion;
       case this.strategies.Semantic:
-        version = await this.generateSemanticVersion();
-        break;
+        return await this.generateSemanticVersion();
       case this.strategies.Tag:
-        version = await this.generateTagVersion();
-        break;
+        return await this.generateTagVersion();
       default:
         throw new NotImplementedException(`Strategy ${strategy} is not implemented.`);
     }
-
-    return version;
   }
 
   /**
@@ -132,7 +112,7 @@ export default class Versioning {
 
     await this.logDiff();
 
-    if ((await this.isDirty()) && !this.isDirtyAllowed) {
+    if ((await this.isDirty()) && !Input.allowDirtyBuild) {
       throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
     }
 
@@ -180,19 +160,9 @@ export default class Versioning {
    */
   static async parseSemanticVersion() {
     const description = await this.getVersionDescription();
-
-    try {
-      const [match, tag, commits, hash] = this.descriptionRegex1.exec(description) as RegExpExecArray;
-
-      return {
-        match,
-        tag,
-        commits,
-        hash,
-      };
-    } catch {
+    for (const descriptionRegex of Versioning.descriptionRegexes) {
       try {
-        const [match, tag, commits, hash] = this.descriptionRegex2.exec(description) as RegExpExecArray;
+        const [match, tag, commits, hash] = descriptionRegex.exec(description) as RegExpExecArray;
 
         return {
           match,
@@ -201,24 +171,13 @@ export default class Versioning {
           hash,
         };
       } catch {
-        try {
-          const [match, tag, commits, hash] = this.descriptionRegex3.exec(description) as RegExpExecArray;
-
-          return {
-            match,
-            tag,
-            commits,
-            hash,
-          };
-        } catch {
-          core.warning(
-            `Failed to parse git describe output or version can not be determined through: "${description}".`,
-          );
-
-          return false;
-        }
+        continue;
       }
     }
+
+    core.warning(`Failed to parse git describe output or version can not be determined through: "${description}".`);
+
+    return false;
   }
 
   /**
@@ -255,7 +214,7 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    return this.git(['describe', '--long', '--tags', '--always', this.sha]);
+    return this.git(['describe', '--long', '--tags', '--always', this.sha!]);
   }
 
   /**
@@ -288,7 +247,7 @@ export default class Versioning {
   static async hasAnyVersionTags() {
     const numberOfTagsAsString = await System.run('sh', undefined, {
       input: Buffer.from(`git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`),
-      cwd: this.projectPath,
+      cwd: Input.projectPath,
       silent: false,
     });
 
@@ -303,7 +262,7 @@ export default class Versioning {
    * Note: HEAD should not be used, as it may be detached, resulting in an additional count.
    */
   static async getTotalNumberOfCommits() {
-    const numberOfCommitsAsString = await this.git(['rev-list', '--count', this.sha]);
+    const numberOfCommitsAsString = await this.git(['rev-list', '--count', this.sha!]);
 
     return Number.parseInt(numberOfCommitsAsString, 10);
   }
@@ -311,7 +270,7 @@ export default class Versioning {
   /**
    * Run git in the specified project path
    */
-  static async git(arguments_, options = {}) {
-    return System.run('git', arguments_, { cwd: this.projectPath, ...options }, false);
+  static async git(arguments_: string[], options = {}) {
+    return System.run('git', arguments_, { cwd: Input.projectPath, ...options }, false);
   }
 }

@@ -13,7 +13,7 @@ export class RemoteClientLogger {
     CloudRunnerLogger.log(`[Client][Diagnostic] ${message}`);
   }
 
-  public static logWarning(message) {
+  public static logWarning(message: string) {
     CloudRunnerLogger.logWarning(message);
   }
 }

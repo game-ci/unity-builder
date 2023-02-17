@@ -1,16 +1,19 @@
 import { execWithErrorCheck } from './exec-with-error-check';
 import ImageEnvironmentFactory from './image-environment-factory';
-import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+import { existsSync, mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { ExecOptions } from '@actions/exec';
+import { DockerParameters, StringKeyValuePair } from './shared-types';
 
 class Docker {
   static async run(
-    image,
-    parameters,
-    silent = false,
-    overrideCommands = '',
-    additionalVariables: any[] = [],
-    options: any = false,
+    image: string,
+    parameters: DockerParameters,
+    silent: boolean = false,
+    overrideCommands: string = '',
+    additionalVariables: StringKeyValuePair[] = [],
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    options: ExecOptions | undefined = undefined,
     entrypointBash: boolean = false,
   ) {
     let runCommand = '';
@@ -21,7 +24,7 @@ class Docker {
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
     }
-    if (options !== false) {
+    if (options) {
       options.silent = silent;
       await execWithErrorCheck(runCommand, undefined, options);
     } else {
@@ -30,10 +33,10 @@ class Docker {
   }
 
   static getLinuxCommand(
-    image,
-    parameters,
-    overrideCommands = '',
-    additionalVariables: any[] = [],
+    image: string,
+    parameters: DockerParameters,
+    overrideCommands: string = '',
+    additionalVariables: StringKeyValuePair[] = [],
     entrypointBash: boolean = false,
   ): string {
     const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
@@ -67,7 +70,7 @@ class Docker {
             "${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}"`;
   }
 
-  static getWindowsCommand(image: any, parameters: any): string {
+  static getWindowsCommand(image: string, parameters: DockerParameters): string {
     const { workspace, actionFolder, unitySerial, gitPrivateToken } = parameters;
 
     return `docker run \

@@ -1,8 +1,8 @@
-import path from 'path';
+import path from 'node:path';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
-import fs from 'fs';
-import { assert } from 'console';
+import fs from 'node:fs';
+import { assert } from 'node:console';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 
@@ -41,7 +41,7 @@ export class LfsHashing {
 
   @CliFunction(`hash`, `hash all folder contents`)
   static async hash() {
-    const folder = Cli.options['cachePushFrom'];
+    const folder = Cli.options!['cachePushFrom'];
     LfsHashing.hashAllFiles(folder);
   }
 }

@@ -44,20 +44,21 @@ export class TaskParameterSerializer {
           x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
           x.value = `${x.value}`;
 
-          if (buildParameters.cloudRunnerDebug && Number(x.name) === Number.NaN) {
+          if (buildParameters.cloudRunnerDebug && Number.isNaN(Number(x.name))) {
             core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
           }
 
           return x;
         }),
-      (item) => item.name,
+      (item: CloudRunnerEnvironmentVariable) => item.name,
     );
 
     return result;
   }
 
-  static uniqBy(a, key) {
-    const seen = {};
+  // eslint-disable-next-line no-unused-vars
+  static uniqBy(a: CloudRunnerEnvironmentVariable[], key: (parameters: CloudRunnerEnvironmentVariable) => string) {
+    const seen: { [key: string]: boolean } = {};
 
     return a.filter(function (item) {
       const k = key(item);
@@ -89,23 +90,23 @@ export class TaskParameterSerializer {
     return TaskParameterSerializer.serializeFromType(Input);
   }
 
-  public static ToEnvVarFormat(input): string {
+  public static ToEnvVarFormat(input: string): string {
     return CloudRunnerOptions.ToEnvVarFormat(input);
   }
 
-  public static UndoEnvVarFormat(element): string {
+  public static UndoEnvVarFormat(element: string): string {
     return this.camelize(element.replace('GAMECI_', '').toLowerCase().replace(/_+/g, ' '));
   }
 
-  private static camelize(string) {
+  private static camelize(string: string) {
     return string
-      .replace(/^\w|[A-Z]|\b\w/g, function (word, index) {
+      .replace(/(^\w)|([A-Z])|(\b\w)/g, function (word: string, index: number) {
         return index === 0 ? word.toLowerCase() : word.toUpperCase();
       })
       .replace(/\s+/g, '');
   }
 
-  private static serializeFromObject(buildParameters) {
+  private static serializeFromObject(buildParameters: any) {
     const array: any[] = [];
     const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
     for (const element of keys) {
@@ -124,7 +125,7 @@ export class TaskParameterSerializer {
     return array;
   }
 
-  private static serializeFromType(type) {
+  private static serializeFromType(type: any) {
     const array: any[] = [];
     const input = CloudRunnerOptionsReader.GetProperties();
     for (const element of input) {
@@ -149,14 +150,15 @@ export class TaskParameterSerializer {
 
     return array;
   }
-  private static getValue(key) {
+
+  private static getValue(key: string) {
     return CloudRunnerQueryOverride.queryOverrides !== undefined &&
       CloudRunnerQueryOverride.queryOverrides[key] !== undefined
       ? CloudRunnerQueryOverride.queryOverrides[key]
       : process.env[key];
   }
-  s;
-  private static tryAddInput(array, key): CloudRunnerSecret[] {
+
+  private static tryAddInput(array: CloudRunnerSecret[], key: string): CloudRunnerSecret[] {
     const value = TaskParameterSerializer.getValue(key);
     if (value !== undefined && value !== '' && value !== 'null') {
       array.push({

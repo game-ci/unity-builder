@@ -1,13 +1,13 @@
 import { Cli } from '../cli/cli';
 import CloudRunnerQueryOverride from './services/cloud-runner-query-override';
 import GitHub from '../github';
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
 class CloudRunnerOptions {
   // ### ### ###
   // Input Handling
   // ### ### ###
-  public static getInput(query) {
+  public static getInput(query: string): string | undefined {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
@@ -32,11 +32,9 @@ class CloudRunnerOptions {
     if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
       return process.env[alternativeQuery];
     }
-
-    return;
   }
 
-  public static ToEnvVarFormat(input: string) {
+  public static ToEnvVarFormat(input: string): string {
     if (input.toUpperCase() === input) {
       return input;
     }
@@ -60,39 +58,40 @@ class CloudRunnerOptions {
   // GitHub  parameters
   // ### ### ###
   static get githubChecks(): boolean {
-    return CloudRunnerOptions.getInput('githubChecks') || false;
+    return CloudRunnerOptions.getInput('githubChecks') === 'true' || false;
   }
 
-  static get githubOwner() {
-    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
+  static get githubOwner(): string {
+    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo?.split(`/`)[0] || '';
   }
 
-  static get githubRepoName() {
-    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+  static get githubRepoName(): string {
+    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo?.split(`/`)[1] || '';
   }
 
   // ### ### ###
   // Git syncronization parameters
   // ### ### ###
 
-  static get githubRepo() {
+  static get githubRepo(): string | undefined {
     return CloudRunnerOptions.getInput('GITHUB_REPOSITORY') || CloudRunnerOptions.getInput('GITHUB_REPO') || undefined;
   }
-  static get branch() {
+
+  static get branch(): string {
     if (CloudRunnerOptions.getInput(`GITHUB_REF`)) {
-      return CloudRunnerOptions.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return CloudRunnerOptions.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (CloudRunnerOptions.getInput('branch')) {
-      return CloudRunnerOptions.getInput('branch');
+      return CloudRunnerOptions.getInput('branch')!;
     } else {
       return '';
     }
   }
 
-  static get gitSha() {
+  static get gitSha(): string | undefined {
     if (CloudRunnerOptions.getInput(`GITHUB_SHA`)) {
-      return CloudRunnerOptions.getInput(`GITHUB_SHA`);
+      return CloudRunnerOptions.getInput(`GITHUB_SHA`)!;
     } else if (CloudRunnerOptions.getInput(`GitSHA`)) {
-      return CloudRunnerOptions.getInput(`GitSHA`);
+      return CloudRunnerOptions.getInput(`GitSHA`)!;
     }
   }
 
@@ -100,7 +99,7 @@ class CloudRunnerOptions {
   // Cloud Runner parameters
   // ### ### ###
 
-  static get cloudRunnerBuilderPlatform() {
+  static get cloudRunnerBuilderPlatform(): string | undefined {
     const input = CloudRunnerOptions.getInput('cloudRunnerBuilderPlatform');
     if (input) {
       return input;
@@ -112,11 +111,11 @@ class CloudRunnerOptions {
     return;
   }
 
-  static get cloudRunnerBranch() {
+  static get cloudRunnerBranch(): string {
     return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'main';
   }
 
-  static get cloudRunnerCluster() {
+  static get cloudRunnerCluster(): string {
     if (Cli.isCliMode) {
       return CloudRunnerOptions.getInput('cloudRunnerCluster') || 'aws';
     }
@@ -124,15 +123,15 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('cloudRunnerCluster') || 'local';
   }
 
-  static get cloudRunnerCpu() {
+  static get cloudRunnerCpu(): string | undefined {
     return CloudRunnerOptions.getInput('cloudRunnerCpu');
   }
 
-  static get cloudRunnerMemory() {
+  static get cloudRunnerMemory(): string | undefined {
     return CloudRunnerOptions.getInput('cloudRunnerMemory');
   }
 
-  static get customJob() {
+  static get customJob(): string {
     return CloudRunnerOptions.getInput('customJob') || '';
   }
 
@@ -140,11 +139,11 @@ class CloudRunnerOptions {
   // Custom commands from files parameters
   // ### ### ###
 
-  static get customStepFiles() {
+  static get customStepFiles(): string[] {
     return CloudRunnerOptions.getInput('customStepFiles')?.split(`,`) || [];
   }
 
-  static get customHookFiles() {
+  static get customHookFiles(): string[] {
     return CloudRunnerOptions.getInput('customHookFiles')?.split(`,`) || [];
   }
 
@@ -152,15 +151,15 @@ class CloudRunnerOptions {
   // Custom commands from yaml parameters
   // ### ### ###
 
-  static customJobHooks() {
+  static customJobHooks(): string {
     return CloudRunnerOptions.getInput('customJobHooks') || '';
   }
 
-  static get postBuildSteps() {
+  static get postBuildSteps(): string {
     return CloudRunnerOptions.getInput('postBuildSteps') || '';
   }
 
-  static get preBuildSteps() {
+  static get preBuildSteps(): string {
     return CloudRunnerOptions.getInput('preBuildSteps') || '';
   }
 
@@ -168,11 +167,11 @@ class CloudRunnerOptions {
   // Input override handling
   // ### ### ###
 
-  static readInputFromOverrideList() {
+  static readInputFromOverrideList(): string {
     return CloudRunnerOptions.getInput('readInputFromOverrideList') || '';
   }
 
-  static readInputOverrideCommand() {
+  static readInputOverrideCommand(): string {
     const value = CloudRunnerOptions.getInput('readInputOverrideCommand');
 
     if (value === 'gcp-secret-manager') {
@@ -188,7 +187,7 @@ class CloudRunnerOptions {
   // Aws
   // ### ### ###
 
-  static get awsBaseStackName() {
+  static get awsBaseStackName(): string {
     return CloudRunnerOptions.getInput('awsBaseStackName') || 'game-ci';
   }
 
@@ -196,15 +195,15 @@ class CloudRunnerOptions {
   // K8s
   // ### ### ###
 
-  static get kubeConfig() {
+  static get kubeConfig(): string {
     return CloudRunnerOptions.getInput('kubeConfig') || '';
   }
 
-  static get kubeVolume() {
+  static get kubeVolume(): string {
     return CloudRunnerOptions.getInput('kubeVolume') || '';
   }
 
-  static get kubeVolumeSize() {
+  static get kubeVolumeSize(): string {
     return CloudRunnerOptions.getInput('kubeVolumeSize') || '5Gi';
   }
 
@@ -225,12 +224,16 @@ class CloudRunnerOptions {
   // ### ### ###
 
   static get cloudRunnerDebug(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerTests`) || CloudRunnerOptions.getInput(`cloudRunnerDebug`) || false;
+    return (
+      CloudRunnerOptions.getInput(`cloudRunnerTests`) === 'true' ||
+      CloudRunnerOptions.getInput(`cloudRunnerDebug`) === 'true' ||
+      false
+    );
   }
-  static get cloudRunnerDebugTree(): boolean {
+  static get cloudRunnerDebugTree(): string | boolean {
     return CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) || false;
   }
-  static get cloudRunnerDebugEnv(): boolean {
+  static get cloudRunnerDebugEnv(): string | boolean {
     return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) || false;
   }
 
@@ -239,7 +242,7 @@ class CloudRunnerOptions {
       return false;
     }
 
-    return CloudRunnerOptions.getInput(`watchToEnd`) || true;
+    return CloudRunnerOptions.getInput(`watchToEnd`) === 'true' || true;
   }
 
   static get asyncCloudRunner(): boolean {
@@ -267,7 +270,7 @@ class CloudRunnerOptions {
   // ### ### ###
 
   public static get retainWorkspaces(): boolean {
-    return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
+    return CloudRunnerOptions.getInput(`retainWorkspaces`) === 'true' || false;
   }
 
   static get maxRetainedWorkspaces(): number {
@@ -279,7 +282,7 @@ class CloudRunnerOptions {
   // ### ### ###
 
   static get constantGarbageCollection(): boolean {
-    return CloudRunnerOptions.getInput(`constantGarbageCollection`) || true;
+    return CloudRunnerOptions.getInput(`constantGarbageCollection`) === 'true' || true;
   }
 
   static get garbageCollectionMaxAge(): number {

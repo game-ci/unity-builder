@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Jest Test",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": [
+        "--collectCoverage=false",
+        "--colors",
+        "--config",
+        "${workspaceRoot}/jest.config.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "${relativeFile}",
+        "--testPathPattern=${fileDirname}",
+        "--testTimeout=10000000"
+      ],
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart",
+      "envFile": "${workspaceRoot}/.env",
+      "skipFiles": ["${workspaceRoot}/../../node_modules/**/*", "<node_internals>/**/*"]
+    }
+  ]
+}

@@ -10,7 +10,8 @@ import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
-import * as fs from 'fs';
+import fs from 'node:fs';
+import { StringKeyValuePair } from '../../../shared-types';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters: BuildParameters | undefined;
@@ -86,7 +87,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(commands);
 
     const { workspace, actionFolder } = Action;
-    const content: any[] = [];
+    const content: StringKeyValuePair[] = [];
     for (const x of secrets) {
       content.push({ name: x.EnvironmentVariable, value: x.ParameterValue });
     }

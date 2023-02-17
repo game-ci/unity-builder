@@ -1,21 +1,21 @@
 import * as core from '@actions/core';
-import { exec } from '@actions/exec';
+import { exec, ExecListeners } from '@actions/exec';
 
 class System {
-  static async run(command, arguments_: any = [], options = {}, shouldLog = true) {
+  static async run(command: string, arguments_: string[] = [], options = {}, shouldLog = true) {
     let result = '';
     let error = '';
     let debug = '';
 
-    const listeners = {
-      stdout: (dataBuffer) => {
+    const listeners: ExecListeners = {
+      stdout: (dataBuffer: Buffer) => {
         result += dataBuffer.toString();
       },
-      stderr: (dataBuffer) => {
+      stderr: (dataBuffer: Buffer) => {
         error += dataBuffer.toString();
       },
-      debug: (dataString) => {
-        debug += dataString.toString();
+      debug: (dataString: string) => {
+        debug += dataString;
       },
     };
 
@@ -33,7 +33,7 @@ class System {
       }
     };
 
-    const throwContextualError = (message) => {
+    const throwContextualError = (message: string) => {
       let commandAsString = command;
       if (Array.isArray(arguments_)) {
         commandAsString += ` ${arguments_.join(' ')}`;
