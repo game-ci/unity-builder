@@ -22,8 +22,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.endsWith(`_workspace`))
-      .map((x) => x.replace(`_workspace`, ``));
+      .filter((x) => x.endsWith(`_workspace`));
   }
   public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
     const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
