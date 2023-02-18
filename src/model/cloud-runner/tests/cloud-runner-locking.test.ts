@@ -235,13 +235,10 @@ describe('Cloud Runner Locking', () => {
         const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParameters);
         const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParameters);
         CloudRunnerLogger.log(`workspace ${element} locked:${isLocked} below max:${isBelowMax}`);
-        expect(element).toMatch(
-          files
-            .filter((x) => {
-              return x.endsWith(`_lock`);
-            })
-            .join(),
-        );
+        const lock = files.find((x) => {
+          return x.endsWith(`_lock`);
+        });
+        expect(lock).toContain(element);
         expect(isLocked).toBeTruthy();
         expect(isBelowMax).toBeTruthy();
         if (!isLocked && isBelowMax) {
