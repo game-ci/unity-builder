@@ -232,6 +232,7 @@ describe('Cloud Runner Locking', () => {
       const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters);
       for (let element of workspaces) {
         element = `${element.split(`_`)[1]}_${element.split(`_`)[2]}`;
+        expect(await SharedWorkspaceLocking.DoesWorkspaceExist(element, buildParameters)).toBeTruthy();
         await new Promise((promise) => setTimeout(promise, 1500));
         const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParameters);
         const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParameters);

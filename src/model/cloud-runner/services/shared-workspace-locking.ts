@@ -187,7 +187,7 @@ export class SharedWorkspaceLocking {
 
   public static async IsWorkspaceLocked(workspace: string, buildParametersContext: BuildParameters): Promise<boolean> {
     if (!(await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext))) {
-      throw new Error(`workspace doesn't exist`);
+      throw new Error(`workspace doesn't exist ${workspace}`);
     }
     const files = await SharedWorkspaceLocking.ReadLines(
       `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
