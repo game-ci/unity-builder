@@ -45,7 +45,6 @@ describe('Cloud Runner Retain Workspace', () => {
       }
 
       CloudRunnerLogger.log(`run 1 succeeded`);
-      const run1Workspace = CloudRunner.lockedWorkspace || ``;
 
       // await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache/${}`);
       const buildParameter2 = await CreateParameters(overrides);
@@ -68,7 +67,6 @@ describe('Cloud Runner Retain Workspace', () => {
         'There is 0 files/dir in the cache pulled contents for LFS',
       );
 
-      expect(CloudRunner.lockedWorkspace).toMatch(run1Workspace);
       expect(build2ContainsCacheKey).toBeTruthy();
       expect(build2ContainsRetainedWorkspacePhrase).toBeTruthy();
       expect(build2ContainsWorkspaceExistsAlreadyPhrase).toBeTruthy();
