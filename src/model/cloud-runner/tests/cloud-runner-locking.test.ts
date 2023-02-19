@@ -187,7 +187,7 @@ describe('Cloud Runner Locking', () => {
       expect(
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
       ).toBeTruthy();
-      expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
+      expect(CloudRunner.lockedWorkspace).not.toContain(newWorkspaceName);
     }, 150000);
     it(`0 free workspaces after locking`, async () => {
       Cli.options.retainWorkspaces = true;
