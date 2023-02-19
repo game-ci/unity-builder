@@ -181,7 +181,7 @@ export class SharedWorkspaceLocking {
       )
     )
       .map((x) => x.replace(`/`, ``))
-      .filter((x) => x.endsWith(`_${workspace}_workspace`))
+      .filter((x) => x.includes(workspace) && x.endsWith(`_workspace`))
       .map((x) => Number(x))[0];
   }
 
