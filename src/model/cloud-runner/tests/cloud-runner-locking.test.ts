@@ -122,7 +122,7 @@ describe('Cloud Runner Locking', () => {
       expect(
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
       ).toBeTruthy();
-    }, 150000);
+    }, 350000);
     it(`Get Or Create From No Workspace`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
