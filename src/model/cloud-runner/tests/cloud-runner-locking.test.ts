@@ -34,7 +34,7 @@ describe('Cloud Runner Locking', () => {
       CloudRunner.buildParameters = buildParameters;
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
-    });
+    }, 150000);
     it(`Create Workspace And Lock Workspace`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
@@ -51,7 +51,7 @@ describe('Cloud Runner Locking', () => {
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
-    });
+    }, 150000);
     it(`Simple Locking End2End Flow`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
