@@ -90,9 +90,8 @@ export class SharedWorkspaceLocking {
 
   public static async DoesWorkspaceExist(workspace: string, buildParametersContext: BuildParameters) {
     return (
-      (await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext)).filter(
-        (x) => x.includes(workspace) && x.endsWith(`_workspace`),
-      ).length > 0
+      (await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext)).filter((x) => x.includes(workspace))
+        .length > 0
     );
   }
   public static async HasWorkspaceLock(
