@@ -55,28 +55,20 @@ export class SharedWorkspaceLocking {
       return false;
     }
 
-    try {
-      if (await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParametersContext)) {
-        const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+    if (await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParametersContext)) {
+      const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
+      CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
+      for (const element of workspaces) {
+        await new Promise((promise) => setTimeout(promise, 1000));
+        const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
         CloudRunnerLogger.log(
-          `run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`,
+          `run agent: ${runId} try lock workspace: ${element} locking attempt result: ${lockResult}`,
         );
-        for (const element of workspaces) {
-          await new Promise((promise) => setTimeout(promise, 1000));
-          const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
-          CloudRunnerLogger.log(
-            `run agent: ${runId} try lock workspace: ${element} locking attempt result: ${lockResult}`,
-          );
 
-          if (lockResult) {
-            return true;
-          }
+        if (lockResult) {
+          return true;
         }
       }
-    } catch (error) {
-      CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
-
-      return false;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
