@@ -84,7 +84,7 @@ class CloudRunner {
     await CloudRunner.setup(buildParameters);
     try {
       if (buildParameters.retainWorkspace) {
-        CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
+        CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
         const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
           CloudRunner.lockedWorkspace,

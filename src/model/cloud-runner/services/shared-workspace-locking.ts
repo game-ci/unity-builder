@@ -30,6 +30,10 @@ export class SharedWorkspaceLocking {
 
     return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
   }
+
+  public static NewWorkspaceName() {
+    return `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
+  }
   public static async GetAllLocksForWorkspace(
     workspace: string,
     buildParametersContext: BuildParameters,
@@ -69,6 +73,11 @@ export class SharedWorkspaceLocking {
           return true;
         }
       }
+    }
+
+    if (await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext)) {
+      workspace = SharedWorkspaceLocking.NewWorkspaceName();
+      CloudRunner.lockedWorkspace = workspace;
     }
 
     const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
@@ -203,6 +212,9 @@ export class SharedWorkspaceLocking {
   ): Promise<boolean> {
     if (lockId !== ``) {
       await SharedWorkspaceLocking.LockWorkspace(workspace, lockId, buildParametersContext);
+    }
+    if (await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext)) {
+      throw new Error(`${workspace} already exists`);
     }
     const timestamp = Date.now();
     const file = `${timestamp}_${workspace}_workspace`;
