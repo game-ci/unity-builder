@@ -20,6 +20,36 @@ describe('Cloud Runner Locking', () => {
   setups();
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
+    it(`Create Workspace`, async () => {
+      Cli.options.retainWorkspaces = true;
+      const overrides: any = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        retainWorkspaces: true,
+      };
+      const buildParameters = await CreateParameters(overrides);
+      const newWorkspaceName = `test-workspace-${uuidv4()}`;
+      expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
+    });
+    it(`Create Workspace And Lock Workspace`, async () => {
+      Cli.options.retainWorkspaces = true;
+      const overrides: any = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        retainWorkspaces: true,
+      };
+      const runId = uuidv4();
+      const buildParameters = await CreateParameters(overrides);
+      const newWorkspaceName = `test-workspace-${uuidv4()}`;
+      expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
+    });
     it(`Simple Locking End2End Flow`, async () => {
       Cli.options.retainWorkspaces = true;
       const overrides: any = {
@@ -36,8 +66,8 @@ describe('Cloud Runner Locking', () => {
       const runId = uuidv4();
       CloudRunner.buildParameters = buildParameters;
       await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters);
-      expect(SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
-      expect(SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
+      expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       const isExpectedUnlockedBeforeLocking =
         (await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)) === false;
       expect(isExpectedUnlockedBeforeLocking).toBeTruthy();
