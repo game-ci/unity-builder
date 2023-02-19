@@ -230,8 +230,7 @@ describe('Cloud Runner Locking', () => {
       expect(lockFilesExist).toBeTruthy();
       const result: string[] = [];
       const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters);
-      for (let element of workspaces) {
-        element = `${element.split(`_`)[1]}_${element.split(`_`)[2]}`;
+      for (const element of workspaces) {
         expect((await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).join()).toContain(element);
         expect(
           (await SharedWorkspaceLocking.GetAllWorkspaces(buildParameters)).filter((x) => x.endsWith(`_workspace`)),
