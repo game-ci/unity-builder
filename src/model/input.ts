@@ -142,10 +142,10 @@ class Input {
 
   static get androidExportType() {
     // TODO: remove this in V3
-    const exportType = Input.getInput('androidExportType');
+    const exportType = Input.getInput('androidExportType') || '';
 
-    if (exportType) {
-      return exportType || 'androidPackage';
+    if (exportType !== '') {
+      return exportType;
     }
 
     return Input.androidAppBundle ? 'androidAppBundle' : 'androidPackage';
