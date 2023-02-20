@@ -147,9 +147,14 @@ class CloudRunner {
       }
 
       return output;
-    } catch (error) {
+    } catch (error: any) {
       CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `Failed - error`, `failure`, `completed`);
+      await GitHub.updateGitHubCheck(
+        CloudRunner.buildParameters.buildGuid,
+        `Failed - Error ${error?.message || error}`,
+        `failure`,
+        `completed`,
+      );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
