@@ -137,6 +137,13 @@ class CloudRunner {
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
         );
+        const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(
+          CloudRunner.lockedWorkspace || ``,
+          CloudRunner.buildParameters,
+        );
+        if (isLocked) {
+          throw new Error(`still locked after releasing`);
+        }
         CloudRunner.lockedWorkspace = undefined;
       }
 
