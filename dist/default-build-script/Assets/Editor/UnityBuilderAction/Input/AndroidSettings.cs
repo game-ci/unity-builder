@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace UnityBuilderAction.Input
 {
-  public class AndroidSettings
+  public static class AndroidSettings
   {
     public static void Apply(Dictionary<string, string> options)
     {
@@ -49,8 +49,8 @@ namespace UnityBuilderAction.Input
       if (options.TryGetValue("androidExportType", out androidExportType) && !string.IsNullOrEmpty(androidExportType))
       {
         // Only exists in 2018.3 and above
-        FieldInfo buildAppBundle = typeof(EditorUserBuildSettings)
-              .GetField("buildAppBundle", System.Reflection.BindingFlags.Public | BindingFlags.Instance);
+        PropertyInfo buildAppBundle = typeof(EditorUserBuildSettings)
+              .GetProperty("buildAppBundle", BindingFlags.Public | BindingFlags.Static);
         switch (androidExportType)
         {
           case "androidStudioProject":
