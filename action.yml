@@ -83,7 +83,7 @@ inputs:
     description: 'The android target API level.'
   androidSymbolType:
     required: false
-    default: 'public'
+    default: 'none'
     description: 'The android symbol type to export. Should be "none", "public" or "debugging".'
   sshAgent:
     required: false
