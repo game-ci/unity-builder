@@ -200,10 +200,6 @@ export class SharedWorkspaceLocking {
       `aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/`,
     );
 
-    if (workspace.includes(`_`)) {
-      workspace = workspace.split(`_`)[1];
-    }
-
     const lockFilesExist =
       files.filter((x) => {
         return x.includes(workspace) && x.endsWith(`_lock`);
