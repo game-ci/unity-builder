@@ -266,6 +266,8 @@ export class SharedWorkspaceLocking {
 
     if (hasLock) {
       CloudRunner.lockedWorkspace = workspace;
+    } else {
+      await SharedWorkspaceLocking.ReleaseWorkspace(workspace, runId, buildParametersContext);
     }
 
     return hasLock;
