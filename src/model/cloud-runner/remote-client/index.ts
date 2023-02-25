@@ -136,10 +136,11 @@ export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
     // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    RemoteClient.handleRetainedWorkspace();
+    if (!RemoteClient.handleRetainedWorkspace()) {
+      await RemoteClient.bootstrapRepository();
+    }
 
     // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    await RemoteClient.bootstrapRepository();
 
     // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
     await RemoteClient.runCustomHookFiles(`before-build`);
@@ -159,7 +160,7 @@ export class RemoteClient {
       }
     }
   }
-  static handleRetainedWorkspace() {
+  static async handleRetainedWorkspace() {
     if (!CloudRunner.buildParameters.retainWorkspace) {
       return;
     }
@@ -168,6 +169,9 @@ export class RemoteClient {
       CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
     ) {
       CloudRunnerLogger.log(`Retained Workspace Already Exists!`);
+      await CloudRunnerSystem.Run(`git fetch`);
+      await CloudRunnerSystem.Run(`git reset --hard "${CloudRunner.buildParameters.gitSha}"`);
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
     }
     RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);
   }

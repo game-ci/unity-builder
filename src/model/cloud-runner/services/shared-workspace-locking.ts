@@ -263,7 +263,7 @@ export class SharedWorkspaceLocking {
     if (hasLock) {
       CloudRunner.lockedWorkspace = workspace;
     } else {
-      await SharedWorkspaceLocking.ReleaseWorkspace(workspace, runId, buildParametersContext);
+      throw new Error(`tried to lock ${workspace} with id ${runId} but hasLock failed`);
     }
 
     return hasLock;
