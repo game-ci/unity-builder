@@ -261,7 +261,6 @@ export class SharedWorkspaceLocking {
         false,
         true,
       );
-      throw new Error(`tried to lock ${workspace} with id ${runId} but hasLock failed`);
     }
 
     return hasLock;
