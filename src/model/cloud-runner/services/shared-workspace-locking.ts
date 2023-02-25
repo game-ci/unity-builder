@@ -87,7 +87,7 @@ export class SharedWorkspaceLocking {
       CloudRunner.lockedWorkspace = workspace;
     }
 
-    const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext, runId);
+    const createResult = await SharedWorkspaceLocking.CreateWorkspace(workspace, buildParametersContext);
     const lockResult = await SharedWorkspaceLocking.LockWorkspace(workspace, runId, buildParametersContext);
     CloudRunnerLogger.log(
       `run agent ${runId} didn't find a free workspace so created: ${workspace} createWorkspaceSuccess: ${createResult} Lock:${lockResult}`,
@@ -208,14 +208,7 @@ export class SharedWorkspaceLocking {
     return lockFilesExist;
   }
 
-  public static async CreateWorkspace(
-    workspace: string,
-    buildParametersContext: BuildParameters,
-    lockId: string = ``,
-  ): Promise<boolean> {
-    if (lockId !== ``) {
-      await SharedWorkspaceLocking.LockWorkspace(workspace, lockId, buildParametersContext);
-    }
+  public static async CreateWorkspace(workspace: string, buildParametersContext: BuildParameters): Promise<boolean> {
     if (await SharedWorkspaceLocking.DoesWorkspaceExist(workspace, buildParametersContext)) {
       throw new Error(`${workspace} already exists`);
     }
@@ -263,6 +256,11 @@ export class SharedWorkspaceLocking {
     if (hasLock) {
       CloudRunner.lockedWorkspace = workspace;
     } else {
+      await CloudRunnerSystem.Run(
+        `aws s3 rm ${SharedWorkspaceLocking.workspaceRoot}${buildParametersContext.cacheKey}/${file}`,
+        false,
+        true,
+      );
       throw new Error(`tried to lock ${workspace} with id ${runId} but hasLock failed`);
     }
 
