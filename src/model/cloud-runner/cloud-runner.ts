@@ -132,19 +132,17 @@ class CloudRunner {
       await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
       if (CloudRunner.buildParameters.retainWorkspace) {
+        const workspace = CloudRunner.lockedWorkspace || ``;
         await SharedWorkspaceLocking.ReleaseWorkspace(
-          CloudRunner.lockedWorkspace || ``,
+          workspace,
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
         );
-        const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(
-          CloudRunner.lockedWorkspace || ``,
-          CloudRunner.buildParameters,
-        );
+        const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(workspace, CloudRunner.buildParameters);
         if (isLocked) {
           throw new Error(
             `still locked after releasing ${await SharedWorkspaceLocking.GetAllLocksForWorkspace(
-              CloudRunner.lockedWorkspace || ``,
+              workspace,
               buildParameters,
             )}`,
           );
