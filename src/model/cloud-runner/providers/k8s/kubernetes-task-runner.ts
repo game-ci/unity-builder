@@ -1,4 +1,4 @@
-import { CoreV1Api, KubeConfig, Log } from '@kubernetes/client-node';
+import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
@@ -84,7 +84,9 @@ class KubernetesTaskRunner {
     try {
       // const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
 
-      await CloudRunnerSystem.Run(`kubectl logs ${podName} -c ${containerName} > app.log`);
+      await CloudRunnerSystem.Run(
+        `kubectl logs ${podName} -c ${containerName} --timestamps --since-time="${KubernetesTaskRunner.lastReceivedTimestamp}" > app.log`,
+      );
       output += await CloudRunnerSystem.Run(`cat app.log`);
 
       stream.destroy();
