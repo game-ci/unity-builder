@@ -159,7 +159,7 @@ export class RemoteClient {
     }
     if (
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) &&
-      CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+      fs.existsSync(CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`)))
     ) {
       CloudRunnerLogger.log(`Retained Workspace Already Exists!`);
       process.chdir(CloudRunnerFolders.repoPathAbsolute);
