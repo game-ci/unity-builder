@@ -15,10 +15,10 @@ class KubernetesJobSpecFactory {
     secrets: CloudRunnerSecret[],
     buildGuid: string,
     buildParameters: BuildParameters,
-    secretName,
-    pvcName,
-    jobName,
-    k8s,
+    secretName: string,
+    pvcName: string,
+    jobName: string,
+    k8s: any,
   ) {
     environment.push(
       ...[

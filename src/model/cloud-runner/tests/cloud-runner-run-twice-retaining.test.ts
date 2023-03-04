@@ -6,12 +6,13 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import * as fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import SharedWorkspaceLocking from '../services/shared-workspace-locking';
+import { OptionValues } from 'commander';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: OptionValues | undefined) {
   if (overrides) {
     Cli.options = overrides;
   }

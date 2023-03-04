@@ -30,7 +30,7 @@ class Platform {
     };
   }
 
-  static isWindows(platform) {
+  static isWindows(platform: string) {
     switch (platform) {
       case Platform.types.StandaloneWindows:
       case Platform.types.StandaloneWindows64:
@@ -40,7 +40,7 @@ class Platform {
     }
   }
 
-  static isAndroid(platform) {
+  static isAndroid(platform: string) {
     switch (platform) {
       case Platform.types.Android:
         return true;

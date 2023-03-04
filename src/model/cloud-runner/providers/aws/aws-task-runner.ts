@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import * as zlib from 'zlib';
+import * as zlib from 'node:zlib';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
@@ -192,22 +192,19 @@ class AWSTaskRunner {
   }
 
   private static logRecords(
-    records,
+    records: AWS.Kinesis.GetRecordsOutput,
     iterator: string,
     shouldReadLogs: boolean,
     output: string,
     shouldCleanup: boolean,
   ) {
     if (records.Records.length > 0 && iterator) {
-      for (let index = 0; index < records.Records.length; index++) {
-        const json = JSON.parse(
-          zlib.gunzipSync(Buffer.from(records.Records[index].Data as string, 'base64')).toString('utf8'),
-        );
+      for (const record of records.Records) {
+        const json = JSON.parse(zlib.gunzipSync(Buffer.from(record.Data as string, 'base64')).toString('utf8'));
         if (json.messageType === 'DATA_MESSAGE') {
-          for (let logEventsIndex = 0; logEventsIndex < json.logEvents.length; logEventsIndex++) {
-            const message = json.logEvents[logEventsIndex].message;
+          for (const logEvent of json.logEvents) {
             ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-              message,
+              logEvent.message,
               shouldReadLogs,
               shouldCleanup,
               output,
@@ -226,7 +223,7 @@ class AWSTaskRunner {
     }).promise();
   }
 
-  private static async getLogIterator(stream) {
+  private static async getLogIterator(stream: AWS.Kinesis.DescribeStreamOutput) {
     return (
       (
         await AWSTaskRunner.Kinesis.getShardIterator({

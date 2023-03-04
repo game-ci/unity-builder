@@ -3,6 +3,7 @@ import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output }
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
+
 async function runMain() {
   try {
     if (Cli.InitCliMode()) {
@@ -18,16 +19,16 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    if (buildParameters.cloudRunnerCluster !== 'local') {
-      await CloudRunner.run(buildParameters, baseImage.toString());
-    } else {
+    if (buildParameters.cloudRunnerCluster === 'local') {
       core.info('Building locally');
       await PlatformSetup.setup(buildParameters, actionFolder);
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder);
       } else {
-        await Docker.run(baseImage, { workspace, actionFolder, ...buildParameters });
+        await Docker.run(baseImage.toString(), { workspace, actionFolder, ...buildParameters });
       }
+    } else {
+      await CloudRunner.run(buildParameters, baseImage.toString());
     }
 
     // Set output

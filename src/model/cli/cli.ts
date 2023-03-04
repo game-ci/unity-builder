@@ -13,13 +13,15 @@ import GitHub from '../github';
 import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folders';
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
+import { OptionValues } from 'commander';
+import { InputKey } from '../input';
 
 export class Cli {
-  public static options;
+  public static options: OptionValues | undefined;
   static get isCliMode() {
     return Cli.options !== undefined && Cli.options.mode !== undefined && Cli.options.mode !== '';
   }
-  public static query(key, alternativeKey) {
+  public static query(key: string, alternativeKey: string) {
     if (Cli.options && Cli.options[key] !== undefined) {
       return Cli.options[key];
     }
@@ -61,15 +63,15 @@ export class Cli {
 
   static async RunCli(): Promise<void> {
     GitHub.githubInputEnabled = false;
-    if (Cli.options['populateOverride'] === `true`) {
+    if (Cli.options!['populateOverride'] === `true`) {
       await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
     }
-    if (Cli.options['logInput']) {
+    if (Cli.options!['logInput']) {
       Cli.logInput();
     }
-    const results = CliFunctionsRepository.GetCliFunctions(Cli.options.mode);
+    const results = CliFunctionsRepository.GetCliFunctions(Cli.options?.mode);
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
-    Cli.options.versioning = 'None';
+    Cli.options!.versioning = 'None';
 
     const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
     CloudRunnerLogger.log(`Build Params:
@@ -88,14 +90,15 @@ export class Cli {
     const properties = CloudRunnerOptionsReader.GetProperties();
     for (const element of properties) {
       if (
-        Input[element] !== undefined &&
-        Input[element] !== '' &&
-        typeof Input[element] !== `function` &&
+        element in Input &&
+        Input[element as InputKey] !== undefined &&
+        Input[element as InputKey] !== '' &&
+        typeof Input[element as InputKey] !== `function` &&
         element !== 'length' &&
         element !== 'cliOptions' &&
         element !== 'prototype'
       ) {
-        core.info(`${element} ${Input[element]}`);
+        core.info(`${element} ${Input[element as InputKey]}`);
       }
     }
     core.info(`\n`);

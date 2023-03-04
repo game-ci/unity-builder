@@ -5,7 +5,7 @@ import { CloudRunnerStatics } from '../cloud-runner-statics';
 import GitHub from '../../github';
 
 export class FollowLogStreamService {
-  public static handleIteration(message, shouldReadLogs, shouldCleanup, output) {
+  public static handleIteration(message: string, shouldReadLogs: boolean, shouldCleanup: boolean, output: string) {
     if (message.includes(`---${CloudRunner.buildParameters.logId}`)) {
       CloudRunnerLogger.log('End of log transmission received');
       shouldReadLogs = false;

@@ -1,11 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Cli } from './cli/cli';
 import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
 import Platform from './platform';
 import GitHub from './github';
 
-const core = require('@actions/core');
+import * as core from '@actions/core';
+
+export type InputKey = keyof typeof Input;
 
 /**
  * Input variables specified in workflows using "with" prop.
@@ -15,7 +17,7 @@ const core = require('@actions/core');
  * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
  */
 class Input {
-  public static getInput(query) {
+  public static getInput(query: string): string | undefined {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
@@ -34,113 +36,120 @@ class Input {
     }
 
     if (process.env[query] !== undefined) {
-      return process.env[query];
+      return process.env[query]!;
     }
 
     if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
-      return process.env[alternativeQuery];
+      return process.env[alternativeQuery]!;
     }
-
-    return;
   }
 
   static get region(): string {
     return Input.getInput('region') || 'eu-west-2';
   }
 
-  static get githubRepo() {
+  static get githubRepo(): string | undefined {
     return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || undefined;
   }
-  static get branch() {
+
+  static get branch(): string {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return Input.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
-      return Input.getInput('branch');
+      return Input.getInput('branch')!;
     } else {
       return '';
     }
   }
 
-  static get gitSha() {
+  static get gitSha(): string {
     if (Input.getInput(`GITHUB_SHA`)) {
-      return Input.getInput(`GITHUB_SHA`);
+      return Input.getInput(`GITHUB_SHA`)!;
     } else if (Input.getInput(`GitSHA`)) {
-      return Input.getInput(`GitSHA`);
+      return Input.getInput(`GitSHA`)!;
     }
+
+    return '';
   }
 
-  static get useIL2Cpp() {
-    return Input.getInput(`useIL2Cpp`) || true;
-  }
-
-  static get runNumber() {
+  static get runNumber(): string {
     return Input.getInput('GITHUB_RUN_NUMBER') || '0';
   }
 
-  static get targetPlatform() {
+  static get targetPlatform(): string {
     return Input.getInput('targetPlatform') || Platform.default;
   }
 
-  static get unityVersion() {
+  static get unityVersion(): string {
     return Input.getInput('unityVersion') || 'auto';
   }
 
-  static get customImage() {
+  static get customImage(): string {
     return Input.getInput('customImage') || '';
   }
 
-  static get projectPath() {
+  static get projectPath(): string {
     const input = Input.getInput('projectPath');
-    const rawProjectPath = input
-      ? input
-      : fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
-        !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
-      ? 'test-project'
-      : '.';
+    let rawProjectPath;
+
+    if (input) {
+      rawProjectPath = input;
+    } else if (
+      fs.existsSync(path.join('test-project', 'ProjectSettings', 'ProjectVersion.txt')) &&
+      !fs.existsSync(path.join('ProjectSettings', 'ProjectVersion.txt'))
+    ) {
+      rawProjectPath = 'test-project';
+    } else {
+      rawProjectPath = '.';
+    }
 
     return rawProjectPath.replace(/\/$/, '');
   }
 
-  static get buildName() {
-    return Input.getInput('buildName') || this.targetPlatform;
+  static get runnerTempPath(): string {
+    return Input.getInput('RUNNER_TEMP') || '';
   }
 
-  static get buildsPath() {
+  static get buildName(): string {
+    return Input.getInput('buildName') || Input.targetPlatform;
+  }
+
+  static get buildsPath(): string {
     return Input.getInput('buildsPath') || 'build';
   }
 
-  static get unityLicensingServer() {
+  static get unityLicensingServer(): string {
     return Input.getInput('unityLicensingServer') || '';
   }
 
-  static get buildMethod() {
+  static get buildMethod(): string {
     return Input.getInput('buildMethod') || ''; // Processed in docker file
   }
 
-  static get customParameters() {
+  static get customParameters(): string {
     return Input.getInput('customParameters') || '';
   }
 
-  static get versioningStrategy() {
+  static get versioningStrategy(): string {
     return Input.getInput('versioning') || 'Semantic';
   }
 
-  static get specifiedVersion() {
+  static get specifiedVersion(): string {
     return Input.getInput('version') || '';
   }
 
-  static get androidVersionCode() {
-    return Input.getInput('androidVersionCode');
+  static get androidVersionCode(): string {
+    return Input.getInput('androidVersionCode') || '';
   }
 
-  static get androidAppBundle() {
+  static get androidAppBundle(): boolean {
     core.warning('androidAppBundle is deprecated, please use androidExportType instead');
     const input = Input.getInput('androidAppBundle') || false;
 
     return input === 'true';
   }
 
-  static get androidExportType() {
+  static get androidExportType(): string {
     // TODO: remove this in V3
     const exportType = Input.getInput('androidExportType') || '';
 
@@ -156,62 +165,70 @@ class Input {
     // return Input.getInput('androidExportType') || 'androidPackage';
   }
 
-  static get androidKeystoreName() {
+  static get androidKeystoreName(): string {
     return Input.getInput('androidKeystoreName') || '';
   }
 
-  static get androidKeystoreBase64() {
+  static get androidKeystoreBase64(): string {
     return Input.getInput('androidKeystoreBase64') || '';
   }
 
-  static get androidKeystorePass() {
+  static get androidKeystorePass(): string {
     return Input.getInput('androidKeystorePass') || '';
   }
 
-  static get androidKeyaliasName() {
+  static get androidKeyaliasName(): string {
     return Input.getInput('androidKeyaliasName') || '';
   }
 
-  static get androidKeyaliasPass() {
+  static get androidKeyaliasPass(): string {
     return Input.getInput('androidKeyaliasPass') || '';
   }
 
-  static get androidTargetSdkVersion() {
+  static get androidTargetSdkVersion(): string {
     return Input.getInput('androidTargetSdkVersion') || '';
   }
 
-  static get androidSymbolType() {
+  static get androidSymbolType(): string {
     return Input.getInput('androidSymbolType') || 'none';
   }
 
-  static get sshAgent() {
+  static get sshAgent(): string {
     return Input.getInput('sshAgent') || '';
   }
 
-  static get gitPrivateToken() {
-    return core.getInput('gitPrivateToken') || false;
+  static get gitPrivateToken(): string | undefined {
+    return Input.getInput('gitPrivateToken');
   }
 
   static get chownFilesTo() {
     return Input.getInput('chownFilesTo') || '';
   }
 
-  static get allowDirtyBuild() {
+  static get allowDirtyBuild(): boolean {
     const input = Input.getInput('allowDirtyBuild') || false;
 
     return input === 'true';
   }
 
-  static get cacheUnityInstallationOnMac() {
+  static get cacheUnityInstallationOnMac(): boolean {
     const input = Input.getInput('cacheUnityInstallationOnMac') || false;
 
     return input === 'true';
   }
 
-  static get unityHubVersionOnMac() {
+  static get unityHubVersionOnMac(): string {
     const input = Input.getInput('unityHubVersionOnMac') || '';
 
     return input !== '' ? input : '';
+  }
+
+  static get unitySerial(): string | undefined {
+    return Input.getInput('UNITY_SERIAL');
+  }
+
+  static get unityLicense(): string | undefined {
+    return Input.getInput('UNITY_LICENSE');
   }
 
   public static ToEnvVarFormat(input: string) {

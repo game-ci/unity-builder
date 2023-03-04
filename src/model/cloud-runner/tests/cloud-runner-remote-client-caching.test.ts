@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
 import UnityVersioning from '../../unity-versioning';

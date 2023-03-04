@@ -1,7 +1,7 @@
 import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
 
 export class AWSCloudFormationTemplates {
-  public static getParameterTemplate(p1) {
+  public static getParameterTemplate(p1: string) {
     return `
   ${p1}:
     Type: String
@@ -9,7 +9,7 @@ export class AWSCloudFormationTemplates {
 `;
   }
 
-  public static getSecretTemplate(p1) {
+  public static getSecretTemplate(p1: string) {
     return `
   ${p1}Secret:
     Type: AWS::SecretsManager::Secret
@@ -19,14 +19,14 @@ export class AWSCloudFormationTemplates {
 `;
   }
 
-  public static getSecretDefinitionTemplate(p1, p2) {
+  public static getSecretDefinitionTemplate(p1: string, p2: string) {
     return `
             - Name: '${p1}'
               ValueFrom: !Ref ${p2}Secret
 `;
   }
 
-  public static insertAtTemplate(template, insertionKey, insertion) {
+  public static insertAtTemplate(template: string, insertionKey: string, insertion: string) {
     const index = template.search(insertionKey) + insertionKey.length + '\n'.length;
     template = [template.slice(0, index), insertion, template.slice(index)].join('');
 

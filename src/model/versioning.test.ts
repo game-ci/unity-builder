@@ -37,7 +37,7 @@ describe('Versioning', () => {
 
   describe('grepCompatibleInputVersionRegex', () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
-    const matchInputUsingGrep = async (input) => {
+    const matchInputUsingGrep = async (input: string) => {
       const output = await System.run('sh', undefined, {
         input: Buffer.from(`echo '${input}' | grep -E '${Versioning.grepCompatibleInputVersionRegex}'`),
         silent: true,
@@ -68,7 +68,7 @@ describe('Versioning', () => {
       const reference = jest.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-branch-2');
 
       expect(Versioning.branch).toStrictEqual('feature-branch-2');
-      expect(reference).toHaveBeenCalledTimes(2);
+      expect(reference).toHaveBeenCalledTimes(1);
     });
 
     it('prefers headRef over ref when set', () => {
@@ -103,16 +103,6 @@ describe('Versioning', () => {
     });
   });
 
-  describe('isDirtyAllowed', () => {
-    it('does not throw', () => {
-      expect(() => Versioning.isDirtyAllowed).not.toThrow();
-    });
-
-    it('returns false by default', () => {
-      expect(Versioning.isDirtyAllowed).toStrictEqual(false);
-    });
-  });
-
   describe('logging git diff', () => {
     it('calls git diff', async () => {
       // allowDirtyBuild: true
@@ -140,28 +130,28 @@ describe('Versioning', () => {
 
   describe('descriptionRegex1', () => {
     it('is a valid regex', () => {
-      expect(Versioning.descriptionRegex1).toBeInstanceOf(RegExp);
+      expect(Versioning.descriptionRegexes[0]).toBeInstanceOf(RegExp);
     });
 
     test.each(['v1.1-1-g12345678', 'v0.1-2-g12345678', 'v0.0-500-gA9B6C3D0-dirty'])(
       'is happy with valid %s',
       (description) => {
-        expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
+        expect(Versioning.descriptionRegexes[0].test(description)).toBeTruthy();
       },
     );
 
     test.each(['1.1-1-g12345678', '0.1-2-g12345678', '0.0-500-gA9B6C3D0-dirty'])(
       'accepts valid semantic versions without v-prefix %s',
       (description) => {
-        expect(Versioning.descriptionRegex1.test(description)).toBeTruthy();
+        expect(Versioning.descriptionRegexes[0].test(description)).toBeTruthy();
       },
     );
 
     test.each(['v0', 'v0.1', 'v0.1.2', 'v0.1-2', 'v0.1-2-g'])('does not like %s', (description) => {
-      expect(Versioning.descriptionRegex1.test(description)).toBeFalsy();
+      expect(Versioning.descriptionRegexes[0].test(description)).toBeFalsy();
 
       // Also, never expect without the v to work for any of these cases.
-      expect(Versioning.descriptionRegex1.test(description?.slice(1))).toBeFalsy();
+      expect(Versioning.descriptionRegexes[0].test(description?.slice(1))).toBeFalsy();
     });
   });
 

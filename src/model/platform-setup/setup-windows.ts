@@ -1,5 +1,5 @@
 import { exec } from '@actions/exec';
-import fs from 'fs';
+import fs from 'node:fs';
 import { BuildParameters } from '..';
 
 class SetupWindows {
@@ -9,7 +9,7 @@ class SetupWindows {
     await SetupWindows.setupWindowsRun(targetPlatform);
   }
 
-  private static async setupWindowsRun(targetPlatform, silent = false) {
+  private static async setupWindowsRun(targetPlatform: string, silent: boolean = false) {
     if (!fs.existsSync('c:/regkeys')) {
       fs.mkdirSync('c:/regkeys');
     }
@@ -24,7 +24,7 @@ class SetupWindows {
     }
   }
 
-  private static async generateWinSDKRegKeys(silent = false) {
+  private static async generateWinSDKRegKeys(silent: boolean = false) {
     // Export registry keys that point to the Windows 10 SDK
     const exportWinSDKRegKeysCommand =
       'reg export "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" c:/regkeys/winsdk.reg /y';

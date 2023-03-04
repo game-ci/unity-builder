@@ -4,56 +4,48 @@ import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
 import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
-import path from 'path';
+import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
-    try {
-      return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
-    } catch (error) {
-      throw error;
-    }
+    return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
   }
 
-  private static async standardBuildAutomation(baseImage: any, cloudRunnerStepState: CloudRunnerStepState) {
+  private static async standardBuildAutomation(baseImage: string, cloudRunnerStepState: CloudRunnerStepState) {
     // TODO accept post and pre build steps as yaml files in the repo
-    try {
-      CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
+    CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 
-      let output = '';
+    let output = '';
 
-      output += await CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
-      CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
+    output += await CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
+    CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
-      CloudRunnerLogger.log(baseImage.toString());
-      CloudRunnerLogger.logLine(` `);
-      CloudRunnerLogger.logLine('Starting build automation job');
+    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
+    CloudRunnerLogger.log(baseImage);
+    CloudRunnerLogger.logLine(` `);
+    CloudRunnerLogger.logLine('Starting build automation job');
 
-      output += await CloudRunner.Provider.runTaskInWorkflow(
-        CloudRunner.buildParameters.buildGuid,
-        baseImage.toString(),
-        BuildAutomationWorkflow.BuildWorkflow,
-        `/${CloudRunnerFolders.buildVolumeFolder}`,
-        `/${CloudRunnerFolders.buildVolumeFolder}/`,
-        cloudRunnerStepState.environment,
-        cloudRunnerStepState.secrets,
-      );
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      CloudRunnerLogger.logWithTime('Build time');
+    output += await CloudRunner.Provider.runTaskInWorkflow(
+      CloudRunner.buildParameters.buildGuid,
+      baseImage.toString(),
+      BuildAutomationWorkflow.BuildWorkflow,
+      `/${CloudRunnerFolders.buildVolumeFolder}`,
+      `/${CloudRunnerFolders.buildVolumeFolder}/`,
+      cloudRunnerStepState.environment,
+      cloudRunnerStepState.secrets,
+    );
+    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
+    CloudRunnerLogger.logWithTime('Build time');
 
-      output += await CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
-      CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
+    output += await CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
+    CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
-      CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
+    CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
 
-      return output;
-    } catch (error) {
-      throw error;
-    }
+    return output;
   }
 
   private static get BuildWorkflow() {
@@ -85,7 +77,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ${BuildAutomationWorkflow.TreeCommand}`;
   }
 
-  private static setupCommands(builderPath) {
+  private static setupCommands(builderPath: string) {
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
     )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
@@ -112,7 +104,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     node ${builderPath} -m remote-cli-pre-build`;
   }
 
-  private static BuildCommands(builderPath) {
+  private static BuildCommands(builderPath: string) {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 

@@ -191,7 +191,7 @@ describe('Input', () => {
       });
 
       spy.mockImplementationOnce(() => {
-        return true;
+        return 'true';
       });
       expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -207,7 +207,7 @@ describe('Input', () => {
       ({ input, expected }) => {
         const spy = jest.spyOn(Input, 'getInput');
         spy.mockImplementationOnce(() => {
-          return;
+          return '';
         });
 
         spy.mockImplementationOnce(() => {

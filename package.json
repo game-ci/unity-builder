@@ -25,7 +25,7 @@
     "test-i-k8s": "cross-env cloudRunnerTests=true cloudRunnerCluster=k8s yarn test -i -t \"cloud runner\""
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.x"
   },
   "dependencies": {
     "@actions/cache": "^3.1.3",
@@ -43,19 +43,21 @@
     "nanoid": "^3.3.1",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.3.5",
-    "unity-changeset": "^1.6.0",
+    "unity-changeset": "^2.0.0",
     "uuid": "^8.3.2",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@arkweid/lefthook": "^0.7.7",
+    "@evilmartians/lefthook": "^1.2.9",
+    "@types/base-64": "^1.0.0",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",
     "@types/semver": "^7.3.9",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/parser": "4.8.1",
-    "@vercel/ncc": "^0.33.3",
+    "@vercel/ncc": "^0.36.1",
     "cross-env": "^7.0.3",
-    "eslint": "7.17.0",
+    "eslint": "^7.23.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-github": "^4.1.1",
     "eslint-plugin-jest": "24.1.3",
@@ -63,7 +65,7 @@
     "eslint-plugin-unicorn": "28.0.2",
     "jest": "^27.5.1",
     "jest-circus": "^27.5.1",
-    "jest-fail-on-console": "^2.3.0",
+    "jest-fail-on-console": "^3.0.2",
     "js-yaml": "^4.1.0",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",

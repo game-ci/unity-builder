@@ -7,6 +7,10 @@ on:
 env:
   CODECOV_TOKEN: '2f2eb890-30e2-4724-83eb-7633832cf0de'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: Tests

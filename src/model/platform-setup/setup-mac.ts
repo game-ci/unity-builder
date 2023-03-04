@@ -3,7 +3,7 @@ import { getUnityChangeset } from 'unity-changeset';
 import { exec, getExecOutput } from '@actions/exec';
 import { restoreCache, saveCache } from '@actions/cache';
 
-import fs from 'fs';
+import fs from 'node:fs';
 
 class SetupMac {
   static unityHubBasePath = `/Applications/"Unity Hub.app"`;
@@ -23,7 +23,7 @@ class SetupMac {
     await SetupMac.setEnvironmentVariables(buildParameters, actionFolder);
   }
 
-  private static async installUnityHub(buildParameters, silent = false) {
+  private static async installUnityHub(buildParameters: BuildParameters, silent = false) {
     // Can't use quotes in the cache package so we need a different path
     const unityHubCachePath = `/Applications/Unity\\ Hub.app`;
 
