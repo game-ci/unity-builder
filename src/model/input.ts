@@ -143,8 +143,13 @@ class Input {
   }
 
   static get androidAppBundle(): boolean {
-    core.warning('androidAppBundle is deprecated, please use androidExportType instead');
-    const input = Input.getInput('androidAppBundle') || false;
+    // Only throw warning if defined
+    let input = Input.getInput('androidAppBundle');
+    if (input !== undefined) {
+      core.warning('androidAppBundle is deprecated, please use androidExportType instead');
+    } else {
+      input = 'false';
+    }
 
     return input === 'true';
   }
