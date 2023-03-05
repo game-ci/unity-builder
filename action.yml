@@ -49,7 +49,7 @@ inputs:
     description: 'The android versionCode'
   androidAppBundle:
     required: false
-    default: 'false'
+    default: ''
     description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
   androidExportType:
     required: false

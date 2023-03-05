@@ -145,7 +145,7 @@ class Input {
   static get androidAppBundle(): boolean {
     // Only throw warning if defined
     let input = Input.getInput('androidAppBundle');
-    if (input !== undefined) {
+    if (input !== '') {
       core.warning('androidAppBundle is deprecated, please use androidExportType instead');
     } else {
       input = 'false';
