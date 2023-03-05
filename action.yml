@@ -207,6 +207,10 @@ inputs:
     description:
       'The version of Unity Hub to install on MacOS (e.g. 3.4.0). Defaults to latest available on brew if empty string
       or nothing is specified.'
+  unityLicensingServer:
+    default: ''
+    required: false
+    description: 'The Unity licensing server address to use for activating Unity.'
 
 outputs:
   volume:
