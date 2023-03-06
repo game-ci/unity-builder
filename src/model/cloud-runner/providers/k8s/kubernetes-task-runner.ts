@@ -2,7 +2,6 @@ import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
-import { CloudRunnerStatics } from '../../cloud-runner-statics';
 import waitUntil from 'async-wait-until';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
@@ -28,8 +27,7 @@ class KubernetesTaskRunner {
     let shouldCleanup = true;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
-      let message = chunk.toString().trimRight(`\n`);
-      message = `[${CloudRunnerStatics.logPrefix}] ${message}`;
+      const message = chunk.toString().split(`Z `)[1].trimRight(`\n`);
       ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
         message,
         shouldReadLogs,
@@ -140,17 +138,16 @@ class KubernetesTaskRunner {
 
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
     let success: boolean = false;
+    let message = ``;
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
         success = phase === 'Running';
-        CloudRunnerLogger.log(
-          `Phase:${status.body.status?.phase} \n Reason:${
-            status.body.status?.conditions?.[0].reason || ''
-          } \n Message:${status.body.status?.conditions?.[0].message || ''}`,
-        );
+        message = `Phase:${status.body.status?.phase} \n Reason:${
+          status.body.status?.conditions?.[0].reason || ''
+        } \n Message:${status.body.status?.conditions?.[0].message || ''}`;
         CloudRunnerLogger.log(
           JSON.stringify(
             (await kubeClient.listNamespacedEvent(namespace)).body.items
@@ -175,6 +172,7 @@ class KubernetesTaskRunner {
         intervalBetweenAttempts: 15000,
       },
     );
+    CloudRunnerLogger.log(message);
 
     return success;
   }
