@@ -50,7 +50,7 @@ jobs:
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking'
         cloudRunnerCluster:
-          #- aws
+          - aws
           - local-docker
           #- k8s
     steps:
