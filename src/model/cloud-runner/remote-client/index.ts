@@ -164,6 +164,7 @@ export class RemoteClient {
       CloudRunnerLogger.log(`Retained Workspace Already Exists!`);
       process.chdir(CloudRunnerFolders.repoPathAbsolute);
       await CloudRunnerSystem.Run(`git fetch`);
+      await CloudRunnerSystem.Run(`git lfs pull`);
       await CloudRunnerSystem.Run(`git reset --hard "${CloudRunner.buildParameters.gitSha}"`);
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
 
