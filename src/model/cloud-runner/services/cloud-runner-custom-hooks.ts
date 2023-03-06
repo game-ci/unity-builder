@@ -45,7 +45,8 @@ echo "---${buildParameters.logId}"`;
 
   static GetCustomHooksFromFiles(hookLifecycle: string): Hook[] {
     const results: Hook[] = [];
-    RemoteClientLogger.log(`GetCustomHookFiles: ${hookLifecycle}`);
+
+    // RemoteClientLogger.log(`GetCustomHookFiles: ${hookLifecycle}`);
     try {
       const gameCiCustomHooksPath = path.join(process.cwd(), `game-ci`, `hooks`);
       const files = fs.readdirSync(gameCiCustomHooksPath);
