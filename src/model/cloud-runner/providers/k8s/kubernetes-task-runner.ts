@@ -87,7 +87,11 @@ class KubernetesTaskRunner {
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
         ? `--since-time="${KubernetesTaskRunner.lastReceivedTimestamp}" `
         : ` `;
-      await CloudRunnerSystem.Run(`kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}> app.log`);
+      await CloudRunnerSystem.Run(
+        `kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}> app.log`,
+        false,
+        true,
+      );
       stream.write(await CloudRunnerSystem.Run(`cat app.log`));
       stream.destroy();
 
