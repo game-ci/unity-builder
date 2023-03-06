@@ -157,6 +157,7 @@ export class RemoteClient {
     if (!CloudRunner.buildParameters.retainWorkspace) {
       return;
     }
+    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);
     if (
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) &&
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`)))
@@ -170,7 +171,6 @@ export class RemoteClient {
 
       return true;
     }
-    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);
 
     return false;
   }
