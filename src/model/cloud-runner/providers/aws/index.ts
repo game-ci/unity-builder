@@ -75,7 +75,11 @@ class AWSBuildEnvironment implements ProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {}
+  ) {
+    process.env.AWS_REGION = Input.region;
+    const CF = new SDK.CloudFormation();
+    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
+  }
 
   async runTaskInWorkflow(
     buildGuid: string,
@@ -94,8 +98,6 @@ class AWSBuildEnvironment implements ProviderInterface {
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
-
-    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
     const taskDef = await new AwsJobStack(this.baseStackName).setupCloudFormations(
       CF,
       buildGuid,

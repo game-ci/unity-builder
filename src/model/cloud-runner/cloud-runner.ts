@@ -82,6 +82,14 @@ class CloudRunner {
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
     await CloudRunner.setup(buildParameters);
+    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
+    await CloudRunner.Provider.setupWorkflow(
+      CloudRunner.buildParameters.buildGuid,
+      CloudRunner.buildParameters,
+      CloudRunner.buildParameters.branch,
+      CloudRunner.defaultSecrets,
+    );
+    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
       if (buildParameters.retainWorkspace) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
@@ -104,14 +112,6 @@ class CloudRunner {
           CloudRunner.lockedWorkspace = undefined;
         }
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
-      await CloudRunner.Provider.setupWorkflow(
-        CloudRunner.buildParameters.buildGuid,
-        CloudRunner.buildParameters,
-        CloudRunner.buildParameters.branch,
-        CloudRunner.defaultSecrets,
-      );
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       const content = { ...CloudRunner.buildParameters };
       content.gitPrivateToken = ``;
       content.unitySerial = ``;
