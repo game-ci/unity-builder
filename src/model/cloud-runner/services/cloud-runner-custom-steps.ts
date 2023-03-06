@@ -13,15 +13,16 @@ import { CustomStep } from './custom-step';
 export class CloudRunnerCustomSteps {
   static GetCustomStepsFromFiles(hookLifecycle: string): CustomStep[] {
     const results: CustomStep[] = [];
-    RemoteClientLogger.log(
-      `GetCustomStepFiles: ${hookLifecycle} CustomStepFiles: ${CloudRunnerOptions.customStepFiles}`,
-    );
+
+    // RemoteClientLogger.log(
+    //   `GetCustomStepFiles: ${hookLifecycle} CustomStepFiles: ${CloudRunnerOptions.customStepFiles}`,
+    // );
     try {
       const gameCiCustomStepsPath = path.join(process.cwd(), `game-ci`, `steps`);
       const files = fs.readdirSync(gameCiCustomStepsPath);
       for (const file of files) {
         if (!CloudRunnerOptions.customStepFiles.includes(file.replace(`.yaml`, ``))) {
-          RemoteClientLogger.log(`Skipping CustomStepFile: ${file}`);
+          // RemoteClientLogger.log(`Skipping CustomStepFile: ${file}`);
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
