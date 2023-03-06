@@ -7,7 +7,7 @@ import { FollowLogStreamService } from '../../services/follow-log-stream-service
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 class KubernetesTaskRunner {
-  static lastReceivedTimestamp: number;
+  static lastReceivedTimestamp: Date;
   static async runTask(
     kubeConfig: KubeConfig,
     kubeClient: CoreV1Api,
@@ -27,6 +27,7 @@ class KubernetesTaskRunner {
     let shouldCleanup = true;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
+      KubernetesTaskRunner.lastReceivedTimestamp = new Date(`${chunk.toString().split(`Z `)[0]}Z`);
       const message = chunk.toString().split(`Z `)[1].trimRight(`\n`);
       ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
         message,
