@@ -7,7 +7,6 @@ import path from 'path';
 import * as fs from 'fs';
 import Input from '../../input';
 import CloudRunnerOptions from '../cloud-runner-options';
-import CloudRunnerLogger from './cloud-runner-logger';
 import { CustomStep } from './custom-step';
 
 export class CloudRunnerCustomSteps {
@@ -34,7 +33,8 @@ export class CloudRunnerCustomSteps {
     } catch (error) {
       RemoteClientLogger.log(`Failed Getting: ${hookLifecycle} \n ${JSON.stringify(error, undefined, 4)}`);
     }
-    RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
+
+    // RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
 
     const builtInCustomSteps: CustomStep[] = CloudRunnerCustomSteps.ParseSteps(
       `- name: aws-s3-upload-build
