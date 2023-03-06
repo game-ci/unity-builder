@@ -26,14 +26,20 @@ export class SharedWorkspaceLocking {
       .map((x) => x.split(`_`)[1]);
   }
   public static async DoesCacheKeyTopLevelExist(buildParametersContext: BuildParameters) {
-    const rootLines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`);
-    const lockFolderExists = rootLines.map((x) => x.replace(`/`, ``)).includes(`locks`);
+    try {
+      const rootLines = await SharedWorkspaceLocking.ReadLines(
+        `aws s3 ls ${SharedWorkspaceLocking.workspaceBucketRoot}`,
+      );
+      const lockFolderExists = rootLines.map((x) => x.replace(`/`, ``)).includes(`locks`);
 
-    if (lockFolderExists) {
-      const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
+      if (lockFolderExists) {
+        const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
 
-      return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
-    } else {
+        return lines.map((x) => x.replace(`/`, ``)).includes(buildParametersContext.cacheKey);
+      } else {
+        return false;
+      }
+    } catch {
       return false;
     }
   }
