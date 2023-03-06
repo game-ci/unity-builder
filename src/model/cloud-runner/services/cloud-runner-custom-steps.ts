@@ -212,7 +212,7 @@ export class CloudRunnerCustomSteps {
         for (const secret of step.secrets) {
           if (secret.ParameterValue === undefined && process.env[secret.EnvironmentVariable] !== undefined) {
             if (CloudRunner.buildParameters?.cloudRunnerDebug) {
-              CloudRunnerLogger.log(`Injecting custom step ${step.name} from env var ${secret.ParameterKey}`);
+              // CloudRunnerLogger.log(`Injecting custom step ${step.name} from env var ${secret.ParameterKey}`);
             }
             secret.ParameterValue = process.env[secret.ParameterKey] || ``;
           }
