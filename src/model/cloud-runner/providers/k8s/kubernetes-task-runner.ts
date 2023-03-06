@@ -92,7 +92,11 @@ class KubernetesTaskRunner {
         false,
         true,
       );
-      stream.write(await CloudRunnerSystem.Run(`cat app.log`));
+      const logs = await CloudRunnerSystem.Run(`cat app.log`, false, true);
+      const splitLogs = logs.split(`\n`);
+      for (const element of splitLogs) {
+        stream.write(element);
+      }
       stream.destroy();
 
       // if (resultError) {
