@@ -4,8 +4,13 @@ export async function execWithErrorCheck(
   commandLine: string,
   arguments_?: string[],
   options?: ExecOptions,
+  errorWhenMissingUnityBuildResults: boolean = true,
 ): Promise<number> {
   const result = await getExecOutput(commandLine, arguments_, options);
+
+  if (!errorWhenMissingUnityBuildResults) {
+    return result.exitCode;
+  }
 
   // Check for errors in the Build Results section
   const match = result.stdout.match(/^#\s*Build results\s*#(.*)^Size:/ms);

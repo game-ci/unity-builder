@@ -149,6 +149,7 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
         },
       },
       true,
+      false,
     );
 
     return myOutput;
