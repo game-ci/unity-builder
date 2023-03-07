@@ -30,6 +30,7 @@ class KubernetesTaskRunner {
       try {
         const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
         const newDate = Date.parse(dateString);
+        new Date(newDate).toISOString();
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
       } catch {
         /*  */
@@ -91,7 +92,7 @@ class KubernetesTaskRunner {
       // const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
 
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
-        ? `--since-time="${KubernetesTaskRunner.lastReceivedTimestamp}" `
+        ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp).toISOString()}" `
         : ` `;
       await CloudRunnerSystem.Run(
         `kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}> app.log`,
