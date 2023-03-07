@@ -7,7 +7,7 @@ class CloudRunnerOptions {
   // ### ### ###
   // Input Handling
   // ### ### ###
-  public static getInput(query) {
+  public static getInput(query: any) {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {

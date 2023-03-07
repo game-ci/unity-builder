@@ -9,7 +9,7 @@ import setups from '../cloud-runner-suite.test';
 import * as fs from 'fs';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: any) {
   if (overrides) {
     Cli.options = overrides;
   }

@@ -25,7 +25,7 @@ echo "end of cloud runner job"
 echo "---${buildParameters.logId}"`;
   }
 
-  public static getHooks(customJobHooks): Hook[] {
+  public static getHooks(customJobHooks: any): Hook[] {
     const experimentHooks = customJobHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
@@ -69,13 +69,13 @@ echo "---${buildParameters.logId}"`;
     return results;
   }
 
-  private static ConvertYamlSecrets(object) {
+  private static ConvertYamlSecrets(object: Hook) {
     if (object.secrets === undefined) {
       object.secrets = [];
 
       return;
     }
-    object.secrets = object.secrets.map((x) => {
+    object.secrets = object.secrets.map((x: any) => {
       return {
         ParameterKey: x.name,
         EnvironmentVariable: Input.ToEnvVarFormat(x.name),
@@ -109,15 +109,15 @@ echo "---${buildParameters.logId}"`;
     return object;
   }
 
-  public static getSecrets(hooks) {
-    const secrets = hooks.map((x) => x.secrets).filter((x) => x !== undefined && x.length > 0);
+  public static getSecrets(hooks: any) {
+    const secrets = hooks.map((x: any) => x.secrets).filter((x: any) => x !== undefined && x.length > 0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
-    return secrets.length > 0 ? secrets.reduce((x, y) => [...x, ...y]) : [];
+    return secrets.length > 0 ? secrets.reduce((x: any, y: any) => [...x, ...y]) : [];
   }
 }
 export class Hook {
-  public commands;
+  public commands: any;
   public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
   public name!: string;
   public hook!: string[];

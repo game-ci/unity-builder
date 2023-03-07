@@ -137,13 +137,13 @@ class Kubernetes implements ProviderInterface {
           let existsAlready = false;
           let status;
           try {
-            status = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
-            CloudRunnerLogger.log(JSON.stringify(status.body.status?.containerStatuses, undefined, 4));
+            status = (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace)).body.status;
+            CloudRunnerLogger.log(JSON.stringify(status?.containerStatuses, undefined, 4));
             existsAlready = true;
           } catch {
             // empty
           }
-          if (!existsAlready || status.state?.terminated !== undefined) {
+          if (!existsAlready) {
             CloudRunnerLogger.log('Job does not exist');
             await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
             CloudRunnerLogger.log('Watching pod until running');
@@ -160,10 +160,10 @@ class Kubernetes implements ProviderInterface {
             this.namespace,
             running,
           );
-          status = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
+          let podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
 
           if (!running) {
-            if (!FollowLogStreamService.DidReceiveEndOfTransmission && status === `Succeeded`) {
+            if (!FollowLogStreamService.DidReceiveEndOfTransmission && podStatus === `Succeeded`) {
               output += await KubernetesTaskRunner.runTask(
                 this.kubeConfig,
                 this.kubeClient,
@@ -204,8 +204,8 @@ class Kubernetes implements ProviderInterface {
               break;
             }
           }
-          status = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
-          CloudRunnerLogger.log(`Pod status ${status}, retrying log stream...`);
+          podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
+          CloudRunnerLogger.log(`Pod status ${podStatus}, retrying log stream...`);
         } catch (error: any) {
           let errorParsed;
           try {
@@ -258,7 +258,7 @@ class Kubernetes implements ProviderInterface {
     this.setPodNameAndContainerName(find);
   }
 
-  private async doesJobExist(name) {
+  private async doesJobExist(name: string) {
     const jobs = await this.kubeClientBatch.listNamespacedJob(this.namespace);
 
     return jobs.body.items.some((x) => x.metadata?.name === name);

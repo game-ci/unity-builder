@@ -8,7 +8,7 @@ import UnityVersioning from '../../unity-versioning';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: any) {
   if (overrides) {
     Cli.options = overrides;
   }
@@ -21,7 +21,6 @@ describe('Cloud Runner Locking', () => {
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
     it(`Create Workspace`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -36,7 +35,6 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
     }, 150000);
     it(`Create Workspace And Lock Workspace`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -53,7 +51,6 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
     }, 150000);
     it(`Get Or Create From No Workspace`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -72,7 +69,6 @@ describe('Cloud Runner Locking', () => {
       ).toBeTruthy();
     }, 150000);
     it(`Get Or Create From Unlocked`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -93,7 +89,6 @@ describe('Cloud Runner Locking', () => {
       expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
     }, 150000);
     it(`Get Or Create From Locked`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -120,7 +115,6 @@ describe('Cloud Runner Locking', () => {
       expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
     }, 150000);
     it(`Get Or Create After Double Lock And One Unlock`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -150,7 +144,6 @@ describe('Cloud Runner Locking', () => {
       expect(CloudRunner.lockedWorkspace).not.toContain(newWorkspaceName);
     }, 150000);
     it(`Get Or Create After Double Lock And Unlock`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -181,7 +174,6 @@ describe('Cloud Runner Locking', () => {
       expect(CloudRunner.lockedWorkspace).toContain(newWorkspaceName);
     }, 150000);
     it(`0 free workspaces after locking`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -243,7 +235,6 @@ describe('Cloud Runner Locking', () => {
       expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
     }, 150000);
     it(`Get Or Create From Unlocked Was Locked`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',

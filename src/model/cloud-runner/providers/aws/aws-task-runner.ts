@@ -92,7 +92,7 @@ class AWSTaskRunner {
       return { output, shouldCleanup };
     }
 
-    if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
+    if (taskData?.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
       throw new Error('Container exited with code 1');
     }
 

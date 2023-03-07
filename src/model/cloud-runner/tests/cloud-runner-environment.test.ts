@@ -8,7 +8,7 @@ import { CloudRunnerStatics } from '../cloud-runner-statics';
 import CloudRunnerOptions from '../cloud-runner-options';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: any) {
   if (overrides) {
     Cli.options = overrides;
   }

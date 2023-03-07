@@ -8,7 +8,7 @@ import CloudRunnerOptions from '../../cloud-runner-options';
 import setups from '../cloud-runner-suite.test';
 import SharedWorkspaceLocking from '../../services/shared-workspace-locking';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: any) {
   if (overrides) {
     Cli.options = overrides;
   }
@@ -21,7 +21,6 @@ describe('Cloud Runner Locking', () => {
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
     it(`Simple Locking End2End Flow`, async () => {
-      Cli.options.retainWorkspaces = true;
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',

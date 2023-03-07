@@ -44,7 +44,7 @@
     "reflect-metadata": "^0.1.13",
     "semver": "^7.3.5",
     "unity-changeset": "^2.0.0",
-    "uuid": "^8.3.2",
+    "uuid": "^9.0.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {

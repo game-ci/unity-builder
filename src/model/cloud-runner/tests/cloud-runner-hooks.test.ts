@@ -9,7 +9,7 @@ import setups from './cloud-runner-suite.test';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: any) {
   if (overrides) {
     Cli.options = overrides;
   }
