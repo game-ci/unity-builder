@@ -27,7 +27,13 @@ class KubernetesTaskRunner {
     let shouldCleanup = true;
     stream._write = (chunk, encoding, next) => {
       didStreamAnyLogs = true;
-      KubernetesTaskRunner.lastReceivedTimestamp = new Date(`${chunk.toString().split(`Z `)[0]}Z`);
+      try {
+        const newData = new Date(`${chunk.toString().split(`Z `)[0]}Z`);
+        KubernetesTaskRunner.lastReceivedTimestamp = newData;
+      } catch {
+        /*  */
+      }
+
       const message = chunk.toString().split(`Z `)[1].trimRight(`\n`);
       ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
         message,
