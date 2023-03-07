@@ -1,5 +1,4 @@
 import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
-import { Writable } from 'stream';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import * as core from '@actions/core';
 import waitUntil from 'async-wait-until';
@@ -20,95 +19,44 @@ class KubernetesTaskRunner {
     CloudRunnerLogger.log(
       `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} finished ${alreadyFinished}`,
     );
-    const stream = new Writable();
     let output = '';
     let didStreamAnyLogs: boolean = false;
     let shouldReadLogs = true;
     let shouldCleanup = true;
-    stream._write = (chunk, encoding, next) => {
-      didStreamAnyLogs = true;
-      try {
-        const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
-        const newDate = Date.parse(dateString);
-        new Date(newDate).toISOString();
-        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-      } catch {
-        /*  */
-      }
 
-      const message = chunk.toString().split(`Z `)[1].trimRight(`\n`);
-      ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-        message,
-        shouldReadLogs,
-        shouldCleanup,
-        output,
-      ));
-      next();
-    };
-
-    // export interface LogOptions {
-    /**
-     * Follow the log stream of the pod. Defaults to false.
-     */
-    // follow?: boolean;
-    /**
-     * If set, the number of bytes to read from the server before terminating the log output. This may not display a
-     * complete final line of logging, and may return slightly more or slightly less than the specified limit.
-     */
-    // limitBytes?: number;
-    /**
-     * If true, then the output is pretty printed.
-     */
-    // pretty?: boolean;
-    /**
-     * Return previous terminated container logs. Defaults to false.
-     */
-    // previous?: boolean;
-    /**
-     * A relative time in seconds before the current time from which to show logs. If this value precedes the time a
-     * pod was started, only logs since the pod start will be returned. If this value is in the future, no logs will
-     * be returned. Only one of sinceSeconds or sinceTime may be specified.
-     */
-    // sinceSeconds?: number;
-    /**
-     * If set, the number of lines from the end of the logs to show. If not specified, logs are shown from the creation
-     * of the container or sinceSeconds or sinceTime
-     */
-    // tailLines?: number;
-    /**
-     * If true, add an RFC3339 or RFC3339Nano timestamp at the beginning of every line of log output. Defaults to false.
-     */
-    // timestamps?: boolean;
-    // }
-
-    // const logOptions = {
-    //   follow: !alreadyFinished,
-    //   pretty: false,
-    //   previous: alreadyFinished,
-    //   timestamps: true,
-    //   sinceSeconds: KubernetesTaskRunner.lastReceivedTimestamp,
-    // };
     try {
-      // const resultError = await new Log(kubeConfig).log(namespace, podName, containerName, stream, logOptions);
-
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
         ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp).toISOString()}" `
         : ` `;
-      await CloudRunnerSystem.Run(
-        `kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}> app.log`,
+
+      // using this instead of Kube
+      const logs = await CloudRunnerSystem.Run(
+        `kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}`,
         false,
         true,
       );
-      const logs = await CloudRunnerSystem.Run(`cat app.log`, false, true);
       const splitLogs = logs.split(`\n`);
       for (const element of splitLogs) {
-        stream.write(element);
-      }
-      stream.destroy();
+        didStreamAnyLogs = true;
+        const chunk = element;
+        try {
+          const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
+          const newDate = Date.parse(dateString);
+          new Date(newDate).toISOString();
+          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
+        } catch {
+          /*  */
+        }
 
-      // if (resultError) {
-      //   throw resultError;
-      // }
+        const message = chunk.split(`Z `)[1];
+        ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+          message,
+          shouldReadLogs,
+          shouldCleanup,
+          output,
+        ));
+      }
+
       if (!didStreamAnyLogs) {
         core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
         core.error(
@@ -133,9 +81,6 @@ class KubernetesTaskRunner {
         throw new Error(`No logs streamed from k8s`);
       }
     } catch (error: any) {
-      if (stream) {
-        stream.destroy();
-      }
       CloudRunnerLogger.log('k8s task runner failed');
       CloudRunnerLogger.log(JSON.stringify(error?.response?.body, undefined, 4));
       CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
@@ -181,7 +126,9 @@ class KubernetesTaskRunner {
         intervalBetweenAttempts: 15000,
       },
     );
-    CloudRunnerLogger.log(message);
+    if (!success) {
+      CloudRunnerLogger.log(message);
+    }
 
     return success;
   }
