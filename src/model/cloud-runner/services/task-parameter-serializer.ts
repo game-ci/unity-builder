@@ -35,6 +35,7 @@ export class TaskParameterSerializer {
             !TaskParameterSerializer.blocked.has(x.name) &&
             x.value !== '' &&
             x.value !== undefined &&
+            x.value !== false &&
             x.name !== `CUSTOM_JOB` &&
             x.name !== `GAMECI_CUSTOM_JOB` &&
             x.value !== `undefined`,
