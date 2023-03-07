@@ -6,7 +6,6 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
-import * as core from '@actions/core';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -43,10 +42,6 @@ export class TaskParameterSerializer {
         .map((x) => {
           x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
           x.value = `${x.value}`;
-
-          if (buildParameters.cloudRunnerDebug && Number.isNaN(Number(x.name))) {
-            core.info(`[ERROR] found a number in task param serializer ${JSON.stringify(x)}`);
-          }
 
           return x;
         }),
