@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import { IncomingMessage } from 'http';
+import { IncomingMessage } from 'node:http';
 import GitHub from '../../../github';
 
 class KubernetesStorage {

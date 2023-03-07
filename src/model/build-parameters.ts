@@ -13,11 +13,14 @@ import GitHub from './github';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 
 class BuildParameters {
+  // eslint-disable-next-line no-undef
+  [key: string]: any;
+
   public editorVersion!: string;
   public customImage!: string;
   public unitySerial!: string;
   public unityLicensingServer!: string;
-  public runnerTempPath: string | undefined;
+  public runnerTempPath!: string;
   public targetPlatform!: string;
   public projectPath!: string;
   public buildName!: string;
@@ -33,6 +36,9 @@ class BuildParameters {
   public androidKeyaliasPass!: string;
   public androidTargetSdkVersion!: string;
   public androidSdkManagerParameters!: string;
+  public androidExportType!: string;
+  public androidSymbolType!: string;
+
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
@@ -40,8 +46,8 @@ class BuildParameters {
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public cloudRunnerMemory!: string;
-  public cloudRunnerCpu!: string;
+  public cloudRunnerMemory!: string | undefined;
+  public cloudRunnerCpu!: string | undefined;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
@@ -61,7 +67,7 @@ class BuildParameters {
   public logId!: string;
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
-  public cloudRunnerDebug!: boolean;
+  public cloudRunnerDebug!: boolean | undefined;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
   public retainWorkspace!: boolean;
@@ -76,29 +82,43 @@ class BuildParameters {
   public triggerWorkflowOnComplete!: string[];
   public cloudRunnerDebugSkipLFS!: boolean;
   public cloudRunnerDebugSkipCache!: boolean;
+  public cacheUnityInstallationOnMac!: boolean;
+  public unityHubVersionOnMac!: string;
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidAppBundle);
+    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
     const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
 
-    // Todo - Don't use process.env directly, that's what the input model class is for.
-    // ---
+    const androidSymbolExportType = Input.androidSymbolType;
+    if (Platform.isAndroid(Input.targetPlatform)) {
+      switch (androidSymbolExportType) {
+        case 'none':
+        case 'public':
+        case 'debugging':
+          break;
+        default:
+          throw new Error(
+            `Invalid androidSymbolType: ${Input.androidSymbolType}. Must be one of: none, public, debugging`,
+          );
+      }
+    }
+
     let unitySerial = '';
     if (Input.unityLicensingServer === '') {
-      if (!process.env.UNITY_SERIAL && GitHub.githubInputEnabled) {
+      if (!Input.unitySerial && GitHub.githubInputEnabled) {
         // No serial was present, so it is a personal license that we need to convert
-        if (!process.env.UNITY_LICENSE) {
+        if (!Input.unityLicense) {
           throw new Error(`Missing Unity License File and no Serial was found. If this
                             is a personal license, make sure to follow the activation
                             steps and set the UNITY_LICENSE GitHub secret or enter a Unity
                             serial number inside the UNITY_SERIAL GitHub secret.`);
         }
-        unitySerial = this.getSerialFromLicenseFile(process.env.UNITY_LICENSE);
+        unitySerial = this.getSerialFromLicenseFile(Input.unityLicense);
       } else {
-        unitySerial = process.env.UNITY_SERIAL!;
+        unitySerial = Input.unitySerial!;
       }
     }
 
@@ -107,7 +127,7 @@ class BuildParameters {
       customImage: Input.customImage,
       unitySerial,
       unityLicensingServer: Input.unityLicensingServer,
-      runnerTempPath: process.env.RUNNER_TEMP,
+      runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
       buildName: Input.buildName,
@@ -123,6 +143,8 @@ class BuildParameters {
       androidKeyaliasPass: Input.androidKeyaliasPass,
       androidTargetSdkVersion: Input.androidTargetSdkVersion,
       androidSdkManagerParameters,
+      androidExportType: Input.androidExportType,
+      androidSymbolType: androidSymbolExportType,
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
@@ -165,22 +187,35 @@ class BuildParameters {
       triggerWorkflowOnComplete: CloudRunnerOptions.triggerWorkflowOnComplete,
       cloudRunnerDebugSkipLFS: CloudRunnerOptions.cloudRunnerDebugSkipLFS,
       cloudRunnerDebugSkipCache: CloudRunnerOptions.cloudRunnerDebugSkipCache,
+      cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
+      unityHubVersionOnMac: Input.unityHubVersionOnMac,
     };
   }
 
-  static parseBuildFile(filename, platform, androidAppBundle) {
+  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
 
     if (Platform.isAndroid(platform)) {
-      return androidAppBundle ? `${filename}.aab` : `${filename}.apk`;
+      switch (androidExportType) {
+        case `androidPackage`:
+          return `${filename}.apk`;
+        case `androidAppBundle`:
+          return `${filename}.aab`;
+        case `androidStudioProject`:
+          return filename;
+        default:
+          throw new Error(
+            `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
+          );
+      }
     }
 
     return filename;
   }
 
-  static getSerialFromLicenseFile(license) {
+  static getSerialFromLicenseFile(license: string) {
     const startKey = `<DeveloperData Value="`;
     const endKey = `"/>`;
     const startIndex = license.indexOf(startKey) + startKey.length;

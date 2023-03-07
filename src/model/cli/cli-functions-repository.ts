@@ -16,7 +16,7 @@ export class CliFunctionsRepository {
     });
   }
 
-  public static GetCliFunctions(key) {
+  public static GetCliFunctions(key: any) {
     const results = CliFunctionsRepository.targets.find((x) => x.key === key);
     if (results === undefined || results.length === 0) {
       throw new Error(`no CLI mode found for ${key}`);

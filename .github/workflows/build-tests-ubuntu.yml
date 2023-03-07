@@ -1,10 +1,17 @@
-name: Builds
+name: Builds - Ubuntu
 
 on:
-  push: { branches: [main] }
+  workflow_dispatch:
+  push:
+    branches:
+      - main
   pull_request:
     paths-ignore:
       - '.github/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   UNITY_LICENSE:
@@ -34,23 +41,37 @@ env:
 
 jobs:
   buildForAllPlatformsUbuntu:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        exclude:
+          - targetPlatform: Android
+            unityVersion: 2022.2.7f1
         cloudRunnerCluster:
           # - local-docker
           - local
         projectPath:
           - test-project
         unityVersion:
-          - 2019.2.11f1
+          - 2018.3.14f1
+          - 2018.4.36f1
+          - 2019.1.14f1
+          - 2019.2.21f1
           - 2019.3.15f1
+          - 2019.4.40f1
+          - 2020.2.7f1
+          - 2020.3.45f1
+          - 2021.1.28f1
+          - 2021.2.19f1
+          - 2021.3.19f1
+          - 2022.1.24f1
+          - 2022.2.7f1
         targetPlatform:
-          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone with mono backend.
           - iOS # Build an iOS player.
           - Android # Build an Android .apk.
           - WebGL # WebGL.
@@ -64,14 +85,14 @@ jobs:
       ###########################
       #         Checkout        #
       ###########################
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
 
       ###########################
       #          Cache          #
       ###########################
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ matrix.projectPath }}/Library
           key: Library-${{ matrix.projectPath }}-ubuntu-${{ matrix.targetPlatform }}
@@ -93,7 +114,7 @@ jobs:
       ###########################
       #          Upload         #
       ###########################
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: Build Ubuntu (${{ matrix.unityVersion }})
           path: build

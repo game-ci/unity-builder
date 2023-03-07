@@ -55,7 +55,7 @@ jobs:
           - k8s
     steps:
       - name: Checkout (default)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: false
       - name: Configure AWS Credentials
@@ -164,7 +164,7 @@ jobs:
           - Android # Build an Android .apk.
     steps:
       - name: Checkout (default)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: false
       - run: yarn
@@ -180,7 +180,7 @@ jobs:
           cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
       - run: |
           cp ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
           path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}

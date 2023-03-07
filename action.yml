@@ -22,7 +22,7 @@ inputs:
   buildName:
     required: false
     default: ''
-    description: 'Name of the build.'
+    description: 'Name of the build. Should not include a file extension.'
   buildsPath:
     required: false
     default: ''
@@ -50,7 +50,13 @@ inputs:
   androidAppBundle:
     required: false
     default: 'false'
-    description: 'Whether to build .aab instead of .apk'
+    description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
+  androidExportType:
+    required: false
+    default: ''
+    description:
+      'The android export type. Should be androidPackage for apk, androidAppBundle for aab, or androidStudioProject for
+      an android studio project.'
   androidKeystoreName:
     required: false
     default: ''
@@ -75,6 +81,10 @@ inputs:
     required: false
     default: ''
     description: 'The android target API level.'
+  androidSymbolType:
+    required: false
+    default: 'none'
+    description: 'The android symbol type to export. Should be "none", "public" or "debugging".'
   sshAgent:
     required: false
     default: ''
@@ -187,6 +197,17 @@ inputs:
     description:
       '[CloudRunner] Whether or not to watch the build to the end. Can be used for especially long running jobs e.g
       imports or self-hosted ephemeral runners.'
+  cacheUnityInstallationOnMac:
+    default: 'false'
+    required: false
+    description: 'Whether to cache the Unity hub and editor installation on MacOS'
+  unityHubVersionOnMac:
+    default: ''
+    required: false
+    description:
+      'The version of Unity Hub to install on MacOS (e.g. 3.4.0). Defaults to latest available on brew if empty string
+      or nothing is specified.'
+
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

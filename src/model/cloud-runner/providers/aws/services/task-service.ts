@@ -5,6 +5,8 @@ import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
 import { ListObjectsRequest } from 'aws-sdk/clients/s3';
 import CloudRunner from '../../../cloud-runner';
+import { StackSummaries } from 'aws-sdk/clients/cloudformation';
+import { LogGroups } from 'aws-sdk/clients/cloudwatchlogs';
 
 export class TaskService {
   static async watch() {
@@ -18,7 +20,7 @@ export class TaskService {
     return output;
   }
   public static async getCloudFormationJobStacks() {
-    const result: any[] = [];
+    const result: StackSummaries = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Cloud Formation Stacks`);
     process.env.AWS_REGION = Input.region;
@@ -62,7 +64,7 @@ export class TaskService {
     return result;
   }
   public static async getTasks() {
-    const result: any[] = [];
+    const result: { taskElement: AWS.ECS.Task; element: string }[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
@@ -123,7 +125,7 @@ export class TaskService {
     return message;
   }
   public static async getLogGroups() {
-    const result: any[] = [];
+    const result: LogGroups = [];
     process.env.AWS_REGION = Input.region;
     const ecs = new AWS.CloudWatchLogs();
     let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {

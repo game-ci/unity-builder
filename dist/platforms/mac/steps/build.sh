@@ -76,8 +76,10 @@ fi
 
 if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
   echo "Updating Android SDK with parameters: $ANDROID_SDK_MANAGER_PARAMETERS"
-  export JAVA_HOME="$(awk -F'=' '/JAVA_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
-  "$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
+  ANDROID_INSTALL_LOCATION="/Applications/Unity/Hub/Editor/$UNITY_VERSION/PlaybackEngines/AndroidPlayer"
+  export JAVA_HOME="$ANDROID_INSTALL_LOCATION/OpenJDK"
+  export ANDROID_HOME="$ANDROID_INSTALL_LOCATION/SDK"
+  yes | "$ANDROID_HOME/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
   echo "Updated Android SDK."
 else
   echo "Not updating Android SDK."
@@ -126,6 +128,7 @@ echo ""
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+  -logFile - \
   -quit \
   -batchmode \
   -nographics \
@@ -144,8 +147,9 @@ echo ""
   -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
   -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
   -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
-  $CUSTOM_PARAMETERS \
-  > "$UNITY_PROJECT_PATH/out.log" 2>&1
+  -androidExportType "$ANDROID_EXPORT_TYPE" \
+  -androidSymbolType "$ANDROID_SYMBOL_TYPE" \
+  $CUSTOM_PARAMETERS
 
 # Catch exit code
 BUILD_EXIT_CODE=$?

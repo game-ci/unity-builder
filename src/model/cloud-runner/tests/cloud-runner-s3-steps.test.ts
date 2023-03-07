@@ -7,8 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { OptionValues } from 'commander';
 
-async function CreateParameters(overrides) {
+async function CreateParameters(overrides: OptionValues | undefined) {
   if (overrides) {
     Cli.options = overrides;
   }

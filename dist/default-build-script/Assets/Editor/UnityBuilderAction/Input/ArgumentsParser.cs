@@ -12,14 +12,17 @@ namespace UnityBuilderAction.Input
 
     public static Dictionary<string, string> GetValidatedOptions()
     {
-      ParseCommandLineArguments(out var validatedOptions);
+      Dictionary<string, string> validatedOptions;
+      ParseCommandLineArguments(out validatedOptions);
 
-      if (!validatedOptions.TryGetValue("projectPath", out var projectPath)) {
+      string projectPath;
+      if (!validatedOptions.TryGetValue("projectPath", out projectPath)) {
         Console.WriteLine("Missing argument -projectPath");
         EditorApplication.Exit(110);
       }
 
-      if (!validatedOptions.TryGetValue("buildTarget", out var buildTarget)) {
+      string buildTarget;
+      if (!validatedOptions.TryGetValue("buildTarget", out buildTarget)) {
         Console.WriteLine("Missing argument -buildTarget");
         EditorApplication.Exit(120);
       }
@@ -28,13 +31,15 @@ namespace UnityBuilderAction.Input
         EditorApplication.Exit(121);
       }
 
-      if (!validatedOptions.TryGetValue("customBuildPath", out var customBuildPath)) {
+      string customBuildPath;
+      if (!validatedOptions.TryGetValue("customBuildPath", out customBuildPath)) {
         Console.WriteLine("Missing argument -customBuildPath");
         EditorApplication.Exit(130);
       }
 
       const string defaultCustomBuildName = "TestBuild";
-      if (!validatedOptions.TryGetValue("customBuildName", out var customBuildName)) {
+      string customBuildName;
+      if (!validatedOptions.TryGetValue("customBuildName", out customBuildName)) {
         Console.WriteLine($"Missing argument -customBuildName, defaulting to {defaultCustomBuildName}.");
         validatedOptions.Add("customBuildName", defaultCustomBuildName);
       } else if (customBuildName == "") {

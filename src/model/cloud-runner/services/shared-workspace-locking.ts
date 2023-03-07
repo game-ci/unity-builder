@@ -1,5 +1,5 @@
 import { CloudRunnerSystem } from './cloud-runner-system';
-import * as fs from 'fs';
+import fs from 'node:fs';
 import CloudRunnerLogger from './cloud-runner-logger';
 import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';

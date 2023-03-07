@@ -3,6 +3,7 @@ import CloudRunner from './cloud-runner/cloud-runner';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
 import * as core from '@actions/core';
 import { Octokit } from '@octokit/core';
+
 class GitHub {
   private static readonly asyncChecksApiWorkflowName = `Async Checks API`;
   public static githubInputEnabled: boolean = true;
@@ -44,8 +45,8 @@ class GitHub {
     return CloudRunnerOptions.githubRepoName;
   }
 
-  public static async createGitHubCheck(summary) {
-    if (!CloudRunnerOptions.githubChecks || CloudRunner.isCloudRunnerEnvironment) {
+  public static async createGitHubCheck(summary: string) {
+    if (!CloudRunnerOptions.githubChecks) {
       return ``;
     }
     GitHub.startedDate = new Date().toISOString();
@@ -81,8 +82,7 @@ class GitHub {
   }
 
   public static async updateGitHubCheck(longDescription, summary, result = `neutral`, status = `in_progress`) {
-    const isLocalAsync = CloudRunner.buildParameters.asyncWorkflow && !CloudRunner.isCloudRunnerAsyncEnvironment;
-    if (!CloudRunnerOptions.githubChecks || isLocalAsync) {
+    if (!CloudRunnerOptions.githubChecks) {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
@@ -129,15 +129,15 @@ class GitHub {
     await GitHub.updateGitHubCheckRequest(data);
   }
 
-  public static async updateGitHubCheckRequest(data) {
+  public static async updateGitHubCheckRequest(data: any) {
     return await GitHub.octokitDefaultToken.request(`PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}`, data);
   }
 
-  public static async createGitHubCheckRequest(data) {
+  public static async createGitHubCheckRequest(data: any) {
     return await GitHub.octokitDefaultToken.request(`POST /repos/{owner}/{repo}/check-runs`, data);
   }
 
-  public static async runUpdateAsyncChecksWorkflow(data, mode) {
+  public static async runUpdateAsyncChecksWorkflow(data: any, mode: string) {
     if (mode === `create`) {
       throw new Error(`Not supported: only use update`);
     }

@@ -2,7 +2,7 @@ import Input from '../../input';
 import { GenericInputReader } from '../../input-readers/generic-input-reader';
 import CloudRunnerOptions from '../cloud-runner-options';
 
-const formatFunction = (value, arguments_) => {
+const formatFunction = (value: string, arguments_: any[]) => {
   for (const element of arguments_) {
     value = value.replace(`{${element.key}}`, element.value);
   }
@@ -11,11 +11,11 @@ const formatFunction = (value, arguments_) => {
 };
 
 class CloudRunnerQueryOverride {
-  static queryOverrides: any;
+  static queryOverrides: { [key: string]: string } | undefined;
 
   // TODO accept premade secret sources or custom secret source definition yamls
 
-  public static query(key, alternativeKey) {
+  public static query(key: string, alternativeKey: string) {
     if (CloudRunnerQueryOverride.queryOverrides && CloudRunnerQueryOverride.queryOverrides[key] !== undefined) {
       return CloudRunnerQueryOverride.queryOverrides[key];
     }
@@ -30,7 +30,7 @@ class CloudRunnerQueryOverride {
     return;
   }
 
-  private static shouldUseOverride(query) {
+  private static shouldUseOverride(query: string) {
     if (CloudRunnerOptions.readInputOverrideCommand() !== '') {
       if (CloudRunnerOptions.readInputFromOverrideList() !== '') {
         const doesInclude =
@@ -44,7 +44,7 @@ class CloudRunnerQueryOverride {
     }
   }
 
-  private static async queryOverride(query) {
+  private static async queryOverride(query: string) {
     if (!this.shouldUseOverride(query)) {
       throw new Error(`Should not be trying to run override query on ${query}`);
     }
@@ -56,7 +56,7 @@ class CloudRunnerQueryOverride {
 
   public static async PopulateQueryOverrideInput() {
     const queries = CloudRunnerOptions.readInputFromOverrideList().split(',');
-    CloudRunnerQueryOverride.queryOverrides = new Array();
+    CloudRunnerQueryOverride.queryOverrides = {};
     for (const element of queries) {
       if (CloudRunnerQueryOverride.shouldUseOverride(element)) {
         CloudRunnerQueryOverride.queryOverrides[element] = await CloudRunnerQueryOverride.queryOverride(element);
