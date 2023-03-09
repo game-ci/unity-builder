@@ -32,7 +32,7 @@ class AWSTaskRunner {
     const streamName =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
 
-    const task = await AWSTaskRunner.ECS.runTask({
+    const runParameters = {
       cluster,
       taskDefinition,
       platformVersion: '1.4.0',
@@ -53,7 +53,13 @@ class AWSTaskRunner {
           securityGroups: [ContainerSecurityGroup],
         },
       },
-    }).promise();
+    };
+
+    if (JSON.stringify(runParameters.overrides.containerOverrides).length > 8192) {
+      throw new Error(`Container Overrides length must be at most 8192`);
+    }
+
+    const task = await AWSTaskRunner.ECS.runTask(runParameters).promise();
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
