@@ -24,6 +24,7 @@ export class RemoteClient {
     process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
     CloudRunnerLogger.log(`t3`);
     await RemoteClient.cloneRepoWithoutLFSFiles();
+    await CloudRunnerSystem.Run(`tree -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     CloudRunnerLogger.log(`t4`);
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.sizeOfFolder(
@@ -86,7 +87,7 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
     await CloudRunnerSystem.Run(
-      `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
+      `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
     );
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git lfs install`);

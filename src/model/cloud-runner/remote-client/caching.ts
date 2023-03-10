@@ -70,11 +70,6 @@ export class Caching {
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
 
-      if (CloudRunner.buildParameters.cloudRunnerDebug === true) {
-        // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
-        // await CloudRunnerSystem.Run(`tree -L 2`);
-      }
-
       if (contents.length === 0) {
         CloudRunnerLogger.log(
           `Did not push source folder to cache because it was empty ${path.basename(sourceFolder)}`,
