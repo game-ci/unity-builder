@@ -16,6 +16,7 @@ export class RemoteClient {
   public static async bootstrapRepository() {
     CloudRunnerLogger.log(`t1`);
     await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
+    CloudRunnerLogger.log(`t1.5`);
     await CloudRunnerSystem.Run(
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );

@@ -56,6 +56,7 @@ class AWSTaskRunner {
     };
 
     if (JSON.stringify(runParameters.overrides.containerOverrides).length > 8192) {
+      CloudRunnerLogger.log(JSON.stringify(runParameters.overrides.containerOverrides, undefined, 4));
       throw new Error(`Container Overrides length must be at most 8192`);
     }
 
