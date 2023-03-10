@@ -74,6 +74,7 @@ export class Cli {
 
     // const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
     const buildParameter = await BuildParameters.create();
+    buildParameter.buildGuid = process.env['GAMECI_BUILD_GUID'] || ``;
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
