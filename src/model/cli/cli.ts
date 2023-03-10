@@ -10,7 +10,6 @@ import { LfsHashing } from '../cloud-runner/services/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
 import CloudRunnerOptionsReader from '../cloud-runner/services/cloud-runner-options-reader';
 import GitHub from '../github';
-import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folders';
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import { OptionValues } from 'commander';
@@ -73,7 +72,8 @@ export class Cli {
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options!.versioning = 'None';
 
-    const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
+    // const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
+    const buildParameter = await BuildParameters.create();
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
