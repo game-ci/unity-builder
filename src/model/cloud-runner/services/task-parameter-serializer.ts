@@ -37,6 +37,7 @@ export class TaskParameterSerializer {
             x.value !== undefined &&
             x.name !== `CUSTOM_JOB` &&
             x.name !== `GAMECI_CUSTOM_JOB` &&
+            x.value !== `false` &&
             x.value !== `undefined`,
         )
         .map((x) => {
