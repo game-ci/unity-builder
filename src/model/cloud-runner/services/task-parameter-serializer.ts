@@ -106,16 +106,10 @@ export class TaskParameterSerializer {
     const array: any[] = [];
     const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
     for (const element of keys) {
-      array.push(
-        {
-          name: `GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`,
-          value: buildParameters[element],
-        },
-        {
-          name: element,
-          value: buildParameters[element],
-        },
-      );
+      array.push({
+        name: `GAMECI_${TaskParameterSerializer.ToEnvVarFormat(element)}`,
+        value: buildParameters[element],
+      });
     }
 
     return array;
