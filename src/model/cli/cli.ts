@@ -78,7 +78,8 @@ export class Cli {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    CloudRunner.lockedWorkspace = process.env.LOCKED_WORKSPACE;
+    await CloudRunner.setup(buildParameter);
+    CloudRunner.lockedWorkspace = process.env.GAMECI_LOCKED_WORKSPACE;
 
     return await results.target[results.propertyKey](Cli.options);
   }
@@ -197,8 +198,7 @@ export class Cli {
 
     await RemoteClient.runCustomHookFiles(`after-build`);
 
-    const parameters = await BuildParameters.create();
-    CloudRunner.setup(parameters);
+    const parameters = CloudRunner.buildParameters;
     if (parameters.constantGarbageCollection) {
       await CloudRunnerSystem.Run(
         `find /${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.buildVolumeFolder)}/ -name '*.*' -mmin +${
