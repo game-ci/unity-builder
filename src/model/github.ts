@@ -46,7 +46,7 @@ class GitHub {
   }
 
   public static async createGitHubCheck(summary: string) {
-    if (!CloudRunnerOptions.githubChecks) {
+    if (!CloudRunner.buildParameters.githubChecks) {
       return ``;
     }
     GitHub.startedDate = new Date().toISOString();
@@ -87,7 +87,7 @@ class GitHub {
     result = `neutral`,
     status = `in_progress`,
   ) {
-    if (!CloudRunnerOptions.githubChecks) {
+    if (!CloudRunner.buildParameters.githubChecks) {
       return;
     }
     GitHub.longDescriptionContent += `\n${longDescription}`;
