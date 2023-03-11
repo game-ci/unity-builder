@@ -139,14 +139,18 @@ export class RemoteClient {
   static async runCustomHookFiles(hookLifecycle: string) {
     RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
     const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
-    const files = fs.readdirSync(gameCiCustomHooksPath);
-    for (const file of files) {
-      const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
-      const fileContentsObject = YAML.parse(fileContents.toString());
-      if (fileContentsObject.hook === hookLifecycle) {
-        RemoteClientLogger.log(`Active Hook File ${file} \n \n file contents: \n ${fileContents}`);
-        await CloudRunnerSystem.Run(fileContentsObject.commands);
+    try {
+      const files = fs.readdirSync(gameCiCustomHooksPath);
+      for (const file of files) {
+        const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
+        const fileContentsObject = YAML.parse(fileContents.toString());
+        if (fileContentsObject.hook === hookLifecycle) {
+          RemoteClientLogger.log(`Active Hook File ${file} \n \n file contents: \n ${fileContents}`);
+          await CloudRunnerSystem.Run(fileContentsObject.commands);
+        }
       }
+    } catch (error) {
+      RemoteClientLogger.log(JSON.stringify(error, undefined, 4));
     }
   }
   static async handleRetainedWorkspace() {
