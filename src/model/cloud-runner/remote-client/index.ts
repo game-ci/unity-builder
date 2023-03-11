@@ -60,11 +60,11 @@ export class RemoteClient {
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
 
-    if (CloudRunner.buildParameters.retainWorkspace) {
+    if (CloudRunner.buildParameters.retainWorkspaces) {
       if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
         process.chdir(CloudRunnerFolders.repoPathAbsolute);
         RemoteClientLogger.log(
-          `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
+          `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspaces}`,
         );
         await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
@@ -148,7 +148,7 @@ export class RemoteClient {
     }
   }
   static async handleRetainedWorkspace() {
-    if (!CloudRunner.buildParameters.retainWorkspace) {
+    if (!CloudRunner.buildParameters.retainWorkspaces) {
       return;
     }
     RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);

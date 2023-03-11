@@ -191,7 +191,7 @@ export class Cli {
       `build-${CloudRunner.buildParameters.buildGuid}`,
     );
 
-    if (!CloudRunner.buildParameters.retainWorkspace) {
+    if (!CloudRunner.buildParameters.retainWorkspaces) {
       await CloudRunnerSystem.Run(
         `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
       );

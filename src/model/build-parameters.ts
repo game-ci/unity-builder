@@ -70,7 +70,7 @@ class BuildParameters {
   public cloudRunnerDebug!: boolean | undefined;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
-  public retainWorkspace!: boolean;
+  public retainWorkspaces!: boolean;
   public maxRetainedWorkspaces!: number;
   public useSharedLargePackages!: boolean;
   public useLz4Compression!: boolean;
@@ -175,7 +175,7 @@ class BuildParameters {
       readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
-      retainWorkspace: CloudRunnerOptions.retainWorkspaces,
+      retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
       useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
       useLz4Compression: CloudRunnerOptions.useLz4Compression,
       maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,

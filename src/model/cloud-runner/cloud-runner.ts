@@ -91,7 +91,7 @@ class CloudRunner {
     );
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      if (buildParameters.retainWorkspace) {
+      if (buildParameters.retainWorkspaces) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
         const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
@@ -108,7 +108,7 @@ class CloudRunner {
           ];
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
-          buildParameters.retainWorkspace = false;
+          buildParameters.retainWorkspaces = false;
           CloudRunner.lockedWorkspace = undefined;
         }
       }
@@ -131,7 +131,7 @@ class CloudRunner {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
-      if (CloudRunner.buildParameters.retainWorkspace) {
+      if (CloudRunner.buildParameters.retainWorkspaces) {
         const workspace = CloudRunner.lockedWorkspace || ``;
         await SharedWorkspaceLocking.ReleaseWorkspace(
           workspace,
