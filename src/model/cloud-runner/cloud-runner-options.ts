@@ -29,7 +29,7 @@ class CloudRunnerOptions {
       return process.env[query];
     }
 
-    if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
+    if (alternativeQuery !== query && process.env[`GAMECI_${alternativeQuery}`] !== undefined) {
       return process.env[alternativeQuery];
     }
 
