@@ -79,8 +79,8 @@ export class Cli {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    await CloudRunner.setup(buildParameter);
     CloudRunner.lockedWorkspace = process.env.GAMECI_LOCKED_WORKSPACE;
+    await CloudRunner.setup(buildParameter);
 
     return await results.target[results.propertyKey](Cli.options);
   }

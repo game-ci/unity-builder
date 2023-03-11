@@ -104,7 +104,7 @@ class CloudRunner {
           CloudRunnerLogger.logLine(`Using retained workspace ${CloudRunner.lockedWorkspace}`);
           CloudRunner.cloudRunnerEnvironmentVariables = [
             ...CloudRunner.cloudRunnerEnvironmentVariables,
-            { name: `LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
+            { name: `GAMECI_LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
           ];
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
