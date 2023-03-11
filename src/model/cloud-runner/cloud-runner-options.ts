@@ -30,6 +30,10 @@ class CloudRunnerOptions {
     }
 
     if (alternativeQuery !== query && process.env[`GAMECI_${alternativeQuery}`] !== undefined) {
+      return process.env[`GAMECI_${alternativeQuery}`];
+    }
+
+    if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
       return process.env[alternativeQuery];
     }
 
