@@ -14,18 +14,12 @@ import GitHub from '../../github';
 
 export class RemoteClient {
   public static async bootstrapRepository() {
-    CloudRunnerLogger.log(`t1 ${CloudRunner.buildParameters.buildGuid} ${CloudRunner.lockedWorkspace}`);
     await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-    CloudRunnerLogger.log(`t1.5`);
     await CloudRunnerSystem.Run(
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );
-    CloudRunnerLogger.log(`t2`);
     process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
-    CloudRunnerLogger.log(`t3`);
     await RemoteClient.cloneRepoWithoutLFSFiles();
-    await CloudRunnerSystem.Run(`tree -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-    CloudRunnerLogger.log(`t4`);
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.sizeOfFolder(
       'repo before lfs cache pull',
