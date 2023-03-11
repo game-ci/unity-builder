@@ -64,7 +64,9 @@ class CloudRunnerOptions {
   // GitHub  parameters
   // ### ### ###
   static get githubChecks(): boolean {
-    return CloudRunnerOptions.getInput('githubChecks') || false;
+    const value = CloudRunnerOptions.getInput('githubChecks');
+
+    return (value !== undefined && value !== 'false') || false;
   }
   static get githubCheckId(): string {
     return CloudRunnerOptions.getInput('githubCheckId') || ``;
