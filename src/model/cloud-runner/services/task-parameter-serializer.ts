@@ -14,14 +14,6 @@ export class TaskParameterSerializer {
   ): CloudRunnerEnvironmentVariable[] {
     const result = this.uniqBy(
       [
-        {
-          name: 'ContainerMemory',
-          value: buildParameters.cloudRunnerMemory,
-        },
-        {
-          name: 'ContainerCpu',
-          value: buildParameters.cloudRunnerCpu,
-        },
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.readInput(),
         ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
