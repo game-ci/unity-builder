@@ -153,4 +153,9 @@ export class TaskParameterSerializer {
 
     return array;
   }
+  public static async exportAllCiVariablesWithoutPrefix() {
+    for (const variable of Object.entries(process.env)) {
+      process.env[variable[0].replace(`CI_`, ``)] = variable[1] || ``;
+    }
+  }
 }
