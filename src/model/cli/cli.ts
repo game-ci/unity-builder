@@ -14,6 +14,7 @@ import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folder
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
+import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 
 export class Cli {
   public static options: OptionValues | undefined;
@@ -57,7 +58,7 @@ export class Cli {
     program.parse(process.argv);
     Cli.options = program.opts();
 
-    return Cli.isCliMode || process.env.GAMECI_CLI;
+    return Cli.isCliMode || process.env.CI_CLI;
   }
 
   static async RunCli(): Promise<void> {
@@ -72,14 +73,13 @@ export class Cli {
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options!.versioning = 'None';
 
-    // const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
-    const buildParameter = await BuildParameters.create();
-    buildParameter.buildGuid = process.env['GAMECI_BUILD_GUID'] || ``;
+    const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
+    buildParameter.buildGuid = process.env['CI_BUILD_GUID'] || ``;
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    CloudRunner.lockedWorkspace = process.env.GAMECI_LOCKED_WORKSPACE;
+    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE;
     await CloudRunner.setup(buildParameter);
 
     return await results.target[results.propertyKey](Cli.options);
