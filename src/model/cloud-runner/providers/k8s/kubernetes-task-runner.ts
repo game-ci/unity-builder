@@ -26,7 +26,7 @@ class KubernetesTaskRunner {
 
     try {
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
-        ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp).toISOString()}" `
+        ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp + 1).toISOString()}" `
         : ` `;
 
       // using this instead of Kube
