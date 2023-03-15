@@ -40,8 +40,7 @@ export class TaskParameterSerializer {
             x.value !== `undefined`,
         )
         .map((x) => {
-          x.name = `CI_${TaskParameterSerializer.ToEnvVarFormat(x.name)}`;
-          x.value = `${x.value}`;
+          x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
 
           return x;
         }),
