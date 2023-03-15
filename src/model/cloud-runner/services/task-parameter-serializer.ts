@@ -22,10 +22,6 @@ export class TaskParameterSerializer {
           name: 'ContainerCpu',
           value: buildParameters.cloudRunnerCpu,
         },
-        {
-          name: 'BUILD_TARGET',
-          value: buildParameters.targetPlatform,
-        },
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.readInput(),
         ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
@@ -48,13 +44,7 @@ export class TaskParameterSerializer {
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
 
-    return [
-      ...result,
-      {
-        name: 'BUILD_PATH',
-        value: buildParameters.buildPath,
-      },
-    ];
+    return result;
   }
 
   // eslint-disable-next-line no-unused-vars
