@@ -94,11 +94,17 @@ export class TaskParameterSerializer {
   }
 
   private static camelize(string: string) {
-    return string
-      .replace(/(^\w)|([A-Z])|(\b\w)/g, function (word: string, index: number) {
-        return index === 0 ? word.toLowerCase() : word.toUpperCase();
-      })
-      .replace(/\s+/g, '');
+    return TaskParameterSerializer.uncapitalizeFirstLetter(
+      string
+        .replace(/(^\w)|([A-Z])|(\b\w)/g, function (word: string, index: number) {
+          return index === 0 ? word.toLowerCase() : word.toUpperCase();
+        })
+        .replace(/\s+/g, ''),
+    );
+  }
+
+  private static uncapitalizeFirstLetter(string: string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
   }
 
   private static serializeFromObject(buildParameters: any) {
