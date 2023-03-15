@@ -37,11 +37,10 @@ export class TaskParameterSerializer {
             x.value !== undefined &&
             x.name !== `CUSTOM_JOB` &&
             x.name !== `CI_CUSTOM_JOB` &&
-            x.value !== `false` &&
             x.value !== `undefined`,
         )
         .map((x) => {
-          x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
+          x.name = `CI_${TaskParameterSerializer.ToEnvVarFormat(x.name)}`;
           x.value = `${x.value}`;
 
           return x;
