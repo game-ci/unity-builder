@@ -6,7 +6,6 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
-import ImageEnvironmentFactory from '../../image-environment-factory';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -49,7 +48,13 @@ export class TaskParameterSerializer {
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
 
-    return [...result, ...ImageEnvironmentFactory.getEnvironmentVariables(buildParameters)];
+    return [
+      ...result,
+      {
+        name: 'BUILD_PATH',
+        value: buildParameters.buildPath,
+      },
+    ];
   }
 
   // eslint-disable-next-line no-unused-vars
