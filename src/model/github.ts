@@ -90,6 +90,7 @@ class GitHub {
     if (!CloudRunner.buildParameters.githubChecks) {
       return;
     }
+    CloudRunnerLogger.log(`githubChecks: ${CloudRunner.buildParameters.githubChecks}`);
     GitHub.longDescriptionContent += `\n${longDescription}`;
     if (GitHub.result !== `success` && GitHub.result !== `failure`) {
       GitHub.result = result;
