@@ -66,7 +66,7 @@ class CloudRunnerOptions {
   static get githubChecks(): boolean {
     const value = CloudRunnerOptions.getInput('githubChecks');
 
-    return (value !== undefined && value !== 'false') || false;
+    return value === `true` || false;
   }
   static get githubCheckId(): string {
     return CloudRunnerOptions.getInput('githubCheckId') || ``;
