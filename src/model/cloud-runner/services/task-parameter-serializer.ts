@@ -41,6 +41,7 @@ export class TaskParameterSerializer {
         )
         .map((x) => {
           x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
+          x.value = `${x.value}`;
 
           return x;
         }),
