@@ -87,7 +87,7 @@ class GitHub {
     result = `neutral`,
     status = `in_progress`,
   ) {
-    if (!CloudRunner.buildParameters.githubChecks) {
+    if (`${CloudRunner.buildParameters.githubChecks}` !== `true`) {
       return;
     }
     CloudRunnerLogger.log(`githubChecks: ${CloudRunner.buildParameters.githubChecks}`);
