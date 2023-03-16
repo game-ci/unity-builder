@@ -6,6 +6,7 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
+import { CloudRunnerSystem } from './cloud-runner-system';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -155,7 +156,10 @@ export class TaskParameterSerializer {
   }
   public static async exportAllCiVariablesWithoutPrefix() {
     for (const variable of Object.entries(process.env)) {
-      process.env[variable[0].replace(`CI_`, ``)] = variable[1] || ``;
+      if (variable[0].includes(`CI_`)) {
+        await CloudRunnerSystem.Run(`export ${variable[0].replace(`CI_`, ``)}="${variable[1] || ``}"`);
+      }
     }
+    await CloudRunnerSystem.Run(`printenv`);
   }
 }
