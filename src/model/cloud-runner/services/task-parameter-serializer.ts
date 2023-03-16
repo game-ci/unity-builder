@@ -15,6 +15,7 @@ export class TaskParameterSerializer {
   ): CloudRunnerEnvironmentVariable[] {
     const result = this.uniqBy(
       [
+        [{ name: 'BUILD_TARGET', value: buildParameters.targetPlatform }],
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.readInput(),
         ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks)),
