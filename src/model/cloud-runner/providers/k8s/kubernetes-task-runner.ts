@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import waitUntil from 'async-wait-until';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
+import CloudRunner from '../../cloud-runner';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number;
@@ -44,7 +45,7 @@ class KubernetesTaskRunner {
         new Date(newDate).toISOString();
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
 
-        const message = chunk.split(`Z `)[1];
+        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
           shouldReadLogs,
