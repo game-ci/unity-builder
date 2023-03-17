@@ -7,6 +7,7 @@ import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerSystem } from './cloud-runner-system';
+import { CloudRunnerFolders } from './cloud-runner-folders';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -161,10 +162,12 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        await CloudRunnerSystem.Run(`echo "export ${name}=\\"${value}\\"" >> setEnv.sh`);
+        await CloudRunnerSystem.Run(
+          `echo "export ${name}=\\"${value}\\"" >> ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+        );
       }
     }
-    await CloudRunnerSystem.Run(`chmod +x ./setEnv.sh`);
-    await CloudRunnerSystem.Run(`./setEnv.sh`);
+    await CloudRunnerSystem.Run(`chmod +x ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`);
+    await CloudRunnerSystem.Run(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`);
   }
 }
