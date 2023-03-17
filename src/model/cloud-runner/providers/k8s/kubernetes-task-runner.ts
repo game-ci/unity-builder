@@ -39,14 +39,10 @@ class KubernetesTaskRunner {
       for (const element of splitLogs) {
         didStreamAnyLogs = true;
         const chunk = element;
-        try {
-          const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
-          const newDate = Date.parse(dateString);
-          new Date(newDate).toISOString();
-          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-        } catch {
-          /*  */
-        }
+        const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
+        const newDate = Date.parse(dateString);
+        new Date(newDate).toISOString();
+        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
 
         const message = chunk.split(`Z `)[1];
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
