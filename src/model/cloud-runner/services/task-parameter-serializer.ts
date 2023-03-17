@@ -161,9 +161,10 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        await CloudRunnerSystem.Run(`export ${name}="${value}"`);
+        await CloudRunnerSystem.Run(`echo "export ${name}=\\"${value}\\"" >> setEnv.sh`);
       }
     }
+    await CloudRunnerSystem.Run(`./setEnv.sh`);
     await CloudRunnerSystem.Run(`printenv`);
   }
 }
