@@ -95,8 +95,8 @@ echo "downloading game-ci..."
 ${cloneBuilderCommands}
 echo "bootstrap game ci cloud runner..."
 node ${builderPath} -m remote-cli-pre-build
-./setEnv.sh
-rm ./setEnv.sh
+${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh
+rm ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh
 printenv`;
   }
 
