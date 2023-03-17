@@ -98,21 +98,22 @@ class KubernetesTaskRunner {
         message = `Phase:${status.body.status?.phase} \n Reason:${
           status.body.status?.conditions?.[0].reason || ''
         } \n Message:${status.body.status?.conditions?.[0].message || ''}`;
-        CloudRunnerLogger.log(
-          JSON.stringify(
-            (await kubeClient.listNamespacedEvent(namespace)).body.items
-              .map((x) => {
-                return {
-                  message: x.message || ``,
-                  name: x.metadata.name || ``,
-                  reason: x.reason || ``,
-                };
-              })
-              .filter((x) => x.name.includes(podName)),
-            undefined,
-            4,
-          ),
-        );
+
+        // CloudRunnerLogger.log(
+        //   JSON.stringify(
+        //     (await kubeClient.listNamespacedEvent(namespace)).body.items
+        //       .map((x) => {
+        //         return {
+        //           message: x.message || ``,
+        //           name: x.metadata.name || ``,
+        //           reason: x.reason || ``,
+        //         };
+        //       })
+        //       .filter((x) => x.name.includes(podName)),
+        //     undefined,
+        //     4,
+        //   ),
+        // );
         if (success || phase !== 'Pending') return true;
 
         return false;
