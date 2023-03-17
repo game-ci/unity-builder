@@ -166,6 +166,5 @@ export class TaskParameterSerializer {
     }
     await CloudRunnerSystem.Run(`chmod +x ./setEnv.sh`);
     await CloudRunnerSystem.Run(`./setEnv.sh`);
-    await CloudRunnerSystem.Run(`printenv`);
   }
 }

@@ -94,7 +94,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 echo "downloading game-ci..."
 ${cloneBuilderCommands}
 echo "bootstrap game ci cloud runner..."
-node ${builderPath} -m remote-cli-pre-build`;
+node ${builderPath} -m remote-cli-pre-build
+./setEnv.sh
+rm ./setEnv.sh
+printenv`;
   }
 
   private static BuildCommands(builderPath: string) {
