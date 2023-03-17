@@ -43,15 +43,16 @@ class KubernetesTaskRunner {
         const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
-        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-
-        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
-        ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-          message,
-          shouldReadLogs,
-          shouldCleanup,
-          output,
-        ));
+        if (KubernetesTaskRunner.lastReceivedTimestamp < newDate) {
+          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
+          const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+          ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+            message,
+            shouldReadLogs,
+            shouldCleanup,
+            output,
+          ));
+        }
       }
 
       if (!didStreamAnyLogs) {
@@ -77,10 +78,10 @@ class KubernetesTaskRunner {
         );
         throw new Error(`No logs streamed from k8s`);
       }
+      CloudRunnerLogger.log('end of log stream');
     } catch (error: any) {
-      CloudRunnerLogger.log(`k8s task runner failed ${JSON.stringify(error, undefined, 4)}`);
+      CloudRunnerLogger.log(`k8s stream watching failed ${JSON.stringify(error, undefined, 4)}`);
     }
-    CloudRunnerLogger.log('end of log stream');
 
     return output;
   }
