@@ -145,7 +145,7 @@ export class RemoteClient {
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
-    if (!CloudRunner.buildParameters.cloudRunnerDebugSkipLFS) {
+    if (!CloudRunner.buildParameters.skipLFS) {
       await CloudRunnerSystem.Run(`git lfs pull`);
       RemoteClientLogger.log(`pulled latest LFS files`);
       assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));

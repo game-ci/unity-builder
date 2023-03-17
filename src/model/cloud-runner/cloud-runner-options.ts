@@ -250,11 +250,11 @@ class CloudRunnerOptions {
   static get cloudRunnerDebugEnv(): boolean {
     return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) === `true` || false;
   }
-  static get cloudRunnerDebugSkipLFS(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipLFS`) === `true` || false;
+  static get skipLFS(): boolean {
+    return CloudRunnerOptions.getInput(`skipLFS`) === `true` || false;
   }
-  static get cloudRunnerDebugSkipCache(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugSkipCache`) === `true` || false;
+  static get skipCache(): boolean {
+    return CloudRunnerOptions.getInput(`skipCache`) === `true` || false;
   }
 
   static get watchCloudRunnerToEnd(): boolean {

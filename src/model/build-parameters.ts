@@ -79,8 +79,8 @@ class BuildParameters {
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
   public triggerWorkflowOnComplete!: string[];
-  public cloudRunnerDebugSkipLFS!: boolean;
-  public cloudRunnerDebugSkipCache!: boolean;
+  public skipLFS!: boolean;
+  public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
 
@@ -183,8 +183,8 @@ class BuildParameters {
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
       triggerWorkflowOnComplete: CloudRunnerOptions.triggerWorkflowOnComplete,
-      cloudRunnerDebugSkipLFS: CloudRunnerOptions.cloudRunnerDebugSkipLFS,
-      cloudRunnerDebugSkipCache: CloudRunnerOptions.cloudRunnerDebugSkipCache,
+      skipLFS: CloudRunnerOptions.skipLFS,
+      skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
     };
