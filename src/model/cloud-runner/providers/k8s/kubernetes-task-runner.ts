@@ -29,10 +29,11 @@ class KubernetesTaskRunner {
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
         ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp + 1).toISOString()}" `
         : ` `;
+      let started = false;
 
       // using this instead of Kube
       const logs = await CloudRunnerSystem.Run(
-        `kubectl logs ${podName} -c ${containerName} --timestamps ${sinceTime}`,
+        `kubectl logs ${podName} -f -c ${containerName} --timestamps ${sinceTime}`,
         false,
         true,
       );
@@ -44,15 +45,19 @@ class KubernetesTaskRunner {
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
         if (KubernetesTaskRunner.lastReceivedTimestamp < newDate) {
-          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-          const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
-          ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-            message,
-            shouldReadLogs,
-            shouldCleanup,
-            output,
-          ));
+          started = true;
         }
+        if (!started) {
+          continue;
+        }
+        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
+        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+        ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+          message,
+          shouldReadLogs,
+          shouldCleanup,
+          output,
+        ));
       }
 
       if (!didStreamAnyLogs) {
