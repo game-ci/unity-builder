@@ -55,6 +55,7 @@ class KubernetesTaskRunner {
         if (!started) {
           continue;
         }
+        KubernetesTaskRunner.lastReceivedMessage = message;
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
