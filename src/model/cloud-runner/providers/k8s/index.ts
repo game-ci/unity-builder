@@ -171,15 +171,6 @@ class Kubernetes implements ProviderInterface {
                 this.namespace,
                 true,
               );
-              output += await KubernetesTaskRunner.runTask(
-                this.kubeConfig,
-                this.kubeClient,
-                this.jobName,
-                this.podName,
-                ``,
-                this.namespace,
-                true,
-              );
               CloudRunnerLogger.log(
                 JSON.stringify(
                   (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
