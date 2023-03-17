@@ -8,6 +8,7 @@ import CloudRunner from '../../cloud-runner';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number;
+  static lastReceivedMessage: string = ``;
   static async runTask(
     kubeConfig: KubeConfig,
     kubeClient: CoreV1Api,
@@ -44,14 +45,17 @@ class KubernetesTaskRunner {
         const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
-        if (KubernetesTaskRunner.lastReceivedTimestamp < newDate) {
+        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+        if (
+          message !== KubernetesTaskRunner.lastReceivedMessage &&
+          KubernetesTaskRunner.lastReceivedTimestamp < newDate
+        ) {
           started = true;
         }
         if (!started) {
           continue;
         }
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
           shouldReadLogs,
