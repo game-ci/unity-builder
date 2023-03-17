@@ -158,7 +158,10 @@ export class TaskParameterSerializer {
   public static async exportAllCiVariablesWithoutPrefix() {
     for (const variable of Object.entries(process.env)) {
       if (variable[0].includes(`CI_`)) {
-        process.env[variable[0].replace(`CI_`, ``)] = `${variable[1] || ``}`;
+        const name = variable[0].replace(`CI_`, ``);
+        const value = `${variable[1] || ``}`;
+        process.env[name] = value;
+        await CloudRunnerSystem.Run(`export ${name}="${value}"`);
       }
     }
     await CloudRunnerSystem.Run(`printenv`);
