@@ -41,7 +41,7 @@ export class AWSJobStack {
       `ContainerMemory:
     Default: ${Number.parseInt(memory)}`,
     );
-    if (CloudRunnerOptions.watchCloudRunnerToEnd) {
+    if (!CloudRunnerOptions.asyncCloudRunner) {
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
         '# template resources logstream',

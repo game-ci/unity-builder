@@ -257,14 +257,6 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput(`skipCache`) === `true` || false;
   }
 
-  static get watchCloudRunnerToEnd(): boolean {
-    if (CloudRunnerOptions.asyncCloudRunner) {
-      return false;
-    }
-
-    return CloudRunnerOptions.getInput(`watchToEnd`) || true;
-  }
-
   public static get asyncCloudRunner(): boolean {
     return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
   }
