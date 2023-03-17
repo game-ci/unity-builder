@@ -301,10 +301,6 @@ class CloudRunnerOptions {
   // Garbage Collection
   // ### ### ###
 
-  static get constantGarbageCollection(): boolean {
-    return CloudRunnerOptions.getInput(`constantGarbageCollection`) || true;
-  }
-
   static get garbageCollectionMaxAge(): number {
     return Number(CloudRunnerOptions.getInput(`garbageCollectionMaxAge`)) || 24;
   }

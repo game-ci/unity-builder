@@ -75,7 +75,6 @@ class BuildParameters {
   public useSharedLargePackages!: boolean;
   public useLz4Compression!: boolean;
   public garbageCollectionMaxAge!: number;
-  public constantGarbageCollection!: boolean;
   public githubChecks!: boolean;
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
@@ -179,7 +178,6 @@ class BuildParameters {
       useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
       useLz4Compression: CloudRunnerOptions.useLz4Compression,
       maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
-      constantGarbageCollection: CloudRunnerOptions.constantGarbageCollection,
       garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
