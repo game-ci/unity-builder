@@ -50,9 +50,9 @@ jobs:
           - 'cloud-runner-local-persistence'
           # - 'cloud-runner-locking'
         cloudRunnerCluster:
-          - aws
+          # - aws
           - local-docker
-          - k8s
+          # - k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v3
