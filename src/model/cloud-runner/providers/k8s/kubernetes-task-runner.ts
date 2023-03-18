@@ -41,13 +41,17 @@ class KubernetesTaskRunner {
       );
       const splitLogs = logs.split(`\n`);
       for (const chunk of splitLogs) {
-        if (chunk === KubernetesTaskRunner.lastReceivedMessage) {
+        if (
+          chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
+          KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
+        ) {
+          CloudRunnerLogger.log(`Previous log message found ${chunk}`);
           lastMessageSeenIncludedInChunk = true;
         }
       }
       for (const chunk of splitLogs) {
         const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
-        if (chunk === KubernetesTaskRunner.lastReceivedMessage) {
+        if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
           lastMessageSeen = true;
         }
         if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
