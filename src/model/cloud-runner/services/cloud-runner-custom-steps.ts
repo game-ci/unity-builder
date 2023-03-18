@@ -45,12 +45,14 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+    aws s3 cp /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
-      } s3://${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
+      } s3://${
+        CloudRunner.buildParameters.awsBaseStackName
+      }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
       }
-    rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+    rm /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
       }
   secrets:
@@ -63,22 +65,22 @@ export class CloudRunnerCustomSteps {
 - name: aws-s3-pull-build
   image: amazon/aws-cli
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
+    aws configure set aws_access_key_id $CI_AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $CI_AWS_DEFAULT_REGION --profile default
     aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CACHE_KEY/build || true
+    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/build || true
     aws s3 cp s3://${
       CloudRunner.buildParameters.awsBaseStackName
-    }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+    }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
-      } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+      } /data/cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
       }
   secrets:
-    - name: awsAccessKeyId
-    - name: awsSecretAccessKey
-    - name: awsDefaultRegion
+    - name: CI_AWS_ACCESS_KEY_ID
+    - name: CI_AWS_SECRET_ACCESS_KEY
+    - name: CI_AWS_DEFAULT_REGION
     - name: BUILD_GUID_TARGET
 - name: steam-deploy-client
   image: steamcmd/steamcmd
@@ -120,47 +122,47 @@ export class CloudRunnerCustomSteps {
   image: amazon/aws-cli
   hook: after
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
+    aws configure set aws_access_key_id $CI_AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $CI_AWS_DEFAULT_REGION --profile default
+    aws s3 cp --recursive /data/cache/$CI_CACHE_KEY/lfs s3://${
       CloudRunner.buildParameters.awsBaseStackName
-    }/cloud-runner-cache/$CACHE_KEY/lfs
-    rm -r /data/cache/$CACHE_KEY/lfs
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
+    }/cloud-runner-cache/$CI_CACHE_KEY/lfs
+    rm -r /data/cache/$CI_CACHE_KEY/lfs
+    aws s3 cp --recursive /data/cache/$CI_CACHE_KEY/Library s3://${
       CloudRunner.buildParameters.awsBaseStackName
-    }/cloud-runner-cache/$CACHE_KEY/Library
-    rm -r /data/cache/$CACHE_KEY/Library
+    }/cloud-runner-cache/$CI_CACHE_KEY/Library
+    rm -r /data/cache/$CI_CACHE_KEY/Library
   secrets:
-  - name: awsAccessKeyId
+  - name: CI_AWS_ACCESS_KEY_ID
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
-  - name: awsSecretAccessKey
+  - name: CI_AWS_SECRET_ACCESS_KEY
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
-  - name: awsDefaultRegion
+  - name: CI_AWS_DEFAULT_REGION
     value: ${process.env.AWS_REGION || ``}
 - name: aws-s3-pull-cache
   image: amazon/aws-cli
   hook: before
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
+    aws configure set aws_access_key_id $CI_AWS_ACCESS_KEY_ID --profile default
+    aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
+    aws configure set region $CI_AWS_DEFAULT_REGION --profile default
     aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CACHE_KEY/ || true
-    BUCKET1="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
+    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/ || true
+    BUCKET1="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/Library/"
     aws s3 ls $BUCKET1 || true
     OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
-    BUCKET2="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
+    aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CI_CACHE_KEY/Library/ || true
+    BUCKET2="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/lfs/"
     aws s3 ls $BUCKET2 || true
     OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+    aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CI_CACHE_KEY/lfs/ || true
   secrets:
-  - name: awsAccessKeyId
+  - name: CI_AWS_ACCESS_KEY_ID
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
-  - name: awsSecretAccessKey
+  - name: CI_AWS_SECRET_ACCESS_KEY
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
-  - name: awsDefaultRegion
+  - name: CI_AWS_DEFAULT_REGION
     value: ${process.env.AWS_REGION || ``}
 - name: debug-cache
   image: ubuntu
