@@ -13,7 +13,7 @@ class GitHub {
   static result: string = ``;
   private static get octokitDefaultToken() {
     return new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: process.env.GITHUB_TOKEN || process.env.CI_GITHUB_TOKEN,
     });
   }
   private static get octokitPAT() {
