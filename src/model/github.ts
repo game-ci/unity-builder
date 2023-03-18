@@ -13,7 +13,7 @@ class GitHub {
   static result: string = ``;
   private static get octokitDefaultToken() {
     return new Octokit({
-      auth: process.env.GITHUB_TOKEN || process.env.CI_GITHUB_TOKEN,
+      auth: process.env.CI_GITHUB_TOKEN || process.env.GITHUB_TOKEN,
     });
   }
   private static get octokitPAT() {
@@ -90,7 +90,9 @@ class GitHub {
     if (`${CloudRunner.buildParameters.githubChecks}` !== `true`) {
       return;
     }
-    CloudRunnerLogger.log(`githubChecks: ${CloudRunner.buildParameters.githubChecks}`);
+    CloudRunnerLogger.log(
+      `githubChecks: ${CloudRunner.buildParameters.githubChecks} checkRunId: ${GitHub.checkRunId} sha: ${GitHub.sha} async: ${CloudRunner.isCloudRunnerAsyncEnvironment}`,
+    );
     GitHub.longDescriptionContent += `\n${longDescription}`;
     if (GitHub.result !== `success` && GitHub.result !== `failure`) {
       GitHub.result = result;
@@ -125,14 +127,9 @@ class GitHub {
       data.conclusion = result;
     }
 
-    if (CloudRunner.isCloudRunnerAsyncEnvironment) {
-      CloudRunnerLogger.log(`Updating check via async update workflow`);
-      await GitHub.runUpdateAsyncChecksWorkflow(data, `update`);
-
-      return;
-    }
-    CloudRunnerLogger.log(`Updating check via direct call`);
-    await GitHub.updateGitHubCheckRequest(data);
+    await (CloudRunner.isCloudRunnerAsyncEnvironment
+      ? GitHub.runUpdateAsyncChecksWorkflow(data, `update`)
+      : GitHub.updateGitHubCheckRequest(data));
   }
 
   public static async updateGitHubCheckRequest(data: any) {
