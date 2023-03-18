@@ -47,7 +47,7 @@ class KubernetesTaskRunner {
         new Date(newDate).toISOString();
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
         if (
-          message !== KubernetesTaskRunner.lastReceivedMessage &&
+          message !== KubernetesTaskRunner.lastReceivedMessage ||
           KubernetesTaskRunner.lastReceivedTimestamp < newDate
         ) {
           started = true;
