@@ -75,6 +75,7 @@ export class SharedWorkspaceLocking {
       const workspaces = await SharedWorkspaceLocking.GetFreeWorkspaces(buildParametersContext);
       CloudRunnerLogger.log(`run agent ${runId} is trying to access a workspace, free: ${JSON.stringify(workspaces)}`);
       for (const element of workspaces) {
+        await new Promise((promise) => setTimeout(promise, 1000));
         const lockResult = await SharedWorkspaceLocking.LockWorkspace(element, runId, buildParametersContext);
         CloudRunnerLogger.log(
           `run agent: ${runId} try lock workspace: ${element} locking attempt result: ${lockResult}`,
@@ -134,6 +135,7 @@ export class SharedWorkspaceLocking {
     const result: string[] = [];
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     for (const element of workspaces) {
+      await new Promise((promise) => setTimeout(promise, 1500));
       const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(element, buildParametersContext);
       const isBelowMax = await SharedWorkspaceLocking.IsWorkspaceBelowMax(element, buildParametersContext);
       CloudRunnerLogger.log(`workspace ${element} locked:${isLocked} below max:${isBelowMax}`);
