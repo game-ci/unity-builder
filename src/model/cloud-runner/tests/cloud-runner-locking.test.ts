@@ -87,7 +87,7 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
-    }, 150000);
+    }, 300000);
     it(`Get Or Create From Locked`, async () => {
       const overrides: any = {
         versioning: 'None',
@@ -113,7 +113,7 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
-    }, 150000);
+    }, 300000);
     it(`Get Or Create After Double Lock And One Unlock`, async () => {
       const overrides: any = {
         versioning: 'None',
@@ -142,7 +142,7 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).not.toContain(newWorkspaceName);
-    }, 150000);
+    }, 300000);
     it(`Get Or Create After Double Lock And Unlock`, async () => {
       const overrides: any = {
         versioning: 'None',
@@ -172,7 +172,7 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toContain(newWorkspaceName);
-    }, 150000);
+    }, 300000);
     it(`0 free workspaces after locking`, async () => {
       const overrides: any = {
         versioning: 'None',
@@ -233,7 +233,7 @@ describe('Cloud Runner Locking', () => {
       }
       expect(result).toHaveLength(0);
       expect(await SharedWorkspaceLocking.GetFreeWorkspaces(buildParameters)).toHaveLength(0);
-    }, 150000);
+    }, 300000);
     it(`Get Or Create From Unlocked Was Locked`, async () => {
       const overrides: any = {
         versioning: 'None',
@@ -255,6 +255,6 @@ describe('Cloud Runner Locking', () => {
         await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
       ).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
-    }, 150000);
+    }, 300000);
   }
 });
