@@ -30,7 +30,8 @@ class KubernetesTaskRunner {
       const sinceTime = KubernetesTaskRunner.lastReceivedTimestamp
         ? `--since-time="${new Date(KubernetesTaskRunner.lastReceivedTimestamp + 1).toISOString()}" `
         : ` `;
-      let started = false;
+      let lastMessageSeenIncludedInChunk = false;
+      let lastMessageSeen = false;
 
       // using this instead of Kube
       const logs = await CloudRunnerSystem.Run(
@@ -39,16 +40,21 @@ class KubernetesTaskRunner {
         true,
       );
       const splitLogs = logs.split(`\n`);
+      for (const chunk of splitLogs) {
+        if (chunk === KubernetesTaskRunner.lastReceivedMessage) {
+          lastMessageSeenIncludedInChunk = true;
+        }
+      }
       for (const element of splitLogs) {
         didStreamAnyLogs = true;
         const chunk = element;
         const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
-        if (chunk !== KubernetesTaskRunner.lastReceivedMessage) {
-          started = true;
+        if (chunk === KubernetesTaskRunner.lastReceivedMessage) {
+          lastMessageSeen = true;
         }
-        if (!started) {
+        if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
           continue;
         }
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
