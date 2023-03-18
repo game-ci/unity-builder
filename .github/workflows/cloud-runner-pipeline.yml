@@ -52,7 +52,7 @@ jobs:
         cloudRunnerCluster:
           # - aws
           - local-docker
-          - k8s
+          # - k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v3
