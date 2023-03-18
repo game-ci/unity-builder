@@ -45,18 +45,15 @@ class KubernetesTaskRunner {
           lastMessageSeenIncludedInChunk = true;
         }
       }
-      for (const element of splitLogs) {
-        didStreamAnyLogs = true;
-        const chunk = element;
-        const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
-        const newDate = Date.parse(dateString);
-        new Date(newDate).toISOString();
+      for (const chunk of splitLogs) {
+        const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
         if (chunk === KubernetesTaskRunner.lastReceivedMessage) {
           lastMessageSeen = true;
         }
         if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
           continue;
         }
+        didStreamAnyLogs = true;
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
         KubernetesTaskRunner.lastReceivedMessage = chunk;
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
