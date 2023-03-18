@@ -12,6 +12,7 @@ import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import YAML from 'yaml';
 import GitHub from '../../github';
 import { TaskParameterSerializer } from '../services/task-parameter-serializer';
+import BuildParameters from '../../build-parameters';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
@@ -89,11 +90,15 @@ export class RemoteClient {
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
 
-    if (CloudRunner.buildParameters.retainWorkspaces) {
+    if (BuildParameters.useRetainedWorkspaceMode(CloudRunner.buildParameters)) {
       if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
         process.chdir(CloudRunnerFolders.repoPathAbsolute);
         RemoteClientLogger.log(
-          `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspaces}`,
+          `${
+            CloudRunnerFolders.repoPathAbsolute
+          } repo exists - skipping clone - retained workspace mode ${BuildParameters.useRetainedWorkspaceMode(
+            CloudRunner.buildParameters,
+          )}`,
         );
         await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
@@ -152,7 +157,7 @@ export class RemoteClient {
     }
   }
   static async handleRetainedWorkspace() {
-    if (!CloudRunner.buildParameters.retainWorkspaces) {
+    if (!BuildParameters.useRetainedWorkspaceMode(CloudRunner.buildParameters)) {
       return;
     }
     RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== undefined}`);

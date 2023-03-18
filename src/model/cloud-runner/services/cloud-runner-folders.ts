@@ -1,6 +1,7 @@
 import path from 'node:path';
 import CloudRunnerOptions from '../cloud-runner-options';
 import CloudRunner from './../cloud-runner';
+import BuildParameters from '../../build-parameters';
 
 export class CloudRunnerFolders {
   public static readonly repositoryFolder = 'repo';
@@ -12,7 +13,9 @@ export class CloudRunnerFolders {
   // Only the following paths that do not start a path.join with another "Full" suffixed property need to start with an absolute /
 
   public static get uniqueCloudRunnerJobFolderAbsolute(): string {
-    return CloudRunner.buildParameters && CloudRunner.buildParameters.retainWorkspaces && CloudRunner.lockedWorkspace
+    return CloudRunner.buildParameters &&
+      BuildParameters.useRetainedWorkspaceMode(CloudRunner.buildParameters) &&
+      CloudRunner.lockedWorkspace
       ? path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.lockedWorkspace)
       : path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
   }

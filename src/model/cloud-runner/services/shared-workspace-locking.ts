@@ -1,7 +1,6 @@
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'node:fs';
 import CloudRunnerLogger from './cloud-runner-logger';
-import CloudRunnerOptions from '../cloud-runner-options';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
@@ -68,7 +67,7 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ) {
-    if (!CloudRunnerOptions.retainWorkspaces) {
+    if (!BuildParameters.useRetainedWorkspaceMode(buildParametersContext)) {
       return false;
     }
 
@@ -153,8 +152,7 @@ export class SharedWorkspaceLocking {
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     if (workspace === ``) {
       return (
-        workspaces.length < buildParametersContext.maxRetainedWorkspaces ||
-        buildParametersContext.maxRetainedWorkspaces === 0
+        workspaces.length < buildParametersContext.retainWorkspaces || buildParametersContext.retainWorkspaces === 0
       );
     }
     const ordered: any[] = [];
@@ -168,8 +166,8 @@ export class SharedWorkspaceLocking {
     const matches = ordered.filter((x) => x.name.includes(workspace));
     const isWorkspaceBelowMax =
       matches.length > 0 &&
-      (ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces ||
-        buildParametersContext.maxRetainedWorkspaces === 0);
+      (ordered.indexOf(matches[0]) < buildParametersContext.retainWorkspaces ||
+        buildParametersContext.retainWorkspaces === 0);
 
     return isWorkspaceBelowMax;
   }
@@ -230,7 +228,7 @@ export class SharedWorkspaceLocking {
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
     if (!(await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext))) {
-      CloudRunnerLogger.log(`Workspace is above max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
+      CloudRunnerLogger.log(`Workspace is above max ${workspaces} ${buildParametersContext.retainWorkspaces}`);
       await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
       return false;

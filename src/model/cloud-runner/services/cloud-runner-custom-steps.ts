@@ -46,14 +46,14 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 cp /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
-        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       } s3://${
         CloudRunner.buildParameters.awsBaseStackName
       }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID.tar${
-        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       }
     rm /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
-        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       }
   secrets:
   - name: awsAccessKeyId
@@ -73,9 +73,9 @@ export class CloudRunnerCustomSteps {
     aws s3 cp s3://${
       CloudRunner.buildParameters.awsBaseStackName
     }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
-        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       } /data/cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
-        CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       }
   secrets:
     - name: CI_AWS_ACCESS_KEY_ID
@@ -169,8 +169,8 @@ export class CloudRunnerCustomSteps {
   hook: after
   commands: |
     apt-get update > /dev/null
-    ${CloudRunnerOptions.cloudRunnerDebugTree ? `apt-get install -y tree > /dev/null` : `#`}
-    ${CloudRunnerOptions.cloudRunnerDebugTree ? `tree -L 3 /data/cache` : `#`}
+    ${CloudRunnerOptions.cloudRunnerDebug ? `apt-get install -y tree > /dev/null` : `#`}
+    ${CloudRunnerOptions.cloudRunnerDebug ? `tree -L 3 /data/cache` : `#`}
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}

@@ -53,7 +53,7 @@ class CloudRunner {
       core.setOutput(
         Input.ToEnvVarFormat(`buildArtifact`),
         `build-${CloudRunner.buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
         }`,
       );
     }
@@ -91,7 +91,7 @@ class CloudRunner {
     );
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      if (buildParameters.retainWorkspaces) {
+      if (BuildParameters.useRetainedWorkspaceMode(buildParameters)) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
         const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
@@ -107,8 +107,8 @@ class CloudRunner {
             { name: `CI_LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
           ];
         } else {
-          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
-          buildParameters.retainWorkspaces = false;
+          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.retainWorkspaces}`);
+          buildParameters.retainWorkspaces = 0;
           CloudRunner.lockedWorkspace = undefined;
         }
       }
@@ -131,7 +131,7 @@ class CloudRunner {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
-      if (CloudRunner.buildParameters.retainWorkspaces) {
+      if (BuildParameters.useRetainedWorkspaceMode(buildParameters)) {
         const workspace = CloudRunner.lockedWorkspace || ``;
         await SharedWorkspaceLocking.ReleaseWorkspace(
           workspace,

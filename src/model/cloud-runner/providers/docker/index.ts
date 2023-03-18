@@ -51,14 +51,14 @@ class LocalDockerCloudRunner implements ProviderInterface {
     if (
       fs.existsSync(
         `${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
         }`,
       )
     ) {
       await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache/cache/build/`);
       await CloudRunnerSystem.Run(
         `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
         }`,
       );
     }

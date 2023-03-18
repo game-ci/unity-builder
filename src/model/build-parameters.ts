@@ -53,8 +53,8 @@ class BuildParameters {
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
   public customJobHooks!: string;
-  public readInputFromOverrideList!: string;
-  public readInputOverrideCommand!: string;
+  public inputOverrides!: string;
+  public inputOverrideCommand!: string;
   public cacheKey!: string;
 
   public postBuildSteps!: string;
@@ -70,10 +70,9 @@ class BuildParameters {
   public cloudRunnerDebug!: boolean | undefined;
   public cloudRunnerBuilderPlatform!: string | undefined;
   public isCliMode!: boolean;
-  public retainWorkspaces!: boolean;
-  public maxRetainedWorkspaces!: number;
+  public retainWorkspaces!: number;
   public useSharedLargePackages!: boolean;
-  public useLz4Compression!: boolean;
+  public compressionStrategy!: boolean;
   public garbageCollectionMaxAge!: number;
   public githubChecks!: boolean;
   public asyncWorkflow!: boolean;
@@ -83,6 +82,9 @@ class BuildParameters {
   public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
+  public static useRetainedWorkspaceMode(buildParameters: BuildParameters) {
+    return buildParameters.retainWorkspaces > 0;
+  }
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
@@ -170,14 +172,13 @@ class BuildParameters {
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
       customJobHooks: CloudRunnerOptions.customJobHooks(),
-      readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
-      readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
+      inputOverrideCommand: CloudRunnerOptions.inputOverrideCommand(),
+      inputOverrides: CloudRunnerOptions.inputOverrides(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
       retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
       useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
-      useLz4Compression: CloudRunnerOptions.useLz4Compression,
-      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
+      compressionStrategy: CloudRunnerOptions.compressionStrategy,
       garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,

@@ -120,7 +120,7 @@ rm ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`;
   }
 
   private static get TreeCommand(): string {
-    return CloudRunnerOptions.cloudRunnerDebugTree
+    return CloudRunnerOptions.cloudRunnerDebug
       ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute} && tree -L 2 ${CloudRunnerFolders.cacheFolderForCacheKeyFull} && du -h -s /${CloudRunnerFolders.buildVolumeFolder}/ && du -h -s ${CloudRunnerFolders.cacheFolderForAllFull}`
       : `#`;
   }

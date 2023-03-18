@@ -181,12 +181,12 @@ class CloudRunnerOptions {
   // Input override handling
   // ### ### ###
 
-  static readInputFromOverrideList() {
-    return CloudRunnerOptions.getInput('readInputFromOverrideList') || '';
+  static inputOverrides() {
+    return CloudRunnerOptions.getInput('inputOverrides') || '';
   }
 
-  static readInputOverrideCommand() {
-    const value = CloudRunnerOptions.getInput('readInputOverrideCommand');
+  static inputOverrideCommand() {
+    const value = CloudRunnerOptions.getInput('inputOverrideCommand');
 
     if (value === 'gcp-secret-manager') {
       return 'gcloud secrets versions access 1 --secret="{0}"';
@@ -241,14 +241,10 @@ class CloudRunnerOptions {
     return (
       CloudRunnerOptions.getInput(`cloudRunnerTests`) === `true` ||
       CloudRunnerOptions.getInput(`cloudRunnerDebug`) === `true` ||
+      CloudRunnerOptions.getInput(`cloudRunnerDebug`) === `true` ||
+      CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) === `true` ||
       false
     );
-  }
-  static get cloudRunnerDebugTree(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) === `true` || false;
-  }
-  static get cloudRunnerDebugEnv(): boolean {
-    return CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) === `true` || false;
   }
   static get skipLFS(): boolean {
     return CloudRunnerOptions.getInput(`skipLFS`) === `true` || false;
@@ -269,8 +265,8 @@ class CloudRunnerOptions {
     return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'false') === 'true';
   }
 
-  public static get useLz4Compression(): boolean {
-    return (CloudRunnerOptions.getInput(`useLz4Compression`) || 'false') === 'true';
+  public static get compressionStrategy(): boolean {
+    return (CloudRunnerOptions.getInput(`compressionStrategy`) || 'false') === 'true';
   }
 
   public static get useCleanupCron(): boolean {
@@ -281,12 +277,8 @@ class CloudRunnerOptions {
   // Retained Workspace
   // ### ### ###
 
-  public static get retainWorkspaces(): boolean {
-    return CloudRunnerOptions.getInput(`retainWorkspaces`) || false;
-  }
-
-  static get maxRetainedWorkspaces(): number {
-    return Number(CloudRunnerOptions.getInput(`maxRetainedWorkspaces`)) || 3;
+  public static get retainWorkspaces(): number {
+    return CloudRunnerOptions.getInput(`retainWorkspaces`) || 0;
   }
 
   // ### ### ###
