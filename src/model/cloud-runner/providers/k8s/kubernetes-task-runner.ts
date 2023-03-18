@@ -46,7 +46,7 @@ class KubernetesTaskRunner {
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
         if (
-          splitLogs[splitLogs.length - 1] !== KubernetesTaskRunner.lastReceivedMessage ||
+          chunk !== KubernetesTaskRunner.lastReceivedMessage ||
           KubernetesTaskRunner.lastReceivedTimestamp < newDate
         ) {
           started = true;
@@ -55,6 +55,7 @@ class KubernetesTaskRunner {
           continue;
         }
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+        KubernetesTaskRunner.lastReceivedMessage = chunk;
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
@@ -63,7 +64,6 @@ class KubernetesTaskRunner {
           output,
         ));
       }
-      KubernetesTaskRunner.lastReceivedMessage = splitLogs[splitLogs.length - 1];
 
       if (!didStreamAnyLogs) {
         core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
