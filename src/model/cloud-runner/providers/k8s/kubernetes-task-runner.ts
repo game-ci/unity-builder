@@ -45,10 +45,7 @@ class KubernetesTaskRunner {
         const dateString = `${chunk.toString().split(`Z `)[0]}Z`;
         const newDate = Date.parse(dateString);
         new Date(newDate).toISOString();
-        if (
-          chunk !== KubernetesTaskRunner.lastReceivedMessage ||
-          KubernetesTaskRunner.lastReceivedTimestamp < newDate
-        ) {
+        if (chunk !== KubernetesTaskRunner.lastReceivedMessage) {
           started = true;
         }
         if (!started) {
