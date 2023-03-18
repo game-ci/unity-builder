@@ -104,7 +104,6 @@ export class RemoteClient {
 
         return;
       }
-      await CloudRunnerSystem.Run(`tree -d ${CloudRunnerFolders.repoPathAbsolute}`);
       RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
       await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }

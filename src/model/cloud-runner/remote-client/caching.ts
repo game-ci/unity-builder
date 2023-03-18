@@ -162,7 +162,6 @@ export class Caching {
           RemoteClientLogger.logWarning(
             `cache item ${cacheArtifactName}.tar${compressionSuffix} doesn't exist ${destinationFolder}`,
           );
-          await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
