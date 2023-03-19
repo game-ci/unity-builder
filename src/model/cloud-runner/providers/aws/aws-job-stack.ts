@@ -145,6 +145,12 @@ export class AWSJobStack {
       CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
       await CF.createStack(createStackInput).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
+      const describeStack = await CF.describeStacks({ StackName: taskDefStackName }).promise();
+      for (const parameter of parameters) {
+        if (!describeStack.Stacks?.[0].Parameters?.some((x) => x.ParameterKey === parameter.ParameterKey)) {
+          throw new Error(`Parameter ${parameter.ParameterKey} not found in stack`);
+        }
+      }
     } catch (error) {
       await AWSError.handleStackCreationFailure(error, CF, taskDefStackName);
       throw error;
