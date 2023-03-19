@@ -27,7 +27,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
       CloudRunner.buildParameters = buildParameters;
@@ -41,7 +41,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const runId = uuidv4();
       const buildParameters = await CreateParameters(overrides);
@@ -57,7 +57,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -75,7 +75,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -95,7 +95,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -121,7 +121,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -150,7 +150,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -180,7 +180,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
@@ -241,7 +241,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 

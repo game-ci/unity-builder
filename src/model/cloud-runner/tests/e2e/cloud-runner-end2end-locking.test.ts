@@ -27,7 +27,7 @@ describe('Cloud Runner Locking', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: true,
+        retainWorkspaces: 3,
       };
       const buildParameters = await CreateParameters(overrides);
 
