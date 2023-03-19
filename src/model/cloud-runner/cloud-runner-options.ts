@@ -246,8 +246,8 @@ class CloudRunnerOptions {
       false
     );
   }
-  static get skipLFS(): boolean {
-    return CloudRunnerOptions.getInput(`skipLFS`) === `true` || false;
+  static get skipLfs(): boolean {
+    return CloudRunnerOptions.getInput(`skipLfs`) === `true` || false;
   }
   static get skipCache(): boolean {
     return CloudRunnerOptions.getInput(`skipCache`) === `true` || false;

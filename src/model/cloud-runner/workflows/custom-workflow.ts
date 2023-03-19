@@ -25,19 +25,19 @@ export class CustomWorkflow {
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.log(
-        `Cloud Runner is running in custom job mode Secrets Count:${JSON.stringify(
-          secrets,
-          undefined,
-          4,
-        )} Env Var Count:${JSON.stringify(environmentVariables, undefined, 4)}`,
-      );
       let output = '';
 
       // if (CloudRunner.buildParameters?.cloudRunnerDebug) {
       //   CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
       // }
       for (const step of buildSteps) {
+        CloudRunnerLogger.log(
+          `Cloud Runner is running in custom job mode Secrets Count:${JSON.stringify(
+            [...secrets, ...step.secrets],
+            undefined,
+            4,
+          )} Env Var Count:${JSON.stringify(environmentVariables, undefined, 4)}`,
+        );
         output += await CloudRunner.Provider.runTaskInWorkflow(
           CloudRunner.buildParameters.buildGuid,
           step.image,

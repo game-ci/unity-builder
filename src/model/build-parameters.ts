@@ -182,7 +182,7 @@ class BuildParameters {
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
       finalHooks: CloudRunnerOptions.finalHooks,
-      skipLFS: CloudRunnerOptions.skipLFS,
+      skipLFS: CloudRunnerOptions.skipLfs,
       skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
