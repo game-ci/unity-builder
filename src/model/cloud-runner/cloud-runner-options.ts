@@ -1,13 +1,13 @@
 import { Cli } from '../cli/cli';
 import CloudRunnerQueryOverride from './services/cloud-runner-query-override';
 import GitHub from '../github';
-const core = require('@actions/core');
+import * as core from '@actions/core';
 
 class CloudRunnerOptions {
   // ### ### ###
   // Input Handling
   // ### ### ###
-  public static getInput(query: any) {
+  public static getInput(query: string) {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
@@ -36,8 +36,6 @@ class CloudRunnerOptions {
     if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
       return process.env[alternativeQuery];
     }
-
-    return;
   }
 
   public static ToEnvVarFormat(input: string) {
@@ -80,7 +78,7 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
   }
 
-  static get triggerWorkflowOnComplete() {
+  static get triggerWorkflowOnComplete(): string[] {
     return CloudRunnerOptions.getInput('triggerWorkflowOnComplete')?.split(',') || [];
   }
 
