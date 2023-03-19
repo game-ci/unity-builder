@@ -140,6 +140,7 @@ export class AWSJobStack {
       Capabilities: ['CAPABILITY_IAM'],
       Parameters: parameters,
     };
+    CloudRunnerLogger.log(`AWS Params ${JSON.stringify(parameters, undefined, 4)}`);
 
     try {
       CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
