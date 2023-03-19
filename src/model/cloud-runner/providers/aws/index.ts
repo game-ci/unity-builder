@@ -19,7 +19,7 @@ class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
-    this.baseStackName = buildParameters.awsBaseStackName;
+    this.baseStackName = buildParameters.awsStackName;
   }
   async listResources(): Promise<ProviderResource[]> {
     await TaskService.getCloudFormationJobStacks();
