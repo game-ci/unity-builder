@@ -200,7 +200,7 @@ class CloudRunnerOptions {
   // ### ### ###
 
   static get awsStackName() {
-    return CloudRunnerOptions.getInput('awsBaseStackName') || 'game-ci';
+    return CloudRunnerOptions.getInput('awsStackName') || 'game-ci';
   }
 
   // ### ### ###

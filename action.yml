@@ -140,7 +140,7 @@ inputs:
     description:
       '[CloudRunner] Run a custom job instead of the standard build automation for cloud runner (in yaml format with the
       keys image, secrets (name, value object array), command line string)'
-  awsBaseStackName:
+  awsStackName:
     default: 'game-ci'
     required: false
     description: '[CloudRunner] The Cloud Formation stack name that must be setup before using this option.'
