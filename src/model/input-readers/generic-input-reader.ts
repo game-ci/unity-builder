@@ -3,7 +3,7 @@ import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export class GenericInputReader {
   public static async Run(command: string) {
-    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.providerStrategy === 'local') {
       return '';
     }
 

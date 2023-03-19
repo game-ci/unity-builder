@@ -60,8 +60,8 @@ class CloudRunner {
   }
 
   private static setupSelectedBuildPlatform() {
-    CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.cloudRunnerCluster}`);
-    switch (CloudRunner.buildParameters.cloudRunnerCluster) {
+    CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.providerStrategy}`);
+    switch (CloudRunner.buildParameters.providerStrategy) {
       case 'k8s':
         CloudRunner.Provider = new Kubernetes(CloudRunner.buildParameters);
         break;
@@ -150,10 +150,10 @@ class CloudRunner {
         CloudRunner.lockedWorkspace = undefined;
       }
 
-      await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.triggerWorkflowOnComplete);
+      await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.finalHooks);
 
       if (buildParameters.constantGarbageCollection) {
-        CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
+        CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageMaxAge, true, true);
       }
 
       return output;

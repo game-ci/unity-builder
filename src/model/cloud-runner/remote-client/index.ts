@@ -132,9 +132,9 @@ export class RemoteClient {
   }
 
   static async replaceLargePackageReferencesWithSharedReferences() {
-    CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useSharedLargePackages}`);
-    GitHub.updateGitHubCheck(`Use Shared Pkgs ${CloudRunner.buildParameters.useSharedLargePackages}`, ``);
-    if (CloudRunner.buildParameters.useSharedLargePackages) {
+    CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`);
+    GitHub.updateGitHubCheck(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`, ``);
+    if (CloudRunner.buildParameters.useLargePackages) {
       await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.projectPathAbsolute}`);
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');

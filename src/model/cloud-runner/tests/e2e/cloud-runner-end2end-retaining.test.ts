@@ -38,7 +38,7 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
 
-      if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+      if (CloudRunnerOptions.providerStrategy === `local-docker`) {
         const cacheFolderExists = fs.existsSync(`cloud-runner-cache/cache/${overrides.cacheKey}`);
         expect(cacheFolderExists).toBeTruthy();
         await CloudRunnerSystem.Run(`tree -d ./cloud-runner-cache`);

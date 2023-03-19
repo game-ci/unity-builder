@@ -4,7 +4,7 @@ import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
 
 export class GithubCliReader {
   static async GetGitHubAuthToken() {
-    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.providerStrategy === 'local') {
       return '';
     }
     try {

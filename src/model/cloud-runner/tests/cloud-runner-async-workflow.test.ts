@@ -15,7 +15,7 @@ describe('Cloud Runner Async Workflows', () => {
   setups();
   it('Responds', () => {});
 
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `local-docker`) {
+  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `local-docker`) {
     it('Async Workflows', async () => {
       // Setup parameters
       const buildParameter = await CreateParameters({

@@ -27,8 +27,8 @@ export class AWSJobStack {
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
-    const cpu = CloudRunner.buildParameters.cloudRunnerCpu || '1024';
-    const memory = CloudRunner.buildParameters.cloudRunnerMemory || '3072';
+    const cpu = CloudRunner.buildParameters.containerCpu || '1024';
+    const memory = CloudRunner.buildParameters.containerMemory || '3072';
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerCpu:
     Default: 1024`,
@@ -116,7 +116,7 @@ export class AWSJobStack {
       ...secretsMappedToCloudFormationParameters,
     ];
     CloudRunnerLogger.log(
-      `Starting AWS job with memory: ${CloudRunner.buildParameters.cloudRunnerMemory} cpu: ${CloudRunner.buildParameters.cloudRunnerCpu}`,
+      `Starting AWS job with memory: ${CloudRunner.buildParameters.containerMemory} cpu: ${CloudRunner.buildParameters.containerCpu}`,
     );
     let previousStackExists = true;
     while (previousStackExists) {

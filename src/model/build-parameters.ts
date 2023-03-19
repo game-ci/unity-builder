@@ -41,17 +41,17 @@ class BuildParameters {
 
   public customParameters!: string;
   public sshAgent!: string;
-  public cloudRunnerCluster!: string;
+  public providerStrategy!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public cloudRunnerMemory!: string | undefined;
-  public cloudRunnerCpu!: string | undefined;
+  public containerMemory!: string | undefined;
+  public containerCpu!: string | undefined;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
-  public customCommandHooks!: string;
+  public commandHooks!: string;
   public pullInputList!: string[];
   public inputPullCommand!: string;
   public cacheKey!: string;
@@ -67,16 +67,16 @@ class BuildParameters {
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
   public cloudRunnerDebug!: boolean | undefined;
-  public cloudRunnerBuilderPlatform!: string | undefined;
+  public buildPlatform!: string | undefined;
   public isCliMode!: boolean;
   public retainWorkspaces!: number;
-  public useSharedLargePackages!: boolean;
+  public useLargePackages!: boolean;
   public compressionStrategy!: boolean;
-  public garbageCollectionMaxAge!: number;
+  public garbageMaxAge!: number;
   public githubChecks!: boolean;
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
-  public triggerWorkflowOnComplete!: string[];
+  public finalHooks!: string[];
   public skipLFS!: boolean;
   public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
@@ -149,11 +149,11 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
-      cloudRunnerCluster: CloudRunnerOptions.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: CloudRunnerOptions.cloudRunnerBuilderPlatform,
+      providerStrategy: CloudRunnerOptions.providerStrategy,
+      buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,
-      cloudRunnerMemory: CloudRunnerOptions.containerMemory,
-      cloudRunnerCpu: CloudRunnerOptions.containerCpu,
+      containerMemory: CloudRunnerOptions.containerMemory,
+      containerCpu: CloudRunnerOptions.containerCpu,
       kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
       kubeVolume: CloudRunnerOptions.kubeVolume,
       postBuildSteps: CloudRunnerOptions.postBuildSteps,
@@ -169,19 +169,19 @@ class BuildParameters {
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customCommandHooks: CloudRunnerOptions.customCommandHooks(),
+      commandHooks: CloudRunnerOptions.commandHooks(),
       inputPullCommand: CloudRunnerOptions.inputPullCommand(),
       pullInputList: CloudRunnerOptions.pullInputList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
       retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
-      useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
+      useLargePackages: CloudRunnerOptions.useLargePackages,
       compressionStrategy: CloudRunnerOptions.compressionStrategy,
-      garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
+      garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
-      triggerWorkflowOnComplete: CloudRunnerOptions.finalHooks,
+      finalHooks: CloudRunnerOptions.finalHooks,
       skipLFS: CloudRunnerOptions.skipLFS,
       skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,

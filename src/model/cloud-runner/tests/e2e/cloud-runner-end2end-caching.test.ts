@@ -30,7 +30,7 @@ describe('Cloud Runner Caching', () => {
         cacheKey: `test-case-${uuidv4()}`,
         customStepFiles: `debug-cache`,
       };
-      if (CloudRunnerOptions.cloudRunnerCluster === `k8s`) {
+      if (CloudRunnerOptions.providerStrategy === `k8s`) {
         overrides.customStepFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;
       }
       const buildParameter = await CreateParameters(overrides);
@@ -48,7 +48,7 @@ describe('Cloud Runner Caching', () => {
 
       CloudRunnerLogger.log(`run 1 succeeded`);
 
-      if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+      if (CloudRunnerOptions.providerStrategy === `local-docker`) {
         await CloudRunnerSystem.Run(`tree ./cloud-runner-cache/cache`);
         await CloudRunnerSystem.Run(
           `cp ./cloud-runner-cache/cache/${buildParameter.cacheKey}/Library/lib-${buildParameter.buildGuid}.tar ./`,

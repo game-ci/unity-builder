@@ -11,7 +11,7 @@ import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customCommandHooks);
+    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.commandHooks);
     CloudRunnerLogger.log(`Applying hooks ${hooks.length}`);
 
     return `echo "---"

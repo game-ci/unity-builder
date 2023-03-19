@@ -11,7 +11,7 @@ describe('Cloud Runner Local Docker Workflows', () => {
   setups();
   it('Responds', () => {});
 
-  if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+  if (CloudRunnerOptions.providerStrategy === `local-docker`) {
     it('inspect stateful folder of Workflows', async () => {
       const testValue = `the state in a job exits in the expected local-docker folder`;
 

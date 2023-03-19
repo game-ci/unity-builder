@@ -47,7 +47,7 @@ commands: echo "test"`;
     const getCustomStepsFromFiles = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
   });
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `k8s`) {
     it('Should be 1 before and 1 after hook', async () => {
       const overrides = {
         versioning: 'None',

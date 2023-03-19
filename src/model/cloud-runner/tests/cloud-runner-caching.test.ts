@@ -11,7 +11,7 @@ import GitHub from '../../github';
 import CloudRunnerOptions from '../cloud-runner-options';
 describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
-  if (CloudRunnerOptions.cloudRunnerCluster === `local-docker`) {
+  if (CloudRunnerOptions.providerStrategy === `local-docker`) {
     it('Simple caching works', async () => {
       Cli.options = {
         versioning: 'None',

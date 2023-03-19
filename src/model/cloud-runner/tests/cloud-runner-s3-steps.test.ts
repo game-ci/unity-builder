@@ -20,7 +20,7 @@ async function CreateParameters(overrides: OptionValues | undefined) {
 describe('Cloud Runner pre-built S3 steps', () => {
   it('Responds', () => {});
   setups();
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.cloudRunnerCluster !== `local-docker`) {
+  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `local-docker`) {
     it('Run build and prebuilt s3 cache pull, cache push and upload build', async () => {
       const overrides = {
         versioning: 'None',

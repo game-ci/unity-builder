@@ -11,14 +11,14 @@ describe(`git repo tests`, () => {
   it(`returns valid branch name when using https`, async () => {
     const mockValue = 'https://github.com/example/example.git';
     await jest.spyOn(CloudRunnerSystem, 'Run').mockReturnValue(Promise.resolve(mockValue));
-    await jest.spyOn(CloudRunnerOptions, 'cloudRunnerCluster', 'get').mockReturnValue('not-local');
+    await jest.spyOn(CloudRunnerOptions, 'providerStrategy', 'get').mockReturnValue('not-local');
     expect(await GitRepoReader.GetRemote()).toEqual(`example/example`);
   });
 
   it(`returns valid branch name when using ssh`, async () => {
     const mockValue = 'git@github.com:example/example.git';
     await jest.spyOn(CloudRunnerSystem, 'Run').mockReturnValue(Promise.resolve(mockValue));
-    await jest.spyOn(CloudRunnerOptions, 'cloudRunnerCluster', 'get').mockReturnValue('not-local');
+    await jest.spyOn(CloudRunnerOptions, 'providerStrategy', 'get').mockReturnValue('not-local');
     expect(await GitRepoReader.GetRemote()).toEqual(`example/example`);
   });
 });

@@ -22,7 +22,7 @@ export class TaskParameterSerializer {
         ],
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.readInput(),
-        ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.customCommandHooks)),
+        ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.commandHooks)),
       ]
         .filter(
           (x) =>

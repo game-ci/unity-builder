@@ -7,7 +7,7 @@ import Input from '../input';
 
 export class GitRepoReader {
   public static async GetRemote() {
-    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.providerStrategy === 'local') {
       return '';
     }
     assert(fs.existsSync(`.git`));
@@ -22,7 +22,7 @@ export class GitRepoReader {
   }
 
   public static async GetBranch() {
-    if (CloudRunnerOptions.cloudRunnerCluster === 'local') {
+    if (CloudRunnerOptions.providerStrategy === 'local') {
       return '';
     }
     assert(fs.existsSync(`.git`));

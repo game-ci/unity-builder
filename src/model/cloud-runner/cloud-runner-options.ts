@@ -111,12 +111,12 @@ class CloudRunnerOptions {
   // Cloud Runner parameters
   // ### ### ###
 
-  static get cloudRunnerBuilderPlatform() {
-    const input = CloudRunnerOptions.getInput('cloudRunnerBuilderPlatform');
+  static get buildPlatform() {
+    const input = CloudRunnerOptions.getInput('buildPlatform');
     if (input) {
       return input;
     }
-    if (CloudRunnerOptions.cloudRunnerCluster !== 'local') {
+    if (CloudRunnerOptions.providerStrategy !== 'local') {
       return 'linux';
     }
 
@@ -127,12 +127,14 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'main';
   }
 
-  static get cloudRunnerCluster() {
+  static get providerStrategy() {
+    const provider =
+      CloudRunnerOptions.getInput('cloudRunnerCluster') || CloudRunnerOptions.getInput('providerStrategy');
     if (Cli.isCliMode) {
-      return CloudRunnerOptions.getInput('cloudRunnerCluster') || 'aws';
+      return provider || 'aws';
     }
 
-    return CloudRunnerOptions.getInput('cloudRunnerCluster') || 'local';
+    return provider || 'local';
   }
 
   static get containerCpu() {
@@ -163,8 +165,8 @@ class CloudRunnerOptions {
   // Custom commands from yaml parameters
   // ### ### ###
 
-  static customCommandHooks() {
-    return CloudRunnerOptions.getInput('customCommandHooks') || '';
+  static commandHooks() {
+    return CloudRunnerOptions.getInput('commandHooks') || '';
   }
 
   static get postBuildSteps() {
@@ -255,8 +257,8 @@ class CloudRunnerOptions {
     return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
   }
 
-  public static get useSharedLargePackages(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedLargePackages`) || 'false') === 'true';
+  public static get useLargePackages(): boolean {
+    return (CloudRunnerOptions.getInput(`useLargePackages`) || 'false') === 'true';
   }
 
   public static get useSharedBuilder(): boolean {
@@ -283,8 +285,8 @@ class CloudRunnerOptions {
   // Garbage Collection
   // ### ### ###
 
-  static get garbageCollectionMaxAge(): number {
-    return Number(CloudRunnerOptions.getInput(`garbageCollectionMaxAge`)) || 24;
+  static get garbageMaxAge(): number {
+    return Number(CloudRunnerOptions.getInput(`garbageMaxAge`)) || 24;
   }
 }
 
