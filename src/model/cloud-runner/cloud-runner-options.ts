@@ -165,7 +165,7 @@ class CloudRunnerOptions {
   // Custom commands from yaml parameters
   // ### ### ###
 
-  static commandHooks() {
+  static get commandHooks() {
     return CloudRunnerOptions.getInput('commandHooks') || '';
   }
 
@@ -181,11 +181,11 @@ class CloudRunnerOptions {
   // Input override handling
   // ### ### ###
 
-  static pullInputList(): string[] {
+  static get pullInputList(): string[] {
     return CloudRunnerOptions.getInput('pullInputList')?.split(`,`) || [];
   }
 
-  static inputPullCommand(): string {
+  static get inputPullCommand(): string {
     const value = CloudRunnerOptions.getInput('inputPullCommand');
 
     if (value === 'gcp-secret-manager') {

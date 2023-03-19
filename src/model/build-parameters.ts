@@ -77,7 +77,7 @@ class BuildParameters {
   public asyncWorkflow!: boolean;
   public githubCheckId!: string;
   public finalHooks!: string[];
-  public skipLFS!: boolean;
+  public skipLfs!: boolean;
   public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
@@ -169,9 +169,9 @@ class BuildParameters {
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      commandHooks: CloudRunnerOptions.commandHooks(),
-      inputPullCommand: CloudRunnerOptions.inputPullCommand(),
-      pullInputList: CloudRunnerOptions.pullInputList(),
+      commandHooks: CloudRunnerOptions.commandHooks,
+      inputPullCommand: CloudRunnerOptions.inputPullCommand,
+      pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
       retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
@@ -182,7 +182,7 @@ class BuildParameters {
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
       finalHooks: CloudRunnerOptions.finalHooks,
-      skipLFS: CloudRunnerOptions.skipLfs,
+      skipLfs: CloudRunnerOptions.skipLfs,
       skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
