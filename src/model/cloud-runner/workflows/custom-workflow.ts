@@ -26,7 +26,11 @@ export class CustomWorkflow {
   ) {
     try {
       CloudRunnerLogger.log(
-        `Cloud Runner is running in custom job mode Secrets Count:${secrets.length} Env Var Count:${environmentVariables.length}`,
+        `Cloud Runner is running in custom job mode Secrets Count:${JSON.stringify(
+          secrets,
+          undefined,
+          4,
+        )} Env Var Count:${JSON.stringify(environmentVariables, undefined, 4)}`,
       );
       let output = '';
 
