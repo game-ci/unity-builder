@@ -161,7 +161,7 @@ export class TaskService {
     process.env.AWS_REGION = Input.region;
     const s3 = new AWS.S3();
     const listRequest: ListObjectsRequest = {
-      Bucket: CloudRunner.buildParameters.awsBaseStackName,
+      Bucket: CloudRunner.buildParameters.awsStackName,
     };
     const results = await s3.listObjects(listRequest).promise();
 

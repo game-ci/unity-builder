@@ -47,9 +47,7 @@ export class CloudRunnerCustomSteps {
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 cp /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
-      } s3://${
-        CloudRunner.buildParameters.awsBaseStackName
-      }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID.tar${
+      } s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       }
     rm /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
@@ -68,10 +66,10 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $CI_AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $CI_AWS_DEFAULT_REGION --profile default
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/build || true
+    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/build || true
     aws s3 cp s3://${
-      CloudRunner.buildParameters.awsBaseStackName
+      CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
       } /data/cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
@@ -126,11 +124,11 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $CI_AWS_DEFAULT_REGION --profile default
     aws s3 cp --recursive /data/cache/$CI_CACHE_KEY/lfs s3://${
-      CloudRunner.buildParameters.awsBaseStackName
+      CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CI_CACHE_KEY/lfs
     rm -r /data/cache/$CI_CACHE_KEY/lfs
     aws s3 cp --recursive /data/cache/$CI_CACHE_KEY/Library s3://${
-      CloudRunner.buildParameters.awsBaseStackName
+      CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CI_CACHE_KEY/Library
     rm -r /data/cache/$CI_CACHE_KEY/Library
   secrets:
@@ -147,13 +145,13 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $CI_AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $CI_AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $CI_AWS_DEFAULT_REGION --profile default
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/ || true
-    BUCKET1="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/Library/"
+    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/ || true
+    BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/Library/"
     aws s3 ls $BUCKET1 || true
     OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
     aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CI_CACHE_KEY/Library/ || true
-    BUCKET2="${CloudRunner.buildParameters.awsBaseStackName}/cloud-runner-cache/$CI_CACHE_KEY/lfs/"
+    BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/lfs/"
     aws s3 ls $BUCKET2 || true
     OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
     aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CI_CACHE_KEY/lfs/ || true

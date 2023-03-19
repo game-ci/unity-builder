@@ -5,7 +5,7 @@ import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';
 export class SharedWorkspaceLocking {
   public static get workspaceBucketRoot() {
-    return `s3://${CloudRunner.buildParameters.awsBaseStackName}/`;
+    return `s3://${CloudRunner.buildParameters.awsStackName}/`;
   }
   public static get workspaceRoot() {
     return `${SharedWorkspaceLocking.workspaceBucketRoot}locks/`;
