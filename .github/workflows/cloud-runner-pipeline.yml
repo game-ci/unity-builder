@@ -143,7 +143,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+          PROVIDER_STRATEGY: ${{ matrix.cloudRunnerCluster }}
   buildTargetTests:
     needs: smokeTests
     name: Local Build Target Tests
