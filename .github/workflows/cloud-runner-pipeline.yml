@@ -49,7 +49,7 @@ jobs:
           - 'cloud-runner-hooks'
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking'
-        cloudRunnerCluster:
+        providerStrategy:
           # - aws
           - local-docker
           # - k8s
@@ -65,14 +65,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - uses: google-github-actions/auth@v1
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - name: 'Set up Cloud SDK'
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: Get GKE cluster credentials
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           gcloud components install gke-gcloud-auth-plugin
@@ -86,7 +86,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.cloudRunnerCluster }}
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
   tests:
     needs: smokeTests
     name: Integration Tests
@@ -106,7 +106,7 @@ jobs:
           - 'cloud-runner-s3-steps'
           #- 'cloud-runner-local-persistence'
           # - 'cloud-runner-locking'
-        cloudRunnerCluster:
+        providerStrategy:
           - aws
           - local-docker
           - k8s
@@ -122,14 +122,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - uses: google-github-actions/auth@v1
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         with:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - name: 'Set up Cloud SDK'
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: Get GKE cluster credentials
-        if: matrix.CloudRunnerCluster == 'k8s'
+        if: matrix.providerStrategy == 'k8s'
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           gcloud components install gke-gcloud-auth-plugin
@@ -143,7 +143,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          PROVIDER_STRATEGY: ${{ matrix.cloudRunnerCluster }}
+          PROVIDER_STRATEGY: ${{ matrix.providerStrategy }}
   buildTargetTests:
     needs: smokeTests
     name: Local Build Target Tests
@@ -151,7 +151,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cloudRunnerCluster:
+        providerStrategy:
           #- aws
           - local-docker
           #- k8s
@@ -177,11 +177,11 @@ jobs:
           cloudRunnerTests: true
           versioning: None
           targetPlatform: ${{ matrix.targetPlatform }}
-          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+          providerStrategy: ${{ matrix.providerStrategy }}
       - run: |
           cp ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.cloudRunnerCluster }} Build (${{ matrix.targetPlatform }})
+          name: ${{ matrix.providerStrategy }} Build (${{ matrix.targetPlatform }})
           path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           retention-days: 14

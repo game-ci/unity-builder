@@ -144,7 +144,7 @@ inputs:
     default: 'game-ci'
     required: false
     description: '[CloudRunner] The Cloud Formation stack name that must be setup before using this option.'
-  cloudRunnerCluster:
+  providerStrategy:
     default: 'local'
     required: false
     description:

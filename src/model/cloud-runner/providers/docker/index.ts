@@ -89,7 +89,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     const { workspace, actionFolder } = Action;
     const content: any[] = [];
     for (const x of secrets) {
-      content.push({ name: x.EnvironmentVariable, value: x.ParameterValue });
+      content.push({ name: x.ParameterKey, value: x.ParameterValue });
     }
     for (const x of environment) {
       content.push({ name: x.name, value: x.value });
