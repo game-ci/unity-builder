@@ -6,7 +6,7 @@ import CloudRunnerLogger from '../../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../../cloud-runner-options';
 import setups from '../cloud-runner-suite.test';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 
 async function CreateParameters(overrides: any) {

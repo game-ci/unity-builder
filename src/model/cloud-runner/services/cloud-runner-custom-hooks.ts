@@ -4,14 +4,14 @@ import CloudRunnerSecret from './cloud-runner-secret';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
 import path from 'path';
 import CloudRunnerOptions from '../cloud-runner-options';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import CloudRunnerLogger from './cloud-runner-logger';
 
 // import CloudRunnerLogger from './cloud-runner-logger';
 
 export class CloudRunnerCustomHooks {
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customJobHooks);
+    const hooks = CloudRunnerCustomHooks.getHooks(buildParameters.customCommandHooks);
     CloudRunnerLogger.log(`Applying hooks ${hooks.length}`);
 
     return `echo "---"
@@ -25,8 +25,8 @@ echo "end of cloud runner job"
 echo "---${buildParameters.logId}"`;
   }
 
-  public static getHooks(customJobHooks: any): Hook[] {
-    const experimentHooks = customJobHooks;
+  public static getHooks(customCommandHooks: any): Hook[] {
+    const experimentHooks = customCommandHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
       try {

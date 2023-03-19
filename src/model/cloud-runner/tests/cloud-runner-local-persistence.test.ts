@@ -3,7 +3,7 @@ import CloudRunner from '../cloud-runner';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import fs from 'fs';
+import fs from 'node:fs';
 import { CreateParameters } from './create-test-parameter';
 import CloudRunnerLogger from '../services/cloud-runner-logger';
 

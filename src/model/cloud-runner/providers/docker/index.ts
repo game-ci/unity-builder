@@ -5,12 +5,12 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../services/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../..';
-import { writeFileSync } from 'fs';
+import { writeFileSync } from 'node:fs';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
 
 class LocalDockerCloudRunner implements ProviderInterface {

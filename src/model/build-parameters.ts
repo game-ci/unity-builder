@@ -42,7 +42,6 @@ class BuildParameters {
   public customParameters!: string;
   public sshAgent!: string;
   public cloudRunnerCluster!: string;
-  public awsBaseStackName!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
@@ -52,9 +51,9 @@ class BuildParameters {
   public kubeVolume!: string;
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
-  public customJobHooks!: string;
-  public inputOverrides!: string;
-  public inputOverrideCommand!: string;
+  public customCommandHooks!: string;
+  public pullInputList!: string[];
+  public inputPullCommand!: string;
   public cacheKey!: string;
 
   public postBuildSteps!: string;
@@ -152,10 +151,9 @@ class BuildParameters {
       chownFilesTo: Input.chownFilesTo,
       cloudRunnerCluster: CloudRunnerOptions.cloudRunnerCluster,
       cloudRunnerBuilderPlatform: CloudRunnerOptions.cloudRunnerBuilderPlatform,
-      awsBaseStackName: CloudRunnerOptions.awsBaseStackName,
       kubeConfig: CloudRunnerOptions.kubeConfig,
-      cloudRunnerMemory: CloudRunnerOptions.cloudRunnerMemory,
-      cloudRunnerCpu: CloudRunnerOptions.cloudRunnerCpu,
+      cloudRunnerMemory: CloudRunnerOptions.containerMemory,
+      cloudRunnerCpu: CloudRunnerOptions.containerCpu,
       kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
       kubeVolume: CloudRunnerOptions.kubeVolume,
       postBuildSteps: CloudRunnerOptions.postBuildSteps,
@@ -167,13 +165,13 @@ class BuildParameters {
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
-      awsStackName: CloudRunnerOptions.awsBaseStackName,
+      awsStackName: CloudRunnerOptions.awsStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customJobHooks: CloudRunnerOptions.customJobHooks(),
-      inputOverrideCommand: CloudRunnerOptions.inputOverrideCommand(),
-      inputOverrides: CloudRunnerOptions.inputOverrides(),
+      customCommandHooks: CloudRunnerOptions.customCommandHooks(),
+      inputPullCommand: CloudRunnerOptions.inputPullCommand(),
+      pullInputList: CloudRunnerOptions.pullInputList(),
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
       retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
@@ -183,7 +181,7 @@ class BuildParameters {
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
       githubCheckId: CloudRunnerOptions.githubCheckId,
-      triggerWorkflowOnComplete: CloudRunnerOptions.triggerWorkflowOnComplete,
+      triggerWorkflowOnComplete: CloudRunnerOptions.finalHooks,
       skipLFS: CloudRunnerOptions.skipLFS,
       skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,

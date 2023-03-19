@@ -130,7 +130,7 @@ inputs:
     description:
       '[CloudRunner] Specify the names (by file name) of custom hooks to run before or after cloud runner jobs, must
       match a yaml step file inside your repo in the folder .game-ci/hooks/'
-  customJobHooks:
+  customCommandHooks:
     required: false
     default: ''
     description: '[CloudRunner] Specify custom commands and trigger hooks (injects commands into jobs)'

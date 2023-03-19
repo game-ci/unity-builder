@@ -70,16 +70,16 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('githubCheckId') || ``;
   }
 
-  static get githubOwner() {
-    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo.split(`/`)[0] || false;
+  static get githubOwner(): string {
+    return CloudRunnerOptions.getInput('githubOwner') || CloudRunnerOptions.githubRepo?.split(`/`)[0] || '';
   }
 
-  static get githubRepoName() {
-    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo.split(`/`)[1] || false;
+  static get githubRepoName(): string {
+    return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo?.split(`/`)[1] || '';
   }
 
-  static get triggerWorkflowOnComplete(): string[] {
-    return CloudRunnerOptions.getInput('triggerWorkflowOnComplete')?.split(',') || [];
+  static get finalHooks(): string[] {
+    return CloudRunnerOptions.getInput('finalHooks')?.split(',') || [];
   }
 
   // ### ### ###
@@ -135,12 +135,12 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('cloudRunnerCluster') || 'local';
   }
 
-  static get cloudRunnerCpu() {
-    return CloudRunnerOptions.getInput('cloudRunnerCpu');
+  static get containerCpu() {
+    return CloudRunnerOptions.getInput('containerCpu');
   }
 
-  static get cloudRunnerMemory() {
-    return CloudRunnerOptions.getInput('cloudRunnerMemory');
+  static get containerMemory() {
+    return CloudRunnerOptions.getInput('containerMemory');
   }
 
   static get customJob() {
@@ -163,8 +163,8 @@ class CloudRunnerOptions {
   // Custom commands from yaml parameters
   // ### ### ###
 
-  static customJobHooks() {
-    return CloudRunnerOptions.getInput('customJobHooks') || '';
+  static customCommandHooks() {
+    return CloudRunnerOptions.getInput('customCommandHooks') || '';
   }
 
   static get postBuildSteps() {
@@ -179,12 +179,12 @@ class CloudRunnerOptions {
   // Input override handling
   // ### ### ###
 
-  static inputOverrides() {
-    return CloudRunnerOptions.getInput('inputOverrides') || '';
+  static pullInputList(): string[] {
+    return CloudRunnerOptions.getInput('pullInputList')?.split(`,`) || [];
   }
 
-  static inputOverrideCommand() {
-    const value = CloudRunnerOptions.getInput('inputOverrideCommand');
+  static inputPullCommand(): string {
+    const value = CloudRunnerOptions.getInput('inputPullCommand');
 
     if (value === 'gcp-secret-manager') {
       return 'gcloud secrets versions access 1 --secret="{0}"';
@@ -199,7 +199,7 @@ class CloudRunnerOptions {
   // Aws
   // ### ### ###
 
-  static get awsBaseStackName() {
+  static get awsStackName() {
     return CloudRunnerOptions.getInput('awsBaseStackName') || 'game-ci';
   }
 

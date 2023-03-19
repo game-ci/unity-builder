@@ -1,7 +1,7 @@
 import path from 'path';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
-import fs from 'fs';
+import fs from 'node:fs';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
 

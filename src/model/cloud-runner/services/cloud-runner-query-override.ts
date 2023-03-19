@@ -31,11 +31,11 @@ class CloudRunnerQueryOverride {
   }
 
   private static shouldUseOverride(query: string) {
-    if (CloudRunnerOptions.inputOverrideCommand() !== '') {
-      if (CloudRunnerOptions.inputOverrides() !== '') {
+    if (CloudRunnerOptions.inputPullCommand() !== '') {
+      if (CloudRunnerOptions.pullInputList().length > 0) {
         const doesInclude =
-          CloudRunnerOptions.inputOverrides().split(',').includes(query) ||
-          CloudRunnerOptions.inputOverrides().split(',').includes(Input.ToEnvVarFormat(query));
+          CloudRunnerOptions.pullInputList().includes(query) ||
+          CloudRunnerOptions.pullInputList().includes(Input.ToEnvVarFormat(query));
 
         return doesInclude ? true : false;
       } else {
@@ -50,12 +50,12 @@ class CloudRunnerQueryOverride {
     }
 
     return await GenericInputReader.Run(
-      formatFunction(CloudRunnerOptions.inputOverrideCommand(), [{ key: 0, value: query }]),
+      formatFunction(CloudRunnerOptions.inputPullCommand(), [{ key: 0, value: query }]),
     );
   }
 
   public static async PopulateQueryOverrideInput() {
-    const queries = CloudRunnerOptions.inputOverrides().split(',');
+    const queries = CloudRunnerOptions.pullInputList();
     CloudRunnerQueryOverride.queryOverrides = {};
     for (const element of queries) {
       if (CloudRunnerQueryOverride.shouldUseOverride(element)) {
