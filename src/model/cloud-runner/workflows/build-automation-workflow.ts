@@ -6,7 +6,6 @@ import * as core from '@actions/core';
 import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
-import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
@@ -65,16 +64,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       n 16.15.1 > /dev/null
       npm --version
       node --version
-      ${BuildAutomationWorkflow.TreeCommand}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.TreeCommand}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.BuildCommands(builderPath)}
-      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.TreeCommand}`;
+      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
   private static setupCommands(builderPath: string) {
@@ -91,7 +87,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     )}" ] ; then echo "Builder Already Exists!"; else ${commands} ; fi`;
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-echo "downloading game-ci..."
 ${cloneBuilderCommands}
 node ${builderPath} -m remote-cli-pre-build
 . ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh
@@ -116,11 +111,5 @@ rm ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`;
     echo "game ci caching results"
     chmod +x ${builderPath}
     node ${builderPath} -m remote-cli-post-build`;
-  }
-
-  private static get TreeCommand(): string {
-    return CloudRunnerOptions.cloudRunnerDebug
-      ? `tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute} && tree -L 2 ${CloudRunnerFolders.cacheFolderForCacheKeyFull} && du -h -s /${CloudRunnerFolders.buildVolumeFolder}/ && du -h -s ${CloudRunnerFolders.cacheFolderForAllFull}`
-      : `#`;
   }
 }
