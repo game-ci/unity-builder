@@ -12,6 +12,7 @@ import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import * as fs from 'node:fs';
 import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
+import { StringKeyValuePair } from '../../../shared-types';
 
 class LocalDockerCloudRunner implements ProviderInterface {
   public buildParameters!: BuildParameters;
@@ -51,14 +52,14 @@ class LocalDockerCloudRunner implements ProviderInterface {
     if (
       fs.existsSync(
         `${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       )
     ) {
       await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache/cache/build/`);
       await CloudRunnerSystem.Run(
         `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       );
     }
@@ -87,7 +88,7 @@ class LocalDockerCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(commands);
 
     const { workspace, actionFolder } = Action;
-    const content: any[] = [];
+    const content: StringKeyValuePair[] = [];
     for (const x of secrets) {
       content.push({ name: x.EnvironmentVariable, value: x.ParameterValue });
     }

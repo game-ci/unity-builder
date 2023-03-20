@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'node:fs';

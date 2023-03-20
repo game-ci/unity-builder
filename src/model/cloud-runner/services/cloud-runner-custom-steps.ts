@@ -46,12 +46,12 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 cp /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
-        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID.tar${
-        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       }
     rm /data/cache/$CI_CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
-        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       }
   secrets:
   - name: awsAccessKeyId
@@ -71,9 +71,9 @@ export class CloudRunnerCustomSteps {
     aws s3 cp s3://${
       CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
-        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } /data/cache/$CI_CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
-        CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       }
   secrets:
     - name: CI_AWS_ACCESS_KEY_ID

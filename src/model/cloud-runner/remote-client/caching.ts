@@ -48,10 +48,10 @@ export class Caching {
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     let compressionSuffix = '';
-    if (CloudRunner.buildParameters.compressionStrategy === true) {
+    if (CloudRunner.buildParameters.useCompressionStrategy === true) {
       compressionSuffix = `.lz4`;
     }
-    CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.compressionStrategy} ${compressionSuffix}`);
+    CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.useCompressionStrategy} ${compressionSuffix}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
@@ -106,7 +106,7 @@ export class Caching {
     }
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     let compressionSuffix = '';
-    if (CloudRunner.buildParameters.compressionStrategy === true) {
+    if (CloudRunner.buildParameters.useCompressionStrategy === true) {
       compressionSuffix = `.lz4`;
     }
     const startPath = process.cwd();

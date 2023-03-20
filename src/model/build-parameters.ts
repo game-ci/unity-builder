@@ -69,9 +69,9 @@ class BuildParameters {
   public cloudRunnerDebug!: boolean | undefined;
   public buildPlatform!: string | undefined;
   public isCliMode!: boolean;
-  public retainWorkspaces!: number;
+  public maxRetainedWorkspaces!: number;
   public useLargePackages!: boolean;
-  public compressionStrategy!: boolean;
+  public useCompressionStrategy!: boolean;
   public garbageMaxAge!: number;
   public githubChecks!: boolean;
   public asyncWorkflow!: boolean;
@@ -82,7 +82,7 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public static useRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.retainWorkspaces > 0;
+    return buildParameters.maxRetainedWorkspaces > 0;
   }
 
   static async create(): Promise<BuildParameters> {
@@ -174,9 +174,9 @@ class BuildParameters {
       pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
-      retainWorkspaces: CloudRunnerOptions.retainWorkspaces,
+      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
       useLargePackages: CloudRunnerOptions.useLargePackages,
-      compressionStrategy: CloudRunnerOptions.compressionStrategy,
+      useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
       garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
       asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,

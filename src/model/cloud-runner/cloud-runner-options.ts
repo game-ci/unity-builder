@@ -86,24 +86,16 @@ class CloudRunnerOptions {
   // Git syncronization parameters
   // ### ### ###
 
-  static get githubRepo() {
+  static get githubRepo(): string | undefined {
     return CloudRunnerOptions.getInput('GITHUB_REPOSITORY') || CloudRunnerOptions.getInput('GITHUB_REPO') || undefined;
   }
-  static get branch() {
+  static get branch(): string {
     if (CloudRunnerOptions.getInput(`GITHUB_REF`)) {
       return CloudRunnerOptions.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (CloudRunnerOptions.getInput('branch')) {
       return CloudRunnerOptions.getInput('branch');
     } else {
       return '';
-    }
-  }
-
-  static get gitSha() {
-    if (CloudRunnerOptions.getInput(`GITHUB_SHA`)) {
-      return CloudRunnerOptions.getInput(`GITHUB_SHA`);
-    } else if (CloudRunnerOptions.getInput(`GitSHA`)) {
-      return CloudRunnerOptions.getInput(`GitSHA`);
     }
   }
 
@@ -241,32 +233,32 @@ class CloudRunnerOptions {
     return (
       CloudRunnerOptions.getInput(`cloudRunnerTests`) === `true` ||
       CloudRunnerOptions.getInput(`cloudRunnerDebug`) === `true` ||
-      CloudRunnerOptions.getInput(`cloudRunnerDebug`) === `true` ||
+      CloudRunnerOptions.getInput(`cloudRunnerDebugTree`) === `true` ||
       CloudRunnerOptions.getInput(`cloudRunnerDebugEnv`) === `true` ||
       false
     );
   }
   static get skipLfs(): boolean {
-    return CloudRunnerOptions.getInput(`skipLfs`) === `true` || false;
+    return CloudRunnerOptions.getInput(`skipLfs`) === `true`;
   }
   static get skipCache(): boolean {
-    return CloudRunnerOptions.getInput(`skipCache`) === `true` || false;
+    return CloudRunnerOptions.getInput(`skipCache`) === `true`;
   }
 
   public static get asyncCloudRunner(): boolean {
-    return (CloudRunnerOptions.getInput('asyncCloudRunner') || `false`) === `true` || false;
+    return CloudRunnerOptions.getInput('asyncCloudRunner') === 'true';
   }
 
   public static get useLargePackages(): boolean {
-    return (CloudRunnerOptions.getInput(`useLargePackages`) || 'false') === 'true';
+    return CloudRunnerOptions.getInput(`useLargePackages`) === `true`;
   }
 
   public static get useSharedBuilder(): boolean {
-    return (CloudRunnerOptions.getInput(`useSharedBuilder`) || 'false') === 'true';
+    return CloudRunnerOptions.getInput(`useSharedBuilder`) === `true`;
   }
 
-  public static get compressionStrategy(): boolean {
-    return (CloudRunnerOptions.getInput(`compressionStrategy`) || 'false') === 'true';
+  public static get useCompressionStrategy(): boolean {
+    return CloudRunnerOptions.getInput(`useCompressionStrategy`) === `true`;
   }
 
   public static get useCleanupCron(): boolean {
@@ -277,8 +269,8 @@ class CloudRunnerOptions {
   // Retained Workspace
   // ### ### ###
 
-  public static get retainWorkspaces(): number {
-    return CloudRunnerOptions.getInput(`retainWorkspaces`) || 0;
+  public static get maxRetainedWorkspaces(): number {
+    return CloudRunnerOptions.getInput(`maxRetainedWorkspaces`) || 0;
   }
 
   // ### ### ###

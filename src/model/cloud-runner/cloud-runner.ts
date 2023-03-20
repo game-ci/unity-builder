@@ -53,7 +53,7 @@ class CloudRunner {
       core.setOutput(
         Input.ToEnvVarFormat(`buildArtifact`),
         `build-${CloudRunner.buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.compressionStrategy ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       );
     }
@@ -107,8 +107,8 @@ class CloudRunner {
             { name: `CI_LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
           ];
         } else {
-          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.retainWorkspaces}`);
-          buildParameters.retainWorkspaces = 0;
+          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
+          buildParameters.maxRetainedWorkspaces = 0;
           CloudRunner.lockedWorkspace = undefined;
         }
       }

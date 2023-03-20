@@ -154,7 +154,8 @@ export class SharedWorkspaceLocking {
     const workspaces = await SharedWorkspaceLocking.GetAllWorkspaces(buildParametersContext);
     if (workspace === ``) {
       return (
-        workspaces.length < buildParametersContext.retainWorkspaces || buildParametersContext.retainWorkspaces === 0
+        workspaces.length < buildParametersContext.maxRetainedWorkspaces ||
+        buildParametersContext.maxRetainedWorkspaces === 0
       );
     }
     const ordered: any[] = [];
@@ -168,8 +169,8 @@ export class SharedWorkspaceLocking {
     const matches = ordered.filter((x) => x.name.includes(workspace));
     const isWorkspaceBelowMax =
       matches.length > 0 &&
-      (ordered.indexOf(matches[0]) < buildParametersContext.retainWorkspaces ||
-        buildParametersContext.retainWorkspaces === 0);
+      (ordered.indexOf(matches[0]) < buildParametersContext.maxRetainedWorkspaces ||
+        buildParametersContext.maxRetainedWorkspaces === 0);
 
     return isWorkspaceBelowMax;
   }
@@ -230,7 +231,7 @@ export class SharedWorkspaceLocking {
 
     CloudRunnerLogger.log(`All workspaces ${workspaces}`);
     if (!(await SharedWorkspaceLocking.IsWorkspaceBelowMax(workspace, buildParametersContext))) {
-      CloudRunnerLogger.log(`Workspace is above max ${workspaces} ${buildParametersContext.retainWorkspaces}`);
+      CloudRunnerLogger.log(`Workspace is above max ${workspaces} ${buildParametersContext.maxRetainedWorkspaces}`);
       await SharedWorkspaceLocking.CleanupWorkspace(workspace, buildParametersContext);
 
       return false;

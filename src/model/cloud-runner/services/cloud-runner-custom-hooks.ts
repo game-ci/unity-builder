@@ -2,7 +2,7 @@ import { BuildParameters, Input } from '../..';
 import YAML from 'yaml';
 import CloudRunnerSecret from './cloud-runner-secret';
 import { RemoteClientLogger } from '../remote-client/remote-client-logger';
-import path from 'path';
+import path from 'node:path';
 import CloudRunnerOptions from '../cloud-runner-options';
 import * as fs from 'node:fs';
 import CloudRunnerLogger from './cloud-runner-logger';
@@ -25,7 +25,7 @@ echo "end of cloud runner job"
 echo "---${buildParameters.logId}"`;
   }
 
-  public static getHooks(customCommandHooks: any): Hook[] {
+  public static getHooks(customCommandHooks: string): Hook[] {
     const experimentHooks = customCommandHooks;
     let output = new Array<Hook>();
     if (experimentHooks && experimentHooks !== '') {
@@ -117,7 +117,7 @@ echo "---${buildParameters.logId}"`;
   }
 }
 export class Hook {
-  public commands: any;
+  public commands: string[] = new Array<string>();
   public secrets: CloudRunnerSecret[] = new Array<CloudRunnerSecret>();
   public name!: string;
   public hook!: string[];
