@@ -16,7 +16,7 @@ async function CreateParameters(overrides: any) {
   return await BuildParameters.create();
 }
 
-describe('Cloud Runner Locking', () => {
+describe('Cloud Runner Locking Core', () => {
   setups();
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
