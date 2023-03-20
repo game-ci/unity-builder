@@ -15,11 +15,11 @@ async function CreateParameters(overrides: any) {
   return await BuildParameters.create();
 }
 
-describe('Cloud Runner Locking Upsert', () => {
+describe('Cloud Runner Locking Get Locked Workspace', () => {
   setups();
   it('Responds', () => {});
   if (CloudRunnerOptions.cloudRunnerDebug) {
-    it(`Get Or Create From No Workspace`, async () => {
+    it(`Get locked workspace From No Workspace`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -33,11 +33,9 @@ describe('Cloud Runner Locking Upsert', () => {
       const newWorkspaceName = `test-workspace-${uuidv4()}`;
       const runId = uuidv4();
       CloudRunner.buildParameters = buildParameters;
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
     }, 150000);
-    it(`Get Or Create From Unlocked`, async () => {
+    it(`Get locked workspace from unlocked`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -52,12 +50,10 @@ describe('Cloud Runner Locking Upsert', () => {
       const runId = uuidv4();
       CloudRunner.buildParameters = buildParameters;
       expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
     }, 300000);
-    it(`Get Or Create From Locked`, async () => {
+    it(`Get locked workspace from locked`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -78,12 +74,10 @@ describe('Cloud Runner Locking Upsert', () => {
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.IsWorkspaceBelowMax(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId2, buildParameters)).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).not.toMatch(newWorkspaceName);
     }, 300000);
-    it(`Get Or Create After Double Lock And One Unlock`, async () => {
+    it(`Get locked workspace after double lock and one unlock`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -107,12 +101,10 @@ describe('Cloud Runner Locking Upsert', () => {
       expect(await SharedWorkspaceLocking.HasWorkspaceLock(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId2, buildParameters)).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).not.toContain(newWorkspaceName);
     }, 300000);
-    it(`Get Or Create After Double Lock And Unlock`, async () => {
+    it(`Get locked workspace after double lock and unlock`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -137,12 +129,10 @@ describe('Cloud Runner Locking Upsert', () => {
       expect(await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.IsWorkspaceLocked(newWorkspaceName, buildParameters)).toBeFalsy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId2, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId2, buildParameters)).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toContain(newWorkspaceName);
     }, 300000);
-    it(`Get Or Create From Unlocked Was Locked`, async () => {
+    it(`Get locked workspace from unlocked was locked`, async () => {
       const overrides: any = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -159,9 +149,7 @@ describe('Cloud Runner Locking Upsert', () => {
       expect(await SharedWorkspaceLocking.CreateWorkspace(newWorkspaceName, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.ReleaseWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
       expect(CloudRunner.lockedWorkspace).toMatch(newWorkspaceName);
     }, 300000);
   }

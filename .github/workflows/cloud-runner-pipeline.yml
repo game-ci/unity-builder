@@ -49,7 +49,7 @@ jobs:
           - 'cloud-runner-hooks'
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking'
-          - 'cloud-runner-locking-upsert'
+          - 'cloud-runner-locking-get-locked'
         providerStrategy:
           # - aws
           - local-docker
@@ -107,7 +107,7 @@ jobs:
           - 'cloud-runner-s3-steps'
           #- 'cloud-runner-local-persistence'
           # - 'cloud-runner-locking'
-          #- 'cloud-runner-locking-upsert'
+          #- 'cloud-runner-locking-get-locked'
         providerStrategy:
           - aws
           - local-docker

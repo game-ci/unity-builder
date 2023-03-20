@@ -86,9 +86,7 @@ describe('Cloud Runner Locking', () => {
       ).toBeTruthy();
       await SharedWorkspaceLocking.CleanupWorkspace(newWorkspaceName, buildParameters);
       CloudRunnerLogger.log(`Starting get or create`);
-      expect(
-        await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(newWorkspaceName, runId, buildParameters),
-      ).toBeTruthy();
+      expect(await SharedWorkspaceLocking.GetLockedWorkspace(newWorkspaceName, runId, buildParameters)).toBeTruthy();
     }, 350000);
   }
 });

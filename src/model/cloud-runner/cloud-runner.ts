@@ -94,7 +94,7 @@ class CloudRunner {
       if (BuildParameters.useRetainedWorkspaceMode(buildParameters)) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
-        const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
+        const result = await SharedWorkspaceLocking.GetLockedWorkspace(
           CloudRunner.lockedWorkspace,
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
