@@ -15,7 +15,7 @@ export class TaskParameterSerializer {
   public static createCloudRunnerEnvironmentVariables(
     buildParameters: BuildParameters,
   ): CloudRunnerEnvironmentVariable[] {
-    const result = this.uniqBy(
+    let result: CloudRunnerEnvironmentVariable[] = this.uniqBy(
       [
         ...[
           { name: 'BUILD_TARGET', value: buildParameters.targetPlatform },
@@ -42,7 +42,7 @@ export class TaskParameterSerializer {
         }),
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
-
+    result = result.filter((x) => !result.some((y) => y.name === `CI_${x}`));
     CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
 
     return result;
