@@ -11,6 +11,7 @@ import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
 import GitHub from './github';
 import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import CloudRunner from './cloud-runner/cloud-runner';
 
 class BuildParameters {
   // eslint-disable-next-line no-undef
@@ -82,7 +83,7 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.maxRetainedWorkspaces > 0;
+    return buildParameters.maxRetainedWorkspaces > 0 && CloudRunner.lockedWorkspace !== ``;
   }
 
   static async create(): Promise<BuildParameters> {

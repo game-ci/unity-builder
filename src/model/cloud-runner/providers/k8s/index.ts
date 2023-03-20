@@ -95,10 +95,9 @@ class Kubernetes implements ProviderInterface {
   ) {
     try {
       this.buildParameters = buildParameters;
-      const id =
-        BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters) && CloudRunner.lockedWorkspace !== ``
-          ? CloudRunner.lockedWorkspace
-          : buildParameters.buildGuid;
+      const id = BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)
+        ? CloudRunner.lockedWorkspace
+        : buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
       this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;

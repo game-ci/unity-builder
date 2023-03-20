@@ -91,7 +91,7 @@ class CloudRunner {
     );
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
+      if (buildParameters.maxRetainedWorkspaces > 0) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
         const result = await SharedWorkspaceLocking.GetLockedWorkspace(

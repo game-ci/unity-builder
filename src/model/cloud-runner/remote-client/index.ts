@@ -172,7 +172,9 @@ export class RemoteClient {
     if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
       return;
     }
-    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace !== ``}`);
+    RemoteClientLogger.log(
+      `Retained Workspace: ${BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)}`,
+    );
     if (
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) &&
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`)))
