@@ -183,11 +183,15 @@ export class TaskParameterSerializer {
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
         if (value.includes(`\n`) || value.includes(`\\n`) || value.includes(`\t`)) {
+          CloudRunnerLogger.log(`Appending possibly bad name ${name}`);
+          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `export ${name}=`);
+          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
           fs.appendFileSync(
             `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-            // eslint-disable-next-line prefer-template
-            'export ' + name + "=`echo '" + base64.encode(value) + "' | base64 --decode `\n",
+            `echo '${base64.encode(value)}' | base64 --decode `,
           );
+          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
+          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `\n`);
         } else {
           fs.appendFileSync(
             `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
