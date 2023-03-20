@@ -93,7 +93,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 echo "downloading game-ci..."
 ${cloneBuilderCommands}
-echo "bootstrap game ci cloud runner..."
 node ${builderPath} -m remote-cli-pre-build
 . ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh
 rm ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`;
