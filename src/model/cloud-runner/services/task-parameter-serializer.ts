@@ -8,7 +8,6 @@ import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { CloudRunnerFolders } from './cloud-runner-folders';
-import CloudRunnerLogger from './cloud-runner-logger';
 import fs from 'node:fs';
 
 export class TaskParameterSerializer {
@@ -52,7 +51,6 @@ export class TaskParameterSerializer {
         }),
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
-    CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
 
     return result;
   }
@@ -182,7 +180,7 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        fs.appendFileSync(file, `export ${name}=$${variable[0]}\n`);
+        fs.appendFileSync(file, `export ${name}="$${variable[0]}"\n`);
       }
     }
     await CloudRunnerSystem.Run(`chmod +x ${file}`);
