@@ -182,22 +182,15 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        if (value.includes(`\n`) || value.includes(`\\n`) || value.includes(`\t`)) {
-          CloudRunnerLogger.log(`Appending possibly bad name ${name}`);
-          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `export ${name}=`);
-          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
-          fs.appendFileSync(
-            `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-            `echo '${base64.encode(value)}' | base64 --decode `,
-          );
-          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
-          fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `\n`);
-        } else {
-          fs.appendFileSync(
-            `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-            `export ${name}="${value}"\n`,
-          );
-        }
+        CloudRunnerLogger.log(`Appending possibly bad name ${name}`);
+        fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `export ${name}=`);
+        fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
+        fs.appendFileSync(
+          `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+          `echo '${base64.encode(value)}' | base64 --decode `,
+        );
+        fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
+        fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `\n`);
       }
     }
     await CloudRunnerSystem.Run(`chmod +x ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`);
