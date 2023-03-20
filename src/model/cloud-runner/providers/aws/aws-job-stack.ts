@@ -27,19 +27,17 @@ export class AWSJobStack {
   ): Promise<CloudRunnerAWSTaskDef> {
     const taskDefStackName = `${this.baseStackName}-${buildGuid}`;
     let taskDefCloudFormation = AWSCloudFormationTemplates.readTaskCloudFormationTemplate();
-    const cpu = CloudRunner.buildParameters.containerCpu || '1024';
-    const memory = CloudRunner.buildParameters.containerMemory || '3072';
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerCpu:
     Default: 1024`,
       `ContainerCpu:
-    Default: ${Number.parseInt(cpu)}`,
+    Default: ${Number.parseInt(CloudRunner.buildParameters.containerCpu)}`,
     );
     taskDefCloudFormation = taskDefCloudFormation.replace(
       `ContainerMemory:
     Default: 2048`,
       `ContainerMemory:
-    Default: ${Number.parseInt(memory)}`,
+    Default: ${Number.parseInt(CloudRunner.buildParameters.containerMemory)}`,
     );
     if (!CloudRunnerOptions.asyncCloudRunner) {
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(

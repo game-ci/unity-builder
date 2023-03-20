@@ -7,7 +7,7 @@ class CloudRunnerOptions {
   // ### ### ###
   // Input Handling
   // ### ### ###
-  public static getInput(query: string) {
+  public static getInput(query: string): string | undefined {
     if (GitHub.githubInputEnabled) {
       const coreInput = core.getInput(query);
       if (coreInput && coreInput !== '') {
@@ -38,7 +38,7 @@ class CloudRunnerOptions {
     }
   }
 
-  public static ToEnvVarFormat(input: string) {
+  public static ToEnvVarFormat(input: string): string {
     if (input.toUpperCase() === input) {
       return input;
     }
@@ -91,9 +91,11 @@ class CloudRunnerOptions {
   }
   static get branch(): string {
     if (CloudRunnerOptions.getInput(`GITHUB_REF`)) {
-      return CloudRunnerOptions.getInput(`GITHUB_REF`).replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return (
+        CloudRunnerOptions.getInput(`GITHUB_REF`)?.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '') || ``
+      );
     } else if (CloudRunnerOptions.getInput('branch')) {
-      return CloudRunnerOptions.getInput('branch');
+      return CloudRunnerOptions.getInput('branch') || ``;
     } else {
       return '';
     }
@@ -103,7 +105,7 @@ class CloudRunnerOptions {
   // Cloud Runner parameters
   // ### ### ###
 
-  static get buildPlatform() {
+  static get buildPlatform(): string {
     const input = CloudRunnerOptions.getInput('buildPlatform');
     if (input) {
       return input;
@@ -112,14 +114,14 @@ class CloudRunnerOptions {
       return 'linux';
     }
 
-    return;
+    return ``;
   }
 
-  static get cloudRunnerBranch() {
+  static get cloudRunnerBranch(): string {
     return CloudRunnerOptions.getInput('cloudRunnerBranch') || 'main';
   }
 
-  static get providerStrategy() {
+  static get providerStrategy(): string {
     const provider =
       CloudRunnerOptions.getInput('cloudRunnerCluster') || CloudRunnerOptions.getInput('providerStrategy');
     if (Cli.isCliMode) {
@@ -129,15 +131,15 @@ class CloudRunnerOptions {
     return provider || 'local';
   }
 
-  static get containerCpu() {
-    return CloudRunnerOptions.getInput('containerCpu');
+  static get containerCpu(): string {
+    return CloudRunnerOptions.getInput('containerCpu') || `1024`;
   }
 
-  static get containerMemory() {
-    return CloudRunnerOptions.getInput('containerMemory');
+  static get containerMemory(): string {
+    return CloudRunnerOptions.getInput('containerMemory') || `3072`;
   }
 
-  static get customJob() {
+  static get customJob(): string {
     return CloudRunnerOptions.getInput('customJob') || '';
   }
 
@@ -145,11 +147,11 @@ class CloudRunnerOptions {
   // Custom commands from files parameters
   // ### ### ###
 
-  static get customStepFiles() {
+  static get customStepFiles(): string[] {
     return CloudRunnerOptions.getInput('customStepFiles')?.split(`,`) || [];
   }
 
-  static get customHookFiles() {
+  static get customHookFiles(): string[] {
     return CloudRunnerOptions.getInput('customHookFiles')?.split(`,`) || [];
   }
 
@@ -157,15 +159,15 @@ class CloudRunnerOptions {
   // Custom commands from yaml parameters
   // ### ### ###
 
-  static get commandHooks() {
+  static get commandHooks(): string {
     return CloudRunnerOptions.getInput('commandHooks') || '';
   }
 
-  static get postBuildSteps() {
+  static get postBuildSteps(): string {
     return CloudRunnerOptions.getInput('postBuildSteps') || '';
   }
 
-  static get preBuildSteps() {
+  static get preBuildSteps(): string {
     return CloudRunnerOptions.getInput('preBuildSteps') || '';
   }
 
@@ -201,15 +203,15 @@ class CloudRunnerOptions {
   // K8s
   // ### ### ###
 
-  static get kubeConfig() {
+  static get kubeConfig(): string {
     return CloudRunnerOptions.getInput('kubeConfig') || '';
   }
 
-  static get kubeVolume() {
+  static get kubeVolume(): string {
     return CloudRunnerOptions.getInput('kubeVolume') || '';
   }
 
-  static get kubeVolumeSize() {
+  static get kubeVolumeSize(): string {
     return CloudRunnerOptions.getInput('kubeVolumeSize') || '5Gi';
   }
 
@@ -269,8 +271,8 @@ class CloudRunnerOptions {
   // Retained Workspace
   // ### ### ###
 
-  public static get maxRetainedWorkspaces(): number {
-    return CloudRunnerOptions.getInput(`maxRetainedWorkspaces`) || 0;
+  public static get maxRetainedWorkspaces(): string {
+    return CloudRunnerOptions.getInput(`maxRetainedWorkspaces`) || `0`;
   }
 
   // ### ### ###

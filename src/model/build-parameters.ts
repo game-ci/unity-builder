@@ -45,8 +45,8 @@ class BuildParameters {
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public containerMemory!: string | undefined;
-  public containerCpu!: string | undefined;
+  public containerMemory!: string;
+  public containerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
@@ -174,7 +174,7 @@ class BuildParameters {
       pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
-      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
+      maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
       useLargePackages: CloudRunnerOptions.useLargePackages,
       useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
       garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
