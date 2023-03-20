@@ -182,7 +182,7 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        if (value.includes(`\n`)) {
+        if (value.includes(`\n`) || value.includes(`\\n`) || value.includes(`\t`)) {
           fs.appendFileSync(
             `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
             // eslint-disable-next-line prefer-template
