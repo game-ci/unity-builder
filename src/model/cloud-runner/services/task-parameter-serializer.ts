@@ -10,6 +10,7 @@ import { CloudRunnerSystem } from './cloud-runner-system';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import CloudRunnerLogger from './cloud-runner-logger';
 import fs from 'node:fs';
+import base64 from 'base-64';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([
@@ -181,10 +182,17 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        fs.appendFileSync(
-          `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-          `export ${name}="${value}"\n`,
-        );
+        if (value.includes(`\n`)) {
+          fs.appendFileSync(
+            `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+            `export ${name}=\`echo '${base64.encode(value)}' | base64 --decode \`\n`,
+          );
+        } else {
+          fs.appendFileSync(
+            `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+            `export ${name}="${value}"\n`,
+          );
+        }
       }
     }
     await CloudRunnerSystem.Run(`chmod +x ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`);

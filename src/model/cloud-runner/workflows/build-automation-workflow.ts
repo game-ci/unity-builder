@@ -60,7 +60,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
 
     return `apt-get update > /dev/null
-      apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
+      apt-get install -y curl tar tree npm git-lfs jq git base64 > /dev/null
       npm i -g n > /dev/null
       n 16.15.1 > /dev/null
       npm --version
