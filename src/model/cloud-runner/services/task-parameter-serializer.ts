@@ -183,7 +183,7 @@ export class TaskParameterSerializer {
         process.env[name] = value;
         fs.appendFileSync(
           `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-          `export ${name}="${value}"`,
+          `export ${name}="${value}"\n`,
         );
       }
     }
