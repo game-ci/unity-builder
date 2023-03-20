@@ -11,11 +11,21 @@ import { CloudRunnerFolders } from './cloud-runner-folders';
 import CloudRunnerLogger from './cloud-runner-logger';
 
 export class TaskParameterSerializer {
-  static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
+  static readonly blockedParameterNames: Set<string> = new Set([
+    '0',
+    'length',
+    'prototype',
+    '',
+    'unityVersion',
+    'CACHE_UNITY_INSTALLATION_ON_MAC',
+    'RUNNER_TEMP_PATH',
+    'NAME',
+    'CUSTOM_JOB',
+  ]);
   public static createCloudRunnerEnvironmentVariables(
     buildParameters: BuildParameters,
   ): CloudRunnerEnvironmentVariable[] {
-    let result: CloudRunnerEnvironmentVariable[] = this.uniqBy(
+    const result: CloudRunnerEnvironmentVariable[] = this.uniqBy(
       [
         ...[
           { name: 'BUILD_TARGET', value: buildParameters.targetPlatform },
@@ -23,26 +33,24 @@ export class TaskParameterSerializer {
         ],
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.readInput(),
+        ...TaskParameterSerializer.readCloudRunerOptions(),
         ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.commandHooks)),
       ]
         .filter(
           (x) =>
-            !TaskParameterSerializer.blocked.has(x.name) &&
+            !TaskParameterSerializer.blockedParameterNames.has(x.name) &&
             x.value !== '' &&
             x.value !== undefined &&
-            x.name !== `CUSTOM_JOB` &&
-            x.name !== `CI_CUSTOM_JOB` &&
             x.value !== `undefined`,
         )
         .map((x) => {
-          x.name = TaskParameterSerializer.ToEnvVarFormat(x.name);
+          x.name = `CI_${TaskParameterSerializer.ToEnvVarFormat(x.name)}`;
           x.value = `${x.value}`;
 
           return x;
         }),
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
-    result = result.filter((x) => !result.some((y) => y.name === `CI_${x}`));
     CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
 
     return result;
@@ -64,7 +72,7 @@ export class TaskParameterSerializer {
     const keys = [
       ...new Set(
         Object.getOwnPropertyNames(process.env)
-          .filter((x) => !this.blocked.has(x) && x.startsWith('CI_'))
+          .filter((x) => !this.blockedParameterNames.has(x) && x.startsWith('CI_'))
           .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
       ),
     ];
@@ -80,6 +88,10 @@ export class TaskParameterSerializer {
 
   private static readInput() {
     return TaskParameterSerializer.serializeFromType(Input);
+  }
+
+  private static readCloudRunerOptions() {
+    return TaskParameterSerializer.serializeFromType(CloudRunnerOptions);
   }
 
   public static ToEnvVarFormat(input: string): string {
@@ -106,10 +118,10 @@ export class TaskParameterSerializer {
 
   private static serializeFromObject(buildParameters: any) {
     const array: any[] = [];
-    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blocked.has(x));
+    const keys = Object.getOwnPropertyNames(buildParameters).filter((x) => !this.blockedParameterNames.has(x));
     for (const element of keys) {
       array.push({
-        name: `CI_${TaskParameterSerializer.ToEnvVarFormat(element)}`,
+        name: TaskParameterSerializer.ToEnvVarFormat(element),
         value: buildParameters[element],
       });
     }
