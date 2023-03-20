@@ -19,7 +19,7 @@ class KubernetesTaskRunner {
     alreadyFinished: boolean = false,
   ) {
     CloudRunnerLogger.log(
-      `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} finished ${alreadyFinished}`,
+      `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} finished ${alreadyFinished} kubeVol ${CloudRunner.buildParameters.kubeVolumeSize} ${CloudRunner.buildParameters.containerCpu} ${CloudRunner.buildParameters.containerMemory}`,
     );
     let output = '';
     let didStreamAnyLogs: boolean = false;
