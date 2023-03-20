@@ -109,6 +109,13 @@ export class RemoteClient {
       await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }
 
+    if (
+      fs.existsSync(CloudRunnerFolders.repoPathAbsolute) &&
+      !fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+    ) {
+      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
+    }
+
     RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
     await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
     RemoteClientLogger.log(`Cloning the repository being built:`);
