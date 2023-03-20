@@ -105,7 +105,7 @@ class KubernetesJobSpecFactory {
               name: KubernetesJobSpecFactory.MainContainerName,
               image,
               command: ['/bin/sh'],
-              args: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)],
+              args: ['-c', `${CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)}`],
 
               workingDir: `${workingDirectory}`,
               resources: {
@@ -160,7 +160,7 @@ class KubernetesJobSpecFactory {
       },
     };
 
-    job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '5Gi';
+    job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '10Gi';
 
     return job;
   }
