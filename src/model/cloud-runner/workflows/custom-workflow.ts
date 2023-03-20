@@ -7,20 +7,20 @@ import { CustomStep } from '../services/custom-step';
 import CloudRunner from '../cloud-runner';
 
 export class CustomWorkflow {
-  public static async runCustomJobFromString(
+  public static async runContainerJobFromString(
     buildSteps: string,
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
-    return await CustomWorkflow.runCustomJob(
+    return await CustomWorkflow.runContainerJob(
       CloudRunnerCustomSteps.ParseSteps(buildSteps),
       environmentVariables,
       secrets,
     );
   }
 
-  public static async runCustomJob(
-    buildSteps: CustomStep[],
+  public static async runContainerJob(
+    steps: CustomStep[],
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
@@ -30,14 +30,8 @@ export class CustomWorkflow {
       // if (CloudRunner.buildParameters?.cloudRunnerDebug) {
       //   CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
       // }
-      for (const step of buildSteps) {
-        CloudRunnerLogger.log(
-          `Cloud Runner is running in custom job mode Secrets Count:${JSON.stringify(
-            [...secrets, ...step.secrets],
-            undefined,
-            4,
-          )} Env Var Count:${JSON.stringify(environmentVariables, undefined, 4)}`,
-        );
+      for (const step of steps) {
+        CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
         output += await CloudRunner.Provider.runTaskInWorkflow(
           CloudRunner.buildParameters.buildGuid,
           step.image,

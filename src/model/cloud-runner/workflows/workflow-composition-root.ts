@@ -18,7 +18,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
       }
 
       if (CloudRunner.buildParameters.customJob !== '') {
-        return await CustomWorkflow.runCustomJobFromString(
+        return await CustomWorkflow.runContainerJobFromString(
           CloudRunner.buildParameters.customJob,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,

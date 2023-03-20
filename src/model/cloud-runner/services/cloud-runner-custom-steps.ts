@@ -239,7 +239,7 @@ export class CloudRunnerCustomSteps {
 
     if (steps.length > 0) {
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
-      output += await CustomWorkflow.runCustomJob(
+      output += await CustomWorkflow.runContainerJob(
         steps,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
@@ -258,7 +258,7 @@ export class CloudRunnerCustomSteps {
 
     if (steps.length > 0) {
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
-      output += await CustomWorkflow.runCustomJob(
+      output += await CustomWorkflow.runContainerJob(
         steps,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
