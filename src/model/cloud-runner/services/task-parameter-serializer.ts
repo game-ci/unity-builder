@@ -187,7 +187,7 @@ export class TaskParameterSerializer {
         fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
         fs.appendFileSync(
           `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
-          `echo '${base64.encode(value)}' | base64 --decode `,
+          `echo '${base64.encode(value)}' | base64 --decode`,
         );
         fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, '`');
         fs.appendFileSync(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`, `\n`);
