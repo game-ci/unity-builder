@@ -147,7 +147,6 @@ jobs:
           versioning: None
           PROVIDER_STRATEGY: ${{ matrix.providerStrategy }}
   buildTargetTests:
-    needs: smokeTests
     name: Local Build Target Tests
     runs-on: ubuntu-latest
     strategy:
