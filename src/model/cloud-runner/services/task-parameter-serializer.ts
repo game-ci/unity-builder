@@ -9,6 +9,7 @@ import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import CloudRunnerLogger from './cloud-runner-logger';
+import fs from 'node:fs';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([
@@ -180,8 +181,9 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        await CloudRunnerSystem.Run(
-          `echo "export ${name}=\\"${value}\\"" >> ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+        fs.appendFileSync(
+          `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
+          `export ${name}="${value}"`,
         );
       }
     }
