@@ -89,7 +89,7 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
   tests:
-    needs: 
+    needs:
       - smokeTests
       - buildTargetTests
     name: Integration Tests
