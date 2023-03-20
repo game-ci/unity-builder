@@ -236,6 +236,10 @@ class Input {
     return Input.getInput('UNITY_LICENSE');
   }
 
+  static get dockerWorkspacePath(): string {
+    return Input.getInput('dockerWorkspacePath') || '/github/workspace';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

@@ -39,7 +39,7 @@ class Docker {
     additionalVariables: StringKeyValuePair[] = [],
     entrypointBash: boolean = false,
   ): string {
-    const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken } = parameters;
+    const { workspace, actionFolder, runnerTempPath, sshAgent, gitPrivateToken, dockerWorkspacePath } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
@@ -48,16 +48,16 @@ class Docker {
     const commandPrefix = image === `alpine` ? `/bin/sh` : `/bin/bash`;
 
     return `docker run \
-            --workdir /github/workspace \
+            --workdir ${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
-            --env GITHUB_WORKSPACE=/github/workspace \
+            --env GITHUB_WORKSPACE=${dockerWorkspacePath} \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             ${sshAgent ? '--env SSH_AUTH_SOCK=/ssh-agent' : ''} \
             --volume "${githubHome}":"/root:z" \
             --volume "${githubWorkflow}":"/github/workflow:z" \
-            --volume "${workspace}":"/github/workspace:z" \
+            --volume "${workspace}":"${dockerWorkspacePath}:z" \
             --volume "${actionFolder}/default-build-script:/UnityBuilderAction:z" \
             --volume "${actionFolder}/platforms/ubuntu/steps:/steps:z" \
             --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
@@ -71,16 +71,16 @@ class Docker {
   }
 
   static getWindowsCommand(image: string, parameters: DockerParameters): string {
-    const { workspace, actionFolder, unitySerial, gitPrivateToken } = parameters;
+    const { workspace, actionFolder, unitySerial, gitPrivateToken, dockerWorkspacePath } = parameters;
 
     return `docker run \
-            --workdir c:/github/workspace \
+            --workdir c:${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env UNITY_SERIAL="${unitySerial}" \
-            --env GITHUB_WORKSPACE=c:/github/workspace \
+            --env GITHUB_WORKSPACE=c:${dockerWorkspacePath} \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
-            --volume "${workspace}":"c:/github/workspace" \
+            --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "c:/regkeys":"c:/regkeys" \
             --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
