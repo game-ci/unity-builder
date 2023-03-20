@@ -114,9 +114,14 @@ export class RemoteClient {
     RemoteClientLogger.log(`Cloning the repository being built:`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
-    await CloudRunnerSystem.Run(
-      `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
-    );
+    try {
+      await CloudRunnerSystem.Run(
+        `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
+      );
+    } catch (error: any) {
+      await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.repoPathAbsolute}`);
+      throw error;
+    }
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git lfs install`);
     assert(fs.existsSync(`.git`), 'git folder exists');
