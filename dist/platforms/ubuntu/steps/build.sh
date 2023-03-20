@@ -153,6 +153,7 @@ fi
 
 # Make a given user owner of all artifacts
 if [[ -n "$CHOWN_FILES_TO" ]]; then
+  echo "Changing ownership of files to $CHOWN_FILES_TO for $BUILD_PATH_FULL and $UNITY_PROJECT_PATH"
   chown -R "$CHOWN_FILES_TO" "$BUILD_PATH_FULL"
   chown -R "$CHOWN_FILES_TO" "$UNITY_PROJECT_PATH"
 fi
