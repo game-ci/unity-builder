@@ -89,7 +89,9 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
   tests:
-    needs: smokeTests
+    needs: 
+      - smokeTests
+      - buildTargetTests
     name: Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
