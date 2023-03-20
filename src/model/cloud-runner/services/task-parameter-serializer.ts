@@ -32,8 +32,8 @@ export class TaskParameterSerializer {
           { name: 'GITHUB_TOKEN', value: process.env.GITHUB_TOKEN },
         ],
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
-        ...TaskParameterSerializer.readInput(),
-        ...TaskParameterSerializer.readCloudRunerOptions(),
+        ...TaskParameterSerializer.serializeInput(),
+        ...TaskParameterSerializer.serializeCloudRunnerOptions(),
         ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.commandHooks)),
       ]
         .filter(
@@ -86,11 +86,11 @@ export class TaskParameterSerializer {
     return buildParameters;
   }
 
-  private static readInput() {
+  private static serializeInput() {
     return TaskParameterSerializer.serializeFromType(Input);
   }
 
-  private static readCloudRunerOptions() {
+  private static serializeCloudRunnerOptions() {
     return TaskParameterSerializer.serializeFromType(CloudRunnerOptions);
   }
 
