@@ -79,7 +79,7 @@ export class Cli {
       ${JSON.stringify(buildParameter, undefined, 4)}
     `);
     CloudRunner.buildParameters = buildParameter;
-    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE;
+    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE || ``;
     await CloudRunner.setup(buildParameter);
 
     return await results.target[results.propertyKey](Cli.options);
@@ -191,7 +191,7 @@ export class Cli {
       `build-${CloudRunner.buildParameters.buildGuid}`,
     );
 
-    if (!BuildParameters.useRetainedWorkspaceMode(CloudRunner.buildParameters)) {
+    if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
       await CloudRunnerSystem.Run(
         `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
       );

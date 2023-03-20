@@ -21,7 +21,7 @@ class CloudRunner {
   public static buildParameters: BuildParameters;
   private static defaultSecrets: CloudRunnerSecret[];
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
-  static lockedWorkspace: string | undefined;
+  static lockedWorkspace: string = ``;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
   public static get isCloudRunnerEnvironment() {
     return process.env[`GITHUB_ACTIONS`] !== `true`;
@@ -91,7 +91,7 @@ class CloudRunner {
     );
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      if (BuildParameters.useRetainedWorkspaceMode(buildParameters)) {
+      if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
         const result = await SharedWorkspaceLocking.GetLockedWorkspace(
@@ -109,7 +109,7 @@ class CloudRunner {
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
           buildParameters.maxRetainedWorkspaces = 0;
-          CloudRunner.lockedWorkspace = undefined;
+          CloudRunner.lockedWorkspace = ``;
         }
       }
       const content = { ...CloudRunner.buildParameters };
@@ -131,7 +131,7 @@ class CloudRunner {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
-      if (BuildParameters.useRetainedWorkspaceMode(buildParameters)) {
+      if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
         const workspace = CloudRunner.lockedWorkspace || ``;
         await SharedWorkspaceLocking.ReleaseWorkspace(
           workspace,
@@ -147,7 +147,7 @@ class CloudRunner {
             )}`,
           );
         }
-        CloudRunner.lockedWorkspace = undefined;
+        CloudRunner.lockedWorkspace = ``;
       }
 
       await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.finalHooks);

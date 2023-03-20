@@ -81,7 +81,7 @@ class BuildParameters {
   public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
-  public static useRetainedWorkspaceMode(buildParameters: BuildParameters) {
+  public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0;
   }
 

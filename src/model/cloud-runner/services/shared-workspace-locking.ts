@@ -63,7 +63,7 @@ export class SharedWorkspaceLocking {
       .filter((x) => x.includes(workspace) && x.endsWith(`_lock`));
   }
   public static async GetLockedWorkspace(workspace: string, runId: string, buildParametersContext: BuildParameters) {
-    if (!BuildParameters.useRetainedWorkspaceMode(buildParametersContext)) {
+    if (!BuildParameters.shouldUseRetainedWorkspaceMode(buildParametersContext)) {
       return false;
     }
 

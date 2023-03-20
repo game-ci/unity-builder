@@ -14,8 +14,8 @@ export class CloudRunnerFolders {
 
   public static get uniqueCloudRunnerJobFolderAbsolute(): string {
     return CloudRunner.buildParameters &&
-      BuildParameters.useRetainedWorkspaceMode(CloudRunner.buildParameters) &&
-      CloudRunner.lockedWorkspace
+      BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters) &&
+      CloudRunner.lockedWorkspace !== ``
       ? path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.lockedWorkspace)
       : path.join(`/`, CloudRunnerFolders.buildVolumeFolder, CloudRunner.buildParameters.buildGuid);
   }
