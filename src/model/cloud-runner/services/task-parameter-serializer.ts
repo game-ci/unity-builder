@@ -186,7 +186,7 @@ export class TaskParameterSerializer {
           fs.appendFileSync(
             `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`,
             // eslint-disable-next-line prefer-template
-            "export ${name}=`echo '" + base64.encode(value) + "' | base64 --decode `\n",
+            'export ' + name + "=`echo '" + base64.encode(value) + "' | base64 --decode `\n",
           );
         } else {
           fs.appendFileSync(
