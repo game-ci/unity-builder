@@ -10,7 +10,6 @@ import { CloudRunnerSystem } from './cloud-runner-system';
 import { CloudRunnerFolders } from './cloud-runner-folders';
 import CloudRunnerLogger from './cloud-runner-logger';
 import fs from 'node:fs';
-import base64 from 'base-64';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([
@@ -183,12 +182,7 @@ export class TaskParameterSerializer {
         const name = variable[0].replace(`CI_`, ``);
         const value = `${variable[1] || ``}`;
         process.env[name] = value;
-        CloudRunnerLogger.log(`Appending possibly bad name ${name}`);
-        fs.appendFileSync(file, `export ${name}=`);
-        fs.appendFileSync(file, '`');
-        fs.appendFileSync(file, `echo '${base64.encode(value)}' | base64 --decode`);
-        fs.appendFileSync(file, '`');
-        fs.appendFileSync(file, `\n`);
+        fs.appendFileSync(file, `export ${name}=$${variable[0]}\n`);
       }
     }
     await CloudRunnerSystem.Run(`chmod +x ${file}`);
