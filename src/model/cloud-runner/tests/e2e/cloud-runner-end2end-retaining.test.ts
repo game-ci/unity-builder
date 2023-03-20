@@ -23,7 +23,7 @@ describe('Cloud Runner Retain Workspace', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        retainWorkspaces: 1,
+        maxRetainedWorkspaces: 1,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
