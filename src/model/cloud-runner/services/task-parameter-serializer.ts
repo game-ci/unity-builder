@@ -8,6 +8,7 @@ import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
 import { CloudRunnerSystem } from './cloud-runner-system';
 import { CloudRunnerFolders } from './cloud-runner-folders';
+import CloudRunnerLogger from './cloud-runner-logger';
 
 export class TaskParameterSerializer {
   static readonly blocked = new Set(['0', 'length', 'prototype', '', 'unityVersion']);
@@ -41,6 +42,8 @@ export class TaskParameterSerializer {
         }),
       (item: CloudRunnerEnvironmentVariable) => item.name,
     );
+
+    CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
 
     return result;
   }
