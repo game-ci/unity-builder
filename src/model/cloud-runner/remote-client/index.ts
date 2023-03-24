@@ -101,9 +101,7 @@ export class RemoteClient {
 
         return;
       } else {
-        RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
-        await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-        await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
+        throw new Error(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
       }
     }
 
@@ -117,17 +115,17 @@ export class RemoteClient {
         `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
       );
     } catch (error: any) {
-      await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.repoPathAbsolute}`);
       throw error;
     }
+    await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.repoPathAbsolute}`);
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git lfs install`);
     assert(fs.existsSync(`.git`), 'git folder exists');
     RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
-    await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
     if (CloudRunner.buildParameters.gitSha !== undefined) {
       await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
     } else {
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
       RemoteClientLogger.log(`buildParameter Git Sha is empty`);
     }
 
