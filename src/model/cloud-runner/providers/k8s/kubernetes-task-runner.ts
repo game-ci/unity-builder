@@ -19,7 +19,9 @@ class KubernetesTaskRunner {
     alreadyFinished: boolean = false,
   ) {
     const lastReceivedMessage =
-      this.lastReceivedMessage !== `` ? `\nLast Log Message"${this.lastReceivedMessage}"` : ``;
+      this.lastReceivedMessage !== ``
+        ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
+        : ``;
     CloudRunnerLogger.log(
       `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} finished ${alreadyFinished} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}\n${lastReceivedMessage}`,
     );
