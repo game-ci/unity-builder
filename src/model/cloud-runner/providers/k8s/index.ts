@@ -14,8 +14,6 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
-import KubernetesPods from './kubernetes-pods';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
@@ -133,98 +131,27 @@ class Kubernetes implements ProviderInterface {
       this.containerName = `main`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       let output = '';
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        try {
-          let existsAlready = false;
-          try {
-            (await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace)).body.status;
-            existsAlready = true;
-          } catch {
-            // empty
-          }
-          if (!existsAlready) {
-            CloudRunnerLogger.log('Job does not exist');
-            await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
-            CloudRunnerLogger.log('Watching pod until running');
-            await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
-          }
-          CloudRunnerLogger.log('Pod running, streaming logs');
-          const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
-          output += await KubernetesTaskRunner.runTask(
-            this.kubeConfig,
-            this.kubeClient,
-            this.jobName,
-            this.podName,
-            KubernetesJobSpecFactory.MainContainerName,
-            this.namespace,
-            running,
-          );
-          let podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
+      try {
+        CloudRunnerLogger.log('Job does not exist');
+        await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
+        CloudRunnerLogger.log('Watching pod until running');
+        await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
 
-          if (!running) {
-            if (!FollowLogStreamService.DidReceiveEndOfTransmission && podStatus === `Succeeded`) {
-              output += await KubernetesTaskRunner.runTask(
-                this.kubeConfig,
-                this.kubeClient,
-                this.jobName,
-                this.podName,
-                'main',
-                this.namespace,
-                true,
-              );
-              CloudRunnerLogger.log(
-                JSON.stringify(
-                  (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
-                    .map((x) => {
-                      return {
-                        message: x.message || ``,
-                        name: x.metadata.name || ``,
-                        reason: x.reason || ``,
-                      };
-                    })
-                    .filter((x) => x.name.includes(this.podName)),
-                  undefined,
-                  4,
-                ),
-              );
-              break;
-            }
-
-            if (FollowLogStreamService.DidReceiveEndOfTransmission) {
-              break;
-            }
-          }
-          podStatus = await KubernetesPods.GetPodStatus(this.podName, this.namespace, this.kubeClient);
-          CloudRunnerLogger.log(`Pod status ${podStatus}, retrying log stream...`);
-        } catch (error: any) {
-          let errorParsed;
-          try {
-            errorParsed = JSON.parse(error);
-          } catch {
-            errorParsed = error;
-          }
-
-          const errorMessage =
-            errorParsed.name || errorParsed.reason || errorParsed.response?.body?.reason || errorParsed.message;
-
-          const continueStreaming =
-            errorMessage.includes(`dial timeout, backstop`) ||
-            errorMessage.includes(`HttpError`) ||
-            errorMessage.includes(`HttpError: HTTP request failed`) ||
-            errorMessage.includes(`an error occurred when try to find container`) ||
-            errorMessage.includes(`not found`) ||
-            errorMessage.includes(`Not Found`);
-          if (continueStreaming) {
-            CloudRunnerLogger.log('Log Stream Container Not Found');
-            await new Promise((resolve) => resolve(5000));
-            continue;
-          } else {
-            CloudRunnerLogger.log(`error running k8s workflow ${error}`);
-            throw error;
-          }
-        }
+        CloudRunnerLogger.log('Pod running, streaming logs');
+        output += await KubernetesTaskRunner.runTask(
+          this.kubeConfig,
+          this.kubeClient,
+          this.jobName,
+          this.podName,
+          KubernetesJobSpecFactory.MainContainerName,
+          this.namespace,
+        );
+      } catch (error: any) {
+        CloudRunnerLogger.log(`error running k8s workflow ${error}`);
+        await this.cleanupTaskResources();
+        throw error;
       }
+
       await this.cleanupTaskResources();
 
       return output;
