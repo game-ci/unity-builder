@@ -26,6 +26,7 @@ export class TaskParameterSerializer {
       [
         ...[
           { name: 'BUILD_TARGET', value: buildParameters.targetPlatform },
+          { name: 'UNITY_VERSION', value: buildParameters.editorVersion },
           { name: 'GITHUB_TOKEN', value: process.env.GITHUB_TOKEN },
         ],
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
