@@ -28,7 +28,7 @@ class KubernetesTaskRunner {
     let didStreamAnyLogs: boolean = false;
     let shouldReadLogs = true;
     let shouldCleanup = true;
-    const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp + 1);
+    const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
     const dateTimeIsoString = currentDate.toISOString();
 
     // k8s compatible iso date format - split by dot - https://www.googlecloudcommunity.com/gc/Apigee/JS-for-current-timestamp-in-W3C-WSDL-date-format-YYYY-MM-DDThh/td-p/68415
