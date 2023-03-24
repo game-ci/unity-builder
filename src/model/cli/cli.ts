@@ -14,7 +14,6 @@ import { CloudRunnerFolders } from '../cloud-runner/services/cloud-runner-folder
 import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
-import { TaskParameterSerializer } from '../cloud-runner/services/task-parameter-serializer';
 
 export class Cli {
   public static options: OptionValues | undefined;
@@ -73,14 +72,13 @@ export class Cli {
     CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
     Cli.options!.versioning = 'None';
 
-    const buildParameter = TaskParameterSerializer.readBuildParameterFromEnvironment();
-    buildParameter.buildGuid = process.env['CI_BUILD_GUID'] || ``;
+    CloudRunner.buildParameters = await BuildParameters.create();
     CloudRunnerLogger.log(`Build Params:
-      ${JSON.stringify(buildParameter, undefined, 4)}
+      ${JSON.stringify(CloudRunner.buildParameters, undefined, 4)}
     `);
-    CloudRunner.buildParameters = buildParameter;
-    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE || ``;
-    await CloudRunner.setup(buildParameter);
+    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE || process.env.LOCKED_WORKSPACE || ``;
+    CloudRunnerLogger.log(`Locked Workspace: ${CloudRunner.lockedWorkspace}`);
+    await CloudRunner.setup(CloudRunner.buildParameters);
 
     return await results.target[results.propertyKey](Cli.options);
   }
