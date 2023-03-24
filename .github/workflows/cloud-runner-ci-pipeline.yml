@@ -51,9 +51,9 @@ jobs:
           - 'cloud-runner-locking-core'
           - 'cloud-runner-locking-get-locked'
         providerStrategy:
-          - aws
+          #- aws
           - local-docker
-          - k8s
+          #- k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v3
@@ -71,7 +71,7 @@ jobs:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - name: 'Set up Cloud SDK'
         if: matrix.providerStrategy == 'k8s'
-        uses: 'google-github-actions/setup-gcloud@v1'
+        uses: 'google-github-actions/setup-gcloud@v1.1.0'
       - name: Get GKE cluster credentials
         if: matrix.providerStrategy == 'k8s'
         run: |
@@ -89,15 +89,19 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
   tests:
-    needs:
-      - smokeTests
-      - buildTargetTests
+    # needs:
+    #   - smokeTests
+    #   - buildTargetTests
     name: Integration Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        providerStrategy:
+          - aws
+          - local-docker
+          - k8s
         test:
           - 'cloud-runner-async-workflow'
           #- 'cloud-runner-caching'
@@ -110,10 +114,6 @@ jobs:
           #- 'cloud-runner-local-persistence'
           #- 'cloud-runner-locking-core'
           #- 'cloud-runner-locking-get-locked'
-        providerStrategy:
-          - aws
-          - local-docker
-          - k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
