@@ -73,6 +73,7 @@ export class Cli {
     Cli.options!.versioning = 'None';
 
     CloudRunner.buildParameters = await BuildParameters.create();
+    CloudRunner.buildParameters.buildGuid = process.env.BUILD_GUID || ``;
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(CloudRunner.buildParameters, undefined, 4)}
     `);
