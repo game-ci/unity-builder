@@ -40,7 +40,6 @@ export class RemoteClient {
     }
   }
   public static async bootstrapRepository() {
-    await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     await CloudRunnerSystem.Run(
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );
@@ -104,13 +103,6 @@ export class RemoteClient {
         await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
         await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
       }
-    }
-
-    if (
-      fs.existsSync(CloudRunnerFolders.repoPathAbsolute) &&
-      !fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
-    ) {
-      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
     }
 
     RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
