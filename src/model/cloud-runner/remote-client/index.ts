@@ -41,6 +41,9 @@ export class RemoteClient {
   }
   public static async bootstrapRepository() {
     await CloudRunnerSystem.Run(
+      `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+    );
+    await CloudRunnerSystem.Run(
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );
     await RemoteClient.cloneRepoWithoutLFSFiles();
