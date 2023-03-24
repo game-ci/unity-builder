@@ -57,7 +57,7 @@ export class Cli {
     program.parse(process.argv);
     Cli.options = program.opts();
 
-    return Cli.isCliMode || process.env.CI_CLI;
+    return Cli.isCliMode;
   }
 
   static async RunCli(): Promise<void> {
@@ -76,7 +76,7 @@ export class Cli {
     CloudRunnerLogger.log(`Build Params:
       ${JSON.stringify(CloudRunner.buildParameters, undefined, 4)}
     `);
-    CloudRunner.lockedWorkspace = process.env.CI_LOCKED_WORKSPACE || process.env.LOCKED_WORKSPACE || ``;
+    CloudRunner.lockedWorkspace = process.env.LOCKED_WORKSPACE || ``;
     CloudRunnerLogger.log(`Locked Workspace: ${CloudRunner.lockedWorkspace}`);
     await CloudRunner.setup(CloudRunner.buildParameters);
 

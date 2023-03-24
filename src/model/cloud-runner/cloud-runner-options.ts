@@ -29,10 +29,6 @@ class CloudRunnerOptions {
       return process.env[query];
     }
 
-    if (alternativeQuery !== query && process.env[`CI_${alternativeQuery}`] !== undefined) {
-      return process.env[`CI_${alternativeQuery}`];
-    }
-
     if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
       return process.env[alternativeQuery];
     }

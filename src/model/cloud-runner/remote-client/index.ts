@@ -11,7 +11,6 @@ import { CliFunction } from '../../cli/cli-functions-repository';
 import { CloudRunnerSystem } from '../services/cloud-runner-system';
 import YAML from 'yaml';
 import GitHub from '../../github';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
 import BuildParameters from '../../build-parameters';
 
 export class RemoteClient {
@@ -21,11 +20,7 @@ export class RemoteClient {
     if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();
     }
-    await RemoteClient.exportCiParameters();
     await RemoteClient.runCustomHookFiles(`before-build`);
-  }
-  static async exportCiParameters() {
-    await TaskParameterSerializer.exportAllCiVariablesWithoutPrefix();
   }
   static async runCustomHookFiles(hookLifecycle: string) {
     RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);

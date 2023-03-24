@@ -6,9 +6,6 @@ import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
 import BuildParameters from '../../build-parameters';
 import CloudRunnerOptions from '../cloud-runner-options';
-import { CloudRunnerSystem } from './cloud-runner-system';
-import { CloudRunnerFolders } from './cloud-runner-folders';
-import fs from 'node:fs';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([
@@ -44,7 +41,7 @@ export class TaskParameterSerializer {
             x.value !== `undefined`,
         )
         .map((x) => {
-          x.name = `CI_${TaskParameterSerializer.ToEnvVarFormat(x.name)}`;
+          x.name = `${TaskParameterSerializer.ToEnvVarFormat(x.name)}`;
           x.value = `${x.value}`;
 
           return x;
@@ -71,14 +68,14 @@ export class TaskParameterSerializer {
     const keys = [
       ...new Set(
         Object.getOwnPropertyNames(process.env)
-          .filter((x) => !this.blockedParameterNames.has(x) && x.startsWith('CI_'))
+          .filter((x) => !this.blockedParameterNames.has(x) && x.startsWith(''))
           .map((x) => TaskParameterSerializer.UndoEnvVarFormat(x)),
       ),
     ];
 
     for (const element of keys) {
       if (element !== `customJob`) {
-        buildParameters[element] = process.env[`CI_${TaskParameterSerializer.ToEnvVarFormat(element)}`];
+        buildParameters[element] = process.env[`${TaskParameterSerializer.ToEnvVarFormat(element)}`];
       }
     }
 
@@ -98,7 +95,7 @@ export class TaskParameterSerializer {
   }
 
   public static UndoEnvVarFormat(element: string): string {
-    return this.camelize(element.replace('CI_', '').toLowerCase().replace(/_+/g, ' '));
+    return this.camelize(element.replace('', '').toLowerCase().replace(/_+/g, ' '));
   }
 
   private static camelize(string: string) {
@@ -172,18 +169,5 @@ export class TaskParameterSerializer {
     }
 
     return array;
-  }
-  public static async exportAllCiVariablesWithoutPrefix() {
-    const file = `${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`;
-    for (const variable of Object.entries(process.env)) {
-      if (variable[0].includes(`CI_`)) {
-        const name = variable[0].replace(`CI_`, ``);
-        const value = `${variable[1] || ``}`;
-        process.env[name] = value;
-        fs.appendFileSync(file, `export ${name}="$${variable[0]}"\n`);
-      }
-    }
-    await CloudRunnerSystem.Run(`chmod +x ${file}`);
-    await CloudRunnerSystem.Run(file);
   }
 }

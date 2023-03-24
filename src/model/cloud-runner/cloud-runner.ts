@@ -27,7 +27,7 @@ class CloudRunner {
     return process.env[`GITHUB_ACTIONS`] !== `true`;
   }
   public static get isCloudRunnerAsyncEnvironment() {
-    return process.env[`CI_ASYNC_WORKFLOW`] === `true`;
+    return process.env[`ASYNC_WORKFLOW`] === `true`;
   }
   public static async setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
@@ -104,7 +104,7 @@ class CloudRunner {
           CloudRunnerLogger.logLine(`Using retained workspace ${CloudRunner.lockedWorkspace}`);
           CloudRunner.cloudRunnerEnvironmentVariables = [
             ...CloudRunner.cloudRunnerEnvironmentVariables,
-            { name: `CI_LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
+            { name: `LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
           ];
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);

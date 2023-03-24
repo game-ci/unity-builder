@@ -68,7 +68,7 @@ describe('Cloud Runner Sync Environments', () => {
           return x;
         })
         .filter((element) => {
-          return !['CI_UNITY_LICENSE', 'UNITY_LICENSE', 'CI_CUSTOM_JOB', 'CUSTOM_JOB'].includes(element.name);
+          return !['UNITY_LICENSE', 'UNITY_LICENSE', 'CUSTOM_JOB', 'CUSTOM_JOB'].includes(element.name);
         });
       const newLinePurgedFile = file
         .replace(/\s+/g, '')

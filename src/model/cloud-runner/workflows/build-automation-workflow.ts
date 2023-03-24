@@ -89,9 +89,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
-node ${builderPath} -m remote-cli-pre-build
-. ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh
-rm ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}/setEnv.sh`;
+node ${builderPath} -m remote-cli-pre-build`;
   }
 
   private static BuildCommands(builderPath: string) {

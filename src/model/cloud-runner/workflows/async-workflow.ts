@@ -12,7 +12,7 @@ export class AsyncWorkflow {
     try {
       CloudRunnerLogger.log(`Cloud Runner is running async mode`);
       const asyncEnvironmentVariable = new CloudRunnerEnvironmentVariable();
-      asyncEnvironmentVariable.name = `CI_ASYNC_WORKFLOW`;
+      asyncEnvironmentVariable.name = `ASYNC_WORKFLOW`;
       asyncEnvironmentVariable.value = `true`;
 
       let output = '';
