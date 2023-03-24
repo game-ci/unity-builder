@@ -85,7 +85,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
     )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
       path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
-    )}" ] ; then echo "Builder Already Exists!"; else ${commands} ; fi`;
+    )}" ] ; then echo "Builder Already Exists!" && tree ${
+      CloudRunnerFolders.builderPathAbsolute
+    }; else ${commands} ; fi`;
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
