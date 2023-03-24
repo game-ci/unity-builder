@@ -131,7 +131,7 @@ jobs:
           credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
       - name: 'Set up Cloud SDK'
         if: matrix.providerStrategy == 'k8s'
-        uses: 'google-github-actions/setup-gcloud@v1'
+        uses: 'google-github-actions/setup-gcloud@v1.1.0'
       - name: Get GKE cluster credentials
         if: matrix.providerStrategy == 'k8s'
         run: |
