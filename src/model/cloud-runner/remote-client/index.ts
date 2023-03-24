@@ -43,7 +43,6 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );
-    process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
     await RemoteClient.cloneRepoWithoutLFSFiles();
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.sizeOfFolder(
