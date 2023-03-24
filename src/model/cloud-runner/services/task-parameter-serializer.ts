@@ -95,7 +95,7 @@ export class TaskParameterSerializer {
   }
 
   public static UndoEnvVarFormat(element: string): string {
-    return this.camelize(element.replace('', '').toLowerCase().replace(/_+/g, ' '));
+    return this.camelize(element.toLowerCase().replace(/_+/g, ' '));
   }
 
   private static camelize(string: string) {

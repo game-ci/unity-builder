@@ -101,7 +101,7 @@ export class RemoteClient {
 
         return;
       } else {
-        throw new Error(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
+        CloudRunnerLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
       }
     }
 
