@@ -51,9 +51,9 @@ jobs:
           - 'cloud-runner-locking-core'
           - 'cloud-runner-locking-get-locked'
         providerStrategy:
-          # - aws
+          - aws
           - local-docker
-          # - k8s
+          - k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v3
