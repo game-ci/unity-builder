@@ -208,7 +208,7 @@ class CloudRunnerOptions {
   }
 
   static get kubeVolumeSize(): string {
-    return CloudRunnerOptions.getInput('kubeVolumeSize') || '10Gi';
+    return CloudRunnerOptions.getInput('kubeVolumeSize') || '15Gi';
   }
 
   static get kubeStorageClass(): string {
