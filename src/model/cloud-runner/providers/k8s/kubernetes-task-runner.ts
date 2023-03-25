@@ -18,7 +18,7 @@ class KubernetesTaskRunner {
     namespace: string,
   ) {
     const lastReceivedMessage =
-      this.lastReceivedMessage !== ``
+      KubernetesTaskRunner.lastReceivedTimestamp > 0
         ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
         : ``;
     CloudRunnerLogger.log(
@@ -32,7 +32,7 @@ class KubernetesTaskRunner {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       let sinceTime = ``;
-      if (KubernetesTaskRunner.lastReceivedTimestamp !== 0) {
+      if (KubernetesTaskRunner.lastReceivedTimestamp > 0) {
         const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
         const dateTimeIsoString = currentDate.toISOString();
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
