@@ -46,7 +46,7 @@ class KubernetesTaskRunner {
 
       try {
         logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName} -f -c${extraFlags} ${containerName} --timestamps${sinceTime}`,
+          `kubectl logs ${podName}${extraFlags} -f -c ${containerName} --timestamps${sinceTime}`,
           false,
           true,
         );
