@@ -138,7 +138,7 @@ class KubernetesJobSpecFactory {
               volumeMounts: [
                 {
                   name: 'build-mount',
-                  mountPath: `/${mountdir}`,
+                  mountPath: `${mountdir}`,
                 },
               ],
               lifecycle: {
