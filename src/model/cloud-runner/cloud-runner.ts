@@ -15,6 +15,7 @@ import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/shared-workspace-locking';
+import { FollowLogStreamService } from './services/follow-log-stream-service';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -57,6 +58,7 @@ class CloudRunner {
         }`,
       );
     }
+    FollowLogStreamService.Reset();
   }
 
   private static setupSelectedBuildPlatform() {

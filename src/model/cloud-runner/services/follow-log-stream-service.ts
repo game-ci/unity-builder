@@ -5,6 +5,9 @@ import { CloudRunnerStatics } from '../cloud-runner-statics';
 import GitHub from '../../github';
 
 export class FollowLogStreamService {
+  static Reset() {
+    FollowLogStreamService.DidReceiveEndOfTransmission = false;
+  }
   static errors = ``;
   public static DidReceiveEndOfTransmission = false;
   public static handleIteration(message: string, shouldReadLogs: boolean, shouldCleanup: boolean, output: string) {
