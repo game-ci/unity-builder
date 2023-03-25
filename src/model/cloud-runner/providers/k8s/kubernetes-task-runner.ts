@@ -53,6 +53,7 @@ class KubernetesTaskRunner {
         const continueStreaming =
           errorString.includes(`dial timeout, backstop`) ||
           errorString.includes(`HttpError: HTTP request failed`) ||
+          errorString.includes(`previous terminated container`) ||
           (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient));
         CloudRunnerLogger.log(`K8s logging error ${error} ${continueStreaming}`);
         if (continueStreaming) {
