@@ -40,11 +40,18 @@ class KubernetesTaskRunner {
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
 
-      const logs = await CloudRunnerSystem.Run(
-        `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
-        false,
-        true,
-      );
+      let logs;
+
+      try {
+        logs = await CloudRunnerSystem.Run(
+          `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
+          false,
+          true,
+        );
+      } catch (error: any) {
+        CloudRunnerLogger.log(`K8s logging error ${error}`);
+        throw error;
+      }
       const splitLogs = logs.split(`\n`);
       for (const chunk of splitLogs) {
         if (
