@@ -7,7 +7,7 @@ import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 
 class KubernetesTaskRunner {
-  static lastReceivedTimestamp: number;
+  static lastReceivedTimestamp: number = 0;
   static lastReceivedMessage: string = ``;
   static async runTask(
     kubeConfig: KubeConfig,
