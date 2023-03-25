@@ -51,11 +51,7 @@ class KubernetesTaskRunner {
       } catch (error: any) {
         const errorString = `${error}`;
         const continueStreaming =
-          errorString.includes(`dial timeout, backstop`) ||
-          errorString.includes(`HttpError: HTTP request failed`) ||
-          errorString.includes(`an error occurred when try to find container`) ||
-          errorString.includes(`not found`) ||
-          errorString.includes(`Not Found`);
+          errorString.includes(`dial timeout, backstop`) || errorString.includes(`HttpError: HTTP request failed`);
         CloudRunnerLogger.log(`K8s logging error ${error} ${continueStreaming}`);
         if (continueStreaming) {
           continue;
