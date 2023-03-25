@@ -29,96 +29,92 @@ class KubernetesTaskRunner {
     let shouldReadLogs = true;
     let shouldCleanup = true;
 
-    try {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        let sinceTime = ``;
-        if (`${KubernetesTaskRunner.lastReceivedTimestamp}` !== ``) {
-          const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
-          const dateTimeIsoString = currentDate.toISOString();
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let sinceTime = ``;
+      if (`${KubernetesTaskRunner.lastReceivedTimestamp}` !== ``) {
+        const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
+        const dateTimeIsoString = currentDate.toISOString();
 
-          // k8s compatible iso date format - split by dot - https://www.googlecloudcommunity.com/gc/Apigee/JS-for-current-timestamp-in-W3C-WSDL-date-format-YYYY-MM-DDThh/td-p/68415
-          const currentDateTime = dateTimeIsoString.split('.')[0];
-          const timeZoneOffset = currentDate.getTimezoneOffset();
-          const positiveOffset = Math.abs(timeZoneOffset);
-          const timeOffsetInHours = -(timeZoneOffset / 60);
-          const minZone = positiveOffset - Math.floor(timeOffsetInHours) * 60;
-          const symbolOffset = timeZoneOffset > 0 ? '-' : '+';
-          const hourOffset = Math.floor(timeOffsetInHours) < 10 ? 0 : '';
-          const minOffset = minZone < 10 ? 0 : '';
-          const tzd = `${symbolOffset + hourOffset + Math.floor(timeOffsetInHours)}:${minOffset}${minZone}`;
-          const dateTZDformat = currentDateTime + tzd;
-          sinceTime = ` --since-time="${dateTZDformat}"`;
-        }
-        let lastMessageSeenIncludedInChunk = false;
-        let lastMessageSeen = false;
+        // k8s compatible iso date format - split by dot - https://www.googlecloudcommunity.com/gc/Apigee/JS-for-current-timestamp-in-W3C-WSDL-date-format-YYYY-MM-DDThh/td-p/68415
+        const currentDateTime = dateTimeIsoString.split('.')[0];
+        const timeZoneOffset = currentDate.getTimezoneOffset();
+        const positiveOffset = Math.abs(timeZoneOffset);
+        const timeOffsetInHours = -(timeZoneOffset / 60);
+        const minZone = positiveOffset - Math.floor(timeOffsetInHours) * 60;
+        const symbolOffset = timeZoneOffset > 0 ? '-' : '+';
+        const hourOffset = Math.floor(timeOffsetInHours) < 10 ? 0 : '';
+        const minOffset = minZone < 10 ? 0 : '';
+        const tzd = `${symbolOffset + hourOffset + Math.floor(timeOffsetInHours)}:${minOffset}${minZone}`;
+        const dateTZDformat = currentDateTime + tzd;
+        sinceTime = ` --since-time="${dateTZDformat}"`;
+      }
+      let lastMessageSeenIncludedInChunk = false;
+      let lastMessageSeen = false;
 
-        // using this instead of Kube
-        const logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
-          false,
-          true,
-        );
-        const splitLogs = logs.split(`\n`);
-        for (const chunk of splitLogs) {
-          if (
-            chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
-            KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
-          ) {
-            CloudRunnerLogger.log(`Previous log message found ${chunk}`);
-            lastMessageSeenIncludedInChunk = true;
-          }
-        }
-        for (const chunk of splitLogs) {
-          const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
-          if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
-            lastMessageSeen = true;
-          }
-          if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
-            continue;
-          }
-          didStreamAnyLogs = true;
-          const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
-          KubernetesTaskRunner.lastReceivedMessage = chunk;
-          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-          ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-            message,
-            shouldReadLogs,
-            shouldCleanup,
-            output,
-          ));
-        }
-
-        if (!didStreamAnyLogs) {
-          core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
-          core.error(
-            JSON.stringify(
-              {
-                events: (await kubeClient.listNamespacedEvent(namespace)).body.items
-                  .filter((x) => {
-                    return x.involvedObject.name === podName || x.involvedObject.name === jobName;
-                  })
-                  .map((x) => {
-                    return {
-                      type: x.involvedObject.kind,
-                      name: x.involvedObject.name,
-                      message: x.message,
-                    };
-                  }),
-              },
-              undefined,
-              4,
-            ),
-          );
-          throw new Error(`No logs streamed from k8s`);
-        }
-        if (FollowLogStreamService.DidReceiveEndOfTransmission) {
-          CloudRunnerLogger.log('end of log stream');
-          break;
+      // using this instead of Kube
+      const logs = await CloudRunnerSystem.Run(
+        `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
+        false,
+        true,
+      );
+      const splitLogs = logs.split(`\n`);
+      for (const chunk of splitLogs) {
+        if (
+          chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
+          KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
+        ) {
+          CloudRunnerLogger.log(`Previous log message found ${chunk}`);
+          lastMessageSeenIncludedInChunk = true;
         }
       }
-    } catch (error: any) {
-      CloudRunnerLogger.log(`k8s stream watching failed ${JSON.stringify(error, undefined, 4)}`);
+      for (const chunk of splitLogs) {
+        const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
+        if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
+          lastMessageSeen = true;
+        }
+        if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
+          continue;
+        }
+        didStreamAnyLogs = true;
+        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+        KubernetesTaskRunner.lastReceivedMessage = chunk;
+        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
+        ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+          message,
+          shouldReadLogs,
+          shouldCleanup,
+          output,
+        ));
+      }
+
+      if (!didStreamAnyLogs) {
+        core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
+        core.error(
+          JSON.stringify(
+            {
+              events: (await kubeClient.listNamespacedEvent(namespace)).body.items
+                .filter((x) => {
+                  return x.involvedObject.name === podName || x.involvedObject.name === jobName;
+                })
+                .map((x) => {
+                  return {
+                    type: x.involvedObject.kind,
+                    name: x.involvedObject.name,
+                    message: x.message,
+                  };
+                }),
+            },
+            undefined,
+            4,
+          ),
+        );
+        throw new Error(`No logs streamed from k8s`);
+      }
+      if (FollowLogStreamService.DidReceiveEndOfTransmission) {
+        CloudRunnerLogger.log('end of log stream');
+        break;
+      }
     }
 
     return output;
