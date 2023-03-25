@@ -86,23 +86,29 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+    if (
+      fs.existsSync(CloudRunnerFolders.repoPathAbsolute) &&
+      !fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+    ) {
+      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.repoPathAbsolute}`);
+      CloudRunnerLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
+    }
 
-    if (BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
-      if (fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))) {
-        process.chdir(CloudRunnerFolders.repoPathAbsolute);
-        RemoteClientLogger.log(
-          `${
-            CloudRunnerFolders.repoPathAbsolute
-          } repo exists - skipping clone - retained workspace mode ${BuildParameters.shouldUseRetainedWorkspaceMode(
-            CloudRunner.buildParameters,
-          )}`,
-        );
-        await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
+    if (
+      BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters) &&
+      fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+    ) {
+      process.chdir(CloudRunnerFolders.repoPathAbsolute);
+      RemoteClientLogger.log(
+        `${
+          CloudRunnerFolders.repoPathAbsolute
+        } repo exists - skipping clone - retained workspace mode ${BuildParameters.shouldUseRetainedWorkspaceMode(
+          CloudRunner.buildParameters,
+        )}`,
+      );
+      await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
-        return;
-      } else {
-        CloudRunnerLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
-      }
+      return;
     }
 
     RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);

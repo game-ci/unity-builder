@@ -41,39 +41,45 @@ class KubernetesTaskRunner {
       let lastMessageSeen = false;
 
       // using this instead of Kube
-      const logs = await CloudRunnerSystem.Run(
-        `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
-        false,
-        true,
-      );
-      const splitLogs = logs.split(`\n`);
-      for (const chunk of splitLogs) {
-        if (
-          chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
-          KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
-        ) {
-          CloudRunnerLogger.log(`Previous log message found ${chunk}`);
-          lastMessageSeenIncludedInChunk = true;
+      try {
+        const logs = await CloudRunnerSystem.Run(
+          `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
+          false,
+          true,
+        );
+        const splitLogs = logs.split(`\n`);
+        for (const chunk of splitLogs) {
+          if (
+            chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
+            KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
+          ) {
+            CloudRunnerLogger.log(`Previous log message found ${chunk}`);
+            lastMessageSeenIncludedInChunk = true;
+          }
         }
-      }
-      for (const chunk of splitLogs) {
-        const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
-        if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
-          lastMessageSeen = true;
+        for (const chunk of splitLogs) {
+          const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
+          if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
+            lastMessageSeen = true;
+          }
+          if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
+            continue;
+          }
+          didStreamAnyLogs = true;
+          const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+          KubernetesTaskRunner.lastReceivedMessage = chunk;
+          KubernetesTaskRunner.lastReceivedTimestamp = newDate;
+          ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
+            message,
+            shouldReadLogs,
+            shouldCleanup,
+            output,
+          ));
         }
-        if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
-          continue;
+      } catch (error: any) {
+        if (error.includes(`s`)) {
+          break;
         }
-        didStreamAnyLogs = true;
-        const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
-        KubernetesTaskRunner.lastReceivedMessage = chunk;
-        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
-        ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
-          message,
-          shouldReadLogs,
-          shouldCleanup,
-          output,
-        ));
       }
 
       if (!didStreamAnyLogs) {
