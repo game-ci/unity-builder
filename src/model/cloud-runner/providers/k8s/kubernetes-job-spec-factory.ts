@@ -102,6 +102,7 @@ class KubernetesJobSpecFactory {
           ],
           containers: [
             {
+              ttlSecondsAfterFinished: 9999,
               name: KubernetesJobSpecFactory.MainContainerName,
               image,
               command: ['/bin/sh'],
