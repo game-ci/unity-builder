@@ -88,6 +88,7 @@ class KubernetesJobSpecFactory {
       },
     };
     job.spec = {
+      ttlSecondsAfterFinished: 9999,
       backoffLimit: 0,
       template: {
         spec: {
