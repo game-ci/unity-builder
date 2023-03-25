@@ -5,7 +5,6 @@ import { FollowLogStreamService } from '../../services/follow-log-stream-service
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 import KubernetesPods from './kubernetes-pods';
-import { setTimeout } from 'timers/promises';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number = 0;
@@ -24,7 +23,6 @@ class KubernetesTaskRunner {
     let sinceTime = ``;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await new Promise((resolve) => setTimeout(5000, resolve));
       const lastReceivedMessage =
         KubernetesTaskRunner.lastReceivedTimestamp > 0
           ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
@@ -51,7 +49,6 @@ class KubernetesTaskRunner {
           true,
         );
       } catch (error: any) {
-        await new Promise((resolve) => setTimeout(5000, resolve));
         const errorString = `${error}`;
         const continueStreaming =
           errorString.includes(`dial timeout, backstop`) ||
