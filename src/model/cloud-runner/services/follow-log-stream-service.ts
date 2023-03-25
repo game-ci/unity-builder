@@ -33,10 +33,12 @@ export class FollowLogStreamService {
       core.setFailed('unity build failed');
       core.error('BUILD FAILED!');
     } else if (message.toLowerCase().includes('error ')) {
-      FollowLogStreamService.errors += `\n${message}`;
-    } else if (message.toLowerCase().includes('command failed: ')) {
+      core.error(message);
       FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('error: ')) {
+      core.error(message);
+      FollowLogStreamService.errors += `\n${message}`;
+    } else if (message.toLowerCase().includes('command failed: ')) {
       FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('invalid ')) {
       FollowLogStreamService.errors += `\n${message}`;
