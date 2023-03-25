@@ -28,32 +28,34 @@ class KubernetesTaskRunner {
     let didStreamAnyLogs: boolean = false;
     let shouldReadLogs = true;
     let shouldCleanup = true;
-    const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
-    const dateTimeIsoString = currentDate.toISOString();
-
-    // k8s compatible iso date format - split by dot - https://www.googlecloudcommunity.com/gc/Apigee/JS-for-current-timestamp-in-W3C-WSDL-date-format-YYYY-MM-DDThh/td-p/68415
-    const currentDateTime = dateTimeIsoString.split('.')[0];
-    const timeZoneOffset = currentDate.getTimezoneOffset();
-    const positiveOffset = Math.abs(timeZoneOffset);
-    const timeOffsetInHours = -(timeZoneOffset / 60);
-    const minZone = positiveOffset - Math.floor(timeOffsetInHours) * 60;
-    const symbolOffset = timeZoneOffset > 0 ? '-' : '+';
-    const hourOffset = Math.floor(timeOffsetInHours) < 10 ? 0 : '';
-    const minOffset = minZone < 10 ? 0 : '';
-    const tzd = `${symbolOffset + hourOffset + Math.floor(timeOffsetInHours)}:${minOffset}${minZone}`;
-    const dateTZDformat = currentDateTime + tzd;
 
     try {
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const sinceTime =
-          `${KubernetesTaskRunner.lastReceivedTimestamp}` !== `` ? `--since-time="${dateTZDformat}" ` : ` `;
+        let sinceTime = ``;
+        if (`${KubernetesTaskRunner.lastReceivedTimestamp}` !== ``) {
+          const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
+          const dateTimeIsoString = currentDate.toISOString();
+
+          // k8s compatible iso date format - split by dot - https://www.googlecloudcommunity.com/gc/Apigee/JS-for-current-timestamp-in-W3C-WSDL-date-format-YYYY-MM-DDThh/td-p/68415
+          const currentDateTime = dateTimeIsoString.split('.')[0];
+          const timeZoneOffset = currentDate.getTimezoneOffset();
+          const positiveOffset = Math.abs(timeZoneOffset);
+          const timeOffsetInHours = -(timeZoneOffset / 60);
+          const minZone = positiveOffset - Math.floor(timeOffsetInHours) * 60;
+          const symbolOffset = timeZoneOffset > 0 ? '-' : '+';
+          const hourOffset = Math.floor(timeOffsetInHours) < 10 ? 0 : '';
+          const minOffset = minZone < 10 ? 0 : '';
+          const tzd = `${symbolOffset + hourOffset + Math.floor(timeOffsetInHours)}:${minOffset}${minZone}`;
+          const dateTZDformat = currentDateTime + tzd;
+          sinceTime = ` --since-time="${dateTZDformat}"`;
+        }
         let lastMessageSeenIncludedInChunk = false;
         let lastMessageSeen = false;
 
         // using this instead of Kube
         const logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName} -f -c ${containerName} --timestamps ${sinceTime}`,
+          `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
           false,
           true,
         );
