@@ -1,10 +1,10 @@
 import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
 import CloudRunnerLogger from '../../services/cloud-runner-logger';
-import * as core from '@actions/core';
 import waitUntil from 'async-wait-until';
 import { FollowLogStreamService } from '../../services/follow-log-stream-service';
 import { CloudRunnerSystem } from '../../services/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
+import KubernetesPods from './kubernetes-pods';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number = 0;
@@ -17,25 +17,27 @@ class KubernetesTaskRunner {
     containerName: string,
     namespace: string,
   ) {
-    const lastReceivedMessage =
-      KubernetesTaskRunner.lastReceivedTimestamp > 0
-        ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
-        : ``;
-    CloudRunnerLogger.log(
-      `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}\n${lastReceivedMessage}`,
-    );
     let output = '';
-    let didStreamAnyLogs: boolean = false;
     let shouldReadLogs = true;
     let shouldCleanup = true;
-
+    let sinceTime = ``;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      let sinceTime = ``;
+      const lastReceivedMessage =
+        KubernetesTaskRunner.lastReceivedTimestamp > 0
+          ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
+          : ``;
+      CloudRunnerLogger.log(
+        `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}\n${lastReceivedMessage}`,
+      );
       if (KubernetesTaskRunner.lastReceivedTimestamp > 0) {
         const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
         const dateTimeIsoString = currentDate.toISOString();
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
+      }
+      let extraFlags = ``;
+      if (!(await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))) {
+        extraFlags += ` -p`;
       }
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
@@ -44,7 +46,7 @@ class KubernetesTaskRunner {
 
       try {
         logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName} -f -c ${containerName} --timestamps${sinceTime}`,
+          `kubectl logs ${podName} -f -c${extraFlags} ${containerName} --timestamps${sinceTime}`,
           false,
           true,
         );
@@ -70,7 +72,6 @@ class KubernetesTaskRunner {
         if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
           continue;
         }
-        didStreamAnyLogs = true;
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
         KubernetesTaskRunner.lastReceivedMessage = chunk;
         KubernetesTaskRunner.lastReceivedTimestamp = newDate;
@@ -80,30 +81,6 @@ class KubernetesTaskRunner {
           shouldCleanup,
           output,
         ));
-      }
-
-      if (!didStreamAnyLogs) {
-        core.error('Failed to stream any logs, listing namespace events, check for an error with the container');
-        core.error(
-          JSON.stringify(
-            {
-              events: (await kubeClient.listNamespacedEvent(namespace)).body.items
-                .filter((x) => {
-                  return x.involvedObject.name === podName || x.involvedObject.name === jobName;
-                })
-                .map((x) => {
-                  return {
-                    type: x.involvedObject.kind,
-                    name: x.involvedObject.name,
-                    message: x.message,
-                  };
-                }),
-            },
-            undefined,
-            4,
-          ),
-        );
-        throw new Error(`No logs streamed from k8s`);
       }
       if (FollowLogStreamService.DidReceiveEndOfTransmission) {
         CloudRunnerLogger.log('end of log stream');

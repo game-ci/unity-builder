@@ -46,11 +46,6 @@ export class FollowLogStreamService {
       FollowLogStreamService.errors += `\n${message}`;
     } else if (message.toLowerCase().includes('cannot be found')) {
       FollowLogStreamService.errors += `\n${message}`;
-    } else if (CloudRunner.buildParameters.cloudRunnerDebug && message.includes(': Listening for Jobs')) {
-      core.setOutput('cloud runner stop watching', 'true');
-      shouldReadLogs = false;
-      shouldCleanup = false;
-      core.warning('cloud runner stop watching');
     }
     if (CloudRunner.buildParameters.cloudRunnerDebug) {
       output += `${message}\n`;
