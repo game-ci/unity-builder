@@ -146,6 +146,8 @@ export class CloudRunnerCustomSteps {
     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
     aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
     aws configure set region $AWS_DEFAULT_REGION --profile default
+    mkdir -p /data/cache/$CACHE_KEY/Library/
+    mkdir -p /data/cache/$CACHE_KEY/lfs/
     aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
     aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
     BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
