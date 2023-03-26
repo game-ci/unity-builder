@@ -143,11 +143,26 @@ class Kubernetes implements ProviderInterface {
           this.kubeClient,
           this.jobName,
           this.podName,
-          KubernetesJobSpecFactory.MainContainerName,
+          this.containerName,
           this.namespace,
         );
       } catch (error: any) {
         CloudRunnerLogger.log(`error running k8s workflow ${error}`);
+        CloudRunnerLogger.log(
+          JSON.stringify(
+            (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
+              .map((x) => {
+                return {
+                  message: x.message || ``,
+                  name: x.metadata.name || ``,
+                  reason: x.reason || ``,
+                };
+              })
+              .filter((x) => x.name.includes(this.podName)),
+            undefined,
+            4,
+          ),
+        );
         await this.cleanupTaskResources();
         throw error;
       }
@@ -212,6 +227,7 @@ class Kubernetes implements ProviderInterface {
           this.pvcName,
           this.jobName,
           k8s,
+          this.containerName,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
         const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
@@ -229,7 +245,7 @@ class Kubernetes implements ProviderInterface {
 
   setPodNameAndContainerName(pod: k8s.V1Pod) {
     this.podName = pod.metadata?.name || '';
-    this.containerName = pod.status?.containerStatuses?.[0].name || '';
+    this.containerName = pod.status?.containerStatuses?.[0].name || this.containerName;
   }
 
   async cleanupTaskResources() {

@@ -36,9 +36,7 @@ class KubernetesTaskRunner {
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
       }
       let extraFlags = ``;
-      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
-        ? ` -c ${containerName}`
-        : ` -p`;
+      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient)) ? `` : ` -p`;
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
 
@@ -46,7 +44,7 @@ class KubernetesTaskRunner {
 
       try {
         logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName}${extraFlags} -f --timestamps${sinceTime}`,
+          `kubectl logs ${podName}${extraFlags} -f -c ${containerName} --timestamps${sinceTime}`,
           false,
           true,
         );
