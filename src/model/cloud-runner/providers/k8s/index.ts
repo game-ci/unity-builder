@@ -93,18 +93,8 @@ class Kubernetes implements ProviderInterface {
   ) {
     try {
       this.buildParameters = buildParameters;
-      const id = BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)
-        ? CloudRunner.lockedWorkspace
-        : buildParameters.buildGuid;
-      this.pvcName = `unity-builder-pvc-${id}`;
-      this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
+      this.cleanupCronJobName = `unity-builder-cronjob-${buildParameters.buildGuid}`;
       this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
-      await KubernetesStorage.createPersistentVolumeClaim(
-        buildParameters,
-        this.pvcName,
-        this.kubeClient,
-        this.namespace,
-      );
 
       await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
     } catch (error) {
@@ -125,6 +115,16 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
+      const id = BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
+        ? CloudRunner.lockedWorkspace
+        : this.buildParameters.buildGuid;
+      this.pvcName = `unity-builder-pvc-${id}`;
+      await KubernetesStorage.createPersistentVolumeClaim(
+        this.buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
