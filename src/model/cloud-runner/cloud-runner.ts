@@ -37,7 +37,6 @@ class CloudRunner {
     if (CloudRunner.buildParameters.githubCheckId === ``) {
       CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
     }
-    CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
       TaskParameterSerializer.createCloudRunnerEnvironmentVariables(buildParameters);
@@ -59,6 +58,28 @@ class CloudRunner {
       );
     }
     FollowLogStreamService.Reset();
+    if (buildParameters.maxRetainedWorkspaces > 0) {
+      CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
+
+      const result = await SharedWorkspaceLocking.GetLockedWorkspace(
+        CloudRunner.lockedWorkspace,
+        CloudRunner.buildParameters.buildGuid,
+        CloudRunner.buildParameters,
+      );
+
+      if (result) {
+        CloudRunnerLogger.logLine(`Using retained workspace ${CloudRunner.lockedWorkspace}`);
+        CloudRunner.cloudRunnerEnvironmentVariables = [
+          ...CloudRunner.cloudRunnerEnvironmentVariables,
+          { name: `LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
+        ];
+      } else {
+        CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
+        buildParameters.maxRetainedWorkspaces = 0;
+        CloudRunner.lockedWorkspace = ``;
+      }
+    }
+    CloudRunner.setupSelectedBuildPlatform();
   }
 
   private static setupSelectedBuildPlatform() {
@@ -93,27 +114,6 @@ class CloudRunner {
     );
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      if (buildParameters.maxRetainedWorkspaces > 0) {
-        CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
-
-        const result = await SharedWorkspaceLocking.GetLockedWorkspace(
-          CloudRunner.lockedWorkspace,
-          CloudRunner.buildParameters.buildGuid,
-          CloudRunner.buildParameters,
-        );
-
-        if (result) {
-          CloudRunnerLogger.logLine(`Using retained workspace ${CloudRunner.lockedWorkspace}`);
-          CloudRunner.cloudRunnerEnvironmentVariables = [
-            ...CloudRunner.cloudRunnerEnvironmentVariables,
-            { name: `LOCKED_WORKSPACE`, value: CloudRunner.lockedWorkspace },
-          ];
-        } else {
-          CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
-          buildParameters.maxRetainedWorkspaces = 0;
-          CloudRunner.lockedWorkspace = ``;
-        }
-      }
       const content = { ...CloudRunner.buildParameters };
       content.gitPrivateToken = ``;
       content.unitySerial = ``;
