@@ -148,6 +148,7 @@ class Kubernetes implements ProviderInterface {
         );
       } catch (error: any) {
         CloudRunnerLogger.log(`error running k8s workflow ${error}`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         CloudRunnerLogger.log(
           JSON.stringify(
             (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items

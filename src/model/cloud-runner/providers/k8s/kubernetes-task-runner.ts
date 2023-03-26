@@ -23,6 +23,7 @@ class KubernetesTaskRunner {
     let sinceTime = ``;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       const lastReceivedMessage =
         KubernetesTaskRunner.lastReceivedTimestamp > 0
           ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
@@ -36,24 +37,19 @@ class KubernetesTaskRunner {
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
       }
       let extraFlags = ``;
-      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient)) ? ` -f` : ` -p`;
+      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
+        ? ` -f -c ${containerName} --timestamps${sinceTime}`
+        : ` --previous`;
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
 
       let logs;
 
       try {
-        logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName}${extraFlags} -c ${containerName} --timestamps${sinceTime}`,
-          false,
-          true,
-        );
+        logs = await CloudRunnerSystem.Run(`kubectl logs ${podName}${extraFlags}`, false, true);
       } catch (error: any) {
-        const errorString = `${error}`;
-        const continueStreaming =
-          errorString.includes(`dial timeout, backstop`) ||
-          errorString.includes(`HttpError: HTTP request failed`) ||
-          (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const continueStreaming = await KubernetesPods.IsPodRunning(podName, namespace, kubeClient);
         CloudRunnerLogger.log(`K8s logging error ${error} ${continueStreaming}`);
         if (continueStreaming) {
           continue;
