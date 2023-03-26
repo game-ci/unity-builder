@@ -1,0 +1,3 @@
+hook: after
+commands: |
+  echo "after-build step test!"

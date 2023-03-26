@@ -28,10 +28,10 @@ describe('Cloud Runner Caching', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        customStepFiles: `debug-cache`,
+        containerHookFiles: `debug-cache`,
       };
       if (CloudRunnerOptions.providerStrategy === `k8s`) {
-        overrides.customStepFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;
+        overrides.containerHookFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;
       }
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);

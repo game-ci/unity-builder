@@ -143,12 +143,12 @@ class CloudRunnerOptions {
   // Custom commands from files parameters
   // ### ### ###
 
-  static get customStepFiles(): string[] {
-    return CloudRunnerOptions.getInput('customStepFiles')?.split(`,`) || [];
+  static get containerHookFiles(): string[] {
+    return CloudRunnerOptions.getInput('containerHookFiles')?.split(`,`) || [];
   }
 
-  static get customHookFiles(): string[] {
-    return CloudRunnerOptions.getInput('customHookFiles')?.split(`,`) || [];
+  static get commandHookFiles(): string[] {
+    return CloudRunnerOptions.getInput('commandHookFiles')?.split(`,`) || [];
   }
 
   // ### ### ###
@@ -159,12 +159,12 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('commandHooks') || '';
   }
 
-  static get postBuildSteps(): string {
-    return CloudRunnerOptions.getInput('postBuildSteps') || '';
+  static get postBuildContainerHooks(): string {
+    return CloudRunnerOptions.getInput('postBuildContainerHooks') || '';
   }
 
-  static get preBuildSteps(): string {
-    return CloudRunnerOptions.getInput('preBuildSteps') || '';
+  static get preBuildContainerHooks(): string {
+    return CloudRunnerOptions.getInput('preBuildContainerHooks') || '';
   }
 
   // ### ### ###

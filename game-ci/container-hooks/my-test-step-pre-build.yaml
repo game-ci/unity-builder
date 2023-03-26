@@ -1,0 +1,3 @@
+hook: before
+commands: |
+  echo "before-build step test!"

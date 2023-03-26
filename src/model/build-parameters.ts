@@ -57,8 +57,8 @@ class BuildParameters {
   public inputPullCommand!: string;
   public cacheKey!: string;
 
-  public postBuildSteps!: string;
-  public preBuildSteps!: string;
+  public postBuildContainerHooks!: string;
+  public preBuildContainerHooks!: string;
   public customJob!: string;
   public runNumber!: string;
   public branch!: string;
@@ -157,8 +157,8 @@ class BuildParameters {
       containerCpu: CloudRunnerOptions.containerCpu,
       kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
       kubeVolume: CloudRunnerOptions.kubeVolume,
-      postBuildSteps: CloudRunnerOptions.postBuildSteps,
-      preBuildSteps: CloudRunnerOptions.preBuildSteps,
+      postBuildContainerHooks: CloudRunnerOptions.postBuildContainerHooks,
+      preBuildContainerHooks: CloudRunnerOptions.preBuildContainerHooks,
       customJob: CloudRunnerOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),

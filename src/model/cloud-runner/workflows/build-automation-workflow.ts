@@ -3,10 +3,10 @@ import { CloudRunnerFolders } from '../services/cloud-runner-folders';
 import { CloudRunnerStepState } from '../cloud-runner-step-state';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
-import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
+import { CloudRunnerCommandHooks } from '../services/cloud-runner-hooks/cloud-runner-command-hook';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
-import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
+import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(cloudRunnerStepState: CloudRunnerStepState) {
@@ -19,7 +19,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     let output = '';
 
-    output += await CloudRunnerCustomSteps.RunPreBuildSteps(cloudRunnerStepState);
+    output += await CloudRunnerContainerHook.RunPreBuildSteps(cloudRunnerStepState);
     CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
 
     if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
@@ -39,7 +39,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     CloudRunnerLogger.logWithTime('Build time');
 
-    output += await CloudRunnerCustomSteps.RunPostBuildSteps(cloudRunnerStepState);
+    output += await CloudRunnerContainerHook.RunPostBuildSteps(cloudRunnerStepState);
     CloudRunnerLogger.logWithTime('Configurable post build step(s) time');
 
     CloudRunnerLogger.log(`Cloud Runner finished running standard build automation`);
@@ -48,10 +48,10 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static get BuildWorkflow() {
-    const setupHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
+    const setupHooks = CloudRunnerCommandHooks.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
       x.step?.includes(`setup`),
     );
-    const buildHooks = CloudRunnerCustomHooks.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
+    const buildHooks = CloudRunnerCommandHooks.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
       x.step?.includes(`build`),
     );
     const builderPath = CloudRunnerFolders.ToLinuxFolder(

@@ -6,8 +6,8 @@ import CloudRunnerLogger from '../services/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
-import { CloudRunnerCustomHooks } from '../services/cloud-runner-custom-hooks';
+import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
+import { CloudRunnerCommandHooks } from '../services/cloud-runner-hooks/cloud-runner-command-hook';
 
 async function CreateParameters(overrides: any) {
   if (overrides) {
@@ -33,8 +33,8 @@ commands: echo "test"`;
       cacheKey: `test-case-${uuidv4()}`,
     };
     CloudRunner.setup(await CreateParameters(overrides));
-    const stringObject = CloudRunnerCustomSteps.ParseSteps(yamlString);
-    const stringObject2 = CloudRunnerCustomSteps.ParseSteps(yamlString2);
+    const stringObject = CloudRunnerContainerHook.ParseContainerHooks(yamlString);
+    const stringObject2 = CloudRunnerContainerHook.ParseContainerHooks(yamlString2);
 
     CloudRunnerLogger.log(yamlString);
     CloudRunnerLogger.log(JSON.stringify(stringObject, undefined, 4));
@@ -44,7 +44,7 @@ commands: echo "test"`;
     expect(stringObject2.length).toBe(1);
     expect(stringObject2[0].hook).toBe(`before`);
 
-    const getCustomStepsFromFiles = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
+    const getCustomStepsFromFiles = CloudRunnerContainerHook.GetContainerHooksFromFiles(`before`);
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
   });
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `k8s`) {
@@ -55,13 +55,13 @@ commands: echo "test"`;
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       await CloudRunner.setup(buildParameter2);
-      const beforeHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`before`);
-      const afterHooks = CloudRunnerCustomHooks.GetCustomHooksFromFiles(`after`);
+      const beforeHooks = CloudRunnerCommandHooks.GetCustomHooksFromFiles(`before`);
+      const afterHooks = CloudRunnerCommandHooks.GetCustomHooksFromFiles(`after`);
       expect(beforeHooks).toHaveLength(1);
       expect(afterHooks).toHaveLength(1);
     });
@@ -72,13 +72,13 @@ commands: echo "test"`;
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       await CloudRunner.setup(buildParameter2);
-      const beforeSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`before`);
-      const afterSteps = CloudRunnerCustomSteps.GetCustomStepsFromFiles(`after`);
+      const beforeSteps = CloudRunnerContainerHook.GetContainerHooksFromFiles(`before`);
+      const afterSteps = CloudRunnerContainerHook.GetContainerHooksFromFiles(`after`);
       expect(beforeSteps).toHaveLength(1);
       expect(afterSteps).toHaveLength(1);
     });
@@ -89,7 +89,7 @@ commands: echo "test"`;
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        customStepFiles: `my-test-step-pre-build,my-test-step-post-build`,
+        containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);

@@ -28,7 +28,7 @@ describe('Cloud Runner pre-built S3 steps', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        customStepFiles: `aws-s3-pull-cache,aws-s3-upload-cache,aws-s3-upload-build`,
+        containerHookFiles: `aws-s3-pull-cache,aws-s3-upload-cache,aws-s3-upload-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);

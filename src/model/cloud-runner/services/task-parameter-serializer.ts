@@ -1,6 +1,6 @@
 import { Input } from '../..';
 import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerCustomHooks } from './cloud-runner-custom-hooks';
+import { CloudRunnerCommandHooks } from './cloud-runner-hooks/cloud-runner-command-hook';
 import CloudRunnerSecret from './cloud-runner-secret';
 import CloudRunnerQueryOverride from './cloud-runner-query-override';
 import CloudRunnerOptionsReader from './cloud-runner-options-reader';
@@ -32,7 +32,7 @@ export class TaskParameterSerializer {
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.serializeInput(),
         ...TaskParameterSerializer.serializeCloudRunnerOptions(),
-        ...CloudRunnerCustomHooks.getSecrets(CloudRunnerCustomHooks.getHooks(buildParameters.commandHooks)),
+        ...CloudRunnerCommandHooks.getSecrets(CloudRunnerCommandHooks.getHooks(buildParameters.commandHooks)),
       ]
         .filter(
           (x) =>
