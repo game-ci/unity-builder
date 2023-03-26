@@ -158,7 +158,8 @@ class Kubernetes implements ProviderInterface {
     } catch (error) {
       CloudRunnerLogger.log('Running job failed');
       core.error(JSON.stringify(error, undefined, 4));
-      await this.cleanupTaskResources();
+
+      // await this.cleanupTaskResources();
       throw error;
     }
   }
