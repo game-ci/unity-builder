@@ -36,7 +36,9 @@ class KubernetesTaskRunner {
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
       }
       let extraFlags = ``;
-      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient)) ? `` : ` -p`;
+      extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
+        ? ` -c ${containerName}`
+        : ` -p`;
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
 
@@ -44,7 +46,7 @@ class KubernetesTaskRunner {
 
       try {
         logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName}${extraFlags} -f -c ${containerName} --timestamps${sinceTime}`,
+          `kubectl logs ${podName}${extraFlags} -f --timestamps${sinceTime}`,
           false,
           true,
         );
@@ -53,7 +55,6 @@ class KubernetesTaskRunner {
         const continueStreaming =
           errorString.includes(`dial timeout, backstop`) ||
           errorString.includes(`HttpError: HTTP request failed`) ||
-          errorString.includes(`previous terminated container`) ||
           (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient));
         CloudRunnerLogger.log(`K8s logging error ${error} ${continueStreaming}`);
         if (continueStreaming) {
