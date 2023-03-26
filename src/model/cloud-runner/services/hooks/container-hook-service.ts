@@ -10,7 +10,7 @@ import CloudRunnerOptions from '../../options/cloud-runner-options';
 import { ContainerHook as ContainerHook } from './container-hook';
 import { CloudRunnerStepParameters } from '../../options/cloud-runner-step-parameters';
 
-export class CloudRunnerContainerHook {
+export class ContainerHookService {
   static GetContainerHooksFromFiles(hookLifecycle: string): ContainerHook[] {
     const results: ContainerHook[] = [];
     try {
@@ -22,7 +22,7 @@ export class CloudRunnerContainerHook {
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomStepsPath, file), `utf8`);
-        const fileContentsObject = CloudRunnerContainerHook.ParseContainerHooks(fileContents)[0];
+        const fileContentsObject = ContainerHookService.ParseContainerHooks(fileContents)[0];
         if (fileContentsObject.hook === hookLifecycle) {
           results.push(fileContentsObject);
         }
@@ -33,7 +33,7 @@ export class CloudRunnerContainerHook {
 
     // RemoteClientLogger.log(`Active Steps From Files: \n ${JSON.stringify(results, undefined, 4)}`);
 
-    const builtInContainerHooks: ContainerHook[] = CloudRunnerContainerHook.ParseContainerHooks(
+    const builtInContainerHooks: ContainerHook[] = ContainerHookService.ParseContainerHooks(
       `- name: aws-s3-upload-build
   image: amazon/aws-cli
   hook: after
@@ -205,7 +205,7 @@ export class CloudRunnerContainerHook {
     const isArray = steps.replace(/\s/g, ``)[0] === `-`;
     const object: ContainerHook[] = isArray ? YAML.parse(steps) : [YAML.parse(steps)];
     for (const step of object) {
-      CloudRunnerContainerHook.ConvertYamlSecrets(step);
+      ContainerHookService.ConvertYamlSecrets(step);
       if (step.secrets === undefined) {
         step.secrets = [];
       } else {
@@ -232,8 +232,8 @@ export class CloudRunnerContainerHook {
   static async RunPostBuildSteps(cloudRunnerStepState: CloudRunnerStepParameters) {
     let output = ``;
     const steps: ContainerHook[] = [
-      ...CloudRunnerContainerHook.ParseContainerHooks(CloudRunner.buildParameters.postBuildContainerHooks),
-      ...CloudRunnerContainerHook.GetContainerHooksFromFiles(`after`),
+      ...ContainerHookService.ParseContainerHooks(CloudRunner.buildParameters.postBuildContainerHooks),
+      ...ContainerHookService.GetContainerHooksFromFiles(`after`),
     ];
 
     if (steps.length > 0) {
@@ -251,8 +251,8 @@ export class CloudRunnerContainerHook {
   static async RunPreBuildSteps(cloudRunnerStepState: CloudRunnerStepParameters) {
     let output = ``;
     const steps: ContainerHook[] = [
-      ...CloudRunnerContainerHook.ParseContainerHooks(CloudRunner.buildParameters.preBuildContainerHooks),
-      ...CloudRunnerContainerHook.GetContainerHooksFromFiles(`before`),
+      ...ContainerHookService.ParseContainerHooks(CloudRunner.buildParameters.preBuildContainerHooks),
+      ...ContainerHookService.GetContainerHooksFromFiles(`before`),
     ];
 
     if (steps.length > 0) {

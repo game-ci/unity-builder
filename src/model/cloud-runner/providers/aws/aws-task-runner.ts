@@ -6,7 +6,7 @@ import * as zlib from 'node:zlib';
 import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
-import { CloudRunnerCommandHooks } from '../../services/cloud-runner-hooks/cloud-runner-command-hook';
+import { CommandHookService } from '../../services/hooks/command-hook-service';
 import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
 import GitHub from '../../../github';
@@ -41,7 +41,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment,
-            command: ['-c', CloudRunnerCommandHooks.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
+            command: ['-c', CommandHookService.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
           },
         ],
       },

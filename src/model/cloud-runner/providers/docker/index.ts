@@ -11,7 +11,7 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 import * as fs from 'node:fs';
-import { CloudRunnerCommandHooks } from '../../services/cloud-runner-hooks/cloud-runner-command-hook';
+import { CommandHookService } from '../../services/hooks/command-hook-service';
 import { StringKeyValuePair } from '../../../shared-types';
 
 class LocalDockerCloudRunner implements ProviderInterface {
@@ -119,7 +119,7 @@ set -e
 mkdir -p /github/workspace/cloud-runner-cache
 mkdir -p /data/cache
 cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
-${CloudRunnerCommandHooks.ApplyHooksToCommands(commands, this.buildParameters)}
+${CommandHookService.ApplyHooksToCommands(commands, this.buildParameters)}
 cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
 `;
     writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {

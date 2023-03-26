@@ -5,7 +5,7 @@ import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environme
 import CloudRunnerOptionsReader from '../../options/cloud-runner-options-reader';
 import CloudRunnerQueryOverride from '../../options/cloud-runner-query-override';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
-import { CloudRunnerCommandHooks } from '../cloud-runner-hooks/cloud-runner-command-hook';
+import { CommandHookService } from '../hooks/command-hook-service';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([
@@ -32,7 +32,7 @@ export class TaskParameterSerializer {
         ...TaskParameterSerializer.serializeFromObject(buildParameters),
         ...TaskParameterSerializer.serializeInput(),
         ...TaskParameterSerializer.serializeCloudRunnerOptions(),
-        ...CloudRunnerCommandHooks.getSecrets(CloudRunnerCommandHooks.getHooks(buildParameters.commandHooks)),
+        ...CommandHookService.getSecrets(CommandHookService.getHooks(buildParameters.commandHooks)),
       ]
         .filter(
           (x) =>

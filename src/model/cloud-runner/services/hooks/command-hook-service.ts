@@ -9,9 +9,9 @@ import { CommandHook } from './command-hook';
 
 // import CloudRunnerLogger from './cloud-runner-logger';
 
-export class CloudRunnerCommandHooks {
+export class CommandHookService {
   public static ApplyHooksToCommands(commands: string, buildParameters: BuildParameters): string {
-    const hooks = CloudRunnerCommandHooks.getHooks(buildParameters.commandHooks);
+    const hooks = CommandHookService.getHooks(buildParameters.commandHooks);
     CloudRunnerLogger.log(`Applying hooks ${hooks.length}`);
 
     return `echo "---"
@@ -38,8 +38,8 @@ echo "---${buildParameters.logId}"`;
 
     return [
       ...output.filter((x) => x.hook !== undefined && x.hook.length > 0),
-      ...CloudRunnerCommandHooks.GetCustomHooksFromFiles(`before`),
-      ...CloudRunnerCommandHooks.GetCustomHooksFromFiles(`after`),
+      ...CommandHookService.GetCustomHooksFromFiles(`before`),
+      ...CommandHookService.GetCustomHooksFromFiles(`after`),
     ];
   }
 
@@ -55,7 +55,7 @@ echo "---${buildParameters.logId}"`;
           continue;
         }
         const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
-        const fileContentsObject = CloudRunnerCommandHooks.ParseHooks(fileContents)[0];
+        const fileContentsObject = CommandHookService.ParseHooks(fileContents)[0];
         if (fileContentsObject.hook.includes(hookLifecycle)) {
           results.push(fileContentsObject);
         }
@@ -97,7 +97,7 @@ echo "---${buildParameters.logId}"`;
     const isArray = hooks.replace(/\s/g, ``)[0] === `-`;
     const object: CommandHook[] = isArray ? YAML.parse(hooks) : [YAML.parse(hooks)];
     for (const hook of object) {
-      CloudRunnerCommandHooks.ConvertYamlSecrets(hook);
+      CommandHookService.ConvertYamlSecrets(hook);
       if (hook.secrets === undefined) {
         hook.secrets = [];
       }

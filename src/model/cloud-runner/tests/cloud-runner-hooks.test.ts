@@ -6,8 +6,8 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
 import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
-import { CloudRunnerCommandHooks } from '../services/cloud-runner-hooks/cloud-runner-command-hook';
+import { ContainerHookService } from '../services/hooks/container-hook-service';
+import { CommandHookService } from '../services/hooks/command-hook-service';
 
 async function CreateParameters(overrides: any) {
   if (overrides) {
@@ -33,8 +33,8 @@ commands: echo "test"`;
       cacheKey: `test-case-${uuidv4()}`,
     };
     CloudRunner.setup(await CreateParameters(overrides));
-    const stringObject = CloudRunnerContainerHook.ParseContainerHooks(yamlString);
-    const stringObject2 = CloudRunnerContainerHook.ParseContainerHooks(yamlString2);
+    const stringObject = ContainerHookService.ParseContainerHooks(yamlString);
+    const stringObject2 = ContainerHookService.ParseContainerHooks(yamlString2);
 
     CloudRunnerLogger.log(yamlString);
     CloudRunnerLogger.log(JSON.stringify(stringObject, undefined, 4));
@@ -44,7 +44,7 @@ commands: echo "test"`;
     expect(stringObject2.length).toBe(1);
     expect(stringObject2[0].hook).toBe(`before`);
 
-    const getCustomStepsFromFiles = CloudRunnerContainerHook.GetContainerHooksFromFiles(`before`);
+    const getCustomStepsFromFiles = ContainerHookService.GetContainerHooksFromFiles(`before`);
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
   });
   if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `k8s`) {
@@ -60,8 +60,8 @@ commands: echo "test"`;
       };
       const buildParameter2 = await CreateParameters(overrides);
       await CloudRunner.setup(buildParameter2);
-      const beforeHooks = CloudRunnerCommandHooks.GetCustomHooksFromFiles(`before`);
-      const afterHooks = CloudRunnerCommandHooks.GetCustomHooksFromFiles(`after`);
+      const beforeHooks = CommandHookService.GetCustomHooksFromFiles(`before`);
+      const afterHooks = CommandHookService.GetCustomHooksFromFiles(`after`);
       expect(beforeHooks).toHaveLength(1);
       expect(afterHooks).toHaveLength(1);
     });
@@ -73,12 +73,12 @@ commands: echo "test"`;
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
-        customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+        commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       await CloudRunner.setup(buildParameter2);
-      const beforeSteps = CloudRunnerContainerHook.GetContainerHooksFromFiles(`before`);
-      const afterSteps = CloudRunnerContainerHook.GetContainerHooksFromFiles(`after`);
+      const beforeSteps = ContainerHookService.GetContainerHooksFromFiles(`before`);
+      const afterSteps = ContainerHookService.GetContainerHooksFromFiles(`after`);
       expect(beforeSteps).toHaveLength(1);
       expect(afterSteps).toHaveLength(1);
     });

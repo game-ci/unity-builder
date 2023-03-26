@@ -2,8 +2,8 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import CloudRunnerSecret from '../options/cloud-runner-secret';
 import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import CloudRunnerEnvironmentVariable from '../options/cloud-runner-environment-variable';
-import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
-import { ContainerHook } from '../services/cloud-runner-hooks/container-hook';
+import { ContainerHookService } from '../services/hooks/container-hook-service';
+import { ContainerHook } from '../services/hooks/container-hook';
 import CloudRunner from '../cloud-runner';
 
 export class CustomWorkflow {
@@ -13,7 +13,7 @@ export class CustomWorkflow {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     return await CustomWorkflow.runContainerJob(
-      CloudRunnerContainerHook.ParseContainerHooks(buildSteps),
+      ContainerHookService.ParseContainerHooks(buildSteps),
       environmentVariables,
       secrets,
     );
