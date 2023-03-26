@@ -68,6 +68,7 @@ export class CloudRunnerCustomSteps {
     aws configure set region $AWS_DEFAULT_REGION --profile default
     aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
     aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
+    mkdir -p /data/cache/$CACHE_KEY/build/
     aws s3 cp s3://${
       CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
