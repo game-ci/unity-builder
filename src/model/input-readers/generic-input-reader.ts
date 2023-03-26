@@ -1,5 +1,5 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
-import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
+import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
+import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
 
 export class GenericInputReader {
   public static async Run(command: string) {

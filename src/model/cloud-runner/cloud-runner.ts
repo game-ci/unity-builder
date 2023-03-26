@@ -1,21 +1,21 @@
 import AwsBuildPlatform from './providers/aws';
 import { BuildParameters, Input } from '..';
 import Kubernetes from './providers/k8s';
-import CloudRunnerLogger from './services/cloud-runner-logger';
-import { CloudRunnerStepState } from './cloud-runner-step-state';
+import CloudRunnerLogger from './services/core/cloud-runner-logger';
+import { CloudRunnerStepParameters } from './options/cloud-runner-step-parameters';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
 import { CloudRunnerError } from './error/cloud-runner-error';
-import { TaskParameterSerializer } from './services/task-parameter-serializer';
+import { TaskParameterSerializer } from './services/core/task-parameter-serializer';
 import * as core from '@actions/core';
-import CloudRunnerSecret from './services/cloud-runner-secret';
+import CloudRunnerSecret from './options/cloud-runner-secret';
 import { ProviderInterface } from './providers/provider-interface';
-import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './options/cloud-runner-environment-variable';
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
-import SharedWorkspaceLocking from './services/shared-workspace-locking';
-import { FollowLogStreamService } from './services/follow-log-stream-service';
+import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
+import { FollowLogStreamService } from './services/core/follow-log-stream-service';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -120,7 +120,11 @@ class CloudRunner {
       const jsonContent = JSON.stringify(content, undefined, 4);
       await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
       const output = await new WorkflowCompositionRoot().run(
-        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
+        new CloudRunnerStepParameters(
+          baseImage,
+          CloudRunner.cloudRunnerEnvironmentVariables,
+          CloudRunner.defaultSecrets,
+        ),
       );
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
       await CloudRunner.Provider.cleanupWorkflow(

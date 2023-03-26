@@ -1,10 +1,10 @@
 import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import waitUntil from 'async-wait-until';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
-import { CloudRunnerSystem } from '../../services/cloud-runner-system';
+import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 import KubernetesPods from './kubernetes-pods';
+import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number = 0;

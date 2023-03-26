@@ -1,8 +1,8 @@
+import GitHub from '../../../github';
+import CloudRunner from '../../cloud-runner';
+import { CloudRunnerStatics } from '../../options/cloud-runner-statics';
 import CloudRunnerLogger from './cloud-runner-logger';
 import * as core from '@actions/core';
-import CloudRunner from '../cloud-runner';
-import { CloudRunnerStatics } from '../cloud-runner-statics';
-import GitHub from '../../github';
 
 export class FollowLogStreamService {
   static Reset() {

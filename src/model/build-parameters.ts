@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
-import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
-import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid';
+import CloudRunnerConstants from './cloud-runner/options/cloud-runner-constants';
+import CloudRunnerBuildGuid from './cloud-runner/options/cloud-runner-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -10,7 +10,7 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
 import GitHub from './github';
-import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
 import CloudRunner from './cloud-runner/cloud-runner';
 
 class BuildParameters {

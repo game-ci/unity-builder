@@ -2,11 +2,11 @@ import CloudRunner from '../cloud-runner';
 import { BuildParameters, ImageTag } from '../..';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import { OptionValues } from 'commander';
 
 async function CreateParameters(overrides: OptionValues | undefined) {

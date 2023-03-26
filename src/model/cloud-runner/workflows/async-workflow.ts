@@ -1,7 +1,7 @@
-import CloudRunnerSecret from '../services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
+import CloudRunnerSecret from '../options/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../options/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import CloudRunner from '../cloud-runner';
 
 export class AsyncWorkflow {

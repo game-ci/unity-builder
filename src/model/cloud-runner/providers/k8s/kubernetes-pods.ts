@@ -1,4 +1,4 @@
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 class KubernetesPods {
   public static async IsPodRunning(podName: string, namespace: string, kubeClient: CoreV1Api) {

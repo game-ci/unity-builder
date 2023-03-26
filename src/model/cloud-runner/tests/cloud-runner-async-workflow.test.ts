@@ -2,7 +2,7 @@ import { BuildParameters, ImageTag } from '../..';
 import CloudRunner from '../cloud-runner';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { OptionValues } from 'commander';
 

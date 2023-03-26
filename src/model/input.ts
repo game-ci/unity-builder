@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Cli } from './cli/cli';
-import CloudRunnerQueryOverride from './cloud-runner/services/cloud-runner-query-override';
+import CloudRunnerQueryOverride from './cloud-runner/options/cloud-runner-query-override';
 import Platform from './platform';
 import GitHub from './github';
 

@@ -1,12 +1,12 @@
 import * as SDK from 'aws-sdk';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { AWSError } from './aws-error';
 import CloudRunner from '../../cloud-runner';
 import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
 
 export class AWSJobStack {

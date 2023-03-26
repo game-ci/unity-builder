@@ -1,6 +1,6 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunnerStepState } from '../cloud-runner-step-state';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
+import { CloudRunnerStepParameters } from '../options/cloud-runner-step-parameters';
 import { WorkflowInterface } from './workflow-interface';
 import * as core from '@actions/core';
 import { CloudRunnerCommandHooks } from '../services/cloud-runner-hooks/cloud-runner-command-hook';
@@ -9,11 +9,11 @@ import CloudRunner from '../cloud-runner';
 import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
-  async run(cloudRunnerStepState: CloudRunnerStepState) {
+  async run(cloudRunnerStepState: CloudRunnerStepParameters) {
     return await BuildAutomationWorkflow.standardBuildAutomation(cloudRunnerStepState.image, cloudRunnerStepState);
   }
 
-  private static async standardBuildAutomation(baseImage: string, cloudRunnerStepState: CloudRunnerStepState) {
+  private static async standardBuildAutomation(baseImage: string, cloudRunnerStepState: CloudRunnerStepParameters) {
     // TODO accept post and pre build steps as yaml files in the repo
     CloudRunnerLogger.log(`Cloud Runner is running standard build automation`);
 

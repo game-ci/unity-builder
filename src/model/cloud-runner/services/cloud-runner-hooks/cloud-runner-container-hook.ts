@@ -6,9 +6,9 @@ import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 import path from 'node:path';
 import fs from 'node:fs';
 import Input from '../../../input';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 import { ContainerHook as ContainerHook } from './container-hook';
-import { CloudRunnerStepState } from '../../cloud-runner-step-state';
+import { CloudRunnerStepParameters } from '../../options/cloud-runner-step-parameters';
 
 export class CloudRunnerContainerHook {
   static GetContainerHooksFromFiles(hookLifecycle: string): ContainerHook[] {
@@ -229,7 +229,7 @@ export class CloudRunnerContainerHook {
     return object;
   }
 
-  static async RunPostBuildSteps(cloudRunnerStepState: CloudRunnerStepState) {
+  static async RunPostBuildSteps(cloudRunnerStepState: CloudRunnerStepParameters) {
     let output = ``;
     const steps: ContainerHook[] = [
       ...CloudRunnerContainerHook.ParseContainerHooks(CloudRunner.buildParameters.postBuildContainerHooks),
@@ -248,7 +248,7 @@ export class CloudRunnerContainerHook {
 
     return output;
   }
-  static async RunPreBuildSteps(cloudRunnerStepState: CloudRunnerStepState) {
+  static async RunPreBuildSteps(cloudRunnerStepState: CloudRunnerStepParameters) {
     let output = ``;
     const steps: ContainerHook[] = [
       ...CloudRunnerContainerHook.ParseContainerHooks(CloudRunner.buildParameters.preBuildContainerHooks),

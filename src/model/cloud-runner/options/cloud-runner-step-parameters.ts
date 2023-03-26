@@ -1,7 +1,7 @@
-import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
-import CloudRunnerSecret from './services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
+import CloudRunnerSecret from './cloud-runner-secret';
 
-export class CloudRunnerStepState {
+export class CloudRunnerStepParameters {
   public image: string;
   public environment: CloudRunnerEnvironmentVariable[];
   public secrets: CloudRunnerSecret[];

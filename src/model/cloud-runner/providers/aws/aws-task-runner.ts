@@ -1,14 +1,14 @@
 import * as AWS from 'aws-sdk';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import * as zlib from 'node:zlib';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
 import { CloudRunnerCommandHooks } from '../../services/cloud-runner-hooks/cloud-runner-command-hook';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 import GitHub from '../../../github';
 
 class AWSTaskRunner {

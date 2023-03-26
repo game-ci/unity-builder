@@ -4,11 +4,11 @@ import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import { Caching } from '../remote-client/caching';
 import { v4 as uuidv4 } from 'uuid';
 import GitHub from '../../github';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 describe('Cloud Runner (Remote Client) Caching', () => {
   it('responds', () => {});
   if (CloudRunnerOptions.providerStrategy === `local-docker`) {

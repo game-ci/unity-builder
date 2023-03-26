@@ -1,6 +1,6 @@
-import { Cli } from '../cli/cli';
-import CloudRunnerQueryOverride from './services/cloud-runner-query-override';
-import GitHub from '../github';
+import { Cli } from '../../cli/cli';
+import CloudRunnerQueryOverride from './cloud-runner-query-override';
+import GitHub from '../../github';
 import * as core from '@actions/core';
 
 class CloudRunnerOptions {

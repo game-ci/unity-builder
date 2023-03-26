@@ -1,11 +1,11 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import AwsTaskRunner from './aws-task-runner';
 import { ProviderInterface } from '../provider-interface';
 import BuildParameters from '../../../build-parameters';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { AWSJobStack as AwsJobStack } from './aws-job-stack';
 import { AWSBaseStack as AwsBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
@@ -13,7 +13,7 @@ import { GarbageCollectionService } from './services/garbage-collection-service'
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { TaskService } from './services/task-service';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;

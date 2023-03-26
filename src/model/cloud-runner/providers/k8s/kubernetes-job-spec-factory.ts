@@ -1,8 +1,8 @@
 import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
 import { CloudRunnerCommandHooks } from '../../services/cloud-runner-hooks/cloud-runner-command-hook';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import CloudRunner from '../../cloud-runner';
 
 class KubernetesJobSpecFactory {

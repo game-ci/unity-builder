@@ -1,5 +1,5 @@
 import Input from '../../input';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from './cloud-runner-options';
 
 class CloudRunnerOptionsReader {
   static GetProperties() {

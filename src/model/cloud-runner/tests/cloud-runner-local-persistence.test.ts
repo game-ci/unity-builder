@@ -1,11 +1,11 @@
 import { ImageTag } from '../..';
 import CloudRunner from '../cloud-runner';
 import UnityVersioning from '../../unity-versioning';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import fs from 'node:fs';
 import { CreateParameters } from './create-test-parameter';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 
 describe('Cloud Runner Local Docker Workflows', () => {
   setups();

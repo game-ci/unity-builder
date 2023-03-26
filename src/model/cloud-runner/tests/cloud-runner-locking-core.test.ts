@@ -1,9 +1,9 @@
-import SharedWorkspaceLocking from '../services/shared-workspace-locking';
+import SharedWorkspaceLocking from '../services/core/shared-workspace-locking';
 import { Cli } from '../../cli/cli';
 import setups from './cloud-runner-suite.test';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import UnityVersioning from '../../unity-versioning';
 import BuildParameters from '../../build-parameters';
 import CloudRunner from '../cloud-runner';

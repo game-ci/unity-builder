@@ -1,6 +1,6 @@
 import { GitRepoReader } from './git-repo';
-import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
-import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
+import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
+import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
 
 describe(`git repo tests`, () => {
   it(`Branch value parsed from CLI to not contain illegal characters`, async () => {

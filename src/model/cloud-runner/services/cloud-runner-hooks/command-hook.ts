@@ -1,4 +1,4 @@
-import CloudRunnerSecret from '../cloud-runner-secret';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 
 export class CommandHook {
   public commands: string[] = new Array<string>();

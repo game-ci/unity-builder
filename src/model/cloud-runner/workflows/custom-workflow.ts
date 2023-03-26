@@ -1,7 +1,7 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
+import CloudRunnerSecret from '../options/cloud-runner-secret';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
+import CloudRunnerEnvironmentVariable from '../options/cloud-runner-environment-variable';
 import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
 import { ContainerHook } from '../services/cloud-runner-hooks/container-hook';
 import CloudRunner from '../cloud-runner';

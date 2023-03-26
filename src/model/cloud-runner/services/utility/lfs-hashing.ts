@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { CloudRunnerFolders } from './cloud-runner-folders';
-import { CloudRunnerSystem } from './cloud-runner-system';
+import { CloudRunnerFolders } from '../../options/cloud-runner-folders';
+import { CloudRunnerSystem } from '../core/cloud-runner-system';
 import fs from 'node:fs';
-import { Cli } from '../../cli/cli';
-import { CliFunction } from '../../cli/cli-functions-repository';
+import { Cli } from '../../../cli/cli';
+import { CliFunction } from '../../../cli/cli-functions-repository';
 
 export class LfsHashing {
   public static async createLFSHashFiles() {

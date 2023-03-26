@@ -1,6 +1,6 @@
 import path from 'node:path';
-import CloudRunnerOptions from '../cloud-runner-options';
-import CloudRunner from './../cloud-runner';
+import CloudRunnerOptions from './cloud-runner-options';
+import CloudRunner from '../cloud-runner';
 import BuildParameters from '../../build-parameters';
 
 export class CloudRunnerFolders {

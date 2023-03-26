@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 import CloudRunner from '../cloud-runner';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import { Caching } from './caching';
-import { LfsHashing } from '../services/lfs-hashing';
+import { LfsHashing } from '../services/utility/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import path from 'node:path';
 import { assert } from 'node:console';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import YAML from 'yaml';
 import GitHub from '../../github';
 import BuildParameters from '../../build-parameters';

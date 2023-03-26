@@ -1,12 +1,12 @@
 import { BuildParameters, CloudRunner, ImageTag, Input } from '../..';
-import { TaskParameterSerializer } from '../services/task-parameter-serializer';
+import { TaskParameterSerializer } from '../services/core/task-parameter-serializer';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
 import GitHub from '../../github';
 import setups from './cloud-runner-suite.test';
-import { CloudRunnerStatics } from '../cloud-runner-statics';
-import CloudRunnerOptions from '../cloud-runner-options';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import { CloudRunnerStatics } from '../options/cloud-runner-statics';
+import CloudRunnerOptions from '../options/cloud-runner-options';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 
 async function CreateParameters(overrides: any) {
   if (overrides) {

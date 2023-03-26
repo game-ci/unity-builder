@@ -1,8 +1,8 @@
 import { assert } from 'node:console';
 import fs from 'node:fs';
-import { CloudRunnerSystem } from '../cloud-runner/services/cloud-runner-system';
-import CloudRunnerLogger from '../cloud-runner/services/cloud-runner-logger';
-import CloudRunnerOptions from '../cloud-runner/cloud-runner-options';
+import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
+import CloudRunnerLogger from '../cloud-runner/services/core/cloud-runner-logger';
+import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
 import Input from '../input';
 
 export class GitRepoReader {

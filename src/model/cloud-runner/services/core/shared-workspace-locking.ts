@@ -1,8 +1,8 @@
 import { CloudRunnerSystem } from './cloud-runner-system';
 import fs from 'node:fs';
 import CloudRunnerLogger from './cloud-runner-logger';
-import BuildParameters from '../../build-parameters';
-import CloudRunner from '../cloud-runner';
+import BuildParameters from '../../../build-parameters';
+import CloudRunner from '../../cloud-runner';
 export class SharedWorkspaceLocking {
   public static get workspaceBucketRoot() {
     return `s3://${CloudRunner.buildParameters.awsStackName}/`;

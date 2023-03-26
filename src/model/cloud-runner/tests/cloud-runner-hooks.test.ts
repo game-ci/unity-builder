@@ -2,9 +2,9 @@ import CloudRunner from '../cloud-runner';
 import { BuildParameters, ImageTag } from '../..';
 import UnityVersioning from '../../unity-versioning';
 import { Cli } from '../../cli/cli';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { v4 as uuidv4 } from 'uuid';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { CloudRunnerContainerHook } from '../services/cloud-runner-hooks/cloud-runner-container-hook';
 import { CloudRunnerCommandHooks } from '../services/cloud-runner-hooks/cloud-runner-command-hook';
@@ -56,7 +56,7 @@ commands: echo "test"`;
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
-        customHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+        commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
       const buildParameter2 = await CreateParameters(overrides);
       await CloudRunner.setup(buildParameter2);

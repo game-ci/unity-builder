@@ -1,6 +1,6 @@
 import Input from '../../input';
 import { GenericInputReader } from '../../input-readers/generic-input-reader';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from './cloud-runner-options';
 
 const formatFunction = (value: string, arguments_: any[]) => {
   for (const element of arguments_) {

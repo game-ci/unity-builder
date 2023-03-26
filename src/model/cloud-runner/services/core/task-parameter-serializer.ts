@@ -1,11 +1,11 @@
-import { Input } from '../..';
-import CloudRunnerEnvironmentVariable from './cloud-runner-environment-variable';
-import { CloudRunnerCommandHooks } from './cloud-runner-hooks/cloud-runner-command-hook';
-import CloudRunnerSecret from './cloud-runner-secret';
-import CloudRunnerQueryOverride from './cloud-runner-query-override';
-import CloudRunnerOptionsReader from './cloud-runner-options-reader';
-import BuildParameters from '../../build-parameters';
-import CloudRunnerOptions from '../cloud-runner-options';
+import BuildParameters from '../../../build-parameters';
+import Input from '../../../input';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
+import CloudRunnerOptionsReader from '../../options/cloud-runner-options-reader';
+import CloudRunnerQueryOverride from '../../options/cloud-runner-query-override';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
+import { CloudRunnerCommandHooks } from '../cloud-runner-hooks/cloud-runner-command-hook';
 
 export class TaskParameterSerializer {
   static readonly blockedParameterNames: Set<string> = new Set([

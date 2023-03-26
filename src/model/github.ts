@@ -1,6 +1,6 @@
-import CloudRunnerLogger from './cloud-runner/services/cloud-runner-logger';
+import CloudRunnerLogger from './cloud-runner/services/core/cloud-runner-logger';
 import CloudRunner from './cloud-runner/cloud-runner';
-import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
 import * as core from '@actions/core';
 import { Octokit } from '@octokit/core';
 

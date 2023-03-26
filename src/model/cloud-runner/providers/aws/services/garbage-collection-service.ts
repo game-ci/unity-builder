@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import Input from '../../../../input';
-import CloudRunnerLogger from '../../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../../services/core/cloud-runner-logger';
 import { TaskService } from './task-service';
 
 export class GarbageCollectionService {
