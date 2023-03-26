@@ -8,6 +8,7 @@ import KubernetesPods from './kubernetes-pods';
 
 class KubernetesTaskRunner {
   static lastReceivedTimestamp: number = 0;
+  static readonly maxRetry: number = 3;
   static lastReceivedMessage: string = ``;
   static async runTask(
     kubeConfig: KubeConfig,
@@ -21,6 +22,7 @@ class KubernetesTaskRunner {
     let shouldReadLogs = true;
     let shouldCleanup = true;
     let sinceTime = ``;
+    let retriesAfterFinish = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -38,7 +40,7 @@ class KubernetesTaskRunner {
       }
       let extraFlags = ``;
       extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
-        ? ` -f -c ${containerName} --timestamps${sinceTime}`
+        ? ` -f -c ${containerName}`
         : ` --previous`;
       let lastMessageSeenIncludedInChunk = false;
       let lastMessageSeen = false;
@@ -46,12 +48,21 @@ class KubernetesTaskRunner {
       let logs;
 
       try {
-        logs = await CloudRunnerSystem.Run(`kubectl logs ${podName}${extraFlags}`, false, true);
+        logs = await CloudRunnerSystem.Run(
+          `kubectl logs ${podName}${extraFlags} --timestamps${sinceTime}`,
+          false,
+          true,
+        );
       } catch (error: any) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
         const continueStreaming = await KubernetesPods.IsPodRunning(podName, namespace, kubeClient);
         CloudRunnerLogger.log(`K8s logging error ${error} ${continueStreaming}`);
         if (continueStreaming) {
+          continue;
+        }
+        if (retriesAfterFinish < KubernetesTaskRunner.maxRetry) {
+          retriesAfterFinish++;
+
           continue;
         }
         throw error;
