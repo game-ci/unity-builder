@@ -106,7 +106,10 @@ class KubernetesJobSpecFactory {
               name: containerName,
               image,
               command: ['/bin/sh'],
-              args: ['-c', `${CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)}`],
+              args: [
+                '-c',
+                `${CloudRunnerCustomHooks.ApplyHooksToCommands(`${command}\nsleep 2m`, CloudRunner.buildParameters)}`,
+              ],
 
               workingDir: `${workingDirectory}`,
               resources: {
