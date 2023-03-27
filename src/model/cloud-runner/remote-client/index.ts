@@ -123,7 +123,6 @@ export class RemoteClient {
     } catch (error: any) {
       throw error;
     }
-    await CloudRunnerSystem.Run(`tree ${CloudRunnerFolders.repoPathAbsolute}`);
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git lfs install`);
     assert(fs.existsSync(`.git`), 'git folder exists');
@@ -143,7 +142,6 @@ export class RemoteClient {
     CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`);
     GitHub.updateGitHubCheck(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`, ``);
     if (CloudRunner.buildParameters.useLargePackages) {
-      await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.projectPathAbsolute}`);
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
       manifest = manifest.replace(/LargeContent/g, '../../../LargeContent');
