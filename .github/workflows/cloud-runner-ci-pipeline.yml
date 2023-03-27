@@ -1,0 +1,190 @@
+name: Cloud Runner CI Pipeline
+
+on:
+  push: { branches: [cloud-runner-develop, cloud-runner-preview, main] }
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  contents: read
+  actions: write
+
+env:
+  GKE_ZONE: 'us-central1'
+  GKE_REGION: 'us-central1'
+  GKE_PROJECT: 'unitykubernetesbuilder'
+  GKE_CLUSTER: 'game-ci-github-pipelines'
+  GCP_LOGGING: true
+  GCP_PROJECT: unitykubernetesbuilder
+  GCP_LOG_FILE: ${{ github.workspace }}/cloud-runner-logs.txt
+  AWS_REGION: eu-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-west-2
+  AWS_STACK_NAME: game-ci-team-pipelines
+  CLOUD_RUNNER_BRANCH: ${{ github.ref }}
+  DEBUG: true
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: test-project
+  UNITY_VERSION: 2019.3.15f1
+  USE_IL2CPP: false
+  USE_GKE_GCLOUD_AUTH_PLUGIN: true
+  GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  smokeTests:
+    name: Smoke Tests
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          #- 'cloud-runner-async-workflow'
+          - 'cloud-runner-caching'
+          # - 'cloud-runner-end2end-caching'
+          # - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-environment'
+          - 'cloud-runner-hooks'
+          - 'cloud-runner-local-persistence'
+          - 'cloud-runner-locking-core'
+          - 'cloud-runner-locking-get-locked'
+        providerStrategy:
+          #- aws
+          - local-docker
+          #- k8s
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v3
+        with:
+          lfs: false
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - uses: google-github-actions/auth@v1
+        if: matrix.providerStrategy == 'k8s'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: 'Set up Cloud SDK'
+        if: matrix.providerStrategy == 'k8s'
+        uses: 'google-github-actions/setup-gcloud@v1.1.0'
+      - name: Get GKE cluster credentials
+        if: matrix.providerStrategy == 'k8s'
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+      - run: yarn
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 35
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
+  tests:
+    # needs:
+    #   - smokeTests
+    #   - buildTargetTests
+    name: Integration Tests
+    if: github.event.event_type != 'pull_request_target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        providerStrategy:
+          - aws
+          - local-docker
+          - k8s
+        test:
+          - 'cloud-runner-async-workflow'
+          #- 'cloud-runner-caching'
+          - 'cloud-runner-end2end-locking'
+          - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-environment'
+          #- 'cloud-runner-hooks'
+          - 'cloud-runner-s3-steps'
+          #- 'cloud-runner-local-persistence'
+          #- 'cloud-runner-locking-core'
+          #- 'cloud-runner-locking-get-locked'
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v2
+        with:
+          lfs: false
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - uses: google-github-actions/auth@v1
+        if: matrix.providerStrategy == 'k8s'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+      - name: 'Set up Cloud SDK'
+        if: matrix.providerStrategy == 'k8s'
+        uses: 'google-github-actions/setup-gcloud@v1.1.0'
+      - name: Get GKE cluster credentials
+        if: matrix.providerStrategy == 'k8s'
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+      - run: yarn
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 60
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          PROJECT_PATH: test-project
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          PROVIDER_STRATEGY: ${{ matrix.providerStrategy }}
+  buildTargetTests:
+    name: Local Build Target Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        providerStrategy:
+          #- aws
+          - local-docker
+          #- k8s
+        targetPlatform:
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          - WebGL # WebGL.
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk.
+    steps:
+      - name: Checkout (default)
+        uses: actions/checkout@v3
+        with:
+          lfs: false
+      - run: yarn
+      - uses: ./
+        id: unity-build
+        timeout-minutes: 30
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          cloudRunnerTests: true
+          versioning: None
+          targetPlatform: ${{ matrix.targetPlatform }}
+          providerStrategy: ${{ matrix.providerStrategy }}
+      - run: |
+          cp ./cloud-runner-cache/cache/${{ steps.unity-build.outputs.CACHE_KEY }}/build/${{ steps.unity-build.outputs.BUILD_ARTIFACT }} ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.providerStrategy }} Build (${{ matrix.targetPlatform }})
+          path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
+          retention-days: 14

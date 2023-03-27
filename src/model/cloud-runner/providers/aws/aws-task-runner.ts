@@ -1,14 +1,14 @@
 import * as AWS from 'aws-sdk';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import * as zlib from 'node:zlib';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { Input } from '../../..';
 import CloudRunner from '../../cloud-runner';
-import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
-import { FollowLogStreamService } from '../../services/follow-log-stream-service';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import { CommandHookService } from '../../services/hooks/command-hook-service';
+import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 import GitHub from '../../../github';
 
 class AWSTaskRunner {
@@ -32,7 +32,7 @@ class AWSTaskRunner {
     const streamName =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
 
-    const task = await AWSTaskRunner.ECS.runTask({
+    const runParameters = {
       cluster,
       taskDefinition,
       platformVersion: '1.4.0',
@@ -41,7 +41,7 @@ class AWSTaskRunner {
           {
             name: taskDef.taskDefStackName,
             environment,
-            command: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
+            command: ['-c', CommandHookService.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
           },
         ],
       },
@@ -53,16 +53,23 @@ class AWSTaskRunner {
           securityGroups: [ContainerSecurityGroup],
         },
       },
-    }).promise();
+    };
+
+    if (JSON.stringify(runParameters.overrides.containerOverrides).length > 8192) {
+      CloudRunnerLogger.log(JSON.stringify(runParameters.overrides.containerOverrides, undefined, 4));
+      throw new Error(`Container Overrides length must be at most 8192`);
+    }
+
+    const task = await AWSTaskRunner.ECS.runTask(runParameters).promise();
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
     CloudRunnerLogger.log(
-      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus} Watch:${
-        CloudRunnerOptions.watchCloudRunnerToEnd
-      } Async:${CloudRunnerOptions.asyncCloudRunner}`,
+      `Cloud runner job status is running ${(await AWSTaskRunner.describeTasks(cluster, taskArn))?.lastStatus} Async:${
+        CloudRunnerOptions.asyncCloudRunner
+      }`,
     );
-    if (!CloudRunnerOptions.watchCloudRunnerToEnd) {
+    if (CloudRunnerOptions.asyncCloudRunner) {
       const shouldCleanup: boolean = false;
       const output: string = '';
       CloudRunnerLogger.log(`Watch Cloud Runner To End: false`);
@@ -72,26 +79,31 @@ class AWSTaskRunner {
 
     CloudRunnerLogger.log(`Streaming...`);
     const { output, shouldCleanup } = await this.streamLogsUntilTaskStops(cluster, taskArn, streamName);
-    await new Promise((resolve) => resolve(5000));
-    const taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
-    const containerState = taskData.containers?.[0];
-    const exitCode = containerState?.exitCode || undefined;
+    let exitCode;
+    let containerState;
+    let taskData;
+    while (exitCode === undefined) {
+      await new Promise((resolve) => resolve(10000));
+      taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
+      containerState = taskData.containers?.[0];
+      exitCode = containerState?.exitCode;
+    }
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
-    const wasSuccessful = exitCode === 0 || (exitCode === undefined && taskData.lastStatus === 'RUNNING');
+    if (exitCode === undefined) {
+      CloudRunnerLogger.logWarning(`Undefined exitcode for container`);
+    }
+    const wasSuccessful = exitCode === 0;
     if (wasSuccessful) {
       CloudRunnerLogger.log(`Cloud runner job has finished successfully`);
 
       return { output, shouldCleanup };
-    } else {
-      if (taskData.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
-        throw new Error('Container exited with code 1');
-      }
-      const message = `Cloud runner job exit code ${exitCode}`;
-      taskData.overrides = undefined;
-      taskData.attachments = undefined;
-      CloudRunnerLogger.log(`${message} ${JSON.stringify(taskData, undefined, 4)}`);
-      throw new Error(message);
     }
+
+    if (taskData?.stoppedReason === 'Essential container in task exited' && exitCode === 1) {
+      throw new Error('Container exited with code 1');
+    }
+
+    throw new Error(`Task failed`);
   }
 
   private static async waitUntilTaskRunning(taskArn: string, cluster: string) {
@@ -129,7 +141,7 @@ class AWSTaskRunner {
     const stream = await AWSTaskRunner.getLogStream(kinesisStreamName);
     let iterator = await AWSTaskRunner.getLogIterator(stream);
 
-    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsBaseStackName}${AWSTaskRunner.encodedUnderscore}${CloudRunner.buildParameters.awsBaseStackName}-${CloudRunner.buildParameters.buildGuid}`;
+    const logBaseUrl = `https://${Input.region}.console.aws.amazon.com/cloudwatch/home?region=${Input.region}#logsV2:log-groups/log-group/${CloudRunner.buildParameters.awsStackName}${AWSTaskRunner.encodedUnderscore}${CloudRunner.buildParameters.awsStackName}-${CloudRunner.buildParameters.buildGuid}`;
     CloudRunnerLogger.log(`You view the log stream on AWS Cloud Watch: ${logBaseUrl}`);
     await GitHub.updateGitHubCheck(`You view the log stream on AWS Cloud Watch:  ${logBaseUrl}`, ``);
     let shouldReadLogs = true;

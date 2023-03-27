@@ -19,7 +19,7 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    if (buildParameters.cloudRunnerCluster === 'local') {
+    if (buildParameters.providerStrategy === 'local') {
       core.info('Building locally');
       await PlatformSetup.setup(buildParameters, actionFolder);
       if (process.platform === 'darwin') {

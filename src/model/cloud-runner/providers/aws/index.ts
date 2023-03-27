@@ -1,11 +1,11 @@
 import * as SDK from 'aws-sdk';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import AwsTaskRunner from './aws-task-runner';
 import { ProviderInterface } from '../provider-interface';
 import BuildParameters from '../../../build-parameters';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { AWSJobStack as AwsJobStack } from './aws-job-stack';
 import { AWSBaseStack as AwsBaseStack } from './aws-base-stack';
 import { Input } from '../../..';
@@ -13,13 +13,13 @@ import { GarbageCollectionService } from './services/garbage-collection-service'
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { TaskService } from './services/task-service';
-import CloudRunnerOptions from '../../cloud-runner-options';
+import CloudRunnerOptions from '../../options/cloud-runner-options';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
 
   constructor(buildParameters: BuildParameters) {
-    this.baseStackName = buildParameters.awsBaseStackName;
+    this.baseStackName = buildParameters.awsStackName;
   }
   async listResources(): Promise<ProviderResource[]> {
     await TaskService.getCloudFormationJobStacks();
@@ -75,7 +75,11 @@ class AWSBuildEnvironment implements ProviderInterface {
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
-  ) {}
+  ) {
+    process.env.AWS_REGION = Input.region;
+    const CF = new SDK.CloudFormation();
+    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
+  }
 
   async runTaskInWorkflow(
     buildGuid: string,
@@ -94,8 +98,6 @@ class AWSBuildEnvironment implements ProviderInterface {
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
-
-    await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
     const taskDef = await new AwsJobStack(this.baseStackName).setupCloudFormations(
       CF,
       buildGuid,
@@ -142,6 +144,9 @@ class AWSBuildEnvironment implements ProviderInterface {
 
     await CF.waitFor('stackDeleteComplete', {
       StackName: taskDef.taskDefStackName,
+    }).promise();
+    await CF.waitFor('stackDeleteComplete', {
+      StackName: `${taskDef.taskDefStackName}-cleanup`,
     }).promise();
     CloudRunnerLogger.log(`Deleted Stack: ${taskDef.taskDefStackName}`);
     CloudRunnerLogger.log('Cleanup complete');

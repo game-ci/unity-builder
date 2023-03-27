@@ -1,8 +1,8 @@
 import { V1EnvVar, V1EnvVarSource, V1SecretKeySelector } from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
-import { CloudRunnerCustomHooks } from '../../services/cloud-runner-custom-hooks';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import { CommandHookService } from '../../services/hooks/command-hook-service';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import CloudRunner from '../../cloud-runner';
 
 class KubernetesJobSpecFactory {
@@ -19,63 +19,8 @@ class KubernetesJobSpecFactory {
     pvcName: string,
     jobName: string,
     k8s: any,
+    containerName: string,
   ) {
-    environment.push(
-      ...[
-        {
-          name: 'GITHUB_SHA',
-          value: buildGuid,
-        },
-        {
-          name: 'GITHUB_WORKSPACE',
-          value: '/data/repo',
-        },
-        {
-          name: 'PROJECT_PATH',
-          value: buildParameters.projectPath,
-        },
-        {
-          name: 'BUILD_PATH',
-          value: buildParameters.buildPath,
-        },
-        {
-          name: 'BUILD_FILE',
-          value: buildParameters.buildFile,
-        },
-        {
-          name: 'BUILD_NAME',
-          value: buildParameters.buildName,
-        },
-        {
-          name: 'BUILD_METHOD',
-          value: buildParameters.buildMethod,
-        },
-        {
-          name: 'CUSTOM_PARAMETERS',
-          value: buildParameters.customParameters,
-        },
-        {
-          name: 'CHOWN_FILES_TO',
-          value: buildParameters.chownFilesTo,
-        },
-        {
-          name: 'BUILD_TARGET',
-          value: buildParameters.targetPlatform,
-        },
-        {
-          name: 'ANDROID_VERSION_CODE',
-          value: buildParameters.androidVersionCode.toString(),
-        },
-        {
-          name: 'ANDROID_KEYSTORE_NAME',
-          value: buildParameters.androidKeystoreName,
-        },
-        {
-          name: 'ANDROID_KEYALIAS_NAME',
-          value: buildParameters.androidKeyaliasName,
-        },
-      ],
-    );
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
     job.kind = 'Job';
@@ -87,6 +32,7 @@ class KubernetesJobSpecFactory {
       },
     };
     job.spec = {
+      ttlSecondsAfterFinished: 9999,
       backoffLimit: 0,
       template: {
         spec: {
@@ -100,16 +46,20 @@ class KubernetesJobSpecFactory {
           ],
           containers: [
             {
-              name: 'main',
+              ttlSecondsAfterFinished: 9999,
+              name: containerName,
               image,
               command: ['/bin/sh'],
-              args: ['-c', CloudRunnerCustomHooks.ApplyHooksToCommands(command, CloudRunner.buildParameters)],
+              args: [
+                '-c',
+                `${CommandHookService.ApplyHooksToCommands(`${command}\nsleep 2m`, CloudRunner.buildParameters)}`,
+              ],
 
               workingDir: `${workingDirectory}`,
               resources: {
                 requests: {
-                  memory: buildParameters.cloudRunnerMemory || '750M',
-                  cpu: buildParameters.cloudRunnerCpu || '1',
+                  memory: `${Number.parseInt(buildParameters.containerMemory) / 1024}G` || '750M',
+                  cpu: Number.parseInt(buildParameters.containerCpu) / 1024 || '1',
                 },
               },
               env: [
@@ -135,7 +85,7 @@ class KubernetesJobSpecFactory {
               volumeMounts: [
                 {
                   name: 'build-mount',
-                  mountPath: `/${mountdir}`,
+                  mountPath: `${mountdir}`,
                 },
               ],
               lifecycle: {
@@ -158,7 +108,7 @@ class KubernetesJobSpecFactory {
       },
     };
 
-    job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '5Gi';
+    job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '10Gi';
 
     return job;
   }

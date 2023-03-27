@@ -1,3 +1,0 @@
-hook: before-build
-commands: |
-  echo "before-build hook test!!"

@@ -1,20 +1,24 @@
-import { CloudRunnerStepState } from '../cloud-runner-step-state';
+import { CloudRunnerStepParameters } from '../options/cloud-runner-step-parameters';
 import { CustomWorkflow } from './custom-workflow';
 import { WorkflowInterface } from './workflow-interface';
 import { BuildAutomationWorkflow } from './build-automation-workflow';
 import CloudRunner from '../cloud-runner';
-import CloudRunnerOptions from '../cloud-runner-options';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 import { AsyncWorkflow } from './async-workflow';
 
 export class WorkflowCompositionRoot implements WorkflowInterface {
-  async run(cloudRunnerStepState: CloudRunnerStepState) {
+  async run(cloudRunnerStepState: CloudRunnerStepParameters) {
     try {
-      if (CloudRunnerOptions.asyncCloudRunner) {
+      if (
+        CloudRunnerOptions.asyncCloudRunner &&
+        !CloudRunner.isCloudRunnerAsyncEnvironment &&
+        !CloudRunner.isCloudRunnerEnvironment
+      ) {
         return await AsyncWorkflow.runAsyncWorkflow(cloudRunnerStepState.environment, cloudRunnerStepState.secrets);
       }
 
       if (CloudRunner.buildParameters.customJob !== '') {
-        return await CustomWorkflow.runCustomJobFromString(
+        return await CustomWorkflow.runContainerJobFromString(
           CloudRunner.buildParameters.customJob,
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,
@@ -22,7 +26,7 @@ export class WorkflowCompositionRoot implements WorkflowInterface {
       }
 
       return await new BuildAutomationWorkflow().run(
-        new CloudRunnerStepState(
+        new CloudRunnerStepParameters(
           cloudRunnerStepState.image.toString(),
           cloudRunnerStepState.environment,
           cloudRunnerStepState.secrets,

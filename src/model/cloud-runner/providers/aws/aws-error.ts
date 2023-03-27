@@ -1,4 +1,4 @@
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import * as SDK from 'aws-sdk';
 import * as core from '@actions/core';
 import CloudRunner from '../../cloud-runner';

@@ -65,7 +65,7 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
-    if (parameters.cloudRunnerCluster === 'local-docker') {
+    if (parameters.providerStrategy === 'local-docker') {
       for (const element of additionalVariables) {
         if (
           environmentVariables.find(

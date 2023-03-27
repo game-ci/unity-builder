@@ -1,6 +1,6 @@
 import BuildParameters from '../../build-parameters';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import CloudRunnerSecret from '../services/cloud-runner-secret';
+import CloudRunnerEnvironmentVariable from '../options/cloud-runner-environment-variable';
+import CloudRunnerSecret from '../options/cloud-runner-secret';
 import { ProviderResource } from './provider-resource';
 import { ProviderWorkflow } from './provider-workflow';
 

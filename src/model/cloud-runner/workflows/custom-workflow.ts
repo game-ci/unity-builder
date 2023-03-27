@@ -1,37 +1,37 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import CloudRunnerSecret from '../services/cloud-runner-secret';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import CloudRunnerEnvironmentVariable from '../services/cloud-runner-environment-variable';
-import { CloudRunnerCustomSteps } from '../services/cloud-runner-custom-steps';
-import { CustomStep } from '../services/custom-step';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
+import CloudRunnerSecret from '../options/cloud-runner-secret';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
+import CloudRunnerEnvironmentVariable from '../options/cloud-runner-environment-variable';
+import { ContainerHookService } from '../services/hooks/container-hook-service';
+import { ContainerHook } from '../services/hooks/container-hook';
 import CloudRunner from '../cloud-runner';
 
 export class CustomWorkflow {
-  public static async runCustomJobFromString(
+  public static async runContainerJobFromString(
     buildSteps: string,
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
-    return await CustomWorkflow.runCustomJob(
-      CloudRunnerCustomSteps.ParseSteps(buildSteps),
+    return await CustomWorkflow.runContainerJob(
+      ContainerHookService.ParseContainerHooks(buildSteps),
       environmentVariables,
       secrets,
     );
   }
 
-  public static async runCustomJob(
-    buildSteps: CustomStep[],
+  public static async runContainerJob(
+    steps: ContainerHook[],
     environmentVariables: CloudRunnerEnvironmentVariable[],
     secrets: CloudRunnerSecret[],
   ) {
     try {
-      CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
       let output = '';
 
       // if (CloudRunner.buildParameters?.cloudRunnerDebug) {
       //   CloudRunnerLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
       // }
-      for (const step of buildSteps) {
+      for (const step of steps) {
+        CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
         output += await CloudRunner.Provider.runTaskInWorkflow(
           CloudRunner.buildParameters.buildGuid,
           step.image,
