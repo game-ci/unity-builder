@@ -143,81 +143,21 @@ describe('Input', () => {
     });
   });
 
-  describe('androidAppBundle', () => {
-    it('returns the default value', () => {
-      expect(Input.androidAppBundle).toStrictEqual(false);
-    });
-
-    it('returns true when string true is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
-      expect(Input.androidAppBundle).toStrictEqual(true);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
-    it('returns false when string false is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
-      expect(Input.androidAppBundle).toStrictEqual(false);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('androidExportType', () => {
     it('returns the default value', () => {
       expect(Input.androidExportType).toStrictEqual('androidPackage');
     });
 
-    // TODO: Remove "and androidAppBundle is not set" in v3
     test.each`
       input                     | expected
       ${'androidPackage'}       | ${'androidPackage'}
       ${'androidAppBundle'}     | ${'androidAppBundle'}
       ${'androidStudioProject'} | ${'androidStudioProject'}
-    `('returns $expected when $input is passed and androidAppBundle is not set', ({ input, expected }) => {
+    `('returns $expected when $input is passed', ({ input, expected }) => {
       const spy = jest.spyOn(core, 'getInput').mockReturnValue(input);
       expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
     });
-
-    // TODO: Remove in v3
-    test.each`
-      input                     | expected
-      ${'androidPackage'}       | ${'androidPackage'}
-      ${'androidAppBundle'}     | ${'androidAppBundle'}
-      ${'androidStudioProject'} | ${'androidStudioProject'}
-    `('returns $expected when $input is passed and overrides androidAppBundle if it is set', ({ input, expected }) => {
-      const spy = jest.spyOn(Input, 'getInput');
-      spy.mockImplementationOnce(() => {
-        return input;
-      });
-
-      spy.mockImplementationOnce(() => {
-        return 'true';
-      });
-      expect(Input.androidExportType).toStrictEqual(expected);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
-    // TODO: Remove in v3
-    test.each`
-      input      | expected
-      ${'true'}  | ${'androidAppBundle'}
-      ${'false'} | ${'androidPackage'}
-    `(
-      'returns $expected when androidExportType is undefined and androidAppBundle is set to $input',
-      ({ input, expected }) => {
-        const spy = jest.spyOn(Input, 'getInput');
-        spy.mockImplementationOnce(() => {
-          return '';
-        });
-
-        spy.mockImplementationOnce(() => {
-          return input;
-        });
-
-        expect(Input.androidExportType).toStrictEqual(expected);
-        expect(spy).toHaveBeenCalledTimes(2);
-      },
-    );
   });
 
   describe('androidSymbolType', () => {

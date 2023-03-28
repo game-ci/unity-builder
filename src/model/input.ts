@@ -142,32 +142,8 @@ class Input {
     return Input.getInput('androidVersionCode') || '';
   }
 
-  static get androidAppBundle(): boolean {
-    // Only throw warning if defined
-    let input = Input.getInput('androidAppBundle');
-    if (input !== undefined) {
-      core.warning('androidAppBundle is deprecated, please use androidExportType instead');
-    } else {
-      input = 'false';
-    }
-
-    return input === 'true';
-  }
-
   static get androidExportType(): string {
-    // TODO: remove this in V3
-    const exportType = Input.getInput('androidExportType') || '';
-
-    if (exportType !== '') {
-      return exportType;
-    }
-
-    return Input.androidAppBundle ? 'androidAppBundle' : 'androidPackage';
-
-    // End TODO
-
-    // Use this in V3 when androidAppBundle is removed
-    // return Input.getInput('androidExportType') || 'androidPackage';
+    return Input.getInput('androidExportType') || 'androidPackage';
   }
 
   static get androidKeystoreName(): string {
