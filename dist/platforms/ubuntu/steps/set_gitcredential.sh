@@ -9,8 +9,8 @@ else
 	git config --global credential.helper store
 	git config --global --replace-all url."https://token:$GIT_PRIVATE_TOKEN@github.com/".insteadOf ssh://git@github.com/
 	git config --global --add url."https://token:$GIT_PRIVATE_TOKEN@github.com/".insteadOf git@github.com
-
   git config --global --add url."https://token:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "https://github.com/"
+  
   git config --global url."https://ssh:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
   git config --global url."https://git:$GIT_PRIVATE_TOKEN@github.com/".insteadOf "git@github.com:"
 

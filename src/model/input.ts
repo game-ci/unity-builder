@@ -142,27 +142,8 @@ class Input {
     return Input.getInput('androidVersionCode') || '';
   }
 
-  static get androidAppBundle(): boolean {
-    core.warning('androidAppBundle is deprecated, please use androidExportType instead');
-    const input = Input.getInput('androidAppBundle') || false;
-
-    return input === 'true';
-  }
-
   static get androidExportType(): string {
-    // TODO: remove this in V3
-    const exportType = Input.getInput('androidExportType') || '';
-
-    if (exportType !== '') {
-      return exportType;
-    }
-
-    return Input.androidAppBundle ? 'androidAppBundle' : 'androidPackage';
-
-    // End TODO
-
-    // Use this in V3 when androidAppBundle is removed
-    // return Input.getInput('androidExportType') || 'androidPackage';
+    return Input.getInput('androidExportType') || 'androidPackage';
   }
 
   static get androidKeystoreName(): string {
@@ -229,6 +210,10 @@ class Input {
 
   static get unityLicense(): string | undefined {
     return Input.getInput('UNITY_LICENSE');
+  }
+
+  static get dockerWorkspacePath(): string {
+    return Input.getInput('dockerWorkspacePath') || '/github/workspace';
   }
 
   public static ToEnvVarFormat(input: string) {

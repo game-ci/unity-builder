@@ -47,13 +47,9 @@ inputs:
     required: false
     default: ''
     description: 'The android versionCode'
-  androidAppBundle:
-    required: false
-    default: 'false'
-    description: '[Deprecated] Use androidExportType instead. Whether to build .aab instead of .apk'
   androidExportType:
     required: false
-    default: ''
+    default: 'androidPackage'
     description:
       'The android export type. Should be androidPackage for apk, androidAppBundle for aab, or androidStudioProject for
       an android studio project.'
@@ -207,6 +203,16 @@ inputs:
     description:
       'The version of Unity Hub to install on MacOS (e.g. 3.4.0). Defaults to latest available on brew if empty string
       or nothing is specified.'
+  unityLicensingServer:
+    default: ''
+    required: false
+    description: 'The Unity licensing server address to use for activating Unity.'
+  dockerWorkspacePath:
+    default: '/github/workspace'
+    required: false
+    description:
+      'The path to mount the workspace inside the docker container. For windows, leave out the drive letter. For example
+      c:/github/workspace should be defined as /github/workspace'
 
 outputs:
   volume:

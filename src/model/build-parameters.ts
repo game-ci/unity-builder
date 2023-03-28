@@ -82,6 +82,8 @@ class BuildParameters {
   public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
+  public dockerWorkspacePath!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && CloudRunner.lockedWorkspace !== ``;
   }
@@ -187,6 +189,7 @@ class BuildParameters {
       skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
+      dockerWorkspacePath: Input.dockerWorkspacePath,
     };
   }
 
