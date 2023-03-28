@@ -1,7 +1,7 @@
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import * as core from '@actions/core';
 import CloudRunner from '../cloud-runner';
-import CloudRunnerSecret from '../services/cloud-runner-secret';
+import CloudRunnerSecret from '../options/cloud-runner-secret';
 import BuildParameters from '../../build-parameters';
 
 export class CloudRunnerError {

@@ -49,7 +49,7 @@ jobs:
         exclude:
           - targetPlatform: Android
             unityVersion: 2022.2.7f1
-        cloudRunnerCluster:
+        providerStrategy:
           # - local-docker
           - local
         projectPath:
@@ -109,7 +109,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
-          cloudRunnerCluster: ${{ matrix.cloudRunnerCluster }}
+          providerStrategy: ${{ matrix.providerStrategy }}
 
       ###########################
       #          Upload         #

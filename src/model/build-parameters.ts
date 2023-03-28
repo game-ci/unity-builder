@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
-import CloudRunnerConstants from './cloud-runner/services/cloud-runner-constants';
-import CloudRunnerBuildGuid from './cloud-runner/services/cloud-runner-guid';
+import CloudRunnerConstants from './cloud-runner/options/cloud-runner-constants';
+import CloudRunnerBuildGuid from './cloud-runner/options/cloud-runner-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -10,7 +10,8 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
 import GitHub from './github';
-import CloudRunnerOptions from './cloud-runner/cloud-runner-options';
+import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
+import CloudRunner from './cloud-runner/cloud-runner';
 
 class BuildParameters {
   // eslint-disable-next-line no-undef
@@ -41,24 +42,23 @@ class BuildParameters {
 
   public customParameters!: string;
   public sshAgent!: string;
-  public cloudRunnerCluster!: string;
-  public awsBaseStackName!: string;
+  public providerStrategy!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
-  public cloudRunnerMemory!: string | undefined;
-  public cloudRunnerCpu!: string | undefined;
+  public containerMemory!: string;
+  public containerCpu!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
   public chownFilesTo!: string;
-  public customJobHooks!: string;
-  public readInputFromOverrideList!: string;
-  public readInputOverrideCommand!: string;
+  public commandHooks!: string;
+  public pullInputList!: string[];
+  public inputPullCommand!: string;
   public cacheKey!: string;
 
-  public postBuildSteps!: string;
-  public preBuildSteps!: string;
+  public postBuildContainerHooks!: string;
+  public preBuildContainerHooks!: string;
   public customJob!: string;
   public runNumber!: string;
   public branch!: string;
@@ -68,18 +68,25 @@ class BuildParameters {
   public buildGuid!: string;
   public cloudRunnerBranch!: string;
   public cloudRunnerDebug!: boolean | undefined;
-  public cloudRunnerBuilderPlatform!: string | undefined;
+  public buildPlatform!: string | undefined;
   public isCliMode!: boolean;
-  public retainWorkspace!: boolean;
   public maxRetainedWorkspaces!: number;
-  public useSharedLargePackages!: boolean;
-  public useLz4Compression!: boolean;
-  public garbageCollectionMaxAge!: number;
-  public constantGarbageCollection!: boolean;
+  public useLargePackages!: boolean;
+  public useCompressionStrategy!: boolean;
+  public garbageMaxAge!: number;
   public githubChecks!: boolean;
+  public asyncWorkflow!: boolean;
+  public githubCheckId!: string;
+  public finalHooks!: string[];
+  public skipLfs!: boolean;
+  public skipCache!: boolean;
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+
+  public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
+    return buildParameters.maxRetainedWorkspaces > 0 && CloudRunner.lockedWorkspace !== ``;
+  }
 
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
@@ -145,16 +152,15 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
-      cloudRunnerCluster: CloudRunnerOptions.cloudRunnerCluster,
-      cloudRunnerBuilderPlatform: CloudRunnerOptions.cloudRunnerBuilderPlatform,
-      awsBaseStackName: CloudRunnerOptions.awsBaseStackName,
+      providerStrategy: CloudRunnerOptions.providerStrategy,
+      buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,
-      cloudRunnerMemory: CloudRunnerOptions.cloudRunnerMemory,
-      cloudRunnerCpu: CloudRunnerOptions.cloudRunnerCpu,
+      containerMemory: CloudRunnerOptions.containerMemory,
+      containerCpu: CloudRunnerOptions.containerCpu,
       kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
       kubeVolume: CloudRunnerOptions.kubeVolume,
-      postBuildSteps: CloudRunnerOptions.postBuildSteps,
-      preBuildSteps: CloudRunnerOptions.preBuildSteps,
+      postBuildContainerHooks: CloudRunnerOptions.postBuildContainerHooks,
+      preBuildContainerHooks: CloudRunnerOptions.preBuildContainerHooks,
       customJob: CloudRunnerOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
@@ -162,22 +168,25 @@ class BuildParameters {
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
       githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
-      awsStackName: CloudRunnerOptions.awsBaseStackName,
+      awsStackName: CloudRunnerOptions.awsStackName,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      customJobHooks: CloudRunnerOptions.customJobHooks(),
-      readInputOverrideCommand: CloudRunnerOptions.readInputOverrideCommand(),
-      readInputFromOverrideList: CloudRunnerOptions.readInputFromOverrideList(),
+      commandHooks: CloudRunnerOptions.commandHooks,
+      inputPullCommand: CloudRunnerOptions.inputPullCommand,
+      pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
-      retainWorkspace: CloudRunnerOptions.retainWorkspaces,
-      useSharedLargePackages: CloudRunnerOptions.useSharedLargePackages,
-      useLz4Compression: CloudRunnerOptions.useLz4Compression,
-      maxRetainedWorkspaces: CloudRunnerOptions.maxRetainedWorkspaces,
-      constantGarbageCollection: CloudRunnerOptions.constantGarbageCollection,
-      garbageCollectionMaxAge: CloudRunnerOptions.garbageCollectionMaxAge,
+      maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
+      useLargePackages: CloudRunnerOptions.useLargePackages,
+      useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
+      garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
       githubChecks: CloudRunnerOptions.githubChecks,
+      asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
+      githubCheckId: CloudRunnerOptions.githubCheckId,
+      finalHooks: CloudRunnerOptions.finalHooks,
+      skipLfs: CloudRunnerOptions.skipLfs,
+      skipCache: CloudRunnerOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,

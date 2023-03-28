@@ -1,4 +1,4 @@
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 class KubernetesPods {
   public static async IsPodRunning(podName: string, namespace: string, kubeClient: CoreV1Api) {
@@ -11,6 +11,12 @@ class KubernetesPods {
     }
 
     return running;
+  }
+  public static async GetPodStatus(podName: string, namespace: string, kubeClient: CoreV1Api) {
+    const pods = (await kubeClient.listNamespacedPod(namespace)).body.items.find((x) => podName === x.metadata?.name);
+    const phase = pods?.status?.phase || 'undefined status';
+
+    return phase;
   }
 }
 

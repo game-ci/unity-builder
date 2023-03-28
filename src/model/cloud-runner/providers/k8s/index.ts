@@ -2,19 +2,18 @@ import * as k8s from '@kubernetes/client-node';
 import { BuildParameters } from '../../..';
 import * as core from '@actions/core';
 import { ProviderInterface } from '../provider-interface';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import KubernetesStorage from './kubernetes-storage';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import KubernetesTaskRunner from './kubernetes-task-runner';
 import KubernetesSecret from './kubernetes-secret';
 import KubernetesJobSpecFactory from './kubernetes-job-spec-factory';
 import KubernetesServiceAccount from './kubernetes-service-account';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
-import KubernetesPods from './kubernetes-pods';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
@@ -94,16 +93,8 @@ class Kubernetes implements ProviderInterface {
   ) {
     try {
       this.buildParameters = buildParameters;
-      const id = buildParameters.retainWorkspace ? CloudRunner.lockedWorkspace : buildParameters.buildGuid;
-      this.pvcName = `unity-builder-pvc-${id}`;
-      this.cleanupCronJobName = `unity-builder-cronjob-${id}`;
+      this.cleanupCronJobName = `unity-builder-cronjob-${buildParameters.buildGuid}`;
       this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
-      await KubernetesStorage.createPersistentVolumeClaim(
-        buildParameters,
-        this.pvcName,
-        this.kubeClient,
-        this.namespace,
-      );
 
       await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
     } catch (error) {
@@ -124,72 +115,97 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
+      const id = BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
+        ? CloudRunner.lockedWorkspace
+        : this.buildParameters.buildGuid;
+      this.pvcName = `unity-builder-pvc-${id}`;
+      await KubernetesStorage.createPersistentVolumeClaim(
+        this.buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
       this.containerName = `main`;
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
-      await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
-      this.setPodNameAndContainerName(await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace));
-      CloudRunnerLogger.log('Watching pod until running');
-      await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
       let output = '';
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        try {
-          CloudRunnerLogger.log('Pod running, streaming logs');
-          output = await KubernetesTaskRunner.runTask(
-            this.kubeConfig,
-            this.kubeClient,
-            this.jobName,
-            this.podName,
-            'main',
-            this.namespace,
-          );
-          const running = await KubernetesPods.IsPodRunning(this.podName, this.namespace, this.kubeClient);
+      try {
+        CloudRunnerLogger.log('Job does not exist');
+        await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
+        CloudRunnerLogger.log('Watching pod until running');
+        await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
 
-          if (!running) {
-            CloudRunnerLogger.log(`Pod not found, assumed ended!`);
-            break;
-          } else {
-            CloudRunnerLogger.log('Pod still running, recovering stream...');
-          }
-          await this.cleanupTaskResources();
-        } catch (error: any) {
-          let errorParsed;
-          try {
-            errorParsed = JSON.parse(error);
-          } catch {
-            errorParsed = error;
-          }
-
-          const reason = errorParsed.reason || errorParsed.response?.body?.reason || ``;
-          const errorMessage = errorParsed.message || reason;
-
-          const continueStreaming =
-            errorMessage.includes(`dial timeout, backstop`) ||
-            errorMessage.includes(`HttpError: HTTP request failed`) ||
-            errorMessage.includes(`an error occurred when try to find container`) ||
-            errorMessage.includes(`not found`) ||
-            errorMessage.includes(`Not Found`);
-          if (continueStreaming) {
-            CloudRunnerLogger.log('Log Stream Container Not Found');
-            await new Promise((resolve) => resolve(5000));
-            continue;
-          } else {
-            CloudRunnerLogger.log(`error running k8s workflow ${error}`);
-            throw error;
-          }
-        }
+        CloudRunnerLogger.log('Pod running, streaming logs');
+        CloudRunnerLogger.log(
+          `Starting logs follow for pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace} pvc: ${this.pvcName} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}`,
+        );
+        output += await KubernetesTaskRunner.runTask(
+          this.kubeConfig,
+          this.kubeClient,
+          this.jobName,
+          this.podName,
+          this.containerName,
+          this.namespace,
+        );
+      } catch (error: any) {
+        CloudRunnerLogger.log(`error running k8s workflow ${error}`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        CloudRunnerLogger.log(
+          JSON.stringify(
+            (await this.kubeClient.listNamespacedEvent(this.namespace)).body.items
+              .map((x) => {
+                return {
+                  message: x.message || ``,
+                  name: x.metadata.name || ``,
+                  reason: x.reason || ``,
+                };
+              })
+              .filter((x) => x.name.includes(this.podName)),
+            undefined,
+            4,
+          ),
+        );
+        await this.cleanupTaskResources();
+        throw error;
       }
+
+      await this.cleanupTaskResources();
 
       return output;
     } catch (error) {
       CloudRunnerLogger.log('Running job failed');
       core.error(JSON.stringify(error, undefined, 4));
-      await this.cleanupTaskResources();
+
+      // await this.cleanupTaskResources();
       throw error;
     }
+  }
+
+  private async createJob(
+    commands: string,
+    image: string,
+    mountdir: string,
+    workingdir: string,
+    environment: CloudRunnerEnvironmentVariable[],
+    secrets: CloudRunnerSecret[],
+  ) {
+    await this.createNamespacedJob(commands, image, mountdir, workingdir, environment, secrets);
+    const find = await Kubernetes.findPodFromJob(this.kubeClient, this.jobName, this.namespace);
+    this.setPodNameAndContainerName(find);
+  }
+
+  private async doesJobExist(name: string) {
+    const jobs = await this.kubeClientBatch.listNamespacedJob(this.namespace);
+
+    return jobs.body.items.some((x) => x.metadata?.name === name);
+  }
+
+  private async doesFailedJobExist() {
+    const podStatus = await this.kubeClient.readNamespacedPodStatus(this.podName, this.namespace);
+
+    return podStatus.body.status?.phase === `Failed`;
   }
 
   private async createNamespacedJob(
@@ -215,14 +231,15 @@ class Kubernetes implements ProviderInterface {
           this.pvcName,
           this.jobName,
           k8s,
+          this.containerName,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
-        await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
+        const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
 
-        return;
+        return result.body.metadata?.name;
       } catch (error) {
         CloudRunnerLogger.log(`Error occured creating job: ${error}`);
         throw error;
@@ -232,7 +249,7 @@ class Kubernetes implements ProviderInterface {
 
   setPodNameAndContainerName(pod: k8s.V1Pod) {
     this.podName = pod.metadata?.name || '';
-    this.containerName = pod.status?.containerStatuses?.[0].name || '';
+    this.containerName = pod.status?.containerStatuses?.[0].name || this.containerName;
   }
 
   async cleanupTaskResources() {
@@ -265,7 +282,7 @@ class Kubernetes implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    if (buildParameters.retainWorkspace) {
+    if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
       return;
     }
     CloudRunnerLogger.log(`deleting PVC`);

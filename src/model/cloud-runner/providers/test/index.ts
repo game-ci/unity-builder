@@ -1,8 +1,8 @@
 import BuildParameters from '../../../build-parameters';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 

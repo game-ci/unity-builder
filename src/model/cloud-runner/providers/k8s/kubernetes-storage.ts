@@ -2,7 +2,7 @@ import waitUntil from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { IncomingMessage } from 'node:http';
 import GitHub from '../../../github';
 

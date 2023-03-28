@@ -1,56 +1,80 @@
 import fs from 'node:fs';
 import CloudRunner from '../cloud-runner';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import { Caching } from './caching';
-import { LfsHashing } from '../services/lfs-hashing';
+import { LfsHashing } from '../services/utility/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import path from 'node:path';
 import { assert } from 'node:console';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { CliFunction } from '../../cli/cli-functions-repository';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import YAML from 'yaml';
+import GitHub from '../../github';
+import BuildParameters from '../../build-parameters';
 
 export class RemoteClient {
-  public static async bootstrapRepository() {
-    try {
-      await CloudRunnerSystem.Run(`mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-      await CloudRunnerSystem.Run(
-        `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
-      );
-      process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
-      await RemoteClient.cloneRepoWithoutLFSFiles();
-      RemoteClient.replaceLargePackageReferencesWithSharedReferences();
-      await RemoteClient.sizeOfFolder(
-        'repo before lfs cache pull',
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
-      );
-      const lfsHashes = await LfsHashing.createLFSHashFiles();
-      if (fs.existsSync(CloudRunnerFolders.libraryFolderAbsolute)) {
-        RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
-      }
-      await Caching.PullFromCache(
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
-        `${lfsHashes.lfsGuidSum}`,
-      );
-      await RemoteClient.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
-      await RemoteClient.pullLatestLFS();
-      await RemoteClient.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathAbsolute);
-      await Caching.PushToCache(
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
-        `${lfsHashes.lfsGuidSum}`,
-      );
-      await Caching.PullFromCache(
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryCacheFolderFull),
-        CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
-      );
-      await RemoteClient.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathAbsolute);
-      await Caching.handleCachePurging();
-    } catch (error) {
-      throw error;
+  @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
+  static async runRemoteClientJob() {
+    CloudRunnerLogger.log(`bootstrap game ci cloud runner...`);
+    if (!(await RemoteClient.handleRetainedWorkspace())) {
+      await RemoteClient.bootstrapRepository();
     }
+    await RemoteClient.runCustomHookFiles(`before-build`);
+  }
+  static async runCustomHookFiles(hookLifecycle: string) {
+    RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
+    const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
+    try {
+      const files = fs.readdirSync(gameCiCustomHooksPath);
+      for (const file of files) {
+        const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
+        const fileContentsObject = YAML.parse(fileContents.toString());
+        if (fileContentsObject.hook === hookLifecycle) {
+          RemoteClientLogger.log(`Active Hook File ${file} \n \n file contents: \n ${fileContents}`);
+          await CloudRunnerSystem.Run(fileContentsObject.commands);
+        }
+      }
+    } catch (error) {
+      RemoteClientLogger.log(JSON.stringify(error, undefined, 4));
+    }
+  }
+  public static async bootstrapRepository() {
+    await CloudRunnerSystem.Run(
+      `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+    );
+    await CloudRunnerSystem.Run(
+      `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
+    );
+    await RemoteClient.cloneRepoWithoutLFSFiles();
+    await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
+    await RemoteClient.sizeOfFolder(
+      'repo before lfs cache pull',
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),
+    );
+    const lfsHashes = await LfsHashing.createLFSHashFiles();
+    if (fs.existsSync(CloudRunnerFolders.libraryFolderAbsolute)) {
+      RemoteClientLogger.logWarning(`!Warning!: The Unity library was included in the git repository`);
+    }
+    await Caching.PullFromCache(
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
+      `${lfsHashes.lfsGuidSum}`,
+    );
+    await RemoteClient.sizeOfFolder('repo after lfs cache pull', CloudRunnerFolders.repoPathAbsolute);
+    await RemoteClient.pullLatestLFS();
+    await RemoteClient.sizeOfFolder('repo before lfs git pull', CloudRunnerFolders.repoPathAbsolute);
+    await Caching.PushToCache(
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsCacheFolderFull),
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.lfsFolderAbsolute),
+      `${lfsHashes.lfsGuidSum}`,
+    );
+    await Caching.PullFromCache(
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryCacheFolderFull),
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+    );
+    await RemoteClient.sizeOfFolder('repo after library cache pull', CloudRunnerFolders.repoPathAbsolute);
+    await Caching.handleCachePurging();
   }
 
   private static async sizeOfFolder(message: string, folder: string) {
@@ -62,58 +86,68 @@ export class RemoteClient {
 
   private static async cloneRepoWithoutLFSFiles() {
     process.chdir(`${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+    if (
+      fs.existsSync(CloudRunnerFolders.repoPathAbsolute) &&
+      !fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
+    ) {
+      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.repoPathAbsolute}`);
+      CloudRunnerLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists, but no git folder, cleaning up`);
+    }
 
     if (
-      CloudRunner.buildParameters.retainWorkspace &&
+      BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters) &&
       fs.existsSync(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`))
     ) {
       process.chdir(CloudRunnerFolders.repoPathAbsolute);
       RemoteClientLogger.log(
-        `${CloudRunnerFolders.repoPathAbsolute} repo exists - skipping clone - retained workspace mode ${CloudRunner.buildParameters.retainWorkspace}`,
+        `${
+          CloudRunnerFolders.repoPathAbsolute
+        } repo exists - skipping clone - retained workspace mode ${BuildParameters.shouldUseRetainedWorkspaceMode(
+          CloudRunner.buildParameters,
+        )}`,
       );
       await CloudRunnerSystem.Run(`git fetch && git reset --hard ${CloudRunner.buildParameters.gitSha}`);
 
       return;
     }
 
-    if (fs.existsSync(CloudRunnerFolders.repoPathAbsolute)) {
-      RemoteClientLogger.log(`${CloudRunnerFolders.repoPathAbsolute} repo exists cleaning up`);
-      await CloudRunnerSystem.Run(`rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}`);
-    }
-
+    RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
+    await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
+    RemoteClientLogger.log(`Cloning the repository being built:`);
+    await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
+    await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
     try {
-      RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
-      await CloudRunnerSystem.Run(`git config --global advice.detachedHead false`);
-      RemoteClientLogger.log(`Cloning the repository being built:`);
-      await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
-      await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
       await CloudRunnerSystem.Run(
-        `git clone -q ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
+        `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
       );
-      process.chdir(CloudRunnerFolders.repoPathAbsolute);
-      await CloudRunnerSystem.Run(`git lfs install`);
-      assert(fs.existsSync(`.git`), 'git folder exists');
-      RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
-      assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
-      RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
-    } catch (error) {
-      await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
+    } catch (error: any) {
       throw error;
     }
+    process.chdir(CloudRunnerFolders.repoPathAbsolute);
+    await CloudRunnerSystem.Run(`git lfs install`);
+    assert(fs.existsSync(`.git`), 'git folder exists');
+    RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
+    if (CloudRunner.buildParameters.gitSha !== undefined) {
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+    } else {
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
+      RemoteClientLogger.log(`buildParameter Git Sha is empty`);
+    }
+
+    assert(fs.existsSync(path.join(`.git`, `lfs`)), 'LFS folder should not exist before caching');
+    RemoteClientLogger.log(`Checked out ${CloudRunner.buildParameters.branch}`);
   }
 
-  static replaceLargePackageReferencesWithSharedReferences() {
-    if (CloudRunner.buildParameters.useSharedLargePackages) {
+  static async replaceLargePackageReferencesWithSharedReferences() {
+    CloudRunnerLogger.log(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`);
+    GitHub.updateGitHubCheck(`Use Shared Pkgs ${CloudRunner.buildParameters.useLargePackages}`, ``);
+    if (CloudRunner.buildParameters.useLargePackages) {
       const filePath = path.join(CloudRunnerFolders.projectPathAbsolute, `Packages/manifest.json`);
       let manifest = fs.readFileSync(filePath, 'utf8');
       manifest = manifest.replace(/LargeContent/g, '../../../LargeContent');
       fs.writeFileSync(filePath, manifest);
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
-        CloudRunnerLogger.log(`Package Manifest`);
-        CloudRunnerLogger.log(manifest);
-      }
+      CloudRunnerLogger.log(`Package Manifest \n ${manifest}`);
+      GitHub.updateGitHubCheck(`Package Manifest \n ${manifest}`, ``);
     }
   }
 
@@ -121,41 +155,31 @@ export class RemoteClient {
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
-    await CloudRunnerSystem.Run(`git lfs pull`);
-    RemoteClientLogger.log(`pulled latest LFS files`);
-    assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
-  }
-
-  @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
-  static async runRemoteClientJob() {
-    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    RemoteClient.handleRetainedWorkspace();
-
-    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    await RemoteClient.bootstrapRepository();
-
-    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-    await RemoteClient.runCustomHookFiles(`before-build`);
-
-    // await CloudRunnerSystem.Run(`tree -L 2 ${CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute}`);
-  }
-  static async runCustomHookFiles(hookLifecycle: string) {
-    RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
-    const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
-    const files = fs.readdirSync(gameCiCustomHooksPath);
-    for (const file of files) {
-      const fileContents = fs.readFileSync(path.join(gameCiCustomHooksPath, file), `utf8`);
-      const fileContentsObject = YAML.parse(fileContents.toString());
-      if (fileContentsObject.hook === hookLifecycle) {
-        RemoteClientLogger.log(`Active Hook File ${file} \n \n file contents: \n ${fileContents}`);
-        await CloudRunnerSystem.Run(fileContentsObject.commands);
-      }
+    if (!CloudRunner.buildParameters.skipLfs) {
+      await CloudRunnerSystem.Run(`git lfs pull`);
+      RemoteClientLogger.log(`pulled latest LFS files`);
+      assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
     }
   }
-  static handleRetainedWorkspace() {
-    if (!CloudRunner.buildParameters.retainWorkspace) {
-      return;
+  static async handleRetainedWorkspace() {
+    RemoteClientLogger.log(
+      `Retained Workspace: ${BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)}`,
+    );
+    if (
+      BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters) &&
+      fs.existsSync(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) &&
+      fs.existsSync(CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.repoPathAbsolute, `.git`)))
+    ) {
+      CloudRunnerLogger.log(`Retained Workspace Already Exists!`);
+      process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
+      await CloudRunnerSystem.Run(`git fetch`);
+      await CloudRunnerSystem.Run(`git lfs pull`);
+      await CloudRunnerSystem.Run(`git reset --hard "${CloudRunner.buildParameters.gitSha}"`);
+      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+
+      return true;
     }
-    RemoteClientLogger.log(`Retained Workspace: ${CloudRunner.lockedWorkspace}`);
+
+    return false;
   }
 }

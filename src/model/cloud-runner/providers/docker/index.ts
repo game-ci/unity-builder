@@ -1,20 +1,21 @@
 import BuildParameters from '../../../build-parameters';
-import CloudRunnerEnvironmentVariable from '../../services/cloud-runner-environment-variable';
-import CloudRunnerLogger from '../../services/cloud-runner-logger';
+import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { ProviderInterface } from '../provider-interface';
-import CloudRunnerSecret from '../../services/cloud-runner-secret';
+import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import Docker from '../../../docker';
 import { Action } from '../../..';
-import { writeFileSync } from 'fs';
+import { writeFileSync } from 'node:fs';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
-import { CloudRunnerSystem } from '../../services/cloud-runner-system';
-import fs from 'node:fs';
+import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
+import * as fs from 'node:fs';
+import { CommandHookService } from '../../services/hooks/command-hook-service';
 import { StringKeyValuePair } from '../../../shared-types';
 
 class LocalDockerCloudRunner implements ProviderInterface {
-  public buildParameters: BuildParameters | undefined;
+  public buildParameters!: BuildParameters;
 
   listResources(): Promise<ProviderResource[]> {
     return new Promise((resolve) => resolve([]));
@@ -51,14 +52,14 @@ class LocalDockerCloudRunner implements ProviderInterface {
     if (
       fs.existsSync(
         `${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       )
     ) {
       await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache/cache/build/`);
       await CloudRunnerSystem.Run(
         `rm -r ${workspace}/cloud-runner-cache/cache/build/build-${buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       );
     }
@@ -118,7 +119,7 @@ set -e
 mkdir -p /github/workspace/cloud-runner-cache
 mkdir -p /data/cache
 cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
-${commands}
+${CommandHookService.ApplyHooksToCommands(commands, this.buildParameters)}
 cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
 `;
     writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {
@@ -149,6 +150,7 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
         },
       },
       true,
+      false,
     );
 
     return myOutput;

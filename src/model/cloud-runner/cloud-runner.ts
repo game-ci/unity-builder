@@ -1,34 +1,42 @@
 import AwsBuildPlatform from './providers/aws';
 import { BuildParameters, Input } from '..';
 import Kubernetes from './providers/k8s';
-import CloudRunnerLogger from './services/cloud-runner-logger';
-import { CloudRunnerStepState } from './cloud-runner-step-state';
+import CloudRunnerLogger from './services/core/cloud-runner-logger';
+import { CloudRunnerStepParameters } from './options/cloud-runner-step-parameters';
 import { WorkflowCompositionRoot } from './workflows/workflow-composition-root';
 import { CloudRunnerError } from './error/cloud-runner-error';
-import { TaskParameterSerializer } from './services/task-parameter-serializer';
+import { TaskParameterSerializer } from './services/core/task-parameter-serializer';
 import * as core from '@actions/core';
-import CloudRunnerSecret from './services/cloud-runner-secret';
+import CloudRunnerSecret from './options/cloud-runner-secret';
 import { ProviderInterface } from './providers/provider-interface';
-import CloudRunnerEnvironmentVariable from './services/cloud-runner-environment-variable';
+import CloudRunnerEnvironmentVariable from './options/cloud-runner-environment-variable';
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
-import SharedWorkspaceLocking from './services/shared-workspace-locking';
+import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
+import { FollowLogStreamService } from './services/core/follow-log-stream-service';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
   public static buildParameters: BuildParameters;
   private static defaultSecrets: CloudRunnerSecret[];
   private static cloudRunnerEnvironmentVariables: CloudRunnerEnvironmentVariable[];
-  static lockedWorkspace: string | undefined;
+  static lockedWorkspace: string = ``;
   public static readonly retainedWorkspacePrefix: string = `retained-workspace`;
-  public static githubCheckId: number | string;
-
-  public static setup(buildParameters: BuildParameters) {
+  public static get isCloudRunnerEnvironment() {
+    return process.env[`GITHUB_ACTIONS`] !== `true`;
+  }
+  public static get isCloudRunnerAsyncEnvironment() {
+    return process.env[`ASYNC_WORKFLOW`] === `true`;
+  }
+  public static async setup(buildParameters: BuildParameters) {
     CloudRunnerLogger.setup();
     CloudRunnerLogger.log(`Setting up cloud runner`);
     CloudRunner.buildParameters = buildParameters;
+    if (CloudRunner.buildParameters.githubCheckId === ``) {
+      CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+    }
     CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
@@ -46,15 +54,16 @@ class CloudRunner {
       core.setOutput(
         Input.ToEnvVarFormat(`buildArtifact`),
         `build-${CloudRunner.buildParameters.buildGuid}.tar${
-          CloudRunner.buildParameters.useLz4Compression ? '.lz4' : ''
+          CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
         }`,
       );
     }
+    FollowLogStreamService.Reset();
   }
 
   private static setupSelectedBuildPlatform() {
-    CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.cloudRunnerCluster}`);
-    switch (CloudRunner.buildParameters.cloudRunnerCluster) {
+    CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.providerStrategy}`);
+    switch (CloudRunner.buildParameters.providerStrategy) {
       case 'k8s':
         CloudRunner.Provider = new Kubernetes(CloudRunner.buildParameters);
         break;
@@ -74,14 +83,20 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
-    CloudRunner.setup(buildParameters);
+    await CloudRunner.setup(buildParameters);
+    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
+    await CloudRunner.Provider.setupWorkflow(
+      CloudRunner.buildParameters.buildGuid,
+      CloudRunner.buildParameters,
+      CloudRunner.buildParameters.branch,
+      CloudRunner.defaultSecrets,
+    );
+    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
-      CloudRunner.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
+      if (buildParameters.maxRetainedWorkspaces > 0) {
+        CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
 
-      if (buildParameters.retainWorkspace) {
-        CloudRunner.lockedWorkspace = `${CloudRunner.retainedWorkspacePrefix}-${CloudRunner.buildParameters.buildGuid}`;
-
-        const result = await SharedWorkspaceLocking.GetOrCreateLockedWorkspace(
+        const result = await SharedWorkspaceLocking.GetLockedWorkspace(
           CloudRunner.lockedWorkspace,
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
@@ -95,21 +110,21 @@ class CloudRunner {
           ];
         } else {
           CloudRunnerLogger.log(`Max retained workspaces reached ${buildParameters.maxRetainedWorkspaces}`);
-          buildParameters.retainWorkspace = false;
-          CloudRunner.lockedWorkspace = undefined;
+          buildParameters.maxRetainedWorkspaces = 0;
+          CloudRunner.lockedWorkspace = ``;
         }
       }
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
-      await CloudRunner.Provider.setupWorkflow(
-        CloudRunner.buildParameters.buildGuid,
-        CloudRunner.buildParameters,
-        CloudRunner.buildParameters.branch,
-        CloudRunner.defaultSecrets,
-      );
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, CloudRunner.buildParameters.buildGuid);
+      const content = { ...CloudRunner.buildParameters };
+      content.gitPrivateToken = ``;
+      content.unitySerial = ``;
+      const jsonContent = JSON.stringify(content, undefined, 4);
+      await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
       const output = await new WorkflowCompositionRoot().run(
-        new CloudRunnerStepState(baseImage, CloudRunner.cloudRunnerEnvironmentVariables, CloudRunner.defaultSecrets),
+        new CloudRunnerStepParameters(
+          baseImage,
+          CloudRunner.cloudRunnerEnvironmentVariables,
+          CloudRunner.defaultSecrets,
+        ),
       );
       if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
       await CloudRunner.Provider.cleanupWorkflow(
@@ -122,22 +137,40 @@ class CloudRunner {
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
 
-      if (CloudRunner.buildParameters.retainWorkspace) {
+      if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
+        const workspace = CloudRunner.lockedWorkspace || ``;
         await SharedWorkspaceLocking.ReleaseWorkspace(
-          CloudRunner.lockedWorkspace || ``,
+          workspace,
           CloudRunner.buildParameters.buildGuid,
           CloudRunner.buildParameters,
         );
-        CloudRunner.lockedWorkspace = undefined;
+        const isLocked = await SharedWorkspaceLocking.IsWorkspaceLocked(workspace, CloudRunner.buildParameters);
+        if (isLocked) {
+          throw new Error(
+            `still locked after releasing ${await SharedWorkspaceLocking.GetAllLocksForWorkspace(
+              workspace,
+              buildParameters,
+            )}`,
+          );
+        }
+        CloudRunner.lockedWorkspace = ``;
       }
 
+      await GitHub.triggerWorkflowOnComplete(CloudRunner.buildParameters.finalHooks);
+
       if (buildParameters.constantGarbageCollection) {
-        CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageCollectionMaxAge, true, true);
+        CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageMaxAge, true, true);
       }
 
       return output;
-    } catch (error) {
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, error, `failure`, `completed`);
+    } catch (error: any) {
+      CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
+      await GitHub.updateGitHubCheck(
+        CloudRunner.buildParameters.buildGuid,
+        `Failed - Error ${error?.message || error}`,
+        `failure`,
+        `completed`,
+      );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;

@@ -2,10 +2,10 @@ import { assert } from 'node:console';
 import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
-import CloudRunnerLogger from '../services/cloud-runner-logger';
-import { CloudRunnerFolders } from '../services/cloud-runner-folders';
-import { CloudRunnerSystem } from '../services/cloud-runner-system';
-import { LfsHashing } from '../services/lfs-hashing';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
+import { LfsHashing } from '../services/utility/lfs-hashing';
 import { RemoteClientLogger } from './remote-client-logger';
 import { Cli } from '../../cli/cli';
 import { CliFunction } from '../../cli/cli-functions-repository';
@@ -44,20 +44,21 @@ export class Caching {
   }
 
   public static async PushToCache(cacheFolder: string, sourceFolder: string, cacheArtifactName: string) {
+    CloudRunnerLogger.log(`Pushing to cache ${sourceFolder}`);
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     const startPath = process.cwd();
     let compressionSuffix = '';
-    if (CloudRunner.buildParameters.useLz4Compression === true) {
+    if (CloudRunner.buildParameters.useCompressionStrategy === true) {
       compressionSuffix = `.lz4`;
     }
-    CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.useLz4Compression} ${compressionSuffix}`);
+    CloudRunnerLogger.log(`Compression: ${CloudRunner.buildParameters.useCompressionStrategy} ${compressionSuffix}`);
     try {
       if (!(await fileExists(cacheFolder))) {
         await CloudRunnerSystem.Run(`mkdir -p ${cacheFolder}`);
       }
       process.chdir(path.resolve(sourceFolder, '..'));
 
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
+      if (CloudRunner.buildParameters.cloudRunnerDebug === true) {
         CloudRunnerLogger.log(
           `Hashed cache folder ${await LfsHashing.hashAllFiles(sourceFolder)} ${sourceFolder} ${path.basename(
             sourceFolder,
@@ -68,11 +69,6 @@ export class Caching {
       CloudRunnerLogger.log(
         `There is ${contents.length} files/dir in the source folder ${path.basename(sourceFolder)}`,
       );
-
-      if (CloudRunner.buildParameters.cloudRunnerDebug) {
-        // await CloudRunnerSystem.Run(`tree -L 2 ./..`);
-        // await CloudRunnerSystem.Run(`tree -L 2`);
-      }
 
       if (contents.length === 0) {
         CloudRunnerLogger.log(
@@ -102,9 +98,15 @@ export class Caching {
     process.chdir(`${startPath}`);
   }
   public static async PullFromCache(cacheFolder: string, destinationFolder: string, cacheArtifactName: string = ``) {
+    CloudRunnerLogger.log(`Pulling from cache ${destinationFolder} ${CloudRunner.buildParameters.skipCache}`);
+    if (`${CloudRunner.buildParameters.skipCache}` === `true`) {
+      CloudRunnerLogger.log(`Skipping cache debugSkipCache is true`);
+
+      return;
+    }
     cacheArtifactName = cacheArtifactName.replace(' ', '');
     let compressionSuffix = '';
-    if (CloudRunner.buildParameters.useLz4Compression === true) {
+    if (CloudRunner.buildParameters.useCompressionStrategy === true) {
       compressionSuffix = `.lz4`;
     }
     const startPath = process.cwd();
@@ -160,7 +162,6 @@ export class Caching {
           RemoteClientLogger.logWarning(
             `cache item ${cacheArtifactName}.tar${compressionSuffix} doesn't exist ${destinationFolder}`,
           );
-          await CloudRunnerSystem.Run(`tree ${cacheFolder}`);
           throw new Error(`Failed to get cache item, but cache hit was found: ${cacheSelection}`);
         }
       }
