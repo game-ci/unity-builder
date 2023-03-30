@@ -95,7 +95,7 @@ Resources:
           EFSVolumeConfiguration:
             FilesystemId:
               'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:EfsFileStorageId'
-            TransitEncryption: ENABLED
+            TransitEncryption: DISABLED
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn:
