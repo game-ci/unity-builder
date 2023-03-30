@@ -92,7 +92,8 @@ class KubernetesJobSpecFactory {
                 preStop: {
                   exec: {
                     command: [
-                      `cd /data/builder/action/steps;
+                      `wait 60s;
+                      cd /data/builder/action/steps;
                       chmod +x /return_license.sh;
                       /return_license.sh;`,
                     ],
