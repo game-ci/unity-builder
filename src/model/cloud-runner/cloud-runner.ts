@@ -114,11 +114,7 @@ class CloudRunner {
           CloudRunner.lockedWorkspace = ``;
         }
       }
-      const content = { ...CloudRunner.buildParameters };
-      content.gitPrivateToken = ``;
-      content.unitySerial = ``;
-      const jsonContent = JSON.stringify(content, undefined, 4);
-      await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
+      await CloudRunner.updateStatusWithBuildParameters();
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepParameters(
           baseImage,
@@ -135,7 +131,9 @@ class CloudRunner {
       );
       CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
+      if ((buildParameters.asyncWorkflow && this.isCloudRunnerEnvironment) || !buildParameters.asyncWorkflow) {
+        await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
+      }
 
       if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
         const workspace = CloudRunner.lockedWorkspace || ``;
@@ -175,6 +173,16 @@ class CloudRunner {
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
     }
+  }
+
+  private static async updateStatusWithBuildParameters() {
+    const content = { ...CloudRunner.buildParameters };
+    content.gitPrivateToken = ``;
+    content.unitySerial = ``;
+    content.unityEmail = ``;
+    content.unityPassword = ``;
+    const jsonContent = JSON.stringify(content, undefined, 4);
+    await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
   }
 }
 export default CloudRunner;

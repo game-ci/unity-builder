@@ -20,6 +20,7 @@ export class RemoteClient {
     if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();
     }
+    await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
   }
   static async runCustomHookFiles(hookLifecycle: string) {
@@ -47,7 +48,6 @@ export class RemoteClient {
       `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.cacheFolderForCacheKeyFull)}`,
     );
     await RemoteClient.cloneRepoWithoutLFSFiles();
-    await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.sizeOfFolder(
       'repo before lfs cache pull',
       CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute),

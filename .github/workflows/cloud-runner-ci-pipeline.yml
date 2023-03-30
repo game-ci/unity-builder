@@ -37,6 +37,9 @@ jobs:
     name: Smoke Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    env:
+      GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
@@ -111,6 +114,7 @@ jobs:
           - 'cloud-runner-environment'
           #- 'cloud-runner-hooks'
           - 'cloud-runner-s3-steps'
+          - 'cloud-runner-github-checks'
           #- 'cloud-runner-local-persistence'
           #- 'cloud-runner-locking-core'
           #- 'cloud-runner-locking-get-locked'
