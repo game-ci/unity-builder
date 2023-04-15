@@ -28,6 +28,7 @@ namespace UnityBuilderAction.Input
       }
 
       if (!Enum.IsDefined(typeof(BuildTarget), buildTarget)) {
+        Console.WriteLine($"{buildTarget} is not a defined {nameof(BuildTarget)}");
         EditorApplication.Exit(121);
       }
 
