@@ -33,7 +33,7 @@ namespace UnityBuilderAction
       // Determine subtarget
       StandaloneBuildSubtarget buildSubtarget;
       if (!options.TryGetValue("standaloneBuildSubtarget", out var subtargetValue) || !Enum.TryParse(subtargetValue, out buildSubtarget)) {
-        buildSubtarget = StandaloneBuildSubtarget.NoSubtarget;
+        buildSubtarget = default;
       }
 #endif
 
