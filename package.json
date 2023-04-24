@@ -45,7 +45,7 @@
     "semver": "^7.5.2",
     "unity-changeset": "^2.0.0",
     "uuid": "^9.0.0",
-    "yaml": "^1.10.2"
+    "yaml": "^2.2.2"
   },
   "devDependencies": {
     "@evilmartians/lefthook": "^1.2.9",
