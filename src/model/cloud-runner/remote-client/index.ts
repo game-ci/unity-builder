@@ -16,9 +16,10 @@ import BuildParameters from '../../build-parameters';
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
-    await CloudRunnerSystem.Run(`sudo sysctl kernel.dmesg_restrict=0`, false, true);
     assert(
-      (await CloudRunnerSystem.Run(`dmesg`, false, true)).includes(`cloud runner build workflow starting`),
+      (await CloudRunnerSystem.Run(`cat /var/log/syslog`, false, true)).includes(
+        `cloud runner build workflow starting`,
+      ),
       'System logs must include startup message',
     );
 
