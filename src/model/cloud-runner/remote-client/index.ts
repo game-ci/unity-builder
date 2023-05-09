@@ -16,13 +16,6 @@ import BuildParameters from '../../build-parameters';
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async runRemoteClientJob() {
-    assert(
-      (await CloudRunnerSystem.Run(`cat /var/log/syslog`, false, true)).includes(
-        `cloud runner build workflow starting`,
-      ),
-      'System logs must include startup message',
-    );
-
     CloudRunnerLogger.log(`bootstrap game ci cloud runner...`);
     if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();

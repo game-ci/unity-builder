@@ -60,7 +60,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `echo "cloud runner build workflow starting"
       apt-get update > /dev/null
-      apt-get install -y curl tar tree npm git-lfs jq git rsyslog > /dev/null
+      apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
       npm i -g n > /dev/null
       n 16.15.1 > /dev/null
       npm --version
