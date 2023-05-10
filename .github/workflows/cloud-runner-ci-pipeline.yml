@@ -75,6 +75,9 @@ jobs:
       - name: 'Set up Cloud SDK'
         if: matrix.providerStrategy == 'k8s'
         uses: 'google-github-actions/setup-gcloud@v1.1.0'
+      - name: start minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
       - name: Get GKE cluster credentials
         if: matrix.providerStrategy == 'k8s'
         run: |
