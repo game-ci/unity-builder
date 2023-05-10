@@ -75,9 +75,6 @@ jobs:
       - name: 'Set up Cloud SDK'
         if: matrix.providerStrategy == 'k8s'
         uses: 'google-github-actions/setup-gcloud@v1.1.0'
-      - name: start minikube
-        id: minikube
-        uses: medyagh/setup-minikube@latest
       - name: Get GKE cluster credentials
         if: matrix.providerStrategy == 'k8s'
         run: |
@@ -132,20 +129,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
-      - uses: google-github-actions/auth@v1
-        if: matrix.providerStrategy == 'k8s'
-        with:
-          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: 'Set up Cloud SDK'
-        if: matrix.providerStrategy == 'k8s'
-        uses: 'google-github-actions/setup-gcloud@v1.1.0'
-      - name: Get GKE cluster credentials
-        if: matrix.providerStrategy == 'k8s'
-        run: |
-          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          gcloud components install gke-gcloud-auth-plugin
-          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - run: yarn
+      - name: start minikube
+        id: minikube
+        if: matrix.providerStrategy == 'k8s'
+        uses: medyagh/setup-minikube@latest
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
