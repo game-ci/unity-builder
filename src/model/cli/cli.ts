@@ -10,8 +10,6 @@ import { LfsHashing } from '../cloud-runner/services/utility/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
 import CloudRunnerOptionsReader from '../cloud-runner/options/cloud-runner-options-reader';
 import GitHub from '../github';
-import { CloudRunnerFolders } from '../cloud-runner/options/cloud-runner-folders';
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
 
@@ -172,32 +170,5 @@ export class Cli {
     await CloudRunner.setup(buildParameter);
 
     return await CloudRunner.Provider.watchWorkflow();
-  }
-
-  @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
-  public static async PostCLIBuild(): Promise<string> {
-    core.info(`Running POST build tasks`);
-
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
-      `lib-${CloudRunner.buildParameters.buildGuid}`,
-    );
-
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
-      `build-${CloudRunner.buildParameters.buildGuid}`,
-    );
-
-    if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
-      await CloudRunnerSystem.Run(
-        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      );
-    }
-
-    await RemoteClient.runCustomHookFiles(`after-build`);
-
-    return new Promise((result) => result(``));
   }
 }

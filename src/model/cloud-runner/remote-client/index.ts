@@ -23,6 +23,35 @@ export class RemoteClient {
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
   }
+
+  @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
+  public static async PostCLIBuild(): Promise<string> {
+    RemoteClientLogger.log(`Running POST build tasks`);
+
+    await Caching.PushToCache(
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+      `lib-${CloudRunner.buildParameters.buildGuid}`,
+    );
+
+    await Caching.PushToCache(
+      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
+      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
+      `build-${CloudRunner.buildParameters.buildGuid}`,
+    );
+
+    if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
+      await CloudRunnerSystem.Run(
+        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+      );
+    }
+
+    await RemoteClient.runCustomHookFiles(`after-build`);
+
+    RemoteClientLogger.printCollectedLogs();
+
+    return new Promise((result) => result(``));
+  }
   static async runCustomHookFiles(hookLifecycle: string) {
     RemoteClientLogger.log(`RunCustomHookFiles: ${hookLifecycle}`);
     const gameCiCustomHooksPath = path.join(CloudRunnerFolders.repoPathAbsolute, `game-ci`, `hooks`);
