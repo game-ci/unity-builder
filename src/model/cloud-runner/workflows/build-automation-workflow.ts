@@ -92,6 +92,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
+chmod -R a+rX /data/*
 node ${builderPath} -m remote-cli-pre-build`;
   }
 

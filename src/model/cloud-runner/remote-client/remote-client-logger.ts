@@ -2,7 +2,6 @@ import path from 'node:path';
 import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import fs from 'node:fs';
-import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -12,7 +11,6 @@ export class RemoteClientLogger {
   public static log(message: string) {
     const finalMessage = `[Client] ${message}`;
     if (!fs.existsSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) {
-      CloudRunnerSystem.Run(`chmod -R a+rX /data/*`);
       fs.mkdirSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute);
     }
     if (!fs.existsSync(this.LogFilePath)) {
