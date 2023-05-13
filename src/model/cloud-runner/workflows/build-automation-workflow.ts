@@ -92,9 +92,8 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
-chmod -R a+rX /data/*
-chmod -R 755 /data
-chmod -R 755 /data/*
+chmod -R a+rX ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}
+chmod -R 755 ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}
 node ${builderPath} -m remote-cli-pre-build`;
   }
 
