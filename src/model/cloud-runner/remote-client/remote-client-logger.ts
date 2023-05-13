@@ -1,18 +1,14 @@
 import path from 'node:path';
-import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import fs from 'node:fs';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
-    return path.join(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute, `job-log.txt`);
+    return path.join(`/home`, `job-log.txt`);
   }
 
   public static log(message: string) {
     const finalMessage = `[Client] ${message}`;
-    if (!fs.existsSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) {
-      fs.mkdirSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute);
-    }
     if (!fs.existsSync(this.LogFilePath)) {
       fs.writeFileSync(this.LogFilePath, ``);
     }
