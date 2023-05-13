@@ -10,6 +10,9 @@ export class RemoteClientLogger {
 
   public static log(message: string) {
     const finalMessage = `[Client] ${message}`;
+    if (!fs.existsSync(this.LogFilePath)) {
+      fs.writeFileSync(this.LogFilePath, ``);
+    }
     this.appendToFile(finalMessage);
     CloudRunnerLogger.log(finalMessage);
   }
