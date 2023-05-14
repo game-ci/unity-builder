@@ -100,7 +100,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
-    return `echo "game ci cloud runner initalized"
+    return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
@@ -108,8 +108,8 @@ node ${builderPath} -m remote-cli-pre-build`;
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
-    echo "game ci start" > /home/job-log.txt
-    /entrypoint.sh > /home/job-log.txt
+    echo "game ci start" >> /home/job-log.txt
+    /entrypoint.sh >> /home/job-log.txt
     node ${builderPath} -m remote-cli-post-build`;
   }
 }
