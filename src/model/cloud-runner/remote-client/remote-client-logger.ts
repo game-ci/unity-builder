@@ -28,7 +28,7 @@ export class RemoteClientLogger {
 
   public static appendToFile(message: string) {
     if (CloudRunner.isCloudRunnerEnvironment) {
-      fs.appendFileSync(RemoteClientLogger.LogFilePath, message);
+      fs.appendFileSync(RemoteClientLogger.LogFilePath, `${message}\n`);
     }
   }
 

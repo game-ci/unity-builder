@@ -69,9 +69,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
       df -H /data/
       ${BuildAutomationWorkflow.setupCommands(builderPath)}
+      echo "log start" > /home/job-log.txt
+      node ${builderPath} -m remote-cli-pre-build
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
+      node ${builderPath} -m remote-cli-build
+      node ${builderPath} -m remote-cli-post-build
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
@@ -91,14 +94,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     }; else ${commands} ; fi`;
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-${cloneBuilderCommands}
-echo "log start" > /home/job-log.txt
-node ${builderPath} -m remote-cli-pre-build`;
-  }
-
-  private static BuildCommands(builderPath: string) {
-    return `echo "game ci cloud runner initalized"
-    node ${builderPath} -m remote-cli-build
-    node ${builderPath} -m remote-cli-post-build`;
+${cloneBuilderCommands}`;
   }
 }
