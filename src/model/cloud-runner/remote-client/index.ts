@@ -15,7 +15,7 @@ import BuildParameters from '../../build-parameters';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
-  static async runRemoteClientJob() {
+  static async setupRemoteClient() {
     CloudRunnerLogger.log(`bootstrap game ci cloud runner...`);
     if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();
@@ -23,9 +23,27 @@ export class RemoteClient {
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
   }
+  @CliFunction(`remote-cli-build`, `sets up a repository, usually before a game-ci build`)
+  static async remoteClientBuild() {
+    CloudRunnerLogger.log(`bootstrap game ci cloud runner...`);
+    const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
+    const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
+    CloudRunnerSystem.Run(`mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(
+      CloudRunnerFolders.projectBuildFolderAbsolute,
+    )}/build`}
+    cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'entrypoint.sh'))}" "/entrypoint.sh"
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
+    chmod -R +x "/entrypoint.sh"
+    chmod -R +x "/steps"
+    echo "game ci start"
+    /entrypoint.sh
+    echo "game ci caching results"`);
+  }
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
-  public static async PostCLIBuild(): Promise<string> {
+  public static async remoteClientPostBuild(): Promise<string> {
     RemoteClientLogger.log(`Running POST build tasks`);
 
     await Caching.PushToCache(
