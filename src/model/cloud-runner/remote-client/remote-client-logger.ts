@@ -1,9 +1,11 @@
 import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import fs from 'node:fs';
+import path from 'node:path';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
-    return `job-log.txt`;
+    return path.join(CloudRunnerFolders.builderPathAbsolute, `job-log.txt`);
   }
 
   public static log(message: string) {
