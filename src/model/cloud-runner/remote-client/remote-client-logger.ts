@@ -1,6 +1,7 @@
 import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import fs from 'node:fs';
 import path from 'node:path';
+import CloudRunner from '../cloud-runner';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -26,7 +27,9 @@ export class RemoteClientLogger {
   }
 
   public static appendToFile(message: string) {
-    fs.appendFileSync(RemoteClientLogger.LogFilePath, message);
+    if (CloudRunner.isCloudRunnerEnvironment) {
+      fs.appendFileSync(RemoteClientLogger.LogFilePath, message);
+    }
   }
 
   public static printCollectedLogs() {
