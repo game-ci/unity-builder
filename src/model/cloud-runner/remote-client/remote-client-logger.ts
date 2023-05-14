@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
-    return path.join(`/`, `job-log.txt`);
+    return path.join(`/home`, `job-log.txt`);
   }
 
   public static log(message: string) {
