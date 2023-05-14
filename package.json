@@ -13,7 +13,7 @@
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "cli": "yarn ts-node src/index.ts -m cli",
     "gcp-secrets-tests": "cross-env providerStrategy=aws cloudRunnerTests=true inputPullCommand=\"gcp-secret-manager\" populateOverride=true pullInputList=UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD yarn test -i -t \"cloud runner\"",
-    "gcp-secrets-cli": "cross-env cloudRunnerTests=true inputPullCommand=\"gcp-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
+    "gcp-secrets-cli": "cross-env cloudRunnerTests=true USE_IL2CPP=false inputPullCommand=\"gcp-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "aws-secrets-cli": "cross-env cloudRunnerTests=true inputPullCommand=\"aws-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "cli-aws": "cross-env providerStrategy=aws yarn run test-cli",
     "cli-k8s": "cross-env providerStrategy=k8s yarn run test-cli",
