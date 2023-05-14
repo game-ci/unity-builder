@@ -10,9 +10,6 @@ export class RemoteClientLogger {
 
   public static log(message: string) {
     const finalMessage = `[Client] ${message}`;
-    if (!fs.existsSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) {
-      fs.mkdirSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute);
-    }
     if (!fs.existsSync(this.LogFilePath)) {
       fs.writeFileSync(this.LogFilePath, ``);
     }
