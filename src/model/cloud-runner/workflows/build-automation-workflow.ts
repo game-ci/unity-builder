@@ -109,7 +109,8 @@ node ${builderPath} -m remote-cli-pre-build`;
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
     echo "game ci start" >> /home/job-log.txt
-    /entrypoint.sh >> /home/job-log.txt
+    /entrypoint.sh >> /home/build-log.txt
+    cat /home/build-log.txt >> /home/job-log.txt
     node ${builderPath} -m remote-cli-post-build`;
   }
 }
