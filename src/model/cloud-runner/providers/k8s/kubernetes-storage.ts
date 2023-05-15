@@ -87,6 +87,7 @@ class KubernetesStorage {
     };
     pvc.spec = {
       accessModes: ['ReadWriteOnce'],
+      storageClassName: buildParameters.kubeStorageClass === '' ? 'standard' : buildParameters.kubeStorageClass,
       resources: {
         requests: {
           storage: buildParameters.kubeVolumeSize,
