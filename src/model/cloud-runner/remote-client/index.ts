@@ -12,6 +12,7 @@ import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import YAML from 'yaml';
 import GitHub from '../../github';
 import BuildParameters from '../../build-parameters';
+import { Cli } from '../../cli/cli';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
@@ -22,6 +23,30 @@ export class RemoteClient {
     }
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
+  }
+
+  @CliFunction('remote-cli-log-stream', `log stream from standard input`)
+  public static async remoteClientLogStream() {
+    const logFile = Cli.options!['logFile'];
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    let lingeringLine = '';
+
+    process.stdin.on('data', (chunk) => {
+      const lines = chunk.toString().split('\n');
+
+      lines[0] = lingeringLine + lines[0];
+      lingeringLine = lines.pop() || '';
+
+      for (const element of lines) {
+        fs.appendFileSync(logFile, element);
+      }
+    });
+
+    process.stdin.on('end', function () {
+      fs.appendFileSync(logFile, lingeringLine);
+    });
   }
 
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)

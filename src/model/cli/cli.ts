@@ -52,6 +52,7 @@ export class Cli {
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.option('--select <select>', 'select a particular resource');
+    program.option('--logFile <logFile>', 'output to log file (log stream only)');
     program.parse(process.argv);
     Cli.options = program.opts();
 
