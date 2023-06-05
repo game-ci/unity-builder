@@ -101,6 +101,12 @@ class KubernetesTaskRunner {
       }
     }
 
+    const configMapLogs = await kubeClient.readNamespacedConfigMap(`${jobName}-logs`, namespace);
+    if (configMapLogs.body.data) {
+      const logs = configMapLogs.body.data[`logs`] || ``;
+      CloudRunnerLogger.log(logs);
+    }
+
     return output;
   }
 
