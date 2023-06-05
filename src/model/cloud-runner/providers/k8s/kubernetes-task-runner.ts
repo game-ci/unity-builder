@@ -111,14 +111,14 @@ class KubernetesTaskRunner {
   }
 
   static async watchUntilPodRunning(kubeClient: CoreV1Api, podName: string, namespace: string) {
-    let success: boolean = false;
+    let waitComplete: boolean = false;
     let message = ``;
     CloudRunnerLogger.log(`Watching ${podName} ${namespace}`);
     await waitUntil(
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
-        success = phase === 'Running';
+        waitComplete = phase !== 'Pending' && phase !== 'Unknown';
         message = `Phase:${status.body.status?.phase} \n Reason:${
           status.body.status?.conditions?.[0].reason || ''
         } \n Message:${status.body.status?.conditions?.[0].message || ''}`;
@@ -138,7 +138,7 @@ class KubernetesTaskRunner {
         //     4,
         //   ),
         // );
-        if (success || phase !== 'Pending') return true;
+        if (waitComplete || phase !== 'Pending') return true;
 
         return false;
       },
@@ -147,11 +147,11 @@ class KubernetesTaskRunner {
         intervalBetweenAttempts: 15000,
       },
     );
-    if (!success) {
+    if (!waitComplete) {
       CloudRunnerLogger.log(message);
     }
 
-    return success;
+    return waitComplete;
   }
 }
 
