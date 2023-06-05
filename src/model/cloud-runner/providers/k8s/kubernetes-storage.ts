@@ -101,7 +101,7 @@ class KubernetesStorage {
     if (process.env['CLOUD_RUNNER_MINIKUBE']) {
       const hostPathVolume = {
         metadata: {
-          name: ``,
+          name: `${pvcName}-volume`,
           labels: {
             type: `local`,
           },
