@@ -108,7 +108,7 @@ class KubernetesStorage {
         },
         spec: {
           storageClassName: `manual`,
-          capacity: { storage: `10Gi` },
+          capacity: { storage: `5Gi` },
           accessModes: ['ReadWriteOnce'],
           hostPath: { path: `/data/${pvcName}` },
         },
