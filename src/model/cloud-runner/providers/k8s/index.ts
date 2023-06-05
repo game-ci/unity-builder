@@ -127,7 +127,7 @@ class Kubernetes implements ProviderInterface {
         ? CloudRunner.lockedWorkspace
         : this.buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
-      if (process.env['CLOUD_RUNNER_MINIKUBE']) {
+      if (!process.env['CLOUD_RUNNER_MINIKUBE']) {
         await KubernetesStorage.createPersistentVolumeClaim(
           this.buildParameters,
           this.pvcName,
