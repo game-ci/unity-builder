@@ -44,7 +44,7 @@ export class RemoteClient {
       }
     });
 
-    process.stdin.on('end', function () {
+    process.stdin.on('end', () => {
       fs.appendFileSync(logFile, lingeringLine);
     });
   }
