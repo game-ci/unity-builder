@@ -118,7 +118,7 @@ class KubernetesTaskRunner {
       async () => {
         const status = await kubeClient.readNamespacedPodStatus(podName, namespace);
         const phase = status?.body.status?.phase;
-        waitComplete = phase !== 'Pending' && phase !== 'Unknown';
+        waitComplete = phase !== 'Pending';
         message = `Phase:${status.body.status?.phase} \n Reason:${
           status.body.status?.conditions?.[0].reason || ''
         } \n Message:${status.body.status?.conditions?.[0].message || ''}`;
