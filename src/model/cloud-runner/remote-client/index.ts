@@ -13,6 +13,7 @@ import YAML from 'yaml';
 import GitHub from '../../github';
 import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
+import CloudRunnerOptions from '../options/cloud-runner-options';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
@@ -40,12 +41,20 @@ export class RemoteClient {
       lingeringLine = lines.pop() || '';
 
       for (const element of lines) {
-        fs.appendFileSync(logFile, element);
+        if (CloudRunnerOptions.providerStrategy !== 'k8s') {
+          CloudRunnerLogger.log(element);
+        } else {
+          fs.appendFileSync(logFile, element);
+        }
       }
     });
 
     process.stdin.on('end', () => {
-      fs.appendFileSync(logFile, lingeringLine);
+      if (CloudRunnerOptions.providerStrategy !== 'k8s') {
+        CloudRunnerLogger.log(lingeringLine);
+      } else {
+        fs.appendFileSync(logFile, lingeringLine);
+      }
     });
   }
 
