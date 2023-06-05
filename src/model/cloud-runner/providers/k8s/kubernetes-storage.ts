@@ -110,7 +110,7 @@ class KubernetesStorage {
           storageClassName: `manual`,
           capacity: { storage: `10Gi` },
           accessModes: ['ReadWriteOnce'],
-          hostPath: { path: `/data` },
+          hostPath: { path: `/data/${pvcName}` },
         },
       };
       await kubeClient.createPersistentVolume(hostPathVolume);
