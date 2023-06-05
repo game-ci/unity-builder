@@ -107,6 +107,16 @@ class KubernetesJobSpecFactory {
       },
     };
 
+    if (process.env['CLOUD_RUNNER_MINIKUBE']) {
+      job.spec.template.spec.volumes[0] = {
+        name: 'build-mount',
+        hostPath: {
+          path: `/data`,
+          type: `Directory`,
+        },
+      };
+    }
+
     job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '10Gi';
 
     return job;
