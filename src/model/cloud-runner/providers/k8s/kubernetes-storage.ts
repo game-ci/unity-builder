@@ -94,7 +94,27 @@ class KubernetesStorage {
         },
       },
     };
+    if (process.env['CLOUD_RUNNER_MINIKUBE']) {
+      pvc.spec.storageClassName = `manual`;
+    }
     const result = await kubeClient.createNamespacedPersistentVolumeClaim(namespace, pvc);
+    if (process.env['CLOUD_RUNNER_MINIKUBE']) {
+      const hostPathVolume = {
+        metadata: {
+          name: ``,
+          labels: {
+            type: `local`,
+          },
+        },
+        spec: {
+          storageClassName: `manual`,
+          capacity: { storage: `10Gi` },
+          accessModes: ['ReadWriteOnce'],
+          hostPath: { path: `/data` },
+        },
+      };
+      await kubeClient.createPersistentVolume(hostPathVolume);
+    }
 
     return result;
   }
