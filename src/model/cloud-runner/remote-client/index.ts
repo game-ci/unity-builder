@@ -82,7 +82,7 @@ export class RemoteClient {
 
     await RemoteClient.runCustomHookFiles(`after-build`);
 
-    RemoteClientLogger.printCollectedLogs();
+    await RemoteClientLogger.printCollectedLogs();
 
     return new Promise((result) => result(``));
   }

@@ -42,6 +42,14 @@ class Kubernetes implements ProviderInterface {
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
   }
 
+  async PushLogUpdate(logs: string) {
+    const body: k8s.V1ConfigMap = new k8s.V1ConfigMap();
+    body.data = {};
+    body.data['logs'] = logs;
+    body.metadata = { name: `${this.jobName}-logs` };
+    await this.kubeClient.createNamespacedConfigMap(this.namespace, body);
+  }
+
   async listResources(): Promise<ProviderResource[]> {
     const pods = await this.kubeClient.listNamespacedPod(this.namespace);
     const serviceAccounts = await this.kubeClient.listNamespacedServiceAccount(this.namespace);

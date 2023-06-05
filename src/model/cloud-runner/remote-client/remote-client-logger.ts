@@ -2,6 +2,8 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
+import CloudRunnerOptions from '../options/cloud-runner-options';
+import Kubernetes from '../providers/k8s';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -32,8 +34,13 @@ export class RemoteClientLogger {
     }
   }
 
-  public static printCollectedLogs() {
+  public static async printCollectedLogs() {
+    if (CloudRunnerOptions.providerStrategy !== 'k8s') {
+      return;
+    }
     CloudRunnerLogger.log(`Collected Logs`);
-    CloudRunnerLogger.log(fs.readFileSync(RemoteClientLogger.LogFilePath).toString());
+    const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+    CloudRunnerLogger.log(logs);
+    await Kubernetes.Instance.PushLogUpdate(logs);
   }
 }
