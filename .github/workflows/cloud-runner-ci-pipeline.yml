@@ -133,6 +133,8 @@ jobs:
       - run: yarn
       - name: actions-k3s
         uses: debianmaster/actions-k3s@v1.0.5
+        with:
+          version: 'latest'
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
