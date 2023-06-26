@@ -31,7 +31,6 @@ env:
   USE_GKE_GCLOUD_AUTH_PLUGIN: true
   GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CLOUD_RUNNER_MINIKUBE: true
 
 jobs:
   smokeTests:
@@ -143,6 +142,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
+          KUBE_STORAGE_CLASS: local-path
           PROVIDER_STRATEGY: ${{ matrix.providerStrategy }}
   buildTargetTests:
     name: Local Build Target Tests

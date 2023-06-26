@@ -127,14 +127,12 @@ class Kubernetes implements ProviderInterface {
         ? CloudRunner.lockedWorkspace
         : this.buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
-      if (!process.env['CLOUD_RUNNER_MINIKUBE']) {
-        await KubernetesStorage.createPersistentVolumeClaim(
-          this.buildParameters,
-          this.pvcName,
-          this.kubeClient,
-          this.namespace,
-        );
-      }
+      await KubernetesStorage.createPersistentVolumeClaim(
+        this.buildParameters,
+        this.pvcName,
+        this.kubeClient,
+        this.namespace,
+      );
       this.buildGuid = buildGuid;
       this.secretName = `build-credentials-${this.buildGuid}`;
       this.jobName = `unity-builder-job-${this.buildGuid}`;
