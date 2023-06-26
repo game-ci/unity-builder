@@ -131,10 +131,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - name: start minikube
-        id: minikube
-        if: matrix.providerStrategy == 'k8s'
-        uses: medyagh/setup-minikube@latest
+      - name: actions-k3s
+        uses: debianmaster/actions-k3s@v1.0.5
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
