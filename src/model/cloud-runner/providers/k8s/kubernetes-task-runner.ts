@@ -108,7 +108,7 @@ class KubernetesTaskRunner {
         CloudRunnerLogger.log(logs);
       }
     } catch (error) {
-      CloudRunnerLogger.log(`Error reading config map ${error}`);
+      CloudRunnerLogger.log(`Error reading config map${namespace} ${jobName}-logs ${error} `);
       const configMaps = await kubeClient.listNamespacedConfigMap(namespace);
       CloudRunnerLogger.log(
         JSON.stringify(
