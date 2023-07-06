@@ -14,6 +14,7 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
@@ -48,6 +49,7 @@ class Kubernetes implements ProviderInterface {
     body.data['logs'] = logs;
     body.metadata = { name: `${this.jobName}-logs` };
     await this.kubeClient.createNamespacedConfigMap(this.namespace, body);
+    RemoteClientLogger.log(`Pushed logs to Kubernetes ConfigMap`);
   }
 
   async listResources(): Promise<ProviderResource[]> {
