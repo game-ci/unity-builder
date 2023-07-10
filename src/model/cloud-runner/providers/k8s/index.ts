@@ -15,6 +15,7 @@ import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
+import { KubernetesRole } from './kubernetes-role';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
@@ -244,6 +245,7 @@ class Kubernetes implements ProviderInterface {
           this.containerName,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
+        await KubernetesRole.createRole(this.serviceAccountName, this.namespace);
         const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
@@ -267,6 +269,7 @@ class Kubernetes implements ProviderInterface {
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
+      await KubernetesRole.deleteRole(this.serviceAccountName, this.namespace);
     } catch (error: any) {
       CloudRunnerLogger.log(`Failed to cleanup`);
       if (error.response.body.reason !== `NotFound`) {
