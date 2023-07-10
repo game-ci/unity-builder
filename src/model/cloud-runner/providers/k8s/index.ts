@@ -50,7 +50,8 @@ class Kubernetes implements ProviderInterface {
     const body: k8s.V1ConfigMap = new k8s.V1ConfigMap();
     body.data = {};
     body.data['logs'] = logs;
-    body.metadata = { name: `${this.jobName}-logs` };
+    body.metadata = { name: `${this.jobName}-logs`, namespace: this.namespace, labels: { app: 'unity-builder' } };
+    RemoteClientLogger.log(`Pushing to Kubernetes ConfigMap`);
     await this.kubeClient.createNamespacedConfigMap(this.namespace, body);
     RemoteClientLogger.log(`Pushed logs to Kubernetes ConfigMap`);
   }
