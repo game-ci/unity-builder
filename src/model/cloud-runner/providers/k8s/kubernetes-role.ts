@@ -1,9 +1,7 @@
 import { RbacAuthorizationV1Api } from '@kubernetes/client-node';
 
 class KubernetesRole {
-  static async createRole(serviceAccountName: string, namespace: string) {
-    const rbac = new RbacAuthorizationV1Api();
-
+  static async createRole(serviceAccountName: string, namespace: string, rbac: RbacAuthorizationV1Api) {
     // create admin kubernetes role and role binding
     const roleBinding = {
       apiVersion: 'rbac.authorization.k8s.io/v1',
@@ -47,8 +45,7 @@ class KubernetesRole {
     return { roleBindingResponse, roleResponse };
   }
 
-  public static async deleteRole(serviceAccountName: string, namespace: string) {
-    const rbac = new RbacAuthorizationV1Api();
+  public static async deleteRole(serviceAccountName: string, namespace: string, rbac: RbacAuthorizationV1Api) {
     await rbac.deleteNamespacedRoleBinding(`${serviceAccountName}-admin`, namespace);
     await rbac.deleteNamespacedRole(`${serviceAccountName}-admin`, namespace);
   }

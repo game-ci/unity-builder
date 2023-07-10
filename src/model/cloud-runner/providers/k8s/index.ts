@@ -22,6 +22,7 @@ class Kubernetes implements ProviderInterface {
   public kubeConfig!: k8s.KubeConfig;
   public kubeClient!: k8s.CoreV1Api;
   public kubeClientBatch!: k8s.BatchV1Api;
+  public rbacAuthorizationV1Api!: k8s.RbacAuthorizationV1Api;
   public buildGuid: string = '';
   public buildParameters!: BuildParameters;
   public pvcName: string = '';
@@ -40,6 +41,7 @@ class Kubernetes implements ProviderInterface {
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+    this.rbacAuthorizationV1Api = this.kubeConfig.makeApiClient(k8s.RbacAuthorizationV1Api);
     this.namespace = 'default';
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
   }
@@ -245,7 +247,7 @@ class Kubernetes implements ProviderInterface {
           this.containerName,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
-        await KubernetesRole.createRole(this.serviceAccountName, this.namespace);
+        await KubernetesRole.createRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
         const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
@@ -269,7 +271,7 @@ class Kubernetes implements ProviderInterface {
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
-      await KubernetesRole.deleteRole(this.serviceAccountName, this.namespace);
+      await KubernetesRole.deleteRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
     } catch (error: any) {
       CloudRunnerLogger.log(`Failed to cleanup`);
       if (error.response.body.reason !== `NotFound`) {
