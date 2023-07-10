@@ -83,7 +83,7 @@ export class RemoteClient {
     await RemoteClient.runCustomHookFiles(`after-build`);
 
     // WIP - need to give the pod permissions to create config map
-    // await RemoteClientLogger.printCollectedLogs();
+    await RemoteClientLogger.printCollectedLogs();
 
     return new Promise((result) => result(``));
   }
