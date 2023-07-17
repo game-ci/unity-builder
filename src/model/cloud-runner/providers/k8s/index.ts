@@ -61,6 +61,9 @@ class Kubernetes implements ProviderInterface {
     }
     const url = `http://${ip}/api/log`;
     RemoteClientLogger.log(`Pushing logs to ${url}`);
+
+    // replace newlines with escaped newlines
+    logs = logs.replace(/\n/g, '\\n');
     const response = await CloudRunnerSystem.Run(`curl -X POST -d "${logs}" ${url}`, false, true);
     RemoteClientLogger.log(`Pushed logs to ${url} ${response}`);
   }
