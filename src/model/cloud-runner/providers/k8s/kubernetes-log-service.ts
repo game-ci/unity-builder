@@ -38,7 +38,7 @@ spec:
         service: http-fileserver
     spec:
       containers:
-      - image: my-docker-hub-account/http-fileserver-kubernetes:latest
+      - image: pgaertig/nginx-big-upload:latest
         imagePullPolicy: Always
         name: http-fileserver
         resources: {}
@@ -72,7 +72,7 @@ status: {}
         spec: {
           containers: [
             {
-              image: 'my-docker-hub-account/http-fileserver-kubernetes:latest',
+              image: 'pgaertig/nginx-big-upload:latest',
               imagePullPolicy: 'Always',
               name: 'http-fileserver',
               resources: {},
