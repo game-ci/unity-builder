@@ -94,7 +94,7 @@ status: {}
       // get ip address of service
       const service = await kubeClientCore.readNamespacedService('http-fileserver', namespace);
       const ip = service.body.status?.loadBalancer?.ingress?.[0]?.ip;
-      if (ip) {
+      if (ip && ip.length > 0) {
         return ip;
       }
     }
