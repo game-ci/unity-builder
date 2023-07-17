@@ -92,12 +92,14 @@ status: {}
       // wait for service to share ip address
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
-      // get ip address of service
+      // get cluster ip address of service
       const service = await kubeClientCore.readNamespacedService('http-fileserver', namespace);
 
       // log service json
-      CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body)}`);
-      const ip = service.body.status?.loadBalancer?.ingress?.[0]?.ip;
+      CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body, undefined, 4)}`);
+
+      // get cluster ip
+      const ip = service.body?.spec?.clusterIP;
       if (ip && ip.length > 0) {
         return ip;
       }
