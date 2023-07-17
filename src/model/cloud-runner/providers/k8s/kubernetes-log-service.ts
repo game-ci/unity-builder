@@ -1,5 +1,6 @@
 import { CoreV1Api } from '@kubernetes/client-node';
 import * as k8s from '@kubernetes/client-node';
+import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 class KubernetesLogService {
   static async cleanupLogDeployment(namespace: string, kubeClientApps: k8s.AppsV1Api, kubeClient: CoreV1Api) {
     await kubeClient.deleteNamespacedService('http-fileserver', namespace);
@@ -93,6 +94,9 @@ status: {}
 
       // get ip address of service
       const service = await kubeClientCore.readNamespacedService('http-fileserver', namespace);
+
+      // log service json
+      CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body)}`);
       const ip = service.body.status?.loadBalancer?.ingress?.[0]?.ip;
       if (ip && ip.length > 0) {
         return ip;
