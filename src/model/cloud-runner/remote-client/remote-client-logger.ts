@@ -39,6 +39,7 @@ export class RemoteClientLogger {
       return;
     }
     CloudRunnerLogger.log(`Collected Logs`);
+    CloudRunnerLogger.log(process.env[`LOG_SERVICE_IP`] || ``);
     const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
     CloudRunnerLogger.log(logs);
     await Kubernetes.Instance.PushLogUpdate(logs);

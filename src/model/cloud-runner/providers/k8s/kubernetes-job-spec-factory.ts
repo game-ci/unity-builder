@@ -20,6 +20,7 @@ class KubernetesJobSpecFactory {
     jobName: string,
     k8s: any,
     containerName: string,
+    ip: string = '',
   ) {
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
@@ -81,6 +82,7 @@ class KubernetesJobSpecFactory {
 
                   return environmentVariable;
                 }),
+                { name: 'LOG_SERVICE_IP', value: ip },
               ],
               volumeMounts: [
                 {

@@ -16,11 +16,14 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 import { KubernetesRole } from './kubernetes-role';
+import KubernetesLogService from './kubernetes-log-service';
+import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
   public kubeConfig!: k8s.KubeConfig;
   public kubeClient!: k8s.CoreV1Api;
+  public kubeClientApps!: k8s.AppsV1Api;
   public kubeClientBatch!: k8s.BatchV1Api;
   public rbacAuthorizationV1Api!: k8s.RbacAuthorizationV1Api;
   public buildGuid: string = '';
@@ -40,6 +43,7 @@ class Kubernetes implements ProviderInterface {
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+    this.kubeClientApps = this.kubeConfig.makeApiClient(k8s.AppsV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
     this.rbacAuthorizationV1Api = this.kubeConfig.makeApiClient(k8s.RbacAuthorizationV1Api);
     this.namespace = 'default';
@@ -47,13 +51,17 @@ class Kubernetes implements ProviderInterface {
   }
 
   async PushLogUpdate(logs: string) {
-    const body: k8s.V1ConfigMap = new k8s.V1ConfigMap();
-    body.data = {};
-    body.data['logs'] = logs;
-    body.metadata = { name: `${this.jobName}-logs`, namespace: this.namespace, labels: { app: 'unity-builder' } };
-    RemoteClientLogger.log(`Pushing to Kubernetes ConfigMap`);
-    await this.kubeClient.createNamespacedConfigMap(this.namespace, body);
-    RemoteClientLogger.log(`Pushed logs to Kubernetes ConfigMap`);
+    // push logs to nginx file server via 'LOG_SERVICE_IP' env var
+    const ip = process.env[`LOG_SERVICE_IP`];
+    if (ip === undefined) {
+      RemoteClientLogger.logWarning(`LOG_SERVICE_IP not set, skipping log push`);
+
+      return;
+    }
+    const url = `http://${ip}/api/log`;
+    RemoteClientLogger.log(`Pushing logs to ${url}`);
+    const response = await CloudRunnerSystem.Run(`curl -X POST -d "${logs}" ${url}`, false, true);
+    RemoteClientLogger.log(`Pushed logs to ${url} ${response}`);
   }
 
   async listResources(): Promise<ProviderResource[]> {
@@ -232,6 +240,7 @@ class Kubernetes implements ProviderInterface {
   ) {
     for (let index = 0; index < 3; index++) {
       try {
+        const ip = await KubernetesLogService.createLogDeployment(this.namespace, this.kubeClientApps, this.kubeClient);
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
           image,
@@ -246,9 +255,12 @@ class Kubernetes implements ProviderInterface {
           this.jobName,
           k8s,
           this.containerName,
+          ip,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
-        await KubernetesRole.createRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
+
+        // await KubernetesRole.createRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
+
         const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
