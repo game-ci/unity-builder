@@ -1,7 +1,11 @@
 import { CoreV1Api } from '@kubernetes/client-node';
 import * as k8s from '@kubernetes/client-node';
 class KubernetesLogService {
-  // static async function, creates a deployment and service
+  static async cleanupLogDeployment(namespace: string, kubeClientApps: k8s.AppsV1Api, kubeClient: CoreV1Api) {
+    await kubeClient.deleteNamespacedService('http-fileserver', namespace);
+    await kubeClientApps.deleteNamespacedDeployment('http-fileserver', namespace);
+  }
+
   static async createLogService(serviceAccountName: string, namespace: string, kubeClient: CoreV1Api) {
     const serviceAccount = new k8s.V1ServiceAccount();
     serviceAccount.apiVersion = 'v1';
@@ -12,10 +16,6 @@ class KubernetesLogService {
     serviceAccount.automountServiceAccountToken = true;
 
     return kubeClient.createNamespacedServiceAccount(namespace, serviceAccount);
-  }
-
-  static async deleteLogService(serviceAccountName: string, namespace: string, kubeClient: CoreV1Api) {
-    await kubeClient.deleteNamespacedServiceAccount(serviceAccountName, namespace);
   }
 
   static async createLogDeployment(namespace: string, kubeClient: k8s.AppsV1Api, kubeClientCore: CoreV1Api) {

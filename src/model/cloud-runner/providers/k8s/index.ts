@@ -36,6 +36,7 @@ class Kubernetes implements ProviderInterface {
   public containerName: string = '';
   public cleanupCronJobName: string = '';
   public serviceAccountName: string = '';
+  public ip: string = '';
 
   // eslint-disable-next-line no-unused-vars
   constructor(buildParameters: BuildParameters) {
@@ -154,6 +155,8 @@ class Kubernetes implements ProviderInterface {
       await KubernetesSecret.createSecret(secrets, this.secretName, this.namespace, this.kubeClient);
       let output = '';
       try {
+        this.ip =
+          (await KubernetesLogService.createLogDeployment(this.namespace, this.kubeClientApps, this.kubeClient)) || ``;
         CloudRunnerLogger.log('Job does not exist');
         await this.createJob(commands, image, mountdir, workingdir, environment, secrets);
         CloudRunnerLogger.log('Watching pod until running');
@@ -240,7 +243,6 @@ class Kubernetes implements ProviderInterface {
   ) {
     for (let index = 0; index < 3; index++) {
       try {
-        const ip = await KubernetesLogService.createLogDeployment(this.namespace, this.kubeClientApps, this.kubeClient);
         const jobSpec = KubernetesJobSpecFactory.getJobSpec(
           commands,
           image,
@@ -255,7 +257,7 @@ class Kubernetes implements ProviderInterface {
           this.jobName,
           k8s,
           this.containerName,
-          ip,
+          this.ip,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
 
@@ -265,6 +267,7 @@ class Kubernetes implements ProviderInterface {
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
         CloudRunnerLogger.log('Job created');
+        await KubernetesLogService.cleanupLogDeployment(this.namespace, this.kubeClientApps, this.kubeClient);
 
         return result.body.metadata?.name;
       } catch (error) {
@@ -285,6 +288,7 @@ class Kubernetes implements ProviderInterface {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
       await KubernetesRole.deleteRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
+      await KubernetesLogService.cleanupLogDeployment(this.namespace, this.kubeClientApps, this.kubeClient);
     } catch (error: any) {
       CloudRunnerLogger.log(`Failed to cleanup`);
       if (error.response.body.reason !== `NotFound`) {
