@@ -110,6 +110,7 @@ jobs:
           #- 'cloud-runner-caching'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-kubernetes'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
           #- 'cloud-runner-hooks'
