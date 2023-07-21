@@ -73,9 +73,14 @@ status: {}
         spec: {
           containers: [
             {
-              image: 'pgaertig/nginx-big-upload:latest',
+              image: 'node:18',
               imagePullPolicy: 'Always',
               name: 'http-fileserver',
+              command: [
+                'bash',
+                '-c',
+                'while true; do sleep 30; npm i files-upload-server -g; files-upload-server "downloads"; done;',
+              ],
               resources: {},
             },
           ],

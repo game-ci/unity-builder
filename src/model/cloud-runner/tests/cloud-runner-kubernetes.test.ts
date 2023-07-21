@@ -27,7 +27,6 @@ describe('Cloud Runner Kubernetes', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        containerHookFiles: `debug-cache`,
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
