@@ -92,26 +92,17 @@ jobs:
           versioning: None
           CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
   localTests:
-    name: Local Integration Tests
+    name: Local Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         test:
-          - 'cloud-runner-async-workflow'
-          #- 'cloud-runner-caching'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
-          - 'cloud-runner-kubernetes'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
-          #- 'cloud-runner-hooks'
-          - 'cloud-runner-s3-steps'
-          - 'cloud-runner-github-checks'
-          #- 'cloud-runner-local-persistence'
-          #- 'cloud-runner-locking-core'
-          #- 'cloud-runner-locking-get-locked'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -124,10 +115,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - name: actions-k3s
-        uses: debianmaster/actions-k3s@v1.0.5
-        with:
-          version: 'latest'
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
@@ -146,7 +133,7 @@ jobs:
     # needs:
     #   - smokeTests
     #   - buildTargetTests
-    name: K8s Integration Tests
+    name: K8s Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
@@ -154,29 +141,17 @@ jobs:
       matrix:
         test:
           - 'cloud-runner-async-workflow'
-          #- 'cloud-runner-caching'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-kubernetes'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
-          #- 'cloud-runner-hooks'
-          - 'cloud-runner-s3-steps'
           - 'cloud-runner-github-checks'
-          #- 'cloud-runner-local-persistence'
-          #- 'cloud-runner-locking-core'
-          #- 'cloud-runner-locking-get-locked'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
         with:
           lfs: false
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
       - run: yarn
       - name: actions-k3s
         uses: debianmaster/actions-k3s@v1.0.5
@@ -197,26 +172,18 @@ jobs:
             #   - smokeTests
             #   - buildTargetTests
   awsTests:
-    name: AWS Integration Tests
+    name: AWS Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         test:
-          - 'cloud-runner-async-workflow'
-          #- 'cloud-runner-caching'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
-          - 'cloud-runner-kubernetes'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
-          #- 'cloud-runner-hooks'
           - 'cloud-runner-s3-steps'
-          - 'cloud-runner-github-checks'
-          #- 'cloud-runner-local-persistence'
-          #- 'cloud-runner-locking-core'
-          #- 'cloud-runner-locking-get-locked'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
