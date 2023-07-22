@@ -8,6 +8,7 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import setups from './cloud-runner-suite.test';
 import { v4 as uuidv4 } from 'uuid';
 import * as k8s from '@kubernetes/client-node';
+import ImageTag from '../../image-tag';
 
 async function CreateParameters(overrides: any) {
   if (overrides) {
@@ -45,6 +46,31 @@ describe('Cloud Runner Kubernetes', () => {
       const kubeClient = kubeConfig.makeApiClient(k8s.CoreV1Api);
 
       await KubernetesLogService.createLogService('test', 'default', kubeClient);
+
+      CloudRunnerLogger.log(`run 1 succeeded`);
+    }, 1_000_000_000);
+    it('curl log service', async () => {
+      const overrides = {
+        versioning: 'None',
+        projectPath: 'test-project',
+        unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
+        targetPlatform: 'StandaloneLinux64',
+        cacheKey: `test-case-${uuidv4()}`,
+        customJob: `
+        - name: 'step 1'
+          image: 'ubuntu'
+          commands: 'curl http://$LOG_SERVICE_IP:80''`,
+      };
+      if (CloudRunnerOptions.providerStrategy !== `k8s`) {
+        return;
+      }
+      const buildParameter = await CreateParameters(overrides);
+      expect(buildParameter.projectPath).toEqual(overrides.projectPath);
+
+      const baseImage = new ImageTag(buildParameter.unityVersion);
+      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      const buildSucceededString = 'Build succeeded';
+      expect(results).toContain(buildSucceededString);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
     }, 1_000_000_000);
