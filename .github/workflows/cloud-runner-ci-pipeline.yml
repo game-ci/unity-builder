@@ -41,46 +41,20 @@ jobs:
       GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         test:
-          #- 'cloud-runner-async-workflow'
           - 'cloud-runner-caching'
-          # - 'cloud-runner-end2end-caching'
-          # - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
           - 'cloud-runner-hooks'
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking-core'
           - 'cloud-runner-locking-get-locked'
-        providerStrategy:
-          #- aws
-          - local-docker
-          #- k8s
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v3
         with:
           lfs: false
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-      - uses: google-github-actions/auth@v1
-        if: matrix.providerStrategy == 'k8s'
-        with:
-          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-      - name: 'Set up Cloud SDK'
-        if: matrix.providerStrategy == 'k8s'
-        uses: 'google-github-actions/setup-gcloud@v1.1.0'
-      - name: Get GKE cluster credentials
-        if: matrix.providerStrategy == 'k8s'
-        run: |
-          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          gcloud components install gke-gcloud-auth-plugin
-          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
       - run: yarn
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 35
@@ -90,7 +64,7 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          CLOUD_RUNNER_CLUSTER: ${{ matrix.providerStrategy }}
+          CLOUD_RUNNER_CLUSTER: local-docker
   localTests:
     name: Local Tests
     if: github.event.event_type != 'pull_request_target'
