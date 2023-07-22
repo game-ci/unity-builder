@@ -68,7 +68,7 @@ describe('Cloud Runner Kubernetes', () => {
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
-      const baseImage = new ImageTag(buildParameter.unityVersion);
+      const baseImage = new ImageTag(buildParameter);
       const results = await CloudRunner.run(buildParameter, baseImage.toString());
       const buildSucceededString = 'Build succeeded';
       expect(results).toContain(buildSucceededString);
