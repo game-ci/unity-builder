@@ -59,7 +59,8 @@ describe('Cloud Runner Kubernetes', () => {
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
-          commands: 'curl http://$LOG_SERVICE_IP:80''`,
+          commands: |
+            curl http://$LOG_SERVICE_IP:80`,
       };
       if (CloudRunnerOptions.providerStrategy !== `k8s`) {
         return;
