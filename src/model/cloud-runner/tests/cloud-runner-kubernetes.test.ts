@@ -1,12 +1,13 @@
 import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
-import ImageTag from '../../image-tag';
 import UnityVersioning from '../../unity-versioning';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
+import KubernetesLogService from '../providers/k8s/kubernetes-log-service';
 import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import setups from './cloud-runner-suite.test';
 import { v4 as uuidv4 } from 'uuid';
+import * as k8s from '@kubernetes/client-node';
 
 async function CreateParameters(overrides: any) {
   if (overrides) {
@@ -20,7 +21,7 @@ describe('Cloud Runner Kubernetes', () => {
   it('Responds', () => {});
   setups();
   if (CloudRunnerOptions.cloudRunnerDebug) {
-    it('Build can contact log service', async () => {
+    it('Build create log service', async () => {
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
@@ -38,10 +39,12 @@ describe('Cloud Runner Kubernetes', () => {
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
-      const baseImage = new ImageTag(buildParameter);
-      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      await CloudRunner.setup(buildParameter);
+      const kubeConfig = new k8s.KubeConfig();
+      kubeConfig.loadFromDefault();
+      const kubeClient = kubeConfig.makeApiClient(k8s.CoreV1Api);
 
-      CloudRunnerLogger.log(results);
+      await KubernetesLogService.createLogService('test', 'default', kubeClient);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
     }, 1_000_000_000);
