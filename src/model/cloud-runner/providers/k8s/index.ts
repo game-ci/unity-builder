@@ -317,7 +317,7 @@ class Kubernetes implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
+    if (BuildParameters && BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
       return;
     }
     CloudRunnerLogger.log(`deleting PVC`);
