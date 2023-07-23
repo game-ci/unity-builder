@@ -60,6 +60,8 @@ describe('Cloud Runner Kubernetes', () => {
         - name: 'step 1'
           image: 'ubuntu'
           commands: |
+            apt-get update
+            apt-get install curl -y
             curl http://$LOG_SERVICE_IP:80`,
       };
       if (CloudRunnerOptions.providerStrategy !== `k8s`) {

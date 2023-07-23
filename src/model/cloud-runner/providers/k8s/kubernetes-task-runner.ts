@@ -101,26 +101,6 @@ class KubernetesTaskRunner {
       }
     }
 
-    try {
-      const configMapLogs = await kubeClient.readNamespacedConfigMap(`${jobName}-logs`, namespace);
-      if (configMapLogs.body.data) {
-        const logs = configMapLogs.body.data[`logs`] || ``;
-        CloudRunnerLogger.log(logs);
-      }
-    } catch (error) {
-      CloudRunnerLogger.log(`Error reading config map${namespace} ${jobName}-logs ${error} `);
-      const configMaps = await kubeClient.listNamespacedConfigMap(namespace);
-      CloudRunnerLogger.log(
-        JSON.stringify(
-          configMaps.body.items.map((x) => {
-            return {
-              name: x.metadata?.name || ``,
-            };
-          }),
-        ),
-      );
-    }
-
     return output;
   }
 
