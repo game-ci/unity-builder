@@ -76,6 +76,7 @@ status: {}
               image: 'node:18',
               imagePullPolicy: 'Always',
               name: 'http-fileserver',
+              ports: [{ containerPort: 80 }],
               command: [
                 'bash',
                 '-c',
