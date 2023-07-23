@@ -141,9 +141,10 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
-      const id = BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
-        ? CloudRunner.lockedWorkspace
-        : this.buildParameters.buildGuid;
+      const id =
+        BuildParameters && BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
+          ? CloudRunner.lockedWorkspace
+          : this.buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         this.buildParameters,
