@@ -104,7 +104,7 @@ status: {}
 
       // log service json
       CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body, undefined, 4)}`);
-      const logs = await CloudRunnerSystem.Run(`kubectl logs http-fileserver -f --timestamps`, false, true);
+      const logs = await CloudRunnerSystem.Run(`kubectl logs deployment/http-fileserver -f --timestamps`, false, true);
       CloudRunnerLogger.log(`Logs: ${logs}`);
 
       // get cluster ip
