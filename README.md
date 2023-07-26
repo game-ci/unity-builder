@@ -17,6 +17,10 @@ Part of the <a href="https://game.ci">GameCI</a> open source project.
 <br />
 <br />
 
+## Why did we fork this repo?
+1. Fix bugs with the git command in Windows
+2. When building a client on Windows, if the action is cancelled, the Unity license won't be returned. GameCI does not provide an GitHub action to return license on Windows. We extended the functionality of this action to return license. When the input "customParameters" = "return_license", the action will return the license without building the project.
+
 ## How to use
 
 Find the
