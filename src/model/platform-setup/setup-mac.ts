@@ -12,11 +12,11 @@ class SetupMac {
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
 
-    if (!fs.existsSync(this.unityHubExecPath)) {
+    if (!fs.existsSync(this.unityHubExecPath.replace(/"/g, ''))) {
       await SetupMac.installUnityHub(buildParameters);
     }
 
-    if (!fs.existsSync(unityEditorPath)) {
+    if (!fs.existsSync(unityEditorPath.replace(/"/g, ''))) {
       await SetupMac.installUnity(buildParameters);
     }
 
@@ -122,11 +122,9 @@ class SetupMac {
       '--childModules',
     ];
 
-    const escapedExecPath = this.unityHubExecPath.replace(/ /g, '\\ ');
-
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
-    const errorCode = await exec(escapedExecPath, execArguments, { silent, ignoreReturnCode: true });
+    const errorCode = await exec(this.unityHubExecPath, execArguments, { silent, ignoreReturnCode: true });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }
