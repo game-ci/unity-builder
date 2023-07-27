@@ -6,8 +6,8 @@ import { restoreCache, saveCache } from '@actions/cache';
 import fs from 'node:fs';
 
 class SetupMac {
-  static unityHubBasePath = `/Applications/Unity Hub.app`;
-  static unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/Unity Hub`;
+  static unityHubBasePath = `/Applications/"Unity Hub.app"`;
+  static unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/"Unity Hub"`;
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
