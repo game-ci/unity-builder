@@ -6,8 +6,8 @@ import { restoreCache, saveCache } from '@actions/cache';
 import fs from 'node:fs';
 
 class SetupMac {
-  static unityHubBasePath = `/Applications/"Unity Hub.app"`;
-  static unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/"Unity Hub"`;
+  static unityHubBasePath = `/Applications/Unity Hub.app`;
+  static unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/Unity Hub`;
 
   public static async setup(buildParameters: BuildParameters, actionFolder: string) {
     const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
@@ -72,23 +72,23 @@ class SetupMac {
     return '';
   }
 
-  private static getModuleParametersForTargetPlatform(targetPlatform: string): string {
-    let moduleArgument = '';
+  private static getModuleParametersForTargetPlatform(targetPlatform: string): string[] {
+    const moduleArgument = [];
     switch (targetPlatform) {
       case 'iOS':
-        moduleArgument += `--module ios `;
+        moduleArgument.push('--module', 'ios');
         break;
       case 'tvOS':
-        moduleArgument += '--module tvos ';
+        moduleArgument.push('--module', 'tvos');
         break;
       case 'StandaloneOSX':
-        moduleArgument += `--module mac-il2cpp `;
+        moduleArgument.push('--module', 'mac-il2cpp');
         break;
       case 'Android':
-        moduleArgument += `--module android `;
+        moduleArgument.push('--module', 'android');
         break;
       case 'WebGL':
-        moduleArgument += '--module webgl ';
+        moduleArgument.push('--module', 'webgl');
         break;
       default:
         throw new Error(`Unsupported module for target platform: ${targetPlatform}.`);
@@ -110,17 +110,23 @@ class SetupMac {
     }
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
-    const moduleArgument = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+    const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
 
-    const command = `${this.unityHubExecPath} -- --headless install \
-                                          --version ${buildParameters.editorVersion} \
-                                          --changeset ${unityChangeset.changeset} \
-                                          ${moduleArgument} \
-                                          --childModules `;
+    const execArguments: string[] = [
+      '--',
+      '--headless',
+      'install',
+      ...['--version', buildParameters.editorVersion],
+      ...['--changeset', unityChangeset.changeset],
+      ...moduleArguments,
+      '--childModules',
+    ];
+
+    const escapedExecPath = this.unityHubExecPath.replace(/ /g, '\\ ');
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
-    const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
+    const errorCode = await exec(escapedExecPath, execArguments, { silent, ignoreReturnCode: true });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }
