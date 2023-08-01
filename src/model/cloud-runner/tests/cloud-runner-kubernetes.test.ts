@@ -44,8 +44,9 @@ describe('Cloud Runner Kubernetes', () => {
       const kubeConfig = new k8s.KubeConfig();
       kubeConfig.loadFromDefault();
       const kubeClient = kubeConfig.makeApiClient(k8s.CoreV1Api);
+      const kubeClientApps = kubeConfig.makeApiClient(k8s.AppsV1Api);
 
-      await KubernetesLogService.createLogService('test', 'default', kubeClient);
+      await KubernetesLogService.createLogDeployment('test', kubeClientApps, kubeClient);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
     }, 1_000_000_000);

@@ -113,6 +113,17 @@ status: {}
         true,
       );
 
+      // if status of pod is not running, then continue
+      const podStatus = await CloudRunnerSystem.Run(
+        `kubectl get pods -n ${namespace} ${podname} -o jsonpath='{.status.phase}'`,
+        false,
+        true,
+      );
+      if (podStatus !== 'Running') {
+        CloudRunnerLogger.log(`Pod status: ${podStatus}`);
+        continue;
+      }
+
       const logs = await CloudRunnerSystem.Run(`kubectl logs ${podname} -f --timestamps`, false, true);
       CloudRunnerLogger.log(`Logs: ${logs}`);
 
