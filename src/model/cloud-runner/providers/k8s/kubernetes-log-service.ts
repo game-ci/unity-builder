@@ -83,7 +83,12 @@ status: {}
                 '-c',
                 'while true; do sleep 30; npm i files-upload-server -g; files-upload-server "downloads"; done;',
               ],
-              resources: {},
+              resources: {
+                requests: {
+                  memory: '750M',
+                  cpu: '0.25',
+                },
+              },
             },
           ],
           restartPolicy: 'Always',
