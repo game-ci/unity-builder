@@ -102,9 +102,6 @@ status: {}
       // get cluster ip address of service
       const service = await kubeClientCore.readNamespacedService('http-fileserver', namespace);
 
-      // log service json
-      CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body, undefined, 4)}`);
-
       // get podname of deployment
 
       const podname = await CloudRunnerSystem.Run(
@@ -130,6 +127,10 @@ status: {}
       // get cluster ip
       const ip = service.body?.spec?.clusterIP;
       if (ip && ip.length > 0) {
+        // log service json
+        CloudRunnerLogger.log(`Service: ${JSON.stringify(service.body, undefined, 4)}`);
+        CloudRunnerLogger.log(`Service IP: ${ip}`);
+
         return ip;
       }
     }
