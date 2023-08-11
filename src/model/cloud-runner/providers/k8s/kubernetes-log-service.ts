@@ -21,32 +21,10 @@ class KubernetesLogService {
   }
 
   static async createLogDeployment(namespace: string, kubeClient: k8s.AppsV1Api, kubeClientCore: CoreV1Api) {
-    // json
-    /*
-    apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  creationTimestamp: null
-  labels:
-    service: http-fileserver
-  name: http-fileserver
-spec:
-  replicas: 1
-  strategy: {}
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        service: http-fileserver
-    spec:
-      containers:
-      - image: pgaertig/nginx-big-upload:latest
-        imagePullPolicy: Always
-        name: http-fileserver
-        resources: {}
-      restartPolicy: Always
-status: {}
-    */
+    if (!process.env.LOG_SERVICE_IP) {
+      return `0.0.0.0`;
+    }
+
     // create a deployment with above json
     const deployment = new k8s.V1Deployment();
     deployment.apiVersion = 'apps/v1';
@@ -126,7 +104,7 @@ status: {}
         continue;
       }
 
-      const logs = await CloudRunnerSystem.Run(`kubectl logs ${podname} -f --timestamps`, false, true);
+      const logs = await CloudRunnerSystem.Run(`kubectl logs ${podname} -f --timestamps -p`, false, true);
       CloudRunnerLogger.log(`Logs: ${logs}`);
 
       // get cluster ip
@@ -143,27 +121,6 @@ status: {}
 
   // create kubernetes service to expose deployment
   static async createLogServiceExpose(namespace: string, kubeClient: CoreV1Api) {
-    // json
-    /*
-    apiVersion: v1
-    kind: Service
-    metadata:
-    creationTimestamp: null
-    labels:
-      service: http-fileserver
-    name: http-fileserver
-    spec:
-      ports:
-      - name: 80-80
-        port: 80
-        protocol: TCP
-        targetPort: 80
-      selector:
-        service: http-fileserver
-      type: LoadBalancer
-    status:
-      loadBalancer: {}
-    */
     // create a service with above json
     const service = new k8s.V1Service();
     service.apiVersion = 'v1';
