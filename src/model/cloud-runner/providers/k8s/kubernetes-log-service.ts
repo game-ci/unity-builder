@@ -4,6 +4,9 @@ import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 class KubernetesLogService {
   static async cleanupLogDeployment(namespace: string, kubeClientApps: k8s.AppsV1Api, kubeClient: CoreV1Api) {
+    if (!process.env.LOG_SERVICE_IP) {
+      return `0.0.0.0`;
+    }
     await kubeClient.deleteNamespacedService('http-fileserver', namespace);
     await kubeClientApps.deleteNamespacedDeployment('http-fileserver', namespace);
   }
