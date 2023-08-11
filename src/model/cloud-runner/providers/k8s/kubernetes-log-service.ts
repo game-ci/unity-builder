@@ -121,6 +121,10 @@ class KubernetesLogService {
 
   // create kubernetes service to expose deployment
   static async createLogServiceExpose(namespace: string, kubeClient: CoreV1Api) {
+    if (!process.env.LOG_SERVICE_IP) {
+      return;
+    }
+
     // create a service with above json
     const service = new k8s.V1Service();
     service.apiVersion = 'v1';
