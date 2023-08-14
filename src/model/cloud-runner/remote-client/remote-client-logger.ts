@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
-import Kubernetes from '../providers/k8s';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -34,14 +33,20 @@ export class RemoteClientLogger {
     }
   }
 
-  public static async printCollectedLogs() {
+  public static async handleLogManagementPostJob() {
     if (CloudRunnerOptions.providerStrategy !== 'k8s') {
       return;
     }
     CloudRunnerLogger.log(`Collected Logs`);
-    CloudRunnerLogger.log(process.env[`LOG_SERVICE_IP`] || ``);
+    const hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+    CloudRunnerLogger.log(hashedLogs);
     const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
     CloudRunnerLogger.log(logs);
-    await Kubernetes.Instance.PushLogUpdate(logs);
+
+    // loop for 5 mins logging the logs every minute
+    for (let index = 0; index < 5; index++) {
+      await new Promise((resolve) => setTimeout(resolve, 60000));
+      CloudRunnerLogger.log(logs);
+    }
   }
 }
