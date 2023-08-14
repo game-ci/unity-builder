@@ -16,7 +16,13 @@ export class CloudRunnerSystem {
       });
   }
 
-  public static async Run(command: string, suppressError = false, suppressLogs = false) {
+  public static async Run(
+    command: string,
+    suppressError = false,
+    suppressLogs = false,
+    // eslint-disable-next-line no-unused-vars
+    outputCallback?: (output: string) => void,
+  ) {
     for (const element of command.split(`\n`)) {
       if (!suppressLogs) {
         RemoteClientLogger.log(element);
@@ -38,6 +44,9 @@ export class CloudRunnerSystem {
           output += diagnosticOutput;
         }
         const outputChunk = `${stdout}`;
+        if (outputCallback) {
+          outputCallback(outputChunk);
+        }
         output += outputChunk;
       });
       child.on('close', (code) => {
