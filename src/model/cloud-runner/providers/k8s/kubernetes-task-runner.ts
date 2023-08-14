@@ -46,12 +46,20 @@ class KubernetesTaskRunner {
       let lastMessageSeen = false;
 
       let logs;
+      const callback = (outputChunk: string) => {
+        output += outputChunk;
 
+        // check if log start included in logs if so log a message
+        if (outputChunk.includes(`log start`)) {
+          CloudRunnerLogger.log(`Log Start found in logs`);
+        }
+      };
       try {
         logs = await CloudRunnerSystem.Run(
           `kubectl logs ${podName}${extraFlags} --timestamps${sinceTime}`,
           false,
           true,
+          callback,
         );
       } catch (error: any) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
