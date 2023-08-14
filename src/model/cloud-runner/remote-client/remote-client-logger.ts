@@ -48,12 +48,12 @@ export class RemoteClientLogger {
     hashedLogs = await await CloudRunnerSystem.Run(`md5sum ${RemoteClientLogger.LogFilePath}`);
     process.chdir(startPath);
 
-    CloudRunnerLogger.log(hashedLogs);
+    CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
     const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
     CloudRunnerLogger.log(logs);
 
     // loop for 5 mins logging the logs every minute
-    for (let index = 0; index < 5; index++) {
+    for (let index = 0; index < 2; index++) {
       await new Promise((resolve) => setTimeout(resolve, 60000));
       CloudRunnerLogger.log(logs);
     }
