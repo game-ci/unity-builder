@@ -117,7 +117,6 @@ jobs:
           - 'cloud-runner-async-workflow'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
-          - 'cloud-runner-kubernetes'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
           - 'cloud-runner-github-checks'

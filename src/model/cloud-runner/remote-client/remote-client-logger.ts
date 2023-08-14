@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
+import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -38,7 +40,14 @@ export class RemoteClientLogger {
       return;
     }
     CloudRunnerLogger.log(`Collected Logs`);
-    const hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+    let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+
+    // create hashed version of logs using md5sum
+    const startPath = process.cwd();
+    process.chdir(path.resolve(CloudRunnerFolders.repoPathAbsolute, '..'));
+    hashedLogs = await await CloudRunnerSystem.Run(`md5sum ${RemoteClientLogger.LogFilePath}`);
+    process.chdir(startPath);
+
     CloudRunnerLogger.log(hashedLogs);
     const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
     CloudRunnerLogger.log(logs);
