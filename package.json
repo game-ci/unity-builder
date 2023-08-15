@@ -42,7 +42,7 @@
     "kubernetes-client": "^9.0.0",
     "nanoid": "^3.3.1",
     "reflect-metadata": "^0.1.13",
-    "semver": "^7.3.5",
+    "semver": "^7.5.2",
     "unity-changeset": "^2.0.0",
     "uuid": "^9.0.0",
     "yaml": "^1.10.2"

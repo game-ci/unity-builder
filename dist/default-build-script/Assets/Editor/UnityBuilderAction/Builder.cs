@@ -29,12 +29,23 @@ namespace UnityBuilderAction
         }
       }
 
+#if UNITY_2021_2_OR_NEWER
+      // Determine subtarget
+      StandaloneBuildSubtarget buildSubtarget;
+      if (!options.TryGetValue("standaloneBuildSubtarget", out var subtargetValue) || !Enum.TryParse(subtargetValue, out buildSubtarget)) {
+        buildSubtarget = default;
+      }
+#endif
+
       // Define BuildPlayer Options
       var buildPlayerOptions = new BuildPlayerOptions {
         scenes = scenes,
         locationPathName = options["customBuildPath"],
         target = (BuildTarget) Enum.Parse(typeof(BuildTarget), options["buildTarget"]),
-        options = buildOptions
+        options = buildOptions,
+#if UNITY_2021_2_OR_NEWER
+        subtarget = (int) buildSubtarget
+#endif
       };
 
       // Set version for this build
