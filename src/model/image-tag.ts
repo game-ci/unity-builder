@@ -33,7 +33,7 @@ class ImageTag {
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
       isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
     );
-    this.imageRollingVersion = 1; // Will automatically roll to the latest non-breaking version.
+    this.imageRollingVersion = 2; // Will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern(): RegExp {
@@ -165,4 +165,5 @@ class ImageTag {
     return `${image}:${tag}`; // '0' here represents the docker repo version
   }
 }
+
 export default ImageTag;
