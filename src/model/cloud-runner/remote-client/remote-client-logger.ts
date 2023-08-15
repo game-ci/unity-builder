@@ -43,13 +43,16 @@ export class RemoteClientLogger {
 
     hashedLogs = await await CloudRunnerSystem.Run(`md5sum ${RemoteClientLogger.LogFilePath}`);
 
-    CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
-    const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
-    CloudRunnerLogger.log(logs);
+    for (let index = 0; index < 3; index++) {
+      CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
+      const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+      CloudRunnerLogger.log(`LOGS: ${Buffer.from(logs).toString('base64')}`);
+      CloudRunnerLogger.log(
+        `Game CI's "Cloud Runner System" will cancel the log when it has successfully received the log data to verify all logs have been received.`,
+      );
 
-    // loop for 5 mins logging the logs every minute
-    for (let index = 0; index < 2; index++) {
-      CloudRunnerLogger.log(logs);
+      // wait for 15 seconds to allow the log to be sent
+      await new Promise((resolve) => setTimeout(resolve, 15000));
     }
   }
 }

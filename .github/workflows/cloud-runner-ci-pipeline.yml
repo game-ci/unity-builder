@@ -118,6 +118,7 @@ jobs:
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-end2end-kubernetes'
           - 'cloud-runner-environment'
           - 'cloud-runner-github-checks'
     steps:

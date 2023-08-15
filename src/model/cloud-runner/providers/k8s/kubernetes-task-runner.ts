@@ -34,6 +34,7 @@ class KubernetesTaskRunner {
         `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}\n${lastReceivedMessage}`,
       );
       if (KubernetesTaskRunner.lastReceivedTimestamp > 0) {
+        CloudRunnerLogger.log(`Last received timestamp was set, including --since-time parameter`);
         const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
         const dateTimeIsoString = currentDate.toISOString();
         sinceTime = ` --since-time="${dateTimeIsoString}"`;
