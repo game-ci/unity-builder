@@ -49,7 +49,6 @@ export class RemoteClientLogger {
 
     // loop for 5 mins logging the logs every minute
     for (let index = 0; index < 2; index++) {
-      await new Promise((resolve) => setTimeout(resolve, 60000));
       CloudRunnerLogger.log(logs);
     }
   }

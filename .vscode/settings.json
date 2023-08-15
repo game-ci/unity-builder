@@ -29,5 +29,6 @@
     "!Select sequence",
     "!Split",
     "!Split sequence"
-  ]
+  ],
+  "dotnet.defaultSolution": "dist/default-build-script/default-build-script.sln"
 }
