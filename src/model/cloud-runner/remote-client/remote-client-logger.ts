@@ -41,7 +41,10 @@ export class RemoteClientLogger {
     CloudRunnerLogger.log(`Collected Logs`);
     let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
 
-    hashedLogs = await CloudRunnerSystem.Run(`md5sum ${RemoteClientLogger.LogFilePath}`);
+    const directory = process.cwd();
+    process.chdir('/home');
+    hashedLogs = await CloudRunnerSystem.Run(`md5sum job-log.txt`);
+    process.chdir(directory);
 
     for (let index = 0; index < 3; index++) {
       CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
