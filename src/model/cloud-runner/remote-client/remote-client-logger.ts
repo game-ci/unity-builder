@@ -44,6 +44,11 @@ export class RemoteClientLogger {
     if (!fs.existsSync(RemoteClientLogger.LogFilePath)) {
       CloudRunnerLogger.log(`Log file does not exist`);
 
+      // check if CloudRunner.isCloudRunnerEnvironment is true, log
+      if (!CloudRunner.isCloudRunnerEnvironment) {
+        CloudRunnerLogger.log(`Cloud Runner is not running in a cloud environment, not collecting logs`);
+      }
+
       return;
     }
 
