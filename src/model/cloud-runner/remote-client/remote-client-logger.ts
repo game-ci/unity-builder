@@ -39,6 +39,14 @@ export class RemoteClientLogger {
       return;
     }
     CloudRunnerLogger.log(`Collected Logs`);
+
+    // check for log file not existing
+    if (!fs.existsSync(RemoteClientLogger.LogFilePath)) {
+      CloudRunnerLogger.log(`Log file does not exist`);
+
+      return;
+    }
+
     let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
 
     const directory = process.cwd();

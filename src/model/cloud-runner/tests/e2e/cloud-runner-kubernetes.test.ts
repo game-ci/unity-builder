@@ -30,7 +30,6 @@ describe('Cloud Runner Kubernetes', () => {
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        containerHookFiles: `debug-cache`,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
@@ -41,6 +40,7 @@ describe('Cloud Runner Kubernetes', () => {
       const cachePushFail = 'Did not push source folder to cache because it was empty Library';
       const buildSucceededString = 'Build succeeded';
 
+      expect(results).toContain('Collected Logs');
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
