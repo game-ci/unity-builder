@@ -45,6 +45,7 @@ export class RemoteClient {
           CloudRunnerLogger.log(element);
         } else {
           fs.appendFileSync(logFile, element);
+          CloudRunnerLogger.log(element);
         }
       }
     });
@@ -54,6 +55,7 @@ export class RemoteClient {
         CloudRunnerLogger.log(lingeringLine);
       } else {
         fs.appendFileSync(logFile, lingeringLine);
+        CloudRunnerLogger.log(lingeringLine);
       }
     });
   }
