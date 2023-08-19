@@ -4,6 +4,7 @@ import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
 import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
+import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -54,10 +55,9 @@ export class RemoteClientLogger {
 
     let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
 
-    const directory = process.cwd();
     process.chdir('/home/');
     hashedLogs = await CloudRunnerSystem.Run(`md5sum job-log.txt`);
-    process.chdir(directory);
+    process.chdir(CloudRunnerFolders.projectPathAbsolute);
 
     for (let index = 0; index < 3; index++) {
       CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
