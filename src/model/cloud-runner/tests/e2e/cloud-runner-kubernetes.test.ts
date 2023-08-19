@@ -41,6 +41,7 @@ describe('Cloud Runner Kubernetes', () => {
       const buildSucceededString = 'Build succeeded';
 
       expect(results).toContain('Collected Logs');
+      expect(results).toContain('LOGHASH');
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
