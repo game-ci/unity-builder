@@ -20,14 +20,11 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2019.3.15f1 # Minimum version for IL2CPP
-          - 2019.4.40f1
-          - 2020.1.17f1
-          - 2020.2.7f1
-          - 2020.3.44f1
-          - 2021.3.18f1 # 2021.1 and 2021.2 seem to have IL2CPP issues
-          - 2022.1.24f1
-          - 2022.2.6f1
+          - 2021.3.29f1
+          - 2022.1.24f
+          - 2022.2.21f
+          - 2022.3.7f1
+          - 2023.1.9f1
         targetPlatform:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - StandaloneWindows # Build a Windows 32-bit standalone.
