@@ -1,4 +1,4 @@
-import waitUntil from 'async-wait-until';
+import { waitUntil } from 'async-wait-until';
 import * as core from '@actions/core';
 import * as k8s from '@kubernetes/client-node';
 import BuildParameters from '../../../build-parameters';
