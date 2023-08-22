@@ -49,10 +49,10 @@ describe('ImageTag', () => {
       const image = new ImageTag({ editorVersion: '2099.1.1111', targetPlatform: testImageParameters.targetPlatform });
       switch (process.platform) {
         case 'win32':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2099.1.1111-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2099.1.1111-2`);
           break;
         case 'linux':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2099.1.1111-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2099.1.1111-2`);
           break;
       }
     });
@@ -71,10 +71,10 @@ describe('ImageTag', () => {
 
       switch (process.platform) {
         case 'win32':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-webgl-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-webgl-2`);
           break;
         case 'linux':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2019.2.11f1-webgl-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2019.2.11f1-webgl-2`);
           break;
       }
     });
@@ -84,10 +84,10 @@ describe('ImageTag', () => {
 
       switch (process.platform) {
         case 'win32':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:windows-2019.2.11f1-2`);
           break;
         case 'linux':
-          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2019.2.11f1-1`);
+          expect(image.toString()).toStrictEqual(`${defaults.image}:ubuntu-2019.2.11f1-2`);
           break;
       }
     });
