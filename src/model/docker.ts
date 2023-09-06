@@ -86,15 +86,7 @@ class Docker {
   }
 
   static getWindowsCommand(image: string, parameters: DockerParameters): string {
-    const {
-      workspace,
-      actionFolder,
-      unitySerial,
-      sshAgent,
-      sshPublicKeysDirectoryPath,
-      gitPrivateToken,
-      dockerWorkspacePath,
-    } = parameters;
+    const { workspace, actionFolder, unitySerial, gitPrivateToken, dockerWorkspacePath } = parameters;
 
     return `docker run \
             --workdir c:${dockerWorkspacePath} \
@@ -102,7 +94,6 @@ class Docker {
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env UNITY_SERIAL="${unitySerial}" \
             --env GITHUB_WORKSPACE=c:${dockerWorkspacePath} \
-            --env GIT_CONFIG_EXTENSIONS \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "c:/regkeys":"c:/regkeys" \
@@ -112,13 +103,6 @@ class Docker {
             --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
             --volume "${actionFolder}/platforms/windows":"c:/steps" \
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
-            ${sshAgent ? `--volume ${sshAgent}:c:/ssh-agent` : ''} \
-                ${
-                  sshAgent && !sshPublicKeysDirectoryPath
-                    ? `--volume c:/Users/Administrator/.ssh/known_hosts:c:/root/.ssh/known_hosts`
-                    : ''
-                } \
-            ${sshPublicKeysDirectoryPath ? `--volume ${sshPublicKeysDirectoryPath}:c:/root/.ssh` : ''} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
   }
