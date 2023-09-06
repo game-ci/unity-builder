@@ -178,6 +178,10 @@ class Input {
     return Input.getInput('sshAgent') || '';
   }
 
+  static get sshPublicKeysDirectoryPath(): string {
+    return Input.getInput('sshPublicKeysDirectoryPath') || '';
+  }
+
   static get gitPrivateToken(): string | undefined {
     return Input.getInput('gitPrivateToken');
   }

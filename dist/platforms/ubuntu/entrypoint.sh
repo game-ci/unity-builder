@@ -10,6 +10,7 @@ mkdir -p "$ACTIVATE_LICENSE_PATH"
 #
 # Run steps
 #
+source /steps/set_extra_git_configs.sh
 source /steps/set_gitcredential.sh
 source /steps/activate.sh
 source /steps/build.sh

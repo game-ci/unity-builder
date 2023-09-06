@@ -85,6 +85,10 @@ inputs:
     required: false
     default: ''
     description: 'SSH Agent path to forward to the container'
+  sshPublicKeysDirectoryPath:
+    required: false
+    default: ''
+    description: 'Path to a directory containing SSH public keys to forward to the container.'
   gitPrivateToken:
     required: false
     default: ''
