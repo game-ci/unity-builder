@@ -22,7 +22,7 @@ export async function execWithErrorCheck(
       throw new Error(`There was an error building the project. Please read the logs for details.`);
     }
   } else {
-    throw new Error(`There was an error building the project. Please read the logs for details.`);
+    throw new Error(`Could not find Build Results. Please read the logs for details.`);
   }
 
   return result.exitCode;
