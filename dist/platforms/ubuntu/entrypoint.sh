@@ -10,11 +10,13 @@ mkdir -p "$ACTIVATE_LICENSE_PATH"
 #
 # Run steps
 #
+source /steps/get_gradle_cache.sh
 source /steps/set_extra_git_configs.sh
 source /steps/set_gitcredential.sh
 source /steps/activate.sh
 source /steps/build.sh
 source /steps/return_license.sh
+source /steps/set_gradle_cache.sh
 
 #
 # Remove license activation directory
