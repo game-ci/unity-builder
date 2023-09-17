@@ -6,20 +6,36 @@ pushd "$ACTIVATE_LICENSE_PATH"
 
 echo "Requesting activation"
 
-# Activate license
-/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-  -logFile - \
-  -batchmode \
-  -nographics \
-  -quit \
-  -serial "$UNITY_SERIAL" \
-  -username "$UNITY_EMAIL" \
-  -password "$UNITY_PASSWORD" \
-  -projectPath "$ACTIVATE_LICENSE_PATH"
+if [[ -n "$UNITY_LICENSING_SERVER" ]]; then
+   #
+    # Custom Unity License Server
+    #
+    echo "Adding licensing server config"
 
-# Store the exit code from the verify command
-UNITY_EXIT_CODE=$?
+   /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
+    PARSEDFILE=$(grep -oP '\".*?\"' < license.txt | tr -d '"')
+    export FLOATING_LICENSE
+    FLOATING_LICENSE=$(sed -n 2p <<< "$PARSEDFILE")
+    FLOATING_LICENSE_TIMEOUT=$(sed -n 4p <<< "$PARSEDFILE")
 
+    echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
+    # Store the exit code from the verify command
+    UNITY_EXIT_CODE=$?
+else
+  # Activate license
+  /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+    -logFile - \
+    -batchmode \
+    -nographics \
+    -quit \
+    -serial "$UNITY_SERIAL" \
+    -username "$UNITY_EMAIL" \
+    -password "$UNITY_PASSWORD" \
+    -projectPath "$ACTIVATE_LICENSE_PATH"
+
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
+fi
 #
 # Display information about the result
 #
