@@ -119,7 +119,7 @@ echo ""
 
 unity-editor \
   -logfile /dev/stdout \
-  -quit \
+  $( [ -n "${MANUAL_EXIT+set}" ] || echo "-quit" ) \
   -customBuildName "$BUILD_NAME" \
   -projectPath "$UNITY_PROJECT_PATH" \
   -buildTarget "$BUILD_TARGET" \

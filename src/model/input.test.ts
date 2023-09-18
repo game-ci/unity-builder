@@ -104,6 +104,19 @@ describe('Input', () => {
     });
   });
 
+  describe('manualExit', () => {
+    it('returns the default value', () => {
+      expect(Input.manualExit).toStrictEqual(undefined);
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'x';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.manualExit).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('versioningStrategy', () => {
     it('returns the default value', () => {
       expect(Input.versioningStrategy).toStrictEqual('Semantic');

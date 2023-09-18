@@ -126,6 +126,10 @@ class Input {
     return Input.getInput('buildMethod') || ''; // Processed in docker file
   }
 
+  static get manualExit(): string | undefined {
+    return Input.getInput('manualExit');
+  }
+
   static get customParameters(): string {
     return Input.getInput('customParameters') || '';
   }
