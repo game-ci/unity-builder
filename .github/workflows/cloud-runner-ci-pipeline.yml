@@ -77,6 +77,7 @@ jobs:
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
           - 'cloud-runner-environment'
+          - 'cloud-runner-remote-client'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
