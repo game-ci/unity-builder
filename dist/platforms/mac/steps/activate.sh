@@ -11,7 +11,8 @@ if [[ -n "$UNITY_LICENSING_SERVER" ]]; then
     # Custom Unity License Server
     #
     echo "Adding licensing server config"
-
+    cat "$ACTION_FOLDER/services-config.json"
+    cp "$ACTION_FOLDER/services-config.json" "/Library/Application Support/Unity/config/services-config.json"
    /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
     cat license.txt
     PARSEDFILE=$(grep -oE '\".*?\"' < license.txt | tr -d '"')
