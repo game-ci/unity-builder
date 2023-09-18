@@ -13,7 +13,9 @@ if [[ -n "$UNITY_LICENSING_SERVER" ]]; then
     echo "Adding licensing server config"
 
    /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client --acquire-floating > license.txt #is this accessible in a env variable?
+    cat license.txt
     PARSEDFILE=$(grep -oE '\".*?\"' < license.txt | tr -d '"')
+    grep -oE '\".*?\"' < license.txt
     export FLOATING_LICENSE
     FLOATING_LICENSE=$(sed -n 2p <<< "$PARSEDFILE")
     FLOATING_LICENSE_TIMEOUT=$(sed -n 4p <<< "$PARSEDFILE")
