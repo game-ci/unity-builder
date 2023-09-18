@@ -83,9 +83,6 @@ export class RemoteClientLogger {
 
       RemoteClientLogger.value += message;
       const hashedValue = md5(RemoteClientLogger.value);
-      CloudRunnerLogger.log(
-        `LOG ITERATION \n message:${message} \n target hash:${RemoteClientLogger.md5} \n hash latest value:${hashedValue} \n cache value:${RemoteClientLogger.value}`,
-      );
       if (RemoteClientLogger.md5 === hashedValue) {
         CloudRunnerLogger.log(`LOG COMPLETE`);
 
