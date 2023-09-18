@@ -66,7 +66,10 @@ class KubernetesTaskRunner {
           shouldCleanup,
           output,
         ));
-        FollowLogStreamService.DidReceiveEndOfTransmission = RemoteClientLogger.HandleLogChunkLine(message);
+        const result = RemoteClientLogger.HandleLogChunkLine(message);
+        if (result) {
+          FollowLogStreamService.DidReceiveEndOfTransmission = true;
+        }
       }
       if (FollowLogStreamService.DidReceiveEndOfTransmission) {
         CloudRunnerLogger.log('end of log stream');
