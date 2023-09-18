@@ -5,11 +5,10 @@ import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 import KubernetesPods from './kubernetes-pods';
 import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
+import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 
 class KubernetesTaskRunner {
-  static lastReceivedTimestamp: number = 0;
   static readonly maxRetry: number = 3;
-  static lastReceivedMessage: string = ``;
   static async runTask(
     kubeConfig: KubeConfig,
     kubeClient: CoreV1Api,
@@ -21,30 +20,17 @@ class KubernetesTaskRunner {
     let output = '';
     let shouldReadLogs = true;
     let shouldCleanup = true;
-    let sinceTime = ``;
     let retriesAfterFinish = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      const lastReceivedMessage =
-        KubernetesTaskRunner.lastReceivedTimestamp > 0
-          ? `\nLast Log Message "${this.lastReceivedMessage}" ${this.lastReceivedTimestamp}`
-          : ``;
       CloudRunnerLogger.log(
-        `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}\n${lastReceivedMessage}`,
+        `Streaming logs from pod: ${podName} container: ${containerName} namespace: ${namespace} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}`,
       );
-      if (KubernetesTaskRunner.lastReceivedTimestamp > 0) {
-        CloudRunnerLogger.log(`Last received timestamp was set, including --since-time parameter`);
-        const currentDate = new Date(KubernetesTaskRunner.lastReceivedTimestamp);
-        const dateTimeIsoString = currentDate.toISOString();
-        sinceTime = ` --since-time="${dateTimeIsoString}"`;
-      }
       let extraFlags = ``;
       extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
         ? ` -f -c ${containerName}`
         : ` --previous`;
-      let lastMessageSeenIncludedInChunk = false;
-      let lastMessageSeen = false;
 
       let logs;
       const callback = (outputChunk: string) => {
@@ -56,12 +42,7 @@ class KubernetesTaskRunner {
         }
       };
       try {
-        logs = await CloudRunnerSystem.Run(
-          `kubectl logs ${podName}${extraFlags} --timestamps${sinceTime}`,
-          false,
-          true,
-          callback,
-        );
+        logs = await CloudRunnerSystem.Run(`kubectl logs ${podName}${extraFlags}`, false, true, callback);
       } catch (error: any) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
         const continueStreaming = await KubernetesPods.IsPodRunning(podName, namespace, kubeClient);
@@ -78,31 +59,14 @@ class KubernetesTaskRunner {
       }
       const splitLogs = logs.split(`\n`);
       for (const chunk of splitLogs) {
-        if (
-          chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) &&
-          KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``) !== ``
-        ) {
-          CloudRunnerLogger.log(`Previous log message found ${chunk}`);
-          lastMessageSeenIncludedInChunk = true;
-        }
-      }
-      for (const chunk of splitLogs) {
-        const newDate = Date.parse(`${chunk.toString().split(`Z `)[0]}Z`);
-        if (chunk.replace(/\s/g, ``) === KubernetesTaskRunner.lastReceivedMessage.replace(/\s/g, ``)) {
-          lastMessageSeen = true;
-        }
-        if (lastMessageSeenIncludedInChunk && !lastMessageSeen) {
-          continue;
-        }
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
-        KubernetesTaskRunner.lastReceivedMessage = chunk;
-        KubernetesTaskRunner.lastReceivedTimestamp = newDate;
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
           shouldReadLogs,
           shouldCleanup,
           output,
         ));
+        FollowLogStreamService.DidReceiveEndOfTransmission = RemoteClientLogger.HandleLogChunkLine(message);
       }
       if (FollowLogStreamService.DidReceiveEndOfTransmission) {
         CloudRunnerLogger.log('end of log stream');

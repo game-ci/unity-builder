@@ -5,6 +5,7 @@ import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
 import { CloudRunnerSystem } from '../services/core/cloud-runner-system';
 import { CloudRunnerFolders } from '../options/cloud-runner-folders';
+const md5 = require('md5');
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -71,4 +72,29 @@ export class RemoteClientLogger {
       await new Promise((resolve) => setTimeout(resolve, 15000));
     }
   }
+  public static HandleLogChunkLine(message: string): boolean {
+    if (message.includes('LOGHASH: ')) {
+      RemoteClientLogger.md5 = message.split(`LOGHASH: `)[1];
+      CloudRunnerLogger.log(`LOGHASH: ${RemoteClientLogger.md5}`);
+    } else {
+      if (RemoteClientLogger.value !== '') {
+        RemoteClientLogger.value += `\n`;
+      }
+
+      RemoteClientLogger.value += message;
+      const hashedValue = md5(RemoteClientLogger.value);
+      CloudRunnerLogger.log(
+        `LOG ITERATION \n message:${message} \n target hash:${RemoteClientLogger.md5} \n hash latest value:${hashedValue} \n cache value:${RemoteClientLogger.value}`,
+      );
+      if (RemoteClientLogger.md5 === hashedValue) {
+        CloudRunnerLogger.log(`LOG COMPLETE`);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+  static value: string = '';
+  static md5: any;
 }
