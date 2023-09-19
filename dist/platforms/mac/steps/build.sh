@@ -127,27 +127,6 @@ echo ""
 
 # Reference: https://docs.unity3d.com/2019.3/Documentation/Manual/CommandLineArguments.html
 
-cat << UnityString
-/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-       -logFile - \
-       -quit \
-       -customBuildName "$BUILD_NAME" \
-       -projectPath "$UNITY_PROJECT_PATH" \
-       -buildTarget "$BUILD_TARGET" \
-       -customBuildTarget "$BUILD_TARGET" \
-       -customBuildPath "$CUSTOM_BUILD_PATH" \
-       -executeMethod "$BUILD_METHOD" \
-       -buildVersion "$VERSION" \
-       -androidVersionCode "$ANDROID_VERSION_CODE" \
-       -androidKeystoreName "$ANDROID_KEYSTORE_NAME" \
-       -androidKeystorePass "$ANDROID_KEYSTORE_PASS" \
-       -androidKeyaliasName "$ANDROID_KEYALIAS_NAME" \
-       -androidKeyaliasPass "$ANDROID_KEYALIAS_PASS" \
-       -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
-       -androidExportType "$ANDROID_EXPORT_TYPE" \
-       -androidSymbolType "$ANDROID_SYMBOL_TYPE" \
-       $CUSTOM_PARAMETERS"
-UnityString
 /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
   -logFile - \
   -quit \
