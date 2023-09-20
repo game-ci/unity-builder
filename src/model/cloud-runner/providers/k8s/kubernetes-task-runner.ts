@@ -40,6 +40,14 @@ class KubernetesTaskRunner {
         if (outputChunk.includes(`Collected Logs`)) {
           CloudRunnerLogger.log(`Log Start found in logs`);
         }
+        if (outputChunk.includes(`LOGHASH:`)) {
+          RemoteClientLogger.HandleLogChunkLine(outputChunk);
+          CloudRunnerLogger.log(`Loghash found`);
+        }
+        if (outputChunk.includes(`LOGS:`)) {
+          const result = RemoteClientLogger.HandleLogChunkLine(outputChunk);
+          CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
+        }
       };
       try {
         logs = await CloudRunnerSystem.Run(`kubectl logs ${podName}${extraFlags}`, false, true, callback);
