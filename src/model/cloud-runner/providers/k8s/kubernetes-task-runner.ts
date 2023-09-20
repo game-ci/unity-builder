@@ -36,17 +36,20 @@ class KubernetesTaskRunner {
       const callback = (outputChunk: string) => {
         output += outputChunk;
 
-        // check if log start included in logs if so log a message
-        if (outputChunk.includes(`Collected Logs`)) {
-          CloudRunnerLogger.log(`Log Start found in logs`);
-        }
-        if (outputChunk.includes(`LOGHASH:`)) {
-          RemoteClientLogger.HandleLogChunkLine(outputChunk);
-          CloudRunnerLogger.log(`Loghash found`);
-        }
-        if (outputChunk.includes(`LOGS:`)) {
-          const result = RemoteClientLogger.HandleLogChunkLine(outputChunk);
-          CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
+        // split output chunk and handle per line
+        for (const chunk of outputChunk.split(`\n`)) {
+          // check if log start included in logs if so log a message
+          if (chunk.includes(`Collected Logs`)) {
+            CloudRunnerLogger.log(`Log Start found in logs`);
+          }
+          if (chunk.includes(`LOGHASH:`)) {
+            RemoteClientLogger.HandleLogChunkLine(chunk);
+            CloudRunnerLogger.log(`Loghash found`);
+          }
+          if (chunk.includes(`LOGS:`)) {
+            const result = RemoteClientLogger.HandleLogChunkLine(chunk);
+            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
+          }
         }
       };
       try {
