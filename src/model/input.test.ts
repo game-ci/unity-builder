@@ -106,13 +106,18 @@ describe('Input', () => {
 
   describe('manualExit', () => {
     it('returns the default value', () => {
-      expect(Input.manualExit).toStrictEqual(undefined);
+      expect(Input.manualExit).toStrictEqual(false);
     });
 
-    it('takes input from the users workflow', () => {
-      const mockValue = 'x';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
-      expect(Input.manualExit).toStrictEqual(mockValue);
+    it('returns true when string true is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.manualExit).toStrictEqual(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.manualExit).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });

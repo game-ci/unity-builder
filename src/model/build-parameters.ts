@@ -29,7 +29,7 @@ class BuildParameters {
   public buildFile!: string;
   public buildMethod!: string;
   public buildVersion!: string;
-  public manualExit!: string | undefined;
+  public manualExit!: boolean;
   public androidVersionCode!: string;
   public androidKeystoreName!: string;
   public androidKeystoreBase64!: string;
