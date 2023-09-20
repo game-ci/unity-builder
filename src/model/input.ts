@@ -220,6 +220,12 @@ class Input {
     return Input.getInput('dockerWorkspacePath') || '/github/workspace';
   }
 
+  static get errorWhenMissingUnityBuildResults(): boolean {
+    const input = Input.getInput('errorWhenMissingUnityBuildResults') || false;
+
+    return input === 'true';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

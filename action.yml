@@ -217,6 +217,12 @@ inputs:
     description:
       'The path to mount the workspace inside the docker container. For windows, leave out the drive letter. For example
       c:/github/workspace should be defined as /github/workspace'
+  errorWhenMissingUnityBuildResults:
+    default: true
+    required: false
+    description:
+      'Check if Unity build product is present after build, and error if not. Set to false to not check, useful if
+      producing alternative build products.'
 
 outputs:
   volume:

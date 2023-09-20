@@ -25,7 +25,13 @@ async function runMain() {
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder);
       } else {
-        await Docker.run(baseImage.toString(), { workspace, actionFolder, ...buildParameters });
+        await Docker.run(
+          baseImage.toString(),
+          { workspace, actionFolder, ...buildParameters },
+          {
+            errorWhenMissingUnityBuildResults: buildParameters.errorWhenMissingUnityBuildResults,
+          },
+        );
       }
     } else {
       await CloudRunner.run(buildParameters, baseImage.toString());

@@ -136,21 +136,23 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
     await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },
-      false,
-      `chmod +x /github/workspace/${entrypointFilePath} && /github/workspace/${entrypointFilePath}`,
-      content,
       {
-        listeners: {
-          stdout: (data: Buffer) => {
-            myOutput += data.toString();
-          },
-          stderr: (data: Buffer) => {
-            myOutput += `[LOCAL-DOCKER-ERROR]${data.toString()}`;
+        silent: false,
+        overrideCommands: `chmod +x /github/workspace/${entrypointFilePath} && /github/workspace/${entrypointFilePath}`,
+        additionalVariables: content,
+        options: {
+          listeners: {
+            stdout: (data: Buffer) => {
+              myOutput += data.toString();
+            },
+            stderr: (data: Buffer) => {
+              myOutput += `[LOCAL-DOCKER-ERROR]${data.toString()}`;
+            },
           },
         },
+        entrypointBash: true,
+        errorWhenMissingUnityBuildResults: false,
       },
-      true,
-      false,
     );
 
     return myOutput;

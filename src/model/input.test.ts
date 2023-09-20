@@ -285,4 +285,22 @@ describe('Input', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('errorWhenMissingUnityBuildResults', () => {
+    it('returns the default value', () => {
+      expect(Input.errorWhenMissingUnityBuildResults).toStrictEqual(false);
+    });
+
+    it('returns true when string true is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.errorWhenMissingUnityBuildResults).toStrictEqual(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.errorWhenMissingUnityBuildResults).toStrictEqual(false);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -11,6 +11,6 @@ describe('Docker', () => {
       buildsPath: 'build',
       method: '',
     };
-    await Docker.run(image, parameters);
+    await Docker.run(image, parameters, {});
   });
 });

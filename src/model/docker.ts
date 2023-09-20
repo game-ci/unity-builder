@@ -5,17 +5,28 @@ import path from 'node:path';
 import { ExecOptions } from '@actions/exec';
 import { DockerParameters, StringKeyValuePair } from './shared-types';
 
+interface IDockerOptions {
+  silent?: boolean;
+  overrideCommands?: string;
+  additionalVariables?: StringKeyValuePair[];
+  options?: ExecOptions | undefined;
+  entrypointBash?: boolean;
+  errorWhenMissingUnityBuildResults?: boolean;
+}
+
 class Docker {
   static async run(
     image: string,
     parameters: DockerParameters,
-    silent: boolean = false,
-    overrideCommands: string = '',
-    additionalVariables: StringKeyValuePair[] = [],
-    // eslint-disable-next-line unicorn/no-useless-undefined
-    options: ExecOptions | undefined = undefined,
-    entrypointBash: boolean = false,
-    errorWhenMissingUnityBuildResults: boolean = true,
+    {
+      silent = false,
+      overrideCommands = '',
+      additionalVariables = [],
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      options = undefined,
+      entrypointBash = false,
+      errorWhenMissingUnityBuildResults = true,
+    }: IDockerOptions,
   ) {
     let runCommand = '';
     switch (process.platform) {
