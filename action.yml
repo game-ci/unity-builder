@@ -31,6 +31,10 @@ inputs:
     required: false
     default: ''
     description: 'Path to a Namespace.Class.StaticMethod to run to perform the build.'
+  manualExit:
+    required: false
+    default: ''
+    description: 'Suppresses `-quit`. Exit your build method using `EditorApplication.Exit(0)` instead.'
   customParameters:
     required: false
     default: ''
