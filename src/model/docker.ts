@@ -59,6 +59,7 @@ class Docker {
     return `docker run \
             --workdir ${dockerWorkspacePath} \
             --rm \
+            --gpus all \
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
             --env UNITY_SERIAL \
             --env GITHUB_WORKSPACE=${dockerWorkspacePath} \
