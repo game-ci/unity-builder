@@ -48,7 +48,7 @@ class KubernetesTaskRunner {
           }
           if (chunk.includes(`LOGS:`)) {
             const result = RemoteClientLogger.HandleLogChunkLine(chunk);
-            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
+            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}\n${chunk}`);
           }
         }
       };
