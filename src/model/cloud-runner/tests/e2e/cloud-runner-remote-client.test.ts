@@ -5,7 +5,7 @@ const md5 = require('md5');
 describe('Cloud Runner Remote Client', () => {
   it('Responds', () => {});
   setups();
-  it('Run one build it using K8s without error', async () => {
+  it('Loghash digestion input matches output', async () => {
     const testLogStream = 'Test \n Log \n Stream';
 
     const splitLogStream = testLogStream.split('\n');
