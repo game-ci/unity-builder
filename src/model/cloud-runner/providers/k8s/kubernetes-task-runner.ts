@@ -47,11 +47,10 @@ class KubernetesTaskRunner {
             CloudRunnerLogger.log(`Loghash found`);
           }
           if (chunk.includes(`LOGS:`)) {
-            const result = RemoteClientLogger.HandleLogChunkLine(chunk);
-
             // remove "LOGS: " and decode base64 remaining
             const unpacked = Buffer.from(chunk.split(`LOGS: `)[1], 'base64').toString('ascii');
-            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}\n${unpacked}`);
+            const result = RemoteClientLogger.HandleLogChunkLine(unpacked);
+            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
           }
         }
       };
