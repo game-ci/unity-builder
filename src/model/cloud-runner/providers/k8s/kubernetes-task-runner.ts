@@ -43,13 +43,13 @@ class KubernetesTaskRunner {
             CloudRunnerLogger.log(`Log Start found in logs`);
           }
           if (chunk.includes(`LOGHASH:`)) {
-            RemoteClientLogger.HandleLogChunkLine(chunk);
+            RemoteClientLogger.HandleLogHash(chunk);
             CloudRunnerLogger.log(`Loghash found`);
           }
           if (chunk.includes(`LOGS:`)) {
             // remove "LOGS: " and decode base64 remaining
             const unpacked = Buffer.from(chunk.split(`LOGS: `)[1], 'base64').toString('ascii');
-            const result = RemoteClientLogger.HandleLogChunkLine(unpacked);
+            const result = RemoteClientLogger.HandleLogFull(unpacked);
             CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
           }
         }
@@ -73,13 +73,19 @@ class KubernetesTaskRunner {
       const splitLogs = logs.split(`\n`);
       for (const chunk of splitLogs) {
         const message = CloudRunner.buildParameters.cloudRunnerDebug ? chunk : chunk.split(`Z `)[1];
+
+        // if line contains "LOGS: " then stop
+        if (message.includes(`LOGS:`)) {
+          CloudRunnerLogger.log(`LOGS: found`);
+          break;
+        }
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
           shouldReadLogs,
           shouldCleanup,
           output,
         ));
-        const result = RemoteClientLogger.HandleLogChunkLine(message);
+        const result = RemoteClientLogger.HandleLog(message);
         if (result) {
           FollowLogStreamService.DidReceiveEndOfTransmission = true;
         }

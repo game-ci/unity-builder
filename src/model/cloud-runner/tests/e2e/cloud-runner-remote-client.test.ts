@@ -9,10 +9,10 @@ describe('Cloud Runner Remote Client', () => {
     const testLogStream = 'Test \n Log \n Stream';
 
     const splitLogStream = testLogStream.split('\n');
-    RemoteClientLogger.HandleLogChunkLine(`LOGHASH: ${md5(testLogStream)}`);
+    RemoteClientLogger.HandleLog(`LOGHASH: ${md5(testLogStream)}`);
     let completed = false;
     for (const element of splitLogStream) {
-      completed = RemoteClientLogger.HandleLogChunkLine(element);
+      completed = RemoteClientLogger.HandleLog(element);
     }
     expect(completed).toBeTruthy();
   }, 1_000_000_000);

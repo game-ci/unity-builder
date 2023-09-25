@@ -68,10 +68,9 @@ export class RemoteClientLogger {
       await new Promise((resolve) => setTimeout(resolve, 15000));
     }
   }
-  public static HandleLogChunkLine(message: string): boolean {
+  public static HandleLog(message: string): boolean {
     if (message.includes('LOGHASH: ')) {
-      RemoteClientLogger.md5 = message.split(`LOGHASH: `)[1];
-      CloudRunnerLogger.log(`LOGHASH: ${RemoteClientLogger.md5}`);
+      RemoteClientLogger.HandleLogHash(message);
     } else {
       if (RemoteClientLogger.value !== '') {
         RemoteClientLogger.value += `\n`;
@@ -84,6 +83,24 @@ export class RemoteClientLogger {
 
         return true;
       }
+    }
+
+    return false;
+  }
+  public static HandleLogHash(message: string) {
+    if (message.includes('LOGHASH: ')) {
+      RemoteClientLogger.md5 = message.split(`LOGHASH: `)[1];
+      CloudRunnerLogger.log(`LOGHASH: ${RemoteClientLogger.md5}`);
+    } else {
+      throw new Error(`LOGHASH: not found`);
+    }
+  }
+  public static HandleLogFull(message: string): boolean {
+    const hashedValue = md5(message);
+    if (RemoteClientLogger.md5 === hashedValue) {
+      CloudRunnerLogger.log(`LOG COMPLETE`);
+
+      return true;
     }
 
     return false;
