@@ -69,7 +69,7 @@ fi
 if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
   echo "Updating Android SDK with parameters: $ANDROID_SDK_MANAGER_PARAMETERS"
   export JAVA_HOME="$(awk -F'=' '/JAVA_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
-  "$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
+  "$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)/cmdline-tools/6.0/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
   echo "Updated Android SDK."
 else
   echo "Not updating Android SDK."
