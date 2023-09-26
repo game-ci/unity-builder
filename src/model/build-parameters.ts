@@ -29,6 +29,7 @@ class BuildParameters {
   public buildFile!: string;
   public buildMethod!: string;
   public buildVersion!: string;
+  public manualExit!: boolean;
   public androidVersionCode!: string;
   public androidKeystoreName!: string;
   public androidKeystoreBase64!: string;
@@ -139,6 +140,7 @@ class BuildParameters {
       buildFile,
       buildMethod: Input.buildMethod,
       buildVersion,
+      manualExit: Input.manualExit,
       androidVersionCode,
       androidKeystoreName: Input.androidKeystoreName,
       androidKeystoreBase64: Input.androidKeystoreBase64,

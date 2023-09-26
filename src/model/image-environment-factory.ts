@@ -37,6 +37,7 @@ class ImageEnvironmentFactory {
       { name: 'BUILD_PATH', value: parameters.buildPath },
       { name: 'BUILD_FILE', value: parameters.buildFile },
       { name: 'BUILD_METHOD', value: parameters.buildMethod },
+      { name: 'MANUAL_EXIT', value: parameters.manualExit },
       { name: 'VERSION', value: parameters.buildVersion },
       { name: 'ANDROID_VERSION_CODE', value: parameters.androidVersionCode },
       { name: 'ANDROID_KEYSTORE_NAME', value: parameters.androidKeystoreName },
