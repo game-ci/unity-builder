@@ -80,6 +80,10 @@ class Input {
     return Input.getInput('targetPlatform') || Platform.default;
   }
 
+  static get targetArchitecture(): string {
+    return Input.getInput('targetArchitecture') || Platform.defaultarch;
+  }
+
   static get unityVersion(): string {
     return Input.getInput('unityVersion') || 'auto';
   }

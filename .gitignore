@@ -5,3 +5,6 @@ lib/
 .vsconfig
 yarn-error.log
 .orig
+.env
+build/*
+dist/unity-config/*.txt

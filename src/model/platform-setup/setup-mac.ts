@@ -76,7 +76,7 @@ class SetupMac {
     const moduleArgument = [];
     switch (targetPlatform) {
       case 'iOS':
-        moduleArgument.push('--module', 'ios');
+        moduleArgument.push('--module', 'ios', '--module', 'android');
         break;
       case 'tvOS':
         moduleArgument.push('--module', 'tvos');
@@ -85,7 +85,7 @@ class SetupMac {
         moduleArgument.push('--module', 'mac-il2cpp');
         break;
       case 'Android':
-        moduleArgument.push('--module', 'android');
+        moduleArgument.push('--module', 'android', '--module', 'ios');
         break;
       case 'WebGL':
         moduleArgument.push('--module', 'webgl');
@@ -111,6 +111,7 @@ class SetupMac {
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
     const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+    const unityArch = buildParameters.targetArchitecture;
 
     const execArguments: string[] = [
       '--',
@@ -120,6 +121,7 @@ class SetupMac {
       ...['--changeset', unityChangeset.changeset],
       ...moduleArguments,
       '--childModules',
+      ...['--architecture', unityArch],
     ];
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers

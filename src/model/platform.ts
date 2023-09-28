@@ -3,6 +3,17 @@ class Platform {
     return Platform.types.StandaloneWindows64;
   }
 
+  static get defaultarch() {
+    return Platform.archs.X86_64;
+  }
+
+  static get archs() {
+    return {
+      X86_64: 'x86_64',
+      Arm64: 'arm64',
+    };
+  }
+
   static get types() {
     return {
       StandaloneOSX: 'StandaloneOSX',

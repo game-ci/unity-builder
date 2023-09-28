@@ -23,6 +23,7 @@ class BuildParameters {
   public unityLicensingServer!: string;
   public runnerTempPath!: string;
   public targetPlatform!: string;
+  public targetArchitecture!: string;
   public projectPath!: string;
   public buildName!: string;
   public buildPath!: string;
@@ -134,6 +135,7 @@ class BuildParameters {
       unityLicensingServer: Input.unityLicensingServer,
       runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
+      targetArchitecture: Input.targetArchitecture,
       projectPath: Input.projectPath,
       buildName: Input.buildName,
       buildPath: `${Input.buildsPath}/${Input.targetPlatform}`,

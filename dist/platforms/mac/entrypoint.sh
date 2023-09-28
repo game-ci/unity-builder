@@ -4,7 +4,7 @@
 # Create directories for license activation
 #
 
-sudo mkdir /Library/Application\ Support/Unity
+sudo mkdir -p /Library/Application\ Support/Unity/config
 sudo chmod -R 777 /Library/Application\ Support/Unity
 
 ACTIVATE_LICENSE_PATH="$ACTION_FOLDER/BlankProject"

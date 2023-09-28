@@ -1,6 +1,17 @@
 {
   "configurations": [
     {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Launch Program",
+      "command": "ts-node -- ${workspaceFolder}/src/index.ts",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceRoot}/.env",
+      "env": {
+        "UNITY_NOPROXY": "localhost,127.0.0.1"
+      }
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Debug Jest Test",
