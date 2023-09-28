@@ -77,7 +77,7 @@ class KubernetesTaskRunner {
         // if line contains "LOGS: " then stop
         if (message.includes(`LOGS:`)) {
           CloudRunnerLogger.log(`LOGS: found`);
-          break;
+          continue;
         }
         ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
           message,
