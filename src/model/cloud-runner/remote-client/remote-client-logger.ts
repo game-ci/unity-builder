@@ -101,6 +101,8 @@ export class RemoteClientLogger {
       CloudRunnerLogger.log(`LOG COMPLETE`);
 
       return true;
+    } else {
+      CloudRunnerLogger.log(`LOG INCOMPLETE ${RemoteClientLogger.md5} ${hashedValue}`);
     }
 
     return false;
