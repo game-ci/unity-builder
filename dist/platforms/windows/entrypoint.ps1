@@ -16,3 +16,6 @@ regsvr32 C:\ProgramData\Microsoft\VisualStudio\Setup\x64\Microsoft.VisualStudio.
 
 # Free the seat for the activated license
 & "c:\steps\return_license.ps1"
+
+# Kill the regsvr process
+Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
