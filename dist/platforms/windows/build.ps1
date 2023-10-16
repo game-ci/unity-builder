@@ -66,6 +66,26 @@ else
     Get-ChildItem -Path $Env:UNITY_PROJECT_PATH\Assets\Editor -Recurse
 }
 
+if ( "$Env:BUILD_TARGET" -eq "Android" -and -not ([string]::IsNullOrEmpty("$Env:ANDROID_KEYSTORE_BASE64")) )
+{
+    Write-Output "Creating Android keystore."
+
+    # Write to consistent location as Windows Unity seems to have issues with pwd and can't find the keystore
+    $keystorePath = "C:/android.keystore"
+    [System.IO.File]::WriteAllBytes($keystorePath, [System.Convert]::FromBase64String($Env:ANDROID_KEYSTORE_BASE64))
+
+    # Ensure the project settings are pointed at the correct path
+    $unitySettingsPath = "$Env:GITHUB_WORKSPACE\ProjectSettings\ProjectSettings.asset"
+    $fileContent = Get-Content -Path "$unitySettingsPath"
+    $fileContent = $fileContent -replace "AndroidKeystoreName:\s+.*", "AndroidKeystoreName: $keystorePath"
+    $fileContent | Set-Content -Path "$unitySettingsPath"
+
+    Write-Output "Created Android keystore."
+}
+else {
+    Write-Output "Not creating Android keystore."
+}
+
 #
 # Pre-build debug information
 #
@@ -121,7 +141,6 @@ $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUST
                                                                           -customBuildPath $Env:CUSTOM_BUILD_PATH `
                                                                           -buildVersion $Env:VERSION `
                                                                           -androidVersionCode $Env:ANDROID_VERSION_CODE `
-                                                                          -androidKeystoreName $Env:ANDROID_KEYSTORE_NAME `
                                                                           -androidKeystorePass $Env:ANDROID_KEYSTORE_PASS `
                                                                           -androidKeyaliasName $Env:ANDROID_KEYALIAS_NAME `
                                                                           -androidKeyaliasPass $Env:ANDROID_KEYALIAS_PASS `
