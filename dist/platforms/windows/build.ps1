@@ -75,7 +75,7 @@ if ( "$Env:BUILD_TARGET" -eq "Android" -and -not ([string]::IsNullOrEmpty("$Env:
     [System.IO.File]::WriteAllBytes($keystorePath, [System.Convert]::FromBase64String($Env:ANDROID_KEYSTORE_BASE64))
 
     # Ensure the project settings are pointed at the correct path
-    $unitySettingsPath = "$Env:GITHUB_WORKSPACE\ProjectSettings\ProjectSettings.asset"
+    $unitySettingsPath = "$Env:UNITY_PROJECT_PATH\ProjectSettings\ProjectSettings.asset"
     $fileContent = Get-Content -Path "$unitySettingsPath"
     $fileContent = $fileContent -replace "AndroidKeystoreName:\s+.*", "AndroidKeystoreName: $keystorePath"
     $fileContent | Set-Content -Path "$unitySettingsPath"
