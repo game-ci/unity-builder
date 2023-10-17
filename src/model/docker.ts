@@ -86,7 +86,15 @@ class Docker {
   }
 
   static getWindowsCommand(image: string, parameters: DockerParameters): string {
-    const { workspace, actionFolder, unitySerial, gitPrivateToken, dockerWorkspacePath } = parameters;
+    const {
+      workspace,
+      actionFolder,
+      unitySerial,
+      gitPrivateToken,
+      dockerWorkspacePath,
+      dockerCpuLimit,
+      dockerMemoryLimit,
+    } = parameters;
 
     return `docker run \
             --workdir c:${dockerWorkspacePath} \
@@ -97,12 +105,15 @@ class Docker {
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "c:/regkeys":"c:/regkeys" \
+            --volume "C:/Program Files/Microsoft Visual Studio":"C:/Program Files/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
             --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
             --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
             --volume "${actionFolder}/platforms/windows":"c:/steps" \
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
+            --cpus=${dockerCpuLimit} \
+            --memory=${dockerMemoryLimit} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
   }

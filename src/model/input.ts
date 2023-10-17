@@ -4,6 +4,7 @@ import { Cli } from './cli/cli';
 import CloudRunnerQueryOverride from './cloud-runner/options/cloud-runner-query-override';
 import Platform from './platform';
 import GitHub from './github';
+import os from 'node:os';
 
 import * as core from '@actions/core';
 
@@ -224,6 +225,16 @@ class Input {
 
   static get dockerWorkspacePath(): string {
     return Input.getInput('dockerWorkspacePath') || '/github/workspace';
+  }
+
+  static get dockerCpuLimit(): string {
+    return Input.getInput('dockerCpuLimit') || os.cpus().length.toString();
+  }
+
+  static get dockerMemoryLimit(): string {
+    const bytesInGigabyte = 1024 * 1024 * 1024;
+
+    return Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInGigabyte) * 0.75)}G`;
   }
 
   public static ToEnvVarFormat(input: string) {
