@@ -25,7 +25,11 @@ async function runMain() {
       if (process.platform === 'darwin') {
         MacBuilder.run(actionFolder);
       } else {
-        await Docker.run(baseImage.toString(), { workspace, actionFolder, ...buildParameters });
+        await Docker.run(baseImage.toString(), {
+          workspace,
+          actionFolder,
+          ...buildParameters,
+        });
       }
     } else {
       await CloudRunner.run(buildParameters, baseImage.toString());
@@ -37,5 +41,7 @@ async function runMain() {
   } catch (error) {
     core.setFailed((error as Error).message);
   }
+
+  core.info('Done');
 }
 runMain();

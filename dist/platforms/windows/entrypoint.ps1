@@ -1,3 +1,4 @@
+Get-Process
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
 Get-ChildItem -Path c:\regkeys -File | Foreach {reg import $_.fullname}
@@ -19,3 +20,5 @@ regsvr32 C:\ProgramData\Microsoft\VisualStudio\Setup\x64\Microsoft.VisualStudio.
 
 # Kill the regsvr process
 Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
+
+Get-Process
