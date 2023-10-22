@@ -131,27 +131,44 @@ Write-Output ""
 
 # If $Env:CUSTOM_PARAMETERS contains spaces and is passed directly on the command line to Unity, powershell will wrap it
 # in double quotes.  To avoid this, parse $Env:CUSTOM_PARAMETERS into an array, while respecting any quotations within the string.
-$_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUSTOM_PARAMETERS)
+$_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUSTOM_PARAMETERS) | ForEach-Object { $_.ToString() }
 
-& "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" -quit -batchmode -nographics `
-                                                                          -projectPath $Env:UNITY_PROJECT_PATH `
-                                                                          -executeMethod $Env:BUILD_METHOD `
-                                                                          -buildTarget $Env:BUILD_TARGET `
-                                                                          -customBuildTarget $Env:BUILD_TARGET `
-                                                                          -customBuildPath $Env:CUSTOM_BUILD_PATH `
-                                                                          -buildVersion $Env:VERSION `
-                                                                          -androidVersionCode $Env:ANDROID_VERSION_CODE `
-                                                                          -androidKeystorePass $Env:ANDROID_KEYSTORE_PASS `
-                                                                          -androidKeyaliasName $Env:ANDROID_KEYALIAS_NAME `
-                                                                          -androidKeyaliasPass $Env:ANDROID_KEYALIAS_PASS `
-                                                                          -androidTargetSdkVersion $Env:ANDROID_TARGET_SDK_VERSION `
-                                                                          -androidExportType $Env:ANDROID_EXPORT_TYPE `
-                                                                          -androidSymbolType $Env:ANDROID_SYMBOL_TYPE `
-                                                                          $customParametersArray `
-                                                                          -logfile | Out-Host
+$process = Start-Process -FilePath "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" `
+                         -ArgumentList @("-quit",
+                                         "-batchmode",
+                                         "-nographics",
+                                         "-projectPath", $Env:UNITY_PROJECT_PATH,
+                                         "-executeMethod", $Env:BUILD_METHOD,
+                                         "-buildTarget", $Env:BUILD_TARGET,
+                                         "-customBuildTarget", $Env:BUILD_TARGET,
+                                         "-customBuildPath", $Env:CUSTOM_BUILD_PATH,
+                                         "-buildVersion", $Env:VERSION,
+                                         "-androidVersionCode", $Env:ANDROID_VERSION_CODE,
+                                         "-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
+                                         "-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
+                                         "-androidKeyaliasPass", $Env:ANDROID_KEYALIAS_PASS,
+                                         "-androidTargetSdkVersion", $Env:ANDROID_TARGET_SDK_VERSION,
+                                         "-androidExportType", $Env:ANDROID_EXPORT_TYPE,
+                                         "-androidSymbolType", $Env:ANDROID_SYMBOL_TYPE,
+                                         "-logfile", "-", "./build.log",
+                                         "-silent-crashes"
+                         ) + $customParametersArray `
+                         -NoNewWindow `
+                         -PassThru
+
+# This ensures that the Unity Editor properly exits as it can hang on Windows
+while (!$process.StandardOutput.EndOfStream) {
+
+if ($process.HasExited) {
+    Write-Host "`nExecute Method Ended`n"
+    exit 0;
+}
+
+Start-Sleep -Seconds 1
+}
 
 # Catch exit code
-$Env:BUILD_EXIT_CODE=$LastExitCode
+$Env:BUILD_EXIT_CODE=$process.ExitCode
 
 # Display results
 if ($Env:BUILD_EXIT_CODE -eq 0)
