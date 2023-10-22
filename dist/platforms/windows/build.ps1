@@ -141,13 +141,13 @@ $argList = @("-quit",
 "-buildTarget", $Env:BUILD_TARGET,
 "-customBuildTarget", $Env:BUILD_TARGET,
 "-customBuildPath", $Env:CUSTOM_BUILD_PATH,
-"-buildVersion", $Env:VERSION
+"-buildVersion", $Env:VERSION,
+"-androidVersionCode", $Env:ANDROID_VERSION_CODE,
+"-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
+"-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
+"-androidKeyaliasPass", $Env:ANDROID_KEYALIAS_PASS
 ) # + $customParametersArray
 # ,
-# "-androidVersionCode", $Env:ANDROID_VERSION_CODE,
-# "-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
-# "-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
-# "-androidKeyaliasPass", $Env:ANDROID_KEYALIAS_PASS,
 # "-androidTargetSdkVersion", $Env:ANDROID_TARGET_SDK_VERSION,
 # "-androidExportType", $Env:ANDROID_EXPORT_TYPE,
 # "-androidSymbolType", $Env:ANDROID_SYMBOL_TYPE,
