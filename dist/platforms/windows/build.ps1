@@ -159,38 +159,27 @@ $process = Start-Process -FilePath "C:\Program Files\Unity\Hub\Editor\$Env:UNITY
 
 # This ensures that the Unity Editor properly exits as it can hang on Windows
 while (!$process.StandardOutput.EndOfStream) {
+  if ($process.HasExited) {
+      # Display results
+      if ($process.ExitCode -eq 0)
+      {
+          Write-Output "Build Succeeded!"
+      } else
+      {
+          Write-Output "$('Build failed, with exit code ')$($process.ExitCode)$('"')"
+      }
 
-if ($process.HasExited) {
-    Write-Host "`nExecute Method Ended`n"
-    exit 0;
+      Write-Output ""
+      Write-Output "###########################"
+      Write-Output "#       Build output      #"
+      Write-Output "###########################"
+      Write-Output ""
+
+      Get-ChildItem $Env:BUILD_PATH_FULL
+      Write-Output ""
+
+      exit $process.ExitCode;
+  }
+
+  Start-Sleep -Seconds 1
 }
-
-Start-Sleep -Seconds 1
-}
-
-# Catch exit code
-$Env:BUILD_EXIT_CODE=$process.ExitCode
-
-# Display results
-if ($Env:BUILD_EXIT_CODE -eq 0)
-{
-    Write-Output "Build Succeeded!"
-} else
-{
-    Write-Output "$('Build failed, with exit code ')$($Env:BUILD_EXIT_CODE)$('"')"
-}
-
-# TODO: Determine if we need to set permissions on any files
-
-#
-# Results
-#
-
-Write-Output ""
-Write-Output "###########################"
-Write-Output "#       Build output      #"
-Write-Output "###########################"
-Write-Output ""
-
-Get-ChildItem $Env:BUILD_PATH_FULL
-Write-Output ""
