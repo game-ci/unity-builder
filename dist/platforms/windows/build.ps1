@@ -151,7 +151,7 @@ $argList = @("-quit",
 "-androidSymbolType", $Env:ANDROID_SYMBOL_TYPE,
 "-logfile", "-", "./build.log",
 "-silent-crashes"
-) + $customParametersArray
+) # + $customParametersArray
 
 foreach ($element in $argList) {
   Write-Host $element
