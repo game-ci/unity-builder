@@ -135,15 +135,15 @@ $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUST
 
 $argList = @("-quit",
 "-batchmode",
-"-nographics"
+"-nographics",
+"-projectPath", $Env:UNITY_PROJECT_PATH,
+"-executeMethod", $Env:BUILD_METHOD,
+"-buildTarget", $Env:BUILD_TARGET,
+"-customBuildTarget", $Env:BUILD_TARGET,
+"-customBuildPath", $Env:CUSTOM_BUILD_PATH,
+"-buildVersion", $Env:VERSION
 ) # + $customParametersArray
 # ,
-# "-projectPath", $Env:UNITY_PROJECT_PATH,
-# "-executeMethod", $Env:BUILD_METHOD,
-# "-buildTarget", $Env:BUILD_TARGET,
-# "-customBuildTarget", $Env:BUILD_TARGET,
-# "-customBuildPath", $Env:CUSTOM_BUILD_PATH,
-# "-buildVersion", $Env:VERSION,
 # "-androidVersionCode", $Env:ANDROID_VERSION_CODE,
 # "-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
 # "-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
