@@ -172,7 +172,7 @@ while (!$process.HasExited) {
       # Display results
       if ($process.ExitCode -eq 0)
       {
-          Write-Output "Build Succeeded!"
+          Write-Output "Build Succeeded!!"
       } else
       {
           Write-Output "$('Build failed, with exit code ')$($process.ExitCode)$('"')"
