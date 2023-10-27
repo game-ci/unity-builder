@@ -158,7 +158,8 @@ $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
 $process = Start-Process -FilePath "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" `
                          -ArgumentList $unityArgs `
-                         -PassThru
+                         -PassThru `
+                         -NoNewWindow
 
 while (!$process.HasExited) {
     if ($process.HasExited) {
