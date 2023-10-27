@@ -48,6 +48,8 @@ class Docker {
       sshPublicKeysDirectoryPath,
       gitPrivateToken,
       dockerWorkspacePath,
+      dockerCpuLimit,
+      dockerMemoryLimit,
     } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -72,6 +74,8 @@ class Docker {
             --volume "${actionFolder}/platforms/ubuntu/steps:/steps:z" \
             --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
             --volume "${actionFolder}/unity-config:/usr/share/unity3d/config/:z" \
+            --cpus=${dockerCpuLimit} \
+            --memory=${dockerMemoryLimit} \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${
               sshAgent && !sshPublicKeysDirectoryPath

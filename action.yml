@@ -109,13 +109,14 @@ inputs:
   dockerCpuLimit:
     required: false
     default: ''
-    description: 'Number of CPU cores to assign the Windows docker container. Defaults to all available cores.'
+    description: 'Number of CPU cores to assign the docker container. Defaults to all available cores on all platforms.'
   dockerMemoryLimit:
     required: false
     default: ''
     description:
-      'Amount of memory to assign the Windows docker container. Defaults to 75% of total system memory rounded down to
-      the nearest gigabyte.'
+      'Amount of memory to assign the docker container. Defaults to 95% of total system memory rounded down to the
+      nearest megabyte on Linux and 80% on Windows. On unrecognized platforms, defaults to 75% of total system memory.
+      To manually specify a value, use the format <number><unit>, where unit is either m or g. ie: 512m = 512 megabytes'
   allowDirtyBuild:
     required: false
     default: ''

@@ -232,9 +232,24 @@ class Input {
   }
 
   static get dockerMemoryLimit(): string {
-    const bytesInGigabyte = 1024 * 1024 * 1024;
+    const bytesInMegabyte = 1024 * 1024;
 
-    return Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInGigabyte) * 0.75)}G`;
+    let memoryMultiplier;
+    switch (os.platform()) {
+      case 'linux':
+        memoryMultiplier = 0.95;
+        break;
+      case 'win32':
+        memoryMultiplier = 0.8;
+        break;
+      default:
+        memoryMultiplier = 0.75;
+        break;
+    }
+
+    return (
+      Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+    );
   }
 
   public static ToEnvVarFormat(input: string) {
