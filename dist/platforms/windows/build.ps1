@@ -158,11 +158,15 @@ $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
 $process = Start-Process -FilePath "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" `
                          -ArgumentList $unityArgs `
-                         -NoNewWindow `
                          -PassThru
 
 while (!$process.HasExited) {
     if ($process.HasExited) {
+      Get-Process
+
+      Start-Sleep -Seconds 10
+
+      Get-Process
 
       # Display results
       if ($process.ExitCode -eq 0)
@@ -185,5 +189,5 @@ while (!$process.HasExited) {
       exit $process.ExitCode
     }
 
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 5
 }
