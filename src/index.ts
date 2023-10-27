@@ -41,7 +41,6 @@ async function runMain() {
   } catch (error) {
     core.setFailed((error as Error).message);
   }
-
-  core.info('Done');
 }
+
 runMain();
