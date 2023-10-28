@@ -33,7 +33,7 @@ class ImageTag {
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
       isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
     );
-    this.imageRollingVersion = 2; // Will automatically roll to the latest non-breaking version.
+    this.imageRollingVersion = 3; // Will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern(): RegExp {
@@ -86,8 +86,10 @@ class ImageTag {
           if (major >= 2020 || (major === 2019 && minor >= 3)) {
             return windowsIl2cpp;
           } else {
-            throw new Error(`Windows-based builds are only supported on 2019.3.X+ versions of Unity.
-                             If you are trying to build for windows-mono, please use a Linux based OS.`);
+            throw new Error(
+              `Windows-based builds are only supported on 2019.3.X+ versions of Unity.
+                             If you are trying to build for windows-mono, please use a Linux based OS.`,
+            );
           }
         }
 
