@@ -98,6 +98,7 @@ class Docker {
       dockerWorkspacePath,
       dockerCpuLimit,
       dockerMemoryLimit,
+      dockerIsolationMode,
     } = parameters;
 
     return `docker run \
@@ -118,6 +119,7 @@ class Docker {
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
             --cpus=${dockerCpuLimit} \
             --memory=${dockerMemoryLimit} \
+            --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
   }

@@ -252,6 +252,10 @@ class Input {
     );
   }
 
+  static get dockerIsolationMode(): string {
+    return Input.getInput('dockerIsolationMode') || 'process';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
