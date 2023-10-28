@@ -1,6 +1,13 @@
 {
   "configurations": [
     {
+      "name": "PowerShell Launch Current File",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${file}",
+      "cwd": "${cwd}"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Debug Jest Test",

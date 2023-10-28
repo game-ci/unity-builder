@@ -48,6 +48,8 @@ class Docker {
       sshPublicKeysDirectoryPath,
       gitPrivateToken,
       dockerWorkspacePath,
+      dockerCpuLimit,
+      dockerMemoryLimit,
     } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -72,6 +74,8 @@ class Docker {
             --volume "${actionFolder}/platforms/ubuntu/steps:/steps:z" \
             --volume "${actionFolder}/platforms/ubuntu/entrypoint.sh:/entrypoint.sh:z" \
             --volume "${actionFolder}/unity-config:/usr/share/unity3d/config/:z" \
+            --cpus=${dockerCpuLimit} \
+            --memory=${dockerMemoryLimit} \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${
               sshAgent && !sshPublicKeysDirectoryPath
@@ -86,7 +90,16 @@ class Docker {
   }
 
   static getWindowsCommand(image: string, parameters: DockerParameters): string {
-    const { workspace, actionFolder, unitySerial, gitPrivateToken, dockerWorkspacePath } = parameters;
+    const {
+      workspace,
+      actionFolder,
+      unitySerial,
+      gitPrivateToken,
+      dockerWorkspacePath,
+      dockerCpuLimit,
+      dockerMemoryLimit,
+      dockerIsolationMode,
+    } = parameters;
 
     return `docker run \
             --workdir c:${dockerWorkspacePath} \
@@ -97,12 +110,16 @@ class Docker {
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "c:/regkeys":"c:/regkeys" \
+            --volume "C:/Program Files/Microsoft Visual Studio":"C:/Program Files/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Windows Kits":"C:/Program Files (x86)/Windows Kits" \
             --volume "C:/ProgramData/Microsoft/VisualStudio":"C:/ProgramData/Microsoft/VisualStudio" \
             --volume "${actionFolder}/default-build-script":"c:/UnityBuilderAction" \
             --volume "${actionFolder}/platforms/windows":"c:/steps" \
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
+            --cpus=${dockerCpuLimit} \
+            --memory=${dockerMemoryLimit} \
+            --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
   }

@@ -40,6 +40,9 @@ class BuildParameters {
   public androidSdkManagerParameters!: string;
   public androidExportType!: string;
   public androidSymbolType!: string;
+  public dockerCpuLimit!: string;
+  public dockerMemoryLimit!: string;
+  public dockerIsolationMode!: string;
 
   public customParameters!: string;
   public sshAgent!: string;
@@ -116,10 +119,12 @@ class BuildParameters {
       if (!Input.unitySerial && GitHub.githubInputEnabled) {
         // No serial was present, so it is a personal license that we need to convert
         if (!Input.unityLicense) {
-          throw new Error(`Missing Unity License File and no Serial was found. If this
+          throw new Error(
+            `Missing Unity License File and no Serial was found. If this
                             is a personal license, make sure to follow the activation
                             steps and set the UNITY_LICENSE GitHub secret or enter a Unity
-                            serial number inside the UNITY_SERIAL GitHub secret.`);
+                            serial number inside the UNITY_SERIAL GitHub secret.`,
+          );
         }
         unitySerial = this.getSerialFromLicenseFile(Input.unityLicense);
       } else {
@@ -156,6 +161,9 @@ class BuildParameters {
       sshPublicKeysDirectoryPath: Input.sshPublicKeysDirectoryPath,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
       chownFilesTo: Input.chownFilesTo,
+      dockerCpuLimit: Input.dockerCpuLimit,
+      dockerMemoryLimit: Input.dockerMemoryLimit,
+      dockerIsolationMode: Input.dockerIsolationMode,
       providerStrategy: CloudRunnerOptions.providerStrategy,
       buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,

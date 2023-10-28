@@ -106,6 +106,24 @@ inputs:
     default: ''
     description:
       'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
+  dockerCpuLimit:
+    required: false
+    default: ''
+    description: 'Number of CPU cores to assign the docker container. Defaults to all available cores on all platforms.'
+  dockerMemoryLimit:
+    required: false
+    default: ''
+    description:
+      'Amount of memory to assign the docker container. Defaults to 95% of total system memory rounded down to the
+      nearest megabyte on Linux and 80% on Windows. On unrecognized platforms, defaults to 75% of total system memory.
+      To manually specify a value, use the format <number><unit>, where unit is either m or g. ie: 512m = 512 megabytes'
+  dockerIsolationMode:
+    required: false
+    default: 'default'
+    description:
+      'Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Default will pick the
+      default mode as described by Microsoft where server versions use process and desktop versions use hyperv. Only
+      applicable on Windows'
   allowDirtyBuild:
     required: false
     default: ''
