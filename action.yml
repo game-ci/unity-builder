@@ -119,9 +119,10 @@ inputs:
       To manually specify a value, use the format <number><unit>, where unit is either m or g. ie: 512m = 512 megabytes'
   dockerIsolationMode:
     required: false
-    default: 'process'
+    default: 'default'
     description:
-      'Isolation mode to use for the docker container. Can be either process or hyperv. Only applicable on Windows'
+      'Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Only applicable on
+      Windows'
   allowDirtyBuild:
     required: false
     default: ''

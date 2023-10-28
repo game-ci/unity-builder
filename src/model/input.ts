@@ -253,7 +253,7 @@ class Input {
   }
 
   static get dockerIsolationMode(): string {
-    return Input.getInput('dockerIsolationMode') || 'process';
+    return Input.getInput('dockerIsolationMode') || 'default';
   }
 
   public static ToEnvVarFormat(input: string) {

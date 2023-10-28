@@ -40,6 +40,9 @@ class BuildParameters {
   public androidSdkManagerParameters!: string;
   public androidExportType!: string;
   public androidSymbolType!: string;
+  public dockerCpuLimit!: string;
+  public dockerMemoryLimit!: string;
+  public dockerIsolationMode!: string;
 
   public customParameters!: string;
   public sshAgent!: string;
@@ -160,6 +163,7 @@ class BuildParameters {
       chownFilesTo: Input.chownFilesTo,
       dockerCpuLimit: Input.dockerCpuLimit,
       dockerMemoryLimit: Input.dockerMemoryLimit,
+      dockerIsolationMode: Input.dockerIsolationMode,
       providerStrategy: CloudRunnerOptions.providerStrategy,
       buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,
