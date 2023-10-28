@@ -121,8 +121,9 @@ inputs:
     required: false
     default: 'default'
     description:
-      'Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Only applicable on
-      Windows'
+      'Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Default will pick the
+      default mode as described by Microsoft where server versions use process and desktop versions use hyperv. Only
+      applicable on Windows'
   allowDirtyBuild:
     required: false
     default: ''
