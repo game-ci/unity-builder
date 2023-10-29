@@ -4,4 +4,4 @@
                                      -password $Env:UNITY_PASSWORD `
                                      -returnlicense `
                                      -projectPath "c:/BlankProject" `
-                                     -logfile
+                                     -logfile -
