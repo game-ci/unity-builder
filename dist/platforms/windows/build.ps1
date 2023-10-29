@@ -163,10 +163,10 @@ $process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
 
 while (!$process.HasExited) {
     if ($process.HasExited) {
+      Start-Sleep -Seconds 5
       Get-Process
 
       Start-Sleep -Seconds 10
-
       Get-Process
 
       # Display results

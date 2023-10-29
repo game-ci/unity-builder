@@ -1,4 +1,5 @@
 Get-Process
+Start-Sleep -Seconds 3
 
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
@@ -22,5 +23,5 @@ Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
 # Free the seat for the activated license
 & "c:\steps\return_license.ps1"
 
-Start-Sleep 3
+Start-Sleep -Seconds 3
 Get-Process
