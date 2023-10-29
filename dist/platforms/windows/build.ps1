@@ -156,7 +156,7 @@ $unityArgs = @(
 # Remove null items as that will fail the Start-Process call
 $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-$process = Start-Process -FilePath "$Env:UNITY_PATH\$Env:UNITY_VERSION\Editor\Unity.exe" `
+$process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -ArgumentList $unityArgs `
                          -PassThru `
                          -NoNewWindow
