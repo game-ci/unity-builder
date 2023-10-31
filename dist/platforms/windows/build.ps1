@@ -156,17 +156,17 @@ $unityArgs = @(
 # Remove null items as that will fail the Start-Process call
 $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-$process = Start-Process -FilePath "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" `
+$process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -ArgumentList $unityArgs `
                          -PassThru `
                          -NoNewWindow
 
 while (!$process.HasExited) {
     if ($process.HasExited) {
+      Start-Sleep -Seconds 5
       Get-Process
 
       Start-Sleep -Seconds 10
-
       Get-Process
 
       # Display results
