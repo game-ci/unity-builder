@@ -12,6 +12,7 @@ import { Cli } from './cli/cli';
 import GitHub from './github';
 import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
 import CloudRunner from './cloud-runner/cloud-runner';
+import * as core from '@actions/core';
 
 class BuildParameters {
   // eslint-disable-next-line no-undef
@@ -127,6 +128,7 @@ class BuildParameters {
           );
         }
         unitySerial = this.getSerialFromLicenseFile(Input.unityLicense);
+        core.setSecret(unitySerial);
       } else {
         unitySerial = Input.unitySerial!;
       }
