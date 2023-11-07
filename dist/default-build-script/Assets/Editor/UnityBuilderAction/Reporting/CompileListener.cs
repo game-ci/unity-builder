@@ -25,6 +25,9 @@ namespace UnityBuilderAction.Reporting
                 case LogType.Warning:
                     prefix = "warning";
                     break;
+                case LogType.Exception:
+                    prefix = "error";
+                    break;
             }
             Debug.Log($"::{prefix} ::{condition}\n{stackTrace}");
         }
