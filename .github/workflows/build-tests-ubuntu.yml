@@ -52,11 +52,9 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2021.3.29f1
-          - 2022.1.24f1
-          - 2022.2.21f1
-          - 2022.3.7f1
-          - 2023.1.8f1
+          - 2021.3.31f1
+          - 2022.3.11f1
+          - 2023.1.17f1
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
           - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
@@ -64,17 +62,11 @@ jobs:
           - iOS # Build an iOS player.
           - Android # Build an Android .apk.
           - WebGL # WebGL.
-          #          - StandaloneWindows # Build a Windows standalone.
-          #          - WSAPlayer # Build an Windows Store Apps player.
-          #          - PS4 # Build a PS4 Standalone.
-          #          - XboxOne # Build a Xbox One Standalone.
-          #          - tvOS # Build to Apple's tvOS platform.
-          #          - Switch # Build a Nintendo Switch player
     steps:
       ###########################
       #         Checkout        #
       ###########################
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
 

@@ -66,6 +66,26 @@ else
     Get-ChildItem -Path $Env:UNITY_PROJECT_PATH\Assets\Editor -Recurse
 }
 
+if ( "$Env:BUILD_TARGET" -eq "Android" -and -not ([string]::IsNullOrEmpty("$Env:ANDROID_KEYSTORE_BASE64")) )
+{
+    Write-Output "Creating Android keystore."
+
+    # Write to consistent location as Windows Unity seems to have issues with pwd and can't find the keystore
+    $keystorePath = "C:/android.keystore"
+    [System.IO.File]::WriteAllBytes($keystorePath, [System.Convert]::FromBase64String($Env:ANDROID_KEYSTORE_BASE64))
+
+    # Ensure the project settings are pointed at the correct path
+    $unitySettingsPath = "$Env:UNITY_PROJECT_PATH\ProjectSettings\ProjectSettings.asset"
+    $fileContent = Get-Content -Path "$unitySettingsPath"
+    $fileContent = $fileContent -replace "AndroidKeystoreName:\s+.*", "AndroidKeystoreName: $keystorePath"
+    $fileContent | Set-Content -Path "$unitySettingsPath"
+
+    Write-Output "Created Android keystore."
+}
+else {
+    Write-Output "Not creating Android keystore."
+}
+
 #
 # Pre-build debug information
 #
@@ -112,48 +132,63 @@ Write-Output ""
 # If $Env:CUSTOM_PARAMETERS contains spaces and is passed directly on the command line to Unity, powershell will wrap it
 # in double quotes.  To avoid this, parse $Env:CUSTOM_PARAMETERS into an array, while respecting any quotations within the string.
 $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUSTOM_PARAMETERS)
+$unityArgs = @(
+    "-quit",
+    "-batchmode",
+    "-nographics",
+    "-silent-crashes",
+    "-projectPath", $Env:UNITY_PROJECT_PATH,
+    "-executeMethod", $Env:BUILD_METHOD,
+    "-buildTarget", $Env:BUILD_TARGET,
+    "-customBuildTarget", $Env:BUILD_TARGET,
+    "-customBuildPath", $Env:CUSTOM_BUILD_PATH,
+    "-buildVersion", $Env:VERSION,
+    "-androidVersionCode", $Env:ANDROID_VERSION_CODE,
+    "-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
+    "-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
+    "-androidKeyaliasPass", $Env:ANDROID_KEYALIAS_PASS,
+    "-androidTargetSdkVersion", $Env:ANDROID_TARGET_SDK_VERSION,
+    "-androidExportType", $Env:ANDROID_EXPORT_TYPE,
+    "-androidSymbolType", $Env:ANDROID_SYMBOL_TYPE,
+    "-logfile", "-"
+) + $customParametersArray
 
-& "C:\Program Files\Unity\Hub\Editor\$Env:UNITY_VERSION\Editor\Unity.exe" -quit -batchmode -nographics `
-                                                                          -projectPath $Env:UNITY_PROJECT_PATH `
-                                                                          -executeMethod $Env:BUILD_METHOD `
-                                                                          -buildTarget $Env:BUILD_TARGET `
-                                                                          -customBuildTarget $Env:BUILD_TARGET `
-                                                                          -customBuildPath $Env:CUSTOM_BUILD_PATH `
-                                                                          -buildVersion $Env:VERSION `
-                                                                          -androidVersionCode $Env:ANDROID_VERSION_CODE `
-                                                                          -androidKeystoreName $Env:ANDROID_KEYSTORE_NAME `
-                                                                          -androidKeystorePass $Env:ANDROID_KEYSTORE_PASS `
-                                                                          -androidKeyaliasName $Env:ANDROID_KEYALIAS_NAME `
-                                                                          -androidKeyaliasPass $Env:ANDROID_KEYALIAS_PASS `
-                                                                          -androidTargetSdkVersion $Env:ANDROID_TARGET_SDK_VERSION `
-                                                                          -androidExportType $Env:ANDROID_EXPORT_TYPE `
-                                                                          -androidSymbolType $Env:ANDROID_SYMBOL_TYPE `
-                                                                          $customParametersArray `
-                                                                          -logfile | Out-Host
+# Remove null items as that will fail the Start-Process call
+$unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-# Catch exit code
-$Env:BUILD_EXIT_CODE=$LastExitCode
+$process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
+                         -ArgumentList $unityArgs `
+                         -PassThru `
+                         -NoNewWindow
 
-# Display results
-if ($Env:BUILD_EXIT_CODE -eq 0)
-{
-    Write-Output "Build Succeeded!"
-} else
-{
-    Write-Output "$('Build failed, with exit code ')$($Env:BUILD_EXIT_CODE)$('"')"
+while (!$process.HasExited) {
+    if ($process.HasExited) {
+      Start-Sleep -Seconds 5
+      Get-Process
+
+      Start-Sleep -Seconds 10
+      Get-Process
+
+      # Display results
+      if ($process.ExitCode -eq 0)
+      {
+          Write-Output "Build Succeeded!!"
+      } else
+      {
+          Write-Output "$('Build failed, with exit code ')$($process.ExitCode)$('"')"
+      }
+
+      Write-Output ""
+      Write-Output "###########################"
+      Write-Output "#       Build output      #"
+      Write-Output "###########################"
+      Write-Output ""
+
+      Get-ChildItem $Env:BUILD_PATH_FULL
+      Write-Output ""
+
+      exit $process.ExitCode
+    }
+
+    Start-Sleep -Seconds 5
 }
-
-# TODO: Determine if we need to set permissions on any files
-
-#
-# Results
-#
-
-Write-Output ""
-Write-Output "###########################"
-Write-Output "#       Build output      #"
-Write-Output "###########################"
-Write-Output ""
-
-Get-ChildItem $Env:BUILD_PATH_FULL
-Write-Output ""
