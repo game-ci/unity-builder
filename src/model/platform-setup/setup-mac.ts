@@ -72,6 +72,26 @@ class SetupMac {
     return '';
   }
 
+  private static getArchitectureParameters(): string[] {
+    const architectureArgument = [];
+
+    // @ts-ignore
+    const process = require('process');
+
+    switch (process.arch) {
+      case 'x64':
+        architectureArgument.push('--architecture', 'x86_64');
+        break;
+      case 'arm64':
+        architectureArgument.push('--architecture', 'arm64');
+        break;
+      default:
+        throw new Error(`Unsupported architecture: ${process.arch}.`);
+    }
+
+    return architectureArgument;
+  }
+
   private static getModuleParametersForTargetPlatform(targetPlatform: string): string[] {
     const moduleArgument = [];
     switch (targetPlatform) {
@@ -111,6 +131,7 @@ class SetupMac {
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
     const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+    const architectureArguments = SetupMac.getArchitectureParameters();
 
     const execArguments: string[] = [
       '--',
@@ -119,6 +140,7 @@ class SetupMac {
       ...['--version', buildParameters.editorVersion],
       ...['--changeset', unityChangeset.changeset],
       ...moduleArguments,
+      ...architectureArguments,
       '--childModules',
     ];
 
