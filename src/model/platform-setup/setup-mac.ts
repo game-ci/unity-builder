@@ -75,9 +75,6 @@ class SetupMac {
   private static getArchitectureParameters(): string[] {
     const architectureArgument = [];
 
-    // @ts-ignore
-    const process = require('process');
-
     switch (process.arch) {
       case 'x64':
         architectureArgument.push('--architecture', 'x86_64');
