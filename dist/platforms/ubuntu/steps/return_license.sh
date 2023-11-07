@@ -20,7 +20,8 @@ elif [[ -n "$UNITY_SERIAL" ]]; then
   unity-editor \
     -logFile /dev/stdout \
     -quit \
-    -returnlicense
+    -returnlicense \
+    -projectPath "/BlankProject"
 fi
 
 # Return to previous working directory

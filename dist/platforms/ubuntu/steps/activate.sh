@@ -18,7 +18,8 @@ if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
     -quit \
     -serial "$UNITY_SERIAL" \
     -username "$UNITY_EMAIL" \
-    -password "$UNITY_PASSWORD"
+    -password "$UNITY_PASSWORD" \
+    -projectPath "/BlankProject"
 
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
