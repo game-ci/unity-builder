@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 
@@ -29,7 +30,7 @@ namespace UnityBuilderAction.Reporting
                     prefix = "error";
                     break;
             }
-            Debug.Log($"::{prefix} ::{condition}\n{stackTrace}");
+            Console.WriteLine($"{Environment.NewLine}::{prefix} ::{condition}{Environent.NewLine}{stackTrace}");
         }
     }
 }
