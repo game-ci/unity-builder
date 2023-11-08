@@ -77,7 +77,7 @@ jobs:
             Library-
 
       - name: Random Delay (to avoid activation rate limits)
-        run: sleep $((RANDOM % 15))
+        run: sleep $((RANDOM % 60))
 
       ###########################
       #          Build          #
