@@ -24,6 +24,10 @@ if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   # Store the exit code from the verify command
   UNITY_EXIT_CODE=$?
 
+  if [ ! -f "~/.local/share/unity3d/Unity/Unity_lic.ulf" ]; then
+    echo "::error ::There was an error while trying to activate the Unity license."
+  fi
+
 elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   #
   # Custom Unity License Server
@@ -50,6 +54,7 @@ else
   echo "Visit https://game.ci/docs/github/getting-started for more"
   echo "details on how to set up one of the possible activation strategies."
 
+  echo "::error ::No valid license activation strategy could be determined."
   # Immediately exit as no UNITY_EXIT_CODE can be derrived.
   exit 1;
 
@@ -65,7 +70,6 @@ else
   # Activation failed so exit with the code from the license verification step
   echo "Unclassified error occured while trying to activate license."
   echo "Exit code was: $UNITY_EXIT_CODE"
-  echo "::error ::There was an error while trying to activate the Unity license."
   exit $UNITY_EXIT_CODE
 fi
 
