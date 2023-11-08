@@ -76,13 +76,52 @@ jobs:
             Library-${{ matrix.projectPath }}-ubuntu-
             Library-
 
-      - name: Random Delay (to avoid activation rate limits)
-        run: sleep $((RANDOM % 60))
-
       ###########################
       #          Build          #
       ###########################
-      - uses: ./
+      - name: Build
+        uses: ./
+        id: build-1
+        continue-on-error: true
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          providerStrategy: ${{ matrix.providerStrategy }}
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        run: |
+          sleep 60
+
+      - name: Build (Retry 1)
+        uses: ./
+        id: build-2
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        continue-on-error: true
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          providerStrategy: ${{ matrix.providerStrategy }}
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-2.outcome == 'failure' }}
+        run: |
+          sleep 240
+
+      - name: Build (Retry 2)
+        uses: ./
+        id: build-3
+        if: ${{ steps.build-2.outcome == 'failure' }}
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
