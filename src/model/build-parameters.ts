@@ -128,10 +128,14 @@ class BuildParameters {
           );
         }
         unitySerial = this.getSerialFromLicenseFile(Input.unityLicense);
-        core.setSecret(unitySerial);
       } else {
         unitySerial = Input.unitySerial!;
       }
+    }
+
+    if (unitySerial !== undefined && unitySerial.length === 27) {
+      core.setSecret(unitySerial);
+      core.setSecret(`${unitySerial.slice(0, -4)}XXXX`);
     }
 
     return {
