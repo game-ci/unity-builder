@@ -12,3 +12,8 @@ Write-Output ""
                                      -serial $Env:UNITY_SERIAL `
                                      -projectPath "c:/BlankProject" `
                                      -logfile - | Out-Host
+
+if(-not(Test-path "C:/ProgramData/Unity/Unity_lic.ulf" -PathType leaf))
+{
+  Write-Output "::error ::There was an error while trying to activate the Unity license."
+}

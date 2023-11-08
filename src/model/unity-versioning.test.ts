@@ -7,9 +7,9 @@ describe('Unity Versioning', () => {
     });
 
     it('parses from ProjectVersion.txt', () => {
-      const projectVersionContents = `m_EditorVersion: 2019.2.11f1
-      m_EditorVersionWithRevision: 2019.2.11f1 (5f859a4cfee5)`;
-      expect(UnityVersioning.parse(projectVersionContents)).toBe('2019.2.11f1');
+      const projectVersionContents = `m_EditorVersion: 2021.3.4f1
+      m_EditorVersionWithRevision: 2021.3.4f1 (cb45f9cae8b7)`;
+      expect(UnityVersioning.parse(projectVersionContents)).toBe('2021.3.4f1');
     });
   });
 
@@ -19,13 +19,13 @@ describe('Unity Versioning', () => {
     });
 
     it('reads from test-project', () => {
-      expect(UnityVersioning.read('./test-project')).toBe('2019.2.11f1');
+      expect(UnityVersioning.read('./test-project')).toBe('2021.3.4f1');
     });
   });
 
   describe('determineUnityVersion', () => {
     it('defaults to parsed version', () => {
-      expect(UnityVersioning.determineUnityVersion('./test-project', 'auto')).toBe('2019.2.11f1');
+      expect(UnityVersioning.determineUnityVersion('./test-project', 'auto')).toBe('2021.3.4f1');
     });
 
     it('use specified unityVersion', () => {

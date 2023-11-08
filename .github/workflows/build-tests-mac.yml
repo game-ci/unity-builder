@@ -23,6 +23,7 @@ jobs:
           - 2023.1.17f1
         targetPlatform:
           - StandaloneOSX # Build a MacOS executable
+          - iOS # Build an iOS executable
 
     steps:
       ###########################
