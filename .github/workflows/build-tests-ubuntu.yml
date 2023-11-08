@@ -112,6 +112,7 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+          allowDirtyBuild: true
 
       - name: Sleep for Retry
         if: ${{ steps.build-2.outcome == 'failure' }}
@@ -131,6 +132,7 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+          allowDirtyBuild: true
 
       ###########################
       #          Upload         #
