@@ -3,8 +3,6 @@ name: Builds - Windows
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -13,21 +11,19 @@ concurrency:
 jobs:
   buildForAllPlatformsWindows:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
         projectPath:
           - test-project
         unityVersion:
-          - 2021.3.29f1
-          - 2022.1.24f1
-          - 2022.2.21f1
-          - 2022.3.7f1
-          - 2023.1.8f1
+          - 2021.3.32f1
+          - 2022.3.13f1
+          - 2023.1.19f1
         targetPlatform:
+          - Android # Build an Android apk.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneWindows # Build a Windows 32-bit standalone.
           - WSAPlayer # Build a UWP App
           - tvOS # Build an Apple TV XCode project
 
@@ -35,7 +31,7 @@ jobs:
       ###########################
       #         Checkout        #
       ###########################
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
