@@ -20,6 +20,10 @@ echo "Requesting activation"
 # Store the exit code from the verify command
 UNITY_EXIT_CODE=$?
 
+if [ ! -f "/Library/Application Support/Unity/Unity_lic.ulf" ]; then
+    echo "::error ::There was an error while trying to activate the Unity license."
+fi
+
 #
 # Display information about the result
 #
@@ -30,6 +34,7 @@ else
   # Activation failed so exit with the code from the license verification step
   echo "Unclassified error occured while trying to activate license."
   echo "Exit code was: $UNITY_EXIT_CODE"
+  echo "::error ::There was an error while trying to activate the Unity license."
   exit $UNITY_EXIT_CODE
 fi
 

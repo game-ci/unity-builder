@@ -12,6 +12,7 @@ import { Cli } from './cli/cli';
 import GitHub from './github';
 import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
 import CloudRunner from './cloud-runner/cloud-runner';
+import * as core from '@actions/core';
 
 class BuildParameters {
   // eslint-disable-next-line no-undef
@@ -130,6 +131,11 @@ class BuildParameters {
       } else {
         unitySerial = Input.unitySerial!;
       }
+    }
+
+    if (unitySerial !== undefined && unitySerial.length === 27) {
+      core.setSecret(unitySerial);
+      core.setSecret(`${unitySerial.slice(0, -4)}XXXX`);
     }
 
     return {
