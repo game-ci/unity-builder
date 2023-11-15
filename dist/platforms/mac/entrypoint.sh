@@ -4,7 +4,7 @@
 # Create directories for license activation
 #
 
-$UNITY_LICENSE_PATH="/Library/Application\ Support/Unity"
+UNITY_LICENSE_PATH="/Library/Application Support/Unity"
 
 if [ -d "$UNITY_LICENSE_PATH"]
   sudo mkdir "$UNITY_LICENSE_PATH"
