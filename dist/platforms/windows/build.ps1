@@ -156,20 +156,20 @@ $unityArgs = @(
 # Remove null items as that will fail the Start-Process call
 $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-$process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
+$unityProcess = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -ArgumentList $unityArgs `
                          -PassThru `
                          -NoNewWindow
 
 while ($true) {
-    if ($process.HasExited) {
+    if ($unityProcess.HasExited) {
       Start-Sleep -Seconds 5
       Get-Process
 
       Start-Sleep -Seconds 10
       Get-Process
 
-      $BUILD_EXIT_CODE = $process.ExitCode
+      $BUILD_EXIT_CODE = $unityProcess.ExitCode
 
       # Display results
       if ($BUILD_EXIT_CODE -eq 0)
@@ -177,7 +177,7 @@ while ($true) {
           Write-Output "Build Succeeded!!"
       } else
       {
-          Write-Output "$('Build failed, with exit code ')$($BUILD_EXIT_CODE)$('"')"
+          Write-Output "Build failed, with exit code $BUILD_EXIT_CODE"
       }
 
       Write-Output ""
