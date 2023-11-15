@@ -162,14 +162,12 @@ $unityProcess = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -NoNewWindow
 
 # Cache the handle so exit code works properly
+# https://stackoverflow.com/questions/10262231/obtaining-exitcode-using-start-process-and-waitforexit-instead-of-wait
 $unityHandle = $unityProcess.Handle
 
 while ($true) {
     if ($unityProcess.HasExited) {
-      Start-Sleep -Seconds 5
-      Get-Process
-
-      Start-Sleep -Seconds 10
+      Start-Sleep -Seconds 3
       Get-Process
 
       $BUILD_EXIT_CODE = $unityProcess.ExitCode
@@ -195,5 +193,5 @@ while ($true) {
       break
     }
 
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 3
 }
