@@ -2,7 +2,6 @@ import Platform from './platform';
 
 class ImageTag {
   public repository: string;
-  public name: string;
   public cloudRunnerBuilderPlatform!: string;
   public editorVersion: string;
   public targetPlatform: string;
@@ -12,7 +11,14 @@ class ImageTag {
   public imagePlatformPrefix: string;
 
   constructor(imageProperties: { [key: string]: string }) {
-    const { editorVersion, targetPlatform, customImage, cloudRunnerBuilderPlatform } = imageProperties;
+    const {
+      editorVersion,
+      targetPlatform,
+      customImage,
+      cloudRunnerBuilderPlatform,
+      containerRegistryRepository,
+      containerRegistryImageVersion,
+    } = imageProperties;
 
     if (!ImageTag.versionPattern.test(editorVersion)) {
       throw new Error(`Invalid version "${editorVersion}".`);
@@ -23,8 +29,7 @@ class ImageTag {
     this.customImage = customImage;
 
     // Or
-    this.repository = 'unityci';
-    this.name = 'editor';
+    this.repository = containerRegistryRepository;
     this.editorVersion = editorVersion;
     this.targetPlatform = targetPlatform;
     this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
@@ -33,7 +38,7 @@ class ImageTag {
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
       isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
     );
-    this.imageRollingVersion = 3; // Will automatically roll to the latest non-breaking version.
+    this.imageRollingVersion = Number(containerRegistryImageVersion); // Will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern(): RegExp {
@@ -156,7 +161,7 @@ class ImageTag {
   }
 
   get image(): string {
-    return `${this.repository}/${this.name}`.replace(/^\/+/, '');
+    return `${this.repository}`.replace(/^\/+/, '');
   }
 
   toString(): string {

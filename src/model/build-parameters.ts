@@ -44,6 +44,8 @@ class BuildParameters {
   public dockerCpuLimit!: string;
   public dockerMemoryLimit!: string;
   public dockerIsolationMode!: string;
+  public containerRegistryRepository!: string;
+  public containerRegistryImageVersion!: string;
 
   public customParameters!: string;
   public sshAgent!: string;
@@ -170,6 +172,8 @@ class BuildParameters {
       dockerCpuLimit: Input.dockerCpuLimit,
       dockerMemoryLimit: Input.dockerMemoryLimit,
       dockerIsolationMode: Input.dockerIsolationMode,
+      containerRegistryRepository: Input.containerRegistryRepository,
+      containerRegistryImageVersion: Input.containerRegistryImageVersion,
       providerStrategy: CloudRunnerOptions.providerStrategy,
       buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,
