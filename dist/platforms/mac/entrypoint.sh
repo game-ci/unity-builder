@@ -6,10 +6,10 @@
 
 UNITY_LICENSE_PATH="/Library/Application Support/Unity"
 
-if [ -d "$UNITY_LICENSE_PATH"]
+if [ -d "$UNITY_LICENSE_PATH"]; then
   sudo mkdir "$UNITY_LICENSE_PATH"
   sudo chmod -R 777 "$UNITY_LICENSE_PATH"
-fi
+fi;
 
 ACTIVATE_LICENSE_PATH="$ACTION_FOLDER/BlankProject"
 mkdir -p "$ACTIVATE_LICENSE_PATH"
