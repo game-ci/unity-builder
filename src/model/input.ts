@@ -257,7 +257,7 @@ class Input {
   }
 
   static get containerRegistryRepository(): string {
-    return Input.getInput('containerRegistryUrl')!;
+    return Input.getInput('containerRegistryRepository')!;
   }
 
   static get containerRegistryImageVersion(): string {
