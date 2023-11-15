@@ -15,7 +15,7 @@ class Docker {
     // eslint-disable-next-line unicorn/no-useless-undefined
     options: ExecOptions | undefined = undefined,
     entrypointBash: boolean = false,
-    errorWhenMissingUnityBuildResults: boolean = true,
+    errorWhenMissingUnityBuildResults: boolean = false,
   ) {
     let runCommand = '';
     switch (process.platform) {

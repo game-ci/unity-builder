@@ -169,13 +169,15 @@ while (!$process.HasExited) {
       Start-Sleep -Seconds 10
       Get-Process
 
+      $BUILD_EXIT_CODE = $process.ExitCode
+
       # Display results
-      if ($process.ExitCode -eq 0)
+      if ($BUILD_EXIT_CODE -eq 0)
       {
           Write-Output "Build Succeeded!!"
       } else
       {
-          Write-Output "$('Build failed, with exit code ')$($process.ExitCode)$('"')"
+          Write-Output "$('Build failed, with exit code ')$($BUILD_EXIT_CODE)$('"')"
       }
 
       Write-Output ""
@@ -187,7 +189,7 @@ while (!$process.HasExited) {
       Get-ChildItem $Env:BUILD_PATH_FULL
       Write-Output ""
 
-      exit $process.ExitCode
+      break
     }
 
     Start-Sleep -Seconds 5
