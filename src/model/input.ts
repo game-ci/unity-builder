@@ -256,6 +256,14 @@ class Input {
     return Input.getInput('dockerIsolationMode') || 'default';
   }
 
+  static get containerRegistryRepository(): string {
+    return Input.getInput('containerRegistryRepository')!;
+  }
+
+  static get containerRegistryImageVersion(): string {
+    return Input.getInput('containerRegistryImageVersion')!;
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
