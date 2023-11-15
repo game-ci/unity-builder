@@ -161,6 +161,9 @@ $unityProcess = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -PassThru `
                          -NoNewWindow
 
+# Cache the handle so exit code works properly
+$unityHandle = $unityProcess.Handle
+
 while ($true) {
     if ($unityProcess.HasExited) {
       Start-Sleep -Seconds 5
