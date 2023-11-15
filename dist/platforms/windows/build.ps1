@@ -161,7 +161,7 @@ $process = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
                          -PassThru `
                          -NoNewWindow
 
-while (!$process.HasExited) {
+while ($true) {
     if ($process.HasExited) {
       Start-Sleep -Seconds 5
       Get-Process
