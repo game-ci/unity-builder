@@ -127,7 +127,7 @@ inputs:
   containerRegistryRepository:
     required: false
     default: 'unityci/editor'
-    description: 'Container registry url to pull image from. Only applicable if customImage is not set.'
+    description: 'Container registry and repository to pull image from. Only applicable if customImage is not set.'
   containerRegistryImageVersion:
     required: false
     default: '3'
