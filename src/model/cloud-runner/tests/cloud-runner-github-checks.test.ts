@@ -39,11 +39,11 @@ describe('Cloud Runner Github Checks', () => {
         asyncCloudRunner: `true`,
         githubChecks: `true`,
       });
-      GitHub.asyncWorkflows = true;
+      GitHub.forceAsyncTest = true;
       await CloudRunner.setup(buildParameter);
       CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`t`);
       await GitHub.updateGitHubCheck(`t`, `t2`);
-      GitHub.asyncWorkflows = false;
+      GitHub.forceAsyncTest = false;
     }, 1_000_000_000);
   }
 });

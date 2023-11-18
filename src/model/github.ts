@@ -11,7 +11,7 @@ class GitHub {
   private static startedDate: string;
   private static endedDate: string;
   static result: string = ``;
-  static asyncWorkflows: boolean;
+  static forceAsyncTest: boolean;
   private static get octokitDefaultToken() {
     return new Octokit({
       auth: process.env.GITHUB_TOKEN,
@@ -128,7 +128,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    await (CloudRunner.isCloudRunnerAsyncEnvironment || GitHub.asyncWorkflows
+    await (CloudRunner.isCloudRunnerAsyncEnvironment || GitHub.forceAsyncTest
       ? GitHub.runUpdateAsyncChecksWorkflow(data, `update`)
       : GitHub.updateGitHubCheckRequest(data));
   }
