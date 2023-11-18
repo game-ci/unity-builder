@@ -69,7 +69,15 @@ fi
 if [[ "$BUILD_TARGET" == "Android" && -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
   echo "Updating Android SDK with parameters: $ANDROID_SDK_MANAGER_PARAMETERS"
   export JAVA_HOME="$(awk -F'=' '/JAVA_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
-  "$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)/tools/bin/sdkmanager" "$ANDROID_SDK_MANAGER_PARAMETERS"
+  ANDROID_HOME_DIRECTORY="$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
+  SDKMANAGER=$(find $ANDROID_HOME_DIRECTORY/cmdline-tools -name sdkmanager)
+  if [ -z "${SDKMANAGER}" ]
+  then
+    echo "No sdkmanager found"
+    exit 1
+  fi
+
+  $SDKMANAGER "$ANDROID_SDK_MANAGER_PARAMETERS"
   echo "Updated Android SDK."
 else
   echo "Not updating Android SDK."
@@ -119,7 +127,7 @@ echo ""
 
 unity-editor \
   -logfile /dev/stdout \
-  -quit \
+  $( [ "${MANUAL_EXIT}" == "true" ] || echo "-quit" ) \
   -customBuildName "$BUILD_NAME" \
   -projectPath "$UNITY_PROJECT_PATH" \
   -buildTarget "$BUILD_TARGET" \

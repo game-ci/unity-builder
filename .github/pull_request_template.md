@@ -2,6 +2,18 @@
 
 - ...
 
+#### Related Issues
+
+- ...
+
+#### Related PRs
+
+- ...
+
+#### Successful Workflow Run Link
+
+- ...
+
 #### Checklist
 
 <!-- please check all items and add your own -->

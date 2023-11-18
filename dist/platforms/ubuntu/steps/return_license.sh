@@ -13,14 +13,17 @@ if [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
   /opt/unity/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --return-floating "$FLOATING_LICENSE"
 elif [[ -n "$UNITY_SERIAL" ]]; then
   #
-  # PROFESSIONAL (SERIAL) LICENSE MODE
+  # SERIAL LICENSE MODE
   #
   # This will return the license that is currently in use.
   #
   unity-editor \
     -logFile /dev/stdout \
     -quit \
-    -returnlicense
+    -returnlicense \
+    -username "$UNITY_EMAIL" \
+    -password "$UNITY_PASSWORD" \
+    -projectPath "/BlankProject"
 fi
 
 # Return to previous working directory

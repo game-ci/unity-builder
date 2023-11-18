@@ -1,6 +1,6 @@
 import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
 import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
-import waitUntil from 'async-wait-until';
+import { waitUntil } from 'async-wait-until';
 import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 import KubernetesPods from './kubernetes-pods';
@@ -9,6 +9,8 @@ import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 
 class KubernetesTaskRunner {
   static readonly maxRetry: number = 3;
+  static lastReceivedMessage: string = ``;
+
   static async runTask(
     kubeConfig: KubeConfig,
     kubeClient: CoreV1Api,

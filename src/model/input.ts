@@ -4,6 +4,7 @@ import { Cli } from './cli/cli';
 import CloudRunnerQueryOverride from './cloud-runner/options/cloud-runner-query-override';
 import Platform from './platform';
 import GitHub from './github';
+import os from 'node:os';
 
 import * as core from '@actions/core';
 
@@ -126,6 +127,12 @@ class Input {
     return Input.getInput('buildMethod') || ''; // Processed in docker file
   }
 
+  static get manualExit(): boolean {
+    const input = Input.getInput('manualExit') || false;
+
+    return input === 'true';
+  }
+
   static get customParameters(): string {
     return Input.getInput('customParameters') || '';
   }
@@ -178,6 +185,10 @@ class Input {
     return Input.getInput('sshAgent') || '';
   }
 
+  static get sshPublicKeysDirectoryPath(): string {
+    return Input.getInput('sshPublicKeysDirectoryPath') || '';
+  }
+
   static get gitPrivateToken(): string | undefined {
     return Input.getInput('gitPrivateToken');
   }
@@ -214,6 +225,43 @@ class Input {
 
   static get dockerWorkspacePath(): string {
     return Input.getInput('dockerWorkspacePath') || '/github/workspace';
+  }
+
+  static get dockerCpuLimit(): string {
+    return Input.getInput('dockerCpuLimit') || os.cpus().length.toString();
+  }
+
+  static get dockerMemoryLimit(): string {
+    const bytesInMegabyte = 1024 * 1024;
+
+    let memoryMultiplier;
+    switch (os.platform()) {
+      case 'linux':
+        memoryMultiplier = 0.95;
+        break;
+      case 'win32':
+        memoryMultiplier = 0.8;
+        break;
+      default:
+        memoryMultiplier = 0.75;
+        break;
+    }
+
+    return (
+      Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+    );
+  }
+
+  static get dockerIsolationMode(): string {
+    return Input.getInput('dockerIsolationMode') || 'default';
+  }
+
+  static get containerRegistryRepository(): string {
+    return Input.getInput('containerRegistryRepository')!;
+  }
+
+  static get containerRegistryImageVersion(): string {
+    return Input.getInput('containerRegistryImageVersion')!;
   }
 
   public static ToEnvVarFormat(input: string) {

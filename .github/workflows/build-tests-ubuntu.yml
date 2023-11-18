@@ -3,11 +3,6 @@ name: Builds - Ubuntu
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-  pull_request:
-    paths-ignore:
-      - '.github/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -46,28 +41,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        exclude:
-          - targetPlatform: Android
-            unityVersion: 2022.2.7f1
         providerStrategy:
           # - local-docker
           - local
         projectPath:
           - test-project
         unityVersion:
-          - 2018.3.14f1
-          - 2018.4.36f1
-          - 2019.1.14f1
-          - 2019.2.21f1
-          - 2019.3.15f1
-          - 2019.4.40f1
-          - 2020.2.7f1
-          - 2020.3.45f1
-          - 2021.1.28f1
-          - 2021.2.19f1
-          - 2021.3.19f1
-          - 2022.1.24f1
-          - 2022.2.7f1
+          - 2021.3.32f1
+          - 2022.3.13f1
+          - 2023.1.19f1
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
           - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
@@ -75,17 +57,11 @@ jobs:
           - iOS # Build an iOS player.
           - Android # Build an Android .apk.
           - WebGL # WebGL.
-          #          - StandaloneWindows # Build a Windows standalone.
-          #          - WSAPlayer # Build an Windows Store Apps player.
-          #          - PS4 # Build a PS4 Standalone.
-          #          - XboxOne # Build a Xbox One Standalone.
-          #          - tvOS # Build to Apple's tvOS platform.
-          #          - Switch # Build a Nintendo Switch player
     steps:
       ###########################
       #         Checkout        #
       ###########################
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
@@ -103,13 +79,60 @@ jobs:
       ###########################
       #          Build          #
       ###########################
-      - uses: ./
+      - name: Build
+        uses: ./
+        id: build-1
+        continue-on-error: true
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        run: |
+          sleep 60
+
+      - name: Build (Retry 1)
+        uses: ./
+        id: build-2
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        continue-on-error: true
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          providerStrategy: ${{ matrix.providerStrategy }}
+          allowDirtyBuild: true
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-2.outcome == 'failure' }}
+        run: |
+          sleep 240
+
+      - name: Build (Retry 2)
+        uses: ./
+        id: build-3
+        if: ${{ steps.build-2.outcome == 'failure' }}
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          providerStrategy: ${{ matrix.providerStrategy }}
+          allowDirtyBuild: true
 
       ###########################
       #          Upload         #

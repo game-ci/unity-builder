@@ -47,7 +47,10 @@ class SetupMac {
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
-    const errorCode = await exec(command, undefined, { silent, ignoreReturnCode: true });
+    const errorCode = await exec(command, undefined, {
+      silent,
+      ignoreReturnCode: true,
+    });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }
@@ -64,12 +67,31 @@ class SetupMac {
   private static async getLatestUnityHubVersion(): Promise<string> {
     // Need to check if the latest version available is the same as the one we have cached
     const hubVersionCommand = `/bin/bash -c "brew info unity-hub | grep -o '[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+'"`;
-    const result = await getExecOutput(hubVersionCommand, undefined, { silent: true });
+    const result = await getExecOutput(hubVersionCommand, undefined, {
+      silent: true,
+    });
     if (result.exitCode === 0 && result.stdout !== '') {
       return result.stdout;
     }
 
     return '';
+  }
+
+  private static getArchitectureParameters(): string[] {
+    const architectureArgument = [];
+
+    switch (process.arch) {
+      case 'x64':
+        architectureArgument.push('--architecture', 'x86_64');
+        break;
+      case 'arm64':
+        architectureArgument.push('--architecture', 'arm64');
+        break;
+      default:
+        throw new Error(`Unsupported architecture: ${process.arch}.`);
+    }
+
+    return architectureArgument;
   }
 
   private static getModuleParametersForTargetPlatform(targetPlatform: string): string[] {
@@ -111,6 +133,7 @@ class SetupMac {
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
     const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+    const architectureArguments = SetupMac.getArchitectureParameters();
 
     const execArguments: string[] = [
       '--',
@@ -119,12 +142,16 @@ class SetupMac {
       ...['--version', buildParameters.editorVersion],
       ...['--changeset', unityChangeset.changeset],
       ...moduleArguments,
+      ...architectureArguments,
       '--childModules',
     ];
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
     // a false error
-    const errorCode = await exec(this.unityHubExecPath, execArguments, { silent, ignoreReturnCode: true });
+    const errorCode = await exec(this.unityHubExecPath, execArguments, {
+      silent,
+      ignoreReturnCode: true,
+    });
     if (errorCode) {
       throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
     }

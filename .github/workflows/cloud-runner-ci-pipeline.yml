@@ -52,7 +52,7 @@ jobs:
           - 'cloud-runner-locking-get-locked'
     steps:
       - name: Checkout (default)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: false
       - run: yarn
@@ -80,7 +80,7 @@ jobs:
           - 'cloud-runner-remote-client'
     steps:
       - name: Checkout (default)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           lfs: false
       - name: Configure AWS Credentials
@@ -201,7 +201,7 @@ jobs:
           - Android # Build an Android .apk.
     steps:
       - name: Checkout (default)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: false
       - run: yarn

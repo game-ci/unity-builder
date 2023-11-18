@@ -1,10 +1,10 @@
-import { getExecOutput, ExecOptions } from '@actions/exec';
+import { ExecOptions, getExecOutput } from '@actions/exec';
 
 export async function execWithErrorCheck(
   commandLine: string,
   arguments_?: string[],
   options?: ExecOptions,
-  errorWhenMissingUnityBuildResults: boolean = true,
+  errorWhenMissingUnityBuildResults: boolean = false,
 ): Promise<number> {
   const result = await getExecOutput(commandLine, arguments_, options);
 

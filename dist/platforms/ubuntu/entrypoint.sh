@@ -10,6 +10,7 @@ mkdir -p "$ACTIVATE_LICENSE_PATH"
 #
 # Run steps
 #
+source /steps/set_extra_git_configs.sh
 source /steps/set_gitcredential.sh
 source /steps/activate.sh
 source /steps/build.sh
@@ -20,6 +21,7 @@ source /steps/return_license.sh
 #
 
 rm -r "$ACTIVATE_LICENSE_PATH"
+chmod -R 777 "/BlankProject"
 
 #
 # Instructions for debugging
