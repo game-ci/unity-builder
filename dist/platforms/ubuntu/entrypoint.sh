@@ -14,13 +14,6 @@ chown $USERNAME:$GROUPNAME "/home/$USERNAME"
 # Switch to the host user so we can create files with the correct ownership
 su - $USERNAME -c '
     #
-    # Create directory for license activation
-    #
-
-    ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license~"
-    mkdir -p "$ACTIVATE_LICENSE_PATH"
-
-    #
     # Run steps
     #
     source /steps/set_extra_git_configs.sh
@@ -28,13 +21,6 @@ su - $USERNAME -c '
     source /steps/activate.sh
     source /steps/build.sh
     source /steps/return_license.sh
-
-    #
-    # Remove license activation directory
-    #
-
-    rm -r "$ACTIVATE_LICENSE_PATH"
-    chmod -R 777 "/BlankProject"
 
     #
     # Instructions for debugging
