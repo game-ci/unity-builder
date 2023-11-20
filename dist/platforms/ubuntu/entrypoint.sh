@@ -33,7 +33,7 @@ if [[ "$BUILD_TARGET" == "Android" ]]; then
     exit 1
   fi
 
-  if [[ -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]: then
+  if [[ -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
     echo "Updating Android SDK with parameters: $ANDROID_SDK_MANAGER_PARAMETERS"
     $SDKMANAGER "$ANDROID_SDK_MANAGER_PARAMETERS"
   else
