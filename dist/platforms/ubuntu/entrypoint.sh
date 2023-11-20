@@ -9,9 +9,11 @@ GROUPID=$(stat -c '%g' "$GITHUB_WORKSPACE/$PROJECT_PATH")
 groupadd -g $GROUPID $GROUPNAME
 useradd -u $USERID -g $GROUPID $USERNAME
 usermod -aG $GROUPNAME $USERNAME
-usermod -aG tty $USERNAME
 mkdir -p "/home/$USERNAME"
 chown $USERNAME:$GROUPNAME "/home/$USERNAME"
+
+chmod 777 /dev/stdout
+chmod 777 /dev/stderr
 
 # Switch to the host user so we can create files with the correct ownership
 su $USERNAME -c "$SHELL -c 'source /steps/runsteps.sh'"
