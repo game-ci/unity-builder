@@ -1,47 +1,65 @@
 #!/usr/bin/env bash
 
-#
-# Create directory for license activation
-#
+# Get host user/group info so we create files with the correct ownership
+USERNAME=stat -c '%U' "$GITHUB_WORKSPACE/$PROJECT_PATH"
+USERID=stat -c '%u' "$GITHUB_WORKSPACE/$PROJECT_PATH"
+GROUPNAME=stat -c '%G' "$GITHUB_WORKSPACE/$PROJECT_PATH"
+GROUPID=stat -c '%g' "$GITHUB_WORKSPACE/$PROJECT_PATH"
 
-ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license~"
-mkdir -p "$ACTIVATE_LICENSE_PATH"
+useradd -u $USERID -g $GROUPID $USERNAME
+usermod -aG $GROUPNAME $USERNAME
+mkdir -p "/home/$USERNAME"
+chown $USERNAME:$GROUPNAME "/home/$USERNAME"
 
-#
-# Run steps
-#
-source /steps/set_extra_git_configs.sh
-source /steps/set_gitcredential.sh
-source /steps/activate.sh
-source /steps/build.sh
-source /steps/return_license.sh
+# Switch to the host user so we can create files with the correct ownership
+su - $USERNAME -c '
+    #
+    # Create directory for license activation
+    #
 
-#
-# Remove license activation directory
-#
+    ACTIVATE_LICENSE_PATH="$GITHUB_WORKSPACE/_activate-license~"
+    mkdir -p "$ACTIVATE_LICENSE_PATH"
 
-rm -r "$ACTIVATE_LICENSE_PATH"
-chmod -R 777 "/BlankProject"
+    #
+    # Run steps
+    #
+    source /steps/set_extra_git_configs.sh
+    source /steps/set_gitcredential.sh
+    source /steps/activate.sh
+    source /steps/build.sh
+    source /steps/return_license.sh
 
-#
-# Instructions for debugging
-#
+    #
+    # Remove license activation directory
+    #
 
-if [[ $BUILD_EXIT_CODE -gt 0 ]]; then
-echo ""
-echo "###########################"
-echo "#         Failure         #"
-echo "###########################"
-echo ""
-echo "Please note that the exit code is not very descriptive."
-echo "Most likely it will not help you solve the issue."
-echo ""
-echo "To find the reason for failure: please search for errors in the log above."
-echo ""
-fi;
+    rm -r "$ACTIVATE_LICENSE_PATH"
+    chmod -R 777 "/BlankProject"
 
-#
-# Exit with code from the build step.
-#
+    #
+    # Instructions for debugging
+    #
 
+    if [[ $BUILD_EXIT_CODE -gt 0 ]]; then
+    echo ""
+    echo "###########################"
+    echo "#         Failure         #"
+    echo "###########################"
+    echo ""
+    echo "Please note that the exit code is not very descriptive."
+    echo "Most likely it will not help you solve the issue."
+    echo ""
+    echo "To find the reason for failure: please search for errors in the log above."
+    echo ""
+    fi;
+
+    #
+    # Exit with code from the build step.
+    #
+
+    # Exiting su
+    exit $BUILD_EXIT_CODE
+'
+
+# Exiting main script
 exit $BUILD_EXIT_CODE
