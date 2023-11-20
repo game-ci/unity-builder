@@ -13,40 +13,7 @@ mkdir -p "/home/$USERNAME"
 chown $USERNAME:$GROUPNAME "/home/$USERNAME"
 
 # Switch to the host user so we can create files with the correct ownership
-su - $USERNAME -c '
-    #
-    # Run steps
-    #
-    source /steps/set_extra_git_configs.sh
-    source /steps/set_gitcredential.sh
-    source /steps/activate.sh
-    source /steps/build.sh
-    source /steps/return_license.sh
-
-    #
-    # Instructions for debugging
-    #
-
-    if [[ $BUILD_EXIT_CODE -gt 0 ]]; then
-    echo ""
-    echo "###########################"
-    echo "#         Failure         #"
-    echo "###########################"
-    echo ""
-    echo "Please note that the exit code is not very descriptive."
-    echo "Most likely it will not help you solve the issue."
-    echo ""
-    echo "To find the reason for failure: please search for errors in the log above."
-    echo ""
-    fi;
-
-    #
-    # Exit with code from the build step.
-    #
-
-    # Exiting su
-    exit $BUILD_EXIT_CODE
-'
+su - $USERNAME -c 'source /steps/runsteps.sh'
 
 # Exiting main script
 exit $BUILD_EXIT_CODE
