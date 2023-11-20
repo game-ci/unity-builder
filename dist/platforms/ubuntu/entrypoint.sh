@@ -9,6 +9,7 @@ GROUPID=$(stat -c '%g' "$GITHUB_WORKSPACE/$PROJECT_PATH")
 groupadd -g $GROUPID $GROUPNAME
 useradd -u $USERID -g $GROUPID $USERNAME
 usermod -aG $GROUPNAME $USERNAME
+usermod -aG tty $USERNAME
 mkdir -p "/home/$USERNAME"
 chown $USERNAME:$GROUPNAME "/home/$USERNAME"
 

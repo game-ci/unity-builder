@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# Run in ACTIVATE_LICENSE_PATH directory
-echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
-pushd "$ACTIVATE_LICENSE_PATH"
-
 if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # SERIAL LICENSE MODE
