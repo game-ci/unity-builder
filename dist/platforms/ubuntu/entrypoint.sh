@@ -13,6 +13,6 @@ mkdir -p "/home/$USERNAME"
 chown $USERNAME:$GROUPNAME "/home/$USERNAME"
 
 # Switch to the host user so we can create files with the correct ownership
-su - $USERNAME -Ec "$SHELL -c 'source /steps/runsteps.sh'"
+su - $USERNAME -pc "$SHELL -c 'source /steps/runsteps.sh'"
 
 exit $?
