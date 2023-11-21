@@ -52,7 +52,12 @@ else
   echo "Not updating Android SDK."
 fi
 
-# Switch to the host user so we can create files with the correct ownership
-su $USERNAME -c "$SHELL -c 'source /steps/runsteps.sh'"
+if [[ "RUN_AS_HOST_USER" == "true" ]]; then
+  # Switch to the host user so we can create files with the correct ownership
+  su $USERNAME -c "$SHELL -c 'source /steps/runsteps.sh'"
+else
+  # Run as root
+  source /steps/runsteps.sh
+fi
 
 exit $?

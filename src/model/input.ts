@@ -193,6 +193,10 @@ class Input {
     return Input.getInput('gitPrivateToken');
   }
 
+  static get runAsHostUser(): string {
+    return Input.getInput('runAsHostUser') || 'false';
+  }
+
   static get chownFilesTo() {
     return Input.getInput('chownFilesTo') || '';
   }
