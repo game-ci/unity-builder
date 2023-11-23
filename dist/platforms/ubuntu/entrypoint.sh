@@ -8,6 +8,8 @@ dbus-uuidgen > /etc/machine-id && mkdir -p /var/lib/dbus/ && ln -sf /etc/machine
 # We do this here to ensure it has root permissions
 #
 
+fullProjectPath="$GITHUB_WORKSPACE/$PROJECT_PATH"
+
 if [[ "$BUILD_TARGET" == "Android" ]]; then
   export JAVA_HOME="$(awk -F'=' '/JAVA_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
   ANDROID_HOME_DIRECTORY="$(awk -F'=' '/ANDROID_HOME=/{print $2}' /usr/bin/unity-editor.d/*)"
@@ -38,10 +40,10 @@ else
 fi
 
 if [[ "RUN_AS_HOST_USER" == "true" ]]; then
+  echo "Running as host user"
+
   # Stop on error if we can't set up the user
   set -e
-
-  fullProjectPath="$GITHUB_WORKSPACE/$PROJECT_PATH"
 
   # Get host user/group info so we create files with the correct ownership
   USERNAME=$(stat -c '%U' "$fullProjectPath")
@@ -65,6 +67,8 @@ if [[ "RUN_AS_HOST_USER" == "true" ]]; then
   # Switch to the host user so we can create files with the correct ownership
   su $USERNAME -c "$SHELL -c 'source /steps/runsteps.sh'"
 else
+  echo "Running as root"
+
   # Run as root
   source /steps/runsteps.sh
 fi
