@@ -39,7 +39,7 @@ else
   echo "Not updating Android SDK."
 fi
 
-if [[ "RUN_AS_HOST_USER" == "true" ]]; then
+if [[ "$RUN_AS_HOST_USER" == "true" ]]; then
   echo "Running as host user"
 
   # Stop on error if we can't set up the user
