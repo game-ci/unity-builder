@@ -16,7 +16,7 @@ class Docker {
     options: ExecOptions | undefined = undefined,
     entrypointBash: boolean = false,
     errorWhenMissingUnityBuildResults: boolean = false,
-  ) {
+  ): Promise<number> {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
@@ -27,9 +27,10 @@ class Docker {
     }
     if (options) {
       options.silent = silent;
-      await execWithErrorCheck(runCommand, undefined, options, errorWhenMissingUnityBuildResults);
+
+      return await execWithErrorCheck(runCommand, undefined, options, errorWhenMissingUnityBuildResults);
     } else {
-      await execWithErrorCheck(runCommand, undefined, { silent }, errorWhenMissingUnityBuildResults);
+      return await execWithErrorCheck(runCommand, undefined, { silent }, errorWhenMissingUnityBuildResults);
     }
   }
 
