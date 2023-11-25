@@ -25,7 +25,7 @@ Steps to be performed to submit a pull request:
 
 #### Pull Request Prerequisites
 
-You have [Node](https://nodejs.org/) installed at v12.2.0+ and [Yarn](https://yarnpkg.com/) at v1.18.0+.
+You have [Node](https://nodejs.org/) installed at v18+ and [Yarn](https://yarnpkg.com/) at v1.22.0+.
 
 Please note that commit hooks will run automatically to perform some tasks;
 
@@ -36,7 +36,8 @@ Please note that commit hooks will run automatically to perform some tasks;
 #### Windows users
 
 Make sure your editor and terminal that run the tests are set to `Powershell 7` or above with
-`Git's Unix tools for Windows` installed. Some tests require you to be able to run `sh` and other unix commands.
+`Git's Unix tools for Windows` installed. This is because some tests require you to be able to run `sh` and other
+unix commands.
 
 #### License
 
