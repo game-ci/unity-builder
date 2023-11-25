@@ -59,6 +59,7 @@ class BuildParameters {
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
+  public runAsHostUser!: String;
   public chownFilesTo!: string;
   public commandHooks!: string;
   public pullInputList!: string[];
@@ -168,6 +169,7 @@ class BuildParameters {
       sshAgent: Input.sshAgent,
       sshPublicKeysDirectoryPath: Input.sshPublicKeysDirectoryPath,
       gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
+      runAsHostUser: Input.runAsHostUser,
       chownFilesTo: Input.chownFilesTo,
       dockerCpuLimit: Input.dockerCpuLimit,
       dockerMemoryLimit: Input.dockerMemoryLimit,

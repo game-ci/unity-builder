@@ -101,6 +101,12 @@ inputs:
     required: false
     default: ''
     description: '[CloudRunner] GitHub owner name or organization/team name'
+  runAsHostUser:
+    required: false
+    default: 'false'
+    description:
+      'Whether to run as a user that matches the host system or the default root container user. Only applicable to
+      Linux hosts and containers. This is useful for fixing permission errors on Self-Hosted runners.'
   chownFilesTo:
     required: false
     default: ''

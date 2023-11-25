@@ -41,7 +41,7 @@ echo ""
 echo "Please note that the exit code is not very descriptive."
 echo "Most likely it will not help you solve the issue."
 echo ""
-echo "To find the reason for failure: please search for errors in the log above."
+echo "To find the reason for failure: please search for errors in the log above and check for annotations in the summary view."
 echo ""
 fi;
 
