@@ -1,5 +1,4 @@
 Get-Process
-Start-Sleep -Seconds 3
 
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
@@ -17,13 +16,17 @@ Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
 # Activate Unity
 . "c:\steps\activate.ps1"
 
+# If we didn't activate successfully, exit with the exit code from the activation step.
+if ($ACTIVATION_EXIT_CODE -ne 0) {
+    exit $ACTIVATION_EXIT_CODE
+}
+
 # Build the project
 . "c:\steps\build.ps1"
 
 # Free the seat for the activated license
 . "c:\steps\return_license.ps1"
 
-Start-Sleep -Seconds 3
 Get-Process
 
 exit $BUILD_EXIT_CODE
