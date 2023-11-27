@@ -40,6 +40,10 @@ async function runMain() {
     await Output.setBuildVersion(buildParameters.buildVersion);
     await Output.setAndroidVersionCode(buildParameters.androidVersionCode);
     await Output.setExitCode(exitCode);
+
+    if (exitCode !== 0) {
+      core.setFailed(`Build failed with exit code ${exitCode}`);
+    }
   } catch (error) {
     core.setFailed((error as Error).message);
   }
