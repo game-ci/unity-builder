@@ -133,7 +133,7 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
     if (fs.existsSync(`${workspace}/cloud-runner-cache`)) {
       await CloudRunnerSystem.Run(`ls ${workspace}/cloud-runner-cache && du -sh ${workspace}/cloud-runner-cache`);
     }
-    await Docker.run(
+    const exitCode = await Docker.run(
       image,
       { workspace, actionFolder, ...this.buildParameters },
       false,
@@ -150,8 +150,13 @@ cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
         },
       },
       true,
-      false,
     );
+
+    // Docker doesn't exit on fail now so adding this to ensure behavior is unchanged
+    // TODO: Is there a helpful way to consume the exit code or is it best to except
+    if (exitCode !== 0) {
+      throw new Error(`Build failed with exit code ${exitCode}`);
+    }
 
     return myOutput;
   }

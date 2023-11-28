@@ -261,6 +261,11 @@ outputs:
     description: 'The generated version used for the Unity build'
   androidVersionCode:
     description: 'The generated versionCode used for the Android Unity build'
+  engineExitCode:
+    description:
+      'Returns the exit code from the build scripts. This code is 0 if the build was successful. If there was an error
+      during activation, the code is from the activation step. If activation is successful, the code is from the project
+      build step.'
 branding:
   icon: 'box'
   color: 'gray-dark'

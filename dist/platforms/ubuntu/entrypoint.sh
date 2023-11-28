@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-# Ensure machine ID is randomized
-dbus-uuidgen > /etc/machine-id && mkdir -p /var/lib/dbus/ && ln -sf /etc/machine-id /var/lib/dbus/machine-id
+# Ensure machine ID is randomized for personal license activation
+if [[ "$UNITY_SERIAL" = F* ]]; then
+  echo "Randomizing machine ID for personal license activation"
+  dbus-uuidgen > /etc/machine-id && mkdir -p /var/lib/dbus/ && ln -sf /etc/machine-id /var/lib/dbus/machine-id
+fi
 
 #
 # Prepare Android SDK, if needed

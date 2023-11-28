@@ -35,11 +35,12 @@ if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
       echo "Activation successful"
       break
     else
-      echo "Activation failed, retrying in $delay seconds..."
-      sleep $delay
-
       # Increment retry count
       ((retry_count++))
+
+      echo "::warning ::Activation failed, attempting retry #$retry_count"
+      echo "Activation failed, retrying in $delay seconds..."
+      sleep $delay
 
       # Double the delay for the next iteration
       delay=$((delay * 2))

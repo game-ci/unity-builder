@@ -1,8 +1,7 @@
-import { execWithErrorCheck } from './exec-with-error-check';
 import ImageEnvironmentFactory from './image-environment-factory';
 import { existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { ExecOptions } from '@actions/exec';
+import { ExecOptions, exec } from '@actions/exec';
 import { DockerParameters, StringKeyValuePair } from './shared-types';
 
 class Docker {
@@ -12,11 +11,9 @@ class Docker {
     silent: boolean = false,
     overrideCommands: string = '',
     additionalVariables: StringKeyValuePair[] = [],
-    // eslint-disable-next-line unicorn/no-useless-undefined
-    options: ExecOptions | undefined = undefined,
+    options: ExecOptions = {},
     entrypointBash: boolean = false,
-    errorWhenMissingUnityBuildResults: boolean = false,
-  ) {
+  ): Promise<number> {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
@@ -25,12 +22,11 @@ class Docker {
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
     }
-    if (options) {
-      options.silent = silent;
-      await execWithErrorCheck(runCommand, undefined, options, errorWhenMissingUnityBuildResults);
-    } else {
-      await execWithErrorCheck(runCommand, undefined, { silent }, errorWhenMissingUnityBuildResults);
-    }
+
+    options.silent = silent;
+    options.ignoreReturnCode = true;
+
+    return await exec(runCommand, undefined, options);
   }
 
   static getLinuxCommand(
