@@ -19,7 +19,7 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    let exitCode = 0;
+    let exitCode = -1;
 
     if (buildParameters.providerStrategy === 'local') {
       core.info('Building locally');
@@ -39,7 +39,7 @@ async function runMain() {
     // Set output
     await Output.setBuildVersion(buildParameters.buildVersion);
     await Output.setAndroidVersionCode(buildParameters.androidVersionCode);
-    await Output.setExitCode(exitCode);
+    await Output.setEngineExitCode(exitCode);
 
     if (exitCode !== 0) {
       core.setFailed(`Build failed with exit code ${exitCode}`);
