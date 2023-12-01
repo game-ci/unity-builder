@@ -1,31 +1,55 @@
 #!/usr/bin/env bash
 
-# Run in ACTIVATE_LICENSE_PATH directory
-echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
-pushd "$ACTIVATE_LICENSE_PATH"
-
 if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # SERIAL LICENSE MODE
   #
-  # This will activate unity, using the activating process.
+  # This will activate unity, using the serial activation process.
   #
   echo "Requesting activation"
 
-  # Activate license
-  unity-editor \
-    -logFile /dev/stdout \
-    -quit \
-    -serial "$UNITY_SERIAL" \
-    -username "$UNITY_EMAIL" \
-    -password "$UNITY_PASSWORD" \
-    -projectPath "/BlankProject"
+  # Loop the unity-editor call until the license is activated with exponential backoff and a maximum of 5 retries
+  retry_count=0
 
-  # Store the exit code from the verify command
-  UNITY_EXIT_CODE=$?
+  # Initialize delay to 15 seconds
+  delay=15
 
-  if [ ! -f "~/.local/share/unity3d/Unity/Unity_lic.ulf" ]; then
-    echo "::error ::There was an error while trying to activate the Unity license."
+  # Loop until UNITY_EXIT_CODE is 0 or retry count reaches 5
+  while [[ $retry_count -lt 5 ]]
+  do
+    # Activate license
+    unity-editor \
+      -logFile /dev/stdout \
+      -quit \
+      -serial "$UNITY_SERIAL" \
+      -username "$UNITY_EMAIL" \
+      -password "$UNITY_PASSWORD" \
+      -projectPath "/BlankProject"
+
+    # Store the exit code from the verify command
+    UNITY_EXIT_CODE=$?
+
+    # Check if UNITY_EXIT_CODE is 0
+    if [[ $UNITY_EXIT_CODE -eq 0 ]]
+    then
+      echo "Activation successful"
+      break
+    else
+      # Increment retry count
+      ((retry_count++))
+
+      echo "::warning ::Activation failed, attempting retry #$retry_count"
+      echo "Activation failed, retrying in $delay seconds..."
+      sleep $delay
+
+      # Double the delay for the next iteration
+      delay=$((delay * 2))
+    fi
+  done
+
+  if [[ $retry_count -eq 5 ]]
+  then
+    echo "Activation failed after 5 retries"
   fi
 
 elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
@@ -54,8 +78,9 @@ else
   echo "Visit https://game.ci/docs/github/getting-started for more"
   echo "details on how to set up one of the possible activation strategies."
 
-  echo "::error ::No valid license activation strategy could be determined."
-  # Immediately exit as no UNITY_EXIT_CODE can be derrived.
+  echo "::error ::No valid license activation strategy could be determined. Make sure to provide UNITY_EMAIL, UNITY_PASSWORD, and either a UNITY_SERIAL \
+or UNITY_LICENSE. Otherwise please use UNITY_LICENSING_SERVER."
+  # Immediately exit as no UNITY_EXIT_CODE can be derived.
   exit 1;
 
 fi
@@ -70,6 +95,7 @@ else
   # Activation failed so exit with the code from the license verification step
   echo "Unclassified error occured while trying to activate license."
   echo "Exit code was: $UNITY_EXIT_CODE"
+  echo "::error ::There was an error while trying to activate the Unity license."
   exit $UNITY_EXIT_CODE
 fi
 

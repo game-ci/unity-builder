@@ -62,6 +62,7 @@ class ImageEnvironmentFactory {
       { name: 'ANDROID_EXPORT_TYPE', value: parameters.androidExportType },
       { name: 'ANDROID_SYMBOL_TYPE', value: parameters.androidSymbolType },
       { name: 'CUSTOM_PARAMETERS', value: parameters.customParameters },
+      { name: 'RUN_AS_HOST_USER', value: parameters.runAsHostUser },
       { name: 'CHOWN_FILES_TO', value: parameters.chownFilesTo },
       { name: 'GITHUB_REF', value: process.env.GITHUB_REF },
       { name: 'GITHUB_SHA', value: process.env.GITHUB_SHA },

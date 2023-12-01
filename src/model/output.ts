@@ -8,6 +8,10 @@ class Output {
   static async setAndroidVersionCode(androidVersionCode: string) {
     core.setOutput('androidVersionCode', androidVersionCode);
   }
+
+  static async setEngineExitCode(exitCode: number) {
+    core.setOutput('engineExitCode', exitCode);
+  }
 }
 
 export default Output;
