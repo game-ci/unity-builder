@@ -19,8 +19,12 @@ if [[ "$BUILD_TARGET" == "Android" ]]; then
   SDKMANAGER=$(find $ANDROID_HOME_DIRECTORY/cmdline-tools -name sdkmanager)
   if [ -z "${SDKMANAGER}" ]
   then
-    echo "No sdkmanager found"
-    exit 1
+    SDKMANAGER=$(find $ANDROID_HOME_DIRECTORY/tools/bin -name sdkmanager)
+    if [ -z "${SDKMANAGER}" ]
+    then
+      echo "No sdkmanager found"
+      exit 1
+    fi
   fi
 
   if [[ -n "$ANDROID_SDK_MANAGER_PARAMETERS" ]]; then
