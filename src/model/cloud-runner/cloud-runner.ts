@@ -87,14 +87,12 @@ class CloudRunner {
       throw new Error(`baseImage is undefined`);
     }
     await CloudRunner.setup(buildParameters);
-    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
     await CloudRunner.Provider.setupWorkflow(
       CloudRunner.buildParameters.buildGuid,
       CloudRunner.buildParameters,
       CloudRunner.buildParameters.branch,
       CloudRunner.defaultSecrets,
     );
-    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
       if (buildParameters.maxRetainedWorkspaces > 0) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
@@ -125,14 +123,12 @@ class CloudRunner {
           CloudRunner.defaultSecrets,
         ),
       );
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
       await CloudRunner.Provider.cleanupWorkflow(
         CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
         CloudRunner.buildParameters.branch,
         CloudRunner.defaultSecrets,
       );
-      CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
       if ((buildParameters.asyncWorkflow && this.isCloudRunnerEnvironment) || !buildParameters.asyncWorkflow) {
         await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);

@@ -2,7 +2,6 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import { CloudRunnerStepParameters } from '../options/cloud-runner-step-parameters';
 import { WorkflowInterface } from './workflow-interface';
-import * as core from '@actions/core';
 import { CommandHookService } from '../services/hooks/command-hook-service';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
@@ -21,8 +20,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     output += await ContainerHookService.RunPreBuildSteps(cloudRunnerStepState);
     CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
-
-    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
     CloudRunnerLogger.log(baseImage);
     CloudRunnerLogger.logLine(` `);
     CloudRunnerLogger.logLine('Starting build automation job');
@@ -36,7 +33,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       cloudRunnerStepState.environment,
       cloudRunnerStepState.secrets,
     );
-    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     CloudRunnerLogger.logWithTime('Build time');
 
     output += await ContainerHookService.RunPostBuildSteps(cloudRunnerStepState);
