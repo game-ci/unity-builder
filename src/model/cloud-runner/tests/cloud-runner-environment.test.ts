@@ -45,6 +45,9 @@ describe('Cloud Runner Sync Environments', () => {
         `,
       });
       const baseImage = new ImageTag(buildParameter);
+      if (baseImage.toString().includes('undefined')) {
+        throw new Error(`Base image is undefined`);
+      }
 
       // Run the job
       const file = await CloudRunner.run(buildParameter, baseImage.toString());
