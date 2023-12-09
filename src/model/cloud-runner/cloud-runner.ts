@@ -83,6 +83,9 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
+    if (baseImage.includes(`undefined`)) {
+      throw new Error(`baseImage is undefined`);
+    }
     await CloudRunner.setup(buildParameters);
     if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
     await CloudRunner.Provider.setupWorkflow(
