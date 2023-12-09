@@ -34,6 +34,7 @@ describe('Cloud Runner Sync Environments', () => {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
+        targetPlatform: 'StandaloneWindows64',
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
