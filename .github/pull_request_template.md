@@ -12,6 +12,9 @@
 
 #### Successful Workflow Run Link
 
+PRs don't have access to secrets so you will need to provide a link to a successful run of the workflows from your own
+repo.
+
 - ...
 
 #### Checklist
