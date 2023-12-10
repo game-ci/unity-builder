@@ -261,7 +261,7 @@ class Input {
   }
 
   static get containerRegistryRepository(): string {
-    return Input.getInput('containerRegistryRepository')!;
+    return Input.getInput('containerRegistryRepository') || 'unityci/editor';
   }
 
   static get containerRegistryImageVersion(): string {
