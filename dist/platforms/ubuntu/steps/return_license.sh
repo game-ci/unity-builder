@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
+if [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   #
   # Return any floating license used.
   #
@@ -20,6 +20,3 @@ elif [[ -n "$UNITY_SERIAL" ]]; then
     -password "$UNITY_PASSWORD" \
     -projectPath "/BlankProject"
 fi
-
-# Return to previous working directory
-popd
