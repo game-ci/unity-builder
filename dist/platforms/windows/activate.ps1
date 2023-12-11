@@ -15,18 +15,40 @@ if ( ($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($
   #
   Write-Output "Requesting activation"
 
-  $ACTIVATION_OUTPUT = Start-Process -NoNewWindow -Wait -PassThru "$Env:UNITY_PATH/Editor/Unity.exe" `
-                                      -ArgumentList `
-                                      "-batchmode `
-                                       -quit `
-                                       -nographics `
-                                       -username $Env:UNITY_EMAIL `
-                                       -password $Env:UNITY_PASSWORD `
-                                       -serial $Env:UNITY_SERIAL `
-                                       -projectPath c:/BlankProject `
-                                       -logfile -"
+  $ACTIVATION_OUTPUT = Start-Process -FilePath "$Env:UNITY_PATH/Editor/Unity.exe" `
+                                     -NoNewWindow `
+                                     -PassThru `
+                                     -ArgumentList  "-batchmode `
+                                                     -quit `
+                                                     -nographics `
+                                                     -username $Env:UNITY_EMAIL `
+                                                     -password $Env:UNITY_PASSWORD `
+                                                     -serial $Env:UNITY_SERIAL `
+                                                     -projectPath c:/BlankProject `
+                                                     -logfile -"
 
-  $ACTIVATION_EXIT_CODE = $ACTIVATION_OUTPUT.ExitCode
+  # Cache the handle so exit code works properly
+  # https://stackoverflow.com/questions/10262231/obtaining-exitcode-using-start-process-and-waitforexit-instead-of-wait
+  $unityHandle = $ACTIVATION_OUTPUT.Handle
+
+  while ($true) {
+      if ($ACTIVATION_OUTPUT.HasExited) {
+        $ACTIVATION_EXIT_CODE = $ACTIVATION_OUTPUT.ExitCode
+
+        # Display results
+        if ($ACTIVATION_EXIT_CODE -eq 0)
+        {
+            Write-Output "Activation Succeeded"
+        } else
+        {
+            Write-Output "Activation failed, with exit code $ACTIVATION_EXIT_CODE"
+        }
+
+        break
+      }
+
+      Start-Sleep -Seconds 3
+  }
 }
 else
 {
