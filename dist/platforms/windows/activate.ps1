@@ -63,7 +63,7 @@ else
     Write-Output "details on how to set up one of the possible activation strategies."
 
     Write-Output "::error ::No valid license activation strategy could be determined. Make sure to provide UNITY_EMAIL, UNITY_PASSWORD, and either a UNITY_SERIAL \
-or UNITY_LICENSE. Otherwise please use UNITY_LICENSING_SERVER. See more info at https://game.ci/docs/github/activation"
+or UNITY_LICENSE. See more info at https://game.ci/docs/github/activation"
 
     $ACTIVATION_EXIT_CODE = 1;
 }
