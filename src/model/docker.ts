@@ -21,6 +21,9 @@ class Docker {
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
+        break;
+      default:
+        throw new Error(`Operation system, ${process.platform}, is not supported yet.`);
     }
 
     options.silent = silent;

@@ -1,4 +1,4 @@
-if ([string]::IsNullOrEmpty($env:GIT_PRIVATE_TOKEN)) {
+if ($null -eq ${env:GIT_PRIVATE_TOKEN}) {
     Write-Host "GIT_PRIVATE_TOKEN unset skipping"
 }
 else {
@@ -8,7 +8,7 @@ else {
     git config --global --replace-all "url.https://token:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
     git config --global --add "url.https://token:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "git@github.com"
     git config --global --add "url.https://token:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "https://github.com/"
-    
+
     git config --global "url.https://ssh:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
     git config --global "url.https://git:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "git@github.com:"
 }

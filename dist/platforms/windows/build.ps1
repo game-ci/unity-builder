@@ -156,10 +156,10 @@ $unityArgs = @(
 # Remove null items as that will fail the Start-Process call
 $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-$unityProcess = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
-                         -ArgumentList $unityArgs `
-                         -PassThru `
-                         -NoNewWindow
+$unityProcess = Start-Process -FilePath "$Env:UNITY_PATH/Editor/Unity.exe" `
+                              -ArgumentList $unityArgs `
+                              -PassThru `
+                              -NoNewWindow
 
 # Cache the handle so exit code works properly
 # https://stackoverflow.com/questions/10262231/obtaining-exitcode-using-start-process-and-waitforexit-instead-of-wait

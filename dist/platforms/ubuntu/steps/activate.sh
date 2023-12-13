@@ -75,11 +75,12 @@ else
   #
   echo "License activation strategy could not be determined."
   echo ""
-  echo "Visit https://game.ci/docs/github/getting-started for more"
+  echo "Visit https://game.ci/docs/github/activation for more"
   echo "details on how to set up one of the possible activation strategies."
 
   echo "::error ::No valid license activation strategy could be determined. Make sure to provide UNITY_EMAIL, UNITY_PASSWORD, and either a UNITY_SERIAL \
-or UNITY_LICENSE. Otherwise please use UNITY_LICENSING_SERVER."
+or UNITY_LICENSE. Otherwise please use UNITY_LICENSING_SERVER. See more info at https://game.ci/docs/github/activation"
+
   # Immediately exit as no UNITY_EXIT_CODE can be derived.
   exit 1;
 
@@ -98,6 +99,3 @@ else
   echo "::error ::There was an error while trying to activate the Unity license."
   exit $UNITY_EXIT_CODE
 fi
-
-# Return to previous working directory
-popd

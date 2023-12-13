@@ -169,7 +169,7 @@ class ImageTag {
 
     if (customImage) return customImage;
 
-    return `${image}:${tag}`; // '0' here represents the docker repo version
+    return `${image}:${tag}`;
   }
 }
 
