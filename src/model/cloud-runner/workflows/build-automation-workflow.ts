@@ -58,7 +58,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
       npm i -g n > /dev/null
-      n 20.8.0 > /dev/null
+      n 16.16.0 > /dev/null
       npm --version
       node --version
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
