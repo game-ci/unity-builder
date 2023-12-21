@@ -64,7 +64,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       npm i -g n > /dev/null
       npm i -g semver > /dev/null
       npm install --global yarn > /dev/null
-      n 16.16.0 > /dev/null
+      n 16.16.0
       node --version
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
