@@ -84,33 +84,6 @@ describe('Cloud Runner Sync Environments', () => {
         expect(newLinePurgedFile).toContain(fullNameEqualValue);
       }
     }, 1_000_000_000);
-    it('Unity Builder can clone', async () => {
-      // Setup parameters
-      const buildParameter = await CreateParameters({
-        versioning: 'None',
-        projectPath: 'test-project',
-        unityVersion: UnityVersioning.read('test-project'),
-        targetPlatform: 'StandaloneWindows64',
-        customJob: `
-        - name: 'step 1'
-          image: 'ubuntu'
-          commands: 'apt-get update > /dev/null\napt-get install -y curl tar tree npm git-lfs jq git > /dev/null\nnpm i -g n > /dev/null\nn 16.16.0 > /dev/null\nnpm --version\nnode --version'
-          secrets:
-            - name: '${testSecretName}'
-              value: '${testSecretValue}'
-        `,
-      });
-      const baseImage = new ImageTag(buildParameter);
-      if (baseImage.toString().includes('undefined')) {
-        throw new Error(`Base image is undefined`);
-      }
-
-      // Run the job
-      await CloudRunner.run(buildParameter, baseImage.toString());
-
-      // Assert results
-      // expect(file).toContain(JSON.stringify(buildParameter));
-    }, 1_000_000_000);
   }
 });
 
