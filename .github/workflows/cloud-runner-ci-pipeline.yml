@@ -39,7 +39,7 @@ jobs:
       GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         test:
           - 'cloud-runner-caching'
