@@ -22,7 +22,9 @@ env:
   AWS_STACK_NAME: game-ci-team-pipelines
   CLOUD_RUNNER_BRANCH: ${{ github.ref }}
   DEBUG: true
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
   PROJECT_PATH: test-project
   UNITY_VERSION: 2019.3.15f1
   USE_IL2CPP: false
@@ -55,7 +57,9 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 35
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
@@ -91,7 +95,9 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
@@ -136,7 +142,9 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
@@ -178,7 +186,9 @@ jobs:
       - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           PROJECT_PATH: test-project
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
@@ -217,7 +227,9 @@ jobs:
         id: unity-build
         timeout-minutes: 30
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
