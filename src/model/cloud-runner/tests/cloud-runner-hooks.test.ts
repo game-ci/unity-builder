@@ -92,7 +92,6 @@ commands: echo "test"`;
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
-        image: 'ubuntu',
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };

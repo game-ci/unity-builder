@@ -78,7 +78,6 @@ jobs:
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
-          - 'cloud-runner-environment'
           - 'cloud-runner-remote-client'
     steps:
       - name: Checkout (default)
@@ -164,6 +163,8 @@ jobs:
     name: AWS Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    needs:
+      - k8sTests
     strategy:
       fail-fast: false
       matrix:
