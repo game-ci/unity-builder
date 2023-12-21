@@ -50,14 +50,18 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const buildHooks = CommandHookService.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
       x.step?.includes(`build`),
     );
-    const builderPath = CloudRunnerFolders.ToLinuxFolder(
-      path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
-    );
+
+    const builderPath = CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.builderPathAbsolute));
+
+    // const builderPath = CloudRunnerFolders.ToLinuxFolder(
+    //   path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
+    // );
 
     return `echo "cloud runner build workflow starting"
       apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
       npm i -g n > /dev/null
+      npm install --global yarn > /dev/null
       n 16.16.0 > /dev/null
       npm --version
       node --version
@@ -88,8 +92,9 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
+yarn install --cwd ${builderPath}
 echo "log start" >> /home/job-log.txt
-node ${builderPath} -m remote-cli-pre-build`;
+yarn run cli --cwd ${builderPath} -m remote-cli-pre-build`;
   }
 
   private static BuildCommands(builderPath: string) {
@@ -106,7 +111,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     chmod -R +x "/steps"
     echo "game ci start"
     echo "game ci start" >> /home/job-log.txt
-    /entrypoint.sh | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
-    node ${builderPath} -m remote-cli-post-build`;
+    /entrypoint.sh | yarn run cli --cwd ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
+    yarn run cli --cwd ${builderPath} -m remote-cli-post-build`;
   }
 }
