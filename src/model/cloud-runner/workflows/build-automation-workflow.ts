@@ -60,11 +60,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `echo "cloud runner build workflow starting"
       apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
+      npm --version
       npm i -g n > /dev/null
       npm i -g semver > /dev/null
       npm install --global yarn > /dev/null
       n 16.16.0 > /dev/null
-      npm --version
       node --version
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
