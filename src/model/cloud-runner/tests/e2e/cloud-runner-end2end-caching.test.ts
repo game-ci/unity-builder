@@ -24,6 +24,7 @@ describe('Cloud Runner Caching', () => {
     it('Run one build it should not use cache, run subsequent build which should use cache', async () => {
       const overrides = {
         versioning: 'None',
+        image: 'ubuntu',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
