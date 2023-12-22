@@ -45,6 +45,7 @@ jobs:
           - 'cloud-runner-remote-client'
           - 'cloud-runner-caching'
           - 'cloud-runner-environment'
+          - 'cloud-runner-image'
           - 'cloud-runner-hooks'
           - 'cloud-runner-local-persistence'
           - 'cloud-runner-locking-core'
@@ -76,8 +77,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-          GITHUB_TOKEN:
-            ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   k8sTests:
     name: K8s Tests
     if: github.event.event_type != 'pull_request_target'

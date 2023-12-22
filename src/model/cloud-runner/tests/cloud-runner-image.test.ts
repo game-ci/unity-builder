@@ -44,5 +44,8 @@ describe('Cloud Runner Image', () => {
     if (baseImage.toString().includes('undefined')) {
       throw new Error(`Base image ${baseImage.toString()} includes undefined`);
     }
+    if (baseImage.toString().includes('NaN')) {
+      throw new Error(`Base image ${baseImage.toString()} includes nan`);
+    }
   }, 1_000_000_000);
 });
