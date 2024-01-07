@@ -31,7 +31,7 @@ export class CloudRunnerSystem {
 
     return await new Promise<string>((promise, throwError) => {
       let output = '';
-      const child = exec(command, { maxBuffer: 1024 * 1500 }, (error, stdout, stderr) => {
+      const child = exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout, stderr) => {
         if (!suppressError && error) {
           RemoteClientLogger.log(error.toString());
           throwError(error);
