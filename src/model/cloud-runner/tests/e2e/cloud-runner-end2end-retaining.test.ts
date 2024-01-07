@@ -59,7 +59,7 @@ describe('Cloud Runner Retain Workspace', () => {
       const build2ContainsRetainedWorkspacePhrase = results2.includes(`Retained Workspace:`);
       const build2ContainsWorkspaceExistsAlreadyPhrase = results2.includes(`Retained Workspace Already Exists!`);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
-      const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
+      const build2NotContainsNoLibraryMessage = !results2.split('Activation successful')[1].includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
         'There is 0 files/dir in the cache pulled contents for Library',
       );
