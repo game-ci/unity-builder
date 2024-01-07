@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# if blankproject folder doesn't exist create it
+if [ ! -d "/BlankProject" ]; then
+  mkdir /BlankProject
+fi
+
 if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
   #
   # SERIAL LICENSE MODE
