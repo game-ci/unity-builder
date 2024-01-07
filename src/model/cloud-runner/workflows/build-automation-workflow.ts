@@ -108,7 +108,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     chmod -R +x "/steps"
     echo "game ci start"
     echo "game ci start" >> /home/job-log.txt
-    mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/BlankProject`}
+    mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}/BlankProject`}
     /entrypoint.sh | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
     node ${builderPath} -m remote-cli-post-build`;
   }
