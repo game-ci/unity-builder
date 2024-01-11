@@ -29,7 +29,8 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
       const baseImage = new ImageTag(buildParameter);
-      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      const resultsObject = await CloudRunner.run(buildParameter, baseImage.toString());
+      const results = resultsObject.BuildResults;
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
       const cachePushFail = 'Did not push source folder to cache because it was empty Library';
       const buildSucceededString = 'Build succeeded';
