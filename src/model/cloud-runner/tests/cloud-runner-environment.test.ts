@@ -50,7 +50,7 @@ describe('Cloud Runner Sync Environments', () => {
       }
 
       // Run the job
-      const file = await CloudRunner.run(buildParameter, baseImage.toString());
+      const file = (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
 
       // Assert results
       // expect(file).toContain(JSON.stringify(buildParameter));

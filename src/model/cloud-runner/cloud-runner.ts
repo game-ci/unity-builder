@@ -16,6 +16,7 @@ import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
 import { FollowLogStreamService } from './services/core/follow-log-stream-service';
+import CloudRunnerResult from './services/core/cloud-runner-result';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -159,7 +160,7 @@ class CloudRunner {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageMaxAge, true, true);
       }
 
-      return output;
+      return new CloudRunnerResult(buildParameters, output, true, true, false);
     } catch (error: any) {
       CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
       await GitHub.updateGitHubCheck(

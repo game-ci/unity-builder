@@ -109,7 +109,7 @@ export class Cli {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
 
-    return await CloudRunner.run(buildParameter, baseImage.toString());
+    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
   @CliFunction(`async-workflow`, `runs a cloud runner build`)
@@ -118,7 +118,7 @@ export class Cli {
     const baseImage = new ImageTag(buildParameter);
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.run(buildParameter, baseImage.toString());
+    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
   @CliFunction(`checks-update`, `runs a cloud runner build`)

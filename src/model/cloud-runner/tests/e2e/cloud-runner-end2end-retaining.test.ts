@@ -51,7 +51,8 @@ describe('Cloud Runner Retain Workspace', () => {
 
       buildParameter2.cacheKey = buildParameter.cacheKey;
       const baseImage2 = new ImageTag(buildParameter2);
-      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2Object = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2 = results2Object.BuildResults;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);

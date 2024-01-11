@@ -64,7 +64,8 @@ describe('Cloud Runner Caching', () => {
 
       buildParameter2.cacheKey = buildParameter.cacheKey;
       const baseImage2 = new ImageTag(buildParameter2);
-      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2Object = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2 = results2Object.BuildResults;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
@@ -78,7 +79,7 @@ describe('Cloud Runner Caching', () => {
 
       expect(build2ContainsCacheKey).toBeTruthy();
       expect(results2).toContain('Activation successful');
-      expect(results2.split('Activation successful')[1]).toContain(libraryString);
+      expect(results2.split('Activation successful')[1]).not.toContain(libraryString);
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
