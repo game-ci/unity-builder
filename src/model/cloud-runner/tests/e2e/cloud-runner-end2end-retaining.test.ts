@@ -61,7 +61,6 @@ describe('Cloud Runner Retain Workspace', () => {
       const build2ContainsRetainedWorkspacePhrase = results2.includes(`Retained Workspace:`);
       const build2ContainsWorkspaceExistsAlreadyPhrase = results2.includes(`Retained Workspace Already Exists!`);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
-      const build2NotContainsNoLibraryMessage = !results2.split('Activation successful')[1].includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
         'There is 0 files/dir in the cache pulled contents for Library',
       );
@@ -76,7 +75,7 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
-      expect(build2NotContainsNoLibraryMessage).toBeTruthy();
+      expect(results2.split('Activation successful')[1]).not.toContain(libraryString);
     }, 1_000_000_000);
     afterAll(async () => {
       await SharedWorkspaceLocking.CleanupWorkspace(CloudRunner.lockedWorkspace || ``, CloudRunner.buildParameters);
