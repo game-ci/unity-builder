@@ -19,23 +19,28 @@ async function CreateParameters(overrides: any) {
 describe('Cloud Runner Kubernetes', () => {
   it('Responds', () => {});
   setups();
+
   if (CloudRunnerOptions.cloudRunnerDebug) {
     it('Run one build it using K8s without error', async () => {
       if (CloudRunnerOptions.providerStrategy !== `k8s`) {
         return;
       }
+      process.env.USE_IL2CPP = 'false';
       const overrides = {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
+        providerStrategy: 'k8s',
+        buildPlatform: 'linux',
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
       const baseImage = new ImageTag(buildParameter);
-      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      const resultsObject = await CloudRunner.run(buildParameter, baseImage.toString());
+      const results = resultsObject.BuildResults;
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
       const cachePushFail = 'Did not push source folder to cache because it was empty Library';
       const buildSucceededString = 'Build succeeded';
