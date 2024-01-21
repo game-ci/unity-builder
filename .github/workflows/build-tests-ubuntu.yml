@@ -143,6 +143,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build Ubuntu (${{ matrix.unityVersion }})
+          name: Build ${{ matrix.targetPlatform }} on Ubuntu (${{ matrix.unityVersion }})
           path: build
           retention-days: 14
