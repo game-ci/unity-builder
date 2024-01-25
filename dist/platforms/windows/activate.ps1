@@ -20,7 +20,6 @@ if ( ($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($
                                      -PassThru `
                                      -ArgumentList  "-batchmode `
                                                      -quit `
-                                                     -nographics `
                                                      -username $Env:UNITY_EMAIL `
                                                      -password $Env:UNITY_PASSWORD `
                                                      -serial $Env:UNITY_SERIAL `
