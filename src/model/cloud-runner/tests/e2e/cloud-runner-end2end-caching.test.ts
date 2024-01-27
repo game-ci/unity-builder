@@ -30,6 +30,7 @@ describe('Cloud Runner Caching', () => {
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
         containerHookFiles: `debug-cache`,
+        cloudRunnerBranch: `cloud-runner-develop`,
       };
       if (CloudRunnerOptions.providerStrategy === `k8s`) {
         overrides.containerHookFiles += `,aws-s3-pull-cache,aws-s3-upload-cache`;

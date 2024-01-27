@@ -125,7 +125,6 @@ class CloudRunner {
         ),
       );
       await CloudRunner.Provider.cleanupWorkflow(
-        CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
         CloudRunner.buildParameters.branch,
         CloudRunner.defaultSecrets,

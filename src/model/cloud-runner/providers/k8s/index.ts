@@ -306,7 +306,6 @@ class Kubernetes implements ProviderInterface {
   }
 
   async cleanupWorkflow(
-    buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
