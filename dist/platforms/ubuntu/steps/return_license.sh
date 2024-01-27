@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-# Run in ACTIVATE_LICENSE_PATH directory
-echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
-pushd "$ACTIVATE_LICENSE_PATH"
-
-
-if [[ -n "$UNITY_LICENSING_SERVER" ]]; then  #
+if [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   #
   # Return any floating license used.
   #
@@ -25,6 +20,3 @@ elif [[ -n "$UNITY_SERIAL" ]]; then
     -password "$UNITY_PASSWORD" \
     -projectPath "/BlankProject"
 fi
-
-# Return to previous working directory
-popd

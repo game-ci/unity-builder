@@ -137,29 +137,30 @@ $unityArgs = @(
     "-batchmode",
     "-nographics",
     "-silent-crashes",
-    "-projectPath", $Env:UNITY_PROJECT_PATH,
-    "-executeMethod", $Env:BUILD_METHOD,
-    "-buildTarget", $Env:BUILD_TARGET,
-    "-customBuildTarget", $Env:BUILD_TARGET,
-    "-customBuildPath", $Env:CUSTOM_BUILD_PATH,
-    "-buildVersion", $Env:VERSION,
-    "-androidVersionCode", $Env:ANDROID_VERSION_CODE,
-    "-androidKeystorePass", $Env:ANDROID_KEYSTORE_PASS,
-    "-androidKeyaliasName", $Env:ANDROID_KEYALIAS_NAME,
-    "-androidKeyaliasPass", $Env:ANDROID_KEYALIAS_PASS,
-    "-androidTargetSdkVersion", $Env:ANDROID_TARGET_SDK_VERSION,
-    "-androidExportType", $Env:ANDROID_EXPORT_TYPE,
-    "-androidSymbolType", $Env:ANDROID_SYMBOL_TYPE,
+    "-customBuildName", "`"$Env:BUILD_NAME`"",
+    "-projectPath", "`"$Env:UNITY_PROJECT_PATH`"",
+    "-executeMethod", "`"$Env:BUILD_METHOD`"",
+    "-buildTarget", "`"$Env:BUILD_TARGET`"",
+    "-customBuildTarget", "`"$Env:BUILD_TARGET`"",
+    "-customBuildPath", "`"$Env:CUSTOM_BUILD_PATH`"",
+    "-buildVersion", "`"$Env:VERSION`"",
+    "-androidVersionCode", "`"$Env:ANDROID_VERSION_CODE`"",
+    "-androidKeystorePass", "`"$Env:ANDROID_KEYSTORE_PASS`"",
+    "-androidKeyaliasName", "`"$Env:ANDROID_KEYALIAS_NAME`"",
+    "-androidKeyaliasPass", "`"$Env:ANDROID_KEYALIAS_PASS`"",
+    "-androidTargetSdkVersion", "`"$Env:ANDROID_TARGET_SDK_VERSION`"",
+    "-androidExportType", "`"$Env:ANDROID_EXPORT_TYPE`"",
+    "-androidSymbolType", "`"$Env:ANDROID_SYMBOL_TYPE`"",
     "-logfile", "-"
 ) + $customParametersArray
 
 # Remove null items as that will fail the Start-Process call
 $unityArgs = $unityArgs | Where-Object { $_ -ne $null }
 
-$unityProcess = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Unity.exe" `
-                         -ArgumentList $unityArgs `
-                         -PassThru `
-                         -NoNewWindow
+$unityProcess = Start-Process -FilePath "$Env:UNITY_PATH/Editor/Unity.exe" `
+                              -ArgumentList $unityArgs `
+                              -PassThru `
+                              -NoNewWindow
 
 # Cache the handle so exit code works properly
 # https://stackoverflow.com/questions/10262231/obtaining-exitcode-using-start-process-and-waitforexit-instead-of-wait
