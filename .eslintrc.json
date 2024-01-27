@@ -1,22 +1,11 @@
 {
-  "plugins": [
-    "jest",
-    "@typescript-eslint",
-    "prettier",
-    "unicorn"
-  ],
-  "extends": [
-    "plugin:unicorn/recommended",
-    "plugin:github/recommended",
-    "plugin:prettier/recommended"
-  ],
+  "plugins": ["jest", "@typescript-eslint", "prettier", "unicorn"],
+  "extends": ["plugin:unicorn/recommended", "plugin:github/recommended", "plugin:prettier/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
-    "extraFileExtensions": [
-      ".mjs"
-    ],
+    "extraFileExtensions": [".mjs"],
     "ecmaFeatures": {
       "impliedStrict": true
     },
@@ -33,10 +22,7 @@
     // Namespaces or sometimes needed
     "import/no-namespace": "off",
     // Properly format comments
-    "spaced-comment": [
-      "error",
-      "always"
-    ],
+    "spaced-comment": ["error", "always"],
     "lines-around-comment": [
       "error",
       {
@@ -71,12 +57,7 @@
     // Enforce camelCase
     "camelcase": "error",
     // Allow forOfStatements
-    "no-restricted-syntax": [
-      "error",
-      "ForInStatement",
-      "LabeledStatement",
-      "WithStatement"
-    ],
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     // Continue is viable in forOf loops in generators
     "no-continue": "off",
     // From experience, named exports are almost always desired. I got tired of this rule
