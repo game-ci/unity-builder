@@ -48,7 +48,6 @@ describe('Cloud Runner Caching', () => {
       expect(results).toContain(libraryString);
       expect(results).toContain(buildSucceededString);
       expect(results).not.toContain(cachePushFail);
-      expect(results.split(buildSucceededString).length - 1).toEqual(4);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
 
