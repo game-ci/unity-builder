@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
-const md5 = require('md5');
+import * as md5 from 'ts-md5';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -51,22 +51,24 @@ export class RemoteClientLogger {
 
       return;
     }
+    CloudRunnerLogger.log(`Log file exist`);
+    await new Promise((resolve) => setTimeout(resolve, 1));
 
-    let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
-
-    hashedLogs = md5(hashedLogs);
-
-    for (let index = 0; index < 3; index++) {
-      CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
-      const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
-      CloudRunnerLogger.log(`LOGS: ${Buffer.from(logs).toString('base64')}`);
-      CloudRunnerLogger.log(
-        `Game CI's "Cloud Runner System" will cancel the log when it has successfully received the log data to verify all logs have been received.`,
-      );
-
-      // wait for 15 seconds to allow the log to be sent
-      await new Promise((resolve) => setTimeout(resolve, 15000));
-    }
+    // let hashedLogs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+    //
+    // hashedLogs = md5(hashedLogs);
+    //
+    // for (let index = 0; index < 3; index++) {
+    //   CloudRunnerLogger.log(`LOGHASH: ${hashedLogs}`);
+    //   const logs = fs.readFileSync(RemoteClientLogger.LogFilePath).toString();
+    //   CloudRunnerLogger.log(`LOGS: ${Buffer.from(logs).toString('base64')}`);
+    //   CloudRunnerLogger.log(
+    //     `Game CI's "Cloud Runner System" will cancel the log when it has successfully received the log data to verify all logs have been received.`,
+    //   );
+    //
+    //   // wait for 15 seconds to allow the log to be sent
+    //   await new Promise((resolve) => setTimeout(resolve, 15000));
+    // }
   }
   public static HandleLog(message: string): boolean {
     if (message.includes('LOGHASH: ')) {
@@ -77,7 +79,7 @@ export class RemoteClientLogger {
       }
 
       RemoteClientLogger.value += message;
-      const hashedValue = md5(RemoteClientLogger.value);
+      const hashedValue = md5.Md5.hashStr(RemoteClientLogger.value);
       if (RemoteClientLogger.md5 === hashedValue) {
         CloudRunnerLogger.log(`LOG COMPLETE`);
 
@@ -96,7 +98,7 @@ export class RemoteClientLogger {
     }
   }
   public static HandleLogFull(message: string): boolean {
-    const hashedValue = md5(message);
+    const hashedValue = md5.Md5.hashStr(message);
     if (RemoteClientLogger.md5 === hashedValue) {
       CloudRunnerLogger.log(`LOG COMPLETE`);
 
