@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
 import CloudRunnerOptions from '../options/cloud-runner-options';
-import * as md5 from 'ts-md5';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
@@ -71,44 +70,13 @@ export class RemoteClientLogger {
     // }
   }
   public static HandleLog(message: string): boolean {
-    if (message.includes('LOGHASH: ')) {
-      RemoteClientLogger.HandleLogHash(message);
-    } else {
-      if (RemoteClientLogger.value !== '') {
-        RemoteClientLogger.value += `\n`;
-      }
-
-      RemoteClientLogger.value += message;
-      const hashedValue = md5.Md5.hashStr(RemoteClientLogger.value);
-      if (RemoteClientLogger.md5 === hashedValue) {
-        CloudRunnerLogger.log(`LOG COMPLETE`);
-
-        return true;
-      }
+    if (RemoteClientLogger.value !== '') {
+      RemoteClientLogger.value += `\n`;
     }
 
-    return false;
-  }
-  public static HandleLogHash(message: string) {
-    if (message.includes('LOGHASH: ')) {
-      RemoteClientLogger.md5 = message.split(`LOGHASH: `)[1];
-      CloudRunnerLogger.log(`LOGHASH: ${RemoteClientLogger.md5}`);
-    } else {
-      throw new Error(`LOGHASH: not found`);
-    }
-  }
-  public static HandleLogFull(message: string): boolean {
-    const hashedValue = md5.Md5.hashStr(message);
-    if (RemoteClientLogger.md5 === hashedValue) {
-      CloudRunnerLogger.log(`LOG COMPLETE`);
-
-      return true;
-    } else {
-      CloudRunnerLogger.log(`LOG INCOMPLETE ${RemoteClientLogger.md5} ${hashedValue}`);
-    }
+    RemoteClientLogger.value += message;
 
     return false;
   }
   static value: string = '';
-  static md5: any;
 }

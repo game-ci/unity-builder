@@ -5,7 +5,6 @@ import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 import CloudRunner from '../../cloud-runner';
 import KubernetesPods from './kubernetes-pods';
 import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
-import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 
 class KubernetesTaskRunner {
   static readonly maxRetry: number = 3;
@@ -39,27 +38,6 @@ class KubernetesTaskRunner {
 
         // split output chunk and handle per line
         for (const chunk of outputChunk.split(`\n`)) {
-          // check if log start included in logs if so log a message
-          if (chunk.includes(`Collected Logs`)) {
-            CloudRunnerLogger.log(`Log Start found in logs`);
-          }
-          if (chunk.includes(`LOGHASH:`)) {
-            RemoteClientLogger.HandleLogHash(chunk);
-            CloudRunnerLogger.log(`Loghash found`);
-          }
-          if (chunk.includes(`LOGS:`)) {
-            CloudRunnerLogger.log(`LOGS: found`);
-
-            // remove "LOGS: " and decode base64 remaining
-            const unpacked = Buffer.from(chunk.split(`LOGS: `)[1], 'base64').toString('ascii');
-            const result = RemoteClientLogger.HandleLogFull(unpacked);
-            CloudRunnerLogger.log(`Logs found HandleLogChunkLineResult:${result}`);
-            if (result) {
-              FollowLogStreamService.DidReceiveEndOfTransmission = true;
-            }
-
-            return;
-          }
           ({ shouldReadLogs, shouldCleanup, output } = FollowLogStreamService.handleIteration(
             chunk,
             shouldReadLogs,

@@ -42,7 +42,6 @@ jobs:
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
-          - 'cloud-runner-remote-client'
           - 'cloud-runner-caching'
           - 'cloud-runner-environment'
           - 'cloud-runner-image'
