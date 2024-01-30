@@ -75,7 +75,8 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
-      expect(results2.split('Activation successful')[1]).not.toContain(libraryString);
+      const splitResults = results2.split('Activation successful');
+      expect(splitResults[splitResults.length - 1]).not.toContain(libraryString);
     }, 1_000_000_000);
     afterAll(async () => {
       await SharedWorkspaceLocking.CleanupWorkspace(CloudRunner.lockedWorkspace || ``, CloudRunner.buildParameters);
