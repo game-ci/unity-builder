@@ -83,8 +83,9 @@ describe('Cloud Runner Caching', () => {
       expect(results2).toContain('Activation successful');
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(results2).toContain(buildSucceededString);
-      expect(results2.split('Activation successful').length - 1).toEqual(2);
-      expect(results2.split('Activation successful')[2]).not.toContain(libraryString);
+      const splitResults = results2.split('Activation successful');
+      expect(splitResults.length - 1).toEqual(2);
+      expect(splitResults[splitResults.length - 1]).not.toContain(libraryString);
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
     }, 1_000_000_000);
