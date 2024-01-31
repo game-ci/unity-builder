@@ -80,7 +80,7 @@ export class Caching {
       }
 
       await CloudRunnerSystem.Run(
-        `tar -cf ${cacheArtifactName}.tar${compressionSuffix} ${path.basename(sourceFolder)}`,
+        `tar -cf ${cacheArtifactName}.tar${compressionSuffix} "${path.basename(sourceFolder)}"`,
       );
       await CloudRunnerSystem.Run(`du ${cacheArtifactName}.tar${compressionSuffix}`);
       assert(await fileExists(`${cacheArtifactName}.tar${compressionSuffix}`), 'cache archive exists');
