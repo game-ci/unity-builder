@@ -163,10 +163,7 @@ class Kubernetes implements ProviderInterface {
         CloudRunnerLogger.log('Watching pod until running');
         await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
 
-        CloudRunnerLogger.log('Pod running, streaming logs');
-        CloudRunnerLogger.log(
-          `Starting logs follow for pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace} pvc: ${this.pvcName} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}`,
-        );
+        CloudRunnerLogger.log('Pod is running');
         output += await KubernetesTaskRunner.runTask(
           this.kubeConfig,
           this.kubeClient,
