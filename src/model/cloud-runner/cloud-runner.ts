@@ -130,7 +130,7 @@ class CloudRunner {
         CloudRunner.defaultSecrets,
       );
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      if (buildParameters.asyncWorkflow && this.isCloudRunnerEnvironment) {
+      if (buildParameters.asyncWorkflow && this.isCloudRunnerEnvironment && this.isCloudRunnerAsyncEnvironment) {
         await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
       }
 
