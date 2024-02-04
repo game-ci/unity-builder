@@ -16,7 +16,7 @@ describe('Cloud Runner Github Checks', () => {
   setups();
   it('Responds', () => {});
 
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy === `local-docker`) {
+  if (CloudRunnerOptions.cloudRunnerDebug) {
     it(
       'Check Handling Direct',
       async () => {
