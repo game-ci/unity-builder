@@ -52,7 +52,7 @@ class GitHub {
     }
     GitHub.startedDate = new Date().toISOString();
 
-    CloudRunnerLogger.log(`Creating inital github check`);
+    CloudRunnerLogger.log(`Creating github check`);
     const data = {
       owner: GitHub.owner,
       repo: GitHub.repo,
@@ -78,6 +78,8 @@ class GitHub {
       },
     };
     const result = await GitHub.createGitHubCheckRequest(data);
+
+    CloudRunnerLogger.log(`Creating github check ${result.status}`);
 
     return result.data.id.toString();
   }
