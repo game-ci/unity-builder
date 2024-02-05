@@ -29,8 +29,8 @@ describe('Cloud Runner Github Checks', () => {
           githubChecks: `true`,
         });
         await CloudRunner.setup(buildParameter);
-        CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`t`);
-        await GitHub.updateGitHubCheck(`t`, `t2`);
+        CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`create`);
+        await GitHub.updateGitHubCheck(`direct`, `update`);
       },
       TIMEOUT_INFINITE,
     );
@@ -47,8 +47,8 @@ describe('Cloud Runner Github Checks', () => {
         });
         GitHub.forceAsyncTest = true;
         await CloudRunner.setup(buildParameter);
-        CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`t`);
-        await GitHub.updateGitHubCheck(`t`, `t2`);
+        CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`async create`);
+        await GitHub.updateGitHubCheck(`async Workflow`, `async update`);
         GitHub.forceAsyncTest = false;
       },
       TIMEOUT_INFINITE,
