@@ -31,6 +31,7 @@ describe('Cloud Runner Github Checks', () => {
         await CloudRunner.setup(buildParameter);
         CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`create`);
         await GitHub.updateGitHubCheck(`direct`, `update`);
+        await GitHub.updateGitHubCheck(`direct`, `update 2`, `success`, `completed`);
       },
       TIMEOUT_INFINITE,
     );
@@ -49,6 +50,7 @@ describe('Cloud Runner Github Checks', () => {
         await CloudRunner.setup(buildParameter);
         CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(`async create`);
         await GitHub.updateGitHubCheck(`async Workflow`, `async update`);
+        await GitHub.updateGitHubCheck(`direct`, `async update 2`, `success`, `completed`);
         GitHub.forceAsyncTest = false;
       },
       TIMEOUT_INFINITE,
