@@ -16,6 +16,7 @@ import LocalDockerCloudRunner from './providers/docker';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
 import { FollowLogStreamService } from './services/core/follow-log-stream-service';
+import CloudRunnerResult from './services/core/cloud-runner-result';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -83,15 +84,16 @@ class CloudRunner {
   }
 
   static async run(buildParameters: BuildParameters, baseImage: string) {
+    if (baseImage.includes(`undefined`)) {
+      throw new Error(`baseImage is undefined`);
+    }
     await CloudRunner.setup(buildParameters);
-    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Setup shared cloud runner resources');
     await CloudRunner.Provider.setupWorkflow(
       CloudRunner.buildParameters.buildGuid,
       CloudRunner.buildParameters,
       CloudRunner.buildParameters.branch,
       CloudRunner.defaultSecrets,
     );
-    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     try {
       if (buildParameters.maxRetainedWorkspaces > 0) {
         CloudRunner.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
@@ -114,11 +116,7 @@ class CloudRunner {
           CloudRunner.lockedWorkspace = ``;
         }
       }
-      const content = { ...CloudRunner.buildParameters };
-      content.gitPrivateToken = ``;
-      content.unitySerial = ``;
-      const jsonContent = JSON.stringify(content, undefined, 4);
-      await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
+      await CloudRunner.updateStatusWithBuildParameters();
       const output = await new WorkflowCompositionRoot().run(
         new CloudRunnerStepParameters(
           baseImage,
@@ -126,16 +124,15 @@ class CloudRunner {
           CloudRunner.defaultSecrets,
         ),
       );
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('Cleanup shared cloud runner resources');
       await CloudRunner.Provider.cleanupWorkflow(
-        CloudRunner.buildParameters.buildGuid,
         CloudRunner.buildParameters,
         CloudRunner.buildParameters.branch,
         CloudRunner.defaultSecrets,
       );
-      CloudRunnerLogger.log(`Cleanup complete`);
       if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
-      await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
+      if (buildParameters.asyncWorkflow && this.isCloudRunnerEnvironment && this.isCloudRunnerAsyncEnvironment) {
+        await GitHub.updateGitHubCheck(CloudRunner.buildParameters.buildGuid, `success`, `success`, `completed`);
+      }
 
       if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
         const workspace = CloudRunner.lockedWorkspace || ``;
@@ -162,7 +159,7 @@ class CloudRunner {
         CloudRunner.Provider.garbageCollect(``, true, buildParameters.garbageMaxAge, true, true);
       }
 
-      return output;
+      return new CloudRunnerResult(buildParameters, output, true, true, false);
     } catch (error: any) {
       CloudRunnerLogger.log(JSON.stringify(error, undefined, 4));
       await GitHub.updateGitHubCheck(
@@ -175,6 +172,16 @@ class CloudRunner {
       await CloudRunnerError.handleException(error, CloudRunner.buildParameters, CloudRunner.defaultSecrets);
       throw error;
     }
+  }
+
+  private static async updateStatusWithBuildParameters() {
+    const content = { ...CloudRunner.buildParameters };
+    content.gitPrivateToken = ``;
+    content.unitySerial = ``;
+    content.unityEmail = ``;
+    content.unityPassword = ``;
+    const jsonContent = JSON.stringify(content, undefined, 4);
+    await GitHub.updateGitHubCheck(jsonContent, CloudRunner.buildParameters.buildGuid);
   }
 }
 export default CloudRunner;

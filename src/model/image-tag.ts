@@ -2,7 +2,6 @@ import Platform from './platform';
 
 class ImageTag {
   public repository: string;
-  public cloudRunnerBuilderPlatform!: string;
   public editorVersion: string;
   public targetPlatform: string;
   public builderPlatform: string;
@@ -15,7 +14,7 @@ class ImageTag {
       editorVersion,
       targetPlatform,
       customImage,
-      cloudRunnerBuilderPlatform,
+      buildPlatform,
       containerRegistryRepository,
       containerRegistryImageVersion,
     } = imageProperties;
@@ -32,12 +31,8 @@ class ImageTag {
     this.repository = containerRegistryRepository;
     this.editorVersion = editorVersion;
     this.targetPlatform = targetPlatform;
-    this.cloudRunnerBuilderPlatform = cloudRunnerBuilderPlatform;
-    const isCloudRunnerLocal = cloudRunnerBuilderPlatform === 'local' || cloudRunnerBuilderPlatform === undefined;
     this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(targetPlatform, editorVersion);
-    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(
-      isCloudRunnerLocal ? process.platform : cloudRunnerBuilderPlatform,
-    );
+    this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(buildPlatform);
     this.imageRollingVersion = Number(containerRegistryImageVersion); // Will automatically roll to the latest non-breaking version.
   }
 
@@ -63,6 +58,10 @@ class ImageTag {
   }
 
   static getImagePlatformPrefixes(platform: string): string {
+    if (!platform || platform === '') {
+      platform = process.platform;
+    }
+
     switch (platform) {
       case 'win32':
         return 'windows';
@@ -101,7 +100,7 @@ class ImageTag {
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
-        if (major >= 2020 || (major === 2019 && minor >= 3)) {
+        if (process.env.USE_IL2CPP === 'true' && (major >= 2020 || (major === 2019 && minor >= 3))) {
           return linuxIl2cpp;
         }
 

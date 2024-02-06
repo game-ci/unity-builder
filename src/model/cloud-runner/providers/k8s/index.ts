@@ -14,12 +14,17 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import CloudRunner from '../../cloud-runner';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
+import { KubernetesRole } from './kubernetes-role';
+import { CloudRunnerSystem } from '../../services/core/cloud-runner-system';
 
 class Kubernetes implements ProviderInterface {
   public static Instance: Kubernetes;
   public kubeConfig!: k8s.KubeConfig;
   public kubeClient!: k8s.CoreV1Api;
+  public kubeClientApps!: k8s.AppsV1Api;
   public kubeClientBatch!: k8s.BatchV1Api;
+  public rbacAuthorizationV1Api!: k8s.RbacAuthorizationV1Api;
   public buildGuid: string = '';
   public buildParameters!: BuildParameters;
   public pvcName: string = '';
@@ -30,6 +35,7 @@ class Kubernetes implements ProviderInterface {
   public containerName: string = '';
   public cleanupCronJobName: string = '';
   public serviceAccountName: string = '';
+  public ip: string = '';
 
   // eslint-disable-next-line no-unused-vars
   constructor(buildParameters: BuildParameters) {
@@ -37,9 +43,28 @@ class Kubernetes implements ProviderInterface {
     this.kubeConfig = new k8s.KubeConfig();
     this.kubeConfig.loadFromDefault();
     this.kubeClient = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
+    this.kubeClientApps = this.kubeConfig.makeApiClient(k8s.AppsV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
+    this.rbacAuthorizationV1Api = this.kubeConfig.makeApiClient(k8s.RbacAuthorizationV1Api);
     this.namespace = 'default';
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
+  }
+
+  async PushLogUpdate(logs: string) {
+    // push logs to nginx file server via 'LOG_SERVICE_IP' env var
+    const ip = process.env[`LOG_SERVICE_IP`];
+    if (ip === undefined) {
+      RemoteClientLogger.logWarning(`LOG_SERVICE_IP not set, skipping log push`);
+
+      return;
+    }
+    const url = `http://${ip}/api/log`;
+    RemoteClientLogger.log(`Pushing logs to ${url}`);
+
+    // logs to base64
+    logs = Buffer.from(logs).toString('base64');
+    const response = await CloudRunnerSystem.Run(`curl -X POST -d "${logs}" ${url}`, false, true);
+    RemoteClientLogger.log(`Pushed logs to ${url} ${response}`);
   }
 
   async listResources(): Promise<ProviderResource[]> {
@@ -115,9 +140,10 @@ class Kubernetes implements ProviderInterface {
       CloudRunnerLogger.log('Cloud Runner K8s workflow!');
 
       // Setup
-      const id = BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
-        ? CloudRunner.lockedWorkspace
-        : this.buildParameters.buildGuid;
+      const id =
+        BuildParameters && BuildParameters.shouldUseRetainedWorkspaceMode(this.buildParameters)
+          ? CloudRunner.lockedWorkspace
+          : this.buildParameters.buildGuid;
       this.pvcName = `unity-builder-pvc-${id}`;
       await KubernetesStorage.createPersistentVolumeClaim(
         this.buildParameters,
@@ -137,10 +163,7 @@ class Kubernetes implements ProviderInterface {
         CloudRunnerLogger.log('Watching pod until running');
         await KubernetesTaskRunner.watchUntilPodRunning(this.kubeClient, this.podName, this.namespace);
 
-        CloudRunnerLogger.log('Pod running, streaming logs');
-        CloudRunnerLogger.log(
-          `Starting logs follow for pod: ${this.podName} container: ${this.containerName} namespace: ${this.namespace} pvc: ${this.pvcName} ${CloudRunner.buildParameters.kubeVolumeSize}/${CloudRunner.buildParameters.containerCpu}/${CloudRunner.buildParameters.containerMemory}`,
-        );
+        CloudRunnerLogger.log('Pod is running');
         output += await KubernetesTaskRunner.runTask(
           this.kubeConfig,
           this.kubeClient,
@@ -232,8 +255,12 @@ class Kubernetes implements ProviderInterface {
           this.jobName,
           k8s,
           this.containerName,
+          this.ip,
         );
         await new Promise((promise) => setTimeout(promise, 15000));
+
+        // await KubernetesRole.createRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
+
         const result = await this.kubeClientBatch.createNamespacedJob(this.namespace, jobSpec);
         CloudRunnerLogger.log(`Build job created`);
         await new Promise((promise) => setTimeout(promise, 5000));
@@ -257,6 +284,7 @@ class Kubernetes implements ProviderInterface {
     try {
       await this.kubeClientBatch.deleteNamespacedJob(this.jobName, this.namespace);
       await this.kubeClient.deleteNamespacedPod(this.podName, this.namespace);
+      await KubernetesRole.deleteRole(this.serviceAccountName, this.namespace, this.rbacAuthorizationV1Api);
     } catch (error: any) {
       CloudRunnerLogger.log(`Failed to cleanup`);
       if (error.response.body.reason !== `NotFound`) {
@@ -275,14 +303,13 @@ class Kubernetes implements ProviderInterface {
   }
 
   async cleanupWorkflow(
-    buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    if (BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
+    if (BuildParameters && BuildParameters.shouldUseRetainedWorkspaceMode(buildParameters)) {
       return;
     }
     CloudRunnerLogger.log(`deleting PVC`);

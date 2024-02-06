@@ -42,6 +42,11 @@ node /builder/dist/index.js -m async-workflow`,
           ...secrets,
           ...[
             {
+              ParameterKey: `GITHUB_TOKEN`,
+              EnvironmentVariable: `GITHUB_TOKEN`,
+              ParameterValue: process.env.GITHUB_TOKEN || ``,
+            },
+            {
               ParameterKey: `AWS_ACCESS_KEY_ID`,
               EnvironmentVariable: `AWS_ACCESS_KEY_ID`,
               ParameterValue: process.env.AWS_ACCESS_KEY_ID || ``,

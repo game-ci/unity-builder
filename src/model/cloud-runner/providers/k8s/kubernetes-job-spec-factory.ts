@@ -20,6 +20,7 @@ class KubernetesJobSpecFactory {
     jobName: string,
     k8s: any,
     containerName: string,
+    ip: string = '',
   ) {
     const job = new k8s.V1Job();
     job.apiVersion = 'batch/v1';
@@ -81,6 +82,7 @@ class KubernetesJobSpecFactory {
 
                   return environmentVariable;
                 }),
+                { name: 'LOG_SERVICE_IP', value: ip },
               ],
               volumeMounts: [
                 {
@@ -92,9 +94,8 @@ class KubernetesJobSpecFactory {
                 preStop: {
                   exec: {
                     command: [
-                      'bin/bash',
-                      '-c',
-                      `cd /data/builder/action/steps;
+                      `wait 60s;
+                      cd /data/builder/action/steps;
                       chmod +x /return_license.sh;
                       /return_license.sh;`,
                     ],
@@ -107,6 +108,16 @@ class KubernetesJobSpecFactory {
         },
       },
     };
+
+    if (process.env['CLOUD_RUNNER_MINIKUBE']) {
+      job.spec.template.spec.volumes[0] = {
+        name: 'build-mount',
+        hostPath: {
+          path: `/data`,
+          type: `Directory`,
+        },
+      };
+    }
 
     job.spec.template.spec.containers[0].resources.requests[`ephemeral-storage`] = '10Gi';
 

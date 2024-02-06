@@ -1,6 +1,9 @@
+import CloudRunner from '../../../cloud-runner';
+
 export class TaskDefinitionFormation {
   public static readonly description: string = `Game CI Cloud Runner Task Stack`;
-  public static readonly formation: string = `AWSTemplateFormatVersion: 2010-09-09
+  public static get formation(): string {
+    return `AWSTemplateFormatVersion: 2010-09-09
 Description: ${TaskDefinitionFormation.description}
 Parameters:
   EnvironmentName:
@@ -26,11 +29,11 @@ Parameters:
     Default: 80
     Description: What port number the application inside the docker container is binding to
   ContainerCpu:
-    Default: 1024
+    Default: ${CloudRunner.buildParameters.containerCpu}
     Type: Number
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
-    Default: 4096
+    Default: ${CloudRunner.buildParameters.containerMemory}
     Type: Number
     Description: How much memory in megabytes to give the container
   BUILDGUID:
@@ -92,7 +95,7 @@ Resources:
           EFSVolumeConfiguration:
             FilesystemId:
               'Fn::ImportValue': !Sub '${'${EnvironmentName}'}:EfsFileStorageId'
-            TransitEncryption: ENABLED
+            TransitEncryption: DISABLED
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn:
@@ -135,6 +138,7 @@ Resources:
     DependsOn:
       - LogGroup
 `;
+  }
   public static streamLogs = `
   SubscriptionFilter:
     Type: 'AWS::Logs::SubscriptionFilter'

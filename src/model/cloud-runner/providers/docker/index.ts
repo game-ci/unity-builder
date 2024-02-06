@@ -41,7 +41,6 @@ class LocalDockerCloudRunner implements ProviderInterface {
     return new Promise((result) => result(``));
   }
   async cleanupWorkflow(
-    buildGuid: string,
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,

@@ -261,11 +261,11 @@ class Input {
   }
 
   static get containerRegistryRepository(): string {
-    return Input.getInput('containerRegistryRepository')!;
+    return Input.getInput('containerRegistryRepository') || 'unityci/editor';
   }
 
   static get containerRegistryImageVersion(): string {
-    return Input.getInput('containerRegistryImageVersion')!;
+    return Input.getInput('containerRegistryImageVersion') || '3';
   }
 
   public static ToEnvVarFormat(input: string) {

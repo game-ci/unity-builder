@@ -33,8 +33,6 @@ class LocalCloudRunner implements ProviderInterface {
   }
   cleanupWorkflow(
     // eslint-disable-next-line no-unused-vars
-    buildGuid: string,
-    // eslint-disable-next-line no-unused-vars
     buildParameters: BuildParameters,
     // eslint-disable-next-line no-unused-vars
     branchName: string,

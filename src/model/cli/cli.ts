@@ -10,8 +10,6 @@ import { LfsHashing } from '../cloud-runner/services/utility/lfs-hashing';
 import { RemoteClient } from '../cloud-runner/remote-client';
 import CloudRunnerOptionsReader from '../cloud-runner/options/cloud-runner-options-reader';
 import GitHub from '../github';
-import { CloudRunnerFolders } from '../cloud-runner/options/cloud-runner-folders';
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
 
@@ -54,6 +52,7 @@ export class Cli {
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.option('--select <select>', 'select a particular resource');
+    program.option('--logFile <logFile>', 'output to log file (log stream only)');
     program.parse(process.argv);
     Cli.options = program.opts();
 
@@ -110,7 +109,7 @@ export class Cli {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
 
-    return await CloudRunner.run(buildParameter, baseImage.toString());
+    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
   @CliFunction(`async-workflow`, `runs a cloud runner build`)
@@ -119,7 +118,7 @@ export class Cli {
     const baseImage = new ImageTag(buildParameter);
     await CloudRunner.setup(buildParameter);
 
-    return await CloudRunner.run(buildParameter, baseImage.toString());
+    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
   @CliFunction(`checks-update`, `runs a cloud runner build`)
@@ -172,32 +171,5 @@ export class Cli {
     await CloudRunner.setup(buildParameter);
 
     return await CloudRunner.Provider.watchWorkflow();
-  }
-
-  @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
-  public static async PostCLIBuild(): Promise<string> {
-    core.info(`Running POST build tasks`);
-
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
-      `lib-${CloudRunner.buildParameters.buildGuid}`,
-    );
-
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
-      `build-${CloudRunner.buildParameters.buildGuid}`,
-    );
-
-    if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
-      await CloudRunnerSystem.Run(
-        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
-      );
-    }
-
-    await RemoteClient.runCustomHookFiles(`after-build`);
-
-    return new Promise((result) => result(``));
   }
 }

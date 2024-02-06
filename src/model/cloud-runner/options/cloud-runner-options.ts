@@ -103,14 +103,14 @@ class CloudRunnerOptions {
 
   static get buildPlatform(): string {
     const input = CloudRunnerOptions.getInput('buildPlatform');
-    if (input) {
+    if (input && input !== '') {
       return input;
     }
     if (CloudRunnerOptions.providerStrategy !== 'local') {
       return 'linux';
     }
 
-    return ``;
+    return process.platform;
   }
 
   static get cloudRunnerBranch(): string {

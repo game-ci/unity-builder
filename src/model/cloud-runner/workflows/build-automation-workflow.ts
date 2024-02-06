@@ -2,7 +2,6 @@ import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 import { CloudRunnerFolders } from '../options/cloud-runner-folders';
 import { CloudRunnerStepParameters } from '../options/cloud-runner-step-parameters';
 import { WorkflowInterface } from './workflow-interface';
-import * as core from '@actions/core';
 import { CommandHookService } from '../services/hooks/command-hook-service';
 import path from 'node:path';
 import CloudRunner from '../cloud-runner';
@@ -21,8 +20,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     output += await ContainerHookService.RunPreBuildSteps(cloudRunnerStepState);
     CloudRunnerLogger.logWithTime('Configurable pre build step(s) time');
-
-    if (!CloudRunner.buildParameters.isCliMode) core.startGroup('build');
     CloudRunnerLogger.log(baseImage);
     CloudRunnerLogger.logLine(` `);
     CloudRunnerLogger.logLine('Starting build automation job');
@@ -36,7 +33,6 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       cloudRunnerStepState.environment,
       cloudRunnerStepState.secrets,
     );
-    if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     CloudRunnerLogger.logWithTime('Build time');
 
     output += await ContainerHookService.RunPostBuildSteps(cloudRunnerStepState);
@@ -58,11 +54,14 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
     );
 
-    return `apt-get update > /dev/null
+    return `echo "cloud runner build workflow starting"
+      apt-get update > /dev/null
       apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
-      npm i -g n > /dev/null
-      n 16.15.1 > /dev/null
       npm --version
+      npm i -g n > /dev/null
+      npm i -g semver > /dev/null
+      npm install --global yarn > /dev/null
+      n 20.8.0
       node --version
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
@@ -91,6 +90,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
+echo "log start" >> /home/job-log.txt
 node ${builderPath} -m remote-cli-pre-build`;
   }
 
@@ -98,7 +98,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
-    return `echo "game ci cloud runner initalized"
+    return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
@@ -107,9 +107,8 @@ node ${builderPath} -m remote-cli-pre-build`;
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
     echo "game ci start"
-    /entrypoint.sh
-    echo "game ci caching results"
-    chmod +x ${builderPath}
+    echo "game ci start" >> /home/job-log.txt
+    /entrypoint.sh | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
     node ${builderPath} -m remote-cli-post-build`;
   }
 }

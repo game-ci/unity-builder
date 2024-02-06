@@ -1,6 +1,5 @@
 import YAML from 'yaml';
 import CloudRunner from '../../cloud-runner';
-import * as core from '@actions/core';
 import { CustomWorkflow } from '../../workflows/custom-workflow';
 import { RemoteClientLogger } from '../../remote-client/remote-client-logger';
 import path from 'node:path';
@@ -237,13 +236,11 @@ export class ContainerHookService {
     ];
 
     if (steps.length > 0) {
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('post build steps');
       output += await CustomWorkflow.runContainerJob(
         steps,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
       );
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     }
 
     return output;
@@ -256,13 +253,11 @@ export class ContainerHookService {
     ];
 
     if (steps.length > 0) {
-      if (!CloudRunner.buildParameters.isCliMode) core.startGroup('pre build steps');
       output += await CustomWorkflow.runContainerJob(
         steps,
         cloudRunnerStepState.environment,
         cloudRunnerStepState.secrets,
       );
-      if (!CloudRunner.buildParameters.isCliMode) core.endGroup();
     }
 
     return output;

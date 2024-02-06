@@ -9,12 +9,7 @@ export class CloudRunnerError {
     CloudRunnerLogger.error(JSON.stringify(error, undefined, 4));
     core.setFailed('Cloud Runner failed');
     if (CloudRunner.Provider !== undefined) {
-      await CloudRunner.Provider.cleanupWorkflow(
-        buildParameters.buildGuid,
-        buildParameters,
-        buildParameters.branch,
-        secrets,
-      );
+      await CloudRunner.Provider.cleanupWorkflow(buildParameters, buildParameters.branch, secrets);
     }
   }
 }
