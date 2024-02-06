@@ -34,6 +34,9 @@ describe('Cloud Runner Async Workflows', () => {
       const result = await GitHub.getCheckStatus();
       expect(result).toBe(`success`);
 
+      // wait for 15 seconds
+      await new Promise((resolve) => setTimeout(resolve, 15_000));
+
       // log data
       CloudRunnerLogger.log(JSON.stringify(result.data, undefined, 4));
     }, 1_000_000_000);
