@@ -5,6 +5,8 @@ import { Cli } from '../../cli/cli';
 import CloudRunnerOptions from '../options/cloud-runner-options';
 import setups from './cloud-runner-suite.test';
 import { OptionValues } from 'commander';
+import GitHub from '../../github';
+import CloudRunnerLogger from '../services/core/cloud-runner-logger';
 
 async function CreateParameters(overrides: OptionValues | undefined) {
   if (overrides) Cli.options = overrides;
@@ -29,6 +31,11 @@ describe('Cloud Runner Async Workflows', () => {
 
       // Run the job
       await CloudRunner.run(buildParameter, baseImage.toString());
+      const result = await GitHub.getCheckStatus();
+      expect(result).toBe(`success`);
+
+      // log data
+      CloudRunnerLogger.log(JSON.stringify(result.data, undefined, 4));
     }, 1_000_000_000);
   }
 });

@@ -213,6 +213,10 @@ class GitHub {
       core.info(`github workflow complete hook not found`);
     }
   }
+
+  public static async getCheckStatus() {
+    return await GitHub.octokitDefaultToken.request(`GET /repos/{owner}/{repo}/check-runs/{check_run_id}`);
+  }
 }
 
 export default GitHub;

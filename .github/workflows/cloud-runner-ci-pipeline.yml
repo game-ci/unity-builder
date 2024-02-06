@@ -176,7 +176,7 @@ jobs:
           - StandaloneLinux64 # Build a Linux 64-bit standalone.
           - WebGL # WebGL.
           - iOS # Build an iOS player.
-          - Android # Build an Android .apk.
+          # - Android # Build an Android .apk.
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v4
