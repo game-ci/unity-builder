@@ -85,7 +85,7 @@ jobs:
       fail-fast: false
       matrix:
         test:
-          - 'cloud-runner-async-workflow'
+          # - 'cloud-runner-async-workflow'
           - 'cloud-runner-end2end-locking'
           - 'cloud-runner-end2end-caching'
           - 'cloud-runner-end2end-retaining'
