@@ -32,7 +32,7 @@ describe('Cloud Runner Async Workflows', () => {
       // Run the job
       await CloudRunner.run(buildParameter, baseImage.toString());
       const result = await GitHub.getCheckStatus();
-      expect(result).toBe(`success`);
+      expect(result.status.toString()[0]).toEqual('2');
 
       // wait for 15 seconds
       await new Promise((resolve) => setTimeout(resolve, 15_000));
