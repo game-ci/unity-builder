@@ -24,6 +24,9 @@ describe('Cloud Runner Async Workflows', () => {
         unityVersion: UnityVersioning.read('test-project'),
         asyncCloudRunner: `true`,
         githubChecks: `true`,
+        providerStrategy: 'k8s',
+        buildPlatform: 'linux',
+        targetPlatform: 'StandaloneLinux64',
       });
       const baseImage = new ImageTag(buildParameter);
 
@@ -31,7 +34,7 @@ describe('Cloud Runner Async Workflows', () => {
       await CloudRunner.run(buildParameter, baseImage.toString());
 
       // wait for 15 seconds
-      await new Promise((resolve) => setTimeout(resolve, 85_000));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 12));
     }, 1_000_000_000);
   }
 });
