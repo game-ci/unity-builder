@@ -77,11 +77,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          docker volume rm $(docker volume ls -qf dangling=true)
-          docker rmi $(docker images -q -f dangling=true)
-          docker rm $(docker ps -aqf status=exited)
-          docker rmi $(docker images -q)
   k8sTests:
     name: K8s Tests
     if: github.event.event_type != 'pull_request_target'
@@ -211,8 +206,3 @@ jobs:
           name: ${{ matrix.providerStrategy }} Build (${{ matrix.targetPlatform }})
           path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           retention-days: 14
-      - run: |
-          docker volume rm $(docker volume ls -qf dangling=true)
-          docker rmi $(docker images -q -f dangling=true)
-          docker rm $(docker ps -aqf status=exited)
-          docker rmi $(docker images -q)
