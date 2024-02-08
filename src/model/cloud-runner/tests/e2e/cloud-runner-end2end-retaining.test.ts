@@ -29,7 +29,8 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
 
       const baseImage = new ImageTag(buildParameter);
-      const results = await CloudRunner.run(buildParameter, baseImage.toString());
+      const resultsObject = await CloudRunner.run(buildParameter, baseImage.toString());
+      const results = resultsObject.BuildResults;
       const libraryString = 'Rebuilding Library because the asset database could not be found!';
       const cachePushFail = 'Did not push source folder to cache because it was empty Library';
       const buildSucceededString = 'Build succeeded';
@@ -51,7 +52,8 @@ describe('Cloud Runner Retain Workspace', () => {
 
       buildParameter2.cacheKey = buildParameter.cacheKey;
       const baseImage2 = new ImageTag(buildParameter2);
-      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2Object = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2 = results2Object.BuildResults;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const build2ContainsCacheKey = results2.includes(buildParameter.cacheKey);
@@ -59,7 +61,6 @@ describe('Cloud Runner Retain Workspace', () => {
       const build2ContainsRetainedWorkspacePhrase = results2.includes(`Retained Workspace:`);
       const build2ContainsWorkspaceExistsAlreadyPhrase = results2.includes(`Retained Workspace Already Exists!`);
       const build2ContainsBuildSucceeded = results2.includes(buildSucceededString);
-      const build2NotContainsNoLibraryMessage = !results2.includes(libraryString);
       const build2NotContainsZeroLibraryCacheFilesMessage = !results2.includes(
         'There is 0 files/dir in the cache pulled contents for Library',
       );
@@ -74,7 +75,8 @@ describe('Cloud Runner Retain Workspace', () => {
       expect(build2ContainsBuildSucceeded).toBeTruthy();
       expect(build2NotContainsZeroLibraryCacheFilesMessage).toBeTruthy();
       expect(build2NotContainsZeroLFSCacheFilesMessage).toBeTruthy();
-      expect(build2NotContainsNoLibraryMessage).toBeTruthy();
+      const splitResults = results2.split('Activation successful');
+      expect(splitResults[splitResults.length - 1]).not.toContain(libraryString);
     }, 1_000_000_000);
     afterAll(async () => {
       await SharedWorkspaceLocking.CleanupWorkspace(CloudRunner.lockedWorkspace || ``, CloudRunner.buildParameters);

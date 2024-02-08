@@ -16,7 +16,13 @@ export class CloudRunnerSystem {
       });
   }
 
-  public static async Run(command: string, suppressError = false, suppressLogs = false) {
+  public static async Run(
+    command: string,
+    suppressError = false,
+    suppressLogs = false,
+    // eslint-disable-next-line no-unused-vars
+    outputCallback?: (output: string) => void,
+  ) {
     for (const element of command.split(`\n`)) {
       if (!suppressLogs) {
         RemoteClientLogger.log(element);
@@ -25,7 +31,7 @@ export class CloudRunnerSystem {
 
     return await new Promise<string>((promise, throwError) => {
       let output = '';
-      const child = exec(command, (error, stdout, stderr) => {
+      const child = exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout, stderr) => {
         if (!suppressError && error) {
           RemoteClientLogger.log(error.toString());
           throwError(error);
@@ -38,6 +44,9 @@ export class CloudRunnerSystem {
           output += diagnosticOutput;
         }
         const outputChunk = `${stdout}`;
+        if (outputCallback) {
+          outputCallback(outputChunk);
+        }
         output += outputChunk;
       });
       child.on('close', (code) => {

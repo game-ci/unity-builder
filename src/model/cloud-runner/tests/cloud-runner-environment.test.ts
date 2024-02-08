@@ -34,6 +34,7 @@ describe('Cloud Runner Sync Environments', () => {
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
+        targetPlatform: 'StandaloneWindows64',
         customJob: `
         - name: 'step 1'
           image: 'ubuntu'
@@ -44,9 +45,12 @@ describe('Cloud Runner Sync Environments', () => {
         `,
       });
       const baseImage = new ImageTag(buildParameter);
+      if (baseImage.toString().includes('undefined')) {
+        throw new Error(`Base image is undefined`);
+      }
 
       // Run the job
-      const file = await CloudRunner.run(buildParameter, baseImage.toString());
+      const file = (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
 
       // Assert results
       // expect(file).toContain(JSON.stringify(buildParameter));

@@ -34,6 +34,7 @@ async function runMain() {
             });
     } else {
       await CloudRunner.run(buildParameters, baseImage.toString());
+      exitCode = 0;
     }
 
     // Set output

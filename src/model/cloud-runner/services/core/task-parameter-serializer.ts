@@ -146,7 +146,8 @@ export class TaskParameterSerializer {
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_SERIAL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_EMAIL');
     array = TaskParameterSerializer.tryAddInput(array, 'UNITY_PASSWORD');
-    array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
+
+    // array = TaskParameterSerializer.tryAddInput(array, 'UNITY_LICENSE');
     array = TaskParameterSerializer.tryAddInput(array, 'GIT_PRIVATE_TOKEN');
 
     return array;

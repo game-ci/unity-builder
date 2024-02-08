@@ -186,11 +186,11 @@ inputs:
     description:
       '[CloudRunner] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
-  cloudRunnerCpu:
+  containerCpu:
     default: ''
     required: false
     description: '[CloudRunner] Amount of CPU time to assign the remote build container'
-  cloudRunnerMemory:
+  containerMemory:
     default: ''
     required: false
     description: '[CloudRunner] Amount of memory to assign the remote build container'

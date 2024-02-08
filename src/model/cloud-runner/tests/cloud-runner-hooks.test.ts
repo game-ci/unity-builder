@@ -30,6 +30,7 @@ commands: echo "test"`;
       projectPath: 'test-project',
       unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
       targetPlatform: 'StandaloneLinux64',
+      image: 'ubuntu',
       cacheKey: `test-case-${uuidv4()}`,
     };
     CloudRunner.setup(await CreateParameters(overrides));
@@ -51,6 +52,7 @@ commands: echo "test"`;
     it('Should be 1 before and 1 after hook', async () => {
       const overrides = {
         versioning: 'None',
+        image: 'ubuntu',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
@@ -72,6 +74,7 @@ commands: echo "test"`;
         unityVersion: UnityVersioning.determineUnityVersion('test-project', UnityVersioning.read('test-project')),
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
+        image: 'ubuntu',
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
       };
@@ -94,7 +97,8 @@ commands: echo "test"`;
       };
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);
-      const results2 = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2Object = await CloudRunner.run(buildParameter2, baseImage2.toString());
+      const results2 = results2Object.BuildResults;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
       const buildContainsBuildSucceeded = results2.includes('Build succeeded');
