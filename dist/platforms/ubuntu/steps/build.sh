@@ -25,7 +25,7 @@ echo "Using build target \"$BUILD_TARGET\"."
 
 echo "Using build path \"$BUILD_PATH\" to save file \"$BUILD_FILE\"."
 BUILD_PATH_FULL="$GITHUB_WORKSPACE/$BUILD_PATH"
-CUSTOM_BUILD_PATH="$BUILD_PATH_FULL/$BUILD_FILE"
+CUSTOM_BUILD_PATH="$BUILD_PATH_FULL/"
 
 #
 # Set the build method, must reference one of:
