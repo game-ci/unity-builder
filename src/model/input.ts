@@ -55,7 +55,7 @@ class Input {
 
   static get branch(): string {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`)!.replaceAll('refs/', '').replaceAll(`head/`, '').replaceAll(`heads/`, '');
+      return Input.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch')!;
     } else {
@@ -104,7 +104,7 @@ class Input {
       rawProjectPath = '.';
     }
 
-    return rawProjectPath.replaceAll(/\/$/, '');
+    return rawProjectPath.replace(/\/$/, '');
   }
 
   static get runnerTempPath(): string {
@@ -278,10 +278,10 @@ class Input {
     }
 
     return input
-      .replaceAll(/([A-Z])/g, ' $1')
+      .replace(/([A-Z])/g, ' $1')
       .trim()
       .toUpperCase()
-      .replaceAll(' ', '_');
+      .replace(/ /g, '_');
   }
 }
 

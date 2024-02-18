@@ -82,7 +82,7 @@ class ImageEnvironmentFactory {
     ];
     if (parameters.providerStrategy === 'local-docker') {
       for (const element of additionalVariables) {
-        if (environmentVariables.some((x) => element?.name === x?.name) === undefined) {
+        if (!environmentVariables.some((x) => element?.name === x?.name)) {
           environmentVariables.push(element);
         }
       }
