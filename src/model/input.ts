@@ -55,7 +55,7 @@ class Input {
 
   static get branch(): string {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return Input.getInput(`GITHUB_REF`)!.replaceAll('refs/', '').replaceAll(`head/`, '').replaceAll(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch')!;
     } else {
@@ -104,7 +104,7 @@ class Input {
       rawProjectPath = '.';
     }
 
-    return rawProjectPath.replace(/\/$/, '');
+    return rawProjectPath.replaceAll(/\/$/, '');
   }
 
   static get runnerTempPath(): string {
@@ -186,7 +186,7 @@ class Input {
   }
 
   static get sshPublicKeysDirectoryPath(): string {
-    return Input.getInput('sshPublicKeysDirectoryPath') || '';
+    return Input.getInput('sshPublicKeysDirectoryPath') ?? '';
   }
 
   static get gitPrivateToken(): string | undefined {
@@ -194,27 +194,27 @@ class Input {
   }
 
   static get runAsHostUser(): string {
-    return Input.getInput('runAsHostUser') || 'false';
+    return Input.getInput('runAsHostUser')?.toLowerCase() ?? 'false';
   }
 
   static get chownFilesTo() {
-    return Input.getInput('chownFilesTo') || '';
+    return Input.getInput('chownFilesTo') ?? '';
   }
 
   static get allowDirtyBuild(): boolean {
-    const input = Input.getInput('allowDirtyBuild') || false;
+    const input = Input.getInput('allowDirtyBuild') ?? false;
 
     return input === 'true';
   }
 
   static get cacheUnityInstallationOnMac(): boolean {
-    const input = Input.getInput('cacheUnityInstallationOnMac') || false;
+    const input = Input.getInput('cacheUnityInstallationOnMac') ?? false;
 
     return input === 'true';
   }
 
   static get unityHubVersionOnMac(): string {
-    const input = Input.getInput('unityHubVersionOnMac') || '';
+    const input = Input.getInput('unityHubVersionOnMac') ?? '';
 
     return input !== '' ? input : '';
   }
@@ -228,11 +228,11 @@ class Input {
   }
 
   static get dockerWorkspacePath(): string {
-    return Input.getInput('dockerWorkspacePath') || '/github/workspace';
+    return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
   static get dockerCpuLimit(): string {
-    return Input.getInput('dockerCpuLimit') || os.cpus().length.toString();
+    return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }
 
   static get dockerMemoryLimit(): string {
@@ -252,20 +252,24 @@ class Input {
     }
 
     return (
-      Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+      Input.getInput('dockerMemoryLimit') ?? `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
     );
   }
 
   static get dockerIsolationMode(): string {
-    return Input.getInput('dockerIsolationMode') || 'default';
+    return Input.getInput('dockerIsolationMode') ?? 'default';
   }
 
   static get containerRegistryRepository(): string {
-    return Input.getInput('containerRegistryRepository') || 'unityci/editor';
+    return Input.getInput('containerRegistryRepository') ?? 'unityci/editor';
   }
 
   static get containerRegistryImageVersion(): string {
-    return Input.getInput('containerRegistryImageVersion') || '3';
+    return Input.getInput('containerRegistryImageVersion') ?? '3';
+  }
+
+  static get skipActivation(): string {
+    return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
   public static ToEnvVarFormat(input: string) {
@@ -274,10 +278,10 @@ class Input {
     }
 
     return input
-      .replace(/([A-Z])/g, ' $1')
+      .replaceAll(/([A-Z])/g, ' $1')
       .trim()
       .toUpperCase()
-      .replace(/ /g, '_');
+      .replaceAll(' ', '_');
   }
 }
 

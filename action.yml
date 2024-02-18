@@ -253,6 +253,10 @@ inputs:
     description:
       'The path to mount the workspace inside the docker container. For windows, leave out the drive letter. For example
       c:/github/workspace should be defined as /github/workspace'
+  skipActivation:
+    default: 'false'
+    required: false
+    description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
 
 outputs:
   volume:
