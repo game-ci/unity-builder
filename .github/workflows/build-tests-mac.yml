@@ -46,13 +46,6 @@ jobs:
             Library-
 
       ###########################
-      #  Set Scripting Backend  #
-      ###########################
-      - name: Set Scripting Backend To il2cpp
-        run: |
-          mv -f "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" "./test-project/ProjectSettings/ProjectSettings.asset"
-
-      ###########################
       #          Build          #
       ###########################
       - uses: ./
