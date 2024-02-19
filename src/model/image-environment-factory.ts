@@ -29,6 +29,7 @@ class ImageEnvironmentFactory {
         name: 'UNITY_LICENSING_SERVER',
         value: parameters.unityLicensingServer,
       },
+      { name: 'SKIP_ACTIVATION', value: parameters.skipActivation },
       { name: 'UNITY_VERSION', value: parameters.editorVersion },
       {
         name: 'USYM_UPLOAD_AUTH_TOKEN',
@@ -81,20 +82,12 @@ class ImageEnvironmentFactory {
     ];
     if (parameters.providerStrategy === 'local-docker') {
       for (const element of additionalVariables) {
-        if (
-          environmentVariables.find(
-            (x) => element !== undefined && element.name !== undefined && x.name === element.name,
-          ) === undefined
-        ) {
+        if (!environmentVariables.some((x) => element?.name === x?.name)) {
           environmentVariables.push(element);
         }
       }
       for (const variable of environmentVariables) {
-        if (
-          environmentVariables.find(
-            (x) => variable !== undefined && variable.name !== undefined && x.name === variable.name,
-          ) === undefined
-        ) {
+        if (!environmentVariables.some((x) => variable?.name === x?.name)) {
           environmentVariables = environmentVariables.filter((x) => x !== variable);
         }
       }

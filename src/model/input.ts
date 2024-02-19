@@ -46,11 +46,11 @@ class Input {
   }
 
   static get region(): string {
-    return Input.getInput('region') || 'eu-west-2';
+    return Input.getInput('region') ?? 'eu-west-2';
   }
 
   static get githubRepo(): string | undefined {
-    return Input.getInput('GITHUB_REPOSITORY') || Input.getInput('GITHUB_REPO') || undefined;
+    return Input.getInput('GITHUB_REPOSITORY') ?? Input.getInput('GITHUB_REPO') ?? undefined;
   }
 
   static get branch(): string {
@@ -74,19 +74,19 @@ class Input {
   }
 
   static get runNumber(): string {
-    return Input.getInput('GITHUB_RUN_NUMBER') || '0';
+    return Input.getInput('GITHUB_RUN_NUMBER') ?? '0';
   }
 
   static get targetPlatform(): string {
-    return Input.getInput('targetPlatform') || Platform.default;
+    return Input.getInput('targetPlatform') ?? Platform.default;
   }
 
   static get unityVersion(): string {
-    return Input.getInput('unityVersion') || 'auto';
+    return Input.getInput('unityVersion') ?? 'auto';
   }
 
   static get customImage(): string {
-    return Input.getInput('customImage') || '';
+    return Input.getInput('customImage') ?? '';
   }
 
   static get projectPath(): string {
@@ -108,85 +108,85 @@ class Input {
   }
 
   static get runnerTempPath(): string {
-    return Input.getInput('RUNNER_TEMP') || '';
+    return Input.getInput('RUNNER_TEMP') ?? '';
   }
 
   static get buildName(): string {
-    return Input.getInput('buildName') || Input.targetPlatform;
+    return Input.getInput('buildName') ?? Input.targetPlatform;
   }
 
   static get buildsPath(): string {
-    return Input.getInput('buildsPath') || 'build';
+    return Input.getInput('buildsPath') ?? 'build';
   }
 
   static get unityLicensingServer(): string {
-    return Input.getInput('unityLicensingServer') || '';
+    return Input.getInput('unityLicensingServer') ?? '';
   }
 
   static get buildMethod(): string {
-    return Input.getInput('buildMethod') || ''; // Processed in docker file
+    return Input.getInput('buildMethod') ?? ''; // Processed in docker file
   }
 
   static get manualExit(): boolean {
-    const input = Input.getInput('manualExit') || false;
+    const input = Input.getInput('manualExit') ?? false;
 
     return input === 'true';
   }
 
   static get customParameters(): string {
-    return Input.getInput('customParameters') || '';
+    return Input.getInput('customParameters') ?? '';
   }
 
   static get versioningStrategy(): string {
-    return Input.getInput('versioning') || 'Semantic';
+    return Input.getInput('versioning') ?? 'Semantic';
   }
 
   static get specifiedVersion(): string {
-    return Input.getInput('version') || '';
+    return Input.getInput('version') ?? '';
   }
 
   static get androidVersionCode(): string {
-    return Input.getInput('androidVersionCode') || '';
+    return Input.getInput('androidVersionCode') ?? '';
   }
 
   static get androidExportType(): string {
-    return Input.getInput('androidExportType') || 'androidPackage';
+    return Input.getInput('androidExportType') ?? 'androidPackage';
   }
 
   static get androidKeystoreName(): string {
-    return Input.getInput('androidKeystoreName') || '';
+    return Input.getInput('androidKeystoreName') ?? '';
   }
 
   static get androidKeystoreBase64(): string {
-    return Input.getInput('androidKeystoreBase64') || '';
+    return Input.getInput('androidKeystoreBase64') ?? '';
   }
 
   static get androidKeystorePass(): string {
-    return Input.getInput('androidKeystorePass') || '';
+    return Input.getInput('androidKeystorePass') ?? '';
   }
 
   static get androidKeyaliasName(): string {
-    return Input.getInput('androidKeyaliasName') || '';
+    return Input.getInput('androidKeyaliasName') ?? '';
   }
 
   static get androidKeyaliasPass(): string {
-    return Input.getInput('androidKeyaliasPass') || '';
+    return Input.getInput('androidKeyaliasPass') ?? '';
   }
 
   static get androidTargetSdkVersion(): string {
-    return Input.getInput('androidTargetSdkVersion') || '';
+    return Input.getInput('androidTargetSdkVersion') ?? '';
   }
 
   static get androidSymbolType(): string {
-    return Input.getInput('androidSymbolType') || 'none';
+    return Input.getInput('androidSymbolType') ?? 'none';
   }
 
   static get sshAgent(): string {
-    return Input.getInput('sshAgent') || '';
+    return Input.getInput('sshAgent') ?? '';
   }
 
   static get sshPublicKeysDirectoryPath(): string {
-    return Input.getInput('sshPublicKeysDirectoryPath') || '';
+    return Input.getInput('sshPublicKeysDirectoryPath') ?? '';
   }
 
   static get gitPrivateToken(): string | undefined {
@@ -194,27 +194,27 @@ class Input {
   }
 
   static get runAsHostUser(): string {
-    return Input.getInput('runAsHostUser') || 'false';
+    return Input.getInput('runAsHostUser')?.toLowerCase() ?? 'false';
   }
 
   static get chownFilesTo() {
-    return Input.getInput('chownFilesTo') || '';
+    return Input.getInput('chownFilesTo') ?? '';
   }
 
   static get allowDirtyBuild(): boolean {
-    const input = Input.getInput('allowDirtyBuild') || false;
+    const input = Input.getInput('allowDirtyBuild') ?? false;
 
     return input === 'true';
   }
 
   static get cacheUnityInstallationOnMac(): boolean {
-    const input = Input.getInput('cacheUnityInstallationOnMac') || false;
+    const input = Input.getInput('cacheUnityInstallationOnMac') ?? false;
 
     return input === 'true';
   }
 
   static get unityHubVersionOnMac(): string {
-    const input = Input.getInput('unityHubVersionOnMac') || '';
+    const input = Input.getInput('unityHubVersionOnMac') ?? '';
 
     return input !== '' ? input : '';
   }
@@ -228,11 +228,11 @@ class Input {
   }
 
   static get dockerWorkspacePath(): string {
-    return Input.getInput('dockerWorkspacePath') || '/github/workspace';
+    return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
   static get dockerCpuLimit(): string {
-    return Input.getInput('dockerCpuLimit') || os.cpus().length.toString();
+    return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }
 
   static get dockerMemoryLimit(): string {
@@ -252,20 +252,24 @@ class Input {
     }
 
     return (
-      Input.getInput('dockerMemoryLimit') || `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+      Input.getInput('dockerMemoryLimit') ?? `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
     );
   }
 
   static get dockerIsolationMode(): string {
-    return Input.getInput('dockerIsolationMode') || 'default';
+    return Input.getInput('dockerIsolationMode') ?? 'default';
   }
 
   static get containerRegistryRepository(): string {
-    return Input.getInput('containerRegistryRepository') || 'unityci/editor';
+    return Input.getInput('containerRegistryRepository') ?? 'unityci/editor';
   }
 
   static get containerRegistryImageVersion(): string {
-    return Input.getInput('containerRegistryImageVersion') || '3';
+    return Input.getInput('containerRegistryImageVersion') ?? '3';
+  }
+
+  static get skipActivation(): string {
+    return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
   public static ToEnvVarFormat(input: string) {

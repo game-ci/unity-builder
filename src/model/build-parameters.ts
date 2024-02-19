@@ -22,6 +22,7 @@ class BuildParameters {
   public customImage!: string;
   public unitySerial!: string;
   public unityLicensingServer!: string;
+  public skipActivation!: string;
   public runnerTempPath!: string;
   public targetPlatform!: string;
   public projectPath!: string;
@@ -59,7 +60,7 @@ class BuildParameters {
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
-  public runAsHostUser!: String;
+  public runAsHostUser!: string;
   public chownFilesTo!: string;
   public commandHooks!: string;
   public pullInputList!: string[];
@@ -146,6 +147,7 @@ class BuildParameters {
       customImage: Input.customImage,
       unitySerial,
       unityLicensingServer: Input.unityLicensingServer,
+      skipActivation: Input.skipActivation,
       runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
@@ -168,7 +170,7 @@ class BuildParameters {
       customParameters: Input.customParameters,
       sshAgent: Input.sshAgent,
       sshPublicKeysDirectoryPath: Input.sshPublicKeysDirectoryPath,
-      gitPrivateToken: Input.gitPrivateToken || (await GithubCliReader.GetGitHubAuthToken()),
+      gitPrivateToken: Input.gitPrivateToken ?? (await GithubCliReader.GetGitHubAuthToken()),
       runAsHostUser: Input.runAsHostUser,
       chownFilesTo: Input.chownFilesTo,
       dockerCpuLimit: Input.dockerCpuLimit,
@@ -190,7 +192,7 @@ class BuildParameters {
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: Input.githubRepo || (await GitRepoReader.GetRemote()) || 'game-ci/unity-builder',
+      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsStackName,
       gitSha: Input.gitSha,
