@@ -20,7 +20,6 @@ jobs:
         unityVersion:
           - 2021.3.32f1
           - 2022.3.13f1
-          - 2023.1.19f1
           - 2023.2.2f1
         targetPlatform:
           - StandaloneOSX # Build a MacOS executable
@@ -44,6 +43,13 @@ jobs:
           restore-keys: |
             Library-${{ matrix.projectPath }}-macos-
             Library-
+
+      ###########################
+      #  Set Scripting Backend  #
+      ###########################
+      - name: Set Scripting Backend To il2cpp
+        run: |
+          mv -f "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" "./test-project/ProjectSettings/ProjectSettings.asset"
 
       ###########################
       #          Build          #
