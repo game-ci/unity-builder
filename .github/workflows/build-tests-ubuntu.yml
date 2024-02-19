@@ -61,28 +61,37 @@ jobs:
         buildWithIl2cpp:
           - false
           - true
+        additionalParameters:
+          - -param value
+          - -standaloneBuildSubtarget Server
         # Skipping configurations that are not supported
         exclude:
+          # No il2cpp support on Linux Host
           - targetPlatform: StandaloneOSX
             buildWithIl2cpp: true
           - targetPlatform: StandaloneWindows64
             buildWithIl2cpp: true
+          # Only builds with Il2cpp
           - targetPlatform: iOS
             buildWithIl2cpp: false
           - targetPlatform: Android
             buildWithIl2cpp: false
           - targetPlatform: WebGL
             buildWithIl2cpp: false
-        include:
-          - targetPlatform: StandaloneLinux64
+          # No dedicated server support
+          - targetPlatform: WebGL
             additionalParameters: -standaloneBuildSubtarget Server
-            buildWithIl2cpp: true
-          - targetPlatform: StandaloneLinux64
+          - targetPlatform: Android
             additionalParameters: -standaloneBuildSubtarget Server
-            buildWithIl2cpp: false
+          - targetPlatform: iOS
+            additionalParameters: -standaloneBuildSubtarget Server
+          # No dedicated server support on Linux Host
+          - targetPlatform: StandaloneOSX
+            additionalParameters: -standaloneBuildSubtarget Server
+          # No il2cpp dedicated server support on Linux Host
           - targetPlatform: StandaloneWindows64
             additionalParameters: -standaloneBuildSubtarget Server
-            buildWithIl2cpp: false
+            buildWithIl2cpp: true
 
     steps:
       - name: Clear Space for Android Build
@@ -182,6 +191,8 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on Ubuntu (${{ matrix.unityVersion }})
+          name:
+            'Build ${{ matrix.targetPlatform }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp
+            }}_params_${{ matrix.additionalParameters }})'
           path: build
           retention-days: 14
