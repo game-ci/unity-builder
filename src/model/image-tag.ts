@@ -17,6 +17,7 @@ class ImageTag {
       buildPlatform,
       containerRegistryRepository,
       containerRegistryImageVersion,
+      providerStrategy,
     } = imageProperties;
 
     if (!ImageTag.versionPattern.test(editorVersion)) {
@@ -31,7 +32,11 @@ class ImageTag {
     this.repository = containerRegistryRepository;
     this.editorVersion = editorVersion;
     this.targetPlatform = targetPlatform;
-    this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(targetPlatform, editorVersion);
+    this.builderPlatform = ImageTag.getTargetPlatformToTargetPlatformSuffixMap(
+      targetPlatform,
+      editorVersion,
+      providerStrategy,
+    );
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(buildPlatform);
     this.imageRollingVersion = Number(containerRegistryImageVersion); // Will automatically roll to the latest non-breaking version.
   }
@@ -72,7 +77,11 @@ class ImageTag {
     }
   }
 
-  static getTargetPlatformToTargetPlatformSuffixMap(platform: string, version: string): string {
+  static getTargetPlatformToTargetPlatformSuffixMap(
+    platform: string,
+    version: string,
+    providerStrategy: string,
+  ): string {
     const { generic, webgl, mac, windows, windowsIl2cpp, wsaPlayer, linux, linuxIl2cpp, android, ios, tvos, facebook } =
       ImageTag.targetPlatformSuffixes;
 
@@ -100,8 +109,12 @@ class ImageTag {
         return windows;
       case Platform.types.StandaloneLinux64: {
         // Unity versions before 2019.3 do not support il2cpp
-        if (process.env.USE_IL2CPP === 'true' && (major >= 2020 || (major === 2019 && minor >= 3))) {
-          return linuxIl2cpp;
+        if (major >= 2020 || (major === 2019 && minor >= 3)) {
+          if (providerStrategy === 'local') {
+            return linuxIl2cpp;
+          } else {
+            return process.env.USE_IL2CPP === 'true' ? linuxIl2cpp : linux;
+          }
         }
 
         return linux;
