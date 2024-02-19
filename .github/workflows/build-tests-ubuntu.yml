@@ -54,10 +54,36 @@ jobs:
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
           - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
-          - StandaloneLinux64 # Build a Linux 64-bit standalone with mono backend.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone with mono/il2cpp backend.
           - iOS # Build an iOS player.
           - Android # Build an Android .apk.
           - WebGL # WebGL.
+        buildWithIl2cpp:
+          - false
+          - true
+        # Skipping configurations that are not supported
+        exclude:
+          - targetPlatform: StandaloneOSX
+            buildWithIl2cpp: true
+          - targetPlatform: StandaloneWindows64
+            buildWithIl2cpp: true
+          - targetPlatform: iOS
+            buildWithIl2cpp: false
+          - targetPlatform: Android
+            buildWithIl2cpp: false
+          - targetPlatform: WebGL
+            buildWithIl2cpp: false
+        include:
+          - targetPlatform: StandaloneLinux64
+            additionalParameters: -standaloneBuildSubtarget Server
+            buildWithIl2cpp: true
+          - targetPlatform: StandaloneLinux64
+            additionalParameters: -standaloneBuildSubtarget Server
+            buildWithIl2cpp: false
+          - targetPlatform: StandaloneWindows64
+            additionalParameters: -standaloneBuildSubtarget Server
+            buildWithIl2cpp: false
+
     steps:
       - name: Clear Space for Android Build
         if: matrix.targetPlatform == 'Android'
@@ -82,6 +108,14 @@ jobs:
             Library-
 
       ###########################
+      #  Set Scripting Backend  #
+      ###########################
+      - name: Set Scripting Backend To il2cpp
+        if: matrix.buildWithIl2cpp == true
+        run: |
+          mv -f "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" "./test-project/ProjectSettings/ProjectSettings.asset"
+
+      ###########################
       #          Build          #
       ###########################
       - name: Build
@@ -96,8 +130,9 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
           providerStrategy: ${{ matrix.providerStrategy }}
+          allowDirtyBuild: true
 
       - name: Sleep for Retry
         if: ${{ steps.build-1.outcome == 'failure' }}
@@ -117,7 +152,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
           providerStrategy: ${{ matrix.providerStrategy }}
           allowDirtyBuild: true
 
@@ -138,7 +173,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
+          customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
           providerStrategy: ${{ matrix.providerStrategy }}
           allowDirtyBuild: true
 
