@@ -30,7 +30,7 @@ namespace UnityBuilderAction.Reporting
                     prefix = "error";
                     break;
             }
-            Console.WriteLine($"{Environment.NewLine}::{prefix} ::{condition}{Environment.NewLine}{stackTrace}");
+            Console.WriteLine(Environment.NewLine + "::" + prefix + "::" + condition + Environment.NewLine + stackTrace);
         }
     }
 }
