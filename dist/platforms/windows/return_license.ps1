@@ -6,7 +6,16 @@ Write-Output "#      Return License     #"
 Write-Output "###########################"
 Write-Output ""
 
-if (($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($null -ne ${env:UNITY_PASSWORD}))
+if (($null -ne ${env:UNITY_LICENSING_SERVER}))
+{
+  Write-Output "Returning floating license: ""$env:FLOATING_LICENSE"""
+  Start-Process -FilePath "$Env:UNITY_PATH\Editor\Data\Resources\Licensing\Client\Unity.Licensing.Client.exe" `
+                -ArgumentList "--return-floating ""$env:FLOATING_LICENSE"" " `
+                -NoNewWindow `
+                -Wait
+}
+
+elseif (($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($null -ne ${env:UNITY_PASSWORD}))
 {
   #
   # SERIAL LICENSE MODE
