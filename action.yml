@@ -35,6 +35,10 @@ inputs:
     required: false
     default: ''
     description: 'Suppresses `-quit`. Exit your build method using `EditorApplication.Exit(0)` instead.'
+  enableGpu:
+    required: false
+    default: ''
+    description: 'Launches unity without specifying `-nographics`.'
   customParameters:
     required: false
     default: ''

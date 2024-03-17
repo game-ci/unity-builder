@@ -131,7 +131,7 @@ echo ""
   -logFile - \
   $( [ "${MANUAL_EXIT}" == "true" ] || echo "-quit" ) \
   -batchmode \
-  -nographics \
+  $( [ "${ENABLE_GPU}" == "true" ] || echo "-nographics" ) \
   -username "$UNITY_EMAIL" \
   -password "$UNITY_PASSWORD" \
   -customBuildName "$BUILD_NAME" \

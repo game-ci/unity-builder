@@ -133,6 +133,12 @@ class Input {
     return input === 'true';
   }
 
+  static get enableGpu(): boolean {
+    const input = Input.getInput('enableGpu') ?? false;
+
+    return input === 'true';
+  }
+
   static get customParameters(): string {
     return Input.getInput('customParameters') ?? '';
   }
