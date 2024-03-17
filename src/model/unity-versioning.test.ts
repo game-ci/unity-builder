@@ -11,6 +11,12 @@ describe('Unity Versioning', () => {
       m_EditorVersionWithRevision: 2021.3.4f1 (cb45f9cae8b7)`;
       expect(UnityVersioning.parse(projectVersionContents)).toBe('2021.3.4f1');
     });
+
+    it('parses Unity 6000 and newer from ProjectVersion.txt', () => {
+      const projectVersionContents = `m_EditorVersion: 6000.0.0f1
+      m_EditorVersionWithRevision: 6000.0.0f1 (cb45f9cae8b7)`;
+      expect(UnityVersioning.parse(projectVersionContents)).toBe('6000.0.0f1');
+    });
   });
 
   describe('read', () => {
