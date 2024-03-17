@@ -20,6 +20,10 @@ class ImageTag {
       providerStrategy,
     } = imageProperties;
 
+    if (!ImageTag.versionPattern.test(editorVersion)) {
+      throw new Error(`Invalid version "${editorVersion}".`);
+    }
+
     // Todo we might as well skip this class for customImage.
     // Either
     this.customImage = customImage;
@@ -35,6 +39,10 @@ class ImageTag {
     );
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(buildPlatform);
     this.imageRollingVersion = Number(containerRegistryImageVersion); // Will automatically roll to the latest non-breaking version.
+  }
+
+  static get versionPattern(): RegExp {
+    return /^\d+\.\d+\.\d+[a-z]\d+$/;
   }
 
   static get targetPlatformSuffixes() {
