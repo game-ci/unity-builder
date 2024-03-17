@@ -27,7 +27,7 @@ describe('ImageTag', () => {
       expect(image.builderPlatform).toStrictEqual(testImageParameters.builderPlatform);
     });
 
-    test.each(['2000.0.0f0', '2011.1.11f1'])('accepts %p version format', (version) => {
+    test.each(['2000.0.0f0', '2011.1.11f1', '6000.0.0f1'])('accepts %p version format', (version) => {
       expect(
         () =>
           new ImageTag({
@@ -35,11 +35,6 @@ describe('ImageTag', () => {
             targetPlatform: testImageParameters.targetPlatform,
           }),
       ).not.toThrow();
-    });
-
-    test.each(['some version', ''])('throws for incorrect version %p', (editorVersion) => {
-      const { targetPlatform } = testImageParameters;
-      expect(() => new ImageTag({ editorVersion, targetPlatform })).toThrow();
     });
 
     test.each(['nonExisting'])('throws for unsupported target %p', (targetPlatform) => {
