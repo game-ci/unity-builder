@@ -4,7 +4,12 @@ import { BuildParameters } from '..';
 class ValidateWindows {
   public static validate(buildParameters: BuildParameters) {
     ValidateWindows.validateWindowsPlatformRequirements(buildParameters.targetPlatform);
-    if (!((process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD) || buildParameters.unityLicensingServer)) {
+
+    const { unityLicensingServer } = buildParameters;
+    const hasLicensingCredentials = process.env.UNITY_EMAIL && process.env.UNITY_PASSWORD;
+    const hasValidLicensingStrategy = hasLicensingCredentials || unityLicensingServer;
+
+    if (!hasValidLicensingStrategy) {
       throw new Error(`Unity email and password or alternatively a Unity licensing server url must be set for 
                        Windows based builds to authenticate the license. Make sure to set them inside UNITY_EMAIL
                        and UNITY_PASSWORD in Github Secrets and pass them into the environment.`);
