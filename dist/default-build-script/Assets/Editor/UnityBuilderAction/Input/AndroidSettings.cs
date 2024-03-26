@@ -56,17 +56,17 @@ namespace UnityBuilderAction.Input
           case "androidStudioProject":
             EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
             if (buildAppBundle != null)
-              buildAppBundle.SetValue(null, false);
+              buildAppBundle.SetValue(null, false, null);
             break;
           case "androidAppBundle":
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
             if (buildAppBundle != null)
-              buildAppBundle.SetValue(null, true);
+              buildAppBundle.SetValue(null, true, null);
             break;
           case "androidPackage":
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
             if (buildAppBundle != null)
-              buildAppBundle.SetValue(null, false);
+              buildAppBundle.SetValue(null, false, null);
             break;
         }
       }

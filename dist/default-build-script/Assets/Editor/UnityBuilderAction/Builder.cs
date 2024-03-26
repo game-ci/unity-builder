@@ -74,7 +74,7 @@ namespace UnityBuilderAction
         }
         catch (Exception e)
         {
-          Debug.LogError($"Failed to run default addressables build:\n{e}");
+          Debug.LogError("Failed to run default addressables build:\n" + e);
         }
       }
 

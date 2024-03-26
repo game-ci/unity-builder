@@ -21,11 +21,11 @@ namespace UnityBuilderAction.Versioning
         version = GetSemanticCommitVersion();
         Console.WriteLine("Repository has a valid version tag.");
       } else {
-        version = $"0.0.{GetTotalNumberOfCommits()}";
+        version = "0.0." + GetTotalNumberOfCommits();
         Console.WriteLine("Repository does not have tags to base the version on.");
       }
 
-      Console.WriteLine($"Version is {version}");
+      Console.WriteLine("Version is " + version);
 
       return version;
     }
