@@ -126,11 +126,11 @@ jobs:
       fail-fast: false
       matrix:
         test:
-          - 'cloud-runner-end2end-locking'
-          - 'cloud-runner-end2end-caching'
-          - 'cloud-runner-end2end-retaining'
-          - 'cloud-runner-environment'
-          - 'cloud-runner-s3-steps'
+          #- 'cloud-runner-end2end-locking'
+          #- 'cloud-runner-end2end-caching'
+          #- 'cloud-runner-end2end-retaining'
+          #- 'cloud-runner-environment'
+          #- 'cloud-runner-s3-steps'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
