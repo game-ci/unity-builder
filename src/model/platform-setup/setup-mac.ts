@@ -20,6 +20,8 @@ class SetupMac {
       await SetupMac.installUnity(buildParameters);
     }
 
+    await SetupMac.ensureRequiredModuleIsInstalled(buildParameters);
+
     await SetupMac.setEnvironmentVariables(buildParameters, actionFolder);
   }
 
@@ -117,6 +119,26 @@ class SetupMac {
     }
 
     return moduleArgument;
+  }
+
+  private static async ensureRequiredModuleIsInstalled(buildParameters: BuildParameters) {
+    const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
+    const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+
+    const execArguments: string[] = [
+      '--',
+      '--headless',
+      'install-modules',
+      ...['--version', buildParameters.editorVersion],
+      ...['--changeset', unityChangeset.changeset],
+      ...moduleArguments,
+      '--childModules',
+    ];
+
+    await exec(this.unityHubExecPath, execArguments, {
+      silent: true,
+      ignoreReturnCode: true,
+    });
   }
 
   private static async installUnity(buildParameters: BuildParameters, silent = false) {
