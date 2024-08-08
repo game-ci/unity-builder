@@ -33,7 +33,7 @@ commands: echo "test"`;
       image: 'ubuntu',
       cacheKey: `test-case-${uuidv4()}`,
     };
-    CloudRunner.setup(await CreateParameters(overrides));
+    await CloudRunner.setup(await CreateParameters(overrides));
     const stringObject = ContainerHookService.ParseContainerHooks(yamlString);
     const stringObject2 = ContainerHookService.ParseContainerHooks(yamlString2);
 
