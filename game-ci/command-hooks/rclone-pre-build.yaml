@@ -1,0 +1,3 @@
+hook: before
+commands: |
+  curl https://rclone.org/install.sh | bash

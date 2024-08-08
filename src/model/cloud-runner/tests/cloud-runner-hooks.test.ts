@@ -48,7 +48,7 @@ commands: echo "test"`;
     const getCustomStepsFromFiles = ContainerHookService.GetContainerHooksFromFiles(`before`);
     CloudRunnerLogger.log(JSON.stringify(getCustomStepsFromFiles, undefined, 4));
   });
-  if (CloudRunnerOptions.cloudRunnerDebug && CloudRunnerOptions.providerStrategy !== `k8s`) {
+  if (CloudRunnerOptions.cloudRunnerDebug) {
     it('Should be 1 before and 1 after hook', async () => {
       const overrides = {
         versioning: 'None',
