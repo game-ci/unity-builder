@@ -35,6 +35,20 @@ jobs:
     name: Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - 'cloud-runner-end2end-locking'
+          - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-caching'
+          - 'cloud-runner-environment'
+          - 'cloud-runner-image'
+          - 'cloud-runner-hooks'
+          - 'cloud-runner-local-persistence'
+          - 'cloud-runner-locking-core'
+          - 'cloud-runner-locking-get-locked'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v4
@@ -47,7 +61,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - run: yarn run test --detectOpenHandles --forceExit --runInBand
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -67,6 +81,18 @@ jobs:
     name: K8s Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          # - 'cloud-runner-async-workflow'
+          - 'cloud-runner-end2end-locking'
+          - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-kubernetes'
+          - 'cloud-runner-environment'
+          - 'cloud-runner-github-checks'
+          - 'cloud-runner-rclone-core'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -77,7 +103,7 @@ jobs:
         uses: debianmaster/actions-k3s@v1.0.5
         with:
           version: 'latest'
-      - run: yarn run test --detectOpenHandles --forceExit --runInBand
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -97,6 +123,15 @@ jobs:
     name: AWS Tests
     if: github.event.event_type != 'pull_request_target'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - 'cloud-runner-end2end-locking'
+          - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-environment'
+          - 'cloud-runner-s3-steps'
     steps:
       - name: Checkout (default)
         uses: actions/checkout@v2
@@ -109,7 +144,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - run: yarn
-      - run: yarn run test --detectOpenHandles --forceExit --runInBand
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
         timeout-minutes: 60
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -125,6 +160,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   buildTargetTests:
     name: Local Build Target Tests
