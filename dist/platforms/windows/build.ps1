@@ -30,11 +30,6 @@ $Env:CUSTOM_BUILD_PATH="$Env:BUILD_PATH_FULL\$Env:BUILD_FILE"
 
 if ($null -ne ${env:PRIVATE_REGISTRY_TOKEN})
 {
-  Write-Output ""
-  Write-Output "###########################"
-  Write-Output "#    Private Registry     #"
-  Write-Output "###########################"
-  Write-Output ""
   Write-Output "Private registry token detected, creating .upmconfig.toml and .npmrc"
 
   $UPM_CONFIG_TOML_PATH="$env:USERPROFILE\.upmconfig.toml"
@@ -48,14 +43,6 @@ if ($null -ne ${env:PRIVATE_REGISTRY_TOKEN})
 token = "${env:PRIVATE_REGISTRY_TOKEN}"
 alwaysAuth = true
 "@ | Set-Content -Path "$env:USERPROFILE\.upmconfig.toml"
-}
-else
-{
-  Write-Output ""
-  Write-Output "###########################"
-  Write-Output "#    Test        Test     #"
-  Write-Output "###########################"
-  Write-Output ""
 }
 
 #
