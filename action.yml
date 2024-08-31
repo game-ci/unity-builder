@@ -261,6 +261,10 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  scopedRegistryUrl:
+    required: false
+    default: ''
+    description: 'Scoped registry to use for resolving package dependencies. Only applicable if packageMode is true.'
 
 outputs:
   volume:

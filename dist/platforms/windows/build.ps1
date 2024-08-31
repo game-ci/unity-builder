@@ -25,6 +25,40 @@ $Env:BUILD_PATH_FULL="$Env:GITHUB_WORKSPACE\$Env:BUILD_PATH"
 $Env:CUSTOM_BUILD_PATH="$Env:BUILD_PATH_FULL\$Env:BUILD_FILE"
 
 #
+# Setup token for private package registry.
+#
+
+if ($null -ne ${env:PRIVATE_REGISTRY_TOKEN})
+{
+  Write-Output ""
+  Write-Output "###########################"
+  Write-Output "#    Private Registry     #"
+  Write-Output "###########################"
+  Write-Output ""
+  Write-Output "Private registry token detected, creating .upmconfig.toml and .npmrc"
+
+  $UPM_CONFIG_TOML_PATH="$env:USERPROFILE\.upmconfig.toml"
+  Write-Output "Creating toml at path: $UPM_CONFIG_TOML_PATH"
+
+  #$NPMRC_PATH="$env:USERPROFILE\.npmrc"
+  #Write-Output "Creating npmrc at path: $NPMRC_PATH"
+
+@"
+[npmAuth."${env:SCOPED_REGISTRY_URL}"]
+token = "${env:PRIVATE_REGISTRY_TOKEN}"
+alwaysAuth = true
+"@ | Set-Content -Path "$env:USERPROFILE\.upmconfig.toml"
+}
+else
+{
+  Write-Output ""
+  Write-Output "###########################"
+  Write-Output "#    Test        Test     #"
+  Write-Output "###########################"
+  Write-Output ""
+}
+
+#
 # Set the build method, must reference one of:
 #
 #   - <NamespaceName.ClassName.MethodName>

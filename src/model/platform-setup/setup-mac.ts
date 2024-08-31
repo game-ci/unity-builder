@@ -190,6 +190,8 @@ class SetupMac {
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
     process.env.MANUAL_EXIT = buildParameters.manualExit.toString();
     process.env.ENABLE_GPU = buildParameters.enableGpu.toString();
+    process.env.PRIVATE_REGISTRY_TOKEN = buildParameters.upmRegistryToken;
+    process.env.SCOPED_REGISTRY_URL = buildParameters.scopedRegistryUrl;
   }
 }
 

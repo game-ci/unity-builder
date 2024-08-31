@@ -35,6 +35,8 @@ class ImageEnvironmentFactory {
         name: 'USYM_UPLOAD_AUTH_TOKEN',
         value: process.env.USYM_UPLOAD_AUTH_TOKEN,
       },
+      { name: 'SCOPED_REGISTRY_URL', value: parameters.scopedRegistryUrl },
+      { name: 'PRIVATE_REGISTRY_TOKEN', value: process.env.UPM_REGISTRY_TOKEN },
       { name: 'PROJECT_PATH', value: parameters.projectPath },
       { name: 'BUILD_TARGET', value: parameters.targetPlatform },
       { name: 'BUILD_NAME', value: parameters.buildName },

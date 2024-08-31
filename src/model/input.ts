@@ -241,6 +241,18 @@ class Input {
     return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }
 
+  static get scopedRegistryUrl(): string {
+    const input = Input.getInput('scopedRegistryUrl') ?? '';
+
+    return input !== '' ? input : '';
+  }
+
+  static get upmRegistryToken(): string {
+    const input = Input.getInput('UPM_REGISTRY_TOKEN') ?? '';
+
+    return input !== '' ? input : '';
+  }
+
   static get dockerMemoryLimit(): string {
     const bytesInMegabyte = 1024 * 1024;
 
