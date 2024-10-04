@@ -207,17 +207,19 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    const versionTags = (await this.git(['tag', '--list', '--merged', 'HEAD', '--sort=-creatordate',]))
+    const versionTags = (await this.git(['tag', '--list', '--merged', 'HEAD', '--sort=-creatordate']))
       .split('\n')
       .filter(tag => new RegExp(this.grepCompatibleInputVersionRegex).test(tag));
     
     if (versionTags.length === 0) {
       core.warning('No valid version tags found. Using fallback description.');
-      return this.git(['describe', '--long', '--always', 'HEAD']);
+      return this.git(['describe', '--long', '--tags', '--always', 'HEAD']);
     }
     
     const latestVersionTag = versionTags[0];
-    return this.git(['describe', '--long', '--tags', latestVersionTag]);
+    const commitsCount = (await this.git(['rev-list', `${latestVersionTag}..HEAD`, '--count'])).trim();
+    const commitHash = (await this.git(['rev-parse', '--short', 'HEAD'])).trim();
+    return `${latestVersionTag}-${commitsCount}-g${commitHash}`;
   }
 
   /**
