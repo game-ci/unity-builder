@@ -50,6 +50,30 @@ if ( ($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($
       Start-Sleep -Seconds 3
   }
 }
+elseif( ($null -ne ${env:UNITY_LICENSING_SERVER}))
+{
+    #
+    # Custom Unity License Server
+    #
+
+    Write-Output "Adding licensing server config"
+
+    $ACTIVATION_OUTPUT = Start-Process -FilePath "$Env:UNITY_PATH\Editor\Data\Resources\Licensing\Client\Unity.Licensing.Client.exe" `
+                                       -ArgumentList "--acquire-floating" `
+                                       -NoNewWindow `
+                                       -PassThru `
+                                       -Wait `
+                                       -RedirectStandardOutput "license.txt"
+
+    $PARSEDFILE = (Get-Content "license.txt" | Select-String -AllMatches -Pattern '\".*?\"' | ForEach-Object { $_.Matches.Value }) -replace '"'
+
+    $env:FLOATING_LICENSE = $PARSEDFILE[1]
+    $FLOATING_LICENSE_TIMEOUT = $PARSEDFILE[3]
+
+    Write-Output "Acquired floating license: ""$env:FLOATING_LICENSE"" with timeout $FLOATING_LICENSE_TIMEOUT"
+    # Store the exit code from the verify command
+    $ACTIVATION_EXIT_CODE = $ACTIVATION_OUTPUT.ExitCode
+}
 else
 {
     #
