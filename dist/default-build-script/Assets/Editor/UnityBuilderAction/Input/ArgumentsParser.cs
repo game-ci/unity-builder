@@ -28,7 +28,7 @@ namespace UnityBuilderAction.Input
       }
 
       if (!Enum.IsDefined(typeof(BuildTarget), buildTarget)) {
-        Console.WriteLine($"{buildTarget} is not a defined {nameof(BuildTarget)}");
+        Console.WriteLine(buildTarget + " is not a defined " + typeof(BuildTarget).Name);
         EditorApplication.Exit(121);
       }
 
@@ -41,10 +41,10 @@ namespace UnityBuilderAction.Input
       const string defaultCustomBuildName = "TestBuild";
       string customBuildName;
       if (!validatedOptions.TryGetValue("customBuildName", out customBuildName)) {
-        Console.WriteLine($"Missing argument -customBuildName, defaulting to {defaultCustomBuildName}.");
+        Console.WriteLine("Missing argument -customBuildName, defaulting to" + defaultCustomBuildName);
         validatedOptions.Add("customBuildName", defaultCustomBuildName);
       } else if (customBuildName == "") {
-        Console.WriteLine($"Invalid argument -customBuildName, defaulting to {defaultCustomBuildName}.");
+        Console.WriteLine("Invalid argument -customBuildName, defaulting to" + defaultCustomBuildName);
         validatedOptions.Add("customBuildName", defaultCustomBuildName);
       }
 
@@ -57,11 +57,11 @@ namespace UnityBuilderAction.Input
       string[] args = Environment.GetCommandLineArgs();
 
       Console.WriteLine(
-        $"{EOL}" +
-        $"###########################{EOL}" +
-        $"#    Parsing settings     #{EOL}" +
-        $"###########################{EOL}" +
-        $"{EOL}"
+        EOL +
+        "###########################" + EOL +
+        "#    Parsing settings     #" + EOL +
+        "###########################" + EOL +
+        EOL
       );
 
       // Extract flags with optional values
@@ -78,7 +78,7 @@ namespace UnityBuilderAction.Input
         string displayValue = secret ? "*HIDDEN*" : "\"" + value + "\"";
 
         // Assign
-        Console.WriteLine($"Found flag \"{flag}\" with value {displayValue}.");
+        Console.WriteLine("Found flag \"" + flag + "\" with value " + displayValue);
         providedArguments.Add(flag, value);
       }
     }
