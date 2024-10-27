@@ -11,16 +11,16 @@ namespace UnityBuilderAction.Reporting
     public static void ReportSummary(BuildSummary summary)
     {
       Console.WriteLine(
-        $"{EOL}" +
-        $"###########################{EOL}" +
-        $"#      Build results      #{EOL}" +
-        $"###########################{EOL}" +
-        $"{EOL}" +
-        $"Duration: {summary.totalTime.ToString()}{EOL}" +
-        $"Warnings: {summary.totalWarnings.ToString()}{EOL}" +
-        $"Errors: {summary.totalErrors.ToString()}{EOL}" +
-        $"Size: {summary.totalSize.ToString()} bytes{EOL}" +
-        $"{EOL}"
+        EOL +
+        "###########################" + EOL +
+        "#      Build results      #" + EOL +
+        "###########################" + EOL +
+        EOL +
+        "Duration: " + summary.totalTime.ToString() + EOL +
+        "Warnings: " + summary.totalWarnings.ToString() + EOL +
+        "Errors: " + summary.totalErrors.ToString() + EOL +
+        "Size: " + summary.totalSize.ToString() + " bytes" + EOL +
+        EOL
       );
     }
 
