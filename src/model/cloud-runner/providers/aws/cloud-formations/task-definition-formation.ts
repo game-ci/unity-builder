@@ -126,9 +126,8 @@ Resources:
           MountPoints:
             - SourceVolume: efs-data
               ContainerPath: !Ref EFSMountDirectory
-              ReadOnly: false
-          Secrets:
-            # template secrets p3 - container def
+              ReadOnly: false          
+          # template secrets p3 - container def
           LogConfiguration:
             LogDriver: awslogs
             Options:

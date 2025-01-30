@@ -70,7 +70,7 @@ export class AWSJobStack {
       );
       taskDefCloudFormation = AWSCloudFormationTemplates.insertAtTemplate(
         taskDefCloudFormation,
-        'p3 - container def',
+        '# template secrets p3 - container def',
         AWSCloudFormationTemplates.getSecretDefinitionTemplate(secret.EnvironmentVariable, secret.ParameterKey),
       );
     }
@@ -113,9 +113,13 @@ export class AWSJobStack {
       },
       ...secretsMappedToCloudFormationParameters,
     ];
+
+    CloudRunnerLogger.log(`TaskDef: ${taskDefCloudFormation}`);
+
     CloudRunnerLogger.log(
       `Starting AWS job with memory: ${CloudRunner.buildParameters.containerMemory} cpu: ${CloudRunner.buildParameters.containerCpu}`,
     );
+
     let previousStackExists = true;
     while (previousStackExists) {
       previousStackExists = false;
@@ -132,13 +136,17 @@ export class AWSJobStack {
         }
       }
     }
+
     const createStackInput: SDK.CloudFormation.CreateStackInput = {
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
       Capabilities: ['CAPABILITY_IAM'],
       Parameters: parameters,
     };
+
+    CloudRunnerLogger.log(`StackInput: ${createStackInput}`);
     try {
+      CloudRunnerLogger.log(`TaskDef Cloud formation: ${taskDefCloudFormation}`);
       CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
       await CF.createStack(createStackInput).promise();
       await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
