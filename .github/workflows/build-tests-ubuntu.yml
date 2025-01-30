@@ -36,7 +36,8 @@ env:
 
 jobs:
   buildForAllPlatformsUbuntu:
-    name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
+    name:
+      "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -91,6 +92,12 @@ jobs:
           - targetPlatform: StandaloneWindows64
             additionalParameters: -standaloneBuildSubtarget Server
             buildWithIl2cpp: true
+        include:
+          - unityVersion: 6000.0.36f1
+            targetPlatform: WebGL
+          - unityVersion: 6000.0.36f1
+            targetPlatform: WebGL
+            buildProfile: 'Assets/Settings/Build Profiles/Sample WebGL Build Profile.asset'
 
     steps:
       - name: Clear Space for Android Build
@@ -136,6 +143,7 @@ jobs:
         with:
           buildName: 'GameCI Test Build'
           projectPath: ${{ matrix.projectPath }}
+          buildProfile: ${{ matrix.buildProfile }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
@@ -158,6 +166,7 @@ jobs:
         with:
           buildName: 'GameCI Test Build'
           projectPath: ${{ matrix.projectPath }}
+          buildProfile: ${{ matrix.buildProfile }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
@@ -179,6 +188,7 @@ jobs:
         with:
           buildName: 'GameCI Test Build'
           projectPath: ${{ matrix.projectPath }}
+          buildProfile: ${{ matrix.buildProfile }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue ${{ matrix.additionalParameters }}
@@ -191,7 +201,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name:
-            'Build ${{ matrix.targetPlatform }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp
-            }}_params_${{ matrix.additionalParameters }})'
+            "Build ${{ matrix.targetPlatform }}${{ startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp }}_params_${{ matrix.additionalParameters }})"
           path: build
           retention-days: 14
