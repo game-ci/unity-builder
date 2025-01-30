@@ -71,6 +71,12 @@ describe('BuildParameters', () => {
       await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ projectPath: mockValue }));
     });
 
+    it('returns the build profile', async () => {
+      const mockValue = 'path/to/build_profile.asset';
+      jest.spyOn(Input, 'buildProfile', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(expect.objectContaining({ buildProfile: mockValue }));
+    });
+
     it('returns the build name', async () => {
       const mockValue = 'someBuildName';
       jest.spyOn(Input, 'buildName', 'get').mockReturnValue(mockValue);

@@ -17,6 +17,25 @@ Write-Output "$('Using build name "')$($Env:BUILD_NAME)$('".')"
 Write-Output "$('Using build target "')$($Env:BUILD_TARGET)$('".')"
 
 #
+# Display the build profile
+#
+
+if ($Env:BUILD_PROFILE)
+{
+  # User has provided a path to a build profile `.asset` file
+  #
+  Write-Output "$('Using build profile "')$($Env:BUILD_PROFILE)$('" relative to "')$($Env:UNITY_PROJECT_PATH)$('".')"
+  #
+}
+else
+{
+  # User has not provided a build profile
+  #
+  Write-Output "$('Doing a default "')$($Env:BUILD_TARGET)$('" platform build.')"
+  #
+}
+
+#
 # Display build path and file
 #
 
@@ -143,6 +162,7 @@ $unityArgs = @(
     "-buildTarget", "`"$Env:BUILD_TARGET`"",
     "-customBuildTarget", "`"$Env:BUILD_TARGET`"",
     "-customBuildPath", "`"$Env:CUSTOM_BUILD_PATH`"",
+    "-customBuildProfile", "`"$Env:BUILD_PROFILE`"",
     "-buildVersion", "`"$Env:VERSION`"",
     "-androidVersionCode", "`"$Env:ANDROID_VERSION_CODE`"",
     "-androidKeystorePass", "`"$Env:ANDROID_KEYSTORE_PASS`"",

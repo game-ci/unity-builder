@@ -107,6 +107,10 @@ class Input {
     return rawProjectPath.replace(/\/$/, '');
   }
 
+  static get buildProfile(): string {
+    return Input.getInput('buildProfile') ?? '';
+  }
+
   static get runnerTempPath(): string {
     return Input.getInput('RUNNER_TEMP') ?? '';
   }
