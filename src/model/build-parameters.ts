@@ -75,6 +75,7 @@ class BuildParameters {
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
+  public cloudRunnerRepoName!: string;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
@@ -195,7 +196,8 @@ class BuildParameters {
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
+      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || CloudRunnerOptions.cloudRunnerRepoName,
+      cloudRunnerRepoName: CloudRunnerOptions.cloudRunnerRepoName,
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsStackName,
       gitSha: Input.gitSha,

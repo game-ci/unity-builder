@@ -74,6 +74,10 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo?.split(`/`)[1] || '';
   }
 
+  static get cloudRunnerRepoName(): string {
+    return CloudRunnerOptions.getInput('cloudRunnerRepoName') || `game-ci/unity-builder`;
+  }
+
   static get finalHooks(): string[] {
     return CloudRunnerOptions.getInput('finalHooks')?.split(',') || [];
   }
@@ -85,6 +89,7 @@ class CloudRunnerOptions {
   static get githubRepo(): string | undefined {
     return CloudRunnerOptions.getInput('GITHUB_REPOSITORY') || CloudRunnerOptions.getInput('GITHUB_REPO') || undefined;
   }
+
   static get branch(): string {
     if (CloudRunnerOptions.getInput(`GITHUB_REF`)) {
       return (
