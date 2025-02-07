@@ -139,6 +139,10 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('customJob') || '';
   }
 
+  static get cloneDepth(): string {
+    return CloudRunnerOptions.getInput('cloneDepth') || `50`;
+  }
+
   // ### ### ###
   // Custom commands from files parameters
   // ### ### ###

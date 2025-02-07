@@ -67,6 +67,7 @@ class BuildParameters {
   public pullInputList!: string[];
   public inputPullCommand!: string;
   public cacheKey!: string;
+  public cloneDepth!: number;
 
   public postBuildContainerHooks!: string;
   public preBuildContainerHooks!: string;
@@ -205,6 +206,7 @@ class BuildParameters {
       pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
+
       maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
       useLargePackages: CloudRunnerOptions.useLargePackages,
       useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
@@ -218,6 +220,7 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      cloneDepth: Number.parseInt(CloudRunnerOptions.cloneDepth),
     };
   }
 
