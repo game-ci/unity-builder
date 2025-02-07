@@ -67,6 +67,7 @@ class BuildParameters {
   public pullInputList!: string[];
   public inputPullCommand!: string;
   public cacheKey!: string;
+  public cloneDepth!: number;
 
   public postBuildContainerHooks!: string;
   public preBuildContainerHooks!: string;
@@ -74,6 +75,7 @@ class BuildParameters {
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
+  public cloudRunnerRepoName!: string;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
@@ -194,7 +196,8 @@ class BuildParameters {
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
+      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || CloudRunnerOptions.cloudRunnerRepoName,
+      cloudRunnerRepoName: CloudRunnerOptions.cloudRunnerRepoName,
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsStackName,
       gitSha: Input.gitSha,
@@ -205,6 +208,7 @@ class BuildParameters {
       pullInputList: CloudRunnerOptions.pullInputList,
       kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
       cacheKey: CloudRunnerOptions.cacheKey,
+
       maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
       useLargePackages: CloudRunnerOptions.useLargePackages,
       useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
@@ -218,6 +222,7 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      cloneDepth: Number.parseInt(CloudRunnerOptions.cloneDepth),
     };
   }
 

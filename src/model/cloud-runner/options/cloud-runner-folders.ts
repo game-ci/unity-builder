@@ -73,7 +73,7 @@ export class CloudRunnerFolders {
   }
 
   public static get unityBuilderRepoUrl(): string {
-    return `https://${CloudRunner.buildParameters.gitPrivateToken}@github.com/game-ci/unity-builder.git`;
+    return `https://${CloudRunner.buildParameters.gitPrivateToken}@github.com/${CloudRunner.buildParameters.cloudRunnerRepoName}.git`;
   }
 
   public static get targetBuildRepoUrl(): string {

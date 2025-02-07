@@ -184,7 +184,9 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
     try {
       await CloudRunnerSystem.Run(
-        `git clone ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(CloudRunnerFolders.repoPathAbsolute)}`,
+        `git clone --depth ${CloudRunnerOptions.cloneDepth} ${CloudRunnerFolders.targetBuildRepoUrl} ${path.basename(
+          CloudRunnerFolders.repoPathAbsolute,
+        )}`,
       );
     } catch (error: any) {
       throw error;

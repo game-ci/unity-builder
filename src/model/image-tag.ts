@@ -6,7 +6,7 @@ class ImageTag {
   public targetPlatform: string;
   public builderPlatform: string;
   public customImage: string;
-  public imageRollingVersion: number;
+  public imageRollingVersion: string;
   public imagePlatformPrefix: string;
 
   constructor(imageProperties: { [key: string]: string }) {
@@ -38,7 +38,7 @@ class ImageTag {
       providerStrategy,
     );
     this.imagePlatformPrefix = ImageTag.getImagePlatformPrefixes(buildPlatform);
-    this.imageRollingVersion = Number(containerRegistryImageVersion); // Will automatically roll to the latest non-breaking version.
+    this.imageRollingVersion = containerRegistryImageVersion; // Will automatically roll to the latest non-breaking version.
   }
 
   static get versionPattern(): RegExp {
