@@ -28,8 +28,8 @@
     "node": ">=18.x"
   },
   "dependencies": {
-    "@actions/cache": "^3.2.4",
-    "@actions/core": "^1.10.1",
+    "@actions/cache": "^4.0.0",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
     "@kubernetes/client-node": "^0.16.3",
