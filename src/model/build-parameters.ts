@@ -26,6 +26,7 @@ class BuildParameters {
   public runnerTempPath!: string;
   public targetPlatform!: string;
   public projectPath!: string;
+  public buildProfile!: string;
   public buildName!: string;
   public buildPath!: string;
   public buildFile!: string;
@@ -152,6 +153,7 @@ class BuildParameters {
       runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
+      buildProfile: Input.buildProfile,
       buildName: Input.buildName,
       buildPath: `${Input.buildsPath}/${Input.targetPlatform}`,
       buildFile,
