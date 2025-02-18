@@ -36,8 +36,30 @@ Please note that commit hooks will run automatically to perform some tasks;
 #### Windows users
 
 Make sure your editor and terminal that run the tests are set to `Powershell 7` or above with
-`Git's Unix tools for Windows` installed. This is because some tests require you to be able to run `sh` and other
-unix commands.
+`Git's Unix tools for Windows` installed. This is because some tests require you to be able to run `sh` and other unix
+commands.
+
+#### Development Containers
+
+This project supports development containers (dev containers) which provide a consistent, pre-configured development
+environment. Using dev containers is recommended as it ensures all contributors work with the same development setup.
+
+To use dev containers:
+
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Install the
+   [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) in
+   VS Code
+3. Clone the repository and open it in VS Code
+4. When prompted, click "Reopen in Container" or use the command palette (F1) and select "Dev Containers: Reopen in
+   Container"
+
+The dev container will automatically:
+
+- Set up Node.js and TypeScript environment
+- Install project dependencies using Yarn
+
+This eliminates the need to manually install Node.js, Yarn, and other dependencies on your local machine.
 
 #### License
 
