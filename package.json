@@ -28,12 +28,12 @@
     "node": ">=18.x"
   },
   "dependencies": {
-    "@actions/cache": "^4.0.0",
+    "@actions/cache": "^4.0.1",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
     "@kubernetes/client-node": "^0.16.3",
-    "@octokit/core": "^5.1.0",
+    "@octokit/core": "^6.1.4",
     "async-wait-until": "^2.0.12",
     "aws-sdk": "^2.1081.0",
     "base-64": "^1.0.0",
