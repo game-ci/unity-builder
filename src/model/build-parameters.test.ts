@@ -206,6 +206,14 @@ describe('BuildParameters', () => {
       await expect(BuildParameters.create()).rejects.toThrowError();
     });
 
+    it('returns the unity licensing product ids', async () => {
+      const mockValue = 'license_id_1';
+      jest.spyOn(Input, 'unityLicensingProductIds', 'get').mockReturnValue(mockValue);
+      await expect(BuildParameters.create()).resolves.toEqual(
+        expect.objectContaining({ unityLicensingProductIds: mockValue }),
+      );
+    });
+
     it('return serial when no license server is provided', async () => {
       const mockValue = '123';
       delete process.env.UNITY_LICENSE; // Need to delete this as it is set for every test currently

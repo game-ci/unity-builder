@@ -168,6 +168,7 @@ class SetupMac {
     process.env.UNITY_VERSION = buildParameters.editorVersion;
     process.env.UNITY_SERIAL = buildParameters.unitySerial;
     process.env.UNITY_LICENSING_SERVER = buildParameters.unityLicensingServer;
+    process.env.UNITY_LICENSING_PRODUCT_IDS = buildParameters.unityLicensingProductIds;
     process.env.SKIP_ACTIVATION = buildParameters.skipActivation;
     process.env.PROJECT_PATH = buildParameters.projectPath;
     process.env.BUILD_PROFILE = buildParameters.buildProfile;

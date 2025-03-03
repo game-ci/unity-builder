@@ -3,5 +3,6 @@
   "enableEntitlementLicensing": true,
   "enableFloatingApi": true,
   "clientConnectTimeoutSec": 5,
-  "clientHandshakeTimeoutSec": 10
+  "clientHandshakeTimeoutSec": 10,
+  "toolset": "%LICENSE_PRODUCT_IDS%"
 }

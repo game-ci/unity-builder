@@ -255,6 +255,13 @@ inputs:
     default: ''
     required: false
     description: 'The Unity licensing server address to use for activating Unity.'
+  unityLicensingProductIds:
+    default: ''
+    required: false
+    description:
+      'Comma separated list of license product identifiers to request licenses for from the license server. Not setting
+      this will request the default license product configured on the licensing server. Only applicable if
+      unityLicensingServer is set.'
   dockerWorkspacePath:
     default: '/github/workspace'
     required: false

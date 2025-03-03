@@ -22,6 +22,7 @@ class BuildParameters {
   public customImage!: string;
   public unitySerial!: string;
   public unityLicensingServer!: string;
+  public unityLicensingProductIds!: string;
   public skipActivation!: string;
   public runnerTempPath!: string;
   public targetPlatform!: string;
@@ -149,6 +150,7 @@ class BuildParameters {
       customImage: Input.customImage,
       unitySerial,
       unityLicensingServer: Input.unityLicensingServer,
+      unityLicensingProductIds: Input.unityLicensingProductIds,
       skipActivation: Input.skipActivation,
       runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
