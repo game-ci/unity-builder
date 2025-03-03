@@ -40,6 +40,7 @@ class ImageEnvironmentFactory {
         value: process.env.USYM_UPLOAD_AUTH_TOKEN,
       },
       { name: 'PROJECT_PATH', value: parameters.projectPath },
+      { name: 'BUILD_PROFILE', value: parameters.buildProfile },
       { name: 'BUILD_TARGET', value: parameters.targetPlatform },
       { name: 'BUILD_NAME', value: parameters.buildName },
       { name: 'BUILD_PATH', value: parameters.buildPath },

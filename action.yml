@@ -18,7 +18,11 @@ inputs:
   projectPath:
     required: false
     default: ''
-    description: 'Relative path to the project to be built.'
+    description: 'Path to the project to be built, relative to the repository root.'
+  buildProfile:
+    required: false
+    default: ''
+    description: 'Path to the build profile to activate, relative to the project root.'
   buildName:
     required: false
     default: ''

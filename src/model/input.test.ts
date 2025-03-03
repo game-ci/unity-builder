@@ -59,6 +59,19 @@ describe('Input', () => {
     });
   });
 
+  describe('buildProfile', () => {
+    it('returns the default value', () => {
+      expect(Input.buildProfile).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = 'path/to/build_profile.asset';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.buildProfile).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('buildName', () => {
     it('returns the default value', () => {
       expect(Input.buildName).toStrictEqual(Input.targetPlatform);
