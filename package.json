@@ -32,7 +32,7 @@
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
-    "@kubernetes/client-node": "^0.16.3",
+    "@kubernetes/client-node": "^1.1.0",
     "@octokit/core": "^5.1.0",
     "async-wait-until": "^2.0.12",
     "aws-sdk": "^2.1081.0",
