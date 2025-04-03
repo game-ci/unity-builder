@@ -1,12 +1,31 @@
-import AWS from 'aws-sdk';
+import {
+  CloudFormation,
+  DescribeStackResourcesCommand,
+  DescribeStacksCommand,
+  ListStacksCommand,
+  StackSummary,
+} from '@aws-sdk/client-cloudformation';
+import {
+  CloudWatchLogs,
+  DescribeLogGroupsCommand,
+  DescribeLogGroupsCommandInput,
+  LogGroup,
+} from '@aws-sdk/client-cloudwatch-logs';
+import {
+  DescribeTasksCommand,
+  DescribeTasksCommandInput,
+  ECS,
+  ListClustersCommand,
+  ListTasksCommand,
+  ListTasksCommandInput,
+  Task,
+} from '@aws-sdk/client-ecs';
+import { ListObjectsCommand, ListObjectsCommandInput, S3 } from '@aws-sdk/client-s3';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/core/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
-import { ListObjectsRequest } from 'aws-sdk/clients/s3';
 import CloudRunner from '../../../cloud-runner';
-import { StackSummaries } from 'aws-sdk/clients/cloudformation';
-import { LogGroups } from 'aws-sdk/clients/cloudwatchlogs';
 
 export class TaskService {
   static async watch() {
@@ -20,20 +39,24 @@ export class TaskService {
     return output;
   }
   public static async getCloudFormationJobStacks() {
-    const result: StackSummaries = [];
+    const result: StackSummary[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Cloud Formation Stacks`);
     process.env.AWS_REGION = Input.region;
-    const CF = new AWS.CloudFormation();
+    const CF = new CloudFormation({ region: Input.region });
     const stacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
+      (await CF.send(new ListStacksCommand({}))).StackSummaries?.filter(
         (_x) =>
           _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription !== BaseStackFormation.baseStackDecription,
       ) || [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`Cloud Formation Stacks ${stacks.length}`);
     for (const element of stacks) {
-      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+      if (!element.CreationTime) {
+        CloudRunnerLogger.log(`${element.StackName} due to undefined CreationTime`);
+      }
+
+      const ageDate: Date = new Date(Date.now() - (element.CreationTime?.getTime() ?? 0));
 
       CloudRunnerLogger.log(
         `Task Stack ${element.StackName} - Age D${Math.floor(
@@ -43,14 +66,18 @@ export class TaskService {
       result.push(element);
     }
     const baseStacks =
-      (await CF.listStacks().promise()).StackSummaries?.filter(
+      (await CF.send(new ListStacksCommand({}))).StackSummaries?.filter(
         (_x) =>
           _x.StackStatus !== 'DELETE_COMPLETE' && _x.TemplateDescription === BaseStackFormation.baseStackDecription,
       ) || [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`Base Stacks ${baseStacks.length}`);
     for (const element of baseStacks) {
-      const ageDate: Date = new Date(Date.now() - element.CreationTime.getTime());
+      if (!element.CreationTime) {
+        CloudRunnerLogger.log(`${element.StackName} due to undefined CreationTime`);
+      }
+
+      const ageDate: Date = new Date(Date.now() - (element.CreationTime?.getTime() ?? 0));
 
       CloudRunnerLogger.log(
         `Task Stack ${element.StackName} - Age D${Math.floor(
@@ -64,22 +91,22 @@ export class TaskService {
     return result;
   }
   public static async getTasks() {
-    const result: { taskElement: AWS.ECS.Task; element: string }[] = [];
+    const result: { taskElement: Task; element: string }[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
-    const ecs = new AWS.ECS();
-    const clusters = (await ecs.listClusters().promise()).clusterArns || [];
+    const ecs = new ECS({ region: Input.region });
+    const clusters = (await ecs.send(new ListClustersCommand({}))).clusterArns || [];
     CloudRunnerLogger.log(`Task Clusters ${clusters.length}`);
     for (const element of clusters) {
-      const input: AWS.ECS.ListTasksRequest = {
+      const input: ListTasksCommandInput = {
         cluster: element,
       };
 
-      const list = (await ecs.listTasks(input).promise()).taskArns || [];
+      const list = (await ecs.send(new ListTasksCommand(input))).taskArns || [];
       if (list.length > 0) {
-        const describeInput: AWS.ECS.DescribeTasksRequest = { tasks: list, cluster: element };
-        const describeList = (await ecs.describeTasks(describeInput).promise()).tasks || [];
+        const describeInput: DescribeTasksCommandInput = { tasks: list, cluster: element };
+        const describeList = (await ecs.send(new DescribeTasksCommand(describeInput))).tasks || [];
         if (describeList.length === 0) {
           CloudRunnerLogger.log(`No Tasks`);
           continue;
@@ -105,14 +132,18 @@ export class TaskService {
   }
   public static async awsDescribeJob(job: string) {
     process.env.AWS_REGION = Input.region;
-    const CF = new AWS.CloudFormation();
-    const stack = (await CF.listStacks().promise()).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
-    const stackInfo = (await CF.describeStackResources({ StackName: job }).promise()) || undefined;
-    const stackInfo2 = (await CF.describeStacks({ StackName: job }).promise()) || undefined;
+    const CF = new CloudFormation({ region: Input.region });
+    const stack =
+      (await CF.send(new ListStacksCommand({}))).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
+    const stackInfo = (await CF.send(new DescribeStackResourcesCommand({ StackName: job }))) || undefined;
+    const stackInfo2 = (await CF.send(new DescribeStacksCommand({ StackName: job }))) || undefined;
     if (stack === undefined) {
       throw new Error('stack not defined');
     }
-    const ageDate: Date = new Date(Date.now() - stack.CreationTime.getTime());
+    if (!stack.CreationTime) {
+      CloudRunnerLogger.log(`${stack.StackName} due to undefined CreationTime`);
+    }
+    const ageDate: Date = new Date(Date.now() - (stack.CreationTime?.getTime() ?? 0));
     const message = `
     Task Stack ${stack.StackName}
     Age D${Math.floor(ageDate.getHours() / 24)} H${ageDate.getHours()} M${ageDate.getMinutes()}
@@ -125,17 +156,17 @@ export class TaskService {
     return message;
   }
   public static async getLogGroups() {
-    const result: LogGroups = [];
+    const result: Array<LogGroup> = [];
     process.env.AWS_REGION = Input.region;
-    const ecs = new AWS.CloudWatchLogs();
-    let logStreamInput: AWS.CloudWatchLogs.DescribeLogGroupsRequest = {
+    const ecs = new CloudWatchLogs();
+    let logStreamInput: DescribeLogGroupsCommandInput = {
       /* logGroupNamePrefix: 'game-ci' */
     };
-    let logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
+    let logGroupsDescribe = await ecs.send(new DescribeLogGroupsCommand(logStreamInput));
     const logGroups = logGroupsDescribe.logGroups || [];
     while (logGroupsDescribe.nextToken) {
       logStreamInput = { /* logGroupNamePrefix: 'game-ci',*/ nextToken: logGroupsDescribe.nextToken };
-      logGroupsDescribe = await ecs.describeLogGroups(logStreamInput).promise();
+      logGroupsDescribe = await ecs.send(new DescribeLogGroupsCommand(logStreamInput));
       logGroups.push(...(logGroupsDescribe?.logGroups || []));
     }
 
@@ -159,11 +190,12 @@ export class TaskService {
   }
   public static async getLocks() {
     process.env.AWS_REGION = Input.region;
-    const s3 = new AWS.S3();
-    const listRequest: ListObjectsRequest = {
+    const s3 = new S3({ region: Input.region });
+    const listRequest: ListObjectsCommandInput = {
       Bucket: CloudRunner.buildParameters.awsStackName,
     };
-    const results = await s3.listObjects(listRequest).promise();
+
+    const results = await s3.send(new ListObjectsCommand(listRequest));
 
     return results.Contents || [];
   }
