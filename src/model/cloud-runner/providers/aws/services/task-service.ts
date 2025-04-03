@@ -133,27 +133,34 @@ export class TaskService {
   public static async awsDescribeJob(job: string) {
     process.env.AWS_REGION = Input.region;
     const CF = new CloudFormation({ region: Input.region });
-    const stack =
-      (await CF.send(new ListStacksCommand({}))).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
-    const stackInfo = (await CF.send(new DescribeStackResourcesCommand({ StackName: job }))) || undefined;
-    const stackInfo2 = (await CF.send(new DescribeStacksCommand({ StackName: job }))) || undefined;
-    if (stack === undefined) {
-      throw new Error('stack not defined');
-    }
-    if (!stack.CreationTime) {
-      CloudRunnerLogger.log(`${stack.StackName} due to undefined CreationTime`);
-    }
-    const ageDate: Date = new Date(Date.now() - (stack.CreationTime?.getTime() ?? 0));
-    const message = `
+    try {
+      const stack =
+        (await CF.send(new ListStacksCommand({}))).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
+      const stackInfo = (await CF.send(new DescribeStackResourcesCommand({ StackName: job }))) || undefined;
+      const stackInfo2 = (await CF.send(new DescribeStacksCommand({ StackName: job }))) || undefined;
+      if (stack === undefined) {
+        throw new Error('stack not defined');
+      }
+      if (!stack.CreationTime) {
+        CloudRunnerLogger.log(`${stack.StackName} due to undefined CreationTime`);
+      }
+      const ageDate: Date = new Date(Date.now() - (stack.CreationTime?.getTime() ?? 0));
+      const message = `
     Task Stack ${stack.StackName}
     Age D${Math.floor(ageDate.getHours() / 24)} H${ageDate.getHours()} M${ageDate.getMinutes()}
     ${JSON.stringify(stack, undefined, 4)}
     ${JSON.stringify(stackInfo, undefined, 4)}
     ${JSON.stringify(stackInfo2, undefined, 4)}
     `;
-    CloudRunnerLogger.log(message);
+      CloudRunnerLogger.log(message);
 
-    return message;
+      return message;
+    } catch (error) {
+      CloudRunnerLogger.error(
+        `Failed to describe job ${job}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
+    }
   }
   public static async getLogGroups() {
     const result: Array<LogGroup> = [];
