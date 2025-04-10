@@ -1,6 +1,18 @@
 import CloudRunnerLogger from '../../services/core/cloud-runner-logger';
 import * as core from '@actions/core';
-import * as SDK from 'aws-sdk';
+import {
+  CloudFormation,
+  CreateStackCommand,
+  CreateStackCommandInput,
+  DescribeStacksCommand,
+  DescribeStacksCommandInput,
+  ListStacksCommand,
+  Parameter,
+  UpdateStackCommand,
+  UpdateStackCommandInput,
+  waitUntilStackCreateComplete,
+  waitUntilStackUpdateComplete,
+} from '@aws-sdk/client-cloudformation';
 import { BaseStackFormation } from './cloud-formations/base-stack-formation';
 import crypto from 'node:crypto';
 
@@ -10,51 +22,49 @@ export class AWSBaseStack {
   }
   private baseStackName: string;
 
-  async setupBaseStack(CF: SDK.CloudFormation) {
+  async setupBaseStack(CF: CloudFormation) {
     const baseStackName = this.baseStackName;
 
     const baseStack = BaseStackFormation.formation;
 
     // Cloud Formation Input
-    const describeStackInput: SDK.CloudFormation.DescribeStacksInput = {
+    const describeStackInput: DescribeStacksCommandInput = {
       StackName: baseStackName,
     };
-    const parametersWithoutHash: SDK.CloudFormation.Parameter[] = [
-      { ParameterKey: 'EnvironmentName', ParameterValue: baseStackName },
-    ];
+    const parametersWithoutHash: Parameter[] = [{ ParameterKey: 'EnvironmentName', ParameterValue: baseStackName }];
     const parametersHash = crypto
       .createHash('md5')
       .update(baseStack + JSON.stringify(parametersWithoutHash))
       .digest('hex');
-    const parameters: SDK.CloudFormation.Parameter[] = [
+    const parameters: Parameter[] = [
       ...parametersWithoutHash,
       ...[{ ParameterKey: 'Version', ParameterValue: parametersHash }],
     ];
-    const updateInput: SDK.CloudFormation.UpdateStackInput = {
+    const updateInput: UpdateStackCommandInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
       Parameters: parameters,
       Capabilities: ['CAPABILITY_IAM'],
     };
-    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+    const createStackInput: CreateStackCommandInput = {
       StackName: baseStackName,
       TemplateBody: baseStack,
       Parameters: parameters,
       Capabilities: ['CAPABILITY_IAM'],
     };
 
-    const stacks = await CF.listStacks({
-      StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE', 'ROLLBACK_COMPLETE'],
-    }).promise();
+    const stacks = await CF.send(
+      new ListStacksCommand({ StackStatusFilter: ['UPDATE_COMPLETE', 'CREATE_COMPLETE', 'ROLLBACK_COMPLETE'] }),
+    );
     const stackNames = stacks.StackSummaries?.map((x) => x.StackName) || [];
     const stackExists: Boolean = stackNames.includes(baseStackName) || false;
     const describeStack = async () => {
-      return await CF.describeStacks(describeStackInput).promise();
+      return await CF.send(new DescribeStacksCommand(describeStackInput));
     };
     try {
       if (!stackExists) {
         CloudRunnerLogger.log(`${baseStackName} stack does not exist (${JSON.stringify(stackNames)})`);
-        await CF.createStack(createStackInput).promise();
+        await CF.send(new CreateStackCommand(createStackInput));
         CloudRunnerLogger.log(`created stack (version: ${parametersHash})`);
       }
       const CFState = await describeStack();
@@ -65,7 +75,13 @@ export class AWSBaseStack {
       const stackVersion = stack.Parameters?.find((x) => x.ParameterKey === 'Version')?.ParameterValue;
 
       if (stack.StackStatus === 'CREATE_IN_PROGRESS') {
-        await CF.waitFor('stackCreateComplete', describeStackInput).promise();
+        await waitUntilStackCreateComplete(
+          {
+            client: CF,
+            maxWaitTime: 200,
+          },
+          describeStackInput,
+        );
       }
 
       if (stackExists) {
@@ -73,7 +89,7 @@ export class AWSBaseStack {
         if (parametersHash !== stackVersion) {
           CloudRunnerLogger.log(`Attempting update of base stack`);
           try {
-            await CF.updateStack(updateInput).promise();
+            await CF.send(new UpdateStackCommand(updateInput));
           } catch (error: any) {
             if (error['message'].includes('No updates are to be performed')) {
               CloudRunnerLogger.log(`No updates are to be performed`);
@@ -93,7 +109,13 @@ export class AWSBaseStack {
           );
         }
         if (stack.StackStatus === 'UPDATE_IN_PROGRESS') {
-          await CF.waitFor('stackUpdateComplete', describeStackInput).promise();
+          await waitUntilStackUpdateComplete(
+            {
+              client: CF,
+              maxWaitTime: 200,
+            },
+            describeStackInput,
+          );
         }
       }
       CloudRunnerLogger.log('base stack is now ready');
