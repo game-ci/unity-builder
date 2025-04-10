@@ -1,0 +1,10 @@
+{
+  "name": "Node.js & TypeScript & Yarn",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "postCreateCommand": {
+    "Install dependencies": "yarn install"
+  }
+}
