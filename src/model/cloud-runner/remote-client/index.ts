@@ -222,9 +222,43 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
     if (!CloudRunner.buildParameters.skipLfs) {
-      await CloudRunnerSystem.Run(`git lfs pull`);
-      RemoteClientLogger.log(`pulled latest LFS files`);
-      assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
+      try {
+        RemoteClientLogger.log(`Attempting to pull LFS files with GIT_PRIVATE_TOKEN...`);
+        await CloudRunnerSystem.Run(`git lfs pull`);
+        RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
+        assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
+      } catch (error: any) {
+        RemoteClientLogger.logCliError(`Failed to pull LFS files with GIT_PRIVATE_TOKEN: ${error.message}`);
+
+        // Try with GITHUB_TOKEN as fallback
+        try {
+          RemoteClientLogger.log(`Attempting to pull LFS files with GITHUB_TOKEN as fallback...`);
+          const githubToken = process.env.GITHUB_TOKEN;
+          if (!githubToken) {
+            throw new Error('GITHUB_TOKEN is not available as fallback');
+          }
+
+          // Configure git to use GITHUB_TOKEN
+          await CloudRunnerSystem.Run(
+            `git config --global --replace-all url."https://token:${githubToken}@github.com/".insteadOf ssh://git@github.com/`,
+          );
+          await CloudRunnerSystem.Run(
+            `git config --global --add url."https://token:${githubToken}@github.com/".insteadOf git@github.com`,
+          );
+          await CloudRunnerSystem.Run(
+            `git config --global --add url."https://token:${githubToken}@github.com/".insteadOf "https://github.com/"`,
+          );
+
+          await CloudRunnerSystem.Run(`git lfs pull`);
+          RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN fallback`);
+          assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
+        } catch (fallbackError: any) {
+          RemoteClientLogger.logCliError(
+            `Failed to pull LFS files with GITHUB_TOKEN fallback: ${fallbackError.message}`,
+          );
+          throw new Error(`Failed to pull LFS files with both tokens. Last error: ${fallbackError.message}`);
+        }
+      }
     }
   }
   static async handleRetainedWorkspace() {
