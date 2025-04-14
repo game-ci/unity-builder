@@ -8,6 +8,10 @@ permissions:
   checks: write
   contents: read
   actions: write
+  packages: read
+  pull-requests: write
+  statuses: write
+  id-token: write
 
 env:
   GKE_ZONE: 'us-central1'
