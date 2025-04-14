@@ -40,7 +40,7 @@
     "@kubernetes/client-node": "^0.16.3",
     "@octokit/core": "^5.1.0",
     "async-wait-until": "^2.0.12",
-    "aws-sdk": "^2.1081.0",
+    "aws-sdk": "^2.1692.0",
     "base-64": "^1.0.0",
     "commander": "^9.0.0",
     "commander-ts": "^0.2.0",
