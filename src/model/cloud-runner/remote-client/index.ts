@@ -224,6 +224,23 @@ export class RemoteClient {
     if (!CloudRunner.buildParameters.skipLfs) {
       try {
         RemoteClientLogger.log(`Attempting to pull LFS files with GIT_PRIVATE_TOKEN...`);
+
+        // Configure git to use GIT_PRIVATE_TOKEN
+        const gitPrivateToken = process.env.GIT_PRIVATE_TOKEN;
+        if (!gitPrivateToken) {
+          throw new Error('GIT_PRIVATE_TOKEN is not available');
+        }
+
+        await CloudRunnerSystem.Run(
+          `git config --global --replace-all url."https://token:${gitPrivateToken}@github.com/".insteadOf ssh://git@github.com/`,
+        );
+        await CloudRunnerSystem.Run(
+          `git config --global --add url."https://token:${gitPrivateToken}@github.com/".insteadOf git@github.com`,
+        );
+        await CloudRunnerSystem.Run(
+          `git config --global --add url."https://token:${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
+        );
+
         await CloudRunnerSystem.Run(`git lfs pull`);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
         assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
