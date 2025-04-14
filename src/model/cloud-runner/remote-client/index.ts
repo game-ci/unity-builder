@@ -231,14 +231,20 @@ export class RemoteClient {
           throw new Error('GIT_PRIVATE_TOKEN is not available');
         }
 
+        // Clear any existing URL configurations
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf`);
+
+        // Set new URL configuration with token
         await CloudRunnerSystem.Run(
-          `git config --global --replace-all url."https://token:${gitPrivateToken}@github.com/".insteadOf ssh://git@github.com/`,
+          `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
         );
         await CloudRunnerSystem.Run(
-          `git config --global --add url."https://token:${gitPrivateToken}@github.com/".insteadOf git@github.com`,
+          `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "ssh://git@github.com/"`,
         );
         await CloudRunnerSystem.Run(
-          `git config --global --add url."https://token:${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
+          `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "git@github.com"`,
         );
 
         await CloudRunnerSystem.Run(`git lfs pull`);
@@ -255,15 +261,20 @@ export class RemoteClient {
             throw new Error('GITHUB_TOKEN is not available as fallback');
           }
 
-          // Configure git to use GITHUB_TOKEN
+          // Clear any existing URL configurations
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf`);
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf`);
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf`);
+
+          // Set new URL configuration with token
           await CloudRunnerSystem.Run(
-            `git config --global --replace-all url."https://token:${githubToken}@github.com/".insteadOf ssh://git@github.com/`,
+            `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
           );
           await CloudRunnerSystem.Run(
-            `git config --global --add url."https://token:${githubToken}@github.com/".insteadOf git@github.com`,
+            `git config --global url."https://${githubToken}@github.com/".insteadOf "ssh://git@github.com/"`,
           );
           await CloudRunnerSystem.Run(
-            `git config --global --add url."https://token:${githubToken}@github.com/".insteadOf "https://github.com/"`,
+            `git config --global url."https://${githubToken}@github.com/".insteadOf "git@github.com"`,
           );
 
           await CloudRunnerSystem.Run(`git lfs pull`);
