@@ -5,7 +5,7 @@ if (Test-Path "C:\githubhome\.upmconfig.toml") {
   Write-Host "Copying .upmconfig.toml to C:\Users\runneradmin"
   Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "C:\Users\runneradmin\" -Force
 } else {
-  Write-Host "No .upmconfig.toml found at C:\githuhHome"
+  Write-Host "No .upmconfig.toml found at C:\githubhome"
 }
 
 # Import any necessary registry keys, ie: location of windows 10 sdk

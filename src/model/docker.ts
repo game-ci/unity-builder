@@ -100,10 +100,13 @@ class Docker {
       dockerIsolationMode,
     } = parameters;
 
+    // 🔥 Add log for runnerTempPath
+    console.log(`🛠️ [DockerCommand] runnerTempPath = ${runnerTempPath}`);
+
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
 
-    return `docker run \
+    const dockerCommand = `docker run \
             --workdir c:${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
@@ -125,7 +128,12 @@ class Docker {
             --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
-  }
+
+    // 🔥 Add log for final dockerCommand
+    console.log('🛠️ [DockerCommand] Final Windows Docker command:');
+    console.log(dockerCommand);
+
+    return dockerCommand;
 }
 
 export default Docker;
