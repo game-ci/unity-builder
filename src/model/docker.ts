@@ -110,7 +110,7 @@ class Docker {
             --env GITHUB_WORKSPACE=c:${dockerWorkspacePath} \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
-            --volume "${githubHome}":"C:/Users/runneradmin" \
+            --volume "${githubHome}":"C:/githubhome" \
             --volume "c:/regkeys":"c:/regkeys" \
             --volume "C:/Program Files/Microsoft Visual Studio":"C:/Program Files/Microsoft Visual Studio" \
             --volume "C:/Program Files (x86)/Microsoft Visual Studio":"C:/Program Files (x86)/Microsoft Visual Studio" \
