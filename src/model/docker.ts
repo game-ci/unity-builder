@@ -103,7 +103,7 @@ class Docker {
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
 
-    const dockerCommand = `docker run \
+    return `docker run \
             --workdir c:${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
@@ -125,8 +125,6 @@ class Docker {
             --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
-
-    return dockerCommand;
   }
 }
 
