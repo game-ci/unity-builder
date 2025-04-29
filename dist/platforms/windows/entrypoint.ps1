@@ -8,8 +8,8 @@ Get-ChildItem -Recurse "C:\Users" | ForEach-Object {
 
 # Copy .upmconfig.toml if it exists
 if (Test-Path "C:\githubhome\.upmconfig.toml") {
-  Write-Host "Copying .upmconfig.toml to C:\ProgramData\Unity\config\upmconfig.toml"
-  Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "C:\ProgramData\Unity\config\upmconfig.toml" -Force
+  Write-Host "Copying .upmconfig.toml to $Env:USERPROFILE\.upmconfig.toml"
+  Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "$Env:USERPROFILE\.upmconfig.toml" -Force
 } else {
   Write-Host "No .upmconfig.toml found at C:\githubhome"
 }

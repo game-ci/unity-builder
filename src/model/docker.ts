@@ -111,6 +111,7 @@ class Docker {
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env GITHUB_WORKSPACE=c:${dockerWorkspacePath} \
+            --env UPM_GLOBAL_CONFIG_FILE="C:/githubhome/.upmconfig.toml" \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "${githubHome}":"C:/githubhome" \
