@@ -1,15 +1,14 @@
 Get-Process
 
-# 🔥 List all files under C:\Users
-Write-Host "📂 Listing contents of C:\Users"
+# List all files under C:\Users
+Write-Host "Listing contents of C:\Users"
 Get-ChildItem -Recurse "C:\Users" | ForEach-Object {
-  Write-Host $_.FullName
+  Write-Host ($_.FullName)
 }
 
 # Copy .upmconfig.toml if it exists
 if (Test-Path "C:\githubhome\.upmconfig.toml") {
-  Write-Host "Copying .upmconfig.toml to C:\Users\runneradmin"
-  # Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "C:\Users\runneradmin\" -Force
+  Write-Host "Copying .upmconfig.toml to C:\ProgramData\Unity\config\upmconfig.toml"
   Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "C:\ProgramData\Unity\config\upmconfig.toml" -Force
 } else {
   Write-Host "No .upmconfig.toml found at C:\githubhome"
