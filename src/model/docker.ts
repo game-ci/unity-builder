@@ -134,6 +134,7 @@ class Docker {
     console.log(dockerCommand);
 
     return dockerCommand;
+  }
 }
 
 export default Docker;
