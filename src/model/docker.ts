@@ -100,9 +100,6 @@ class Docker {
       dockerIsolationMode,
     } = parameters;
 
-    // 🔥 Add log for runnerTempPath
-    console.log(`🛠️ [DockerCommand] runnerTempPath = ${runnerTempPath}`);
-
     const githubHome = path.join(runnerTempPath, '_github_home');
     if (!existsSync(githubHome)) mkdirSync(githubHome);
 
@@ -111,7 +108,6 @@ class Docker {
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
             --env GITHUB_WORKSPACE=c:${dockerWorkspacePath} \
-            --env UPM_GLOBAL_CONFIG_FILE="C:/githubhome/.upmconfig.toml" \
             ${gitPrivateToken ? `--env GIT_PRIVATE_TOKEN="${gitPrivateToken}"` : ''} \
             --volume "${workspace}":"c:${dockerWorkspacePath}" \
             --volume "${githubHome}":"C:/githubhome" \
@@ -129,10 +125,6 @@ class Docker {
             --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
-
-    // 🔥 Add log for final dockerCommand
-    console.log('🛠️ [DockerCommand] Final Windows Docker command:');
-    console.log(dockerCommand);
 
     return dockerCommand;
   }

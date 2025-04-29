@@ -1,11 +1,5 @@
 Get-Process
 
-# List all files under C:\Users
-Write-Host "Listing contents of C:\Users"
-Get-ChildItem -Recurse "C:\Users" | ForEach-Object {
-  Write-Host ($_.FullName)
-}
-
 # Copy .upmconfig.toml if it exists
 if (Test-Path "C:\githubhome\.upmconfig.toml") {
   Write-Host "Copying .upmconfig.toml to $Env:USERPROFILE\.upmconfig.toml"
