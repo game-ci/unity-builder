@@ -154,7 +154,7 @@ $_, $customParametersArray = Invoke-Expression('Write-Output -- "" ' + $Env:CUST
 $unityArgs = @(
     "-quit",
     "-batchmode",
-    "-nographics",
+    ($Env:LLVMPIPE_INSTALLED -eq "true" ? "-force-opengl" : "-nographics"),
     "-silent-crashes",
     "-customBuildName", "`"$Env:BUILD_NAME`"",
     "-projectPath", "`"$Env:UNITY_PROJECT_PATH`"",
