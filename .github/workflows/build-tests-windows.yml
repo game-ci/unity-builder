@@ -26,6 +26,14 @@ jobs:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - WSAPlayer # Build a UWP App
           - tvOS # Build an Apple TV XCode project
+        enableGpu:
+          - false
+        include:
+          # Additionally test enableGpu build for a standalone windows target
+          - projectPath: test-project
+            unityVersion: 2023.2.2f1
+            targetPlatform: StandaloneWindows64
+            enableGpu: true
 
     steps:
       ###########################
@@ -71,6 +79,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          enableGpu: ${{ matrix.enableGpu }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           allowDirtyBuild: true
       # We use dirty build because we are replacing the default project settings file above
@@ -96,6 +105,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          enableGpu: ${{ matrix.enableGpu }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           allowDirtyBuild: true
       # We use dirty build because we are replacing the default project settings file above
@@ -120,6 +130,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          enableGpu: ${{ matrix.enableGpu }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           allowDirtyBuild: true
       # We use dirty build because we are replacing the default project settings file above
@@ -129,6 +140,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on Windows (${{ matrix.unityVersion }})
+          name: Build ${{ matrix.targetPlatform }} on Windows (${{ matrix.unityVersion }})${{ matrix.enableGpu && ' With GPU' || '' }}
           path: build
           retention-days: 14
