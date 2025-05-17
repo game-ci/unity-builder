@@ -140,6 +140,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on Windows (${{ matrix.unityVersion }})(${{ matrix.enableGpu == 'true' && ' With GPU' || '' }})
+          name: Build ${{ matrix.targetPlatform }} on Windows (${{ matrix.unityVersion }})${{ matrix.enableGpu && ' With GPU' || '' }}
           path: build
           retention-days: 14
