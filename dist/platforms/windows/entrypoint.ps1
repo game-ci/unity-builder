@@ -13,7 +13,7 @@ Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
 # Setup Git Credentials
 . "c:\steps\set_gitcredential.ps1"
 
-if ($env:ENABLE_GPU -e "true") {
+if ($env:ENABLE_GPU -eq "true") {
   # Install LLVMpipe software graphics driver
   . "c:\steps\install_llvmpipe.ps1"
 }
