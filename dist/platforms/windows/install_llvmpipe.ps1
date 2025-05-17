@@ -2,12 +2,13 @@ $Private:repo = "mmozeiko/build-mesa"
 $Private:downloadPath = "$Env:TEMP\mesa.zip"
 $Private:extractPath = "$Env:TEMP\mesa"
 $Private:destinationPath = "$Env:UNITY_PATH\Editor\"
+$Private:version = "25.1.0"
 
 $LLVMPIPE_INSTALLED = "false"
 
 try {
-    # Get the 25.1.0 release info from GitHub API (version fixed to decrease probability of breakage)
-    $releaseUrl = "https://api.github.com/repos/$repo/releases/25.1.0"
+    # Get the release info from GitHub API (version fixed to decrease probability of breakage)
+    $releaseUrl = "https://api.github.com/repos/$repo/releases/tags/$version"
     $release = Invoke-RestMethod -Uri $releaseUrl -Headers @{ "User-Agent" = "PowerShell" }
 
     # Get the download URL for the zip asset
