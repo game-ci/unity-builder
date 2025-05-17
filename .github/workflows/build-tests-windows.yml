@@ -31,7 +31,7 @@ jobs:
           - projectPath: test-project
             unityVersion: 2023.2.2f1
             targetPlatform: StandaloneWindows64
-            enableGPU: true
+            enableGpu: true
 
     steps:
       ###########################
