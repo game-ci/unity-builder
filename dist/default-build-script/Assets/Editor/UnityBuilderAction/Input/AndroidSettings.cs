@@ -74,7 +74,20 @@ namespace UnityBuilderAction.Input
       string symbolType;
       if (options.TryGetValue("androidSymbolType", out symbolType) && !string.IsNullOrEmpty(symbolType))
       {
-#if UNITY_2021_1_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
+        switch (symbolType)
+        {
+          case "public":
+            SetDebugSymbols("SymbolTable");
+            break;
+          case "debugging":
+            SetDebugSymbols("Full");
+            break;
+          case "none":
+            SetDebugSymbols("None");
+            break;
+        }
+#elif UNITY_2021_1_OR_NEWER
         switch (symbolType)
         {
           case "public":
@@ -100,6 +113,36 @@ namespace UnityBuilderAction.Input
         }
 #endif
       }
+    }
+
+    private static void SetDebugSymbols(string enumValueName)
+    {
+      // UnityEditor.Android.UserBuildSettings and Unity.Android.Types.DebugSymbolLevel are part of the Unity Android module.
+      // Reflection is used here to ensure the code works even if the module is not installed.
+
+      var debugSymbolsType = Type.GetType("UnityEditor.Android.UserBuildSettings+DebugSymbols, UnityEditor.Android.Extensions");
+      if (debugSymbolsType == null)
+      {
+        return;
+      }
+
+      var levelProp = debugSymbolsType.GetProperty("level", BindingFlags.Static | BindingFlags.Public);
+      if (levelProp == null)
+      {
+        return;
+      }
+
+      var enumType = Type.GetType("Unity.Android.Types.DebugSymbolLevel, Unity.Android.Types");
+      if (enumType == null)
+      {
+        return;
+      }
+
+      if (!Enum.TryParse(enumType, enumValueName, false , out var enumValue))
+      {
+        return;
+      }
+      levelProp.SetValue(null, enumValue);
     }
   }
 }
