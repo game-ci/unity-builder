@@ -26,6 +26,12 @@ jobs:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - WSAPlayer # Build a UWP App
           - tvOS # Build an Apple TV XCode project
+        include:
+          # Additionally test enableGPU build for a standalone windows target
+          - projectPath: test-project
+            unityVersion: 2023.2.2f1
+            targetPlatform: StandaloneWindows64
+            enableGPU: true
 
     steps:
       ###########################

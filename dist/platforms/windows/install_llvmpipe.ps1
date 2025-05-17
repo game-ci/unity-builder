@@ -6,8 +6,8 @@ $Private:destinationPath = "$Env:UNITY_PATH\Editor\"
 $LLVMPIPE_INSTALLED = "false"
 
 try {
-    # Get the latest release info from GitHub API
-    $releaseUrl = "https://api.github.com/repos/$repo/releases/latest"
+    # Get the 25.1.0 release info from GitHub API (version fixed to decrease probability of breakage)
+    $releaseUrl = "https://api.github.com/repos/$repo/releases/25.1.0"
     $release = Invoke-RestMethod -Uri $releaseUrl -Headers @{ "User-Agent" = "PowerShell" }
 
     # Get the download URL for the zip asset
