@@ -58,6 +58,7 @@ class ImageTag {
       android: 'android',
       ios: 'ios',
       tvos: 'appletv',
+      visionos: 'visionos',
       facebook: 'facebook',
     };
   }
@@ -82,8 +83,21 @@ class ImageTag {
     version: string,
     providerStrategy: string,
   ): string {
-    const { generic, webgl, mac, windows, windowsIl2cpp, wsaPlayer, linux, linuxIl2cpp, android, ios, tvos, facebook } =
-      ImageTag.targetPlatformSuffixes;
+    const {
+      generic,
+      webgl,
+      mac,
+      windows,
+      windowsIl2cpp,
+      wsaPlayer,
+      linux,
+      linuxIl2cpp,
+      android,
+      ios,
+      tvos,
+      visionos,
+      facebook,
+    } = ImageTag.targetPlatformSuffixes;
 
     const [major, minor] = version.split('.').map((digit) => Number(digit));
 
@@ -136,11 +150,17 @@ class ImageTag {
       case Platform.types.XboxOne:
         return windows;
       case Platform.types.tvOS:
-        if (process.platform !== 'win32') {
-          throw new Error(`tvOS can only be built on a windows base OS`);
+        if (process.platform !== 'win32' && process.platform !== 'darwin') {
+          throw new Error(`tvOS can only be built on Windows or macOS base OS`);
         }
 
         return tvos;
+      case Platform.types.VisionOS:
+        if (process.platform !== 'darwin') {
+          throw new Error(`visionOS can only be built on a macOS base OS`);
+        }
+
+        return visionos;
       case Platform.types.Switch:
         return windows;
 
