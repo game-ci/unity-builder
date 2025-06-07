@@ -1,5 +1,13 @@
 Get-Process
 
+# Copy .upmconfig.toml if it exists
+if (Test-Path "C:\githubhome\.upmconfig.toml") {
+  Write-Host "Copying .upmconfig.toml to $Env:USERPROFILE\.upmconfig.toml"
+  Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "$Env:USERPROFILE\.upmconfig.toml" -Force
+} else {
+  Write-Host "No .upmconfig.toml found at C:\githubhome"
+}
+
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
 Get-ChildItem -Path c:\regkeys -File | ForEach-Object { reg import $_.fullname }
