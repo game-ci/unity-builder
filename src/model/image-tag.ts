@@ -136,10 +136,6 @@ class ImageTag {
       case Platform.types.XboxOne:
         return windows;
       case Platform.types.tvOS:
-        if (process.platform !== 'win32') {
-          throw new Error(`tvOS can only be built on a windows base OS`);
-        }
-
         return tvos;
       case Platform.types.Switch:
         return windows;
