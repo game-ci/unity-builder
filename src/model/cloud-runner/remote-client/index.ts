@@ -232,9 +232,9 @@ export class RemoteClient {
         }
 
         // Clear any existing URL configurations
-        await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf`);
-        await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf`);
-        await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
 
         // Set new URL configuration with token
         await CloudRunnerSystem.Run(
@@ -262,9 +262,9 @@ export class RemoteClient {
           }
 
           // Clear any existing URL configurations
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf`);
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf`);
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf`);
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
+          await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
 
           // Set new URL configuration with token
           await CloudRunnerSystem.Run(
