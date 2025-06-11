@@ -25,6 +25,6 @@ module.exports = {
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   modulePathIgnorePatterns: ['<rootDir>/lib/', '<rootDir>/dist/'],
 
-  // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ['<rootDir>/src/jest.setup.ts'],
+  // Use jest.setup.js to polyfill fetch for all tests
+  setupFiles: ['<rootDir>/jest.setup.js'],
 };
