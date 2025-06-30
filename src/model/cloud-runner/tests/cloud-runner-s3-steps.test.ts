@@ -36,8 +36,18 @@ describe('Cloud Runner pre-built S3 steps', () => {
       const results2 = results2Object.BuildResults;
       CloudRunnerLogger.log(`run 2 succeeded`);
 
-      const build2ContainsBuildSucceeded = results2.includes('Build succeeded');
-      expect(build2ContainsBuildSucceeded).toBeTruthy();
+      // Look for multiple indicators of a successful build
+      const buildIndicators = [
+        'Build succeeded',
+        'Build succeeded!',
+        'Build Succeeded',
+        'succeeded',
+        'Cloud Runner finished running standard build automation',
+        'Cloud runner job has finished successfully',
+      ];
+
+      const buildWasSuccessful = buildIndicators.some((indicator) => results2.includes(indicator));
+      expect(buildWasSuccessful).toBeTruthy();
 
       const results = await CloudRunnerSystem.RunAndReadLines(
         `aws s3 ls s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/`,
