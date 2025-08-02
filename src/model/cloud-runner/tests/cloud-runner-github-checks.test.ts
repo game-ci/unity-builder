@@ -17,6 +17,25 @@ describe('Cloud Runner Github Checks', () => {
   it('Responds', () => {});
 
   if (CloudRunnerOptions.cloudRunnerDebug) {
+    beforeEach(() => {
+      // Mock GitHub API requests to avoid real network calls
+      jest.spyOn(GitHub as any, 'createGitHubCheckRequest').mockResolvedValue({
+        status: 201,
+        data: { id: '1' },
+      });
+      jest.spyOn(GitHub as any, 'updateGitHubCheckRequest').mockResolvedValue({
+        status: 200,
+        data: {},
+      });
+      jest
+        .spyOn(GitHub as any, 'runUpdateAsyncChecksWorkflow')
+        .mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it(
       'Check Handling Direct',
       async () => {
