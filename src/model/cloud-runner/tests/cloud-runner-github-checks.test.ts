@@ -27,9 +27,7 @@ describe('Cloud Runner Github Checks', () => {
         status: 200,
         data: {},
       });
-      jest
-        .spyOn(GitHub as any, 'runUpdateAsyncChecksWorkflow')
-        .mockResolvedValue(undefined);
+      jest.spyOn(GitHub as any, 'runUpdateAsyncChecksWorkflow').mockResolvedValue(undefined);
     });
 
     afterEach(() => {
