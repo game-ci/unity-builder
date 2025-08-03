@@ -3,6 +3,11 @@ name: Cloud Runner CI Pipeline
 on:
   push: { branches: [cloud-runner-develop, cloud-runner-preview, main] }
   workflow_dispatch:
+    inputs:
+      runGithubIntegrationTests:
+        description: 'Run GitHub Checks integration tests'
+        required: false
+        default: 'false'
 
 permissions:
   checks: write
@@ -207,3 +212,20 @@ jobs:
           name: ${{ matrix.providerStrategy }} Build (${{ matrix.targetPlatform }})
           path: ${{ steps.unity-build.outputs.BUILD_ARTIFACT }}
           retention-days: 14
+
+  githubChecksIntegration:
+    name: GitHub Checks Integration
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.runGithubIntegrationTests == 'true'
+    env:
+      RUN_GITHUB_INTEGRATION_TESTS: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn test cloud-runner-github-checks.integration --detectOpenHandles --forceExit --runInBand
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
