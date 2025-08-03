@@ -1,0 +1,24 @@
+name: GitHub Checks Integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      RUN_GITHUB_INTEGRATION_TESTS: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn test cloud-runner-github-checks.integration --detectOpenHandles --forceExit --runInBand
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

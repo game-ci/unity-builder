@@ -6,18 +6,9 @@ import failOnConsole from 'jest-fail-on-console';
 // implementation, so we provide one using undici's implementation.
 // This ensures tests that interact with Octokit do not throw when
 // constructing the client.
-import { fetch, Headers, Request, Response } from 'undici';
+import { fetch as undiciFetch, Headers, Request, Response } from 'undici';
 
-if (!global.fetch) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).fetch = fetch;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).Headers = Headers;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).Request = Request;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).Response = Response;
-}
+Object.assign(globalThis, { fetch: undiciFetch, Headers, Request, Response });
 
 // Fail when console logs something inside a test - use spyOn instead
 failOnConsole({
