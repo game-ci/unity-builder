@@ -1,18 +1,8 @@
 // Integration test for exercising real GitHub check creation and updates.
-import { BuildParameters } from '../model';
 import CloudRunner from '../model/cloud-runner/cloud-runner';
 import UnityVersioning from '../model/unity-versioning';
-import { Cli } from '../model/cli/cli';
 import GitHub from '../model/github';
-import { OptionValues } from 'commander';
-
-export const TIMEOUT_INFINITE = 1e9;
-
-async function createParameters(overrides?: OptionValues) {
-  if (overrides) Cli.options = overrides;
-
-  return BuildParameters.create();
-}
+import { TIMEOUT_INFINITE, createParameters } from '../test-utils/cloud-runner-test-helpers';
 
 const runIntegration = process.env.RUN_GITHUB_INTEGRATION_TESTS === 'true';
 const describeOrSkip = runIntegration ? describe : describe.skip;

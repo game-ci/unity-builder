@@ -1,16 +1,8 @@
-import { BuildParameters } from '../..';
 import CloudRunner from '../cloud-runner';
 import UnityVersioning from '../../unity-versioning';
-import { Cli } from '../../cli/cli';
 import setups from './cloud-runner-suite.test';
-import { OptionValues } from 'commander';
 import GitHub from '../../github';
-export const TIMEOUT_INFINITE = 1e9;
-async function CreateParameters(overrides: OptionValues | undefined) {
-  if (overrides) Cli.options = overrides;
-
-  return BuildParameters.create();
-}
+import { TIMEOUT_INFINITE, createParameters } from '../../../test-utils/cloud-runner-test-helpers';
 describe('Cloud Runner Github Checks', () => {
   setups();
   it('Responds', () => {});
@@ -36,7 +28,7 @@ describe('Cloud Runner Github Checks', () => {
     'Check Handling Direct',
     async () => {
       // Setup parameters
-      const buildParameter = await CreateParameters({
+      const buildParameter = await createParameters({
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
@@ -54,7 +46,7 @@ describe('Cloud Runner Github Checks', () => {
     'Check Handling Via Async Workflow',
     async () => {
       // Setup parameters
-      const buildParameter = await CreateParameters({
+      const buildParameter = await createParameters({
         versioning: 'None',
         projectPath: 'test-project',
         unityVersion: UnityVersioning.read('test-project'),
