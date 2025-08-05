@@ -25,6 +25,8 @@ module.exports = {
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   modulePathIgnorePatterns: ['<rootDir>/lib/', '<rootDir>/dist/'],
 
+  // Files that will be run before Jest is loaded to set globals like fetch
+  setupFiles: ['<rootDir>/src/jest.globals.ts'],
   // A list of paths to modules that run some code to configure or set up the testing framework after the environment is ready
-  setupFilesAfterEnv: ['<rootDir>/src/jest.globals.ts', '<rootDir>/src/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/jest.setup.ts'],
 };
