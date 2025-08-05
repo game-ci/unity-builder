@@ -4,7 +4,14 @@ import CloudRunner from '../../cloud-runner';
 import Input from '../../../input';
 import { DeleteObjectCommand, ListObjectsV2Command, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 export class SharedWorkspaceLocking {
-  private static s3 = new S3({ region: Input.region });
+  private static _s3: S3;
+  private static get s3(): S3 {
+    if (!SharedWorkspaceLocking._s3) {
+      const region = Input.region || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
+      SharedWorkspaceLocking._s3 = new S3({ region });
+    }
+    return SharedWorkspaceLocking._s3;
+  }
   private static get bucket() {
     return CloudRunner.buildParameters.awsStackName;
   }
