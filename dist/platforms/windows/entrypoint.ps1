@@ -1,5 +1,13 @@
 Get-Process
 
+# Copy .upmconfig.toml if it exists
+if (Test-Path "C:\githubhome\.upmconfig.toml") {
+  Write-Host "Copying .upmconfig.toml to $Env:USERPROFILE\.upmconfig.toml"
+  Copy-Item -Path "C:\githubhome\.upmconfig.toml" -Destination "$Env:USERPROFILE\.upmconfig.toml" -Force
+} else {
+  Write-Host "No .upmconfig.toml found at C:\githubhome"
+}
+
 # Import any necessary registry keys, ie: location of windows 10 sdk
 # No guarantee that there will be any necessary registry keys, ie: tvOS
 Get-ChildItem -Path c:\regkeys -File | ForEach-Object { reg import $_.fullname }
@@ -12,6 +20,11 @@ Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
 
 # Setup Git Credentials
 . "c:\steps\set_gitcredential.ps1"
+
+if ($env:ENABLE_GPU -eq "true") {
+  # Install LLVMpipe software graphics driver
+  . "c:\steps\install_llvmpipe.ps1"
+}
 
 # Activate Unity
 if ($env:SKIP_ACTIVATION -ne "true") {

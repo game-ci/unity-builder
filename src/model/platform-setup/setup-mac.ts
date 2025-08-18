@@ -101,7 +101,10 @@ class SetupMac {
         moduleArgument.push('--module', 'ios');
         break;
       case 'tvOS':
-        moduleArgument.push('--module', 'tvos');
+        moduleArgument.push('--module', 'appletv');
+        break;
+      case 'VisionOS':
+        moduleArgument.push('--module', 'visionos');
         break;
       case 'StandaloneOSX':
         moduleArgument.push('--module', 'mac-il2cpp');
