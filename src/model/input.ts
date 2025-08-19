@@ -282,6 +282,10 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  static get linux64FileExtension(): string {
+    return Input.getInput('linux64FileExtension') ?? '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

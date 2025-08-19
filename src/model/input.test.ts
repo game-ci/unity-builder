@@ -334,4 +334,17 @@ describe('Input', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('linux64FileExtension', () => {
+    it('returns the default value', () => {
+      expect(Input.linux64FileExtension).toStrictEqual('');
+    });
+
+    it('takes input from the users workflow', () => {
+      const mockValue = '.x86_64';
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      expect(Input.linux64FileExtension).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
 });
