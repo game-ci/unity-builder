@@ -104,21 +104,21 @@ describe('BuildParameters', () => {
     });
 
     test.each`
-      targetPlatform                        | expectedExtension | androidExportType         | linux64FileExtension
-      ${Platform.types.Android}             | ${'.apk'}         | ${'androidPackage'}       | ${'n/a'}
-      ${Platform.types.Android}             | ${'.aab'}         | ${'androidAppBundle'}     | ${'n/a'}
-      ${Platform.types.Android}             | ${''}             | ${'androidStudioProject'} | ${'n/a'}
-      ${Platform.types.StandaloneWindows}   | ${'.exe'}         | ${'n/a'}                  | ${'n/a'}
-      ${Platform.types.StandaloneWindows64} | ${'.exe'}         | ${'n/a'}                  | ${'n/a'}
-      ${Platform.types.StandaloneLinux64}   | ${''}             | ${'n/a'}                  | ${''}
-      ${Platform.types.StandaloneLinux64}   | ${'.x86_64'}      | ${'n/a'}                  | ${'.x86_64'}
+      targetPlatform                        | expectedExtension | androidExportType         | linux64RemoveExecutableExtension
+      ${Platform.types.Android}             | ${'.apk'}         | ${'androidPackage'}       | ${false}
+      ${Platform.types.Android}             | ${'.aab'}         | ${'androidAppBundle'}     | ${true}
+      ${Platform.types.Android}             | ${''}             | ${'androidStudioProject'} | ${false}
+      ${Platform.types.StandaloneWindows}   | ${'.exe'}         | ${'n/a'}                  | ${true}
+      ${Platform.types.StandaloneWindows64} | ${'.exe'}         | ${'n/a'}                  | ${false}
+      ${Platform.types.StandaloneLinux64}   | ${''}             | ${'n/a'}                  | ${true}
+      ${Platform.types.StandaloneLinux64}   | ${'.x86_64'}      | ${'n/a'}                  | ${false}
     `(
-      'appends $expectedExtension for $targetPlatform with androidExportType $androidExportType and linux64FileExtension $linux64FileExtension',
-      async ({ targetPlatform, expectedExtension, androidExportType, linux64FileExtension }) => {
+      'appends $expectedExtension for $targetPlatform with androidExportType $androidExportType and linux64RemoveExecutableExtension $linux64RemoveExecutableExtension',
+      async ({ targetPlatform, expectedExtension, androidExportType, linux64RemoveExecutableExtension }) => {
         jest.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
         jest.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
         jest.spyOn(Input, 'androidExportType', 'get').mockReturnValue(androidExportType);
-        jest.spyOn(Input, 'linux64FileExtension', 'get').mockReturnValue(linux64FileExtension);
+        jest.spyOn(Input, 'linux64RemoveExecutableExtension', 'get').mockReturnValue(linux64RemoveExecutableExtension);
         await expect(BuildParameters.create()).resolves.toEqual(
           expect.objectContaining({ buildFile: `${targetPlatform}${expectedExtension}` }),
         );

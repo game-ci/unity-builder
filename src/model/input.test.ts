@@ -335,15 +335,20 @@ describe('Input', () => {
     });
   });
 
-  describe('linux64FileExtension', () => {
+  describe('linux64RemoveExecutableExtension', () => {
     it('returns the default value', () => {
-      expect(Input.linux64FileExtension).toStrictEqual('');
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(true);
     });
 
-    it('takes input from the users workflow', () => {
-      const mockValue = '.x86_64';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
-      expect(Input.linux64FileExtension).toStrictEqual(mockValue);
+    it('returns true when string true is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
