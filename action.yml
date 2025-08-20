@@ -279,6 +279,11 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  linux64FileExtension:
+    default: ''
+    required: false
+    description:
+      'Specify the file extension of the executable when building for StandaloneLinux64. For example, ".x86_64"'
 
 outputs:
   volume:
