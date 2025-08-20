@@ -105,7 +105,7 @@ class BuildParameters {
       Input.buildName,
       Input.targetPlatform,
       Input.androidExportType,
-      Input.linux64FileExtension,
+      Input.linux64RemoveExecutableExtension,
     );
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
@@ -232,7 +232,7 @@ class BuildParameters {
     filename: string,
     platform: string,
     androidExportType: string,
-    linux64FileExtension: string,
+    linux64RemoveExecutableExtension: boolean,
   ): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
@@ -253,8 +253,8 @@ class BuildParameters {
       }
     }
 
-    if (platform === Platform.types.StandaloneLinux64) {
-      return `${filename}${linux64FileExtension}`;
+    if (platform === Platform.types.StandaloneLinux64 && !linux64RemoveExecutableExtension) {
+      return `${filename}.x86_64`;
     }
 
     return filename;
