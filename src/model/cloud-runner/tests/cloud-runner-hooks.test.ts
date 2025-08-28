@@ -94,6 +94,7 @@ commands: echo "test"`;
         cacheKey: `test-case-${uuidv4()}`,
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+        cloudRunnerDebug: true,
       };
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);

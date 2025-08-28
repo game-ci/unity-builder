@@ -24,6 +24,7 @@ describe('Cloud Runner Retain Workspace', () => {
         targetPlatform: 'StandaloneLinux64',
         cacheKey: `test-case-${uuidv4()}`,
         maxRetainedWorkspaces: 1,
+        cloudRunnerDebug: true,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);

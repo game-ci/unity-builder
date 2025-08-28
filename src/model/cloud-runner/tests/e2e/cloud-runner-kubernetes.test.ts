@@ -34,6 +34,7 @@ describe('Cloud Runner Kubernetes', () => {
         cacheKey: `test-case-${uuidv4()}`,
         providerStrategy: 'k8s',
         buildPlatform: 'linux',
+        cloudRunnerDebug: true,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);

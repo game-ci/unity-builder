@@ -6,6 +6,11 @@ import CloudRunnerOptions from '../options/cloud-runner-options';
 
 export class RemoteClientLogger {
   private static get LogFilePath() {
+    // Use a cross-platform temporary directory for local development
+    if (process.platform === 'win32') {
+      return path.join(process.cwd(), 'temp', 'job-log.txt');
+    }
+
     return path.join(`/home`, `job-log.txt`);
   }
 
@@ -29,6 +34,12 @@ export class RemoteClientLogger {
 
   public static appendToFile(message: string) {
     if (CloudRunner.isCloudRunnerEnvironment) {
+      // Ensure the directory exists before writing
+      const logDirectory = path.dirname(RemoteClientLogger.LogFilePath);
+      if (!fs.existsSync(logDirectory)) {
+        fs.mkdirSync(logDirectory, { recursive: true });
+      }
+
       fs.appendFileSync(RemoteClientLogger.LogFilePath, `${message}\n`);
     }
   }

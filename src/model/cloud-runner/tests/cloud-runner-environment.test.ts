@@ -43,6 +43,7 @@ describe('Cloud Runner Sync Environments', () => {
             - name: '${testSecretName}'
               value: '${testSecretValue}'
         `,
+        cloudRunnerDebug: true,
       });
       const baseImage = new ImageTag(buildParameter);
       if (baseImage.toString().includes('undefined')) {

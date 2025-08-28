@@ -80,6 +80,10 @@ class CloudRunner {
       case 'local-system':
         CloudRunner.Provider = new LocalCloudRunner();
         break;
+      case 'local':
+      default:
+        CloudRunner.Provider = new LocalCloudRunner();
+        break;
     }
   }
 
