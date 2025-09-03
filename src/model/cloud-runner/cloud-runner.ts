@@ -13,6 +13,7 @@ import CloudRunnerEnvironmentVariable from './options/cloud-runner-environment-v
 import TestCloudRunner from './providers/test';
 import LocalCloudRunner from './providers/local';
 import LocalDockerCloudRunner from './providers/docker';
+import loadProvider from './providers/provider-loader';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
 import { FollowLogStreamService } from './services/core/follow-log-stream-service';
@@ -38,7 +39,7 @@ class CloudRunner {
     if (CloudRunner.buildParameters.githubCheckId === ``) {
       CloudRunner.buildParameters.githubCheckId = await GitHub.createGitHubCheck(CloudRunner.buildParameters.buildGuid);
     }
-    CloudRunner.setupSelectedBuildPlatform();
+    await CloudRunner.setupSelectedBuildPlatform();
     CloudRunner.defaultSecrets = TaskParameterSerializer.readDefaultSecrets();
     CloudRunner.cloudRunnerEnvironmentVariables =
       TaskParameterSerializer.createCloudRunnerEnvironmentVariables(buildParameters);
@@ -62,7 +63,7 @@ class CloudRunner {
     FollowLogStreamService.Reset();
   }
 
-  private static setupSelectedBuildPlatform() {
+  private static async setupSelectedBuildPlatform() {
     CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.providerStrategy}`);
     switch (CloudRunner.buildParameters.providerStrategy) {
       case 'k8s':
@@ -80,6 +81,13 @@ class CloudRunner {
       case 'local-system':
         CloudRunner.Provider = new LocalCloudRunner();
         break;
+      default:
+        if (CloudRunner.buildParameters.providerStrategy !== 'local') {
+          CloudRunner.Provider = await loadProvider(
+            CloudRunner.buildParameters.providerStrategy,
+            CloudRunner.buildParameters,
+          );
+        }
     }
   }
 
