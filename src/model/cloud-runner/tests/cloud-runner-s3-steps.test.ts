@@ -54,21 +54,8 @@ describe('Cloud Runner pre-built S3 steps', () => {
         const buildParameter2 = await CreateParameters(overrides);
         const baseImage2 = new ImageTag(buildParameter2);
         const results2Object = await CloudRunner.run(buildParameter2, baseImage2.toString());
-        const results2 = results2Object.BuildResults;
         CloudRunnerLogger.log(`run 2 succeeded`);
-
-        // Look for multiple indicators of a successful build
-        const buildIndicators = [
-          'Build succeeded',
-          'Build succeeded!',
-          'Build Succeeded',
-          'succeeded',
-          'Cloud Runner finished running standard build automation',
-          'Cloud runner job has finished successfully',
-        ];
-
-        const buildWasSuccessful = buildIndicators.some((indicator) => results2.includes(indicator));
-        expect(buildWasSuccessful).toBeTruthy();
+        expect(results2Object.BuildSucceeded).toBe(true);
 
         // Only run S3 operations if we're in CI or AWS CLI is available
         if (isCI || awsAvailable) {

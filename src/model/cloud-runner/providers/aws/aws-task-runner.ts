@@ -1,19 +1,5 @@
-import {
-  DescribeTasksCommand,
-  ECS,
-  RunTaskCommand,
-  RunTaskCommandInput,
-  Task,
-  waitUntilTasksRunning,
-} from '@aws-sdk/client-ecs';
-import {
-  DescribeStreamCommand,
-  DescribeStreamCommandOutput,
-  GetRecordsCommand,
-  GetRecordsCommandOutput,
-  GetShardIteratorCommand,
-  Kinesis,
-} from '@aws-sdk/client-kinesis';
+import { DescribeTasksCommand, ECS, RunTaskCommand, waitUntilTasksRunning } from '@aws-sdk/client-ecs';
+import { DescribeStreamCommand, GetRecordsCommand, GetShardIteratorCommand, Kinesis } from '@aws-sdk/client-kinesis';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -75,7 +61,7 @@ class AWSTaskRunner {
       throw new Error(`Container Overrides length must be at most 8192`);
     }
 
-    const task = await AWSTaskRunner.ECS.send(new RunTaskCommand(runParameters as RunTaskCommandInput));
+    const task = await AWSTaskRunner.ECS.send(new RunTaskCommand(runParameters as any));
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
@@ -100,7 +86,11 @@ class AWSTaskRunner {
     while (exitCode === undefined) {
       await new Promise((resolve) => resolve(10000));
       taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
-      containerState = taskData.containers?.[0];
+      const containers = taskData?.containers as any[] | undefined;
+      if (!containers || containers.length === 0) {
+        continue;
+      }
+      containerState = containers[0];
       exitCode = containerState?.exitCode;
     }
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
@@ -133,11 +123,8 @@ class AWSTaskRunner {
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      CloudRunnerLogger.log(
-        `Cloud runner job has ended ${
-          (await AWSTaskRunner.describeTasks(cluster, taskArn)).containers?.[0].lastStatus
-        }`,
-      );
+      const taskAfterError = await AWSTaskRunner.describeTasks(cluster, taskArn);
+      CloudRunnerLogger.log(`Cloud runner job has ended ${taskAfterError?.containers?.[0]?.lastStatus}`);
 
       core.setFailed(error);
       core.error(error);
@@ -145,11 +132,25 @@ class AWSTaskRunner {
   }
 
   static async describeTasks(clusterName: string, taskArn: string) {
-    const tasks = await AWSTaskRunner.ECS.send(new DescribeTasksCommand({ cluster: clusterName, tasks: [taskArn] }));
-    if (tasks.tasks?.[0]) {
-      return tasks.tasks?.[0];
-    } else {
-      throw new Error('No task found');
+    const maxAttempts = 6;
+    let delayMs = 500;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const tasks = await AWSTaskRunner.ECS.send(
+          new DescribeTasksCommand({ cluster: clusterName, tasks: [taskArn] }),
+        );
+        if (tasks.tasks?.[0]) {
+          return tasks.tasks?.[0];
+        }
+        throw new Error('No task found');
+      } catch (error: any) {
+        const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
+        if (!isThrottle || attempt === maxAttempts) {
+          throw error;
+        }
+        await new Promise((r) => setTimeout(r, delayMs));
+        delayMs *= 2;
+      }
     }
   }
 
@@ -200,7 +201,7 @@ class AWSTaskRunner {
     return { iterator, shouldReadLogs, output, shouldCleanup };
   }
 
-  private static checkStreamingShouldContinue(taskData: Task, timestamp: number, shouldReadLogs: boolean) {
+  private static checkStreamingShouldContinue(taskData: any, timestamp: number, shouldReadLogs: boolean) {
     if (taskData?.lastStatus === 'UNKNOWN') {
       CloudRunnerLogger.log('## Cloud runner job unknwon');
     }
@@ -220,7 +221,7 @@ class AWSTaskRunner {
   }
 
   private static logRecords(
-    records: GetRecordsCommandOutput,
+    records: any,
     iterator: string,
     shouldReadLogs: boolean,
     output: string,
@@ -251,7 +252,7 @@ class AWSTaskRunner {
     return await AWSTaskRunner.Kinesis.send(new DescribeStreamCommand({ StreamName: kinesisStreamName }));
   }
 
-  private static async getLogIterator(stream: DescribeStreamCommandOutput) {
+  private static async getLogIterator(stream: any) {
     return (
       (
         await AWSTaskRunner.Kinesis.send(
