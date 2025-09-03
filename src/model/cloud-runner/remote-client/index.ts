@@ -281,6 +281,9 @@ export class RemoteClient {
     RemoteClientLogger.log(
       `Retained Workspace: ${BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)}`,
     );
+
+    // Log cache key explicitly to aid debugging and assertions
+    CloudRunnerLogger.log(`Cache Key: ${CloudRunner.buildParameters.cacheKey}`);
     if (
       BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters) &&
       fs.existsSync(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)) &&
