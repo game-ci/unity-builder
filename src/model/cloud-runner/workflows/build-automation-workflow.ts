@@ -91,6 +91,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
 echo "log start" >> /home/job-log.txt
+echo "CACHE_KEY=$CACHE_KEY"
 node ${builderPath} -m remote-cli-pre-build`;
   }
 
