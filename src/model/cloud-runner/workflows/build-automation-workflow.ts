@@ -50,56 +50,69 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const buildHooks = CommandHookService.getHooks(CloudRunner.buildParameters.commandHooks).filter((x) =>
       x.step?.includes(`build`),
     );
-    const builderPath = CloudRunnerFolders.ToLinuxFolder(
-      path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`),
-    );
+    const isContainerized =
+      CloudRunner.buildParameters.providerStrategy === 'aws' ||
+      CloudRunner.buildParameters.providerStrategy === 'k8s' ||
+      CloudRunner.buildParameters.providerStrategy === 'local-docker';
+
+    const builderPath = isContainerized
+      ? CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`))
+      : CloudRunnerFolders.ToLinuxFolder(path.join(process.cwd(), 'dist', `index.js`));
 
     return `echo "cloud runner build workflow starting"
-      apt-get update > /dev/null
-      apt-get install -y curl tar tree npm git-lfs jq git > /dev/null
-      npm --version
-      npm i -g n > /dev/null
-      npm i -g semver > /dev/null
-      npm install --global yarn > /dev/null
-      n 20.8.0
-      node --version
+      ${isContainerized ? 'apt-get update > /dev/null' : '# skipping apt-get in non-container provider'}
+      ${
+        isContainerized
+          ? 'apt-get install -y curl tar tree npm git-lfs jq git > /dev/null\n      npm --version\n      npm i -g n > /dev/null\n      npm i -g semver > /dev/null\n      npm install --global yarn > /dev/null\n      n 20.8.0\n      node --version'
+          : '# skipping toolchain setup in non-container provider'
+      }
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
-      df -H /data/
-      ${BuildAutomationWorkflow.setupCommands(builderPath)}
+      ${isContainerized ? 'df -H /data/' : '# skipping df on /data in non-container provider'}
+      export LOG_FILE=${isContainerized ? '/home/job-log.txt' : '$(pwd)/temp/job-log.txt'}
+      ${BuildAutomationWorkflow.setupCommands(builderPath, isContainerized)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      ${BuildAutomationWorkflow.BuildCommands(builderPath)}
+      ${BuildAutomationWorkflow.BuildCommands(builderPath, isContainerized)}
       ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
   }
 
-  private static setupCommands(builderPath: string) {
+  private static setupCommands(builderPath: string, isContainerized: boolean) {
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
     )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
       CloudRunnerFolders.unityBuilderRepoUrl
     } "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
 
-    const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
-      CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
-    )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
-      path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
-    )}" ] ; then echo "Builder Already Exists!" && tree ${
-      CloudRunnerFolders.builderPathAbsolute
-    }; else ${commands} ; fi`;
+    if (isContainerized) {
+      const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
+        CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
+      )}" ] && [ -e "${CloudRunnerFolders.ToLinuxFolder(
+        path.join(CloudRunnerFolders.builderPathAbsolute, `.git`),
+      )}" ] ; then echo "Builder Already Exists!" && tree ${
+        CloudRunnerFolders.builderPathAbsolute
+      }; else ${commands} ; fi`;
 
-    return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+      return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ${cloneBuilderCommands}
 echo "log start" >> /home/job-log.txt
 echo "CACHE_KEY=$CACHE_KEY"
 node ${builderPath} -m remote-cli-pre-build`;
+    }
+
+    return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+mkdir -p "$(dirname "$LOG_FILE")"
+echo "log start" >> "$LOG_FILE"
+echo "CACHE_KEY=$CACHE_KEY"
+node ${builderPath} -m remote-cli-pre-build`;
   }
 
-  private static BuildCommands(builderPath: string) {
+  private static BuildCommands(builderPath: string, isContainerized: boolean) {
     const distFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist');
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
-    return `
+    if (isContainerized) {
+      return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
@@ -110,6 +123,13 @@ node ${builderPath} -m remote-cli-pre-build`;
     echo "game ci start"
     echo "game ci start" >> /home/job-log.txt
     /entrypoint.sh | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
+    node ${builderPath} -m remote-cli-post-build`;
+    }
+
+    return `
+    echo "game ci start"
+    echo "game ci start" >> "$LOG_FILE"
+    node ${builderPath} -m remote-cli-log-stream --logFile "$LOG_FILE"
     node ${builderPath} -m remote-cli-post-build`;
   }
 }
