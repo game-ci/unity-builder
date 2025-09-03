@@ -127,6 +127,12 @@ class CloudRunnerOptions {
     return provider || 'local';
   }
 
+  static get providerPackage(): string {
+    return (
+      CloudRunnerOptions.getInput('providerPackage') || `unity-builder-provider-${CloudRunnerOptions.providerStrategy}`
+    );
+  }
+
   static get containerCpu(): string {
     return CloudRunnerOptions.getInput('containerCpu') || `1024`;
   }

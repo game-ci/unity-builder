@@ -54,6 +54,7 @@ class BuildParameters {
   public sshAgent!: string;
   public sshPublicKeysDirectoryPath!: string;
   public providerStrategy!: string;
+  public providerPackage!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public kubeConfig!: string;
@@ -183,6 +184,7 @@ class BuildParameters {
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
       providerStrategy: CloudRunnerOptions.providerStrategy,
+      providerPackage: CloudRunnerOptions.providerPackage,
       buildPlatform: CloudRunnerOptions.buildPlatform,
       kubeConfig: CloudRunnerOptions.kubeConfig,
       containerMemory: CloudRunnerOptions.containerMemory,

@@ -194,6 +194,10 @@ inputs:
     description:
       '[CloudRunner] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
+  providerPackage:
+    default: ''
+    required: false
+    description: '[CloudRunner] Override the provider package name used to load the provider'
   containerCpu:
     default: ''
     required: false

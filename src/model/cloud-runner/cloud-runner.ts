@@ -84,7 +84,7 @@ class CloudRunner {
       default:
         if (CloudRunner.buildParameters.providerStrategy !== 'local') {
           CloudRunner.Provider = await loadProvider(
-            CloudRunner.buildParameters.providerStrategy,
+            CloudRunner.buildParameters.providerPackage,
             CloudRunner.buildParameters,
           );
         }
