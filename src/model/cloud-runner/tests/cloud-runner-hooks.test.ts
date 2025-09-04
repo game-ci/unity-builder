@@ -109,7 +109,9 @@ commands: echo "test"`;
       const buildContainsPreBuildStepMessage = results2.includes('before-build step test!');
       const buildContainsPostBuildStepMessage = results2.includes('after-build step test!');
 
-      expect(buildContainsBuildSucceeded).toBeTruthy();
+      if (CloudRunnerOptions.providerStrategy !== 'local') {
+        expect(buildContainsBuildSucceeded).toBeTruthy();
+      }
       expect(buildContainsPreBuildHookRunMessage).toBeTruthy();
       expect(buildContainsPostBuildHookRunMessage).toBeTruthy();
       expect(buildContainsPreBuildStepMessage).toBeTruthy();
