@@ -175,8 +175,22 @@ export class ContainerHookService {
   - name: awsDefaultRegion
     value: ${process.env.AWS_REGION || ``}`,
     ).filter((x) => CloudRunnerOptions.containerHookFiles.includes(x.name) && x.hook === hookLifecycle);
-    if (builtInContainerHooks.length > 0) {
-      results.push(...builtInContainerHooks);
+
+    // In local provider mode (non-container) or when AWS credentials are not present, skip AWS S3 hooks
+    const isContainerized =
+      CloudRunner.buildParameters?.providerStrategy === 'aws' ||
+      CloudRunner.buildParameters?.providerStrategy === 'k8s' ||
+      CloudRunner.buildParameters?.providerStrategy === 'local-docker';
+    const hasAwsCreds =
+      (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ||
+      (process.env.awsAccessKeyId && process.env.awsSecretAccessKey);
+    const shouldIncludeAwsHooks = isContainerized && !CloudRunner.buildParameters?.skipCache && hasAwsCreds;
+    const filteredBuiltIns = shouldIncludeAwsHooks
+      ? builtInContainerHooks
+      : builtInContainerHooks.filter((x) => x.image !== 'amazon/aws-cli');
+
+    if (filteredBuiltIns.length > 0) {
+      results.push(...filteredBuiltIns);
     }
 
     return results;
