@@ -19,6 +19,7 @@
     "cli-k8s": "cross-env providerStrategy=k8s yarn run test-cli",
     "test-cli": "cross-env cloudRunnerTests=true yarn ts-node src/index.ts -m cli --projectPath test-project",
     "test": "jest",
+    "test:ci": "jest --config=jest.ci.config.js --runInBand",
     "test-i": "cross-env cloudRunnerTests=true yarn test -i -t \"cloud runner\"",
     "test-i-*": "yarn run test-i-aws && yarn run test-i-k8s",
     "test-i-aws": "cross-env cloudRunnerTests=true providerStrategy=aws yarn test -i -t \"cloud runner\"",
