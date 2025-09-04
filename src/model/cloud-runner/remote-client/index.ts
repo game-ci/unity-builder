@@ -221,61 +221,58 @@ export class RemoteClient {
     process.chdir(CloudRunnerFolders.repoPathAbsolute);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge -- %f"`);
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
-    if (!CloudRunner.buildParameters.skipLfs) {
-      try {
+    if (CloudRunner.buildParameters.skipLfs) {
+      RemoteClientLogger.log(`Skipping LFS pull (skipLfs=true)`);
+      return;
+    }
+
+    // Best effort: try plain pull first (works for public repos or pre-configured auth)
+    try {
+      await CloudRunnerSystem.Run(`git lfs pull`, true);
+      RemoteClientLogger.log(`Pulled LFS files without explicit token configuration`);
+      return;
+    } catch {}
+
+    // Try with GIT_PRIVATE_TOKEN
+    try {
+      const gitPrivateToken = process.env.GIT_PRIVATE_TOKEN;
+      if (gitPrivateToken) {
         RemoteClientLogger.log(`Attempting to pull LFS files with GIT_PRIVATE_TOKEN...`);
-
-        // Configure git to use GIT_PRIVATE_TOKEN
-        const gitPrivateToken = process.env.GIT_PRIVATE_TOKEN;
-        if (!gitPrivateToken) {
-          throw new Error('GIT_PRIVATE_TOKEN is not available');
-        }
-
-        // Clear any existing URL configurations
         await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
         await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
         await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-
-        // Set new URL configuration with token for HTTPS
         await CloudRunnerSystem.Run(
           `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
         );
-
-        await CloudRunnerSystem.Run(`git lfs pull`);
+        await CloudRunnerSystem.Run(`git lfs pull`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
-        assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
-      } catch (error: any) {
-        RemoteClientLogger.logCliError(`Failed to pull LFS files with GIT_PRIVATE_TOKEN: ${error.message}`);
-
-        // Try with GITHUB_TOKEN as fallback
-        try {
-          RemoteClientLogger.log(`Attempting to pull LFS files with GITHUB_TOKEN as fallback...`);
-          const githubToken = process.env.GITHUB_TOKEN;
-          if (!githubToken) {
-            throw new Error('GITHUB_TOKEN is not available as fallback');
-          }
-
-          // Clear any existing URL configurations
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
-          await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-
-          // Set new URL configuration with token for HTTPS
-          await CloudRunnerSystem.Run(
-            `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
-          );
-
-          await CloudRunnerSystem.Run(`git lfs pull`);
-          RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN fallback`);
-          assert(fs.existsSync(CloudRunnerFolders.lfsFolderAbsolute));
-        } catch (fallbackError: any) {
-          RemoteClientLogger.logCliError(
-            `Failed to pull LFS files with GITHUB_TOKEN fallback: ${fallbackError.message}`,
-          );
-          throw new Error(`Failed to pull LFS files with both tokens. Last error: ${fallbackError.message}`);
-        }
+        return;
       }
+    } catch (error: any) {
+      RemoteClientLogger.logCliError(`Failed with GIT_PRIVATE_TOKEN: ${error.message}`);
     }
+
+    // Try with GITHUB_TOKEN
+    try {
+      const githubToken = process.env.GITHUB_TOKEN;
+      if (githubToken) {
+        RemoteClientLogger.log(`Attempting to pull LFS files with GITHUB_TOKEN fallback...`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
+        await CloudRunnerSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
+        await CloudRunnerSystem.Run(
+          `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
+        );
+        await CloudRunnerSystem.Run(`git lfs pull`, true);
+        RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN`);
+        return;
+      }
+    } catch (error: any) {
+      RemoteClientLogger.logCliError(`Failed with GITHUB_TOKEN: ${error.message}`);
+    }
+
+    // If we get here, all strategies failed; continue without failing the build
+    RemoteClientLogger.logWarning(`Proceeding without LFS files (no tokens or pull failed)`);
   }
   static async handleRetainedWorkspace() {
     RemoteClientLogger.log(
