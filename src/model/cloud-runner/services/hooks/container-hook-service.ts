@@ -70,8 +70,8 @@ export class ContainerHookService {
       aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
       aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
       aws s3 cp s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
@@ -129,12 +129,12 @@ export class ContainerHookService {
       aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
       aws configure set region $AWS_DEFAULT_REGION --profile default || true
       aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/lfs || true
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/lfs || true
       rm -r /data/cache/$CACHE_KEY/lfs || true
       aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/Library || true
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/Library || true
       rm -r /data/cache/$CACHE_KEY/Library || true
     else
       echo "AWS CLI not available, skipping aws-s3-upload-cache"
@@ -191,6 +191,7 @@ export class ContainerHookService {
     const hasAwsCreds =
       (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ||
       (process.env.awsAccessKeyId && process.env.awsSecretAccessKey);
+
     // Always include AWS hooks on the AWS provider (task role provides creds),
     // otherwise require explicit creds for other containerized providers.
     const shouldIncludeAwsHooks =
