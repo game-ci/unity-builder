@@ -22,7 +22,7 @@ jobs:
           node-version: '18'
       - run: yarn
       - run: yarn lint
-      - run: yarn test --coverage
+      - run: yarn test:ci --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
 #      - run: yarn build --quiet && git diff --quiet dist || { echo "dist should be auto generated" ; git diff dist ; exit 62; }
