@@ -2,9 +2,9 @@ name: Integrity
 
 on:
   pull_request:
-    branches: [ "**" ]
+    branches: ['**']
   push:
-    branches: [ "**" ]
+    branches: ['**']
 
 jobs:
   tests:
@@ -24,5 +24,3 @@ jobs:
         run: yarn test:ci
         env:
           CI: true
-
-
