@@ -127,7 +127,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     return `
     echo "game ci start"
     echo "game ci start" >> "$LOG_FILE"
-    printf '' | node ${builderPath} -m remote-cli-log-stream --logFile "$LOG_FILE"
+    timeout 3s node ${builderPath} -m remote-cli-log-stream --logFile "$LOG_FILE" || true
     node ${builderPath} -m remote-cli-post-build`;
   }
 }
