@@ -1,0 +1,28 @@
+name: Integrity
+
+on:
+  pull_request:
+    branches: [ "**" ]
+  push:
+    branches: [ "**" ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - name: Install
+        run: yarn install --frozen-lockfile
+      - name: Test (CI)
+        run: yarn test:ci
+        env:
+          CI: true
+
+
