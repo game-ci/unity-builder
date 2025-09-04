@@ -120,9 +120,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
-    echo "game ci start"
-    echo "game ci start" >> /home/job-log.txt
-    /entrypoint.sh | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
+    { echo "game ci start"; echo "game ci start" >> /home/job-log.txt; echo "CACHE_KEY=$CACHE_KEY"; if [ -n "$LOCKED_WORKSPACE" ]; then echo "Retained Workspace: true"; fi; if [ -n "$LOCKED_WORKSPACE" ] && [ -d "$GITHUB_WORKSPACE/.git" ]; then echo "Retained Workspace Already Exists!"; fi; /entrypoint.sh; } | node ${builderPath} -m remote-cli-log-stream --logFile /home/job-log.txt
     node ${builderPath} -m remote-cli-post-build`;
     }
 

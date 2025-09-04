@@ -177,14 +177,15 @@ export class ContainerHookService {
     ).filter((x) => CloudRunnerOptions.containerHookFiles.includes(x.name) && x.hook === hookLifecycle);
 
     // In local provider mode (non-container) or when AWS credentials are not present, skip AWS S3 hooks
-    const isContainerized =
-      CloudRunner.buildParameters?.providerStrategy === 'aws' ||
-      CloudRunner.buildParameters?.providerStrategy === 'k8s' ||
-      CloudRunner.buildParameters?.providerStrategy === 'local-docker';
+    const provider = CloudRunner.buildParameters?.providerStrategy;
+    const isContainerized = provider === 'aws' || provider === 'k8s' || provider === 'local-docker';
     const hasAwsCreds =
       (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ||
       (process.env.awsAccessKeyId && process.env.awsSecretAccessKey);
-    const shouldIncludeAwsHooks = isContainerized && !CloudRunner.buildParameters?.skipCache && hasAwsCreds;
+    // Always include AWS hooks on the AWS provider (task role provides creds),
+    // otherwise require explicit creds for other containerized providers.
+    const shouldIncludeAwsHooks =
+      isContainerized && !CloudRunner.buildParameters?.skipCache && (provider === 'aws' || Boolean(hasAwsCreds));
     const filteredBuiltIns = shouldIncludeAwsHooks
       ? builtInContainerHooks
       : builtInContainerHooks.filter((x) => x.image !== 'amazon/aws-cli');
