@@ -37,17 +37,21 @@ export class ContainerHookService {
   image: amazon/aws-cli
   hook: after
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
-    rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+      } || true
+      rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
+      } || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-upload-build"
+    fi
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -58,19 +62,23 @@ export class ContainerHookService {
 - name: aws-s3-pull-build
   image: amazon/aws-cli
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
     mkdir -p /data/cache/$CACHE_KEY/build/
-    aws s3 cp s3://${
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
+      aws s3 cp s3://${
       CloudRunner.buildParameters.awsStackName
     }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
+      } || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-pull-build"
+    fi
   secrets:
     - name: AWS_ACCESS_KEY_ID
     - name: AWS_SECRET_ACCESS_KEY
@@ -116,17 +124,21 @@ export class ContainerHookService {
   image: amazon/aws-cli
   hook: after
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
       CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/lfs
-    rm -r /data/cache/$CACHE_KEY/lfs
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
+    }/cloud-runner-cache/$CACHE_KEY/lfs || true
+      rm -r /data/cache/$CACHE_KEY/lfs || true
+      aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
       CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/Library
-    rm -r /data/cache/$CACHE_KEY/Library
+    }/cloud-runner-cache/$CACHE_KEY/Library || true
+      rm -r /data/cache/$CACHE_KEY/Library || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-upload-cache"
+    fi
   secrets:
   - name: AWS_ACCESS_KEY_ID
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -138,28 +150,25 @@ export class ContainerHookService {
   image: amazon/aws-cli
   hook: before
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
     mkdir -p /data/cache/$CACHE_KEY/Library/
     mkdir -p /data/cache/$CACHE_KEY/lfs/
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
-    BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
-    aws s3 ls $BUCKET1 || true
-    OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
-    BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
-    aws s3 ls $BUCKET2 || true
-    OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
-  secrets:
-  - name: AWS_ACCESS_KEY_ID
-    value: ${process.env.AWS_ACCESS_KEY_ID || ``}
-  - name: AWS_SECRET_ACCESS_KEY
-    value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
-  - name: AWS_DEFAULT_REGION
-    value: ${process.env.AWS_REGION || ``}
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
+      BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
+      aws s3 ls $BUCKET1 || true
+      OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
+      BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
+      aws s3 ls $BUCKET2 || true
+      OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-pull-cache"
+    fi
 - name: debug-cache
   image: ubuntu
   hook: after
