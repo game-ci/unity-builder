@@ -107,9 +107,14 @@ export class RemoteClient {
     }
 
     if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
-      await CloudRunnerSystem.Run(
-        `rm -r ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute)}`,
+      const uniqueJobFolderLinux = CloudRunnerFolders.ToLinuxFolder(
+        CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute,
       );
+      if (fs.existsSync(CloudRunnerFolders.uniqueCloudRunnerJobFolderAbsolute) || fs.existsSync(uniqueJobFolderLinux)) {
+        await CloudRunnerSystem.Run(`rm -r ${uniqueJobFolderLinux} || true`);
+      } else {
+        RemoteClientLogger.log(`Skipping cleanup; unique job folder missing`);
+      }
     }
 
     await RemoteClient.runCustomHookFiles(`after-build`);
