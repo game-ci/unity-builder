@@ -103,8 +103,7 @@ node ${builderPath} -m remote-cli-pre-build`;
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 mkdir -p "$(dirname "$LOG_FILE")"
 echo "log start" >> "$LOG_FILE"
-echo "CACHE_KEY=$CACHE_KEY"
-node ${builderPath} -m remote-cli-pre-build`;
+echo "CACHE_KEY=$CACHE_KEY"`;
   }
 
   private static BuildCommands(builderPath: string, isContainerized: boolean) {
