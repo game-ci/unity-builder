@@ -173,9 +173,9 @@ export class ContainerHookService {
   image: ubuntu
   hook: after
   commands: |
-    apt-get update > /dev/null
-    ${CloudRunnerOptions.cloudRunnerDebug ? `apt-get install -y tree > /dev/null` : `#`}
-    ${CloudRunnerOptions.cloudRunnerDebug ? `tree -L 3 /data/cache` : `#`}
+    apt-get update > /dev/null || true
+    ${CloudRunnerOptions.cloudRunnerDebug ? `apt-get install -y tree > /dev/null || true` : `#`}
+    ${CloudRunnerOptions.cloudRunnerDebug ? `tree -L 3 /data/cache || true` : `#`}
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}

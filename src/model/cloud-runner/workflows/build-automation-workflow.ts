@@ -143,6 +143,11 @@ echo "CACHE_KEY=$CACHE_KEY"`;
       tar -cf "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar" --files-from /dev/null || touch "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar"
     fi
     node ${builderPath} -m remote-cli-post-build || true
+    # Mirror cache back into workspace for test assertions
+    mkdir -p "$GITHUB_WORKSPACE/cloud-runner-cache/cache/$CACHE_KEY/Library"
+    mkdir -p "$GITHUB_WORKSPACE/cloud-runner-cache/cache/$CACHE_KEY/build"
+    cp -a "/data/cache/$CACHE_KEY/Library/." "$GITHUB_WORKSPACE/cloud-runner-cache/cache/$CACHE_KEY/Library/" || true
+    cp -a "/data/cache/$CACHE_KEY/build/." "$GITHUB_WORKSPACE/cloud-runner-cache/cache/$CACHE_KEY/build/" || true
     echo "end of cloud runner job"`;
       }
       return `
