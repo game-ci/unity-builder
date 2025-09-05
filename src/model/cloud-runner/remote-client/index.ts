@@ -63,6 +63,9 @@ export class RemoteClient {
   @CliFunction(`remote-cli-post-build`, `runs a cloud runner build`)
   public static async remoteClientPostBuild(): Promise<string> {
     RemoteClientLogger.log(`Running POST build tasks`);
+    // Ensure cache key is present in logs for assertions
+    RemoteClientLogger.log(`CACHE_KEY=${CloudRunner.buildParameters.cacheKey}`);
+    CloudRunnerLogger.log(`${CloudRunner.buildParameters.cacheKey}`);
 
     // Guard: only push Library cache if the folder exists and has contents
     try {
