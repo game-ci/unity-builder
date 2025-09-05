@@ -71,7 +71,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           : '# skipping toolchain setup in local-docker or non-container provider'
       }
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
-      export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
+      ${
+        CloudRunner.buildParameters.providerStrategy === 'local-docker'
+          ? `export GITHUB_WORKSPACE="${CloudRunner.buildParameters.dockerWorkspacePath}"
+      echo "Using docker workspace: $GITHUB_WORKSPACE"`
+          : `export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"`
+      }
       ${isContainerized ? 'df -H /data/' : '# skipping df on /data in non-container provider'}
       export LOG_FILE=${isContainerized ? '/home/job-log.txt' : '$(pwd)/temp/job-log.txt'}
       ${BuildAutomationWorkflow.setupCommands(builderPath, isContainerized)}
