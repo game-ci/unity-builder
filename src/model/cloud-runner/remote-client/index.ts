@@ -64,17 +64,47 @@ export class RemoteClient {
   public static async remoteClientPostBuild(): Promise<string> {
     RemoteClientLogger.log(`Running POST build tasks`);
 
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
-      `lib-${CloudRunner.buildParameters.buildGuid}`,
-    );
+    // Guard: only push Library cache if the folder exists and has contents
+    try {
+      const libraryFolderHost = CloudRunnerFolders.libraryFolderAbsolute;
+      if (fs.existsSync(libraryFolderHost)) {
+        const libraryEntries = await fs.promises.readdir(libraryFolderHost).catch(() => [] as string[]);
+        if (libraryEntries.length > 0) {
+          await Caching.PushToCache(
+            CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/Library`),
+            CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.libraryFolderAbsolute),
+            `lib-${CloudRunner.buildParameters.buildGuid}`,
+          );
+        } else {
+          RemoteClientLogger.log(`Skipping Library cache push (folder is empty)`);
+        }
+      } else {
+        RemoteClientLogger.log(`Skipping Library cache push (folder missing)`);
+      }
+    } catch (error: any) {
+      RemoteClientLogger.logWarning(`Library cache push skipped with error: ${error.message}`);
+    }
 
-    await Caching.PushToCache(
-      CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
-      CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
-      `build-${CloudRunner.buildParameters.buildGuid}`,
-    );
+    // Guard: only push Build cache if the folder exists and has contents
+    try {
+      const buildFolderHost = CloudRunnerFolders.projectBuildFolderAbsolute;
+      if (fs.existsSync(buildFolderHost)) {
+        const buildEntries = await fs.promises.readdir(buildFolderHost).catch(() => [] as string[]);
+        if (buildEntries.length > 0) {
+          await Caching.PushToCache(
+            CloudRunnerFolders.ToLinuxFolder(`${CloudRunnerFolders.cacheFolderForCacheKeyFull}/build`),
+            CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute),
+            `build-${CloudRunner.buildParameters.buildGuid}`,
+          );
+        } else {
+          RemoteClientLogger.log(`Skipping Build cache push (folder is empty)`);
+        }
+      } else {
+        RemoteClientLogger.log(`Skipping Build cache push (folder missing)`);
+      }
+    } catch (error: any) {
+      RemoteClientLogger.logWarning(`Build cache push skipped with error: ${error.message}`);
+    }
 
     if (!BuildParameters.shouldUseRetainedWorkspaceMode(CloudRunner.buildParameters)) {
       await CloudRunnerSystem.Run(
