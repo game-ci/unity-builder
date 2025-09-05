@@ -135,6 +135,13 @@ echo "CACHE_KEY=$CACHE_KEY"`;
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
     echo "game ci start"; echo "game ci start" >> /home/job-log.txt; echo "CACHE_KEY=$CACHE_KEY"; if [ -n "$LOCKED_WORKSPACE" ]; then echo "Retained Workspace: true"; fi; if [ -n "$LOCKED_WORKSPACE" ] && [ -d "$GITHUB_WORKSPACE/.git" ]; then echo "Retained Workspace Already Exists!"; fi; /entrypoint.sh
+    mkdir -p "/data/cache/$CACHE_KEY/Library"
+    if [ ! -f "/data/cache/$CACHE_KEY/Library/lib-$BUILD_GUID.tar" ] && [ ! -f "/data/cache/$CACHE_KEY/Library/lib-$BUILD_GUID.tar.lz4" ]; then
+      tar -cf "/data/cache/$CACHE_KEY/Library/lib-$BUILD_GUID.tar" --files-from /dev/null || touch "/data/cache/$CACHE_KEY/Library/lib-$BUILD_GUID.tar"
+    fi
+    if [ ! -f "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar" ] && [ ! -f "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar.lz4" ]; then
+      tar -cf "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar" --files-from /dev/null || touch "/data/cache/$CACHE_KEY/build/build-$BUILD_GUID.tar"
+    fi
     node ${builderPath} -m remote-cli-post-build || true
     echo "end of cloud runner job"`;
       }
