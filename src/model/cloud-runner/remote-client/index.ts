@@ -223,6 +223,7 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process"`);
     if (CloudRunner.buildParameters.skipLfs) {
       RemoteClientLogger.log(`Skipping LFS pull (skipLfs=true)`);
+
       return;
     }
 
@@ -230,8 +231,12 @@ export class RemoteClient {
     try {
       await CloudRunnerSystem.Run(`git lfs pull`, true);
       RemoteClientLogger.log(`Pulled LFS files without explicit token configuration`);
+
       return;
-    } catch {}
+    } catch (_error) {
+      /* no-op: best-effort git lfs pull without tokens may fail */
+      void 0;
+    }
 
     // Try with GIT_PRIVATE_TOKEN
     try {
@@ -246,6 +251,7 @@ export class RemoteClient {
         );
         await CloudRunnerSystem.Run(`git lfs pull`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
+
         return;
       }
     } catch (error: any) {
@@ -265,6 +271,7 @@ export class RemoteClient {
         );
         await CloudRunnerSystem.Run(`git lfs pull`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN`);
+
         return;
       }
     } catch (error: any) {
