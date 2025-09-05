@@ -60,11 +60,15 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       : CloudRunnerFolders.ToLinuxFolder(path.join(process.cwd(), 'dist', `index.js`));
 
     return `echo "cloud runner build workflow starting"
-      ${isContainerized ? 'apt-get update > /dev/null' : '# skipping apt-get in non-container provider'}
       ${
-        isContainerized
+        isContainerized && CloudRunner.buildParameters.providerStrategy !== 'local-docker'
+          ? 'apt-get update > /dev/null'
+          : '# skipping apt-get in local-docker or non-container provider'
+      }
+      ${
+        isContainerized && CloudRunner.buildParameters.providerStrategy !== 'local-docker'
           ? 'apt-get install -y curl tar tree npm git-lfs jq git > /dev/null\n      npm --version\n      npm i -g n > /dev/null\n      npm i -g semver > /dev/null\n      npm install --global yarn > /dev/null\n      n 20.8.0\n      node --version'
-          : '# skipping toolchain setup in non-container provider'
+          : '# skipping toolchain setup in local-docker or non-container provider'
       }
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       export GITHUB_WORKSPACE="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute)}"
@@ -97,7 +101,11 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 ${cloneBuilderCommands}
 echo "log start" >> /home/job-log.txt
 echo "CACHE_KEY=$CACHE_KEY"
-node ${builderPath} -m remote-cli-pre-build`;
+${
+  CloudRunner.buildParameters.providerStrategy !== 'local-docker'
+    ? `node ${builderPath} -m remote-cli-pre-build`
+    : `# skipping remote-cli-pre-build in local-docker`
+}`;
     }
 
     return `export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
@@ -111,6 +119,18 @@ echo "CACHE_KEY=$CACHE_KEY"`;
     const ubuntuPlatformsFolder = path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', 'platforms', 'ubuntu');
 
     if (isContainerized) {
+      if (CloudRunner.buildParameters.providerStrategy === 'local-docker') {
+        return `
+    mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
+    cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(distFolder, 'default-build-script'))}" "/UnityBuilderAction"
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'entrypoint.sh'))}" "/entrypoint.sh"
+    cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
+    chmod -R +x "/entrypoint.sh"
+    chmod -R +x "/steps"
+    echo "game ci start"; echo "game ci start" >> /home/job-log.txt; echo "CACHE_KEY=$CACHE_KEY"; if [ -n "$LOCKED_WORKSPACE" ]; then echo "Retained Workspace: true"; fi; if [ -n "$LOCKED_WORKSPACE" ] && [ -d "$GITHUB_WORKSPACE/.git" ]; then echo "Retained Workspace Already Exists!"; fi; /entrypoint.sh
+    echo "end of cloud runner job"`;
+      }
       return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
