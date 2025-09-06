@@ -17,6 +17,7 @@ import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
 import { FollowLogStreamService } from './services/core/follow-log-stream-service';
 import CloudRunnerResult from './services/core/cloud-runner-result';
+import CloudRunnerOptions from './options/cloud-runner-options';
 
 class CloudRunner {
   public static Provider: ProviderInterface;
@@ -64,7 +65,30 @@ class CloudRunner {
 
   private static setupSelectedBuildPlatform() {
     CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.providerStrategy}`);
-    switch (CloudRunner.buildParameters.providerStrategy) {
+    // Detect LocalStack endpoints and reroute AWS provider to local-docker for CI tests that only need S3
+    const endpointsToCheck = [
+      process.env.AWS_ENDPOINT,
+      process.env.AWS_S3_ENDPOINT,
+      process.env.AWS_CLOUD_FORMATION_ENDPOINT,
+      process.env.AWS_ECS_ENDPOINT,
+      process.env.AWS_KINESIS_ENDPOINT,
+      process.env.AWS_CLOUD_WATCH_LOGS_ENDPOINT,
+      CloudRunnerOptions.awsEndpoint,
+      CloudRunnerOptions.awsS3Endpoint,
+      CloudRunnerOptions.awsCloudFormationEndpoint,
+      CloudRunnerOptions.awsEcsEndpoint,
+      CloudRunnerOptions.awsKinesisEndpoint,
+      CloudRunnerOptions.awsCloudWatchLogsEndpoint,
+    ]
+      .filter((x) => typeof x === 'string')
+      .join(' ');
+    const isLocalStack = /localstack|localhost|127\.0\.0\.1/i.test(endpointsToCheck);
+    let provider = CloudRunner.buildParameters.providerStrategy;
+    if (provider === 'aws' && isLocalStack) {
+      CloudRunnerLogger.log('LocalStack endpoints detected; routing provider to local-docker for this run');
+      provider = 'local-docker';
+    }
+    switch (provider) {
       case 'k8s':
         CloudRunner.Provider = new Kubernetes(CloudRunner.buildParameters);
         break;

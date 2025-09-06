@@ -2,13 +2,21 @@ import CloudRunnerLogger from './cloud-runner-logger';
 import BuildParameters from '../../../build-parameters';
 import CloudRunner from '../../cloud-runner';
 import Input from '../../../input';
-import { DeleteObjectCommand, ListObjectsV2Command, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import {
+  CreateBucketCommand,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3,
+} from '@aws-sdk/client-s3';
+import { AwsClientFactory } from '../../providers/aws/aws-client-factory';
 export class SharedWorkspaceLocking {
   private static _s3: S3;
   private static get s3(): S3 {
     if (!SharedWorkspaceLocking._s3) {
-      const region = Input.region || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
-      SharedWorkspaceLocking._s3 = new S3({ region });
+      // Use factory so LocalStack endpoint/path-style settings are honored
+      SharedWorkspaceLocking._s3 = AwsClientFactory.getS3();
     }
     return SharedWorkspaceLocking._s3;
   }
@@ -24,7 +32,21 @@ export class SharedWorkspaceLocking {
   private static get workspacePrefix() {
     return `locks/`;
   }
+  private static async ensureBucketExists(): Promise<void> {
+    const bucket = SharedWorkspaceLocking.bucket;
+    try {
+      await SharedWorkspaceLocking.s3.send(new HeadBucketCommand({ Bucket: bucket }));
+    } catch {
+      const region = Input.region || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
+      const createParams: any = { Bucket: bucket };
+      if (region && region !== 'us-east-1') {
+        createParams.CreateBucketConfiguration = { LocationConstraint: region };
+      }
+      await SharedWorkspaceLocking.s3.send(new CreateBucketCommand(createParams));
+    }
+  }
   private static async listObjects(prefix: string, bucket = SharedWorkspaceLocking.bucket): Promise<string[]> {
+    await SharedWorkspaceLocking.ensureBucketExists();
     if (prefix !== '' && !prefix.endsWith('/')) {
       prefix += '/';
     }
@@ -241,6 +263,7 @@ export class SharedWorkspaceLocking {
     }
     const timestamp = Date.now();
     const key = `${SharedWorkspaceLocking.workspacePrefix}${buildParametersContext.cacheKey}/${timestamp}_${workspace}_workspace`;
+    await SharedWorkspaceLocking.ensureBucketExists();
     await SharedWorkspaceLocking.s3.send(
       new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: '' }),
     );
@@ -268,6 +291,7 @@ export class SharedWorkspaceLocking {
     const key = `${SharedWorkspaceLocking.workspacePrefix}${
       buildParametersContext.cacheKey
     }/${Date.now()}_${runId}_${ending}_lock`;
+    await SharedWorkspaceLocking.ensureBucketExists();
     await SharedWorkspaceLocking.s3.send(
       new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: '' }),
     );
@@ -290,6 +314,7 @@ export class SharedWorkspaceLocking {
     runId: string,
     buildParametersContext: BuildParameters,
   ): Promise<boolean> {
+    await SharedWorkspaceLocking.ensureBucketExists();
     const files = await SharedWorkspaceLocking.GetAllLocksForWorkspace(workspace, buildParametersContext);
     const file = files.find((x) => x.includes(workspace) && x.endsWith(`_lock`) && x.includes(runId));
     CloudRunnerLogger.log(`All Locks ${files} ${workspace} ${runId}`);
