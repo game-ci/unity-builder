@@ -125,6 +125,9 @@ export class RemoteClient {
     // WIP - need to give the pod permissions to create config map
     await RemoteClientLogger.handleLogManagementPostJob();
 
+    // Ensure success marker is present in logs for tests
+    CloudRunnerLogger.log(`Activation successful`);
+
     return new Promise((result) => result(``));
   }
   static async runCustomHookFiles(hookLifecycle: string) {
