@@ -84,7 +84,7 @@ class AWSTaskRunner {
     let containerState;
     let taskData;
     while (exitCode === undefined) {
-      await new Promise((resolve) => resolve(10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
       const containers = taskData?.containers as any[] | undefined;
       if (!containers || containers.length === 0) {
@@ -116,7 +116,9 @@ class AWSTaskRunner {
       await waitUntilTasksRunning(
         {
           client: AWSTaskRunner.ECS,
-          maxWaitTime: 120,
+          maxWaitTime: 300,
+          minDelay: 5,
+          maxDelay: 30,
         },
         { tasks: [taskArn], cluster },
       );
@@ -134,6 +136,7 @@ class AWSTaskRunner {
   static async describeTasks(clusterName: string, taskArn: string) {
     const maxAttempts = 10;
     let delayMs = 1000;
+    const maxDelayMs = 60000;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const tasks = await AWSTaskRunner.ECS.send(
@@ -148,11 +151,13 @@ class AWSTaskRunner {
         if (!isThrottle || attempt === maxAttempts) {
           throw error;
         }
+        const jitterMs = Math.floor(Math.random() * Math.min(1000, delayMs));
+        const sleepMs = delayMs + jitterMs;
         CloudRunnerLogger.log(
-          `AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${delayMs}ms`,
+          `AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${sleepMs}ms (${delayMs} + jitter ${jitterMs})`,
         );
-        await new Promise((r) => setTimeout(r, delayMs));
-        delayMs *= 2;
+        await new Promise((r) => setTimeout(r, sleepMs));
+        delayMs = Math.min(delayMs * 2, maxDelayMs);
       }
     }
   }
@@ -174,6 +179,9 @@ class AWSTaskRunner {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSTaskRunner.describeTasks(clusterName, taskArn);
       ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
+      if (taskData?.lastStatus !== 'RUNNING') {
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+      }
       ({ iterator, shouldReadLogs, output, shouldCleanup } = await AWSTaskRunner.handleLogStreamIteration(
         iterator,
         shouldReadLogs,
@@ -197,8 +205,11 @@ class AWSTaskRunner {
     } catch (error: any) {
       const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
       if (isThrottle) {
-        CloudRunnerLogger.log(`AWS throttled GetRecords, backing off 1000ms`);
-        await new Promise((r) => setTimeout(r, 1000));
+        const baseBackoffMs = 1000;
+        const jitterMs = Math.floor(Math.random() * 1000);
+        const sleepMs = baseBackoffMs + jitterMs;
+        CloudRunnerLogger.log(`AWS throttled GetRecords, backing off ${sleepMs}ms (1000 + jitter ${jitterMs})`);
+        await new Promise((r) => setTimeout(r, sleepMs));
         return { iterator, shouldReadLogs, output, shouldCleanup };
       }
       throw error;
