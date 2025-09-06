@@ -1,31 +1,17 @@
 import {
-  CloudFormation,
   DescribeStackResourcesCommand,
   DescribeStacksCommand,
   ListStacksCommand,
-  StackSummary,
 } from '@aws-sdk/client-cloudformation';
-import {
-  CloudWatchLogs,
-  DescribeLogGroupsCommand,
-  DescribeLogGroupsCommandInput,
-  LogGroup,
-} from '@aws-sdk/client-cloudwatch-logs';
-import {
-  DescribeTasksCommand,
-  DescribeTasksCommandInput,
-  ECS,
-  ListClustersCommand,
-  ListTasksCommand,
-  ListTasksCommandInput,
-  Task,
-} from '@aws-sdk/client-ecs';
-import { ListObjectsCommand, ListObjectsCommandInput, S3 } from '@aws-sdk/client-s3';
+import { DescribeLogGroupsCommand } from '@aws-sdk/client-cloudwatch-logs';
+import { DescribeTasksCommand, ListClustersCommand, ListTasksCommand } from '@aws-sdk/client-ecs';
+import { ListObjectsCommand } from '@aws-sdk/client-s3';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/core/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
 import CloudRunner from '../../../cloud-runner';
+import { AwsClientFactory } from '../aws-client-factory';
 
 export class TaskService {
   static async watch() {
@@ -39,11 +25,11 @@ export class TaskService {
     return output;
   }
   public static async getCloudFormationJobStacks() {
-    const result: StackSummary[] = [];
+    const result: any[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Cloud Formation Stacks`);
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     const stacks =
       (await CF.send(new ListStacksCommand({}))).StackSummaries?.filter(
         (_x) =>
@@ -91,21 +77,20 @@ export class TaskService {
     return result;
   }
   public static async getTasks() {
-    const result: { taskElement: Task; element: string }[] = [];
+    const result: { taskElement: any; element: string }[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
-    const ecs = new ECS({ region: Input.region });
+    const ecs = AwsClientFactory.getECS();
     const clusters = (await ecs.send(new ListClustersCommand({}))).clusterArns || [];
     CloudRunnerLogger.log(`Task Clusters ${clusters.length}`);
     for (const element of clusters) {
-      const input: ListTasksCommandInput = {
+      const input = {
         cluster: element,
       };
-
       const list = (await ecs.send(new ListTasksCommand(input))).taskArns || [];
       if (list.length > 0) {
-        const describeInput: DescribeTasksCommandInput = { tasks: list, cluster: element };
+        const describeInput = { tasks: list, cluster: element };
         const describeList = (await ecs.send(new DescribeTasksCommand(describeInput))).tasks || [];
         if (describeList.length === 0) {
           CloudRunnerLogger.log(`No Tasks`);
@@ -132,7 +117,7 @@ export class TaskService {
   }
   public static async awsDescribeJob(job: string) {
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     try {
       const stack =
         (await CF.send(new ListStacksCommand({}))).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
@@ -163,10 +148,10 @@ export class TaskService {
     }
   }
   public static async getLogGroups() {
-    const result: Array<LogGroup> = [];
+    const result: any[] = [];
     process.env.AWS_REGION = Input.region;
-    const ecs = new CloudWatchLogs();
-    let logStreamInput: DescribeLogGroupsCommandInput = {
+    const ecs = AwsClientFactory.getCloudWatchLogs();
+    let logStreamInput: any = {
       /* logGroupNamePrefix: 'game-ci' */
     };
     let logGroupsDescribe = await ecs.send(new DescribeLogGroupsCommand(logStreamInput));
@@ -197,8 +182,8 @@ export class TaskService {
   }
   public static async getLocks() {
     process.env.AWS_REGION = Input.region;
-    const s3 = new S3({ region: Input.region });
-    const listRequest: ListObjectsCommandInput = {
+    const s3 = AwsClientFactory.getS3();
+    const listRequest = {
       Bucket: CloudRunner.buildParameters.awsStackName,
     };
 

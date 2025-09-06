@@ -1,6 +1,4 @@
 import { CloudFormation, DeleteStackCommand, waitUntilStackDeleteComplete } from '@aws-sdk/client-cloudformation';
-import { ECS as ECSClient } from '@aws-sdk/client-ecs';
-import { Kinesis } from '@aws-sdk/client-kinesis';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -16,6 +14,7 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { TaskService } from './services/task-service';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
+import { AwsClientFactory } from './aws-client-factory';
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -77,7 +76,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
   }
 
@@ -91,10 +90,9 @@ class AWSBuildEnvironment implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     process.env.AWS_REGION = Input.region;
-    const ECS = new ECSClient({ region: Input.region });
-    const CF = new CloudFormation({ region: Input.region });
-    AwsTaskRunner.ECS = ECS;
-    AwsTaskRunner.Kinesis = new Kinesis({ region: Input.region });
+    AwsClientFactory.getECS();
+    const CF = AwsClientFactory.getCloudFormation();
+    AwsClientFactory.getKinesis();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();

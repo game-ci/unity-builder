@@ -56,6 +56,12 @@ class BuildParameters {
   public providerStrategy!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
+  public awsEndpoint?: string;
+  public awsCloudFormationEndpoint?: string;
+  public awsEcsEndpoint?: string;
+  public awsKinesisEndpoint?: string;
+  public awsCloudWatchLogsEndpoint?: string;
+  public awsS3Endpoint?: string;
   public kubeConfig!: string;
   public containerMemory!: string;
   public containerCpu!: string;
@@ -199,6 +205,12 @@ class BuildParameters {
       githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsStackName,
+      awsEndpoint: CloudRunnerOptions.awsEndpoint,
+      awsCloudFormationEndpoint: CloudRunnerOptions.awsCloudFormationEndpoint,
+      awsEcsEndpoint: CloudRunnerOptions.awsEcsEndpoint,
+      awsKinesisEndpoint: CloudRunnerOptions.awsKinesisEndpoint,
+      awsCloudWatchLogsEndpoint: CloudRunnerOptions.awsCloudWatchLogsEndpoint,
+      awsS3Endpoint: CloudRunnerOptions.awsS3Endpoint,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
