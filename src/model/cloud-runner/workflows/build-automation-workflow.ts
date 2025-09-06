@@ -89,9 +89,19 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   private static setupCommands(builderPath: string, isContainerized: boolean) {
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
-    )} && git clone -q -b ${CloudRunner.buildParameters.cloudRunnerBranch} ${
-      CloudRunnerFolders.unityBuilderRepoUrl
-    } "${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}" && chmod +x ${builderPath}`;
+    )}
+BRANCH="${CloudRunner.buildParameters.cloudRunnerBranch}"
+REPO="${CloudRunnerFolders.unityBuilderRepoUrl}"
+DEST="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
+if git ls-remote --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+  git clone -q -b "$BRANCH" "$REPO" "$DEST"
+else
+  echo "Remote branch $BRANCH not found in $REPO; falling back to a known branch"
+  git clone -q -b cloud-runner-develop "$REPO" "$DEST" \
+    || git clone -q -b main "$REPO" "$DEST" \
+    || git clone -q "$REPO" "$DEST"
+fi
+chmod +x ${builderPath}`;
 
     if (isContainerized) {
       const cloneBuilderCommands = `if [ -e "${CloudRunnerFolders.ToLinuxFolder(
