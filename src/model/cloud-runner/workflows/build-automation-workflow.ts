@@ -93,7 +93,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
 BRANCH="${CloudRunner.buildParameters.cloudRunnerBranch}"
 REPO="${CloudRunnerFolders.unityBuilderRepoUrl}"
 DEST="${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.builderPathAbsolute)}"
-if git ls-remote --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+if [ -n "$(git ls-remote --heads \"$REPO\" \"$BRANCH\" 2>/dev/null)" ]; then
   git clone -q -b "$BRANCH" "$REPO" "$DEST"
 else
   echo "Remote branch $BRANCH not found in $REPO; falling back to a known branch"
