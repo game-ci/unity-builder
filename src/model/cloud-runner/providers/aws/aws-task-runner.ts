@@ -1,5 +1,5 @@
-import { DescribeTasksCommand, ECS, RunTaskCommand, waitUntilTasksRunning } from '@aws-sdk/client-ecs';
-import { DescribeStreamCommand, GetRecordsCommand, GetShardIteratorCommand, Kinesis } from '@aws-sdk/client-kinesis';
+import { DescribeTasksCommand, RunTaskCommand, waitUntilTasksRunning } from '@aws-sdk/client-ecs';
+import { DescribeStreamCommand, GetRecordsCommand, GetShardIteratorCommand } from '@aws-sdk/client-kinesis';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -11,10 +11,9 @@ import { CommandHookService } from '../../services/hooks/command-hook-service';
 import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
 import GitHub from '../../../github';
+import { AwsClientFactory } from './aws-client-factory';
 
 class AWSTaskRunner {
-  public static ECS: ECS;
-  public static Kinesis: Kinesis;
   private static readonly encodedUnderscore = `$252F`;
   static async runTask(
     taskDef: CloudRunnerAWSTaskDef,
@@ -61,7 +60,7 @@ class AWSTaskRunner {
       throw new Error(`Container Overrides length must be at most 8192`);
     }
 
-    const task = await AWSTaskRunner.ECS.send(new RunTaskCommand(runParameters as any));
+    const task = await AwsClientFactory.getECS().send(new RunTaskCommand(runParameters as any));
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
@@ -115,7 +114,7 @@ class AWSTaskRunner {
     try {
       await waitUntilTasksRunning(
         {
-          client: AWSTaskRunner.ECS,
+          client: AwsClientFactory.getECS(),
           maxWaitTime: 300,
           minDelay: 5,
           maxDelay: 30,
@@ -139,7 +138,7 @@ class AWSTaskRunner {
     const maxDelayMs = 60000;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const tasks = await AWSTaskRunner.ECS.send(
+        const tasks = await AwsClientFactory.getECS().send(
           new DescribeTasksCommand({ cluster: clusterName, tasks: [taskArn] }),
         );
         if (tasks.tasks?.[0]) {
@@ -201,7 +200,7 @@ class AWSTaskRunner {
   ) {
     let records: any;
     try {
-      records = await AWSTaskRunner.Kinesis.send(new GetRecordsCommand({ ShardIterator: iterator }));
+      records = await AwsClientFactory.getKinesis().send(new GetRecordsCommand({ ShardIterator: iterator }));
     } catch (error: any) {
       const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
       if (isThrottle) {
@@ -274,13 +273,13 @@ class AWSTaskRunner {
   }
 
   private static async getLogStream(kinesisStreamName: string) {
-    return await AWSTaskRunner.Kinesis.send(new DescribeStreamCommand({ StreamName: kinesisStreamName }));
+    return await AwsClientFactory.getKinesis().send(new DescribeStreamCommand({ StreamName: kinesisStreamName }));
   }
 
   private static async getLogIterator(stream: any) {
     return (
       (
-        await AWSTaskRunner.Kinesis.send(
+        await AwsClientFactory.getKinesis().send(
           new GetShardIteratorCommand({
             ShardIteratorType: 'TRIM_HORIZON',
             StreamName: stream.StreamDescription?.StreamName ?? '',
