@@ -132,8 +132,8 @@ class AWSTaskRunner {
   }
 
   static async describeTasks(clusterName: string, taskArn: string) {
-    const maxAttempts = 6;
-    let delayMs = 500;
+    const maxAttempts = 10;
+    let delayMs = 1000;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const tasks = await AWSTaskRunner.ECS.send(
@@ -148,6 +148,7 @@ class AWSTaskRunner {
         if (!isThrottle || attempt === maxAttempts) {
           throw error;
         }
+        CloudRunnerLogger.log(`AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${delayMs}ms`);
         await new Promise((r) => setTimeout(r, delayMs));
         delayMs *= 2;
       }
@@ -188,7 +189,18 @@ class AWSTaskRunner {
     output: string,
     shouldCleanup: boolean,
   ) {
-    const records = await AWSTaskRunner.Kinesis.send(new GetRecordsCommand({ ShardIterator: iterator }));
+    let records: any;
+    try {
+      records = await AWSTaskRunner.Kinesis.send(new GetRecordsCommand({ ShardIterator: iterator }));
+    } catch (error: any) {
+      const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
+      if (isThrottle) {
+        CloudRunnerLogger.log(`AWS throttled GetRecords, backing off 1000ms`);
+        await new Promise((r) => setTimeout(r, 1000));
+        return { iterator, shouldReadLogs, output, shouldCleanup };
+      }
+      throw error;
+    }
     iterator = records.NextShardIterator || '';
     ({ shouldReadLogs, output, shouldCleanup } = AWSTaskRunner.logRecords(
       records,
