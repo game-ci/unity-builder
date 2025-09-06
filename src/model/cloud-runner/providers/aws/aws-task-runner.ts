@@ -148,7 +148,9 @@ class AWSTaskRunner {
         if (!isThrottle || attempt === maxAttempts) {
           throw error;
         }
-        CloudRunnerLogger.log(`AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${delayMs}ms`);
+        CloudRunnerLogger.log(
+          `AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${delayMs}ms`,
+        );
         await new Promise((r) => setTimeout(r, delayMs));
         delayMs *= 2;
       }
