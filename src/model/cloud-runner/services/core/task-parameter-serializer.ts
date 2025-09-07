@@ -106,7 +106,7 @@ export class TaskParameterSerializer {
       'AWS_KINESIS_ENDPOINT',
       'AWS_CLOUD_WATCH_LOGS_ENDPOINT',
     ];
-    
+
     return awsEnvVars
       .filter((key) => process.env[key] !== undefined)
       .map((key) => ({
