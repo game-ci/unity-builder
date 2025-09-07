@@ -234,10 +234,43 @@ export class RemoteClient {
     await CloudRunnerSystem.Run(`git lfs install`);
     assert(fs.existsSync(`.git`), 'git folder exists');
     RemoteClientLogger.log(`${CloudRunner.buildParameters.branch}`);
-    if (CloudRunner.buildParameters.gitSha !== undefined) {
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+    // Ensure refs exist (tags and PR refs)
+    await CloudRunnerSystem.Run(`git fetch --all --tags || true`);
+    if ((CloudRunner.buildParameters.branch || '').startsWith('pull/')) {
+      await CloudRunnerSystem.Run(`git fetch origin +refs/pull/*:refs/remotes/origin/pull/* || true`);
+    }
+    const targetSha = CloudRunner.buildParameters.gitSha;
+    const targetBranch = CloudRunner.buildParameters.branch;
+    if (targetSha) {
+      try {
+        await CloudRunnerSystem.Run(`git checkout ${targetSha}`);
+      } catch (_error) {
+        try {
+          await CloudRunnerSystem.Run(`git fetch origin ${targetSha} || true`);
+          await CloudRunnerSystem.Run(`git checkout ${targetSha}`);
+        } catch (_error2) {
+          RemoteClientLogger.logWarning(`Falling back to branch checkout; SHA not found: ${targetSha}`);
+          try {
+            await CloudRunnerSystem.Run(`git checkout ${targetBranch}`);
+          } catch (_error3) {
+            if ((targetBranch || '').startsWith('pull/')) {
+              await CloudRunnerSystem.Run(`git checkout origin/${targetBranch}`);
+            } else {
+              throw _error2;
+            }
+          }
+        }
+      }
     } else {
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.branch}`);
+      try {
+        await CloudRunnerSystem.Run(`git checkout ${targetBranch}`);
+      } catch (_error) {
+        if ((targetBranch || '').startsWith('pull/')) {
+          await CloudRunnerSystem.Run(`git checkout origin/${targetBranch}`);
+        } else {
+          throw _error;
+        }
+      }
       RemoteClientLogger.log(`buildParameter Git Sha is empty`);
     }
 
@@ -336,10 +369,28 @@ export class RemoteClient {
     ) {
       CloudRunnerLogger.log(`Retained Workspace Already Exists!`);
       process.chdir(CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.repoPathAbsolute));
-      await CloudRunnerSystem.Run(`git fetch`);
+      await CloudRunnerSystem.Run(`git fetch --all --tags || true`);
+      if ((CloudRunner.buildParameters.branch || '').startsWith('pull/')) {
+        await CloudRunnerSystem.Run(`git fetch origin +refs/pull/*:refs/remotes/origin/pull/* || true`);
+      }
       await CloudRunnerSystem.Run(`git lfs pull`);
-      await CloudRunnerSystem.Run(`git reset --hard "${CloudRunner.buildParameters.gitSha}"`);
-      await CloudRunnerSystem.Run(`git checkout ${CloudRunner.buildParameters.gitSha}`);
+      const sha = CloudRunner.buildParameters.gitSha;
+      const branch = CloudRunner.buildParameters.branch;
+      try {
+        await CloudRunnerSystem.Run(`git reset --hard "${sha}"`);
+        await CloudRunnerSystem.Run(`git checkout ${sha}`);
+      } catch (_error) {
+        RemoteClientLogger.logWarning(`Retained workspace: SHA not found, falling back to branch ${branch}`);
+        try {
+          await CloudRunnerSystem.Run(`git checkout ${branch}`);
+        } catch (_error2) {
+          if ((branch || '').startsWith('pull/')) {
+            await CloudRunnerSystem.Run(`git checkout origin/${branch}`);
+          } else {
+            throw _error2;
+          }
+        }
+      }
 
       return true;
     }
