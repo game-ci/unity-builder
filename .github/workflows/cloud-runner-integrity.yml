@@ -88,12 +88,15 @@ jobs:
         run: |
           for i in {1..60}; do kubectl get nodes && break || sleep 5; done
           kubectl get storageclass
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Start LocalStack (S3)
+        uses: localstack/setup-localstack@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          services: s3
+          install-awslocal: true
+      - name: Create S3 bucket for tests
+        run: |
+          awslocal s3 mb s3://$AWS_STACK_NAME || true
+          awslocal s3 ls
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -111,8 +114,12 @@ jobs:
           versioning: None
           KUBE_STORAGE_CLASS: ${{ matrix.provider == 'k8s' && 'local-path' || '' }}
           PROVIDER_STRATEGY: ${{ matrix.provider }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_S3_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT: http://localhost:4566
+          INPUT_AWSS3ENDPOINT: http://localhost:4566
+          INPUT_AWSENDPOINT: http://localhost:4566
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
   aws:
