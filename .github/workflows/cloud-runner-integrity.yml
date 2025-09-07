@@ -89,7 +89,7 @@ jobs:
           for i in {1..60}; do kubectl get nodes && break || sleep 5; done
           kubectl get storageclass
       - name: Start LocalStack (S3)
-        uses: localstack/setup-localstack@v1
+        uses: localstack/setup-localstack@v0.2.3
         with:
           services: s3
           install-awslocal: true
