@@ -67,6 +67,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: false
+      # Set up Kubernetes (k3s via k3d) only for k8s matrix entries
+      - name: Set up kubectl
+        if: ${{ matrix.provider == 'k8s' }}
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.29.0'
+      - name: Install k3d
+        if: ${{ matrix.provider == 'k8s' }}
+        run: |
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+          k3d version | cat
+      - name: Create k3s cluster (k3d)
+        if: ${{ matrix.provider == 'k8s' }}
+        run: |
+          k3d cluster create unity-builder --agents 1 --wait
+          kubectl config current-context | cat
+      - name: Verify cluster readiness
+        if: ${{ matrix.provider == 'k8s' }}
+        run: |
+          for i in {1..60}; do kubectl get nodes && break || sleep 5; done
+          kubectl get storageclass
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
