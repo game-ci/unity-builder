@@ -89,14 +89,62 @@ jobs:
           for i in {1..60}; do kubectl get nodes && break || sleep 5; done
           kubectl get storageclass
       - name: Start LocalStack (S3)
+        if: ${{ matrix.provider == 'local-docker' }}
         uses: localstack/setup-localstack@v0.2.3
         with:
           services: s3
           install-awslocal: true
-      - name: Create S3 bucket for tests
+      - name: Create S3 bucket for tests (host LocalStack)
+        if: ${{ matrix.provider == 'local-docker' }}
         run: |
           awslocal s3 mb s3://$AWS_STACK_NAME || true
           awslocal s3 ls
+      - name: Deploy LocalStack in k3s
+        if: ${{ matrix.provider == 'k8s' }}
+        run: |
+          cat <<'YAML' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: localstack
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: localstack
+            template:
+              metadata:
+                labels:
+                  app: localstack
+              spec:
+                containers:
+                  - name: localstack
+                    image: localstack/localstack:latest
+                    env:
+                      - name: SERVICES
+                        value: s3
+                      - name: DEBUG
+                        value: "1"
+                    ports:
+                      - containerPort: 4566
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: localstack
+          spec:
+            selector:
+              app: localstack
+            ports:
+              - name: edge
+                port: 4566
+                targetPort: 4566
+          YAML
+          kubectl rollout status deploy/localstack --timeout=180s
+      - name: Create S3 bucket for tests (in-cluster LocalStack)
+        if: ${{ matrix.provider == 'k8s' }}
+        run: |
+          kubectl run awscli --rm -i --restart=Never --image=amazon/aws-cli --env=AWS_ACCESS_KEY_ID=test --env=AWS_SECRET_ACCESS_KEY=test --env=AWS_REGION=${{ env.AWS_REGION }} --command -- aws --endpoint-url http://localstack:4566 s3 mb s3://$AWS_STACK_NAME || true
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -116,10 +164,10 @@ jobs:
           PROVIDER_STRATEGY: ${{ matrix.provider }}
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
-          AWS_S3_ENDPOINT: http://localhost:4566
-          AWS_ENDPOINT: http://localhost:4566
-          INPUT_AWSS3ENDPOINT: http://localhost:4566
-          INPUT_AWSENDPOINT: http://localhost:4566
+          AWS_S3_ENDPOINT: ${{ matrix.provider == 'k8s' && 'http://localstack.default.svc.cluster.local:4566' || 'http://localhost:4566' }}
+          AWS_ENDPOINT: ${{ matrix.provider == 'k8s' && 'http://localstack.default.svc.cluster.local:4566' || 'http://localhost:4566' }}
+          INPUT_AWSS3ENDPOINT: ${{ matrix.provider == 'k8s' && 'http://localstack.default.svc.cluster.local:4566' || 'http://localhost:4566' }}
+          INPUT_AWSENDPOINT: ${{ matrix.provider == 'k8s' && 'http://localstack.default.svc.cluster.local:4566' || 'http://localhost:4566' }}
           AWS_S3_FORCE_PATH_STYLE: 'true'
           AWS_EC2_METADATA_DISABLED: 'true'
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
