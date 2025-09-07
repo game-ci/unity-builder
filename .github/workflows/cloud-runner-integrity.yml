@@ -34,17 +34,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test:
-          - 'cloud-runner-end2end-locking'
-          - 'cloud-runner-end2end-caching'
-          - 'cloud-runner-end2end-retaining'
-          - 'cloud-runner-caching'
-          - 'cloud-runner-environment'
-          - 'cloud-runner-image'
-          - 'cloud-runner-hooks'
-          - 'cloud-runner-local-persistence'
-          - 'cloud-runner-locking-core'
-          - 'cloud-runner-locking-get-locked'
+        include:
+          # Local Docker runs (fast path without cluster)
+          - test: 'cloud-runner-end2end-locking'
+            provider: local-docker
+          - test: 'cloud-runner-end2end-caching'
+            provider: local-docker
+          - test: 'cloud-runner-end2end-retaining'
+            provider: local-docker
+          - test: 'cloud-runner-caching'
+            provider: local-docker
+          - test: 'cloud-runner-environment'
+            provider: local-docker
+          - test: 'cloud-runner-image'
+            provider: local-docker
+          - test: 'cloud-runner-hooks'
+            provider: local-docker
+          - test: 'cloud-runner-local-persistence'
+            provider: local-docker
+          - test: 'cloud-runner-locking-core'
+            provider: local-docker
+          - test: 'cloud-runner-locking-get-locked'
+            provider: local-docker
+          # K8s runs (k3s)
+          - test: 'cloud-runner-end2end-caching'
+            provider: k8s
+          - test: 'cloud-runner-end2end-retaining'
+            provider: k8s
+          - test: 'cloud-runner-hooks'
+            provider: k8s
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,8 +88,8 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           cloudRunnerTests: true
           versioning: None
-          KUBE_STORAGE_CLASS: local-path
-          PROVIDER_STRATEGY: local-docker
+          KUBE_STORAGE_CLASS: ${{ matrix.provider == 'k8s' && 'local-path' || '' }}
+          PROVIDER_STRATEGY: ${{ matrix.provider }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
