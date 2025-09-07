@@ -82,17 +82,11 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
-    if (parameters.providerStrategy === 'local-docker') {
-      for (const element of additionalVariables) {
-        if (!environmentVariables.some((x) => element?.name === x?.name)) {
-          environmentVariables.push(element);
-        }
-      }
-      for (const variable of environmentVariables) {
-        if (!environmentVariables.some((x) => variable?.name === x?.name)) {
-          environmentVariables = environmentVariables.filter((x) => x !== variable);
-        }
-      }
+    // Always merge additional variables (e.g., secrets/env from Cloud Runner) uniquely by name
+    for (const element of additionalVariables) {
+      if (!element || !element.name) continue;
+      environmentVariables = environmentVariables.filter((x) => x?.name !== element.name);
+      environmentVariables.push(element);
     }
     if (parameters.sshAgent) {
       environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });
