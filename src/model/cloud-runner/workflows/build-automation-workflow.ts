@@ -59,6 +59,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       ? CloudRunnerFolders.ToLinuxFolder(path.join(CloudRunnerFolders.builderPathAbsolute, 'dist', `index.js`))
       : CloudRunnerFolders.ToLinuxFolder(path.join(process.cwd(), 'dist', `index.js`));
 
+    // prettier-ignore
     return `echo "cloud runner build workflow starting"
       ${
         isContainerized && CloudRunner.buildParameters.providerStrategy !== 'local-docker'
@@ -87,6 +88,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static setupCommands(builderPath: string, isContainerized: boolean) {
+    // prettier-ignore
     const commands = `mkdir -p ${CloudRunnerFolders.ToLinuxFolder(
       CloudRunnerFolders.builderPathAbsolute,
     )}
@@ -135,6 +137,7 @@ echo "CACHE_KEY=$CACHE_KEY"`;
 
     if (isContainerized) {
       if (CloudRunner.buildParameters.providerStrategy === 'local-docker') {
+        // prettier-ignore
         return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     mkdir -p "/data/cache/$CACHE_KEY/build"
@@ -169,6 +172,7 @@ echo "CACHE_KEY=$CACHE_KEY"`;
     cp -a "/data/cache/$CACHE_KEY/build/." "$GITHUB_WORKSPACE/cloud-runner-cache/cache/$CACHE_KEY/build/" || true
     echo "end of cloud runner job"`;
       }
+      // prettier-ignore
       return `
     mkdir -p ${`${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectBuildFolderAbsolute)}/build`}
     cd ${CloudRunnerFolders.ToLinuxFolder(CloudRunnerFolders.projectPathAbsolute)}
@@ -181,6 +185,7 @@ echo "CACHE_KEY=$CACHE_KEY"`;
     node ${builderPath} -m remote-cli-post-build`;
     }
 
+    // prettier-ignore
     return `
     echo "game ci start"
     echo "game ci start" >> "$LOG_FILE"
