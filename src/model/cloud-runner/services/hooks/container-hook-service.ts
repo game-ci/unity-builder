@@ -41,7 +41,9 @@ export class ContainerHookService {
       aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
       aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
       aws configure set region $AWS_DEFAULT_REGION --profile default || true
-      aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
@@ -59,6 +61,8 @@ export class ContainerHookService {
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
     value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}
 - name: aws-s3-pull-build
   image: amazon/aws-cli
   commands: |
@@ -67,8 +71,10 @@ export class ContainerHookService {
       aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
       aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
       aws configure set region $AWS_DEFAULT_REGION --profile default || true
-      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
       aws s3 cp s3://${
         CloudRunner.buildParameters.awsStackName
       }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
@@ -84,6 +90,7 @@ export class ContainerHookService {
     - name: AWS_SECRET_ACCESS_KEY
     - name: AWS_DEFAULT_REGION
     - name: BUILD_GUID_TARGET
+    - name: AWS_S3_ENDPOINT
 - name: steam-deploy-client
   image: steamcmd/steamcmd
   commands: |
@@ -128,11 +135,13 @@ export class ContainerHookService {
       aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
       aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
       aws configure set region $AWS_DEFAULT_REGION --profile default || true
-      aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
         CloudRunner.buildParameters.awsStackName
       }/cloud-runner-cache/$CACHE_KEY/lfs || true
       rm -r /data/cache/$CACHE_KEY/lfs || true
-      aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
+      aws $ENDPOINT_ARGS s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
         CloudRunner.buildParameters.awsStackName
       }/cloud-runner-cache/$CACHE_KEY/Library || true
       rm -r /data/cache/$CACHE_KEY/Library || true
@@ -146,6 +155,8 @@ export class ContainerHookService {
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: AWS_DEFAULT_REGION
     value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}
 - name: aws-s3-pull-cache
   image: amazon/aws-cli
   hook: before
@@ -156,16 +167,18 @@ export class ContainerHookService {
       aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
       aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
       aws configure set region $AWS_DEFAULT_REGION --profile default || true
-      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-      aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
       BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
-      aws s3 ls $BUCKET1 || true
-      OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
-      aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
+      aws $ENDPOINT_ARGS s3 ls $BUCKET1 || true
+      OBJECT1="$(aws $ENDPOINT_ARGS s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws $ENDPOINT_ARGS s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
       BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
-      aws s3 ls $BUCKET2 || true
-      OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
-      aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+      aws $ENDPOINT_ARGS s3 ls $BUCKET2 || true
+      OBJECT2="$(aws $ENDPOINT_ARGS s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws $ENDPOINT_ARGS s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
     else
       echo "AWS CLI not available, skipping aws-s3-pull-cache"
     fi
@@ -182,7 +195,9 @@ export class ContainerHookService {
   - name: awsSecretAccessKey
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
-    value: ${process.env.AWS_REGION || ``}`,
+    value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}`,
     ).filter((x) => CloudRunnerOptions.containerHookFiles.includes(x.name) && x.hook === hookLifecycle);
 
     // In local provider mode (non-container) or when AWS credentials are not present, skip AWS S3 hooks
