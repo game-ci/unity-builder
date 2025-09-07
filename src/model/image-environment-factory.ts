@@ -5,16 +5,17 @@ class ImageEnvironmentFactory {
     const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
     let string = '';
     for (const p of environmentVariables) {
-      if (p.value === '' || p.value === undefined) {
+      if (p.value === '' || p.value === undefined || p.value === null) {
         continue;
       }
-      if (p.name !== 'ANDROID_KEYSTORE_BASE64' && p.value.toString().includes(`\n`)) {
+      const valueAsString = typeof p.value === 'string' ? p.value : String(p.value);
+      if (p.name !== 'ANDROID_KEYSTORE_BASE64' && valueAsString.includes(`\n`)) {
         string += `--env ${p.name} `;
-        process.env[p.name] = p.value.toString();
+        process.env[p.name] = valueAsString;
         continue;
       }
 
-      string += `--env ${p.name}="${p.value}" `;
+      string += `--env ${p.name}="${valueAsString}" `;
     }
 
     return string;
