@@ -63,12 +63,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     return `echo "cloud runner build workflow starting"
       ${
         isContainerized && CloudRunner.buildParameters.providerStrategy !== 'local-docker'
-          ? 'apt-get update > /dev/null'
+          ? 'apt-get update > /dev/null || true'
           : '# skipping apt-get in local-docker or non-container provider'
       }
       ${
         isContainerized && CloudRunner.buildParameters.providerStrategy !== 'local-docker'
-          ? 'apt-get install -y curl tar tree npm git-lfs jq git > /dev/null\n      npm --version\n      npm i -g n > /dev/null\n      npm i -g semver > /dev/null\n      npm install --global yarn > /dev/null\n      n 20.8.0\n      node --version'
+          ? 'apt-get install -y curl tar tree npm git-lfs jq git > /dev/null || true\n      npm --version || true\n      npm i -g n > /dev/null || true\n      npm i -g semver > /dev/null || true\n      npm install --global yarn > /dev/null || true\n      n 20.8.0 || true\n      node --version || true'
           : '# skipping toolchain setup in local-docker or non-container provider'
       }
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
