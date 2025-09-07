@@ -116,12 +116,10 @@ jobs:
           PROVIDER_STRATEGY: ${{ matrix.provider }}
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
-          AWS_S3_ENDPOINT: ${{ matrix.provider == 'k8s' && 'http://host.k3d.internal:4566' || 'http://localhost:4566' }}
-          AWS_ENDPOINT: ${{ matrix.provider == 'k8s' && 'http://host.k3d.internal:4566' || 'http://localhost:4566' }}
-          INPUT_AWSS3ENDPOINT:
-            ${{ matrix.provider == 'k8s' && 'http://host.k3d.internal:4566' || 'http://localhost:4566' }}
-          INPUT_AWSENDPOINT:
-            ${{ matrix.provider == 'k8s' && 'http://host.k3d.internal:4566' || 'http://localhost:4566' }}
+          AWS_S3_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT: http://localhost:4566
+          INPUT_AWSS3ENDPOINT: http://localhost:4566
+          INPUT_AWSENDPOINT: http://localhost:4566
           AWS_S3_FORCE_PATH_STYLE: 'true'
           AWS_EC2_METADATA_DISABLED: 'true'
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
