@@ -304,6 +304,7 @@ export class RemoteClient {
     // Best effort: try plain pull first (works for public repos or pre-configured auth)
     try {
       await CloudRunnerSystem.Run(`git lfs pull`, true);
+      await CloudRunnerSystem.Run(`git lfs checkout || true`, true);
       RemoteClientLogger.log(`Pulled LFS files without explicit token configuration`);
 
       return;
@@ -324,6 +325,7 @@ export class RemoteClient {
           `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
         );
         await CloudRunnerSystem.Run(`git lfs pull`, true);
+        await CloudRunnerSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
 
         return;
@@ -344,6 +346,7 @@ export class RemoteClient {
           `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
         );
         await CloudRunnerSystem.Run(`git lfs pull`, true);
+        await CloudRunnerSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN`);
 
         return;
@@ -374,6 +377,7 @@ export class RemoteClient {
         await CloudRunnerSystem.Run(`git fetch origin +refs/pull/*:refs/remotes/origin/pull/* || true`);
       }
       await CloudRunnerSystem.Run(`git lfs pull`);
+      await CloudRunnerSystem.Run(`git lfs checkout || true`);
       const sha = CloudRunner.buildParameters.gitSha;
       const branch = CloudRunner.buildParameters.branch;
       try {
