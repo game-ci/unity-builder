@@ -62,6 +62,8 @@ class BuildParameters {
   public awsKinesisEndpoint?: string;
   public awsCloudWatchLogsEndpoint?: string;
   public awsS3Endpoint?: string;
+  public storageProvider!: string;
+  public rcloneRemote!: string;
   public kubeConfig!: string;
   public containerMemory!: string;
   public containerCpu!: string;
@@ -211,6 +213,8 @@ class BuildParameters {
       awsKinesisEndpoint: CloudRunnerOptions.awsKinesisEndpoint,
       awsCloudWatchLogsEndpoint: CloudRunnerOptions.awsCloudWatchLogsEndpoint,
       awsS3Endpoint: CloudRunnerOptions.awsS3Endpoint,
+      storageProvider: CloudRunnerOptions.storageProvider,
+      rcloneRemote: CloudRunnerOptions.rcloneRemote,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),

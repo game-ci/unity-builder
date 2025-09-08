@@ -220,6 +220,18 @@ class CloudRunnerOptions {
   }
 
   // ### ### ###
+  // Storage
+  // ### ### ###
+
+  static get storageProvider(): string {
+    return CloudRunnerOptions.getInput('storageProvider') || 's3';
+  }
+
+  static get rcloneRemote(): string {
+    return CloudRunnerOptions.getInput('rcloneRemote') || '';
+  }
+
+  // ### ### ###
   // K8s
   // ### ### ###
 
