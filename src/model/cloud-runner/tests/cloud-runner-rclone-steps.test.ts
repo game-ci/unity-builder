@@ -26,7 +26,9 @@ describe('Cloud Runner pre-built rclone steps', () => {
   (() => {
     // Determine environment capability to run rclone operations
     const isCI = process.env.GITHUB_ACTIONS === 'true';
+    const isWindows = process.platform === 'win32';
     let rcloneAvailable = false;
+    let bashAvailable = !isWindows; // assume available on non-Windows
     if (!isCI) {
       try {
         const { execSync } = require('child_process');
@@ -35,10 +37,19 @@ describe('Cloud Runner pre-built rclone steps', () => {
       } catch {
         rcloneAvailable = false;
       }
+      if (isWindows) {
+        try {
+          const { execSync } = require('child_process');
+          execSync('bash --version', { stdio: 'ignore' });
+          bashAvailable = true;
+        } catch {
+          bashAvailable = false;
+        }
+      }
     }
 
     const hasRcloneRemote = Boolean(process.env.RCLONE_REMOTE || process.env.rcloneRemote);
-    const shouldRunRclone = (isCI && hasRcloneRemote) || rcloneAvailable;
+    const shouldRunRclone = (isCI && hasRcloneRemote) || (rcloneAvailable && (!isWindows || bashAvailable));
 
     if (shouldRunRclone) {
       it('Run build and prebuilt rclone cache pull, cache push and upload build', async () => {
