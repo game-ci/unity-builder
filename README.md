@@ -36,6 +36,25 @@ When these variables are set, Unity Builder will direct its CloudFormation, ECS,
 to the emulator instead of the real AWS services. See `.github/workflows/cloud-runner-integrity-localstack.yml` for an
 example configuration.
 
+## Rclone storage provider (experimental)
+
+Unity Builder can use rclone as an alternative storage provider for cache and build artifacts in Cloud Runner.
+
+- Inputs:
+  - `storageProvider`: set to `rclone` to enable rclone-backed storage (default is `s3`).
+  - `rcloneRemote`: rclone remote to use, e.g. `s3:my-bucket`, `gcs:my-bucket`, `local:./path`.
+
+When `storageProvider=rclone`:
+
+- Retained workspace locking uses rclone operations instead of S3 (touch/delete/ls).
+- Built-in container hooks are available:
+  - `rclone-pull-cache`, `rclone-upload-cache`
+  - `rclone-pull-build`, `rclone-upload-build`
+
+You must ensure the `rclone` CLI is available in the container runtime. The built-in hooks use the `rclone/rclone` image.
+
+Example (local testing): set `RCLONE_REMOTE=local:./temp/rclone-remote` and include the rclone hooks via `containerHookFiles`.
+
 ## Community
 
 Feel free to join us on

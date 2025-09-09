@@ -182,6 +182,80 @@ export class ContainerHookService {
     else
       echo "AWS CLI not available, skipping aws-s3-pull-cache"
     fi
+- name: rclone-upload-build
+  image: rclone/rclone
+  hook: after
+  commands: |
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } ${CloudRunner.buildParameters.rcloneRemote}/cloud-runner-cache/$CACHE_KEY/build/ || true
+      rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } || true
+    else
+      echo "rclone not available, skipping rclone-upload-build"
+    fi
+  secrets:
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-pull-build
+  image: rclone/rclone
+  commands: |
+    mkdir -p /data/cache/$CACHE_KEY/build/
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } || true
+    else
+      echo "rclone not available, skipping rclone-pull-build"
+    fi
+  secrets:
+    - name: BUILD_GUID_TARGET
+    - name: RCLONE_REMOTE
+      value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-upload-cache
+  image: rclone/rclone
+  hook: after
+  commands: |
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy /data/cache/$CACHE_KEY/lfs ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/lfs || true
+      rm -r /data/cache/$CACHE_KEY/lfs || true
+      rclone copy /data/cache/$CACHE_KEY/Library ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/Library || true
+      rm -r /data/cache/$CACHE_KEY/Library || true
+    else
+      echo "rclone not available, skipping rclone-upload-cache"
+    fi
+  secrets:
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-pull-cache
+  image: rclone/rclone
+  hook: before
+  commands: |
+    mkdir -p /data/cache/$CACHE_KEY/Library/
+    mkdir -p /data/cache/$CACHE_KEY/lfs/
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/Library /data/cache/$CACHE_KEY/Library/ || true
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/lfs /data/cache/$CACHE_KEY/lfs/ || true
+    else
+      echo "rclone not available, skipping rclone-pull-cache"
+    fi
+  secrets:
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
 - name: debug-cache
   image: ubuntu
   hook: after

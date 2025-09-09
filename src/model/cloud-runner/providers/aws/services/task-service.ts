@@ -12,6 +12,7 @@ import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
 import CloudRunner from '../../../cloud-runner';
 import { AwsClientFactory } from '../aws-client-factory';
+import SharedWorkspaceLocking from '../../../services/core/shared-workspace-locking';
 
 export class TaskService {
   static async watch() {
@@ -182,6 +183,10 @@ export class TaskService {
   }
   public static async getLocks() {
     process.env.AWS_REGION = Input.region;
+    if (CloudRunner.buildParameters.storageProvider === 'rclone') {
+      const objects = await (SharedWorkspaceLocking as any).listObjects('');
+      return objects.map((x: string) => ({ Key: x }));
+    }
     const s3 = AwsClientFactory.getS3();
     const listRequest = {
       Bucket: CloudRunner.buildParameters.awsStackName,

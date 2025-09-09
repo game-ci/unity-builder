@@ -66,6 +66,18 @@ class LocalCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
 
+    // On Windows, many built-in hooks use POSIX shell syntax. Execute via bash if available.
+    if (process.platform === 'win32') {
+      const inline = commands
+        .replace(/"/g, '\\"')
+        .replace(/\r/g, '')
+        .split('\n')
+        .filter((x) => x.trim().length > 0)
+        .join(' ; ');
+      const bashWrapped = `bash -lc "${inline}"`;
+      return await CloudRunnerSystem.Run(bashWrapped);
+    }
+
     return await CloudRunnerSystem.Run(commands);
   }
 }

@@ -147,6 +147,18 @@ echo "CACHE_KEY=$CACHE_KEY"`;
     cp -r "${CloudRunnerFolders.ToLinuxFolder(path.join(ubuntuPlatformsFolder, 'steps'))}" "/steps"
     chmod -R +x "/entrypoint.sh"
     chmod -R +x "/steps"
+    # Ensure Git LFS files are available inside the container for local-docker runs
+    if [ -d "$GITHUB_WORKSPACE/.git" ]; then
+      echo "Ensuring Git LFS content is pulled"
+      (cd "$GITHUB_WORKSPACE" \
+        && git lfs install || true \
+        && git config --global filter.lfs.smudge "git-lfs smudge -- %f" \
+        && git config --global filter.lfs.process "git-lfs filter-process" \
+        && git lfs pull || true \
+        && git lfs checkout || true)
+    else
+      echo "Skipping Git LFS pull: no .git directory in workspace"
+    fi
     # Normalize potential CRLF line endings and create safe stubs for missing tooling
     if command -v sed > /dev/null 2>&1; then
       sed -i 's/\r$//' "/entrypoint.sh" || true
