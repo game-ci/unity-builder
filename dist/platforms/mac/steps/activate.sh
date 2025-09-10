@@ -32,6 +32,8 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   # Custom Unity License Server
   #
   echo "Adding licensing server config"
+  mkdir -p "$UNITY_LICENSE_PATH/config/"
+  cp "$ACTION_FOLDER/unity-config/services-config.json" "$UNITY_LICENSE_PATH/config/services-config.json"
 
   /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client \
     --acquire-floating > license.txt
