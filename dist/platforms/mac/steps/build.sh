@@ -149,8 +149,6 @@ echo ""
   $( [ "${MANUAL_EXIT}" == "true" ] || echo "-quit" ) \
   -batchmode \
   $( [ "${ENABLE_GPU}" == "true" ] || echo "-nographics" ) \
-  -username "$UNITY_EMAIL" \
-  -password "$UNITY_PASSWORD" \
   -customBuildName "$BUILD_NAME" \
   -projectPath "$UNITY_PROJECT_PATH" \
   -buildTarget "$BUILD_TARGET" \
