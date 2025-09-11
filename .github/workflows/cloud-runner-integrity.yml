@@ -28,34 +28,13 @@ env:
   USE_IL2CPP: false
 
 jobs:
-  localstack-and-k8s:
-    name: Cloud Runner Tests (LocalStack + K8s)
+  k8s:
+    name: Cloud Runner Tests (K8s)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Local Docker runs (fast path without cluster)
-          - test: 'cloud-runner-end2end-locking'
-            provider: local-docker
-          - test: 'cloud-runner-end2end-caching'
-            provider: local-docker
-          - test: 'cloud-runner-end2end-retaining'
-            provider: local-docker
-          - test: 'cloud-runner-caching'
-            provider: local-docker
-          - test: 'cloud-runner-environment'
-            provider: local-docker
-          - test: 'cloud-runner-image'
-            provider: local-docker
-          - test: 'cloud-runner-hooks'
-            provider: local-docker
-          - test: 'cloud-runner-local-persistence'
-            provider: local-docker
-          - test: 'cloud-runner-locking-core'
-            provider: local-docker
-          - test: 'cloud-runner-locking-get-locked'
-            provider: local-docker
           # K8s runs (k3s)
           - test: 'cloud-runner-end2end-caching'
             provider: k8s
@@ -123,10 +102,61 @@ jobs:
           AWS_EC2_METADATA_DISABLED: 'true'
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+  localstack:
+    name: Cloud Runner Tests (LocalStack)
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: cloudformation,ecs,kinesis,cloudwatch,s3,logs
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - 'cloud-runner-end2end-locking'
+          - 'cloud-runner-end2end-caching'
+          - 'cloud-runner-end2end-retaining'
+          - 'cloud-runner-caching'
+          - 'cloud-runner-environment'
+          - 'cloud-runner-image'
+          - 'cloud-runner-hooks'
+          - 'cloud-runner-local-persistence'
+          - 'cloud-runner-locking-core'
+          - 'cloud-runner-locking-get-locked'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn run test "${{ matrix.test }}" --detectOpenHandles --forceExit --runInBand
+        timeout-minutes: 60
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          PROJECT_PATH: test-project
+          TARGET_PLATFORM: StandaloneWindows64
+          cloudRunnerTests: true
+          versioning: None
+          KUBE_STORAGE_CLASS: local-path
+          PROVIDER_STRATEGY: aws
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT_URL: http://localhost:4566
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
   aws:
     name: Cloud Runner Tests (AWS)
     runs-on: ubuntu-latest
-    needs: [localstack-and-k8s]
+    needs: [k8s, localstack]
     strategy:
       fail-fast: false
       matrix:
