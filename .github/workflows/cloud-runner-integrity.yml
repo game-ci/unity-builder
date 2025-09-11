@@ -91,7 +91,6 @@ jobs:
       - name: Start LocalStack (S3)
         uses: localstack/setup-localstack@v0.2.3
         with:
-          services: s3
           install-awslocal: true
       - name: Create S3 bucket for tests (host LocalStack)
         run: |
