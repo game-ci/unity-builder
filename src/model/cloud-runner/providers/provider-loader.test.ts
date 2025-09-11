@@ -1,19 +1,113 @@
-import loadProvider from './provider-loader';
+import loadProvider, { ProviderLoader } from './provider-loader';
 import { ProviderInterface } from './provider-interface';
+import { ProviderGitManager } from './provider-git-manager';
+
+// Mock the git manager
+jest.mock('./provider-git-manager');
+const mockProviderGitManager = ProviderGitManager as jest.Mocked<typeof ProviderGitManager>;
 
 describe('provider-loader', () => {
-  it('loads a provider dynamically', async () => {
-    const provider: ProviderInterface = await loadProvider('./test', {} as any);
-    expect(typeof provider.runTaskInWorkflow).toBe('function');
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('throws when provider package is missing', async () => {
-    await expect(loadProvider('non-existent-package', {} as any)).rejects.toThrow('non-existent-package');
+  describe('loadProvider', () => {
+    it('loads a built-in provider dynamically', async () => {
+      const provider: ProviderInterface = await loadProvider('test', {} as any);
+      expect(typeof provider.runTaskInWorkflow).toBe('function');
+    });
+
+    it('loads a local provider from relative path', async () => {
+      const provider: ProviderInterface = await loadProvider('./test', {} as any);
+      expect(typeof provider.runTaskInWorkflow).toBe('function');
+    });
+
+    it('loads a GitHub provider', async () => {
+      const mockLocalPath = '/path/to/cloned/repo';
+      const mockModulePath = '/path/to/cloned/repo/index.js';
+
+      mockProviderGitManager.ensureRepositoryAvailable.mockResolvedValue(mockLocalPath);
+      mockProviderGitManager.getProviderModulePath.mockReturnValue(mockModulePath);
+
+      // Mock the import to return a valid provider
+      const mockProvider = {
+        default: class MockProvider {
+          constructor() {}
+          runTaskInWorkflow() {}
+          cleanupWorkflow() {}
+          setupWorkflow() {}
+          garbageCollect() {}
+          listResources() {}
+          listWorkflow() {}
+          watchWorkflow() {}
+        },
+      };
+
+      jest.doMock(mockModulePath, () => mockProvider, { virtual: true });
+
+      const provider: ProviderInterface = await loadProvider('https://github.com/user/repo', {} as any);
+      expect(typeof provider.runTaskInWorkflow).toBe('function');
+      expect(mockProviderGitManager.ensureRepositoryAvailable).toHaveBeenCalled();
+    });
+
+    it('throws when provider package is missing', async () => {
+      await expect(loadProvider('non-existent-package', {} as any)).rejects.toThrow('non-existent-package');
+    });
+
+    it('throws when provider does not implement ProviderInterface', async () => {
+      await expect(loadProvider('./fixtures/invalid-provider', {} as any)).rejects.toThrow(
+        'does not implement ProviderInterface',
+      );
+    });
+
+    it('throws when provider does not export a constructor', async () => {
+      // Mock a module that doesn't export a constructor
+      jest.doMock('./test', () => ({ default: 'not-a-constructor' }), { virtual: true });
+
+      await expect(loadProvider('./test', {} as any)).rejects.toThrow('does not export a constructor function');
+    });
   });
 
-  it('throws when provider does not implement ProviderInterface', async () => {
-    await expect(loadProvider('./fixtures/invalid-provider', {} as any)).rejects.toThrow(
-      'does not implement ProviderInterface',
-    );
+  describe('ProviderLoader class', () => {
+    it('loads providers using the static method', async () => {
+      const provider: ProviderInterface = await ProviderLoader.loadProvider('test', {} as any);
+      expect(typeof provider.runTaskInWorkflow).toBe('function');
+    });
+
+    it('returns available providers', () => {
+      const providers = ProviderLoader.getAvailableProviders();
+      expect(providers).toContain('aws');
+      expect(providers).toContain('k8s');
+      expect(providers).toContain('test');
+    });
+
+    it('cleans up cache', async () => {
+      mockProviderGitManager.cleanupOldRepositories.mockResolvedValue();
+
+      await ProviderLoader.cleanupCache(7);
+
+      expect(mockProviderGitManager.cleanupOldRepositories).toHaveBeenCalledWith(7);
+    });
+
+    it('analyzes provider sources', () => {
+      const githubInfo = ProviderLoader.analyzeProviderSource('https://github.com/user/repo');
+      expect(githubInfo.type).toBe('github');
+      if (githubInfo.type === 'github') {
+        expect(githubInfo.owner).toBe('user');
+        expect(githubInfo.repo).toBe('repo');
+      }
+
+      const localInfo = ProviderLoader.analyzeProviderSource('./local-provider');
+      expect(localInfo.type).toBe('local');
+      if (localInfo.type === 'local') {
+        expect(localInfo.path).toBe('./local-provider');
+      }
+
+      const npmInfo = ProviderLoader.analyzeProviderSource('my-package');
+      expect(npmInfo.type).toBe('npm');
+      if (npmInfo.type === 'npm') {
+        expect(npmInfo.packageName).toBe('my-package');
+      }
+    });
   });
 });
