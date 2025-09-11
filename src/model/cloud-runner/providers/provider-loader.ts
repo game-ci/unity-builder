@@ -13,17 +13,17 @@ export default async function loadProvider(
   buildParameters: BuildParameters,
 ): Promise<ProviderInterface> {
   CloudRunnerLogger.log(`Loading provider: ${providerName}`);
-  
+
   let importedModule: any;
   try {
     // Map provider names to their module paths for built-in providers
     const providerModuleMap: Record<string, string> = {
-      'aws': './aws',
-      'k8s': './k8s',
-      'test': './test',
+      aws: './aws',
+      k8s: './k8s',
+      test: './test',
       'local-docker': './docker',
       'local-system': './local',
-      'local': './local'
+      local: './local',
     };
 
     const modulePath = providerModuleMap[providerName] || providerName;
@@ -52,13 +52,14 @@ export default async function loadProvider(
 
   for (const method of requiredMethods) {
     if (typeof instance[method] !== 'function') {
-      throw new Error(
+      throw new TypeError(
         `Provider package '${providerName}' does not implement ProviderInterface. Missing method '${method}'.`,
       );
     }
   }
 
   CloudRunnerLogger.log(`Successfully loaded provider: ${providerName}`);
+
   return instance as ProviderInterface;
 }
 

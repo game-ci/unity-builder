@@ -66,6 +66,7 @@ class CloudRunner {
 
   private static async setupSelectedBuildPlatform() {
     CloudRunnerLogger.log(`Cloud Runner platform selected ${CloudRunner.buildParameters.providerStrategy}`);
+
     // Detect LocalStack endpoints and reroute AWS provider to local-docker for CI tests that only need S3
     const endpointsToCheck = [
       process.env.AWS_ENDPOINT,
