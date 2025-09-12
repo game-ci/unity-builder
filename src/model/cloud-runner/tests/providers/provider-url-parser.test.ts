@@ -1,4 +1,4 @@
-import { parseProviderSource, generateCacheKey, isGitHubSource } from './provider-url-parser';
+import { parseProviderSource, generateCacheKey, isGitHubSource } from '../../providers/provider-url-parser';
 
 describe('provider-url-parser', () => {
   describe('parseProviderSource', () => {

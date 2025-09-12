@@ -1,9 +1,9 @@
-import loadProvider, { ProviderLoader } from './provider-loader';
-import { ProviderInterface } from './provider-interface';
-import { ProviderGitManager } from './provider-git-manager';
+import loadProvider, { ProviderLoader } from '../../providers/provider-loader';
+import { ProviderInterface } from '../../providers/provider-interface';
+import { ProviderGitManager } from '../../providers/provider-git-manager';
 
 // Mock the git manager
-jest.mock('./provider-git-manager');
+jest.mock('../../providers/provider-git-manager');
 const mockProviderGitManager = ProviderGitManager as jest.Mocked<typeof ProviderGitManager>;
 
 describe('provider-loader', () => {

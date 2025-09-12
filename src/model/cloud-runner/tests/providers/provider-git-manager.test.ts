@@ -1,6 +1,5 @@
-import { GitHubUrlInfo } from './provider-url-parser';
+import { GitHubUrlInfo } from '../../providers/provider-url-parser';
 import * as fs from 'fs';
-import path from 'path';
 
 // Mock @actions/core to fix fs.promises compatibility issue
 jest.mock('@actions/core', () => ({
@@ -14,8 +13,8 @@ jest.mock('fs');
 
 // Mock the entire provider-git-manager module
 const mockExecAsync = jest.fn();
-jest.mock('./provider-git-manager', () => {
-  const originalModule = jest.requireActual('./provider-git-manager');
+jest.mock('../../providers/provider-git-manager', () => {
+  const originalModule = jest.requireActual('../../providers/provider-git-manager');
   return {
     ...originalModule,
     ProviderGitManager: {
@@ -30,7 +29,7 @@ jest.mock('./provider-git-manager', () => {
 const mockFs = fs as jest.Mocked<typeof fs>;
 
 // Import the mocked ProviderGitManager
-import { ProviderGitManager } from './provider-git-manager';
+import { ProviderGitManager } from '../../providers/provider-git-manager';
 const mockProviderGitManager = ProviderGitManager as jest.Mocked<typeof ProviderGitManager>;
 
 describe('ProviderGitManager', () => {
