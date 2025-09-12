@@ -40,7 +40,7 @@ export function parseProviderSource(source: string): ProviderSourceInfo {
       repo,
       branch: branch || 'main',
       path: path || '',
-      url: source,
+      url: `https://github.com/${owner}/${repo}`,
     };
   }
 
