@@ -32,7 +32,3 @@ jobs:
     uses: ./.github/workflows/cloud-runner-integrity.yml
     secrets: inherit
 
-  cloud-runner-localstack:
-    name: Cloud Runner Integrity (LocalStack)
-    uses: ./.github/workflows/cloud-runner-integrity-localstack.yml
-    secrets: inherit

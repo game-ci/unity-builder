@@ -300,7 +300,7 @@ export class SharedWorkspaceLocking {
       await SharedWorkspaceLocking.rclone(`touch ${SharedWorkspaceLocking.bucket}/${key}`);
     } else {
       await SharedWorkspaceLocking.s3.send(
-        new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: '' }),
+        new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: new Uint8Array(0) }),
       );
     }
 
@@ -332,7 +332,7 @@ export class SharedWorkspaceLocking {
       await SharedWorkspaceLocking.rclone(`touch ${SharedWorkspaceLocking.bucket}/${key}`);
     } else {
       await SharedWorkspaceLocking.s3.send(
-        new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: '' }),
+        new PutObjectCommand({ Bucket: SharedWorkspaceLocking.bucket, Key: key, Body: new Uint8Array(0) }),
       );
     }
 
