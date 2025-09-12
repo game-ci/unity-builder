@@ -46,7 +46,6 @@ describe('ProviderGitManager', () => {
     jest.clearAllMocks();
   });
 
-
   describe('cloneRepository', () => {
     it('successfully clones a repository', async () => {
       const expectedResult = {
