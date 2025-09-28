@@ -21,6 +21,19 @@ namespace UnityBuilderAction.Input
         EditorApplication.Exit(110);
       }
 
+#if UNITY_6000_0_OR_NEWER
+      var buildProfileSupport = true;
+#else
+      var buildProfileSupport = false;
+#endif // UNITY_6000_0_OR_NEWER
+
+      string buildProfile;
+      if (buildProfileSupport && validatedOptions.TryGetValue("activeBuildProfile", out buildProfile)) {
+        if (validatedOptions.ContainsKey("buildTarget")) {
+          Console.WriteLine("Extra argument -buildTarget");
+          EditorApplication.Exit(122);
+        }
+      } else {
       string buildTarget;
       if (!validatedOptions.TryGetValue("buildTarget", out buildTarget)) {
         Console.WriteLine("Missing argument -buildTarget");
@@ -30,6 +43,7 @@ namespace UnityBuilderAction.Input
       if (!Enum.IsDefined(typeof(BuildTarget), buildTarget)) {
         Console.WriteLine(buildTarget + " is not a defined " + typeof(BuildTarget).Name);
         EditorApplication.Exit(121);
+      }
       }
 
       string customBuildPath;
