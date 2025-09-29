@@ -56,7 +56,10 @@ namespace UnityBuilderAction
       // of either `UnityEditor.BuildPlayerOptions` or `UnityEditor.BuildPlayerWithProfileOptions`
       dynamic buildPlayerOptions;
 
-      if (options.TryGetValue("activeBuildProfile", out var buildProfilePath) && !string.IsNullOrEmpty(buildProfilePath)) {
+      if (options.TryGetValue("activeBuildProfile", out var buildProfilePath)) {
+        if (string.IsNullOrEmpty(buildProfilePath)) {
+          throw new Exception("`-activeBuildProfile` is set but with an empty value; this shouldn't happen");
+        }
 
 #if UNITY_6000_0_OR_NEWER
         // Load build profile from Assets folder
