@@ -4,21 +4,69 @@
 echo "Changing to \"$ACTIVATE_LICENSE_PATH\" directory."
 pushd "$ACTIVATE_LICENSE_PATH"
 
-echo "Requesting activation"
+if [[ -n "$UNITY_SERIAL" && -n "$UNITY_EMAIL" && -n "$UNITY_PASSWORD" ]]; then
+  #
+  # SERIAL LICENSE MODE
+  #
+  # This will activate unity, using the serial activation process.
+  #
 
-# Activate license
-/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-  -logFile - \
-  -batchmode \
-  -nographics \
-  -quit \
-  -serial "$UNITY_SERIAL" \
-  -username "$UNITY_EMAIL" \
-  -password "$UNITY_PASSWORD" \
-  -projectPath "$ACTIVATE_LICENSE_PATH"
+  echo "Requesting activation"
 
-# Store the exit code from the verify command
-UNITY_EXIT_CODE=$?
+  # Activate license
+  /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+    -logFile - \
+    -batchmode \
+    -nographics \
+    -quit \
+    -serial "$UNITY_SERIAL" \
+    -username "$UNITY_EMAIL" \
+    -password "$UNITY_PASSWORD" \
+    -projectPath "$ACTIVATE_LICENSE_PATH"
+
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
+
+elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
+  #
+  # Custom Unity License Server
+  #
+  echo "Adding licensing server config"
+  mkdir -p "$UNITY_LICENSE_PATH/config/"
+  cp "$ACTION_FOLDER/unity-config/services-config.json" "$UNITY_LICENSE_PATH/config/services-config.json"
+
+  /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client \
+    --acquire-floating > license.txt
+
+  # Store the exit code from the verify command
+  UNITY_EXIT_CODE=$?
+
+  if [ $UNITY_EXIT_CODE -eq 0 ]; then
+    PARSEDFILE=$(grep -oE '\"[^"]*\"' < license.txt | tr -d '"')
+    export FLOATING_LICENSE
+    FLOATING_LICENSE=$(sed -n 2p <<< "$PARSEDFILE")
+    FLOATING_LICENSE_TIMEOUT=$(sed -n 4p <<< "$PARSEDFILE")
+
+    echo "Acquired floating license: \"$FLOATING_LICENSE\" with timeout $FLOATING_LICENSE_TIMEOUT"
+  fi
+else
+  #
+  # NO LICENSE ACTIVATION STRATEGY MATCHED
+  #
+  # This will exit since no activation strategies could be matched.
+  #
+  echo "License activation strategy could not be determined."
+  echo ""
+  echo "Visit https://game.ci/docs/github/activation for more"
+  echo "details on how to set up one of the possible activation strategies."
+
+  echo "::error ::No valid license activation strategy could be determined. Make sure to provide UNITY_EMAIL, UNITY_PASSWORD, and either a UNITY_SERIAL \
+or UNITY_LICENSE. Otherwise please use UNITY_LICENSING_SERVER. See more info at https://game.ci/docs/github/activation"
+
+  # Immediately exit as no UNITY_EXIT_CODE can be derived.
+  exit 1;
+
+fi
 
 #
 # Display information about the result
