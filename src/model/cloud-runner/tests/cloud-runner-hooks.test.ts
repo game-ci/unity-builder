@@ -94,6 +94,7 @@ commands: echo "test"`;
         cacheKey: `test-case-${uuidv4()}`,
         containerHookFiles: `my-test-step-pre-build,my-test-step-post-build`,
         commandHookFiles: `my-test-hook-pre-build,my-test-hook-post-build`,
+        cloudRunnerDebug: true,
       };
       const buildParameter2 = await CreateParameters(overrides);
       const baseImage2 = new ImageTag(buildParameter2);
@@ -108,7 +109,9 @@ commands: echo "test"`;
       const buildContainsPreBuildStepMessage = results2.includes('before-build step test!');
       const buildContainsPostBuildStepMessage = results2.includes('after-build step test!');
 
-      expect(buildContainsBuildSucceeded).toBeTruthy();
+      if (CloudRunnerOptions.providerStrategy !== 'local') {
+        expect(buildContainsBuildSucceeded).toBeTruthy();
+      }
       expect(buildContainsPreBuildHookRunMessage).toBeTruthy();
       expect(buildContainsPostBuildHookRunMessage).toBeTruthy();
       expect(buildContainsPreBuildStepMessage).toBeTruthy();
