@@ -153,10 +153,11 @@ echo ""
   -password "$UNITY_PASSWORD" \
   -customBuildName "$BUILD_NAME" \
   -projectPath "$UNITY_PROJECT_PATH" \
-  -buildTarget "$BUILD_TARGET" \
+  $( [ -z "$BUILD_PROFILE" ] && echo "-buildTarget $BUILD_TARGET") \
   -customBuildTarget "$BUILD_TARGET" \
   -customBuildPath "$CUSTOM_BUILD_PATH" \
   -customBuildProfile "$BUILD_PROFILE" \
+  ${BUILD_PROFILE:+-activeBuildProfile} ${BUILD_PROFILE:+"$BUILD_PROFILE"} \
   -executeMethod "$BUILD_METHOD" \
   -buildVersion "$VERSION" \
   -androidVersionCode "$ANDROID_VERSION_CODE" \
