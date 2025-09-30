@@ -265,6 +265,11 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  linux64RemoveExecutableExtension:
+    default: 'true'
+    required: false
+    description:
+      'When building for StandaloneLinux64, remove the default file extension of `.x86_64`. (This matches the behavior of older versions of this action)'
 
 outputs:
   volume:
