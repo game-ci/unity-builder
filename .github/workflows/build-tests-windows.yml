@@ -34,7 +34,12 @@ jobs:
             unityVersion: 2023.2.2f1
             targetPlatform: StandaloneWindows64
             enableGpu: true
-
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneWindows64
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneWindows64
+            buildProfile: 'Assets/Settings/Build Profiles/Sample Windows Build Profile.asset'
+  
     steps:
       ###########################
       #         Checkout        #
@@ -79,6 +84,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildProfile: ${{ matrix.buildProfile }}
           enableGpu: ${{ matrix.enableGpu }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           allowDirtyBuild: true

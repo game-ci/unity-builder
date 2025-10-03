@@ -181,10 +181,10 @@ $unityArgs = @(
 ) + $customParametersArray
 
 if (-not $Env:BUILD_PROFILE) {
-    $unityArgs += @("-buildTarget", $Env:BUILD_TARGET)
+    $unityArgs += @("-buildTarget", "`"$Env:BUILD_TARGET`"")
 }
 if ($Env:BUILD_PROFILE) {
-    $unityArgs += @("-activeBuildProfile", $Env:BUILD_PROFILE)
+    $unityArgs += @("-activeBuildProfile", "`"$Env:BUILD_PROFILE`"")
 }
 
 # Remove null items as that will fail the Start-Process call
