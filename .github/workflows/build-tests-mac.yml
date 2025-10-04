@@ -24,6 +24,13 @@ jobs:
         targetPlatform:
           - StandaloneOSX # Build a MacOS executable
           - iOS # Build an iOS executable
+        include:
+          # Additionally test enableGpu build for a standalone windows target
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneOSX
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneOSX
+            buildProfile: 'Assets/Settings/Build Profiles/Sample macOS Build Profile.asset'
 
     steps:
       ###########################
