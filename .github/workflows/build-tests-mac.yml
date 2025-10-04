@@ -72,6 +72,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildProfile: ${{ matrix.buildProfile }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           # We use dirty build because we are replacing the default project settings file above
           allowDirtyBuild: true
