@@ -81,6 +81,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})
+          name: Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})${{ matrix.buildProfile && '  With Build Profile' || '' }}
           path: build
           retention-days: 14
