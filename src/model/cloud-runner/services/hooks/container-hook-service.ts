@@ -37,17 +37,23 @@ export class ContainerHookService {
   image: amazon/aws-cli
   hook: after
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 cp /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } s3://${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
-    rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+      } || true
+      rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
+      } || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-upload-build"
+    fi
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -55,27 +61,36 @@ export class ContainerHookService {
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
     value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}
 - name: aws-s3-pull-build
   image: amazon/aws-cli
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
     mkdir -p /data/cache/$CACHE_KEY/build/
-    aws s3 cp s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/build || true
+      aws s3 cp s3://${
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
       } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
         CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
-      }
+      } || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-pull-build"
+    fi
   secrets:
     - name: AWS_ACCESS_KEY_ID
     - name: AWS_SECRET_ACCESS_KEY
     - name: AWS_DEFAULT_REGION
     - name: BUILD_GUID_TARGET
+    - name: AWS_S3_ENDPOINT
 - name: steam-deploy-client
   image: steamcmd/steamcmd
   commands: |
@@ -116,17 +131,23 @@ export class ContainerHookService {
   image: amazon/aws-cli
   hook: after
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/lfs
-    rm -r /data/cache/$CACHE_KEY/lfs
-    aws s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
-      CloudRunner.buildParameters.awsStackName
-    }/cloud-runner-cache/$CACHE_KEY/Library
-    rm -r /data/cache/$CACHE_KEY/Library
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 cp --recursive /data/cache/$CACHE_KEY/lfs s3://${
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/lfs || true
+      rm -r /data/cache/$CACHE_KEY/lfs || true
+      aws $ENDPOINT_ARGS s3 cp --recursive /data/cache/$CACHE_KEY/Library s3://${
+        CloudRunner.buildParameters.awsStackName
+      }/cloud-runner-cache/$CACHE_KEY/Library || true
+      rm -r /data/cache/$CACHE_KEY/Library || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-upload-cache"
+    fi
   secrets:
   - name: AWS_ACCESS_KEY_ID
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
@@ -134,49 +155,142 @@ export class ContainerHookService {
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: AWS_DEFAULT_REGION
     value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}
 - name: aws-s3-pull-cache
   image: amazon/aws-cli
   hook: before
   commands: |
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default
-    aws configure set region $AWS_DEFAULT_REGION --profile default
     mkdir -p /data/cache/$CACHE_KEY/Library/
     mkdir -p /data/cache/$CACHE_KEY/lfs/
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
-    aws s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
-    BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
-    aws s3 ls $BUCKET1 || true
-    OBJECT1="$(aws s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
-    BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
-    aws s3 ls $BUCKET2 || true
-    OBJECT2="$(aws s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
-    aws s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+    if command -v aws > /dev/null 2>&1; then
+      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile default || true
+      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile default || true
+      aws configure set region $AWS_DEFAULT_REGION --profile default || true
+      ENDPOINT_ARGS=""
+      if [ -n "$AWS_S3_ENDPOINT" ]; then ENDPOINT_ARGS="--endpoint-url $AWS_S3_ENDPOINT"; fi
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/ || true
+      aws $ENDPOINT_ARGS s3 ls ${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/ || true
+      BUCKET1="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/Library/"
+      aws $ENDPOINT_ARGS s3 ls $BUCKET1 || true
+      OBJECT1="$(aws $ENDPOINT_ARGS s3 ls $BUCKET1 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws $ENDPOINT_ARGS s3 cp s3://$BUCKET1$OBJECT1 /data/cache/$CACHE_KEY/Library/ || true
+      BUCKET2="${CloudRunner.buildParameters.awsStackName}/cloud-runner-cache/$CACHE_KEY/lfs/"
+      aws $ENDPOINT_ARGS s3 ls $BUCKET2 || true
+      OBJECT2="$(aws $ENDPOINT_ARGS s3 ls $BUCKET2 | sort | tail -n 1 | awk '{print $4}' || '')"
+      aws $ENDPOINT_ARGS s3 cp s3://$BUCKET2$OBJECT2 /data/cache/$CACHE_KEY/lfs/ || true
+    else
+      echo "AWS CLI not available, skipping aws-s3-pull-cache"
+    fi
+- name: rclone-upload-build
+  image: rclone/rclone
+  hook: after
+  commands: |
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } ${CloudRunner.buildParameters.rcloneRemote}/cloud-runner-cache/$CACHE_KEY/build/ || true
+      rm /data/cache/$CACHE_KEY/build/build-${CloudRunner.buildParameters.buildGuid}.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } || true
+    else
+      echo "rclone not available, skipping rclone-upload-build"
+    fi
   secrets:
-  - name: AWS_ACCESS_KEY_ID
-    value: ${process.env.AWS_ACCESS_KEY_ID || ``}
-  - name: AWS_SECRET_ACCESS_KEY
-    value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
-  - name: AWS_DEFAULT_REGION
-    value: ${process.env.AWS_REGION || ``}
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-pull-build
+  image: rclone/rclone
+  commands: |
+    mkdir -p /data/cache/$CACHE_KEY/build/
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } /data/cache/$CACHE_KEY/build/build-$BUILD_GUID_TARGET.tar${
+        CloudRunner.buildParameters.useCompressionStrategy ? '.lz4' : ''
+      } || true
+    else
+      echo "rclone not available, skipping rclone-pull-build"
+    fi
+  secrets:
+    - name: BUILD_GUID_TARGET
+    - name: RCLONE_REMOTE
+      value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-upload-cache
+  image: rclone/rclone
+  hook: after
+  commands: |
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy /data/cache/$CACHE_KEY/lfs ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/lfs || true
+      rm -r /data/cache/$CACHE_KEY/lfs || true
+      rclone copy /data/cache/$CACHE_KEY/Library ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/Library || true
+      rm -r /data/cache/$CACHE_KEY/Library || true
+    else
+      echo "rclone not available, skipping rclone-upload-cache"
+    fi
+  secrets:
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
+- name: rclone-pull-cache
+  image: rclone/rclone
+  hook: before
+  commands: |
+    mkdir -p /data/cache/$CACHE_KEY/Library/
+    mkdir -p /data/cache/$CACHE_KEY/lfs/
+    if command -v rclone > /dev/null 2>&1; then
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/Library /data/cache/$CACHE_KEY/Library/ || true
+      rclone copy ${
+        CloudRunner.buildParameters.rcloneRemote
+      }/cloud-runner-cache/$CACHE_KEY/lfs /data/cache/$CACHE_KEY/lfs/ || true
+    else
+      echo "rclone not available, skipping rclone-pull-cache"
+    fi
+  secrets:
+  - name: RCLONE_REMOTE
+    value: ${CloudRunner.buildParameters.rcloneRemote || ``}
 - name: debug-cache
   image: ubuntu
   hook: after
   commands: |
-    apt-get update > /dev/null
-    ${CloudRunnerOptions.cloudRunnerDebug ? `apt-get install -y tree > /dev/null` : `#`}
-    ${CloudRunnerOptions.cloudRunnerDebug ? `tree -L 3 /data/cache` : `#`}
+    apt-get update > /dev/null || true
+    ${CloudRunnerOptions.cloudRunnerDebug ? `apt-get install -y tree > /dev/null || true` : `#`}
+    ${CloudRunnerOptions.cloudRunnerDebug ? `tree -L 3 /data/cache || true` : `#`}
   secrets:
   - name: awsAccessKeyId
     value: ${process.env.AWS_ACCESS_KEY_ID || ``}
   - name: awsSecretAccessKey
     value: ${process.env.AWS_SECRET_ACCESS_KEY || ``}
   - name: awsDefaultRegion
-    value: ${process.env.AWS_REGION || ``}`,
+    value: ${process.env.AWS_REGION || ``}
+  - name: AWS_S3_ENDPOINT
+    value: ${CloudRunnerOptions.awsS3Endpoint || process.env.AWS_S3_ENDPOINT || ``}`,
     ).filter((x) => CloudRunnerOptions.containerHookFiles.includes(x.name) && x.hook === hookLifecycle);
-    if (builtInContainerHooks.length > 0) {
-      results.push(...builtInContainerHooks);
+
+    // In local provider mode (non-container) or when AWS credentials are not present, skip AWS S3 hooks
+    const provider = CloudRunner.buildParameters?.providerStrategy;
+    const isContainerized = provider === 'aws' || provider === 'k8s' || provider === 'local-docker';
+    const hasAwsCreds =
+      (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ||
+      (process.env.awsAccessKeyId && process.env.awsSecretAccessKey);
+
+    // Always include AWS hooks on the AWS provider (task role provides creds),
+    // otherwise require explicit creds for other containerized providers.
+    const shouldIncludeAwsHooks =
+      isContainerized && !CloudRunner.buildParameters?.skipCache && (provider === 'aws' || Boolean(hasAwsCreds));
+    const filteredBuiltIns = shouldIncludeAwsHooks
+      ? builtInContainerHooks
+      : builtInContainerHooks.filter((x) => x.image !== 'amazon/aws-cli');
+
+    if (filteredBuiltIns.length > 0) {
+      results.push(...filteredBuiltIns);
     }
 
     return results;

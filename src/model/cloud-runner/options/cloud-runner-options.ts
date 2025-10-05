@@ -195,6 +195,42 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('awsStackName') || 'game-ci';
   }
 
+  static get awsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsEndpoint');
+  }
+
+  static get awsCloudFormationEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsCloudFormationEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsEcsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsEcsEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsKinesisEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsKinesisEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsCloudWatchLogsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsCloudWatchLogsEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsS3Endpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsS3Endpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  // ### ### ###
+  // Storage
+  // ### ### ###
+
+  static get storageProvider(): string {
+    return CloudRunnerOptions.getInput('storageProvider') || 's3';
+  }
+
+  static get rcloneRemote(): string {
+    return CloudRunnerOptions.getInput('rcloneRemote') || '';
+  }
+
   // ### ### ###
   // K8s
   // ### ### ###

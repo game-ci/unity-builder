@@ -1,14 +1,10 @@
-import {
-  CloudFormation,
-  DeleteStackCommand,
-  DeleteStackCommandInput,
-  DescribeStackResourcesCommand,
-} from '@aws-sdk/client-cloudformation';
-import { CloudWatchLogs, DeleteLogGroupCommand } from '@aws-sdk/client-cloudwatch-logs';
-import { ECS, StopTaskCommand } from '@aws-sdk/client-ecs';
+import { DeleteStackCommand, DescribeStackResourcesCommand } from '@aws-sdk/client-cloudformation';
+import { DeleteLogGroupCommand } from '@aws-sdk/client-cloudwatch-logs';
+import { StopTaskCommand } from '@aws-sdk/client-ecs';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/core/cloud-runner-logger';
 import { TaskService } from './task-service';
+import { AwsClientFactory } from '../aws-client-factory';
 
 export class GarbageCollectionService {
   static isOlderThan1day(date: Date) {
@@ -19,9 +15,9 @@ export class GarbageCollectionService {
 
   public static async cleanup(deleteResources = false, OneDayOlderOnly: boolean = false) {
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
-    const ecs = new ECS({ region: Input.region });
-    const cwl = new CloudWatchLogs({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
+    const ecs = AwsClientFactory.getECS();
+    const cwl = AwsClientFactory.getCloudWatchLogs();
     const taskDefinitionsInUse = new Array();
     const tasks = await TaskService.getTasks();
 
@@ -57,8 +53,7 @@ export class GarbageCollectionService {
         }
 
         CloudRunnerLogger.log(`Deleting ${element.StackName}`);
-        const deleteStackInput: DeleteStackCommandInput = { StackName: element.StackName };
-        await CF.send(new DeleteStackCommand(deleteStackInput));
+        await CF.send(new DeleteStackCommand({ StackName: element.StackName }));
       }
     }
     const logGroups = await TaskService.getLogGroups();

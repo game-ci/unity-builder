@@ -21,7 +21,9 @@ describe('Cloud Runner Kubernetes', () => {
   setups();
 
   if (CloudRunnerOptions.cloudRunnerDebug) {
-    it('Run one build it using K8s without error', async () => {
+    const enableK8sE2E = process.env.ENABLE_K8S_E2E === 'true';
+
+    const testBody = async () => {
       if (CloudRunnerOptions.providerStrategy !== `k8s`) {
         return;
       }
@@ -34,6 +36,7 @@ describe('Cloud Runner Kubernetes', () => {
         cacheKey: `test-case-${uuidv4()}`,
         providerStrategy: 'k8s',
         buildPlatform: 'linux',
+        cloudRunnerDebug: true,
       };
       const buildParameter = await CreateParameters(overrides);
       expect(buildParameter.projectPath).toEqual(overrides.projectPath);
@@ -51,6 +54,14 @@ describe('Cloud Runner Kubernetes', () => {
       expect(results).not.toContain(cachePushFail);
 
       CloudRunnerLogger.log(`run 1 succeeded`);
-    }, 1_000_000_000);
+    };
+
+    if (enableK8sE2E) {
+      it('Run one build it using K8s without error', testBody, 1_000_000_000);
+    } else {
+      it.skip('Run one build it using K8s without error - disabled (no outbound network)', () => {
+        CloudRunnerLogger.log('Skipping K8s e2e (ENABLE_K8S_E2E not true)');
+      });
+    }
   }
 });
