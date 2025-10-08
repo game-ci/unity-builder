@@ -44,7 +44,7 @@
     "base-64": "^1.0.0",
     "commander": "^9.0.0",
     "commander-ts": "^0.2.0",
-    "graphql": "^16",
+    "graphql": "^16.11.0",
     "kubernetes-client": "^9.0.0",
     "md5": "^2.3.0",
     "nanoid": "^3.3.1",
