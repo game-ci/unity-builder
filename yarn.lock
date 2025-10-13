@@ -4818,6 +4818,11 @@ graphql-request@6.1.0:
     "@graphql-typed-document-node/core" "^3.2.0"
     cross-fetch "^3.1.5"
 
+graphql@^16.8.1:
+  version "16.11.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.11.0.tgz#96d17f66370678027fdf59b2d4c20b4efaa8a633"
+  integrity sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==
+
 har-schema@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/har-schema/-/har-schema-2.0.0.tgz"
@@ -7676,12 +7681,13 @@ undici@^5.25.4:
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
-unity-changeset@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/unity-changeset/-/unity-changeset-3.0.0.tgz#2a201ab76646a9c2d11aca3023108ddf2fbd4d77"
-  integrity sha512-NayBfB+Olb9UosItzonJKrvW7S7KQQ+sbz0dyHuAjT55jt8v7umtfk6pf/rvQziOdVUfk9ndwXdpuGJADD5+iA==
+unity-changeset@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/unity-changeset/-/unity-changeset-3.1.0.tgz#7217915b995f1c441d8bdb1045c45c09f64ca94a"
+  integrity sha512-bFqaq3yuxeMROwqw81fi6S2f8l+4lracvnW8SkdJLGDx+QvWxQhjK4LsGYM19/plDDh7q3MwEbzQgmcqj5uxBg==
   dependencies:
     "@deno/shim-deno" "~0.18.0"
+    graphql "^16.8.1"
     graphql-request "6.1.0"
 
 universal-user-agent@^6.0.0:
