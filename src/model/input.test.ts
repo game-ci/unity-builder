@@ -334,4 +334,22 @@ describe('Input', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('linux64RemoveExecutableExtension', () => {
+    it('returns the default value', () => {
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(true);
+    });
+
+    it('returns true when string true is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.linux64RemoveExecutableExtension).toStrictEqual(false);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
 });
