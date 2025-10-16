@@ -24,6 +24,13 @@ jobs:
         targetPlatform:
           - StandaloneOSX # Build a MacOS executable
           - iOS # Build an iOS executable
+        include:
+          # Additionally test enableGpu build for a standalone windows target
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneOSX
+          - unityVersion: 6000.0.36f1
+            targetPlatform: StandaloneOSX
+            buildProfile: 'Assets/Settings/Build Profiles/Sample macOS Build Profile.asset'
 
     steps:
       ###########################
@@ -65,6 +72,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildProfile: ${{ matrix.buildProfile }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           # We use dirty build because we are replacing the default project settings file above
           allowDirtyBuild: true
@@ -74,6 +82,8 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})
+          name:
+            Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})${{ matrix.buildProfile && '  With
+            Build Profile' || '' }}
           path: build
           retention-days: 14
