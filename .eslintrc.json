@@ -14,7 +14,8 @@
   "env": {
     "node": true,
     "es6": true,
-    "jest/globals": true
+    "jest/globals": true,
+    "es2020": true
   },
   "rules": {
     // Error out for code formatting errors

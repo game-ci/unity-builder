@@ -17,6 +17,7 @@ describe('Cloud Runner Github Checks', () => {
       status: 200,
       data: {},
     });
+    // eslint-disable-next-line unicorn/no-useless-undefined
     jest.spyOn(GitHub as any, 'runUpdateAsyncChecksWorkflow').mockResolvedValue(undefined);
   });
 
