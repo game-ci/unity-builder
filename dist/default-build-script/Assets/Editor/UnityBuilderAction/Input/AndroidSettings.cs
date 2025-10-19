@@ -115,6 +115,7 @@ namespace UnityBuilderAction.Input
       }
     }
 
+#if UNITY_6000_0_OR_NEWER
     private static void SetDebugSymbols(string enumValueName)
     {
       // UnityEditor.Android.UserBuildSettings and Unity.Android.Types.DebugSymbolLevel are part of the Unity Android module.
@@ -144,5 +145,6 @@ namespace UnityBuilderAction.Input
       }
       levelProp.SetValue(null, enumValue);
     }
+#endif
   }
 }
