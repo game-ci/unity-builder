@@ -8,6 +8,11 @@ Write-Output ""
 
 if ( ($null -ne ${env:UNITY_SERIAL}) -and ($null -ne ${env:UNITY_EMAIL}) -and ($null -ne ${env:UNITY_PASSWORD}) )
 {
+
+  # Ensure Visual C++ Redistributables
+  Write-Output "Ensuring Visual C++ Redistributables are installed"
+  choco install vcredist-all -y --no-progress | Out-Null
+
   #
   # SERIAL LICENSE MODE
   #
