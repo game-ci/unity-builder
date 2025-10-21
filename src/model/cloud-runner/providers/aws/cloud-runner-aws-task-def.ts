@@ -1,9 +1,9 @@
-import * as AWS from 'aws-sdk';
+import { StackResource } from '@aws-sdk/client-cloudformation';
 
 class CloudRunnerAWSTaskDef {
   public taskDefStackName!: string;
   public taskDefCloudFormation!: string;
-  public taskDefResources: AWS.CloudFormation.StackResources | undefined;
-  public baseResources: AWS.CloudFormation.StackResources | undefined;
+  public taskDefResources: StackResource[] | undefined;
+  public baseResources: StackResource[] | undefined;
 }
 export default CloudRunnerAWSTaskDef;

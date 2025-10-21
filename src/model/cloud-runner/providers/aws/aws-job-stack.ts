@@ -1,4 +1,12 @@
-import * as SDK from 'aws-sdk';
+import {
+  CloudFormation,
+  CreateStackCommand,
+  CreateStackCommandInput,
+  DescribeStackResourcesCommand,
+  DescribeStacksCommand,
+  ListStacksCommand,
+  waitUntilStackCreateComplete,
+} from '@aws-sdk/client-cloudformation';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import { AWSCloudFormationTemplates } from './aws-cloud-formation-templates';
@@ -16,7 +24,7 @@ export class AWSJobStack {
   }
 
   public async setupCloudFormations(
-    CF: SDK.CloudFormation,
+    CF: CloudFormation,
     buildGuid: string,
     image: string,
     entrypoint: string[],
@@ -119,7 +127,7 @@ export class AWSJobStack {
     let previousStackExists = true;
     while (previousStackExists) {
       previousStackExists = false;
-      const stacks = await CF.listStacks().promise();
+      const stacks = await CF.send(new ListStacksCommand({}));
       if (!stacks.StackSummaries) {
         throw new Error('Faild to get stacks');
       }
@@ -132,7 +140,7 @@ export class AWSJobStack {
         }
       }
     }
-    const createStackInput: SDK.CloudFormation.CreateStackInput = {
+    const createStackInput: CreateStackCommandInput = {
       StackName: taskDefStackName,
       TemplateBody: taskDefCloudFormation,
       Capabilities: ['CAPABILITY_IAM'],
@@ -140,9 +148,15 @@ export class AWSJobStack {
     };
     try {
       CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
-      await CF.createStack(createStackInput).promise();
-      await CF.waitFor('stackCreateComplete', { StackName: taskDefStackName }).promise();
-      const describeStack = await CF.describeStacks({ StackName: taskDefStackName }).promise();
+      await CF.send(new CreateStackCommand(createStackInput));
+      await waitUntilStackCreateComplete(
+        {
+          client: CF,
+          maxWaitTime: 200,
+        },
+        { StackName: taskDefStackName },
+      );
+      const describeStack = await CF.send(new DescribeStacksCommand({ StackName: taskDefStackName }));
       for (const parameter of parameters) {
         if (!describeStack.Stacks?.[0].Parameters?.some((x) => x.ParameterKey === parameter.ParameterKey)) {
           throw new Error(`Parameter ${parameter.ParameterKey} not found in stack`);
@@ -153,7 +167,7 @@ export class AWSJobStack {
       throw error;
     }
 
-    const createCleanupStackInput: SDK.CloudFormation.CreateStackInput = {
+    const createCleanupStackInput: CreateStackCommandInput = {
       StackName: `${taskDefStackName}-cleanup`,
       TemplateBody: CleanupCronFormation.formation,
       Capabilities: ['CAPABILITY_IAM'],
@@ -183,7 +197,7 @@ export class AWSJobStack {
     if (CloudRunnerOptions.useCleanupCron) {
       try {
         CloudRunnerLogger.log(`Creating job cleanup formation`);
-        await CF.createStack(createCleanupStackInput).promise();
+        await CF.send(new CreateStackCommand(createCleanupStackInput));
 
         // await CF.waitFor('stackCreateComplete', { StackName: createCleanupStackInput.StackName }).promise();
       } catch (error) {
@@ -193,12 +207,15 @@ export class AWSJobStack {
     }
 
     const taskDefResources = (
-      await CF.describeStackResources({
-        StackName: taskDefStackName,
-      }).promise()
+      await CF.send(
+        new DescribeStackResourcesCommand({
+          StackName: taskDefStackName,
+        }),
+      )
     ).StackResources;
 
-    const baseResources = (await CF.describeStackResources({ StackName: this.baseStackName }).promise()).StackResources;
+    const baseResources = (await CF.send(new DescribeStackResourcesCommand({ StackName: this.baseStackName })))
+      .StackResources;
 
     return {
       taskDefStackName,

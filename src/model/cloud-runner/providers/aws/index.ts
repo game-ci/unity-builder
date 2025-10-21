@@ -1,4 +1,6 @@
-import * as SDK from 'aws-sdk';
+import { CloudFormation, DeleteStackCommand, waitUntilStackDeleteComplete } from '@aws-sdk/client-cloudformation';
+import { ECS as ECSClient } from '@aws-sdk/client-ecs';
+import { Kinesis } from '@aws-sdk/client-kinesis';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -75,7 +77,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     process.env.AWS_REGION = Input.region;
-    const CF = new SDK.CloudFormation();
+    const CF = new CloudFormation({ region: Input.region });
     await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
   }
 
@@ -89,10 +91,10 @@ class AWSBuildEnvironment implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     process.env.AWS_REGION = Input.region;
-    const ECS = new SDK.ECS();
-    const CF = new SDK.CloudFormation();
+    const ECS = new ECSClient({ region: Input.region });
+    const CF = new CloudFormation({ region: Input.region });
     AwsTaskRunner.ECS = ECS;
-    AwsTaskRunner.Kinesis = new SDK.Kinesis();
+    AwsTaskRunner.Kinesis = new Kinesis({ region: Input.region });
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
@@ -129,23 +131,31 @@ class AWSBuildEnvironment implements ProviderInterface {
     }
   }
 
-  async cleanupResources(CF: SDK.CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
+  async cleanupResources(CF: CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
     CloudRunnerLogger.log('Cleanup starting');
-    await CF.deleteStack({
-      StackName: taskDef.taskDefStackName,
-    }).promise();
+    await CF.send(new DeleteStackCommand({ StackName: taskDef.taskDefStackName }));
     if (CloudRunnerOptions.useCleanupCron) {
-      await CF.deleteStack({
-        StackName: `${taskDef.taskDefStackName}-cleanup`,
-      }).promise();
+      await CF.send(new DeleteStackCommand({ StackName: `${taskDef.taskDefStackName}-cleanup` }));
     }
 
-    await CF.waitFor('stackDeleteComplete', {
-      StackName: taskDef.taskDefStackName,
-    }).promise();
-    await CF.waitFor('stackDeleteComplete', {
-      StackName: `${taskDef.taskDefStackName}-cleanup`,
-    }).promise();
+    await waitUntilStackDeleteComplete(
+      {
+        client: CF,
+        maxWaitTime: 200,
+      },
+      {
+        StackName: taskDef.taskDefStackName,
+      },
+    );
+    await waitUntilStackDeleteComplete(
+      {
+        client: CF,
+        maxWaitTime: 200,
+      },
+      {
+        StackName: `${taskDef.taskDefStackName}-cleanup`,
+      },
+    );
     CloudRunnerLogger.log(`Deleted Stack: ${taskDef.taskDefStackName}`);
     CloudRunnerLogger.log('Cleanup complete');
   }
