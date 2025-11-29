@@ -37,7 +37,6 @@ class Kubernetes implements ProviderInterface {
   public serviceAccountName: string = '';
   public ip: string = '';
 
-  // eslint-disable-next-line no-unused-vars
   constructor(buildParameters: BuildParameters) {
     Kubernetes.Instance = this;
     this.kubeConfig = new k8s.KubeConfig();
@@ -46,7 +45,7 @@ class Kubernetes implements ProviderInterface {
     this.kubeClientApps = this.kubeConfig.makeApiClient(k8s.AppsV1Api);
     this.kubeClientBatch = this.kubeConfig.makeApiClient(k8s.BatchV1Api);
     this.rbacAuthorizationV1Api = this.kubeConfig.makeApiClient(k8s.RbacAuthorizationV1Api);
-    this.namespace = 'default';
+    this.namespace = buildParameters.containerNamespace ? buildParameters.containerNamespace : 'default';
     CloudRunnerLogger.log('Loaded default Kubernetes configuration for this environment');
   }
 
