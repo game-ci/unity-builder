@@ -143,6 +143,12 @@ class Input {
     return input === 'true';
   }
 
+  static get enableParallelLinking(): boolean {
+    const input = Input.getInput('enableParallelLinking') ?? false;
+
+    return input === 'true';
+  }
+
   static get customParameters(): string {
     return Input.getInput('customParameters') ?? '';
   }

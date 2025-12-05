@@ -34,6 +34,7 @@ class BuildParameters {
   public buildVersion!: string;
   public manualExit!: boolean;
   public enableGpu!: boolean;
+  public enableParallelLinking!: boolean;
   public androidVersionCode!: string;
   public androidKeystoreName!: string;
   public androidKeystoreBase64!: string;
@@ -162,6 +163,7 @@ class BuildParameters {
       buildVersion,
       manualExit: Input.manualExit,
       enableGpu: Input.enableGpu,
+      enableParallelLinking: Input.enableParallelLinking,
       androidVersionCode,
       androidKeystoreName: Input.androidKeystoreName,
       androidKeystoreBase64: Input.androidKeystoreBase64,

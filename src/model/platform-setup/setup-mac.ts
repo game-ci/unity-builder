@@ -194,6 +194,7 @@ class SetupMac {
     process.env.CHOWN_FILES_TO = buildParameters.chownFilesTo;
     process.env.MANUAL_EXIT = buildParameters.manualExit.toString();
     process.env.ENABLE_GPU = buildParameters.enableGpu.toString();
+    process.env.ENABLE_PARALLEL_LINKING = buildParameters.enableParallelLinking.toString();
   }
 }
 

@@ -178,7 +178,11 @@ $unityArgs = @(
     "-androidExportType", "`"$Env:ANDROID_EXPORT_TYPE`"",
     "-androidSymbolType", "`"$Env:ANDROID_SYMBOL_TYPE`"",
     "-logfile", "-"
-) + $customParametersArray
+)
+if ($Env:ENABLE_PARALLEL_LINKING -eq "true") {
+    $unityArgs += @("-enableParallelLinking")
+}
+$unityArgs = $unityArgs + $customParametersArray
 
 if (-not $Env:BUILD_PROFILE) {
     $unityArgs += @("-buildTarget", "`"$Env:BUILD_TARGET`"")

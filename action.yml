@@ -43,6 +43,10 @@ inputs:
     required: false
     default: ''
     description: 'Launches unity without specifying `-nographics`.'
+  enableParallelLinking:
+    required: false
+    default: 'true'
+    description: 'Enable parallel linking for IL2CPP builds to speed up linking phase.'
   customParameters:
     required: false
     default: ''
