@@ -144,7 +144,7 @@ class Input {
   }
 
   static get enableParallelLinking(): boolean {
-    const input = Input.getInput('enableParallelLinking') ?? false;
+    const input = Input.getInput('enableParallelLinking') ?? true;
 
     return input === 'true';
   }
