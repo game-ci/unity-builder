@@ -166,6 +166,7 @@ echo ""
   -androidTargetSdkVersion "$ANDROID_TARGET_SDK_VERSION" \
   -androidExportType "$ANDROID_EXPORT_TYPE" \
   -androidSymbolType "$ANDROID_SYMBOL_TYPE" \
+  $( [ "${ENABLE_PARALLEL_LINKING}" == "true" ] && echo "-enableParallelLinking" ) \
   $CUSTOM_PARAMETERS
 
 # Catch exit code

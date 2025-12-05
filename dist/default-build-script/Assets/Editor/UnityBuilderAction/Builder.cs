@@ -116,6 +116,12 @@ namespace UnityBuilderAction
           AndroidSettings.Apply(options);
         }
 
+        // Enable parallel linking for IL2CPP builds
+        if (options.TryGetValue("enableParallelLinking", out var enableParallelLinking) && 
+            enableParallelLinking != "false") {
+          SetParallelLinking(buildTarget);
+        }
+
       }
 
       // Perform build
@@ -128,6 +134,48 @@ namespace UnityBuilderAction
       // Result
       BuildResult result = summary.result;
       StdOutReporter.ExitWithResult(result);
+    }
+
+    private static void SetParallelLinking(BuildTarget buildTarget) {
+      string additionalArgs = PlayerSettings.additionalIl2CppArgs;
+      
+      // Determine number of parallel jobs (use CPU count, or default to 4)
+      int numJobs = System.Environment.ProcessorCount;
+      if (numJobs <= 0) numJobs = 2;
+      
+      // Platform-specific parallel linking flags
+      switch (buildTarget) {
+        case BuildTarget.StandaloneWindows:
+        case BuildTarget.StandaloneWindows64:
+          string cgthreadsFlag = $"--linker-flags=/CGTHREADS:{numJobs}";
+          if (!additionalArgs.Contains("/CGTHREADS:")) {
+            additionalArgs = string.IsNullOrEmpty(additionalArgs) 
+              ? cgthreadsFlag 
+              : $"{additionalArgs} {cgthreadsFlag}";
+          }
+          break;
+          
+        case BuildTarget.StandaloneLinux64:
+        case BuildTarget.Android:
+        case BuildTarget.iOS:
+          if (!additionalArgs.Contains("--threads")) {
+            additionalArgs = string.IsNullOrEmpty(additionalArgs)
+              ? $"-Wl,--threads={numJobs}"
+              : $"{additionalArgs} -Wl,--threads={numJobs}";
+          }
+          break;
+          
+        case BuildTarget.StandaloneOSX:
+          if (!additionalArgs.Contains("thread_count")) {
+            additionalArgs = string.IsNullOrEmpty(additionalArgs)
+              ? $"-Wl,-thread_count,{numJobs}"
+              : $"{additionalArgs} -Wl,-thread_count,{numJobs}";
+          }
+          break;
+      }
+      
+      PlayerSettings.additionalIl2CppArgs = additionalArgs;
+      Debug.Log($"IL2CPP parallel linking enabled with {numJobs} jobs. Additional args: {additionalArgs}");
     }
   }
 }

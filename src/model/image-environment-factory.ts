@@ -44,6 +44,7 @@ class ImageEnvironmentFactory {
       { name: 'BUILD_METHOD', value: parameters.buildMethod },
       { name: 'MANUAL_EXIT', value: parameters.manualExit },
       { name: 'ENABLE_GPU', value: parameters.enableGpu },
+      { name: 'ENABLE_PARALLEL_LINKING', value: parameters.enableParallelLinking },
       { name: 'VERSION', value: parameters.buildVersion },
       { name: 'ANDROID_VERSION_CODE', value: parameters.androidVersionCode },
       { name: 'ANDROID_KEYSTORE_NAME', value: parameters.androidKeystoreName },
