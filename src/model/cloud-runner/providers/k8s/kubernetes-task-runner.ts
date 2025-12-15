@@ -30,8 +30,8 @@ class KubernetesTaskRunner {
       );
       let extraFlags = ``;
       extraFlags += (await KubernetesPods.IsPodRunning(podName, namespace, kubeClient))
-        ? ` -f -c ${containerName}`
-        : ` --previous`;
+        ? ` -f -c ${containerName} -n ${namespace}`
+        : ` --previous -n ${namespace}`;
 
       const callback = (outputChunk: string) => {
         output += outputChunk;

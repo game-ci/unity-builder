@@ -18,6 +18,9 @@ regsvr32 C:\ProgramData\Microsoft\VisualStudio\Setup\x64\Microsoft.VisualStudio.
 # Kill the regsvr process
 Get-Process -Name regsvr32 | ForEach-Object { Stop-Process -Id $_.Id -Force }
 
+# Install Visual C++ 2013 Redistributables
+. "c:\steps\install_vcredist13.ps1"
+
 # Setup Git Credentials
 . "c:\steps\set_gitcredential.ps1"
 
