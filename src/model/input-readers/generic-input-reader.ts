@@ -1,12 +1,12 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
-import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
+import { OrchestratorSystem } from '../orchestrator/services/core/orchestrator-system';
+import OrchestratorOptions from '../orchestrator/options/orchestrator-options';
 
 export class GenericInputReader {
   public static async Run(command: string) {
-    if (CloudRunnerOptions.providerStrategy === 'local') {
+    if (OrchestratorOptions.providerStrategy === 'local') {
       return '';
     }
 
-    return await CloudRunnerSystem.Run(command, false, true);
+    return await OrchestratorSystem.Run(command, false, true);
   }
 }

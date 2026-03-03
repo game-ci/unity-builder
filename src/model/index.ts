@@ -9,8 +9,8 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
-import CloudRunner from './cloud-runner/cloud-runner';
-import loadProvider, { ProviderLoader } from './cloud-runner/providers/provider-loader';
+import Orchestrator from './orchestrator/orchestrator';
+import loadProvider, { ProviderLoader } from './orchestrator/providers/provider-loader';
 
 export {
   Action,
@@ -24,7 +24,7 @@ export {
   Project,
   Unity,
   Versioning,
-  CloudRunner as CloudRunner,
+  Orchestrator as Orchestrator,
   loadProvider,
   ProviderLoader,
 };

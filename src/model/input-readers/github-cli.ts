@@ -1,19 +1,19 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
+import { OrchestratorSystem } from '../orchestrator/services/core/orchestrator-system';
 import * as core from '@actions/core';
-import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
+import OrchestratorOptions from '../orchestrator/options/orchestrator-options';
 
 export class GithubCliReader {
   static async GetGitHubAuthToken() {
-    if (CloudRunnerOptions.providerStrategy === 'local') {
+    if (OrchestratorOptions.providerStrategy === 'local') {
       return '';
     }
     try {
-      const authStatus = await CloudRunnerSystem.Run(`gh auth status`, true, true);
+      const authStatus = await OrchestratorSystem.Run(`gh auth status`, true, true);
       if (authStatus.includes('You are not logged') || authStatus === '') {
         return '';
       }
 
-      return (await CloudRunnerSystem.Run(`gh auth status -t`, false, true))
+      return (await OrchestratorSystem.Run(`gh auth status -t`, false, true))
         .split(`Token: `)[1]
         .replace(/ /g, '')
         .replace(/\n/g, '');

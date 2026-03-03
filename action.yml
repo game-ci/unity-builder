@@ -104,11 +104,11 @@ inputs:
   gitPrivateToken:
     required: false
     default: ''
-    description: '[CloudRunner] Github private token to pull from github'
+    description: '[Orchestrator] Github private token to pull from github'
   githubOwner:
     required: false
     default: ''
-    description: '[CloudRunner] GitHub owner name or organization/team name'
+    description: '[Orchestrator] GitHub owner name or organization/team name'
   runAsHostUser:
     required: false
     default: 'false'
@@ -149,101 +149,101 @@ inputs:
   allowDirtyBuild:
     required: false
     default: ''
-    description: '[CloudRunner] Allows the branch of the build to be dirty, and still generate the build.'
+    description: '[Orchestrator] Allows the branch of the build to be dirty, and still generate the build.'
   postBuildSteps:
     required: false
     default: ''
     description:
-      '[CloudRunner] run a post build job in yaml format with the keys image, secrets (name, value object array),
+      '[Orchestrator] run a post build job in yaml format with the keys image, secrets (name, value object array),
       command string'
   preBuildSteps:
     required: false
     default: ''
     description:
-      '[CloudRunner] Run a pre build job after the repository setup but before the build job (in yaml format with the
+      '[Orchestrator] Run a pre build job after the repository setup but before the build job (in yaml format with the
       keys image, secrets (name, value object array), command line string)'
   containerHookFiles:
     required: false
     default: ''
     description:
-      '[CloudRunner] Specify the names (by file name) of custom steps to run before or after cloud runner jobs, must
+      '[Orchestrator] Specify the names (by file name) of custom steps to run before or after orchestrator jobs, must
       match a yaml step file inside your repo in the folder .game-ci/steps/'
   customHookFiles:
     required: false
     default: ''
     description:
-      '[CloudRunner] Specify the names (by file name) of custom hooks to run before or after cloud runner jobs, must
+      '[Orchestrator] Specify the names (by file name) of custom hooks to run before or after orchestrator jobs, must
       match a yaml step file inside your repo in the folder .game-ci/hooks/'
   customCommandHooks:
     required: false
     default: ''
-    description: '[CloudRunner] Specify custom commands and trigger hooks (injects commands into jobs)'
+    description: '[Orchestrator] Specify custom commands and trigger hooks (injects commands into jobs)'
   customJob:
     required: false
     default: ''
     description:
-      '[CloudRunner] Run a custom job instead of the standard build automation for cloud runner (in yaml format with the
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
       keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
-    description: '[CloudRunner] The Cloud Formation stack name that must be setup before using this option.'
+    description: '[Orchestrator] The Cloud Formation stack name that must be setup before using this option.'
   providerStrategy:
     default: 'local'
     required: false
     description:
-      '[CloudRunner] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
+      '[Orchestrator] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
   resourceTracking:
     default: 'false'
     required: false
-    description: '[CloudRunner] Enable resource tracking logs for disk usage and allocation summaries.'
+    description: '[Orchestrator] Enable resource tracking logs for disk usage and allocation summaries.'
   containerCpu:
     default: ''
     required: false
-    description: '[CloudRunner] Amount of CPU time to assign the remote build container'
+    description: '[Orchestrator] Amount of CPU time to assign the remote build container'
   containerMemory:
     default: ''
     required: false
-    description: '[CloudRunner] Amount of memory to assign the remote build container'
+    description: '[Orchestrator] Amount of memory to assign the remote build container'
   readInputFromOverrideList:
     default: ''
     required: false
-    description: '[CloudRunner] Comma separated list of input value names to read from "input override command"'
+    description: '[Orchestrator] Comma separated list of input value names to read from "input override command"'
   readInputOverrideCommand:
     default: ''
     required: false
     description:
-      '[CloudRunner] Extend game ci by specifying a command to execute to pull input from external source e.g cloud
+      '[Orchestrator] Extend game ci by specifying a command to execute to pull input from external source e.g cloud
       provider secret managers'
   kubeConfig:
     default: ''
     required: false
     description:
-      '[CloudRunner] Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until
+      '[Orchestrator] Supply a base64 encoded kubernetes config to run builds on kubernetes and stream logs until
       completion.'
   kubeVolume:
     default: ''
     required: false
-    description: '[CloudRunner] Supply a Persistent Volume Claim name to use for the Unity build.'
+    description: '[Orchestrator] Supply a Persistent Volume Claim name to use for the Unity build.'
   kubeStorageClass:
     default: ''
     required: false
     description:
-      '[CloudRunner] Kubernetes storage class to use for cloud runner jobs, leave empty to install rook cluster.'
+      '[Orchestrator] Kubernetes storage class to use for orchestrator jobs, leave empty to install rook cluster.'
   kubeVolumeSize:
     default: '5Gi'
     required: false
-    description: '[CloudRunner] Amount of disc space to assign the Kubernetes Persistent Volume'
+    description: '[Orchestrator] Amount of disc space to assign the Kubernetes Persistent Volume'
   cacheKey:
     default: ''
     required: false
-    description: '[CloudRunner] Cache key to indicate bucket for cache'
+    description: '[Orchestrator] Cache key to indicate bucket for cache'
   watchToEnd:
     default: 'true'
     required: false
     description:
-      '[CloudRunner] Whether or not to watch the build to the end. Can be used for especially long running jobs e.g
+      '[Orchestrator] Whether or not to watch the build to the end. Can be used for especially long running jobs e.g
       imports or self-hosted ephemeral runners.'
   cacheUnityInstallationOnMac:
     default: 'false'
@@ -272,12 +272,12 @@ inputs:
   cloneDepth:
     default: '50'
     required: false
-    description: '[CloudRunner] Specifies the depth of the git clone for the repository. Use 0 for full clone.'
-  cloudRunnerRepoName:
+    description: '[Orchestrator] Specifies the depth of the git clone for the repository. Use 0 for full clone.'
+  orchestratorRepoName:
     default: 'game-ci/unity-builder'
     required: false
     description:
-      '[CloudRunner] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
+      '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
 
 outputs:

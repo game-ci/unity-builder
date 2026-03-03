@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Cli } from './cli/cli';
-import CloudRunnerQueryOverride from './cloud-runner/options/cloud-runner-query-override';
+import OrchestratorQueryOverride from './orchestrator/options/orchestrator-query-override';
 import Platform from './platform';
 import GitHub from './github';
 import os from 'node:os';
@@ -32,8 +32,8 @@ class Input {
       return Cli.query(query, alternativeQuery);
     }
 
-    if (CloudRunnerQueryOverride.query(query, alternativeQuery)) {
-      return CloudRunnerQueryOverride.query(query, alternativeQuery);
+    if (OrchestratorQueryOverride.query(query, alternativeQuery)) {
+      return OrchestratorQueryOverride.query(query, alternativeQuery);
     }
 
     if (process.env[query] !== undefined) {

@@ -84,7 +84,7 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
 
-    // Always merge additional variables (e.g., secrets/env from Cloud Runner) uniquely by name
+    // Always merge additional variables (e.g., secrets/env from Orchestrator) uniquely by name
     for (const element of additionalVariables) {
       if (!element || !element.name) continue;
       environmentVariables = environmentVariables.filter((x) => x?.name !== element.name);

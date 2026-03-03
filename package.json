@@ -12,18 +12,18 @@
     "lint": "prettier --check \"src/**/*.{js,ts}\" && eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "cli": "yarn ts-node src/index.ts -m cli",
-    "gcp-secrets-tests": "cross-env providerStrategy=aws cloudRunnerTests=true inputPullCommand=\"gcp-secret-manager\" populateOverride=true pullInputList=UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD yarn test -i -t \"cloud runner\"",
-    "gcp-secrets-cli": "cross-env cloudRunnerTests=true USE_IL2CPP=false inputPullCommand=\"gcp-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
-    "aws-secrets-cli": "cross-env cloudRunnerTests=true inputPullCommand=\"aws-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
+    "gcp-secrets-tests": "cross-env providerStrategy=aws orchestratorTests=true inputPullCommand=\"gcp-secret-manager\" populateOverride=true pullInputList=UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD yarn test -i -t \"orchestrator\"",
+    "gcp-secrets-cli": "cross-env orchestratorTests=true USE_IL2CPP=false inputPullCommand=\"gcp-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
+    "aws-secrets-cli": "cross-env orchestratorTests=true inputPullCommand=\"aws-secret-manager\" yarn ts-node src/index.ts -m cli --populateOverride true --pullInputList UNITY_EMAIL,UNITY_SERIAL,UNITY_PASSWORD",
     "cli-aws": "cross-env providerStrategy=aws yarn run test-cli",
     "cli-k8s": "cross-env providerStrategy=k8s yarn run test-cli",
-    "test-cli": "cross-env cloudRunnerTests=true yarn ts-node src/index.ts -m cli --projectPath test-project",
+    "test-cli": "cross-env orchestratorTests=true yarn ts-node src/index.ts -m cli --projectPath test-project",
     "test": "jest",
     "test:ci": "jest --config=jest.ci.config.js --runInBand",
-    "test-i": "cross-env cloudRunnerTests=true yarn test -i -t \"cloud runner\"",
+    "test-i": "cross-env orchestratorTests=true yarn test -i -t \"orchestrator\"",
     "test-i-*": "yarn run test-i-aws && yarn run test-i-k8s",
-    "test-i-aws": "cross-env cloudRunnerTests=true providerStrategy=aws yarn test -i -t \"cloud runner\"",
-    "test-i-k8s": "cross-env cloudRunnerTests=true providerStrategy=k8s yarn test -i -t \"cloud runner\""
+    "test-i-aws": "cross-env orchestratorTests=true providerStrategy=aws yarn test -i -t \"orchestrator\"",
+    "test-i-k8s": "cross-env orchestratorTests=true providerStrategy=k8s yarn test -i -t \"orchestrator\""
   },
   "engines": {
     "node": ">=18.x"

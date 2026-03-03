@@ -1,14 +1,14 @@
 import { Command } from 'commander-ts';
-import { BuildParameters, CloudRunner, ImageTag, Input } from '..';
+import { BuildParameters, Orchestrator, ImageTag, Input } from '..';
 import * as core from '@actions/core';
 import { ActionYamlReader } from '../input-readers/action-yaml';
-import CloudRunnerLogger from '../cloud-runner/services/core/cloud-runner-logger';
-import CloudRunnerQueryOverride from '../cloud-runner/options/cloud-runner-query-override';
+import OrchestratorLogger from '../orchestrator/services/core/orchestrator-logger';
+import OrchestratorQueryOverride from '../orchestrator/options/orchestrator-query-override';
 import { CliFunction, CliFunctionsRepository } from './cli-functions-repository';
-import { Caching } from '../cloud-runner/remote-client/caching';
-import { LfsHashing } from '../cloud-runner/services/utility/lfs-hashing';
-import { RemoteClient } from '../cloud-runner/remote-client';
-import CloudRunnerOptionsReader from '../cloud-runner/options/cloud-runner-options-reader';
+import { Caching } from '../orchestrator/remote-client/caching';
+import { LfsHashing } from '../orchestrator/services/utility/lfs-hashing';
+import { RemoteClient } from '../orchestrator/remote-client';
+import OrchestratorOptionsReader from '../orchestrator/options/orchestrator-options-reader';
 import GitHub from '../github';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
@@ -36,7 +36,7 @@ export class Cli {
     const program = new Command();
     program.version('0.0.1');
 
-    const properties = CloudRunnerOptionsReader.GetProperties();
+    const properties = OrchestratorOptionsReader.GetProperties();
     const actionYamlReader: ActionYamlReader = new ActionYamlReader();
     for (const element of properties) {
       program.option(`--${element} <${element}>`, actionYamlReader.GetActionYamlValue(element));
@@ -62,23 +62,23 @@ export class Cli {
   static async RunCli(): Promise<void> {
     GitHub.githubInputEnabled = false;
     if (Cli.options!['populateOverride'] === `true`) {
-      await CloudRunnerQueryOverride.PopulateQueryOverrideInput();
+      await OrchestratorQueryOverride.PopulateQueryOverrideInput();
     }
     if (Cli.options!['logInput']) {
       Cli.logInput();
     }
     const results = CliFunctionsRepository.GetCliFunctions(Cli.options?.mode);
-    CloudRunnerLogger.log(`Entrypoint: ${results.key}`);
+    OrchestratorLogger.log(`Entrypoint: ${results.key}`);
     Cli.options!.versioning = 'None';
 
-    CloudRunner.buildParameters = await BuildParameters.create();
-    CloudRunner.buildParameters.buildGuid = process.env.BUILD_GUID || ``;
-    CloudRunnerLogger.log(`Build Params:
-      ${JSON.stringify(CloudRunner.buildParameters, undefined, 4)}
+    Orchestrator.buildParameters = await BuildParameters.create();
+    Orchestrator.buildParameters.buildGuid = process.env.BUILD_GUID || ``;
+    OrchestratorLogger.log(`Build Params:
+      ${JSON.stringify(Orchestrator.buildParameters, undefined, 4)}
     `);
-    CloudRunner.lockedWorkspace = process.env.LOCKED_WORKSPACE || ``;
-    CloudRunnerLogger.log(`Locked Workspace: ${CloudRunner.lockedWorkspace}`);
-    await CloudRunner.setup(CloudRunner.buildParameters);
+    Orchestrator.lockedWorkspace = process.env.LOCKED_WORKSPACE || ``;
+    OrchestratorLogger.log(`Locked Workspace: ${Orchestrator.lockedWorkspace}`);
+    await Orchestrator.setup(Orchestrator.buildParameters);
 
     return await results.target[results.propertyKey](Cli.options);
   }
@@ -87,7 +87,7 @@ export class Cli {
   private static logInput() {
     core.info(`\n`);
     core.info(`INPUT:`);
-    const properties = CloudRunnerOptionsReader.GetProperties();
+    const properties = OrchestratorOptionsReader.GetProperties();
     for (const element of properties) {
       if (
         element in Input &&
@@ -104,28 +104,28 @@ export class Cli {
     core.info(`\n`);
   }
 
-  @CliFunction(`cli-build`, `runs a cloud runner build`)
+  @CliFunction(`cli-build`, `runs a orchestrator build`)
   public static async CLIBuild(): Promise<string> {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
 
-    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
+    return (await Orchestrator.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
-  @CliFunction(`async-workflow`, `runs a cloud runner build`)
+  @CliFunction(`async-workflow`, `runs a orchestrator build`)
   public static async asyncronousWorkflow(): Promise<string> {
     const buildParameter = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameter);
-    await CloudRunner.setup(buildParameter);
+    await Orchestrator.setup(buildParameter);
 
-    return (await CloudRunner.run(buildParameter, baseImage.toString())).BuildResults;
+    return (await Orchestrator.run(buildParameter, baseImage.toString())).BuildResults;
   }
 
-  @CliFunction(`checks-update`, `runs a cloud runner build`)
+  @CliFunction(`checks-update`, `runs a orchestrator build`)
   public static async checksUpdate() {
     const buildParameter = await BuildParameters.create();
 
-    await CloudRunner.setup(buildParameter);
+    await Orchestrator.setup(buildParameter);
     const input = JSON.parse(process.env.CHECKS_UPDATE || ``);
     core.info(`Checks Update ${process.env.CHECKS_UPDATE}`);
     if (input.mode === `create`) {
@@ -139,18 +139,18 @@ export class Cli {
   public static async GarbageCollect(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
-    await CloudRunner.setup(buildParameter);
+    await Orchestrator.setup(buildParameter);
 
-    return await CloudRunner.Provider.garbageCollect(``, false, 0, false, false);
+    return await Orchestrator.Provider.garbageCollect(``, false, 0, false, false);
   }
 
   @CliFunction(`list-resources`, `lists active resources`)
   public static async ListResources(): Promise<string[]> {
     const buildParameter = await BuildParameters.create();
 
-    await CloudRunner.setup(buildParameter);
-    const result = await CloudRunner.Provider.listResources();
-    CloudRunnerLogger.log(JSON.stringify(result, undefined, 4));
+    await Orchestrator.setup(buildParameter);
+    const result = await Orchestrator.Provider.listResources();
+    OrchestratorLogger.log(JSON.stringify(result, undefined, 4));
 
     return result.map((x) => x.Name);
   }
@@ -159,17 +159,17 @@ export class Cli {
   public static async ListWorfklow(): Promise<string[]> {
     const buildParameter = await BuildParameters.create();
 
-    await CloudRunner.setup(buildParameter);
+    await Orchestrator.setup(buildParameter);
 
-    return (await CloudRunner.Provider.listWorkflow()).map((x) => x.Name);
+    return (await Orchestrator.Provider.listWorkflow()).map((x) => x.Name);
   }
 
   @CliFunction(`watch`, `follows logs of a running workflow`)
   public static async Watch(): Promise<string> {
     const buildParameter = await BuildParameters.create();
 
-    await CloudRunner.setup(buildParameter);
+    await Orchestrator.setup(buildParameter);
 
-    return await CloudRunner.Provider.watchWorkflow();
+    return await Orchestrator.Provider.watchWorkflow();
   }
 }
