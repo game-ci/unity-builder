@@ -5,3 +5,5 @@ lib/
 .vsconfig
 yarn-error.log
 .orig
+$LOG_FILE
+temp/
