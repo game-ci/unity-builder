@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/named
 import { StackResource } from '@aws-sdk/client-cloudformation';
 
 class CloudRunnerAWSTaskDef {

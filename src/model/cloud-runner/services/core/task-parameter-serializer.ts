@@ -33,6 +33,9 @@ export class TaskParameterSerializer {
         ...TaskParameterSerializer.serializeInput(),
         ...TaskParameterSerializer.serializeCloudRunnerOptions(),
         ...CommandHookService.getSecrets(CommandHookService.getHooks(buildParameters.commandHooks)),
+
+        // Include AWS environment variables for LocalStack compatibility
+        ...TaskParameterSerializer.serializeAwsEnvironmentVariables(),
       ]
         .filter(
           (x) =>
@@ -89,6 +92,28 @@ export class TaskParameterSerializer {
 
   private static serializeCloudRunnerOptions() {
     return TaskParameterSerializer.serializeFromType(CloudRunnerOptions);
+  }
+
+  private static serializeAwsEnvironmentVariables() {
+    const awsEnvironmentVariables = [
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+      'AWS_DEFAULT_REGION',
+      'AWS_REGION',
+      'AWS_S3_ENDPOINT',
+      'AWS_ENDPOINT',
+      'AWS_CLOUD_FORMATION_ENDPOINT',
+      'AWS_ECS_ENDPOINT',
+      'AWS_KINESIS_ENDPOINT',
+      'AWS_CLOUD_WATCH_LOGS_ENDPOINT',
+    ];
+
+    return awsEnvironmentVariables
+      .filter((key) => process.env[key] !== undefined)
+      .map((key) => ({
+        name: key,
+        value: process.env[key] || '',
+      }));
   }
 
   public static ToEnvVarFormat(input: string): string {

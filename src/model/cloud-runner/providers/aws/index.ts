@@ -1,6 +1,4 @@
 import { CloudFormation, DeleteStackCommand, waitUntilStackDeleteComplete } from '@aws-sdk/client-cloudformation';
-import { ECS as ECSClient } from '@aws-sdk/client-ecs';
-import { Kinesis } from '@aws-sdk/client-kinesis';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -16,6 +14,19 @@ import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
 import { TaskService } from './services/task-service';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
+import { AwsClientFactory } from './aws-client-factory';
+import ResourceTracking from '../../services/core/resource-tracking';
+
+const DEFAULT_STACK_WAIT_TIME_SECONDS = 600;
+
+function getStackWaitTime(): number {
+  const overrideValue = Number(process.env.CLOUD_RUNNER_AWS_STACK_WAIT_TIME ?? '');
+  if (!Number.isNaN(overrideValue) && overrideValue > 0) {
+    return overrideValue;
+  }
+
+  return DEFAULT_STACK_WAIT_TIME_SECONDS;
+}
 
 class AWSBuildEnvironment implements ProviderInterface {
   private baseStackName: string;
@@ -77,7 +88,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     await new AwsBaseStack(this.baseStackName).setupBaseStack(CF);
   }
 
@@ -91,10 +102,11 @@ class AWSBuildEnvironment implements ProviderInterface {
     secrets: CloudRunnerSecret[],
   ): Promise<string> {
     process.env.AWS_REGION = Input.region;
-    const ECS = new ECSClient({ region: Input.region });
-    const CF = new CloudFormation({ region: Input.region });
-    AwsTaskRunner.ECS = ECS;
-    AwsTaskRunner.Kinesis = new Kinesis({ region: Input.region });
+    ResourceTracking.logAllocationSummary('aws workflow');
+    await ResourceTracking.logDiskUsageSnapshot('aws workflow (host)');
+    AwsClientFactory.getECS();
+    const CF = AwsClientFactory.getCloudFormation();
+    AwsClientFactory.getKinesis();
     CloudRunnerLogger.log(`AWS Region: ${CF.config.region}`);
     const entrypoint = ['/bin/sh'];
     const startTimeMs = Date.now();
@@ -132,7 +144,8 @@ class AWSBuildEnvironment implements ProviderInterface {
   }
 
   async cleanupResources(CF: CloudFormation, taskDef: CloudRunnerAWSTaskDef) {
-    CloudRunnerLogger.log('Cleanup starting');
+    const stackWaitTimeSeconds = getStackWaitTime();
+    CloudRunnerLogger.log(`Cleanup starting (waiting up to ${stackWaitTimeSeconds}s for stack deletion)`);
     await CF.send(new DeleteStackCommand({ StackName: taskDef.taskDefStackName }));
     if (CloudRunnerOptions.useCleanupCron) {
       await CF.send(new DeleteStackCommand({ StackName: `${taskDef.taskDefStackName}-cleanup` }));
@@ -141,7 +154,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     await waitUntilStackDeleteComplete(
       {
         client: CF,
-        maxWaitTime: 200,
+        maxWaitTime: stackWaitTimeSeconds,
       },
       {
         StackName: taskDef.taskDefStackName,
@@ -150,7 +163,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     await waitUntilStackDeleteComplete(
       {
         client: CF,
-        maxWaitTime: 200,
+        maxWaitTime: stackWaitTimeSeconds,
       },
       {
         StackName: `${taskDef.taskDefStackName}-cleanup`,

@@ -21,6 +21,7 @@ export class AWSCloudFormationTemplates {
 
   public static getSecretDefinitionTemplate(p1: string, p2: string) {
     return `
+          Secrets:
             - Name: '${p1}'
               ValueFrom: !Ref ${p2}Secret
 `;

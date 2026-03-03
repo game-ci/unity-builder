@@ -1,31 +1,22 @@
 import {
-  CloudFormation,
   DescribeStackResourcesCommand,
   DescribeStacksCommand,
   ListStacksCommand,
-  StackSummary,
 } from '@aws-sdk/client-cloudformation';
-import {
-  CloudWatchLogs,
-  DescribeLogGroupsCommand,
-  DescribeLogGroupsCommandInput,
-  LogGroup,
-} from '@aws-sdk/client-cloudwatch-logs';
-import {
-  DescribeTasksCommand,
-  DescribeTasksCommandInput,
-  ECS,
-  ListClustersCommand,
-  ListTasksCommand,
-  ListTasksCommandInput,
-  Task,
-} from '@aws-sdk/client-ecs';
-import { ListObjectsCommand, ListObjectsCommandInput, S3 } from '@aws-sdk/client-s3';
+import type { StackSummary } from '@aws-sdk/client-cloudformation';
+// eslint-disable-next-line import/named
+import { DescribeLogGroupsCommand, DescribeLogGroupsCommandInput } from '@aws-sdk/client-cloudwatch-logs';
+import type { LogGroup } from '@aws-sdk/client-cloudwatch-logs';
+import { DescribeTasksCommand, ListClustersCommand, ListTasksCommand } from '@aws-sdk/client-ecs';
+import type { Task } from '@aws-sdk/client-ecs';
+import { ListObjectsV2Command } from '@aws-sdk/client-s3';
 import Input from '../../../../input';
 import CloudRunnerLogger from '../../../services/core/cloud-runner-logger';
 import { BaseStackFormation } from '../cloud-formations/base-stack-formation';
 import AwsTaskRunner from '../aws-task-runner';
 import CloudRunner from '../../../cloud-runner';
+import { AwsClientFactory } from '../aws-client-factory';
+import SharedWorkspaceLocking from '../../../services/core/shared-workspace-locking';
 
 export class TaskService {
   static async watch() {
@@ -38,12 +29,12 @@ export class TaskService {
 
     return output;
   }
-  public static async getCloudFormationJobStacks() {
+  public static async getCloudFormationJobStacks(): Promise<StackSummary[]> {
     const result: StackSummary[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Cloud Formation Stacks`);
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     const stacks =
       (await CF.send(new ListStacksCommand({}))).StackSummaries?.filter(
         (_x) =>
@@ -90,22 +81,34 @@ export class TaskService {
 
     return result;
   }
-  public static async getTasks() {
+  public static async getTasks(): Promise<{ taskElement: Task; element: string }[]> {
     const result: { taskElement: Task; element: string }[] = [];
     CloudRunnerLogger.log(``);
     CloudRunnerLogger.log(`List Tasks`);
     process.env.AWS_REGION = Input.region;
-    const ecs = new ECS({ region: Input.region });
-    const clusters = (await ecs.send(new ListClustersCommand({}))).clusterArns || [];
+    const ecs = AwsClientFactory.getECS();
+    const clusters: string[] = [];
+    {
+      let nextToken: string | undefined;
+      do {
+        const clusterResponse = await ecs.send(new ListClustersCommand({ nextToken }));
+        clusters.push(...(clusterResponse.clusterArns ?? []));
+        nextToken = clusterResponse.nextToken;
+      } while (nextToken);
+    }
     CloudRunnerLogger.log(`Task Clusters ${clusters.length}`);
     for (const element of clusters) {
-      const input: ListTasksCommandInput = {
-        cluster: element,
-      };
-
-      const list = (await ecs.send(new ListTasksCommand(input))).taskArns || [];
-      if (list.length > 0) {
-        const describeInput: DescribeTasksCommandInput = { tasks: list, cluster: element };
+      const taskArns: string[] = [];
+      {
+        let nextToken: string | undefined;
+        do {
+          const taskResponse = await ecs.send(new ListTasksCommand({ cluster: element, nextToken }));
+          taskArns.push(...(taskResponse.taskArns ?? []));
+          nextToken = taskResponse.nextToken;
+        } while (nextToken);
+      }
+      if (taskArns.length > 0) {
+        const describeInput = { tasks: taskArns, cluster: element };
         const describeList = (await ecs.send(new DescribeTasksCommand(describeInput))).tasks || [];
         if (describeList.length === 0) {
           CloudRunnerLogger.log(`No Tasks`);
@@ -116,8 +119,6 @@ export class TaskService {
           if (taskElement === undefined) {
             continue;
           }
-          taskElement.overrides = {};
-          taskElement.attachments = [];
           if (taskElement.createdAt === undefined) {
             CloudRunnerLogger.log(`Skipping ${taskElement.taskDefinitionArn} no createdAt date`);
             continue;
@@ -132,7 +133,7 @@ export class TaskService {
   }
   public static async awsDescribeJob(job: string) {
     process.env.AWS_REGION = Input.region;
-    const CF = new CloudFormation({ region: Input.region });
+    const CF = AwsClientFactory.getCloudFormation();
     try {
       const stack =
         (await CF.send(new ListStacksCommand({}))).StackSummaries?.find((_x) => _x.StackName === job) || undefined;
@@ -162,18 +163,21 @@ export class TaskService {
       throw error;
     }
   }
-  public static async getLogGroups() {
-    const result: Array<LogGroup> = [];
+  public static async getLogGroups(): Promise<LogGroup[]> {
+    const result: LogGroup[] = [];
     process.env.AWS_REGION = Input.region;
-    const ecs = new CloudWatchLogs();
+    const cwl = AwsClientFactory.getCloudWatchLogs();
     let logStreamInput: DescribeLogGroupsCommandInput = {
       /* logGroupNamePrefix: 'game-ci' */
     };
-    let logGroupsDescribe = await ecs.send(new DescribeLogGroupsCommand(logStreamInput));
+    let logGroupsDescribe = await cwl.send(new DescribeLogGroupsCommand(logStreamInput));
     const logGroups = logGroupsDescribe.logGroups || [];
     while (logGroupsDescribe.nextToken) {
-      logStreamInput = { /* logGroupNamePrefix: 'game-ci',*/ nextToken: logGroupsDescribe.nextToken };
-      logGroupsDescribe = await ecs.send(new DescribeLogGroupsCommand(logStreamInput));
+      logStreamInput = {
+        /* logGroupNamePrefix: 'game-ci',*/
+        nextToken: logGroupsDescribe.nextToken,
+      };
+      logGroupsDescribe = await cwl.send(new DescribeLogGroupsCommand(logStreamInput));
       logGroups.push(...(logGroupsDescribe?.logGroups || []));
     }
 
@@ -195,15 +199,22 @@ export class TaskService {
 
     return result;
   }
-  public static async getLocks() {
+  public static async getLocks(): Promise<Array<{ Key: string }>> {
     process.env.AWS_REGION = Input.region;
-    const s3 = new S3({ region: Input.region });
-    const listRequest: ListObjectsCommandInput = {
+    if (CloudRunner.buildParameters.storageProvider === 'rclone') {
+      // eslint-disable-next-line no-unused-vars
+      type ListObjectsFunction = (prefix: string) => Promise<string[]>;
+      const objects = await (SharedWorkspaceLocking as unknown as { listObjects: ListObjectsFunction }).listObjects('');
+
+      return objects.map((x: string) => ({ Key: x }));
+    }
+    const s3 = AwsClientFactory.getS3();
+    const listRequest = {
       Bucket: CloudRunner.buildParameters.awsStackName,
     };
 
-    const results = await s3.send(new ListObjectsCommand(listRequest));
+    const results = await s3.send(new ListObjectsV2Command(listRequest));
 
-    return results.Contents || [];
+    return (results.Contents || []).map((object) => ({ Key: object.Key || '' }));
   }
 }

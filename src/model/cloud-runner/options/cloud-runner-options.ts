@@ -74,6 +74,14 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('githubRepoName') || CloudRunnerOptions.githubRepo?.split(`/`)[1] || '';
   }
 
+  static get cloudRunnerRepoName(): string {
+    return CloudRunnerOptions.getInput('cloudRunnerRepoName') || 'game-ci/unity-builder';
+  }
+
+  static get cloneDepth(): string {
+    return CloudRunnerOptions.getInput('cloneDepth') || '50';
+  }
+
   static get finalHooks(): string[] {
     return CloudRunnerOptions.getInput('finalHooks')?.split(',') || [];
   }
@@ -199,6 +207,42 @@ class CloudRunnerOptions {
     return CloudRunnerOptions.getInput('awsStackName') || 'game-ci';
   }
 
+  static get awsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsEndpoint');
+  }
+
+  static get awsCloudFormationEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsCloudFormationEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsEcsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsEcsEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsKinesisEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsKinesisEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsCloudWatchLogsEndpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsCloudWatchLogsEndpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  static get awsS3Endpoint(): string | undefined {
+    return CloudRunnerOptions.getInput('awsS3Endpoint') || CloudRunnerOptions.awsEndpoint;
+  }
+
+  // ### ### ###
+  // Storage
+  // ### ### ###
+
+  static get storageProvider(): string {
+    return CloudRunnerOptions.getInput('storageProvider') || 's3';
+  }
+
+  static get rcloneRemote(): string {
+    return CloudRunnerOptions.getInput('rcloneRemote') || '';
+  }
+
   // ### ### ###
   // K8s
   // ### ### ###
@@ -249,6 +293,10 @@ class CloudRunnerOptions {
 
   public static get asyncCloudRunner(): boolean {
     return CloudRunnerOptions.getInput('asyncCloudRunner') === 'true';
+  }
+
+  public static get resourceTracking(): boolean {
+    return CloudRunnerOptions.getInput('resourceTracking') === 'true';
   }
 
   public static get useLargePackages(): boolean {

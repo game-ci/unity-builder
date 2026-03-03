@@ -47,9 +47,9 @@ export class FollowLogStreamService {
     } else if (message.toLowerCase().includes('cannot be found')) {
       FollowLogStreamService.errors += `\n${message}`;
     }
-    if (CloudRunner.buildParameters.cloudRunnerDebug) {
-      output += `${message}\n`;
-    }
+
+    // Always append log lines to output so tests can assert on BuildResults
+    output += `${message}\n`;
     CloudRunnerLogger.log(`[${CloudRunnerStatics.logPrefix}] ${message}`);
 
     return { shouldReadLogs, shouldCleanup, output };

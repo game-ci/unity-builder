@@ -6,4 +6,5 @@ export class ContainerHook {
   public name!: string;
   public image: string = `ubuntu`;
   public hook!: string;
+  public allowFailure: boolean = false; // If true, hook failures won't stop the build
 }

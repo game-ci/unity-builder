@@ -194,6 +194,10 @@ inputs:
     description:
       '[CloudRunner] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
+  resourceTracking:
+    default: 'false'
+    required: false
+    description: '[CloudRunner] Enable resource tracking logs for disk usage and allocation summaries.'
   containerCpu:
     default: ''
     required: false
@@ -265,6 +269,16 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  cloneDepth:
+    default: '50'
+    required: false
+    description: '[CloudRunner] Specifies the depth of the git clone for the repository. Use 0 for full clone.'
+  cloudRunnerRepoName:
+    default: 'game-ci/unity-builder'
+    required: false
+    description:
+      '[CloudRunner] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
+      fixes.'
 
 outputs:
   volume:

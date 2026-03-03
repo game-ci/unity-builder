@@ -1,6 +1,7 @@
 import {
   CloudFormation,
   CreateStackCommand,
+  // eslint-disable-next-line import/named
   CreateStackCommandInput,
   DescribeStackResourcesCommand,
   DescribeStacksCommand,
@@ -16,6 +17,17 @@ import CloudRunner from '../../cloud-runner';
 import { CleanupCronFormation } from './cloud-formations/cleanup-cron-formation';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
 import { TaskDefinitionFormation } from './cloud-formations/task-definition-formation';
+
+const DEFAULT_STACK_WAIT_TIME_SECONDS = 600;
+
+function getStackWaitTime(): number {
+  const overrideValue = Number(process.env.CLOUD_RUNNER_AWS_STACK_WAIT_TIME ?? '');
+  if (!Number.isNaN(overrideValue) && overrideValue > 0) {
+    return overrideValue;
+  }
+
+  return DEFAULT_STACK_WAIT_TIME_SECONDS;
+}
 
 export class AWSJobStack {
   private baseStackName: string;
@@ -147,12 +159,15 @@ export class AWSJobStack {
       Parameters: parameters,
     };
     try {
-      CloudRunnerLogger.log(`Creating job aws formation ${taskDefStackName}`);
+      const stackWaitTimeSeconds = getStackWaitTime();
+      CloudRunnerLogger.log(
+        `Creating job aws formation ${taskDefStackName} (waiting up to ${stackWaitTimeSeconds}s for completion)`,
+      );
       await CF.send(new CreateStackCommand(createStackInput));
       await waitUntilStackCreateComplete(
         {
           client: CF,
-          maxWaitTime: 200,
+          maxWaitTime: stackWaitTimeSeconds,
         },
         { StackName: taskDefStackName },
       );

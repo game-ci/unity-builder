@@ -43,6 +43,7 @@ describe('Cloud Runner Sync Environments', () => {
             - name: '${testSecretName}'
               value: '${testSecretValue}'
         `,
+        cloudRunnerDebug: true,
       });
       const baseImage = new ImageTag(buildParameter);
       if (baseImage.toString().includes('undefined')) {
@@ -62,11 +63,36 @@ describe('Cloud Runner Sync Environments', () => {
           value: x.ParameterValue,
         };
       });
+
+      // Apply the same localhost -> host.docker.internal replacement that the Docker provider does
+      // This ensures the test expectations match what's actually in the output
+      const endpointEnvironmentNames = new Set([
+        'AWS_S3_ENDPOINT',
+        'AWS_ENDPOINT',
+        'AWS_CLOUD_FORMATION_ENDPOINT',
+        'AWS_ECS_ENDPOINT',
+        'AWS_KINESIS_ENDPOINT',
+        'AWS_CLOUD_WATCH_LOGS_ENDPOINT',
+        'INPUT_AWSS3ENDPOINT',
+        'INPUT_AWSENDPOINT',
+      ]);
       const combined = [...environmentVariables, ...secrets]
         .filter((element) => element.value !== undefined && element.value !== '' && typeof element.value !== 'function')
         .map((x) => {
           if (typeof x.value === `string`) {
             x.value = x.value.replace(/\s+/g, '');
+
+            // Apply localhost -> host.docker.internal replacement for LocalStack endpoints
+            // when using local-docker or aws provider (which uses Docker)
+            if (
+              endpointEnvironmentNames.has(x.name) &&
+              (x.value.startsWith('http://localhost') || x.value.startsWith('http://127.0.0.1')) &&
+              (CloudRunnerOptions.providerStrategy === 'local-docker' || CloudRunnerOptions.providerStrategy === 'aws')
+            ) {
+              x.value = x.value
+                .replace('http://localhost', 'http://host.docker.internal')
+                .replace('http://127.0.0.1', 'http://host.docker.internal');
+            }
           }
 
           return x;

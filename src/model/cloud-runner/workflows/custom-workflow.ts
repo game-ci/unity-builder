@@ -32,15 +32,36 @@ export class CustomWorkflow {
       // }
       for (const step of steps) {
         CloudRunnerLogger.log(`Cloud Runner is running in custom job mode`);
-        output += await CloudRunner.Provider.runTaskInWorkflow(
-          CloudRunner.buildParameters.buildGuid,
-          step.image,
-          step.commands,
-          `/${CloudRunnerFolders.buildVolumeFolder}`,
-          `/${CloudRunnerFolders.projectPathAbsolute}/`,
-          environmentVariables,
-          [...secrets, ...step.secrets],
-        );
+        try {
+          const stepOutput = await CloudRunner.Provider.runTaskInWorkflow(
+            CloudRunner.buildParameters.buildGuid,
+            step.image,
+            step.commands,
+            `/${CloudRunnerFolders.buildVolumeFolder}`,
+            `/${CloudRunnerFolders.projectPathAbsolute}/`,
+            environmentVariables,
+            [...secrets, ...step.secrets],
+          );
+          output += stepOutput;
+        } catch (error: any) {
+          const allowFailure = step.allowFailure === true;
+          const stepName = step.name || step.image || 'unknown';
+
+          if (allowFailure) {
+            CloudRunnerLogger.logWarning(
+              `Hook container "${stepName}" failed but allowFailure is true. Continuing build. Error: ${
+                error?.message || error
+              }`,
+            );
+
+            // Continue to next step
+          } else {
+            CloudRunnerLogger.log(
+              `Hook container "${stepName}" failed and allowFailure is false (default). Stopping build.`,
+            );
+            throw error;
+          }
+        }
       }
 
       return output;

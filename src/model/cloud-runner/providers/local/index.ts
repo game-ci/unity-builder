@@ -6,6 +6,7 @@ import { ProviderInterface } from '../provider-interface';
 import CloudRunnerSecret from '../../options/cloud-runner-secret';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+import { quote } from 'shell-quote';
 
 class LocalCloudRunner implements ProviderInterface {
   listResources(): Promise<ProviderResource[]> {
@@ -65,6 +66,20 @@ class LocalCloudRunner implements ProviderInterface {
     CloudRunnerLogger.log(image);
     CloudRunnerLogger.log(buildGuid);
     CloudRunnerLogger.log(commands);
+
+    // On Windows, many built-in hooks use POSIX shell syntax. Execute via bash if available.
+    if (process.platform === 'win32') {
+      const inline = commands
+        .replace(/\r/g, '')
+        .split('\n')
+        .filter((x) => x.trim().length > 0)
+        .join(' ; ');
+
+      // Use shell-quote to properly escape the command string, preventing command injection
+      const bashWrapped = `bash -lc ${quote([inline])}`;
+
+      return await CloudRunnerSystem.Run(bashWrapped);
+    }
 
     return await CloudRunnerSystem.Run(commands);
   }

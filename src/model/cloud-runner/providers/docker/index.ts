@@ -91,8 +91,33 @@ class LocalDockerCloudRunner implements ProviderInterface {
     for (const x of secrets) {
       content.push({ name: x.EnvironmentVariable, value: x.ParameterValue });
     }
+
+    // Replace localhost with host.docker.internal for LocalStack endpoints (similar to K8s)
+    // This allows Docker containers to access LocalStack running on the host
+    const endpointEnvironmentNames = new Set([
+      'AWS_S3_ENDPOINT',
+      'AWS_ENDPOINT',
+      'AWS_CLOUD_FORMATION_ENDPOINT',
+      'AWS_ECS_ENDPOINT',
+      'AWS_KINESIS_ENDPOINT',
+      'AWS_CLOUD_WATCH_LOGS_ENDPOINT',
+      'INPUT_AWSS3ENDPOINT',
+      'INPUT_AWSENDPOINT',
+    ]);
     for (const x of environment) {
-      content.push({ name: x.name, value: x.value });
+      let value = x.value;
+      if (
+        typeof value === 'string' &&
+        endpointEnvironmentNames.has(x.name) &&
+        (value.startsWith('http://localhost') || value.startsWith('http://127.0.0.1'))
+      ) {
+        // Replace localhost with host.docker.internal so containers can access host services
+        value = value
+          .replace('http://localhost', 'http://host.docker.internal')
+          .replace('http://127.0.0.1', 'http://host.docker.internal');
+        CloudRunnerLogger.log(`Replaced localhost with host.docker.internal for ${x.name}: ${value}`);
+      }
+      content.push({ name: x.name, value });
     }
 
     // if (this.buildParameters?.cloudRunnerIntegrationTests) {
@@ -112,14 +137,22 @@ class LocalDockerCloudRunner implements ProviderInterface {
 
     // core.info(JSON.stringify({ workspace, actionFolder, ...this.buildParameters, ...content }, undefined, 4));
     const entrypointFilePath = `start.sh`;
-    const fileContents = `#!/bin/bash
+
+    // Use #!/bin/sh for POSIX compatibility (Alpine-based images like rclone/rclone don't have bash)
+    const fileContents = `#!/bin/sh
 set -e
 
 mkdir -p /github/workspace/cloud-runner-cache
 mkdir -p /data/cache
 cp -a /github/workspace/cloud-runner-cache/. ${sharedFolder}
 ${CommandHookService.ApplyHooksToCommands(commands, this.buildParameters)}
-cp -a ${sharedFolder}. /github/workspace/cloud-runner-cache/
+# Only copy cache directory, exclude retained workspaces to avoid running out of disk space
+if [ -d "${sharedFolder}cache" ]; then
+  cp -a ${sharedFolder}cache/. /github/workspace/cloud-runner-cache/cache/ || true
+fi
+# Copy test files from /data/ root to workspace for test assertions
+# This allows tests to write files to /data/ and have them available in the workspace
+find ${sharedFolder} -maxdepth 1 -type f -name "test-*" -exec cp -a {} /github/workspace/cloud-runner-cache/ \\; || true
 `;
     writeFileSync(`${workspace}/${entrypointFilePath}`, fileContents, {
       flag: 'w',

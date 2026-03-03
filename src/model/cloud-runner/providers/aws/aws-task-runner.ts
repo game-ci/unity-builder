@@ -1,19 +1,5 @@
-import {
-  DescribeTasksCommand,
-  ECS,
-  RunTaskCommand,
-  RunTaskCommandInput,
-  Task,
-  waitUntilTasksRunning,
-} from '@aws-sdk/client-ecs';
-import {
-  DescribeStreamCommand,
-  DescribeStreamCommandOutput,
-  GetRecordsCommand,
-  GetRecordsCommandOutput,
-  GetShardIteratorCommand,
-  Kinesis,
-} from '@aws-sdk/client-kinesis';
+import { DescribeTasksCommand, RunTaskCommand, waitUntilTasksRunning } from '@aws-sdk/client-ecs';
+import { DescribeStreamCommand, GetRecordsCommand, GetShardIteratorCommand } from '@aws-sdk/client-kinesis';
 import CloudRunnerEnvironmentVariable from '../../options/cloud-runner-environment-variable';
 import * as core from '@actions/core';
 import CloudRunnerAWSTaskDef from './cloud-runner-aws-task-def';
@@ -25,11 +11,48 @@ import { CommandHookService } from '../../services/hooks/command-hook-service';
 import { FollowLogStreamService } from '../../services/core/follow-log-stream-service';
 import CloudRunnerOptions from '../../options/cloud-runner-options';
 import GitHub from '../../../github';
+import { AwsClientFactory } from './aws-client-factory';
 
 class AWSTaskRunner {
-  public static ECS: ECS;
-  public static Kinesis: Kinesis;
   private static readonly encodedUnderscore = `$252F`;
+
+  /**
+   * Transform localhost endpoints to host.docker.internal for container environments.
+   * When LocalStack is used, ECS tasks run in Docker containers that need to reach
+   * LocalStack on the host machine via host.docker.internal.
+   */
+  private static transformEndpointsForContainer(
+    environment: CloudRunnerEnvironmentVariable[],
+  ): CloudRunnerEnvironmentVariable[] {
+    const endpointEnvironmentNames = new Set([
+      'AWS_S3_ENDPOINT',
+      'AWS_ENDPOINT',
+      'AWS_CLOUD_FORMATION_ENDPOINT',
+      'AWS_ECS_ENDPOINT',
+      'AWS_KINESIS_ENDPOINT',
+      'AWS_CLOUD_WATCH_LOGS_ENDPOINT',
+      'INPUT_AWSS3ENDPOINT',
+      'INPUT_AWSENDPOINT',
+    ]);
+
+    return environment.map((x) => {
+      let value = x.value;
+      if (
+        typeof value === 'string' &&
+        endpointEnvironmentNames.has(x.name) &&
+        (value.startsWith('http://localhost') || value.startsWith('http://127.0.0.1'))
+      ) {
+        // Replace localhost with host.docker.internal so ECS containers can access host services
+        value = value
+          .replace('http://localhost', 'http://host.docker.internal')
+          .replace('http://127.0.0.1', 'http://host.docker.internal');
+        CloudRunnerLogger.log(`AWS TaskRunner: Replaced localhost with host.docker.internal for ${x.name}: ${value}`);
+      }
+
+      return { name: x.name, value };
+    });
+  }
+
   static async runTask(
     taskDef: CloudRunnerAWSTaskDef,
     environment: CloudRunnerEnvironmentVariable[],
@@ -47,6 +70,9 @@ class AWSTaskRunner {
     const streamName =
       taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
 
+    // Transform localhost endpoints for container environment
+    const transformedEnvironment = AWSTaskRunner.transformEndpointsForContainer(environment);
+
     const runParameters = {
       cluster,
       taskDefinition,
@@ -55,7 +81,7 @@ class AWSTaskRunner {
         containerOverrides: [
           {
             name: taskDef.taskDefStackName,
-            environment,
+            environment: transformedEnvironment,
             command: ['-c', CommandHookService.ApplyHooksToCommands(commands, CloudRunner.buildParameters)],
           },
         ],
@@ -75,7 +101,7 @@ class AWSTaskRunner {
       throw new Error(`Container Overrides length must be at most 8192`);
     }
 
-    const task = await AWSTaskRunner.ECS.send(new RunTaskCommand(runParameters as RunTaskCommandInput));
+    const task = await AwsClientFactory.getECS().send(new RunTaskCommand(runParameters as any));
     const taskArn = task.tasks?.[0].taskArn || '';
     CloudRunnerLogger.log('Cloud runner job is starting');
     await AWSTaskRunner.waitUntilTaskRunning(taskArn, cluster);
@@ -98,9 +124,13 @@ class AWSTaskRunner {
     let containerState;
     let taskData;
     while (exitCode === undefined) {
-      await new Promise((resolve) => resolve(10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       taskData = await AWSTaskRunner.describeTasks(cluster, taskArn);
-      containerState = taskData.containers?.[0];
+      const containers = taskData?.containers as any[] | undefined;
+      if (!containers || containers.length === 0) {
+        continue;
+      }
+      containerState = containers[0];
       exitCode = containerState?.exitCode;
     }
     CloudRunnerLogger.log(`Container State: ${JSON.stringify(containerState, undefined, 4)}`);
@@ -125,19 +155,18 @@ class AWSTaskRunner {
     try {
       await waitUntilTasksRunning(
         {
-          client: AWSTaskRunner.ECS,
-          maxWaitTime: 120,
+          client: AwsClientFactory.getECS(),
+          maxWaitTime: 300,
+          minDelay: 5,
+          maxDelay: 30,
         },
         { tasks: [taskArn], cluster },
       );
     } catch (error_) {
       const error = error_ as Error;
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      CloudRunnerLogger.log(
-        `Cloud runner job has ended ${
-          (await AWSTaskRunner.describeTasks(cluster, taskArn)).containers?.[0].lastStatus
-        }`,
-      );
+      const taskAfterError = await AWSTaskRunner.describeTasks(cluster, taskArn);
+      CloudRunnerLogger.log(`Cloud runner job has ended ${taskAfterError?.containers?.[0]?.lastStatus}`);
 
       core.setFailed(error);
       core.error(error);
@@ -145,11 +174,31 @@ class AWSTaskRunner {
   }
 
   static async describeTasks(clusterName: string, taskArn: string) {
-    const tasks = await AWSTaskRunner.ECS.send(new DescribeTasksCommand({ cluster: clusterName, tasks: [taskArn] }));
-    if (tasks.tasks?.[0]) {
-      return tasks.tasks?.[0];
-    } else {
-      throw new Error('No task found');
+    const maxAttempts = 10;
+    let delayMs = 1000;
+    const maxDelayMs = 60000;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const tasks = await AwsClientFactory.getECS().send(
+          new DescribeTasksCommand({ cluster: clusterName, tasks: [taskArn] }),
+        );
+        if (tasks.tasks?.[0]) {
+          return tasks.tasks?.[0];
+        }
+        throw new Error('No task found');
+      } catch (error: any) {
+        const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
+        if (!isThrottle || attempt === maxAttempts) {
+          throw error;
+        }
+        const jitterMs = Math.floor(Math.random() * Math.min(1000, delayMs));
+        const sleepMs = delayMs + jitterMs;
+        CloudRunnerLogger.log(
+          `AWS throttled DescribeTasks (attempt ${attempt}/${maxAttempts}), backing off ${sleepMs}ms (${delayMs} + jitter ${jitterMs})`,
+        );
+        await new Promise((r) => setTimeout(r, sleepMs));
+        delayMs = Math.min(delayMs * 2, maxDelayMs);
+      }
     }
   }
 
@@ -170,6 +219,9 @@ class AWSTaskRunner {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const taskData = await AWSTaskRunner.describeTasks(clusterName, taskArn);
       ({ timestamp, shouldReadLogs } = AWSTaskRunner.checkStreamingShouldContinue(taskData, timestamp, shouldReadLogs));
+      if (taskData?.lastStatus !== 'RUNNING') {
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+      }
       ({ iterator, shouldReadLogs, output, shouldCleanup } = await AWSTaskRunner.handleLogStreamIteration(
         iterator,
         shouldReadLogs,
@@ -187,7 +239,22 @@ class AWSTaskRunner {
     output: string,
     shouldCleanup: boolean,
   ) {
-    const records = await AWSTaskRunner.Kinesis.send(new GetRecordsCommand({ ShardIterator: iterator }));
+    let records: any;
+    try {
+      records = await AwsClientFactory.getKinesis().send(new GetRecordsCommand({ ShardIterator: iterator }));
+    } catch (error: any) {
+      const isThrottle = error?.name === 'ThrottlingException' || /rate exceeded/i.test(String(error?.message));
+      if (isThrottle) {
+        const baseBackoffMs = 1000;
+        const jitterMs = Math.floor(Math.random() * 1000);
+        const sleepMs = baseBackoffMs + jitterMs;
+        CloudRunnerLogger.log(`AWS throttled GetRecords, backing off ${sleepMs}ms (1000 + jitter ${jitterMs})`);
+        await new Promise((r) => setTimeout(r, sleepMs));
+
+        return { iterator, shouldReadLogs, output, shouldCleanup };
+      }
+      throw error;
+    }
     iterator = records.NextShardIterator || '';
     ({ shouldReadLogs, output, shouldCleanup } = AWSTaskRunner.logRecords(
       records,
@@ -200,7 +267,7 @@ class AWSTaskRunner {
     return { iterator, shouldReadLogs, output, shouldCleanup };
   }
 
-  private static checkStreamingShouldContinue(taskData: Task, timestamp: number, shouldReadLogs: boolean) {
+  private static checkStreamingShouldContinue(taskData: any, timestamp: number, shouldReadLogs: boolean) {
     if (taskData?.lastStatus === 'UNKNOWN') {
       CloudRunnerLogger.log('## Cloud runner job unknwon');
     }
@@ -220,7 +287,7 @@ class AWSTaskRunner {
   }
 
   private static logRecords(
-    records: GetRecordsCommandOutput,
+    records: any,
     iterator: string,
     shouldReadLogs: boolean,
     output: string,
@@ -248,13 +315,13 @@ class AWSTaskRunner {
   }
 
   private static async getLogStream(kinesisStreamName: string) {
-    return await AWSTaskRunner.Kinesis.send(new DescribeStreamCommand({ StreamName: kinesisStreamName }));
+    return await AwsClientFactory.getKinesis().send(new DescribeStreamCommand({ StreamName: kinesisStreamName }));
   }
 
-  private static async getLogIterator(stream: DescribeStreamCommandOutput) {
+  private static async getLogIterator(stream: any) {
     return (
       (
-        await AWSTaskRunner.Kinesis.send(
+        await AwsClientFactory.getKinesis().send(
           new GetShardIteratorCommand({
             ShardIteratorType: 'TRIM_HORIZON',
             StreamName: stream.StreamDescription?.StreamName ?? '',

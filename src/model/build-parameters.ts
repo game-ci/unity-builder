@@ -56,6 +56,14 @@ class BuildParameters {
   public providerStrategy!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
+  public awsEndpoint?: string;
+  public awsCloudFormationEndpoint?: string;
+  public awsEcsEndpoint?: string;
+  public awsKinesisEndpoint?: string;
+  public awsCloudWatchLogsEndpoint?: string;
+  public awsS3Endpoint?: string;
+  public storageProvider!: string;
+  public rcloneRemote!: string;
   public kubeConfig!: string;
   public containerMemory!: string;
   public containerCpu!: string;
@@ -76,6 +84,8 @@ class BuildParameters {
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
+  public cloudRunnerRepoName!: string;
+  public cloneDepth!: number;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
@@ -198,9 +208,19 @@ class BuildParameters {
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
       cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
       cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
+      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || CloudRunnerOptions.cloudRunnerRepoName,
+      cloudRunnerRepoName: CloudRunnerOptions.cloudRunnerRepoName,
+      cloneDepth: Number.parseInt(CloudRunnerOptions.cloneDepth),
       isCliMode: Cli.isCliMode,
       awsStackName: CloudRunnerOptions.awsStackName,
+      awsEndpoint: CloudRunnerOptions.awsEndpoint,
+      awsCloudFormationEndpoint: CloudRunnerOptions.awsCloudFormationEndpoint,
+      awsEcsEndpoint: CloudRunnerOptions.awsEcsEndpoint,
+      awsKinesisEndpoint: CloudRunnerOptions.awsKinesisEndpoint,
+      awsCloudWatchLogsEndpoint: CloudRunnerOptions.awsCloudWatchLogsEndpoint,
+      awsS3Endpoint: CloudRunnerOptions.awsS3Endpoint,
+      storageProvider: CloudRunnerOptions.storageProvider,
+      rcloneRemote: CloudRunnerOptions.rcloneRemote,
       gitSha: Input.gitSha,
       logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
       buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),

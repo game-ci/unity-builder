@@ -55,7 +55,10 @@ class Docker {
     if (!existsSync(githubHome)) mkdirSync(githubHome);
     const githubWorkflow = path.join(runnerTempPath, '_github_workflow');
     if (!existsSync(githubWorkflow)) mkdirSync(githubWorkflow);
-    const commandPrefix = image === `alpine` ? `/bin/sh` : `/bin/bash`;
+
+    // Alpine-based images (alpine, rclone/rclone, etc.) don't have /bin/bash, only /bin/sh
+    const isAlpineBasedImage = image === 'alpine' || image.startsWith('rclone/');
+    const commandPrefix = isAlpineBasedImage ? `/bin/sh` : `/bin/bash`;
 
     return `docker run \
             --workdir ${dockerWorkspacePath} \
