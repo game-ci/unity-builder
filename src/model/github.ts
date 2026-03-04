@@ -1,6 +1,6 @@
-import CloudRunnerLogger from './cloud-runner/services/core/cloud-runner-logger';
-import CloudRunner from './cloud-runner/cloud-runner';
-import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
+import OrchestratorLogger from './orchestrator/services/core/orchestrator-logger';
+import Orchestrator from './orchestrator/orchestrator';
+import OrchestratorOptions from './orchestrator/options/orchestrator-options';
 import * as core from '@actions/core';
 import { Octokit } from '@octokit/core';
 
@@ -19,15 +19,15 @@ class GitHub {
   }
   private static get octokitPAT() {
     return new Octokit({
-      auth: CloudRunner.buildParameters.gitPrivateToken,
+      auth: Orchestrator.buildParameters.gitPrivateToken,
     });
   }
   private static get sha() {
-    return CloudRunner.buildParameters.gitSha;
+    return Orchestrator.buildParameters.gitSha;
   }
 
   private static get checkName() {
-    return `Cloud Runner (${CloudRunner.buildParameters.buildGuid})`;
+    return `Orchestrator (${Orchestrator.buildParameters.buildGuid})`;
   }
 
   private static get nameReadable() {
@@ -35,24 +35,24 @@ class GitHub {
   }
 
   private static get checkRunId() {
-    return CloudRunner.buildParameters.githubCheckId;
+    return Orchestrator.buildParameters.githubCheckId;
   }
 
   private static get owner() {
-    return CloudRunnerOptions.githubOwner;
+    return OrchestratorOptions.githubOwner;
   }
 
   private static get repo() {
-    return CloudRunnerOptions.githubRepoName;
+    return OrchestratorOptions.githubRepoName;
   }
 
   public static async createGitHubCheck(summary: string) {
-    if (!CloudRunner.buildParameters.githubChecks) {
+    if (!Orchestrator.buildParameters.githubChecks) {
       return ``;
     }
     GitHub.startedDate = new Date().toISOString();
 
-    CloudRunnerLogger.log(`Creating github check`);
+    OrchestratorLogger.log(`Creating github check`);
     const data = {
       owner: GitHub.owner,
       repo: GitHub.repo,
@@ -61,7 +61,7 @@ class GitHub {
       head_sha: GitHub.sha,
       status: 'queued',
       // eslint-disable-next-line camelcase
-      external_id: CloudRunner.buildParameters.buildGuid,
+      external_id: Orchestrator.buildParameters.buildGuid,
       // eslint-disable-next-line camelcase
       started_at: GitHub.startedDate,
       output: {
@@ -79,7 +79,7 @@ class GitHub {
     };
     const result = await GitHub.createGitHubCheckRequest(data);
 
-    CloudRunnerLogger.log(`Creating github check ${result.status}`);
+    OrchestratorLogger.log(`Creating github check ${result.status}`);
 
     return result.data.id.toString();
   }
@@ -90,11 +90,11 @@ class GitHub {
     result = `neutral`,
     status = `in_progress`,
   ) {
-    if (`${CloudRunner.buildParameters.githubChecks}` !== `true`) {
+    if (`${Orchestrator.buildParameters.githubChecks}` !== `true`) {
       return;
     }
-    CloudRunnerLogger.log(
-      `githubChecks: ${CloudRunner.buildParameters.githubChecks} checkRunId: ${GitHub.checkRunId} sha: ${GitHub.sha} async: ${CloudRunner.isCloudRunnerAsyncEnvironment}`,
+    OrchestratorLogger.log(
+      `githubChecks: ${Orchestrator.buildParameters.githubChecks} checkRunId: ${GitHub.checkRunId} sha: ${GitHub.sha} async: ${Orchestrator.isOrchestratorAsyncEnvironment}`,
     );
     GitHub.longDescriptionContent += `\n${longDescription}`;
     if (GitHub.result !== `success` && GitHub.result !== `failure`) {
@@ -130,7 +130,7 @@ class GitHub {
       data.conclusion = result;
     }
 
-    await (CloudRunner.isCloudRunnerAsyncEnvironment || GitHub.forceAsyncTest
+    await (Orchestrator.isOrchestratorAsyncEnvironment || GitHub.forceAsyncTest
       ? GitHub.runUpdateAsyncChecksWorkflow(data, `update`)
       : GitHub.updateGitHubCheckRequest(data));
   }
@@ -152,7 +152,7 @@ class GitHub {
       repo: GitHub.repo,
     });
     const workflows = workflowsResult.data.workflows;
-    CloudRunnerLogger.log(`Got ${workflows.length} workflows`);
+    OrchestratorLogger.log(`Got ${workflows.length} workflows`);
     let selectedId = ``;
     for (let index = 0; index < workflowsResult.data.total_count; index++) {
       if (workflows[index].name === GitHub.asyncChecksApiWorkflowName) {
@@ -168,7 +168,7 @@ class GitHub {
       repo: GitHub.repo,
       // eslint-disable-next-line camelcase
       workflow_id: selectedId,
-      ref: CloudRunnerOptions.branch,
+      ref: OrchestratorOptions.branch,
       inputs: {
         checksObject: JSON.stringify({ data, mode }),
       },
@@ -176,7 +176,7 @@ class GitHub {
   }
 
   static async triggerWorkflowOnComplete(triggerWorkflowOnComplete: string[]) {
-    const isLocalAsync = CloudRunner.buildParameters.asyncWorkflow && !CloudRunner.isCloudRunnerAsyncEnvironment;
+    const isLocalAsync = Orchestrator.buildParameters.asyncWorkflow && !Orchestrator.isOrchestratorAsyncEnvironment;
     if (isLocalAsync || triggerWorkflowOnComplete === undefined || triggerWorkflowOnComplete.length === 0) {
       return;
     }
@@ -186,7 +186,7 @@ class GitHub {
         repo: GitHub.repo,
       });
       const workflows = workflowsResult.data.workflows;
-      CloudRunnerLogger.log(`Got ${workflows.length} workflows`);
+      OrchestratorLogger.log(`Got ${workflows.length} workflows`);
       for (const element of triggerWorkflowOnComplete) {
         let selectedId = ``;
         for (let index = 0; index < workflowsResult.data.total_count; index++) {
@@ -203,9 +203,9 @@ class GitHub {
           repo: GitHub.repo,
           // eslint-disable-next-line camelcase
           workflow_id: selectedId,
-          ref: CloudRunnerOptions.branch,
+          ref: OrchestratorOptions.branch,
           inputs: {
-            buildGuid: CloudRunner.buildParameters.buildGuid,
+            buildGuid: Orchestrator.buildParameters.buildGuid,
           },
         });
       }

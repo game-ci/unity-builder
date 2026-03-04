@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Action, BuildParameters, Cache, CloudRunner, Docker, ImageTag, Output } from './model';
+import { Action, BuildParameters, Cache, Orchestrator, Docker, ImageTag, Output } from './model';
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
@@ -33,7 +33,7 @@ async function runMain() {
               ...buildParameters,
             });
     } else {
-      await CloudRunner.run(buildParameters, baseImage.toString());
+      await Orchestrator.run(buildParameters, baseImage.toString());
       exitCode = 0;
     }
 

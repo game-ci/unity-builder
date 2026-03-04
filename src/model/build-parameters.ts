@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
-import CloudRunnerConstants from './cloud-runner/options/cloud-runner-constants';
-import CloudRunnerBuildGuid from './cloud-runner/options/cloud-runner-guid';
+import OrchestratorConstants from './orchestrator/options/orchestrator-constants';
+import OrchestratorBuildGuid from './orchestrator/options/orchestrator-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -10,8 +10,8 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
 import GitHub from './github';
-import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
-import CloudRunner from './cloud-runner/cloud-runner';
+import OrchestratorOptions from './orchestrator/options/orchestrator-options';
+import Orchestrator from './orchestrator/orchestrator';
 import * as core from '@actions/core';
 
 class BuildParameters {
@@ -84,13 +84,13 @@ class BuildParameters {
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
-  public cloudRunnerRepoName!: string;
+  public orchestratorRepoName!: string;
   public cloneDepth!: number;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
-  public cloudRunnerBranch!: string;
-  public cloudRunnerDebug!: boolean | undefined;
+  public orchestratorBranch!: string;
+  public orchestratorDebug!: boolean | undefined;
   public buildPlatform!: string | undefined;
   public isCliMode!: boolean;
   public maxRetainedWorkspaces!: number;
@@ -108,7 +108,7 @@ class BuildParameters {
   public dockerWorkspacePath!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.maxRetainedWorkspaces > 0 && CloudRunner.lockedWorkspace !== ``;
+    return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
 
   static async create(): Promise<BuildParameters> {
@@ -193,52 +193,52 @@ class BuildParameters {
       dockerIsolationMode: Input.dockerIsolationMode,
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
-      providerStrategy: CloudRunnerOptions.providerStrategy,
-      buildPlatform: CloudRunnerOptions.buildPlatform,
-      kubeConfig: CloudRunnerOptions.kubeConfig,
-      containerMemory: CloudRunnerOptions.containerMemory,
-      containerCpu: CloudRunnerOptions.containerCpu,
-      containerNamespace: CloudRunnerOptions.containerNamespace,
-      kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
-      kubeVolume: CloudRunnerOptions.kubeVolume,
-      postBuildContainerHooks: CloudRunnerOptions.postBuildContainerHooks,
-      preBuildContainerHooks: CloudRunnerOptions.preBuildContainerHooks,
-      customJob: CloudRunnerOptions.customJob,
+      providerStrategy: OrchestratorOptions.providerStrategy,
+      buildPlatform: OrchestratorOptions.buildPlatform,
+      kubeConfig: OrchestratorOptions.kubeConfig,
+      containerMemory: OrchestratorOptions.containerMemory,
+      containerCpu: OrchestratorOptions.containerCpu,
+      containerNamespace: OrchestratorOptions.containerNamespace,
+      kubeVolumeSize: OrchestratorOptions.kubeVolumeSize,
+      kubeVolume: OrchestratorOptions.kubeVolume,
+      postBuildContainerHooks: OrchestratorOptions.postBuildContainerHooks,
+      preBuildContainerHooks: OrchestratorOptions.preBuildContainerHooks,
+      customJob: OrchestratorOptions.customJob,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || CloudRunnerOptions.cloudRunnerRepoName,
-      cloudRunnerRepoName: CloudRunnerOptions.cloudRunnerRepoName,
-      cloneDepth: Number.parseInt(CloudRunnerOptions.cloneDepth),
+      orchestratorBranch: OrchestratorOptions.orchestratorBranch.split('/').reverse()[0],
+      orchestratorDebug: OrchestratorOptions.orchestratorDebug,
+      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || OrchestratorOptions.orchestratorRepoName,
+      orchestratorRepoName: OrchestratorOptions.orchestratorRepoName,
+      cloneDepth: Number.parseInt(OrchestratorOptions.cloneDepth),
       isCliMode: Cli.isCliMode,
-      awsStackName: CloudRunnerOptions.awsStackName,
-      awsEndpoint: CloudRunnerOptions.awsEndpoint,
-      awsCloudFormationEndpoint: CloudRunnerOptions.awsCloudFormationEndpoint,
-      awsEcsEndpoint: CloudRunnerOptions.awsEcsEndpoint,
-      awsKinesisEndpoint: CloudRunnerOptions.awsKinesisEndpoint,
-      awsCloudWatchLogsEndpoint: CloudRunnerOptions.awsCloudWatchLogsEndpoint,
-      awsS3Endpoint: CloudRunnerOptions.awsS3Endpoint,
-      storageProvider: CloudRunnerOptions.storageProvider,
-      rcloneRemote: CloudRunnerOptions.rcloneRemote,
+      awsStackName: OrchestratorOptions.awsStackName,
+      awsEndpoint: OrchestratorOptions.awsEndpoint,
+      awsCloudFormationEndpoint: OrchestratorOptions.awsCloudFormationEndpoint,
+      awsEcsEndpoint: OrchestratorOptions.awsEcsEndpoint,
+      awsKinesisEndpoint: OrchestratorOptions.awsKinesisEndpoint,
+      awsCloudWatchLogsEndpoint: OrchestratorOptions.awsCloudWatchLogsEndpoint,
+      awsS3Endpoint: OrchestratorOptions.awsS3Endpoint,
+      storageProvider: OrchestratorOptions.storageProvider,
+      rcloneRemote: OrchestratorOptions.rcloneRemote,
       gitSha: Input.gitSha,
-      logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
-      buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      commandHooks: CloudRunnerOptions.commandHooks,
-      inputPullCommand: CloudRunnerOptions.inputPullCommand,
-      pullInputList: CloudRunnerOptions.pullInputList,
-      kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
-      cacheKey: CloudRunnerOptions.cacheKey,
-      maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
-      useLargePackages: CloudRunnerOptions.useLargePackages,
-      useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
-      garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
-      githubChecks: CloudRunnerOptions.githubChecks,
-      asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
-      githubCheckId: CloudRunnerOptions.githubCheckId,
-      finalHooks: CloudRunnerOptions.finalHooks,
-      skipLfs: CloudRunnerOptions.skipLfs,
-      skipCache: CloudRunnerOptions.skipCache,
+      logId: customAlphabet(OrchestratorConstants.alphabet, 9)(),
+      buildGuid: OrchestratorBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
+      commandHooks: OrchestratorOptions.commandHooks,
+      inputPullCommand: OrchestratorOptions.inputPullCommand,
+      pullInputList: OrchestratorOptions.pullInputList,
+      kubeStorageClass: OrchestratorOptions.kubeStorageClass,
+      cacheKey: OrchestratorOptions.cacheKey,
+      maxRetainedWorkspaces: Number.parseInt(OrchestratorOptions.maxRetainedWorkspaces),
+      useLargePackages: OrchestratorOptions.useLargePackages,
+      useCompressionStrategy: OrchestratorOptions.useCompressionStrategy,
+      garbageMaxAge: OrchestratorOptions.garbageMaxAge,
+      githubChecks: OrchestratorOptions.githubChecks,
+      asyncWorkflow: OrchestratorOptions.asyncOrchestrator,
+      githubCheckId: OrchestratorOptions.githubCheckId,
+      finalHooks: OrchestratorOptions.finalHooks,
+      skipLfs: OrchestratorOptions.skipLfs,
+      skipCache: OrchestratorOptions.skipCache,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
