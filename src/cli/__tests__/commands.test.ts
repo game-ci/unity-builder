@@ -4,6 +4,7 @@ import orchestrateCommand from '../commands/orchestrate';
 import cacheCommand from '../commands/cache';
 import statusCommand from '../commands/status';
 import versionCommand from '../commands/version';
+import updateCommand from '../commands/update';
 
 function createFakeYargs(): { yargs: any; options: Record<string, any> } {
   const options: Record<string, any> = {};
@@ -219,6 +220,36 @@ describe('CLI commands', () => {
 
     it('has a handler function', () => {
       expect(typeof versionCommand.handler).toStrictEqual('function');
+    });
+  });
+
+  describe('update command', () => {
+    it('exports the correct command name', () => {
+      expect(updateCommand.command).toStrictEqual('update');
+    });
+
+    it('has a description', () => {
+      expect(updateCommand.describe).toBeTruthy();
+    });
+
+    it('has a builder function', () => {
+      expect(typeof updateCommand.builder).toStrictEqual('function');
+    });
+
+    it('has a handler function', () => {
+      expect(typeof updateCommand.handler).toStrictEqual('function');
+    });
+
+    it('defines force and version flags', () => {
+      const { yargs, options } = createFakeYargs();
+
+      (updateCommand.builder as Function)(yargs);
+
+      expect(options['force']).toBeDefined();
+      expect(options['force'].type).toStrictEqual('boolean');
+      expect(options['force'].default).toStrictEqual(false);
+      expect(options['version']).toBeDefined();
+      expect(options['version'].type).toStrictEqual('string');
     });
   });
 });

@@ -41,6 +41,7 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('cache');
     expect(result.stdout).toContain('status');
     expect(result.stdout).toContain('version');
+    expect(result.stdout).toContain('update');
   });
 
   it('exits 0 and shows version info for version command', async () => {
@@ -96,5 +97,14 @@ describe('CLI integration', () => {
 
     expect(result.code).toStrictEqual(0);
     expect(result.stdout).toContain('cache');
+  });
+
+  it('exits 0 for update --help', async () => {
+    const result = await runCli(['update', '--help']);
+
+    expect(result.code).toStrictEqual(0);
+    expect(result.stdout).toContain('update');
+    expect(result.stdout).toContain('--force');
+    expect(result.stdout).toContain('--version');
   });
 });

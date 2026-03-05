@@ -9,6 +9,7 @@ import orchestrateCommand from './cli/commands/orchestrate';
 import cacheCommand from './cli/commands/cache';
 import statusCommand from './cli/commands/status';
 import versionCommand from './cli/commands/version';
+import updateCommand from './cli/commands/update';
 import * as core from '@actions/core';
 
 const cli = yargs(hideBin(process.argv))
@@ -20,6 +21,7 @@ const cli = yargs(hideBin(process.argv))
   .command(cacheCommand)
   .command(statusCommand)
   .command(versionCommand)
+  .command(updateCommand)
   .demandCommand(1, 'You must specify a command. Run game-ci --help for available commands.')
   .strict()
   .alias('h', 'help')
