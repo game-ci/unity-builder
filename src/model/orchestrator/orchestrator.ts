@@ -84,7 +84,9 @@ class Orchestrator {
       const token = Orchestrator.buildParameters.gitPrivateToken || process.env.GITHUB_TOKEN || '';
 
       OrchestratorLogger.log(
-        `Checking runner availability (labels: [${Orchestrator.buildParameters.runnerCheckLabels.join(', ')}], min: ${Orchestrator.buildParameters.runnerCheckMinAvailable})`,
+        `Checking runner availability (labels: [${Orchestrator.buildParameters.runnerCheckLabels.join(', ')}], min: ${
+          Orchestrator.buildParameters.runnerCheckMinAvailable
+        })`,
       );
 
       const result = await RunnerAvailabilityService.checkAvailability(

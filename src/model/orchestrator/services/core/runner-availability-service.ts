@@ -149,8 +149,7 @@ export class RunnerAvailabilityService {
         const status = requestError.status ?? requestError.response?.status;
         if (status === 403 || status === 429) {
           const resetTime =
-            requestError.response?.headers?.['x-ratelimit-reset'] ??
-            requestError.headers?.['x-ratelimit-reset'];
+            requestError.response?.headers?.['x-ratelimit-reset'] ?? requestError.headers?.['x-ratelimit-reset'];
           const resetMessage = resetTime
             ? ` Resets at ${new Date(Number.parseInt(String(resetTime), 10) * 1000).toISOString()}`
             : '';

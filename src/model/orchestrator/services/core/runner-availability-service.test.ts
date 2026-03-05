@@ -44,7 +44,7 @@ describe('RunnerAvailabilityService', () => {
 
     it('should fallback when no runners are registered', async () => {
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners: [] } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(true);
@@ -58,7 +58,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'runner-2', status: 'online', busy: false, labels: ['self-hosted', 'linux'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(false);
@@ -72,7 +72,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'runner-2', status: 'online', busy: true, labels: ['self-hosted'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(true);
@@ -85,7 +85,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'runner-1', status: 'offline', busy: false, labels: ['self-hosted'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(true);
@@ -98,7 +98,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'windows-runner', status: 'online', busy: false, labels: ['self-hosted', 'windows'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability(
         'owner',
@@ -119,7 +119,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'windows-runner', status: 'online', busy: false, labels: ['self-hosted', 'windows'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability(
         'owner',
@@ -135,11 +135,9 @@ describe('RunnerAvailabilityService', () => {
     });
 
     it('should respect minAvailable threshold', async () => {
-      const runners = createMockRunners([
-        { name: 'runner-1', status: 'online', busy: false, labels: ['self-hosted'] },
-      ]);
+      const runners = createMockRunners([{ name: 'runner-1', status: 'online', busy: false, labels: ['self-hosted'] }]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       // Need 2, have 1 — should fallback
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 2);
@@ -152,7 +150,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'runner-1', status: 'online', busy: false, labels: ['Self-Hosted', 'Linux'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability(
         'owner',
@@ -167,7 +165,7 @@ describe('RunnerAvailabilityService', () => {
 
     it('should not fallback on API error (fail-open)', async () => {
       const mockRequest = jest.fn().mockRejectedValue(new Error('403 Forbidden'));
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(false);
@@ -181,7 +179,7 @@ describe('RunnerAvailabilityService', () => {
         { name: 'offline', status: 'offline', busy: false, labels: ['self-hosted'] },
       ]);
       const mockRequest = jest.fn().mockResolvedValue({ status: 200, data: { runners } });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
       expect(result.shouldFallback).toBe(false);
@@ -208,7 +206,7 @@ describe('RunnerAvailabilityService', () => {
 
         return Promise.resolve({ status: 200, data: { runners } });
       });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
 
@@ -245,7 +243,7 @@ describe('RunnerAvailabilityService', () => {
 
         return Promise.resolve({ status: 200, data: { runners } });
       });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
 
@@ -271,7 +269,7 @@ describe('RunnerAvailabilityService', () => {
 
         return Promise.resolve({ status: 200, data: { runners: [] } });
       });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
 
@@ -304,7 +302,7 @@ describe('RunnerAvailabilityService', () => {
 
         return Promise.resolve({ status: 200, data: { runners } });
       });
-      MockedOctokit.mockImplementation(() => ({ request: mockRequest }) as any);
+      MockedOctokit.mockImplementation(() => ({ request: mockRequest } as any));
 
       const result = await RunnerAvailabilityService.checkAvailability('owner', 'repo', 'token', [], 1);
 
