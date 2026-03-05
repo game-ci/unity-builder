@@ -45,7 +45,7 @@
     "test-i-k8s": "cross-env orchestratorTests=true providerStrategy=k8s yarn test -i -t \"orchestrator\""
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=20.x"
   },
   "dependencies": {
     "@actions/cache": "^4.0.0",
