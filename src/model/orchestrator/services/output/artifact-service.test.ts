@@ -518,5 +518,90 @@ describe('ArtifactUploadHandler', () => {
       expect(result.success).toBe(false);
       expect(result.entries[0].error).toContain('destination URI');
     });
+
+    it('should fail storage upload when destination URI has invalid format', async () => {
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.statSync.mockReturnValue({ isDirectory: () => false, size: 256 } as any);
+
+      const manifest: OutputManifest = {
+        buildGuid: 'test-guid',
+        timestamp: new Date().toISOString(),
+        outputs: [{ type: 'build', path: './Builds/', size: 256 }],
+      };
+
+      const config: ArtifactUploadConfig = {
+        target: 'storage',
+        destination: '/just/a/local/path',
+        compression: 'gzip',
+        retentionDays: 30,
+      };
+
+      const result = await ArtifactUploadHandler.uploadArtifacts(manifest, config, projectPath);
+      expect(result.success).toBe(false);
+      expect(result.entries[0].error).toContain('Invalid storage destination URI');
+    });
+
+    it('should fail storage upload when rclone is not installed', async () => {
+      // Mock child_process.execFileSync to throw (rclone not found)
+      const childProcess = require('node:child_process');
+      const originalExecFileSync = childProcess.execFileSync;
+      childProcess.execFileSync = jest.fn(() => {
+        throw new Error('ENOENT');
+      });
+
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.statSync.mockReturnValue({ isDirectory: () => false, size: 256 } as any);
+
+      const manifest: OutputManifest = {
+        buildGuid: 'test-guid',
+        timestamp: new Date().toISOString(),
+        outputs: [{ type: 'build', path: './Builds/', size: 256 }],
+      };
+
+      const config: ArtifactUploadConfig = {
+        target: 'storage',
+        destination: 's3:my-bucket/artifacts',
+        compression: 'gzip',
+        retentionDays: 30,
+      };
+
+      const result = await ArtifactUploadHandler.uploadArtifacts(manifest, config, projectPath);
+      expect(result.success).toBe(false);
+      expect(result.entries[0].error).toContain('rclone is not installed');
+
+      // Restore
+      childProcess.execFileSync = originalExecFileSync;
+    });
+
+    it('should accept valid rclone storage URI formats', async () => {
+      // Mock child_process.execFileSync to succeed (rclone available)
+      const childProcess = require('node:child_process');
+      const originalExecFileSync = childProcess.execFileSync;
+      childProcess.execFileSync = jest.fn(() => 'rclone v1.65.0');
+
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.statSync.mockReturnValue({ isDirectory: () => false, size: 256 } as any);
+
+      const manifest: OutputManifest = {
+        buildGuid: 'test-guid',
+        timestamp: new Date().toISOString(),
+        outputs: [{ type: 'build', path: './Builds/', size: 256 }],
+      };
+
+      // s3:bucket format should pass URI validation and reach the exec call
+      const config: ArtifactUploadConfig = {
+        target: 'storage',
+        destination: 's3:my-bucket/artifacts',
+        compression: 'gzip',
+        retentionDays: 30,
+      };
+
+      const result = await ArtifactUploadHandler.uploadArtifacts(manifest, config, projectPath);
+      // Should succeed because exec is mocked to return 0
+      expect(result.entries[0].success).toBe(true);
+
+      // Restore
+      childProcess.execFileSync = originalExecFileSync;
+    });
   });
 });

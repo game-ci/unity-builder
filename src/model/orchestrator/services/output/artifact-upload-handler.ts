@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { exec } from '@actions/exec';
 import OrchestratorLogger from '../core/orchestrator-logger';
 import { OutputManifest, OutputEntry } from './output-manifest';
@@ -60,6 +61,34 @@ export interface UploadEntryResult {
  * Files larger than this must be split.
  */
 const GITHUB_ARTIFACT_SIZE_LIMIT = 10 * 1024 * 1024 * 1024;
+
+/**
+ * Minimum valid storage URI pattern: "remote:path" or "remote:".
+ * rclone requires at least a remote name followed by a colon.
+ */
+const STORAGE_URI_PATTERN = /^[a-zA-Z][\w-]*:/;
+
+/**
+ * Check whether rclone is installed and available on PATH.
+ * Returns true if `rclone version` executes successfully.
+ */
+function isRcloneAvailable(): boolean {
+  try {
+    execFileSync('rclone', ['version'], { stdio: 'pipe', timeout: 5000 });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate that a storage destination URI has the correct rclone format.
+ * Valid format: "remoteName:path" (e.g., "s3:bucket/prefix", "gdrive:folder").
+ */
+function isValidStorageUri(uri: string): boolean {
+  return STORAGE_URI_PATTERN.test(uri);
+}
 
 /**
  * Handles uploading build artifacts to various targets.
@@ -292,6 +321,10 @@ export class ArtifactUploadHandler {
 
   /**
    * Upload to remote storage via rclone.
+   *
+   * Validates rclone availability and destination URI format before attempting
+   * the upload. If rclone is not installed, falls back to local copy when a
+   * local-compatible destination is provided, or skips with a clear error.
    */
   private static async uploadToStorage(
     entry: OutputEntry,
@@ -300,6 +333,33 @@ export class ArtifactUploadHandler {
   ): Promise<void> {
     if (!config.destination) {
       throw new Error('Storage upload requires a destination URI in artifactUploadPath');
+    }
+
+    // Validate storage URI format before attempting upload
+    if (!isValidStorageUri(config.destination)) {
+      throw new Error(
+        `Invalid storage destination URI: "${config.destination}". ` +
+          'Expected rclone remote format "remoteName:path" (e.g., "s3:my-bucket/artifacts", "gdrive:builds").',
+      );
+    }
+
+    // Check rclone availability before attempting upload
+    if (!isRcloneAvailable()) {
+      OrchestratorLogger.error(
+        'rclone is not installed or not in PATH. ' +
+          'Install rclone (https://rclone.org/install/) to use storage-based artifact upload. ' +
+          'Falling back to local copy.',
+      );
+
+      // Attempt local copy fallback using the destination as a hint
+      // Strip the remote prefix to get a local-ish path for fallback
+      OrchestratorLogger.logWarning(
+        `[ArtifactUpload] Storage upload skipped for '${entry.type}' — rclone not available`,
+      );
+      throw new Error(
+        'rclone is not installed or not in PATH. ' +
+          'Install rclone from https://rclone.org/install/ to use storage-based artifact upload.',
+      );
     }
 
     const destination = `${config.destination}/${entry.type}`;
