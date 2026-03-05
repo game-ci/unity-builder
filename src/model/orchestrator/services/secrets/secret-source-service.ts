@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import * as core from '@actions/core';
 import OrchestratorLogger from '../core/orchestrator-logger';
 import { OrchestratorSystem } from '../core/orchestrator-system';
 
@@ -13,16 +14,46 @@ export interface SecretSourceDefinition {
 }
 
 /**
+ * Validate that a secret key name contains only safe characters.
+ * Prevents shell injection when keys are interpolated into commands.
+ *
+ * Allowed characters: alphanumeric, hyphens, underscores, dots, forward slashes.
+ *
+ * @param key - The secret key name to validate
+ * @returns The validated key (unchanged)
+ * @throws Error if the key contains disallowed characters
+ */
+export function validateSecretKey(key: string): string {
+  if (!/^[a-zA-Z0-9\-_./]+$/.test(key)) {
+    throw new Error(
+      `Invalid secret key name: "${key}". Keys may only contain alphanumeric characters, hyphens, underscores, dots, and forward slashes.`,
+    );
+  }
+
+  return key;
+}
+
+/**
+ * Mask a secret value so it does not appear in GitHub Actions logs.
+ * Empty or whitespace-only values are skipped (core.setSecret would be a no-op).
+ */
+function maskSecretValue(value: string): void {
+  if (value.trim().length > 0) {
+    core.setSecret(value);
+  }
+}
+
+/**
  * Premade secret sources and custom YAML-based secret source definitions.
  *
  * Premade sources are string shortcuts that expand to shell commands:
- *   - `aws-secrets-manager` — AWS Secrets Manager
- *   - `aws-parameter-store` — AWS Systems Manager Parameter Store
- *   - `gcp-secret-manager` — Google Cloud Secret Manager
- *   - `azure-key-vault` — Azure Key Vault (requires AZURE_VAULT_NAME env var)
- *   - `hashicorp-vault` — HashiCorp Vault KV v2 (requires VAULT_ADDR, optionally VAULT_MOUNT)
- *   - `hashicorp-vault-kv1` — HashiCorp Vault KV v1 (requires VAULT_ADDR, optionally VAULT_MOUNT)
- *   - `env` — Read from environment variables (no shell command needed)
+ *   - `aws-secrets-manager` -- AWS Secrets Manager
+ *   - `aws-parameter-store` -- AWS Systems Manager Parameter Store
+ *   - `gcp-secret-manager` -- Google Cloud Secret Manager
+ *   - `azure-key-vault` -- Azure Key Vault (requires AZURE_VAULT_NAME env var)
+ *   - `hashicorp-vault` -- HashiCorp Vault KV v2 (requires VAULT_ADDR, optionally VAULT_MOUNT)
+ *   - `hashicorp-vault-kv1` -- HashiCorp Vault KV v1 (requires VAULT_ADDR, optionally VAULT_MOUNT)
+ *   - `env` -- Read from environment variables (no shell command needed)
  *
  * Custom YAML format:
  *   sources:
@@ -76,7 +107,7 @@ export class SecretSourceService {
       command: 'vault read -mount="${VAULT_MOUNT:-secret}" -field=value {0}',
       parseOutput: 'raw',
     },
-    'vault': {
+    vault: {
       // Short alias for hashicorp-vault (KV v2)
       name: 'vault',
       command: 'vault kv get -mount="${VAULT_MOUNT:-secret}" -field=value {0}',
@@ -157,29 +188,41 @@ export class SecretSourceService {
   /**
    * Fetch a secret value using the given source definition.
    *
+   * Validates the key against an allowlist pattern before interpolating it
+   * into the command string to prevent shell injection. The fetched secret
+   * value is masked via core.setSecret() so it does not leak in logs.
+   *
    * @param source - The secret source definition to use
    * @param key - The secret key to fetch
    * @returns The secret value, or empty string on failure
    */
   static async fetchSecret(source: SecretSourceDefinition, key: string): Promise<string> {
+    // Validate the key to prevent shell injection
+    validateSecretKey(key);
+
     const command = source.command.replace(/\{0\}/g, key);
 
     try {
       const output = await OrchestratorSystem.Run(command, false, true);
 
+      let value: string;
+
       if (source.parseOutput === 'json-field' && source.jsonField) {
         try {
           const parsed = JSON.parse(output);
-
-          return parsed[source.jsonField] || '';
+          value = parsed[source.jsonField] || '';
         } catch {
           OrchestratorLogger.logWarning(`Failed to parse JSON output from ${source.name} for key ${key}`);
-
-          return output.trim();
+          value = output.trim();
         }
+      } else {
+        value = output.trim();
       }
 
-      return output.trim();
+      // Mask the secret value so it does not appear in GitHub Actions logs
+      maskSecretValue(value);
+
+      return value;
     } catch (error: any) {
       OrchestratorLogger.logWarning(`Failed to fetch secret '${key}' from ${source.name}: ${error.message}`);
 
@@ -189,9 +232,13 @@ export class SecretSourceService {
 
   /**
    * Fetch a secret from an environment variable. No shell command needed.
+   * The value is masked via core.setSecret() so it does not leak in logs.
    */
   static fetchFromEnv(key: string): string {
-    return process.env[key] || '';
+    const value = process.env[key] || '';
+    maskSecretValue(value);
+
+    return value;
   }
 
   /**
@@ -201,10 +248,7 @@ export class SecretSourceService {
    * @param keys - List of secret keys to fetch
    * @returns Map of key -> value
    */
-  static async fetchAll(
-    sourceName: string,
-    keys: string[],
-  ): Promise<Record<string, string>> {
+  static async fetchAll(sourceName: string, keys: string[]): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
 
     if (sourceName === 'env') {
@@ -218,7 +262,9 @@ export class SecretSourceService {
     const source = SecretSourceService.resolveSource(sourceName);
     if (!source) {
       OrchestratorLogger.logWarning(
-        `Unknown secret source '${sourceName}'. Available sources: ${SecretSourceService.getAvailableSources().join(', ')}`,
+        `Unknown secret source '${sourceName}'. Available sources: ${SecretSourceService.getAvailableSources().join(
+          ', ',
+        )}`,
       );
 
       return results;
@@ -254,19 +300,31 @@ export class SecretSourceService {
         }
 
         current = {
-          name: trimmed.replace('- name:', '').trim().replace(/^['"]|['"]$/g, ''),
+          name: trimmed
+            .replace('- name:', '')
+            .trim()
+            .replace(/^['"]|['"]$/g, ''),
           parseOutput: 'raw',
         };
         continue;
       }
 
       if (current && trimmed.startsWith('command:')) {
-        current.command = trimmed.replace('command:', '').trim().replace(/^['"]|['"]$/g, '');
+        current.command = trimmed
+          .replace('command:', '')
+          .trim()
+          .replace(/^['"]|['"]$/g, '');
       } else if (current && trimmed.startsWith('parseOutput:')) {
-        const value = trimmed.replace('parseOutput:', '').trim().replace(/^['"]|['"]$/g, '');
+        const value = trimmed
+          .replace('parseOutput:', '')
+          .trim()
+          .replace(/^['"]|['"]$/g, '');
         current.parseOutput = value as 'raw' | 'json-field';
       } else if (current && trimmed.startsWith('jsonField:')) {
-        current.jsonField = trimmed.replace('jsonField:', '').trim().replace(/^['"]|['"]$/g, '');
+        current.jsonField = trimmed
+          .replace('jsonField:', '')
+          .trim()
+          .replace(/^['"]|['"]$/g, '');
       }
     }
 

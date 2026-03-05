@@ -1,7 +1,14 @@
 import fs from 'node:fs';
-import { SecretSourceService } from './secret-source-service';
+import * as core from '@actions/core';
+import { SecretSourceService, validateSecretKey } from './secret-source-service';
 
 jest.mock('node:fs');
+jest.mock('@actions/core', () => ({
+  setSecret: jest.fn(),
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+}));
 jest.mock('../core/orchestrator-system', () => ({
   OrchestratorSystem: {
     Run: jest.fn().mockResolvedValue(''),
@@ -21,6 +28,69 @@ const mockFs = fs as jest.Mocked<typeof fs>;
 describe('SecretSourceService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('validateSecretKey', () => {
+    it('should accept alphanumeric keys', () => {
+      expect(validateSecretKey('MY_SECRET_KEY')).toBe('MY_SECRET_KEY');
+    });
+
+    it('should accept keys with hyphens', () => {
+      expect(validateSecretKey('my-secret-key')).toBe('my-secret-key');
+    });
+
+    it('should accept keys with dots', () => {
+      expect(validateSecretKey('my.secret.key')).toBe('my.secret.key');
+    });
+
+    it('should accept keys with forward slashes', () => {
+      expect(validateSecretKey('path/to/secret')).toBe('path/to/secret');
+    });
+
+    it('should accept keys with mixed valid characters', () => {
+      expect(validateSecretKey('my-app/prod_db.password')).toBe('my-app/prod_db.password');
+    });
+
+    it('should reject keys with semicolons (shell injection)', () => {
+      expect(() => validateSecretKey('; rm -rf /')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with backticks (command substitution)', () => {
+      expect(() => validateSecretKey('`whoami`')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with dollar signs (variable expansion)', () => {
+      expect(() => validateSecretKey('$HOME')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with pipe characters', () => {
+      expect(() => validateSecretKey('key | cat /etc/passwd')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with ampersands', () => {
+      expect(() => validateSecretKey('key && echo pwned')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with newlines', () => {
+      expect(() => validateSecretKey('key\nmalicious')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with quotes', () => {
+      expect(() => validateSecretKey('"key"')).toThrow('Invalid secret key name');
+      expect(() => validateSecretKey("'key'")).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with parentheses (subshell)', () => {
+      expect(() => validateSecretKey('$(whoami)')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject empty keys', () => {
+      expect(() => validateSecretKey('')).toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with spaces', () => {
+      expect(() => validateSecretKey('key with spaces')).toThrow('Invalid secret key name');
+    });
   });
 
   describe('isPremadeSource', () => {
@@ -111,11 +181,7 @@ describe('SecretSourceService', () => {
       const result = await SecretSourceService.fetchSecret(source, 'MY_SECRET');
 
       expect(result).toBe('my-secret-value');
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('MY_SECRET'),
-        false,
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('MY_SECRET'), false, true);
     });
 
     it('should parse JSON output when parseOutput is json-field', async () => {
@@ -157,6 +223,71 @@ describe('SecretSourceService', () => {
 
       expect(result).toBe('');
     });
+
+    it('should reject keys with shell injection characters', async () => {
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+
+      await expect(SecretSourceService.fetchSecret(source, '; rm -rf /')).rejects.toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with command substitution', async () => {
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+
+      await expect(SecretSourceService.fetchSecret(source, '$(whoami)')).rejects.toThrow('Invalid secret key name');
+    });
+
+    it('should reject keys with backtick command substitution', async () => {
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+
+      await expect(SecretSourceService.fetchSecret(source, '`cat /etc/passwd`')).rejects.toThrow(
+        'Invalid secret key name',
+      );
+    });
+
+    it('should accept keys with valid path-like patterns', async () => {
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      OrchestratorSystem.Run.mockResolvedValue('secret-value');
+
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+      const result = await SecretSourceService.fetchSecret(source, 'prod/database/password');
+
+      expect(result).toBe('secret-value');
+    });
+
+    it('should mask fetched secret values with core.setSecret', async () => {
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      OrchestratorSystem.Run.mockResolvedValue('super-secret-value');
+
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+      await SecretSourceService.fetchSecret(source, 'MY_SECRET');
+
+      expect(core.setSecret).toHaveBeenCalledWith('super-secret-value');
+    });
+
+    it('should not mask empty secret values', async () => {
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      OrchestratorSystem.Run.mockResolvedValue('');
+
+      const source = SecretSourceService.resolveSource('aws-secrets-manager')!;
+      await SecretSourceService.fetchSecret(source, 'MY_SECRET');
+
+      expect(core.setSecret).not.toHaveBeenCalled();
+    });
+
+    it('should mask JSON-extracted secret values', async () => {
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      OrchestratorSystem.Run.mockResolvedValue(JSON.stringify({ value: 'json-secret' }));
+
+      const source = {
+        name: 'test-source',
+        command: 'fetch {0}',
+        parseOutput: 'json-field' as const,
+        jsonField: 'value',
+      };
+      await SecretSourceService.fetchSecret(source, 'KEY');
+
+      expect(core.setSecret).toHaveBeenCalledWith('json-secret');
+    });
   });
 
   describe('fetchFromEnv', () => {
@@ -170,6 +301,19 @@ describe('SecretSourceService', () => {
     it('should return empty string when env var is not set', () => {
       const result = SecretSourceService.fetchFromEnv('NONEXISTENT_KEY_12345');
       expect(result).toBe('');
+    });
+
+    it('should mask env var values with core.setSecret', () => {
+      process.env.TEST_MASK_KEY = 'masked-env-value';
+      SecretSourceService.fetchFromEnv('TEST_MASK_KEY');
+      expect(core.setSecret).toHaveBeenCalledWith('masked-env-value');
+      delete process.env.TEST_MASK_KEY;
+    });
+
+    it('should not mask empty env var values', () => {
+      const result = SecretSourceService.fetchFromEnv('NONEXISTENT_KEY_99999');
+      expect(result).toBe('');
+      expect(core.setSecret).not.toHaveBeenCalled();
     });
   });
 
@@ -189,9 +333,7 @@ describe('SecretSourceService', () => {
 
     it('should fetch all keys from premade source', async () => {
       const { OrchestratorSystem } = require('../core/orchestrator-system');
-      OrchestratorSystem.Run
-        .mockResolvedValueOnce('secret-1')
-        .mockResolvedValueOnce('secret-2');
+      OrchestratorSystem.Run.mockResolvedValueOnce('secret-1').mockResolvedValueOnce('secret-2');
 
       const results = await SecretSourceService.fetchAll('aws-parameter-store', ['param1', 'param2']);
 

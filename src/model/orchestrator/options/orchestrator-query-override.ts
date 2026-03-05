@@ -1,7 +1,8 @@
+import * as core from '@actions/core';
 import Input from '../../input';
 import { GenericInputReader } from '../../input-readers/generic-input-reader';
 import OrchestratorOptions from './orchestrator-options';
-import { SecretSourceService } from '../services/secrets/secret-source-service';
+import { SecretSourceService, validateSecretKey } from '../services/secrets/secret-source-service';
 import OrchestratorLogger from '../services/core/orchestrator-logger';
 
 const formatFunction = (value: string, arguments_: any[]) => {
@@ -49,9 +50,19 @@ class OrchestratorQueryOverride {
       throw new Error(`Should not be trying to run override query on ${query}`);
     }
 
-    return await GenericInputReader.Run(
+    // Validate the query key before interpolating it into a shell command
+    validateSecretKey(query);
+
+    const result = await GenericInputReader.Run(
       formatFunction(OrchestratorOptions.inputPullCommand, [{ key: 0, value: query }]),
     );
+
+    // Mask the fetched secret value so it does not appear in GitHub Actions logs
+    if (result && result.trim().length > 0) {
+      core.setSecret(result);
+    }
+
+    return result;
   }
 
   /**
@@ -80,10 +91,7 @@ class OrchestratorQueryOverride {
         if (definitions.length > 0) {
           OrchestratorLogger.log(`Loaded ${definitions.length} secret source(s) from ${secretSource}`);
           for (const key of queries) {
-            OrchestratorQueryOverride.queryOverrides[key] = await SecretSourceService.fetchSecret(
-              definitions[0],
-              key,
-            );
+            OrchestratorQueryOverride.queryOverrides[key] = await SecretSourceService.fetchSecret(definitions[0], key);
           }
         }
 
