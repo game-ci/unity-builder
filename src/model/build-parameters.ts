@@ -164,6 +164,29 @@ class BuildParameters {
   public azureDiskSizeGb!: string;
   public azureSubnetId!: string;
 
+  // Remote PowerShell provider
+  public remotePowershellHost!: string;
+  public remotePowershellCredential!: string;
+  public remotePowershellTransport!: string;
+
+  // GitHub Actions provider
+  public githubActionsRepo!: string;
+  public githubActionsWorkflow!: string;
+  public githubActionsToken!: string;
+  public githubActionsRef!: string;
+
+  // GitLab CI provider
+  public gitlabProjectId!: string;
+  public gitlabTriggerToken!: string;
+  public gitlabApiUrl!: string;
+  public gitlabRef!: string;
+
+  // Ansible provider
+  public ansibleInventory!: string;
+  public ansiblePlaybook!: string;
+  public ansibleExtraVars!: string;
+  public ansibleVaultPassword!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -352,6 +375,29 @@ class BuildParameters {
       buildArchiveEnabled: Input.buildArchiveEnabled,
       buildArchivePath: Input.buildArchivePath,
       buildArchiveRetention: Input.buildArchiveRetention,
+
+      // Remote PowerShell provider
+      remotePowershellHost: Input.remotePowershellHost,
+      remotePowershellCredential: Input.remotePowershellCredential,
+      remotePowershellTransport: Input.remotePowershellTransport,
+
+      // GitHub Actions provider
+      githubActionsRepo: Input.githubActionsRepo,
+      githubActionsWorkflow: Input.githubActionsWorkflow,
+      githubActionsToken: Input.githubActionsToken,
+      githubActionsRef: Input.githubActionsRef,
+
+      // GitLab CI provider
+      gitlabProjectId: Input.gitlabProjectId,
+      gitlabTriggerToken: Input.gitlabTriggerToken,
+      gitlabApiUrl: Input.gitlabApiUrl,
+      gitlabRef: Input.gitlabRef,
+
+      // Ansible provider
+      ansibleInventory: Input.ansibleInventory,
+      ansiblePlaybook: Input.ansiblePlaybook,
+      ansibleExtraVars: Input.ansibleExtraVars,
+      ansibleVaultPassword: Input.ansibleVaultPassword,
     };
   }
 
