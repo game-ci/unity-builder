@@ -217,6 +217,30 @@ class Orchestrator {
     if (baseImage.includes(`undefined`)) {
       throw new Error(`baseImage is undefined`);
     }
+
+    try {
+      return await Orchestrator.runWithProvider(buildParameters, baseImage);
+    } catch (primaryError: any) {
+      // Retry on fallback provider if enabled and a fallback is configured
+      const fallback = buildParameters.fallbackProviderStrategy;
+      const alreadyOnFallback = buildParameters.providerStrategy === fallback;
+      if (buildParameters.retryOnFallback && fallback && !alreadyOnFallback) {
+        OrchestratorLogger.log(
+          `Primary provider '${buildParameters.providerStrategy}' failed: ${primaryError.message}`,
+        );
+        OrchestratorLogger.log(`Retrying build on fallback provider '${fallback}'...`);
+        buildParameters.providerStrategy = fallback;
+        core.setOutput('providerFallbackUsed', 'true');
+        core.setOutput('providerFallbackReason', `Primary provider failed: ${primaryError.message}`);
+
+        return await Orchestrator.runWithProvider(buildParameters, baseImage);
+      }
+
+      throw primaryError;
+    }
+  }
+
+  private static async runWithProvider(buildParameters: BuildParameters, baseImage: string) {
     await Orchestrator.setup(buildParameters);
 
     // When aws-local mode is enabled, validate AWS CloudFormation templates
@@ -224,12 +248,10 @@ class Orchestrator {
     if (Orchestrator.validateAwsTemplates) {
       await Orchestrator.validateAwsCloudFormationTemplates();
     }
-    await Orchestrator.Provider.setupWorkflow(
-      Orchestrator.buildParameters.buildGuid,
-      Orchestrator.buildParameters,
-      Orchestrator.buildParameters.branch,
-      Orchestrator.defaultSecrets,
-    );
+
+    // Setup workflow with optional init timeout
+    await Orchestrator.setupWorkflowWithTimeout();
+
     try {
       if (buildParameters.maxRetainedWorkspaces > 0) {
         Orchestrator.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
@@ -308,6 +330,39 @@ class Orchestrator {
       await OrchestratorError.handleException(error, Orchestrator.buildParameters, Orchestrator.defaultSecrets);
       throw error;
     }
+  }
+
+  /**
+   * Runs setupWorkflow with an optional timeout. If providerInitTimeout is set and the
+   * provider takes longer than that to initialize, throws an error that triggers
+   * retry-on-fallback (if enabled).
+   */
+  private static async setupWorkflowWithTimeout() {
+    const timeoutSeconds = Orchestrator.buildParameters.providerInitTimeout;
+
+    const setupPromise = Orchestrator.Provider.setupWorkflow(
+      Orchestrator.buildParameters.buildGuid,
+      Orchestrator.buildParameters,
+      Orchestrator.buildParameters.branch,
+      Orchestrator.defaultSecrets,
+    );
+
+    if (timeoutSeconds <= 0) {
+      await setupPromise;
+
+      return;
+    }
+
+    OrchestratorLogger.log(`Provider init timeout: ${timeoutSeconds}s`);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error(`Provider initialization timed out after ${timeoutSeconds}s`)),
+        timeoutSeconds * 1000,
+      );
+    });
+
+    await Promise.race([setupPromise, timeoutPromise]);
   }
 
   private static async updateStatusWithBuildParameters() {

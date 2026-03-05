@@ -156,6 +156,14 @@ class OrchestratorOptions {
     return Number(OrchestratorOptions.getInput('runnerCheckMinAvailable')) || 1;
   }
 
+  static get retryOnFallback(): boolean {
+    return OrchestratorOptions.getInput('retryOnFallback') === 'true';
+  }
+
+  static get providerInitTimeout(): number {
+    return Number(OrchestratorOptions.getInput('providerInitTimeout')) || 0;
+  }
+
   static get containerCpu(): string {
     return OrchestratorOptions.getInput('containerCpu') || `1024`;
   }

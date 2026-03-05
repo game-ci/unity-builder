@@ -218,6 +218,18 @@ inputs:
     description:
       '[Orchestrator] Minimum number of idle runners required for the primary provider. If fewer are available,
       routes to fallbackProviderStrategy.'
+  retryOnFallback:
+    default: 'false'
+    required: false
+    description:
+      '[Orchestrator] When true and fallbackProviderStrategy is set, automatically retry the build on the fallback
+      provider if the primary provider fails. Useful for long builds where transient cloud failures are common.'
+  providerInitTimeout:
+    default: '0'
+    required: false
+    description:
+      '[Orchestrator] Maximum seconds to wait for the primary provider to initialize (setupWorkflow). If exceeded
+      and fallbackProviderStrategy is set, switches to the fallback. Set to 0 to disable (default).'
   resourceTracking:
     default: 'false'
     required: false

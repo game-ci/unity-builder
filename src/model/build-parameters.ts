@@ -58,6 +58,8 @@ class BuildParameters {
   public runnerCheckEnabled!: boolean;
   public runnerCheckLabels!: string[];
   public runnerCheckMinAvailable!: number;
+  public retryOnFallback!: boolean;
+  public providerInitTimeout!: number;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public awsEndpoint?: string;
@@ -202,6 +204,8 @@ class BuildParameters {
       runnerCheckEnabled: OrchestratorOptions.runnerCheckEnabled,
       runnerCheckLabels: OrchestratorOptions.runnerCheckLabels,
       runnerCheckMinAvailable: OrchestratorOptions.runnerCheckMinAvailable,
+      retryOnFallback: OrchestratorOptions.retryOnFallback,
+      providerInitTimeout: OrchestratorOptions.providerInitTimeout,
       buildPlatform: OrchestratorOptions.buildPlatform,
       kubeConfig: OrchestratorOptions.kubeConfig,
       containerMemory: OrchestratorOptions.containerMemory,
