@@ -83,10 +83,7 @@ export class OutputTypeRegistry {
    * Get all registered types (built-in + custom).
    */
   static getAllTypes(): OutputTypeDefinition[] {
-    return [
-      ...Object.values(OutputTypeRegistry.builtInTypes),
-      ...Object.values(OutputTypeRegistry.customTypes),
-    ];
+    return [...Object.values(OutputTypeRegistry.builtInTypes), ...Object.values(OutputTypeRegistry.customTypes)];
   }
 
   /**
@@ -94,9 +91,7 @@ export class OutputTypeRegistry {
    */
   static registerType(definition: OutputTypeDefinition): void {
     if (OutputTypeRegistry.builtInTypes[definition.name]) {
-      OrchestratorLogger.logWarning(
-        `[OutputTypes] Cannot override built-in type '${definition.name}'`,
-      );
+      OrchestratorLogger.logWarning(`[OutputTypes] Cannot override built-in type '${definition.name}'`);
 
       return;
     }
@@ -114,7 +109,10 @@ export class OutputTypeRegistry {
       return [];
     }
 
-    const names = outputTypesInput.split(',').map((s) => s.trim()).filter(Boolean);
+    const names = outputTypesInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     const types: OutputTypeDefinition[] = [];
 
     for (const name of names) {

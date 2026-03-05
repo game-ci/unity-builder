@@ -39,10 +39,15 @@ export class OutputService {
       return manifest;
     }
 
-    OrchestratorLogger.log(`[Output] Collecting ${types.length} output type(s): ${types.map((t) => t.name).join(', ')}`);
+    OrchestratorLogger.log(
+      `[Output] Collecting ${types.length} output type(s): ${types.map((t) => t.name).join(', ')}`,
+    );
 
     for (const typeDef of types) {
-      const outputPath = path.join(projectPath, typeDef.defaultPath.replace('{platform}', process.env.BUILD_TARGET || 'Unknown'));
+      const outputPath = path.join(
+        projectPath,
+        typeDef.defaultPath.replace('{platform}', process.env.BUILD_TARGET || 'Unknown'),
+      );
 
       if (!fs.existsSync(outputPath)) {
         OrchestratorLogger.log(`[Output] No output found for '${typeDef.name}' at ${outputPath}`);
@@ -68,7 +73,9 @@ export class OutputService {
       }
 
       manifest.outputs.push(entry);
-      OrchestratorLogger.log(`[Output] Collected '${typeDef.name}': ${entry.files?.length || 1} file(s), ${entry.size || 0} bytes`);
+      OrchestratorLogger.log(
+        `[Output] Collected '${typeDef.name}': ${entry.files?.length || 1} file(s), ${entry.size || 0} bytes`,
+      );
     }
 
     // Write manifest to disk
