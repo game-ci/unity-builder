@@ -107,6 +107,12 @@ class BuildParameters {
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
 
+  public testSuitePath!: string;
+  public testSuiteEvent!: string;
+  public testTaxonomyPath!: string;
+  public testResultFormat!: string;
+  public testResultPath!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -242,6 +248,11 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      testSuitePath: Input.testSuitePath,
+      testSuiteEvent: Input.testSuiteEvent,
+      testTaxonomyPath: Input.testTaxonomyPath,
+      testResultFormat: Input.testResultFormat,
+      testResultPath: Input.testResultPath,
     };
   }
 
