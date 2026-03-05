@@ -1,10 +1,12 @@
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import OrchestratorLogger from '../core/orchestrator-logger';
-import { OrchestratorSystem } from '../core/orchestrator-system';
+import * as core from '@actions/core';
 
 /**
  * Build reliability features for hardening CI pipelines.
+ * Provides git integrity checks, stale lock cleanup, submodule validation,
+ * reserved filename removal, build archival, and git environment configuration.
  * All features are opt-in and fail gracefully (warnings only).
  */
 export class BuildReliabilityService {
@@ -34,45 +36,65 @@ export class BuildReliabilityService {
     'lpt9',
   ]);
 
-  // Common git lock files left by crashed processes
-  private static readonly LOCK_FILE_PATTERNS = [
-    'index.lock',
-    'shallow.lock',
-    'config.lock',
-    'HEAD.lock',
-    'refs/heads/*.lock',
-    'refs/remotes/**/*.lock',
-  ];
+  // Lock files to look for in the .git directory
+  private static readonly LOCK_FILE_NAMES = new Set(['index.lock', 'shallow.lock', 'config.lock', 'HEAD.lock']);
+
+  // Maximum age in milliseconds before a lock file is considered stale (10 minutes)
+  private static readonly LOCK_FILE_MAX_AGE_MS = 10 * 60 * 1000;
 
   /**
    * Run git fsck to check repository integrity.
    * Returns true if the repo is healthy, false if corruption detected.
    */
-  static async checkGitIntegrity(repoPath: string): Promise<boolean> {
-    OrchestratorLogger.log(`[Reliability] Checking git integrity in ${repoPath}`);
+  static checkGitIntegrity(repoPath: string = '.'): boolean {
+    core.info(`[Reliability] Checking git integrity in ${repoPath}`);
 
     try {
-      await OrchestratorSystem.Run(`git -C "${repoPath}" fsck --no-dangling --no-progress`, true);
-      OrchestratorLogger.log(`[Reliability] Git integrity check passed`);
+      const output = execSync(`git -C "${repoPath}" fsck --no-dangling`, {
+        encoding: 'utf8',
+        timeout: 120_000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
 
+      // Parse output for corruption indicators
+      const corruptionPatterns = [
+        /broken link/i,
+        /missing (blob|tree|commit|tag)/i,
+        /dangling/i,
+        /corrupt/i,
+        /error in /i,
+      ];
+
+      for (const pattern of corruptionPatterns) {
+        if (pattern.test(output)) {
+          core.warning(`[Reliability] Git integrity check found issues: ${output.trim()}`);
+          return false;
+        }
+      }
+
+      core.info('[Reliability] Git integrity check passed');
       return true;
     } catch (error: any) {
-      OrchestratorLogger.logWarning(`[Reliability] Git integrity check failed: ${error.message}`);
-
+      // execSync throws on non-zero exit code
+      const stderr = error.stderr?.toString() ?? error.message;
+      core.warning(`[Reliability] Git integrity check failed: ${stderr}`);
       return false;
     }
   }
 
   /**
-   * Remove stale lock files from the .git directory.
+   * Remove stale .lock files from the .git directory.
+   * Only removes lock files older than 10 minutes to avoid interfering with active operations.
    * Returns the number of lock files removed.
    */
-  static async cleanStaleLockFiles(repoPath: string): Promise<number> {
-    const gitDirectory = path.join(repoPath, '.git');
-    if (!fs.existsSync(gitDirectory)) {
+  static cleanStaleLockFiles(repoPath: string = '.'): number {
+    const gitDir = path.join(repoPath, '.git');
+    if (!fs.existsSync(gitDir) || !fs.statSync(gitDir).isDirectory()) {
       return 0;
     }
 
+    core.info(`[Reliability] Scanning for stale lock files in ${gitDir}`);
+    const now = Date.now();
     let removed = 0;
 
     const cleanDirectory = (directory: string): void => {
@@ -85,12 +107,30 @@ export class BuildReliabilityService {
           if (entry.isDirectory()) {
             cleanDirectory(fullPath);
           } else if (entry.name.endsWith('.lock')) {
-            try {
-              fs.unlinkSync(fullPath);
-              removed++;
-              OrchestratorLogger.log(`[Reliability] Removed stale lock file: ${fullPath}`);
-            } catch {
-              OrchestratorLogger.logWarning(`[Reliability] Could not remove lock file: ${fullPath}`);
+            // Check if it is a known lock file location OR under refs/
+            const relativePath = path.relative(gitDir, fullPath);
+            const isKnownLock = BuildReliabilityService.LOCK_FILE_NAMES.has(entry.name);
+            const isRefsLock = relativePath.startsWith('refs' + path.sep);
+
+            if (isKnownLock || isRefsLock) {
+              try {
+                const stat = fs.statSync(fullPath);
+                const ageMs = now - stat.mtimeMs;
+
+                if (ageMs > BuildReliabilityService.LOCK_FILE_MAX_AGE_MS) {
+                  fs.unlinkSync(fullPath);
+                  removed++;
+                  core.info(
+                    `[Reliability] Removed stale lock file (age: ${Math.round(ageMs / 1000)}s): ${relativePath}`,
+                  );
+                } else {
+                  core.info(
+                    `[Reliability] Lock file is recent (age: ${Math.round(ageMs / 1000)}s), skipping: ${relativePath}`,
+                  );
+                }
+              } catch {
+                core.warning(`[Reliability] Could not remove lock file: ${fullPath}`);
+              }
             }
           }
         }
@@ -99,26 +139,31 @@ export class BuildReliabilityService {
       }
     };
 
-    cleanDirectory(gitDirectory);
+    cleanDirectory(gitDir);
 
     if (removed > 0) {
-      OrchestratorLogger.log(`[Reliability] Cleaned ${removed} stale lock file(s)`);
+      core.info(`[Reliability] Cleaned ${removed} stale lock file(s)`);
+    } else {
+      core.info('[Reliability] No stale lock files found');
     }
 
     return removed;
   }
 
   /**
-   * Validate that submodule .git files point to existing backing stores.
-   * Returns list of submodules with broken backing stores.
+   * Validate that submodule .git files point to existing backing stores
+   * under .git/modules/. Returns list of submodule paths with broken backing stores.
    */
-  static async validateSubmoduleBackingStores(repoPath: string): Promise<string[]> {
+  static validateSubmoduleBackingStores(repoPath: string = '.'): string[] {
     const broken: string[] = [];
     const gitmodulesPath = path.join(repoPath, '.gitmodules');
 
     if (!fs.existsSync(gitmodulesPath)) {
+      core.info('[Reliability] No .gitmodules found, skipping submodule validation');
       return broken;
     }
+
+    core.info(`[Reliability] Validating submodule backing stores in ${repoPath}`);
 
     try {
       const content = fs.readFileSync(gitmodulesPath, 'utf8');
@@ -128,7 +173,10 @@ export class BuildReliabilityService {
         const submodulePath = match[1].trim();
         const gitFile = path.join(repoPath, submodulePath, '.git');
 
-        if (!fs.existsSync(gitFile)) continue;
+        if (!fs.existsSync(gitFile)) {
+          // Submodule not initialized -- not necessarily broken
+          continue;
+        }
 
         try {
           const stat = fs.statSync(gitFile);
@@ -141,64 +189,85 @@ export class BuildReliabilityService {
               const backingStore = path.resolve(path.join(repoPath, submodulePath), gitdirMatch[1]);
               if (!fs.existsSync(backingStore)) {
                 broken.push(submodulePath);
-                OrchestratorLogger.logWarning(
-                  `[Reliability] Submodule ${submodulePath} has broken backing store: ${backingStore}`,
-                );
+                core.warning(`[Reliability] Submodule ${submodulePath} has broken backing store: ${backingStore}`);
+              } else {
+                core.info(`[Reliability] Submodule ${submodulePath} backing store OK`);
               }
+            } else {
+              broken.push(submodulePath);
+              core.warning(`[Reliability] Submodule ${submodulePath} .git file has invalid format`);
             }
           }
         } catch {
           // Can't read .git file
+          core.warning(`[Reliability] Could not read .git file for submodule: ${submodulePath}`);
         }
       }
-    } catch {
-      // Can't read .gitmodules
+    } catch (error: any) {
+      core.warning(`[Reliability] Could not read .gitmodules: ${error.message}`);
     }
 
     if (broken.length > 0) {
-      OrchestratorLogger.logWarning(`[Reliability] ${broken.length} submodule(s) have broken backing stores`);
+      core.warning(`[Reliability] ${broken.length} submodule(s) have broken backing stores`);
+    } else {
+      core.info('[Reliability] All submodule backing stores are valid');
     }
 
     return broken;
   }
 
   /**
-   * Attempt to recover a corrupted repository by removing .git and re-cloning.
-   * This is a last resort -- only called when git fsck fails and autoRecover is enabled.
+   * Orchestrate recovery of a corrupted repository.
+   * Sequence: fsck -> clean locks -> re-fetch -> retry fsck.
+   * Returns true if recovery succeeded.
    */
-  static async recoverCorruptedRepo(repoPath: string): Promise<void> {
-    OrchestratorLogger.logWarning(`[Reliability] Attempting to recover corrupted repository at ${repoPath}`);
+  static recoverCorruptedRepo(repoPath: string = '.'): boolean {
+    core.warning(`[Reliability] Attempting automatic recovery for ${repoPath}`);
 
-    const gitDirectory = path.join(repoPath, '.git');
-    if (fs.existsSync(gitDirectory)) {
-      try {
-        fs.rmSync(gitDirectory, { recursive: true, force: true });
-        OrchestratorLogger.log(`[Reliability] Removed corrupted .git directory`);
-      } catch (error: any) {
-        OrchestratorLogger.logWarning(`[Reliability] Failed to remove .git: ${error.message}`);
-      }
+    // Step 1: Clean stale lock files that may be preventing operations
+    const locksRemoved = BuildReliabilityService.cleanStaleLockFiles(repoPath);
+    if (locksRemoved > 0) {
+      core.info(`[Reliability] Recovery: cleaned ${locksRemoved} lock file(s)`);
     }
 
-    // Re-initialize -- the checkout action will handle the full clone
+    // Step 2: Re-fetch to restore missing objects
     try {
-      await OrchestratorSystem.Run(`git -C "${repoPath}" init`, true);
-      OrchestratorLogger.log(`[Reliability] Repository re-initialized, checkout action will complete the clone`);
+      core.info('[Reliability] Recovery: re-fetching from remote');
+      execSync(`git -C "${repoPath}" fetch --all`, {
+        encoding: 'utf8',
+        timeout: 300_000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      core.info('[Reliability] Recovery: fetch completed');
     } catch (error: any) {
-      OrchestratorLogger.logWarning(`[Reliability] Re-init failed: ${error.message}`);
+      core.warning(`[Reliability] Recovery: fetch failed: ${error.stderr?.toString() ?? error.message}`);
     }
+
+    // Step 3: Retry fsck
+    const healthy = BuildReliabilityService.checkGitIntegrity(repoPath);
+    if (healthy) {
+      core.info('[Reliability] Recovery succeeded -- repository is healthy');
+    } else {
+      core.warning('[Reliability] Recovery failed -- repository still has integrity issues');
+    }
+
+    return healthy;
   }
 
   /**
    * Scan a directory tree for files/directories with Windows reserved names.
-   * Returns list of paths that were cleaned up.
+   * These names (con, prn, aux, nul, com1-9, lpt1-9) with any extension
+   * cause Unity asset importer infinite loops on Windows.
+   * Returns list of paths that were removed.
    */
-  static async cleanReservedFilenames(projectPath: string): Promise<string[]> {
+  static cleanReservedFilenames(projectPath: string): string[] {
     const assetsPath = path.join(projectPath, 'Assets');
     if (!fs.existsSync(assetsPath)) {
+      core.info(`[Reliability] No Assets directory found at ${assetsPath}, skipping reserved filename scan`);
       return [];
     }
 
-    OrchestratorLogger.log(`[Reliability] Scanning for reserved filenames in ${assetsPath}`);
+    core.info(`[Reliability] Scanning for reserved filenames in ${assetsPath}`);
     const cleaned: string[] = [];
 
     const scanDirectory = (directory: string): void => {
@@ -216,9 +285,9 @@ export class BuildReliabilityService {
                 fs.unlinkSync(fullPath);
               }
               cleaned.push(fullPath);
-              OrchestratorLogger.logWarning(`[Reliability] Removed reserved filename: ${fullPath}`);
+              core.warning(`[Reliability] Removed reserved filename: ${fullPath}`);
             } catch {
-              OrchestratorLogger.logWarning(`[Reliability] Could not remove: ${fullPath}`);
+              core.warning(`[Reliability] Could not remove reserved filename: ${fullPath}`);
             }
           } else if (entry.isDirectory()) {
             scanDirectory(fullPath);
@@ -232,105 +301,125 @@ export class BuildReliabilityService {
     scanDirectory(assetsPath);
 
     if (cleaned.length > 0) {
-      OrchestratorLogger.logWarning(`[Reliability] Cleaned ${cleaned.length} reserved filename(s)`);
+      core.warning(`[Reliability] Cleaned ${cleaned.length} reserved filename(s)`);
     } else {
-      OrchestratorLogger.log(`[Reliability] No reserved filenames found`);
+      core.info('[Reliability] No reserved filenames found');
     }
 
     return cleaned;
   }
 
   /**
-   * Archive build output to a designated location with retention policy.
+   * Create a tar.gz archive of build output.
    */
-  static async archiveBuildOutput(
-    outputPath: string,
-    archivePath: string,
-    retention: number,
-    platform: string,
-  ): Promise<void> {
-    if (!fs.existsSync(outputPath)) {
-      OrchestratorLogger.log(`[Reliability] No build output to archive at ${outputPath}`);
-
+  static archiveBuildOutput(sourcePath: string, archivePath: string): void {
+    if (!fs.existsSync(sourcePath)) {
+      core.info(`[Reliability] No build output to archive at ${sourcePath}`);
       return;
     }
 
-    const platformArchive = path.join(archivePath, platform);
-    fs.mkdirSync(platformArchive, { recursive: true });
+    fs.mkdirSync(archivePath, { recursive: true });
 
     const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
-    const archiveDirectory = path.join(platformArchive, `build-${timestamp}`);
+    const archiveFile = path.join(archivePath, `build-${timestamp}.tar.gz`);
 
     try {
-      fs.renameSync(outputPath, archiveDirectory);
-      OrchestratorLogger.log(`[Reliability] Build output archived to ${archiveDirectory}`);
-    } catch {
-      // Cross-device move -- fall back to copy
-      try {
-        await OrchestratorSystem.Run(`cp -r "${outputPath}" "${archiveDirectory}"`, true);
-        fs.rmSync(outputPath, { recursive: true, force: true });
-        OrchestratorLogger.log(`[Reliability] Build output copied and archived to ${archiveDirectory}`);
-      } catch (error: any) {
-        OrchestratorLogger.logWarning(`[Reliability] Failed to archive build output: ${error.message}`);
-
-        return;
-      }
+      execSync(`tar -czf "${archiveFile}" -C "${path.dirname(sourcePath)}" "${path.basename(sourcePath)}"`, {
+        encoding: 'utf8',
+        timeout: 600_000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      core.info(`[Reliability] Build output archived to ${archiveFile}`);
+    } catch (error: any) {
+      core.warning(`[Reliability] Failed to archive build output: ${error.stderr?.toString() ?? error.message}`);
     }
-
-    // Enforce retention
-    await BuildReliabilityService.enforceRetention(platformArchive, retention);
   }
 
   /**
-   * Enforce retention policy -- keep only the N most recent builds.
-   * Returns the number of old builds removed.
+   * Enforce retention policy -- delete archives older than the retention period.
+   * Returns the number of old archives removed.
    */
-  static async enforceRetention(archivePath: string, retention: number): Promise<number> {
-    if (!fs.existsSync(archivePath)) return 0;
-
-    try {
-      const entries = fs
-        .readdirSync(archivePath, { withFileTypes: true })
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => ({
-          name: entry.name,
-          path: path.join(archivePath, entry.name),
-          mtime: fs.statSync(path.join(archivePath, entry.name)).mtimeMs,
-        }))
-        .sort((a, b) => b.mtime - a.mtime);
-
-      let removed = 0;
-      if (entries.length > retention) {
-        const toRemove = entries.slice(retention);
-        for (const entry of toRemove) {
-          try {
-            fs.rmSync(entry.path, { recursive: true, force: true });
-            removed++;
-            OrchestratorLogger.log(`[Reliability] Removed old build archive: ${entry.name}`);
-          } catch {
-            OrchestratorLogger.logWarning(`[Reliability] Could not remove: ${entry.path}`);
-          }
-        }
-      }
-
-      if (removed > 0) {
-        OrchestratorLogger.log(
-          `[Reliability] Retention enforced: removed ${removed} old archive(s), keeping ${retention}`,
-        );
-      }
-
-      return removed;
-    } catch {
+  static enforceRetention(archivePath: string, retentionDays: number): number {
+    if (!fs.existsSync(archivePath)) {
       return 0;
     }
+
+    const now = Date.now();
+    const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+    let removed = 0;
+
+    try {
+      const entries = fs.readdirSync(archivePath, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(archivePath, entry.name);
+        try {
+          const stat = fs.statSync(fullPath);
+          const ageMs = now - stat.mtimeMs;
+
+          if (ageMs > retentionMs) {
+            if (entry.isDirectory()) {
+              fs.rmSync(fullPath, { recursive: true, force: true });
+            } else {
+              fs.unlinkSync(fullPath);
+            }
+            removed++;
+            core.info(
+              `[Reliability] Removed old archive: ${entry.name} (age: ${Math.round(
+                ageMs / (24 * 60 * 60 * 1000),
+              )} days)`,
+            );
+          }
+        } catch {
+          core.warning(`[Reliability] Could not process archive entry: ${fullPath}`);
+        }
+      }
+    } catch {
+      core.warning(`[Reliability] Could not read archive directory: ${archivePath}`);
+      return 0;
+    }
+
+    if (removed > 0) {
+      core.info(
+        `[Reliability] Retention enforced: removed ${removed} old archive(s), retention: ${retentionDays} days`,
+      );
+    }
+
+    return removed;
   }
 
   /**
-   * Configure environment for corrupted system git config bypass.
+   * Configure git environment variables for CI reliability.
+   * Sets GIT_TERMINAL_PROMPT=0, increases http.postBuffer, enables core.longpaths.
    */
-  static configureGitEnvironment(): Record<string, string> {
-    return {
-      GIT_CONFIG_NOSYSTEM: '1',
-    };
+  static configureGitEnvironment(): void {
+    core.info('[Reliability] Configuring git environment for CI');
+
+    // Prevent git from prompting for credentials (hangs in CI)
+    process.env.GIT_TERMINAL_PROMPT = '0';
+    core.info('[Reliability] Set GIT_TERMINAL_PROMPT=0');
+
+    try {
+      // Increase http.postBuffer to 500MB for large pushes
+      execSync('git config --global http.postBuffer 524288000', {
+        encoding: 'utf8',
+        timeout: 10_000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      core.info('[Reliability] Set http.postBuffer=524288000 (500MB)');
+    } catch (error: any) {
+      core.warning(`[Reliability] Could not set http.postBuffer: ${error.message}`);
+    }
+
+    try {
+      // Enable long paths on Windows
+      execSync('git config --global core.longpaths true', {
+        encoding: 'utf8',
+        timeout: 10_000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      core.info('[Reliability] Set core.longpaths=true');
+    } catch (error: any) {
+      core.warning(`[Reliability] Could not set core.longpaths: ${error.message}`);
+    }
   }
 }

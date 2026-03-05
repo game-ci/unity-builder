@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -280,29 +280,29 @@ inputs:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
   gitIntegrityCheck:
-    default: 'false'
+    description: 'Run git integrity checks before build (fsck, lock cleanup, submodule validation)'
     required: false
-    description: '[Orchestrator] Enable pre-checkout git integrity verification for self-hosted runners'
+    default: 'false'
   gitAutoRecover:
-    default: 'true'
+    description: 'Attempt automatic recovery if git corruption is detected'
     required: false
-    description: '[Orchestrator] Automatically recover from detected git corruption (requires gitIntegrityCheck)'
+    default: 'false'
   cleanReservedFilenames:
-    default: 'false'
+    description: 'Remove Windows reserved filenames that cause Unity import loops'
     required: false
-    description: '[Orchestrator] Remove Windows reserved filenames (nul, con, prn, etc.) from Assets before build'
+    default: 'false'
   buildArchiveEnabled:
+    description: 'Archive build output after successful build'
+    required: false
     default: 'false'
-    required: false
-    description: '[Orchestrator] Enable post-build output archival with retention policy'
   buildArchivePath:
-    default: ''
+    description: 'Path to store build archives'
     required: false
-    description: '[Orchestrator] Path to archive location for build outputs'
+    default: './build-archives'
   buildArchiveRetention:
-    default: '3'
+    description: 'Days to retain build archives before cleanup'
     required: false
-    description: '[Orchestrator] Number of builds to retain per platform in the archive'
+    default: '30'
 
 outputs:
   volume:
