@@ -282,6 +282,72 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  // GCP Cloud Run (Experimental)
+  static get gcpProject(): string {
+    return Input.getInput('gcpProject') ?? '';
+  }
+
+  static get gcpRegion(): string {
+    return Input.getInput('gcpRegion') ?? '';
+  }
+
+  static get gcpBucket(): string {
+    return Input.getInput('gcpBucket') ?? '';
+  }
+
+  static get gcpMachineType(): string {
+    return Input.getInput('gcpMachineType') ?? 'e2-standard-4';
+  }
+
+  static get gcpDiskSizeGb(): string {
+    return Input.getInput('gcpDiskSizeGb') ?? '100';
+  }
+
+  static get gcpServiceAccount(): string {
+    return Input.getInput('gcpServiceAccount') ?? '';
+  }
+
+  static get gcpVpcConnector(): string {
+    return Input.getInput('gcpVpcConnector') ?? '';
+  }
+
+  // Azure Container Instances (Experimental)
+  static get azureResourceGroup(): string {
+    return Input.getInput('azureResourceGroup') ?? '';
+  }
+
+  static get azureLocation(): string {
+    return Input.getInput('azureLocation') ?? '';
+  }
+
+  static get azureStorageAccount(): string {
+    return Input.getInput('azureStorageAccount') ?? '';
+  }
+
+  static get azureFileShareName(): string {
+    return Input.getInput('azureFileShareName') ?? 'unity-builds';
+  }
+
+  static get azureSubscriptionId(): string {
+    return Input.getInput('azureSubscriptionId') ?? '';
+  }
+
+  static get azureCpu(): string {
+    return Input.getInput('azureCpu') ?? '4';
+  }
+
+  static get azureMemoryGb(): string {
+    return Input.getInput('azureMemoryGb') ?? '16';
+  }
+
+  static get azureDiskSizeGb(): string {
+    return Input.getInput('azureDiskSizeGb') ?? '100';
+  }
+
+  static get azureSubnetId(): string {
+    return Input.getInput('azureSubnetId') ?? '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

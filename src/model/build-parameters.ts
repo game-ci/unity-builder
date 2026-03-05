@@ -107,6 +107,26 @@ class BuildParameters {
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
 
+  // GCP Cloud Run (Experimental)
+  public gcpProject!: string;
+  public gcpRegion!: string;
+  public gcpBucket!: string;
+  public gcpMachineType!: string;
+  public gcpDiskSizeGb!: string;
+  public gcpServiceAccount!: string;
+  public gcpVpcConnector!: string;
+
+  // Azure Container Instances (Experimental)
+  public azureResourceGroup!: string;
+  public azureLocation!: string;
+  public azureStorageAccount!: string;
+  public azureFileShareName!: string;
+  public azureSubscriptionId!: string;
+  public azureCpu!: string;
+  public azureMemoryGb!: string;
+  public azureDiskSizeGb!: string;
+  public azureSubnetId!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -228,6 +248,22 @@ class BuildParameters {
       inputPullCommand: OrchestratorOptions.inputPullCommand,
       pullInputList: OrchestratorOptions.pullInputList,
       kubeStorageClass: OrchestratorOptions.kubeStorageClass,
+      gcpProject: Input.gcpProject,
+      gcpRegion: Input.gcpRegion,
+      gcpBucket: Input.gcpBucket,
+      gcpMachineType: Input.gcpMachineType,
+      gcpDiskSizeGb: Input.gcpDiskSizeGb,
+      gcpServiceAccount: Input.gcpServiceAccount,
+      gcpVpcConnector: Input.gcpVpcConnector,
+      azureResourceGroup: Input.azureResourceGroup,
+      azureLocation: Input.azureLocation,
+      azureStorageAccount: Input.azureStorageAccount,
+      azureFileShareName: Input.azureFileShareName,
+      azureSubscriptionId: Input.azureSubscriptionId,
+      azureCpu: Input.azureCpu,
+      azureMemoryGb: Input.azureMemoryGb,
+      azureDiskSizeGb: Input.azureDiskSizeGb,
+      azureSubnetId: Input.azureSubnetId,
       cacheKey: OrchestratorOptions.cacheKey,
       maxRetainedWorkspaces: Number.parseInt(OrchestratorOptions.maxRetainedWorkspaces),
       useLargePackages: OrchestratorOptions.useLargePackages,
