@@ -3,6 +3,7 @@ import path from 'node:path';
 import { OrchestratorSystem } from '../core/orchestrator-system';
 import OrchestratorLogger from '../core/orchestrator-logger';
 import { SyncState, SyncStrategy } from './sync-state';
+import { SyncStateManager } from './sync-state-manager';
 
 /**
  * Service for incremental workspace synchronization.
@@ -14,55 +15,31 @@ import { SyncState, SyncStrategy } from './sync-state';
  * - storage-pull: Fetch changed files from rclone-backed generic storage
  */
 export class IncrementalSyncService {
-  private static readonly SYNC_STATE_FILE = '.game-ci-sync-state.json';
-
   /**
    * Load sync state from the workspace.
    */
-  static loadSyncState(workspacePath: string): SyncState | null {
-    const statePath = path.join(workspacePath, IncrementalSyncService.SYNC_STATE_FILE);
-    if (!fs.existsSync(statePath)) {
-      return null;
-    }
-
-    try {
-      const content = fs.readFileSync(statePath, 'utf8');
-
-      return JSON.parse(content) as SyncState;
-    } catch {
-      OrchestratorLogger.logWarning(`[Sync] Failed to load sync state from ${statePath}`);
-
-      return null;
-    }
+  static loadSyncState(workspacePath: string, statePath?: string): SyncState | undefined {
+    return SyncStateManager.loadState(workspacePath, statePath);
   }
 
   /**
    * Save sync state to the workspace.
    */
-  static saveSyncState(workspacePath: string, state: SyncState): void {
-    const statePath = path.join(workspacePath, IncrementalSyncService.SYNC_STATE_FILE);
-    try {
-      fs.writeFileSync(statePath, JSON.stringify(state, null, 2), 'utf8');
-      OrchestratorLogger.log(`[Sync] State saved: commit=${state.lastSyncCommit}`);
-    } catch (error: any) {
-      OrchestratorLogger.logWarning(`[Sync] Failed to save sync state: ${error.message}`);
-    }
+  static saveSyncState(workspacePath: string, state: SyncState, statePath?: string): void {
+    SyncStateManager.saveState(workspacePath, state, statePath);
   }
 
   /**
    * Determine the appropriate sync strategy based on workspace state and configuration.
    */
-  static resolveStrategy(
-    requestedStrategy: SyncStrategy,
-    workspacePath: string,
-  ): SyncStrategy {
+  static resolveStrategy(requestedStrategy: SyncStrategy, workspacePath: string, statePath?: string): SyncStrategy {
     if (requestedStrategy === 'full') {
       return 'full';
     }
 
     // git-delta requires an existing sync state
     if (requestedStrategy === 'git-delta') {
-      const state = IncrementalSyncService.loadSyncState(workspacePath);
+      const state = SyncStateManager.loadState(workspacePath, statePath);
       if (!state) {
         OrchestratorLogger.log('[Sync] No sync state found, falling back to full sync');
 
@@ -79,23 +56,24 @@ export class IncrementalSyncService {
    * Execute a git-delta sync: fetch latest and apply only changed files.
    *
    * @param workspacePath - Path to the git workspace
-   * @param targetRef - Git ref to sync to (commit SHA, branch, tag)
+   * @param targetReference - Git ref to sync to (commit SHA, branch, tag)
+   * @param statePath - Optional custom path for sync state file
    * @returns Number of files changed
    */
-  static async syncGitDelta(workspacePath: string, targetRef: string): Promise<number> {
-    const state = IncrementalSyncService.loadSyncState(workspacePath);
+  static async syncGitDelta(workspacePath: string, targetReference: string, statePath?: string): Promise<number> {
+    const state = SyncStateManager.loadState(workspacePath, statePath);
     if (!state) {
       throw new Error('Cannot git-delta sync without existing sync state');
     }
 
-    OrchestratorLogger.log(`[Sync] Git delta: ${state.lastSyncCommit.slice(0, 8)} → ${targetRef.slice(0, 8)}`);
+    OrchestratorLogger.log(`[Sync] Git delta: ${state.lastSyncCommit.slice(0, 8)} -> ${targetReference.slice(0, 8)}`);
 
     // Fetch latest
     await OrchestratorSystem.Run(`git -C "${workspacePath}" fetch origin`, true);
 
     // Get list of changed files
     const diffOutput = await OrchestratorSystem.Run(
-      `git -C "${workspacePath}" diff --name-only ${state.lastSyncCommit}..${targetRef}`,
+      `git -C "${workspacePath}" diff --name-only ${state.lastSyncCommit}..${targetReference}`,
       true,
     );
 
@@ -104,16 +82,17 @@ export class IncrementalSyncService {
 
     if (changedFiles.length > 0) {
       // Checkout target ref
-      await OrchestratorSystem.Run(`git -C "${workspacePath}" checkout ${targetRef}`, true);
+      await OrchestratorSystem.Run(`git -C "${workspacePath}" checkout ${targetReference}`, true);
     }
 
     // Update sync state
     const newState: SyncState = {
-      lastSyncCommit: targetRef,
+      lastSyncCommit: targetReference,
       lastSyncTimestamp: new Date().toISOString(),
+      workspaceHash: SyncStateManager.calculateWorkspaceHash(workspacePath),
       pendingOverlays: state.pendingOverlays,
     };
-    IncrementalSyncService.saveSyncState(workspacePath, newState);
+    SyncStateManager.saveState(workspacePath, newState, statePath);
 
     return changedFiles.length;
   }
@@ -121,34 +100,33 @@ export class IncrementalSyncService {
   /**
    * Apply a direct input overlay from a local archive or storage URI.
    *
-   * For storage URIs (storage://remote/path), the archive is fetched via rclone.
+   * For storage URIs (storage://remote:bucket/path), the archive is fetched via rclone.
    * For local paths, the archive is extracted directly.
    *
    * @param workspacePath - Path to the workspace
-   * @param inputRef - Local path or storage:// URI to the input archive
-   * @param rcloneRemote - rclone remote name for storage:// URIs (optional, uses default)
+   * @param inputReference - Local path or storage:// URI to the input archive
+   * @param rcloneRemote - rclone remote name for storage:// URIs (optional, uses URI-embedded remote)
+   * @param statePath - Optional custom path for sync state file
    * @returns List of overlay paths applied
    */
   static async applyDirectInput(
     workspacePath: string,
-    inputRef: string,
+    inputReference: string,
     rcloneRemote?: string,
+    statePath?: string,
   ): Promise<string[]> {
-    let localArchive = inputRef;
+    let localArchive = inputReference;
 
     // If storage URI, fetch via rclone first
-    if (inputRef.startsWith('storage://')) {
-      const storagePath = inputRef.replace('storage://', '');
-      const remote = rcloneRemote || storagePath.split('/')[0];
-      const remotePath = storagePath.includes('/') ? storagePath.slice(storagePath.indexOf('/') + 1) : storagePath;
+    if (inputReference.startsWith('storage://')) {
+      const parsed = IncrementalSyncService.parseStorageUri(inputReference);
+      const remote = rcloneRemote || parsed.remote;
+      const remotePath = parsed.path;
 
       localArchive = path.join(workspacePath, '.game-ci-input-overlay.tar');
-      OrchestratorLogger.log(`[Sync] Fetching input from storage: ${inputRef}`);
+      OrchestratorLogger.log(`[Sync] Fetching input from storage: ${inputReference}`);
 
-      await OrchestratorSystem.Run(
-        `rclone copy "${remote}:${remotePath}" "${path.dirname(localArchive)}" --include "${path.basename(localArchive)}"`,
-        true,
-      );
+      await IncrementalSyncService.executeRcloneCopy(remote, remotePath, path.dirname(localArchive));
     }
 
     if (!fs.existsSync(localArchive)) {
@@ -158,48 +136,179 @@ export class IncrementalSyncService {
     OrchestratorLogger.log(`[Sync] Applying direct input overlay from ${localArchive}`);
 
     // Extract overlay
-    await OrchestratorSystem.Run(
-      `tar -xf "${localArchive}" -C "${workspacePath}"`,
-      true,
-    );
+    await OrchestratorSystem.Run(`tar -xf "${localArchive}" -C "${workspacePath}"`, true);
 
     // Track overlay in sync state
-    const state = IncrementalSyncService.loadSyncState(workspacePath) || {
+    const state = SyncStateManager.loadState(workspacePath, statePath) || {
       lastSyncCommit: '',
       lastSyncTimestamp: new Date().toISOString(),
       pendingOverlays: [],
     };
 
     state.pendingOverlays.push(localArchive);
-    IncrementalSyncService.saveSyncState(workspacePath, state);
+    SyncStateManager.saveState(workspacePath, state, statePath);
 
     return [localArchive];
   }
 
   /**
+   * Execute a storage-pull sync: pull changed files from an rclone remote.
+   *
+   * This strategy fetches content from a remote storage backend (S3, GCS, Azure, etc.)
+   * and overlays it onto the workspace. Supports two modes:
+   * - overlay: extract on top of existing workspace (default)
+   * - clean: fresh git checkout, then apply overlay
+   *
+   * @param workspacePath - Path to the workspace
+   * @param storageUri - storage://remote:bucket/path URI pointing to remote content
+   * @param options - Configuration for the storage-pull operation
+   * @returns List of files pulled from storage
+   */
+  static async syncStoragePull(
+    workspacePath: string,
+    storageUri: string,
+    options: {
+      rcloneRemote?: string;
+      cleanMode?: boolean;
+      syncRevertAfter?: boolean;
+      statePath?: string;
+    } = {},
+  ): Promise<string[]> {
+    if (!storageUri.startsWith('storage://')) {
+      throw new Error(`Invalid storage URI: ${storageUri}. Must start with storage://`);
+    }
+
+    // Verify rclone is available
+    try {
+      await OrchestratorSystem.Run('rclone version', true, true);
+    } catch {
+      throw new Error('rclone binary not found. Install rclone to use storage-pull sync strategy.');
+    }
+
+    const parsed = IncrementalSyncService.parseStorageUri(storageUri);
+    const remote = options.rcloneRemote || parsed.remote;
+    const remotePath = parsed.path;
+
+    OrchestratorLogger.log(`[Sync] Storage pull: ${remote}:${remotePath} -> ${workspacePath}`);
+
+    // Clean mode: reset workspace to clean git state before applying overlay
+    if (options.cleanMode) {
+      OrchestratorLogger.log('[Sync] Clean mode: resetting workspace to HEAD');
+      await OrchestratorSystem.Run(`git -C "${workspacePath}" checkout -- .`, true);
+      await OrchestratorSystem.Run(`git -C "${workspacePath}" clean -fd`, true);
+    }
+
+    // Pull from remote storage directly into workspace
+    const rcloneSource = `${remote}:${remotePath}`;
+    await OrchestratorSystem.Run(`rclone copy "${rcloneSource}" "${workspacePath}" --transfers 8 --checkers 16`, true);
+
+    // List what was pulled for tracking
+    let pulledFiles: string[] = [];
+    try {
+      const lsOutput = await OrchestratorSystem.Run(`rclone ls "${rcloneSource}"`, true, true);
+      pulledFiles = lsOutput
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => {
+          // rclone ls outputs: "  <size> <path>"
+          const trimmed = line.trim();
+          const spaceIndex = trimmed.indexOf(' ');
+
+          return spaceIndex >= 0 ? trimmed.slice(spaceIndex + 1).trim() : trimmed;
+        })
+        .filter(Boolean);
+    } catch {
+      OrchestratorLogger.logWarning('[Sync] Could not list pulled files from remote');
+    }
+
+    OrchestratorLogger.log(`[Sync] Pulled ${pulledFiles.length} file(s) from storage`);
+
+    // Update sync state with overlay tracking
+    const state = SyncStateManager.loadState(workspacePath, options.statePath) || {
+      lastSyncCommit: '',
+      lastSyncTimestamp: new Date().toISOString(),
+      pendingOverlays: [],
+    };
+
+    state.pendingOverlays.push(storageUri);
+    state.lastSyncTimestamp = new Date().toISOString();
+    state.workspaceHash = SyncStateManager.calculateWorkspaceHash(workspacePath);
+    SyncStateManager.saveState(workspacePath, state, options.statePath);
+
+    return pulledFiles;
+  }
+
+  /**
+   * Parse a storage:// URI into remote and path components.
+   *
+   * Supported formats:
+   * - storage://remote:bucket/path  (explicit remote with colon separator)
+   * - storage://remote/path         (remote name is first path segment)
+   *
+   * @param uri - The storage:// URI to parse
+   * @returns Object with remote name and path
+   */
+  static parseStorageUri(uri: string): { remote: string; path: string } {
+    if (!uri.startsWith('storage://')) {
+      throw new Error(`Invalid storage URI: ${uri}. Must start with storage://`);
+    }
+
+    const stripped = uri.replace('storage://', '');
+
+    // Check for explicit remote:path format (e.g., "myremote:bucket/path")
+    const colonIndex = stripped.indexOf(':');
+    if (colonIndex > 0) {
+      return {
+        remote: stripped.slice(0, colonIndex),
+        path: stripped.slice(colonIndex + 1),
+      };
+    }
+
+    // Fallback: first segment is remote name (e.g., "myremote/bucket/path")
+    const slashIndex = stripped.indexOf('/');
+    if (slashIndex > 0) {
+      return {
+        remote: stripped.slice(0, slashIndex),
+        path: stripped.slice(slashIndex + 1),
+      };
+    }
+
+    // Just a remote name with no path
+    return {
+      remote: stripped,
+      path: '',
+    };
+  }
+
+  /**
+   * Execute rclone copy with standard flags.
+   */
+  private static async executeRcloneCopy(remote: string, remotePath: string, destinationPath: string): Promise<void> {
+    await OrchestratorSystem.Run(
+      `rclone copy "${remote}:${remotePath}" "${destinationPath}" --transfers 8 --checkers 16`,
+      true,
+    );
+  }
+
+  /**
    * Revert pending overlays by restoring git state.
    */
-  static async revertOverlays(workspacePath: string): Promise<void> {
-    const state = IncrementalSyncService.loadSyncState(workspacePath);
+  static async revertOverlays(workspacePath: string, statePath?: string): Promise<void> {
+    const state = SyncStateManager.loadState(workspacePath, statePath);
     if (!state || state.pendingOverlays.length === 0) {
       return;
     }
 
     OrchestratorLogger.log(`[Sync] Reverting ${state.pendingOverlays.length} overlay(s)`);
 
-    await OrchestratorSystem.Run(
-      `git -C "${workspacePath}" checkout -- .`,
-      true,
-    );
+    await OrchestratorSystem.Run(`git -C "${workspacePath}" checkout -- .`, true);
 
     // Clean untracked files from overlays
-    await OrchestratorSystem.Run(
-      `git -C "${workspacePath}" clean -fd`,
-      true,
-    );
+    await OrchestratorSystem.Run(`git -C "${workspacePath}" clean -fd`, true);
 
     state.pendingOverlays = [];
-    IncrementalSyncService.saveSyncState(workspacePath, state);
+    state.workspaceHash = SyncStateManager.calculateWorkspaceHash(workspacePath);
+    SyncStateManager.saveState(workspacePath, state, statePath);
 
     OrchestratorLogger.log('[Sync] Overlays reverted');
   }
