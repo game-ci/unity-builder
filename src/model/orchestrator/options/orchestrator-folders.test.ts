@@ -1,5 +1,4 @@
 import { OrchestratorFolders } from './orchestrator-folders';
-import path from 'node:path';
 
 // Mock Orchestrator
 jest.mock('../orchestrator', () => ({
@@ -61,9 +60,7 @@ describe('OrchestratorFolders', () => {
     });
 
     it('handles mixed slashes', () => {
-      expect(OrchestratorFolders.ToLinuxFolder('some/path\\mixed/slashes\\here')).toBe(
-        'some/path/mixed/slashes/here',
-      );
+      expect(OrchestratorFolders.ToLinuxFolder('some/path\\mixed/slashes\\here')).toBe('some/path/mixed/slashes/here');
     });
 
     it('handles empty string', () => {
