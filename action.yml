@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -283,126 +283,116 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Google Cloud project ID for Cloud Run Jobs provider.
-      Falls back to GOOGLE_CLOUD_PROJECT env var.'
+      '[Orchestrator] [Experimental] Google Cloud project ID for Cloud Run Jobs provider. Falls back to
+      GOOGLE_CLOUD_PROJECT env var.'
   gcpRegion:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Google Cloud region for Cloud Run Jobs (e.g. us-central1).
-      Defaults to the region input if empty.'
+      '[Orchestrator] [Experimental] Google Cloud region for Cloud Run Jobs (e.g. us-central1). Defaults to the region
+      input if empty.'
   gcpStorageType:
     required: false
     default: 'gcs-fuse'
     description:
-      '[Orchestrator] [Experimental] Storage type for Cloud Run Jobs. Options:
-      gcs-fuse (mount GCS bucket as filesystem, unlimited size, best for large sequential I/O),
-      gcs-copy (copy artifacts in/out via gsutil, simpler, no FUSE overhead),
-      nfs (Filestore NFS mount, true POSIX, good random I/O, up to 100 TiB),
-      in-memory (tmpfs, fastest but volatile, up to 32 GiB).'
+      '[Orchestrator] [Experimental] Storage type for Cloud Run Jobs. Options: gcs-fuse (mount GCS bucket as filesystem,
+      unlimited size, best for large sequential I/O), gcs-copy (copy artifacts in/out via gsutil, simpler, no FUSE
+      overhead), nfs (Filestore NFS mount, true POSIX, good random I/O, up to 100 TiB), in-memory (tmpfs, fastest but
+      volatile, up to 32 GiB).'
   gcpBucket:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] GCS bucket name for build artifact storage.
-      Used by gcs-fuse and gcs-copy storage types.'
+      '[Orchestrator] [Experimental] GCS bucket name for build artifact storage. Used by gcs-fuse and gcs-copy storage
+      types.'
   gcpFilestoreIp:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Filestore instance IP address for NFS storage type.
-      Required when gcpStorageType is nfs.'
+      '[Orchestrator] [Experimental] Filestore instance IP address for NFS storage type. Required when gcpStorageType is
+      nfs.'
   gcpFilestoreShare:
     required: false
     default: '/share1'
     description:
-      '[Orchestrator] [Experimental] Filestore share name for NFS storage type.
-      Defaults to /share1 (the Filestore default).'
+      '[Orchestrator] [Experimental] Filestore share name for NFS storage type. Defaults to /share1 (the Filestore
+      default).'
   gcpMachineType:
     required: false
     default: 'e2-standard-4'
-    description:
-      '[Orchestrator] [Experimental] Machine type for Cloud Run Jobs (e.g. e2-standard-4, e2-highmem-8).'
+    description: '[Orchestrator] [Experimental] Machine type for Cloud Run Jobs (e.g. e2-standard-4, e2-highmem-8).'
   gcpDiskSizeGb:
     required: false
     default: '100'
     description:
-      '[Orchestrator] [Experimental] Disk size in GB for Cloud Run Jobs in-memory volumes.
-      Only applies to in-memory storage type (max 32).'
+      '[Orchestrator] [Experimental] Disk size in GB for Cloud Run Jobs in-memory volumes. Only applies to in-memory
+      storage type (max 32).'
   gcpServiceAccount:
     required: false
     default: ''
-    description:
-      '[Orchestrator] [Experimental] Google Cloud service account email for Cloud Run Jobs execution.'
+    description: '[Orchestrator] [Experimental] Google Cloud service account email for Cloud Run Jobs execution.'
   gcpVpcConnector:
     required: false
     default: ''
-    description:
-      '[Orchestrator] [Experimental] VPC connector name for Cloud Run Jobs private networking.'
+    description: '[Orchestrator] [Experimental] VPC connector name for Cloud Run Jobs private networking.'
   azureResourceGroup:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Azure resource group for Container Instances provider.
-      Falls back to AZURE_RESOURCE_GROUP env var.'
+      '[Orchestrator] [Experimental] Azure resource group for Container Instances provider. Falls back to
+      AZURE_RESOURCE_GROUP env var.'
   azureLocation:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Azure region for Container Instances (e.g. eastus, westeurope).
-      Defaults to the region input if empty.'
+      '[Orchestrator] [Experimental] Azure region for Container Instances (e.g. eastus, westeurope). Defaults to the
+      region input if empty.'
   azureStorageType:
     required: false
     default: 'azure-files'
     description:
-      '[Orchestrator] [Experimental] Storage type for Azure Container Instances. Options:
-      azure-files (SMB file share mount, up to 100 TiB, premium throughput),
-      blob-copy (copy artifacts in/out via az storage blob, no mount overhead),
-      azure-files-nfs (NFS 4.1 file share mount, true POSIX, no SMB lock overhead),
-      in-memory (emptyDir tmpfs, fastest but volatile, size limited by container memory).'
+      '[Orchestrator] [Experimental] Storage type for Azure Container Instances. Options: azure-files (SMB file share
+      mount, up to 100 TiB, premium throughput), blob-copy (copy artifacts in/out via az storage blob, no mount
+      overhead), azure-files-nfs (NFS 4.1 file share mount, true POSIX, no SMB lock overhead), in-memory (emptyDir
+      tmpfs, fastest but volatile, size limited by container memory).'
   azureStorageAccount:
     required: false
     default: ''
     description:
-      '[Orchestrator] [Experimental] Azure Storage Account name.
-      Used by azure-files, azure-files-nfs, and blob-copy storage types.'
+      '[Orchestrator] [Experimental] Azure Storage Account name. Used by azure-files, azure-files-nfs, and blob-copy
+      storage types.'
   azureFileShareName:
     required: false
     default: 'unity-builds'
     description:
-      '[Orchestrator] [Experimental] Azure File Share name within the storage account.
-      Used by azure-files and azure-files-nfs storage types. Supports up to 100 TiB per share.'
+      '[Orchestrator] [Experimental] Azure File Share name within the storage account. Used by azure-files and
+      azure-files-nfs storage types. Supports up to 100 TiB per share.'
   azureBlobContainer:
     required: false
     default: 'unity-builds'
-    description:
-      '[Orchestrator] [Experimental] Azure Blob container name for blob-copy storage type.'
+    description: '[Orchestrator] [Experimental] Azure Blob container name for blob-copy storage type.'
   azureSubscriptionId:
     required: false
     default: ''
-    description:
-      '[Orchestrator] [Experimental] Azure subscription ID. Falls back to AZURE_SUBSCRIPTION_ID env var.'
+    description: '[Orchestrator] [Experimental] Azure subscription ID. Falls back to AZURE_SUBSCRIPTION_ID env var.'
   azureCpu:
     required: false
     default: '4'
-    description:
-      '[Orchestrator] [Experimental] CPU cores for Azure Container Instances (1-16).'
+    description: '[Orchestrator] [Experimental] CPU cores for Azure Container Instances (1-16).'
   azureMemoryGb:
     required: false
     default: '16'
-    description:
-      '[Orchestrator] [Experimental] Memory in GB for Azure Container Instances (1-16).'
+    description: '[Orchestrator] [Experimental] Memory in GB for Azure Container Instances (1-16).'
   azureDiskSizeGb:
     required: false
     default: '100'
     description:
-      '[Orchestrator] [Experimental] File share quota in GB for Azure Container Instances.
-      Premium shares support up to 102400 GB (100 TiB).'
+      '[Orchestrator] [Experimental] File share quota in GB for Azure Container Instances. Premium shares support up to
+      102400 GB (100 TiB).'
   azureSubnetId:
     required: false
     default: ''
-    description:
-      '[Orchestrator] [Experimental] Azure subnet resource ID for VNet-integrated Container Instances.'
+    description: '[Orchestrator] [Experimental] Azure subnet resource ID for VNet-integrated Container Instances.'
 
 outputs:
   volume:

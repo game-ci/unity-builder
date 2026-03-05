@@ -228,7 +228,10 @@ class GcpCloudRunProvider implements ProviderInterface {
     OrchestratorLogger.log(`[GCP Cloud Run] Running task for build ${buildGuid}`);
     ResourceTracking.logAllocationSummary('gcp-cloud-run task');
 
-    const jobName = `unity-build-${buildGuid}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 63);
+    const jobName = `unity-build-${buildGuid}`
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .slice(0, 63);
     const projectFlag = this.project ? `--project=${this.project}` : '';
 
     // Build environment variable flags

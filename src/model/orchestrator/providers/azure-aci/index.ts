@@ -83,9 +83,7 @@ class AzureAciProvider implements ProviderInterface {
             '[Azure ACI] Storage type "azure-files" requires azureStorageAccount to be set.',
           );
         } else {
-          OrchestratorLogger.log(
-            `[Azure ACI] File Share: ${this.storageAccount}/${this.fileShareName} (SMB)`,
-          );
+          OrchestratorLogger.log(`[Azure ACI] File Share: ${this.storageAccount}/${this.fileShareName} (SMB)`);
         }
         break;
       case 'azure-files-nfs':
@@ -95,26 +93,22 @@ class AzureAciProvider implements ProviderInterface {
           );
         }
         if (!this.subnetId) {
-          OrchestratorLogger.logWarning(
-            '[Azure ACI] NFS file shares require VNet integration. Set azureSubnetId.',
-          );
+          OrchestratorLogger.logWarning('[Azure ACI] NFS file shares require VNet integration. Set azureSubnetId.');
         } else {
-          OrchestratorLogger.log(
-            `[Azure ACI] File Share: ${this.storageAccount}/${this.fileShareName} (NFS 4.1)`,
-          );
+          OrchestratorLogger.log(`[Azure ACI] File Share: ${this.storageAccount}/${this.fileShareName} (NFS 4.1)`);
         }
         break;
       case 'blob-copy':
         if (!this.storageAccount) {
-          OrchestratorLogger.logWarning(
-            '[Azure ACI] Storage type "blob-copy" requires azureStorageAccount to be set.',
-          );
+          OrchestratorLogger.logWarning('[Azure ACI] Storage type "blob-copy" requires azureStorageAccount to be set.');
         } else {
           OrchestratorLogger.log(`[Azure ACI] Blob container: ${this.storageAccount}/${this.blobContainer}`);
         }
         break;
       case 'in-memory':
-        OrchestratorLogger.log(`[Azure ACI] In-memory volume (emptyDir): limited by ${this.memoryGb}GB container memory`);
+        OrchestratorLogger.log(
+          `[Azure ACI] In-memory volume (emptyDir): limited by ${this.memoryGb}GB container memory`,
+        );
         break;
       default:
         OrchestratorLogger.logWarning(
@@ -155,17 +149,11 @@ class AzureAciProvider implements ProviderInterface {
     // Ensure resource group exists
     if (this.resourceGroup) {
       try {
-        await OrchestratorSystem.Run(
-          `az group show --name "${this.resourceGroup}" --output json`,
-          false,
-          true,
-        );
+        await OrchestratorSystem.Run(`az group show --name "${this.resourceGroup}" --output json`, false, true);
         OrchestratorLogger.log(`[Azure ACI] Resource group ${this.resourceGroup} exists`);
       } catch {
         OrchestratorLogger.log(`[Azure ACI] Creating resource group ${this.resourceGroup}`);
-        await OrchestratorSystem.Run(
-          `az group create --name "${this.resourceGroup}" --location "${this.location}"`,
-        );
+        await OrchestratorSystem.Run(`az group create --name "${this.resourceGroup}" --location "${this.location}"`);
       }
     }
 
@@ -325,15 +313,17 @@ class AzureAciProvider implements ProviderInterface {
     OrchestratorLogger.log(`[Azure ACI] Running task for build ${buildGuid}`);
     ResourceTracking.logAllocationSummary('azure-aci task');
 
-    const containerName = `unity-build-${buildGuid}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 63);
+    const containerName = `unity-build-${buildGuid}`
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .slice(0, 63);
 
     // Build environment variable flags
     const allEnvVars = [
       ...environment.map((env) => `${env.name}=${env.value}`),
       ...secrets.map((s) => `${s.EnvironmentVariable}=${s.ParameterValue}`),
     ];
-    const envFlag =
-      allEnvVars.length > 0 ? `--environment-variables ${allEnvVars.map((e) => `"${e}"`).join(' ')}` : '';
+    const envFlag = allEnvVars.length > 0 ? `--environment-variables ${allEnvVars.map((e) => `"${e}"`).join(' ')}` : '';
 
     // Build volume flags based on storage type
     const volumeFlags = await this.buildVolumeFlags(mountdir);
@@ -402,9 +392,7 @@ class AzureAciProvider implements ProviderInterface {
 
         const state = JSON.parse(stateJson);
         const containerState =
-          state.containers?.[0]?.instanceView?.currentState?.state ||
-          state.instanceView?.state ||
-          'Unknown';
+          state.containers?.[0]?.instanceView?.currentState?.state || state.instanceView?.state || 'Unknown';
         const provisioningState = state.provisioningState || 'Unknown';
 
         // Stream logs incrementally
@@ -452,10 +440,7 @@ class AzureAciProvider implements ProviderInterface {
           throw new Error(`[Azure ACI] Container provisioning failed: ${detail}`);
         }
       } catch (error: any) {
-        if (
-          error.message?.includes('Container provisioning failed') ||
-          error.message?.includes('exited with code')
-        ) {
+        if (error.message?.includes('Container provisioning failed') || error.message?.includes('exited with code')) {
           throw error;
         }
         OrchestratorLogger.logWarning(`[Azure ACI] Polling error: ${error.message}`);
@@ -500,9 +485,7 @@ class AzureAciProvider implements ProviderInterface {
         const name = container.name || '';
         if (!name.startsWith('unity-build-')) continue;
 
-        const createdAt = new Date(
-          container.tags?.createdAt || container.properties?.provisioningState || 0,
-        );
+        const createdAt = new Date(container.tags?.createdAt || container.properties?.provisioningState || 0);
         const state = container.containers?.[0]?.instanceView?.currentState?.state || '';
 
         if (state === 'Terminated' || createdAt < cutoffDate) {
