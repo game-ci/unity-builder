@@ -320,7 +320,9 @@ inputs:
     required: false
     default: ''
     description:
-      'Path to a custom Git LFS transfer agent executable (e.g. elastic-git-storage). When set, the agent is registered
+      'Custom Git LFS transfer agent. Set to "elastic-git-storage" for built-in support (auto-installs
+      from GitHub releases). Append @version for a specific release (e.g. "elastic-git-storage@v1.0.0").
+      Or provide a path to any custom transfer agent executable. When set, the agent is registered
       via git config before LFS operations.'
   lfsTransferAgentArgs:
     required: false
