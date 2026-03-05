@@ -1,4 +1,5 @@
-import { spawn } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
+import * as core from '@actions/core';
 import { ProviderInterface } from '../provider-interface';
 import BuildParameters from '../../../build-parameters';
 import OrchestratorEnvironmentVariable from '../../options/orchestrator-environment-variable';
@@ -9,6 +10,29 @@ import OrchestratorLogger from '../../services/core/orchestrator-logger';
 import { CliProviderRequest, CliProviderResponse, CliProviderSubcommand } from './cli-provider-protocol';
 
 const DEFAULT_TIMEOUT_MS = 300_000; // 300 seconds
+const RUN_TASK_TIMEOUT_MS = 7_200_000; // 2 hours
+const WATCH_WORKFLOW_TIMEOUT_MS = 3_600_000; // 1 hour
+const SIGKILL_GRACE_MS = 10_000; // 10 seconds grace period before SIGKILL
+
+/**
+ * Gracefully kill a child process: SIGTERM first, then SIGKILL after a grace period.
+ */
+function gracefulKill(child: ChildProcess, graceMs: number = SIGKILL_GRACE_MS): void {
+  child.kill('SIGTERM');
+
+  const forceKillTimer = setTimeout(() => {
+    try {
+      child.kill('SIGKILL');
+    } catch {
+      // Process may already be dead
+    }
+  }, graceMs);
+
+  // Clear the force-kill timer if the process exits on its own
+  child.on('close', () => {
+    clearTimeout(forceKillTimer);
+  });
+}
 
 class CliProvider implements ProviderInterface {
   private readonly executablePath: string;
@@ -74,6 +98,8 @@ class CliProvider implements ProviderInterface {
       },
     };
 
+    const timeoutMs = RUN_TASK_TIMEOUT_MS;
+
     return new Promise<string>((resolve, reject) => {
       const child = spawn(this.executablePath, ['run-task'], {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -83,6 +109,17 @@ class CliProvider implements ProviderInterface {
       let lastJsonResponse: CliProviderResponse | undefined;
       const outputLines: string[] = [];
       let stderrOutput = '';
+      let timedOut = false;
+
+      // Set up timeout to prevent indefinite hangs
+      const timer = setTimeout(() => {
+        timedOut = true;
+        const minutes = Math.round(timeoutMs / 60_000);
+        const message = `CLI provider timed out after ${minutes} minutes. The external provider may be unresponsive.`;
+        core.error(message);
+        gracefulKill(child);
+        reject(new Error(`CliProvider run-task timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
 
       child.stdin.write(JSON.stringify(request));
       child.stdin.end();
@@ -123,10 +160,16 @@ class CliProvider implements ProviderInterface {
       });
 
       child.on('error', (error: Error) => {
-        reject(new Error(`CliProvider: failed to spawn executable '${this.executablePath}': ${error.message}`));
+        clearTimeout(timer);
+        if (!timedOut) {
+          reject(new Error(`CliProvider: failed to spawn executable '${this.executablePath}': ${error.message}`));
+        }
       });
 
       child.on('close', (code: number | null) => {
+        clearTimeout(timer);
+        if (timedOut) return;
+
         if (lastJsonResponse) {
           if (lastJsonResponse.success) {
             resolve(lastJsonResponse.output || outputLines.join('\n'));
@@ -182,6 +225,8 @@ class CliProvider implements ProviderInterface {
       params: {},
     };
 
+    const timeoutMs = WATCH_WORKFLOW_TIMEOUT_MS;
+
     return new Promise<string>((resolve, reject) => {
       const child = spawn(this.executablePath, ['watch-workflow'], {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -190,6 +235,17 @@ class CliProvider implements ProviderInterface {
 
       let lastJsonResponse: CliProviderResponse | undefined;
       const outputLines: string[] = [];
+      let timedOut = false;
+
+      // Set up timeout to prevent indefinite hangs
+      const timer = setTimeout(() => {
+        timedOut = true;
+        const minutes = Math.round(timeoutMs / 60_000);
+        const message = `CLI provider timed out after ${minutes} minutes. The external provider may be unresponsive.`;
+        core.error(message);
+        gracefulKill(child);
+        reject(new Error(`CliProvider watch-workflow timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
 
       child.stdin.write(JSON.stringify(request));
       child.stdin.end();
@@ -225,10 +281,16 @@ class CliProvider implements ProviderInterface {
       });
 
       child.on('error', (error: Error) => {
-        reject(new Error(`CliProvider: failed to spawn executable '${this.executablePath}': ${error.message}`));
+        clearTimeout(timer);
+        if (!timedOut) {
+          reject(new Error(`CliProvider: failed to spawn executable '${this.executablePath}': ${error.message}`));
+        }
       });
 
       child.on('close', (code: number | null) => {
+        clearTimeout(timer);
+        if (timedOut) return;
+
         if (lastJsonResponse) {
           if (lastJsonResponse.success) {
             resolve(lastJsonResponse.output || outputLines.join('\n'));
@@ -246,7 +308,7 @@ class CliProvider implements ProviderInterface {
 
   /**
    * Execute a CLI provider subcommand with a default timeout.
-   * Used for all methods except runTaskInWorkflow and watchWorkflow (which have no timeout).
+   * Timeout applies a graceful SIGTERM followed by SIGKILL after a grace period.
    */
   private execute(
     command: CliProviderSubcommand,
@@ -265,10 +327,10 @@ class CliProvider implements ProviderInterface {
       let stderrData = '';
       let timedOut = false;
 
-      // Set up timeout
+      // Set up timeout with graceful kill
       const timer = setTimeout(() => {
         timedOut = true;
-        child.kill('SIGTERM');
+        gracefulKill(child);
         reject(new Error(`CliProvider: command '${command}' timed out after ${timeoutMs}ms`));
       }, timeoutMs);
 

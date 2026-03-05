@@ -20,6 +20,7 @@ jest.mock('@actions/core', () => ({
 jest.mock('../provider-git-manager');
 
 import { spawn } from 'child_process';
+import * as core from '@actions/core';
 import CliProvider from './cli-provider';
 
 const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
@@ -215,6 +216,18 @@ describe('CliProvider', () => {
       const result = await promise;
       expect(result).toBe('line 1\nline 2');
     });
+
+    it('rejects on spawn error', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/nonexistent/path', {} as any);
+      const promise = provider.runTaskInWorkflow('guid', 'image', 'cmd', '/mnt', '/work', [], []);
+
+      child.emit('error', new Error('ENOENT'));
+
+      await expect(promise).rejects.toThrow('failed to spawn executable');
+    });
   });
 
   describe('cleanupWorkflow', () => {
@@ -404,7 +417,7 @@ describe('CliProvider', () => {
       jest.useRealTimers();
     });
 
-    it('rejects and kills process when command times out', async () => {
+    it('rejects and kills process when execute command times out', async () => {
       const child = createMockChildProcess();
       mockSpawn.mockReturnValue(child);
 
@@ -416,6 +429,97 @@ describe('CliProvider', () => {
 
       await expect(promise).rejects.toThrow('timed out');
       expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+    });
+
+    it('rejects and kills process when runTaskInWorkflow times out', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.runTaskInWorkflow('guid', 'image', 'cmd', '/mnt', '/work', [], []);
+
+      // Advance past the 2-hour timeout (7_200_000ms)
+      jest.advanceTimersByTime(7_200_001);
+
+      await expect(promise).rejects.toThrow('run-task timed out');
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+      expect(core.error).toHaveBeenCalledWith(expect.stringContaining('CLI provider timed out after 120 minutes'));
+    });
+
+    it('rejects and kills process when watchWorkflow times out', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.watchWorkflow();
+
+      // Advance past the 1-hour timeout (3_600_000ms)
+      jest.advanceTimersByTime(3_600_001);
+
+      await expect(promise).rejects.toThrow('watch-workflow timed out');
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+      expect(core.error).toHaveBeenCalledWith(expect.stringContaining('CLI provider timed out after 60 minutes'));
+    });
+
+    it('escalates to SIGKILL after grace period on runTaskInWorkflow timeout', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.runTaskInWorkflow('guid', 'image', 'cmd', '/mnt', '/work', [], []);
+
+      // Trigger the timeout
+      jest.advanceTimersByTime(7_200_001);
+
+      await expect(promise).rejects.toThrow('timed out');
+
+      // SIGTERM was sent
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+
+      // Advance past the 10s grace period — SIGKILL should fire
+      jest.advanceTimersByTime(10_001);
+      expect(child.kill).toHaveBeenCalledWith('SIGKILL');
+    });
+
+    it('does not send SIGKILL if process exits before grace period', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.runTaskInWorkflow('guid', 'image', 'cmd', '/mnt', '/work', [], []);
+
+      // Trigger the timeout
+      jest.advanceTimersByTime(7_200_001);
+
+      await expect(promise).rejects.toThrow('timed out');
+
+      // Process exits voluntarily after SIGTERM
+      child.emit('close', 143);
+
+      // Advance past the grace period — SIGKILL should NOT fire because process already exited
+      jest.advanceTimersByTime(10_001);
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+      // SIGKILL should not have been called because the close event cleared the timer
+      expect(child.kill).not.toHaveBeenCalledWith('SIGKILL');
+    });
+
+    it('clears timeout when runTaskInWorkflow completes normally', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.runTaskInWorkflow('guid', 'image', 'cmd', '/mnt', '/work', [], []);
+
+      // Process completes before timeout
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, output: 'done' }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('done');
+
+      // Advance far past timeout — should NOT reject
+      jest.advanceTimersByTime(8_000_000);
+      expect(child.kill).not.toHaveBeenCalled();
     });
   });
 
