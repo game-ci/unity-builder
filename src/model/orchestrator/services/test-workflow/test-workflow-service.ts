@@ -1,4 +1,5 @@
-import { execSync } from 'node:child_process';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
 import path from 'node:path';
 import * as core from '@actions/core';
 import BuildParameters from '../../../build-parameters';
@@ -6,6 +7,8 @@ import { TestSuiteParser } from './test-suite-parser';
 import { TaxonomyFilterService } from './taxonomy-filter-service';
 import { TestResultReporter } from './test-result-reporter';
 import { TestRunDefinition, TestResult } from './test-workflow-types';
+
+const execAsync = promisify(exec);
 
 /**
  * Main entry point for the test workflow engine.
@@ -19,7 +22,7 @@ export class TestWorkflowService {
    * group sequentially (runs within a group execute concurrently), and
    * collects all results.
    */
-  static async executeTestSuite(suitePath: string, params: BuildParameters): Promise<TestResult[]> {
+  static async executeTestSuite(suitePath: string, parameters: BuildParameters): Promise<TestResult[]> {
     core.info(`[TestWorkflow] Loading test suite from: ${suitePath}`);
 
     const suite = TestSuiteParser.parseSuiteFile(suitePath);
@@ -41,7 +44,7 @@ export class TestWorkflowService {
       core.info(`[TestWorkflow] Executing group ${groupIndex}/${groups.length}: [${runNames}]`);
 
       // Execute runs within a group concurrently
-      const groupResults = await Promise.all(group.map((run) => TestWorkflowService.executeTestRun(run, params)));
+      const groupResults = await Promise.all(group.map((run) => TestWorkflowService.executeTestRun(run, parameters)));
 
       allResults.push(...groupResults);
 
@@ -59,8 +62,8 @@ export class TestWorkflowService {
     core.info(summary);
 
     // Write results if output path is configured
-    const resultPath = params.testResultPath;
-    const resultFormat = params.testResultFormat;
+    const resultPath = parameters.testResultPath;
+    const resultFormat = parameters.testResultFormat;
     if (resultPath) {
       TestResultReporter.writeResults(allResults, resultPath, resultFormat as 'junit' | 'json' | 'both');
       core.info(`[TestWorkflow] Results written to: ${resultPath}`);
@@ -72,34 +75,37 @@ export class TestWorkflowService {
   /**
    * Execute a single test run definition.
    * Builds the Unity CLI arguments based on the run configuration (edit mode,
-   * play mode, built client) and taxonomy filters, executes the command, and
-   * parses the result output.
+   * play mode, built client) and taxonomy filters, executes the command
+   * asynchronously, and parses the result output.
+   *
+   * Uses promisified exec instead of execSync so that Promise.all can
+   * actually run multiple test groups in parallel without blocking the
+   * Node.js event loop.
    */
-  static async executeTestRun(run: TestRunDefinition, params: BuildParameters): Promise<TestResult> {
+  static async executeTestRun(run: TestRunDefinition, parameters: BuildParameters): Promise<TestResult> {
     core.info(`[TestWorkflow] Starting run: '${run.name}'`);
 
-    const args = TestWorkflowService.buildUnityArgs(run, params);
+    const unityArguments = TestWorkflowService.buildUnityArgs(run, parameters);
     const timeoutMs = (run.timeout ?? 600) * 1000;
 
-    core.info(`[TestWorkflow] Unity args: ${args}`);
+    core.info(`[TestWorkflow] Unity args: ${unityArguments}`);
 
     const startTime = Date.now();
 
     try {
-      const resultDir = path.join(params.testResultPath ?? './test-results', run.name);
-      const resultFile = path.join(resultDir, 'results.xml');
+      const resultDirectory = path.join(parameters.testResultPath ?? './test-results', run.name);
+      const resultFile = path.join(resultDirectory, 'results.xml');
 
       // Build the full Unity command
-      const unityPath = TestWorkflowService.resolveUnityPath(params);
-      const command = `"${unityPath}" ${args} -testResults "${resultFile}"`;
+      const unityPath = TestWorkflowService.resolveUnityPath(parameters);
+      const command = `"${unityPath}" ${unityArguments} -testResults "${resultFile}"`;
 
       core.info(`[TestWorkflow] Executing: ${command}`);
 
-      execSync(command, {
+      await execAsync(command, {
         timeout: timeoutMs,
-        stdio: 'pipe',
-        encoding: 'utf8',
-        cwd: params.projectPath || process.cwd(),
+        maxBuffer: 50 * 1024 * 1024, // 50 MB to handle large Unity output
+        cwd: parameters.projectPath || process.cwd(),
       });
 
       const duration = (Date.now() - startTime) / 1000;
@@ -109,10 +115,12 @@ export class TestWorkflowService {
         const result = TestResultReporter.parseJUnitResults(resultFile);
         result.runName = run.name;
         result.duration = duration;
+
         return result;
       } catch {
         // Result file may not exist if Unity exited early
         core.warning(`[TestWorkflow] Could not parse results for run '${run.name}' -- result file may be missing`);
+
         return {
           runName: run.name,
           passed: 0,
@@ -124,22 +132,26 @@ export class TestWorkflowService {
       }
     } catch (error: any) {
       const duration = (Date.now() - startTime) / 1000;
-      const isTimeout = error.killed || error.signal === 'SIGTERM';
+
+      // The promisified exec sets error.killed when the process is terminated
+      // due to timeout, and error.signal will be 'SIGTERM'
+      const isTimeout = error.killed === true || error.signal === 'SIGTERM';
 
       if (isTimeout) {
-        core.error(`[TestWorkflow] Run '${run.name}' timed out after ${run.timeout}s`);
+        core.error(`[TestWorkflow] Run '${run.name}' timed out after ${run.timeout ?? 600}s`);
       } else {
         core.error(`[TestWorkflow] Run '${run.name}' failed: ${error.message}`);
       }
 
       // Try to parse partial results even on failure
-      const resultDir = path.join(params.testResultPath ?? './test-results', run.name);
-      const resultFile = path.join(resultDir, 'results.xml');
+      const resultDirectory = path.join(parameters.testResultPath ?? './test-results', run.name);
+      const resultFile = path.join(resultDirectory, 'results.xml');
 
       try {
         const result = TestResultReporter.parseJUnitResults(resultFile);
         result.runName = run.name;
         result.duration = duration;
+
         return result;
       } catch {
         return {
@@ -153,7 +165,7 @@ export class TestWorkflowService {
               testName: isTimeout ? 'Timeout' : 'ExecutionError',
               className: run.name,
               message: isTimeout
-                ? `Test run timed out after ${run.timeout}s`
+                ? `Test run timed out after ${run.timeout ?? 600}s`
                 : error.message ?? 'Unknown execution error',
               stackTrace: error.stderr ?? undefined,
             },
@@ -166,70 +178,66 @@ export class TestWorkflowService {
   /**
    * Build Unity CLI arguments for a test run based on its configuration.
    */
-  static buildUnityArgs(run: TestRunDefinition, params: BuildParameters): string {
-    const args: string[] = [];
-
-    // Batch mode and no-graphics for CI
-    args.push('-batchmode');
-    args.push('-nographics');
+  static buildUnityArgs(run: TestRunDefinition, parameters: BuildParameters): string {
+    const unityArguments: string[] = ['-batchmode', '-nographics'];
 
     // Project path
-    if (params.projectPath) {
-      args.push(`-projectPath "${params.projectPath}"`);
+    if (parameters.projectPath) {
+      unityArguments.push(`-projectPath "${parameters.projectPath}"`);
     }
 
     // Test mode
     if (run.builtClient && run.builtClientPath) {
       // Built client testing: run tests against a built player
-      args.push('-runTests');
-      args.push(`-testPlatform StandalonePlayer`);
-      args.push(`-assemblyNames Assembly-CSharp-Tests`);
-      args.push(`-builtPlayerPath "${run.builtClientPath}"`);
+      unityArguments.push(
+        '-runTests',
+        `-testPlatform StandalonePlayer`,
+        `-assemblyNames Assembly-CSharp-Tests`,
+        `-builtPlayerPath "${run.builtClientPath}"`,
+      );
     } else if (run.editMode && run.playMode) {
       // Both modes: run EditMode first, then PlayMode will require a separate invocation
       // For combined mode, use EditMode (the service handles sequencing)
-      args.push('-runTests');
-      args.push('-testPlatform EditMode');
+      unityArguments.push('-runTests', '-testPlatform EditMode');
     } else if (run.playMode) {
-      args.push('-runTests');
-      args.push('-testPlatform PlayMode');
+      unityArguments.push('-runTests', '-testPlatform PlayMode');
     } else if (run.editMode) {
-      args.push('-runTests');
-      args.push('-testPlatform EditMode');
+      unityArguments.push('-runTests', '-testPlatform EditMode');
     }
 
     // Apply taxonomy filters
     if (run.filters && Object.keys(run.filters).length > 0) {
-      const filterArgs = TaxonomyFilterService.buildFilterArgs(run.filters);
-      if (filterArgs) {
-        args.push(filterArgs);
+      const filterArguments = TaxonomyFilterService.buildFilterArgs(run.filters);
+      if (filterArguments) {
+        unityArguments.push(filterArguments);
       }
     }
 
     // Target platform
-    if (params.targetPlatform) {
-      args.push(`-buildTarget ${params.targetPlatform}`);
+    if (parameters.targetPlatform) {
+      unityArguments.push(`-buildTarget ${parameters.targetPlatform}`);
     }
 
-    return args.join(' ');
+    return unityArguments.join(' ');
   }
 
   /**
    * Resolve the path to the Unity editor executable.
    */
-  private static resolveUnityPath(params: BuildParameters): string {
+  private static resolveUnityPath(parameters: BuildParameters): string {
     // In CI, Unity path is typically set via environment or the docker container
-    const envUnityPath = process.env.UNITY_PATH ?? process.env.UNITY_EDITOR;
-    if (envUnityPath) {
-      return envUnityPath;
+    const environmentUnityPath = process.env.UNITY_PATH ?? process.env.UNITY_EDITOR;
+    if (environmentUnityPath) {
+      return environmentUnityPath;
     }
 
     // Default paths by platform
     if (process.platform === 'win32') {
-      return `C:/Program Files/Unity/Hub/Editor/${params.editorVersion}/Editor/Unity.exe`;
+      return `C:/Program Files/Unity/Hub/Editor/${parameters.editorVersion}/Editor/Unity.exe`;
     }
+
     if (process.platform === 'darwin') {
-      return `/Applications/Unity/Hub/Editor/${params.editorVersion}/Unity.app/Contents/MacOS/Unity`;
+      return `/Applications/Unity/Hub/Editor/${parameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
     }
 
     // Linux default (Docker container path)
