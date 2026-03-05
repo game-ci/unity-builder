@@ -20,6 +20,7 @@ import { FollowLogStreamService } from './services/core/follow-log-stream-servic
 import OrchestratorResult from './services/core/orchestrator-result';
 import OrchestratorOptions from './options/orchestrator-options';
 import ResourceTracking from './services/core/resource-tracking';
+import { RunnerAvailabilityService } from './services/core/runner-availability-service';
 
 class Orchestrator {
   public static Provider: ProviderInterface;
@@ -75,6 +76,40 @@ class Orchestrator {
 
   private static async setupSelectedBuildPlatform() {
     OrchestratorLogger.log(`Orchestrator platform selected ${Orchestrator.buildParameters.providerStrategy}`);
+
+    // Check runner availability and apply fallback if needed
+    if (Orchestrator.buildParameters.runnerCheckEnabled && Orchestrator.buildParameters.fallbackProviderStrategy) {
+      const owner = OrchestratorOptions.githubOwner;
+      const repo = OrchestratorOptions.githubRepoName;
+      const token = Orchestrator.buildParameters.gitPrivateToken || process.env.GITHUB_TOKEN || '';
+
+      OrchestratorLogger.log(
+        `Checking runner availability (labels: [${Orchestrator.buildParameters.runnerCheckLabels.join(', ')}], min: ${Orchestrator.buildParameters.runnerCheckMinAvailable})`,
+      );
+
+      const result = await RunnerAvailabilityService.checkAvailability(
+        owner,
+        repo,
+        token,
+        Orchestrator.buildParameters.runnerCheckLabels,
+        Orchestrator.buildParameters.runnerCheckMinAvailable,
+      );
+
+      OrchestratorLogger.log(
+        `Runner check: ${result.totalRunners} total, ${result.matchingRunners} matching, ${result.idleRunners} idle — ${result.reason}`,
+      );
+
+      if (result.shouldFallback) {
+        const original = Orchestrator.buildParameters.providerStrategy;
+        const fallback = Orchestrator.buildParameters.fallbackProviderStrategy;
+        OrchestratorLogger.log(`Falling back from '${original}' to '${fallback}' — ${result.reason}`);
+        Orchestrator.buildParameters.providerStrategy = fallback;
+        core.setOutput('providerFallbackUsed', 'true');
+        core.setOutput('providerFallbackReason', result.reason);
+      } else {
+        core.setOutput('providerFallbackUsed', 'false');
+      }
+    }
 
     // Detect LocalStack endpoints and handle AWS provider appropriately
     // AWS_FORCE_PROVIDER options:
