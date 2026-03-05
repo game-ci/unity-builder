@@ -320,6 +320,28 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  artifactOutputTypes:
+    description: 'Comma-separated list of output types to collect (build, logs, test-results, coverage, images, metrics, data-export, server-build, custom)'
+    required: false
+    default: 'build,logs,test-results'
+  artifactUploadTarget:
+    description: 'Where to upload artifacts: github-artifacts, storage, local, none'
+    required: false
+    default: 'github-artifacts'
+  artifactUploadPath:
+    description: 'Destination path for artifact upload (storage URI or local path)'
+    required: false
+  artifactCompression:
+    description: 'Compression for artifacts: none, gzip, lz4'
+    required: false
+    default: 'gzip'
+  artifactRetentionDays:
+    description: 'Retention period for uploaded artifacts in days'
+    required: false
+    default: '30'
+  artifactCustomTypes:
+    description: 'JSON string defining custom output types [{name, defaultPath, description}]'
+    required: false
   cloneDepth:
     default: '50'
     required: false
@@ -695,6 +717,8 @@ outputs:
       'Returns the exit code from the build scripts. This code is 0 if the build was successful. If there was an error
       during activation, the code is from the activation step. If activation is successful, the code is from the project
       build step.'
+  artifactManifestPath:
+    description: 'Path to the generated artifact manifest JSON file'
 branding:
   icon: 'box'
   color: 'gray-dark'

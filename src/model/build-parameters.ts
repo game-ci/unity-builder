@@ -199,6 +199,12 @@ class BuildParameters {
   public hotRunnerHealthInterval!: number;
   public hotRunnerMaxIdle!: number;
   public hotRunnerFallbackToCold!: boolean;
+  public artifactOutputTypes!: string;
+  public artifactUploadTarget!: string;
+  public artifactUploadPath!: string;
+  public artifactCompression!: string;
+  public artifactRetentionDays!: string;
+  public artifactCustomTypes!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -423,6 +429,12 @@ class BuildParameters {
       hotRunnerHealthInterval: Input.hotRunnerHealthInterval,
       hotRunnerMaxIdle: Input.hotRunnerMaxIdle,
       hotRunnerFallbackToCold: Input.hotRunnerFallbackToCold,
+      artifactOutputTypes: Input.artifactOutputTypes,
+      artifactUploadTarget: Input.artifactUploadTarget,
+      artifactUploadPath: Input.artifactUploadPath,
+      artifactCompression: Input.artifactCompression,
+      artifactRetentionDays: Input.artifactRetentionDays,
+      artifactCustomTypes: Input.artifactCustomTypes,
     };
   }
 
