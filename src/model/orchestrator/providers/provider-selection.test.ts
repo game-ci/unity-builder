@@ -120,9 +120,7 @@ describe('Provider Selection', () => {
       expect(uniqueClassNames.size).toBe(4);
 
       // Verify expected mapping
-      expect(instances.find((i) => i.strategy === 'remote-powershell')!.className).toBe(
-        'RemotePowershellProvider',
-      );
+      expect(instances.find((i) => i.strategy === 'remote-powershell')!.className).toBe('RemotePowershellProvider');
       expect(instances.find((i) => i.strategy === 'github-actions')!.className).toBe('GitHubActionsProvider');
       expect(instances.find((i) => i.strategy === 'gitlab-ci')!.className).toBe('GitLabCIProvider');
       expect(instances.find((i) => i.strategy === 'ansible')!.className).toBe('AnsibleProvider');
