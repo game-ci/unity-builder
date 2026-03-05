@@ -278,6 +278,30 @@ class Input {
     return Input.getInput('containerRegistryImageVersion') ?? '3';
   }
 
+  static get artifactOutputTypes(): string {
+    return Input.getInput('artifactOutputTypes') ?? 'build,logs,test-results';
+  }
+
+  static get artifactUploadTarget(): string {
+    return Input.getInput('artifactUploadTarget') ?? 'github-artifacts';
+  }
+
+  static get artifactUploadPath(): string {
+    return Input.getInput('artifactUploadPath') ?? '';
+  }
+
+  static get artifactCompression(): string {
+    return Input.getInput('artifactCompression') ?? 'gzip';
+  }
+
+  static get artifactRetentionDays(): string {
+    return Input.getInput('artifactRetentionDays') ?? '30';
+  }
+
+  static get artifactCustomTypes(): string {
+    return Input.getInput('artifactCustomTypes') ?? '';
+  }
+
   static get skipActivation(): string {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
