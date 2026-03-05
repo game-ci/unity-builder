@@ -10,6 +10,8 @@ import { HotRunnerConfig } from './model/orchestrator/services/hot-runner/hot-ru
 import { OutputService } from './model/orchestrator/services/output/output-service';
 import { OutputTypeRegistry } from './model/orchestrator/services/output/output-type-registry';
 import { ArtifactUploadHandler } from './model/orchestrator/services/output/artifact-upload-handler';
+import { IncrementalSyncService } from './model/orchestrator/services/sync';
+import { SyncStrategy } from './model/orchestrator/services/sync/sync-state';
 
 async function runMain() {
   try {
@@ -84,7 +86,25 @@ async function runMain() {
       }
     } else if (buildParameters.providerStrategy === 'local') {
       core.info('Building locally');
+
+      // Apply incremental sync strategy before build
+      const syncStrategy = buildParameters.syncStrategy as SyncStrategy;
+      if (syncStrategy !== 'full') {
+        core.info(`[Sync] Applying sync strategy: ${syncStrategy}`);
+        await applySyncStrategy(buildParameters, workspace);
+      }
+
       exitCode = await runColdBuild(buildParameters, baseImage, workspace, actionFolder);
+
+      // Revert overlays after job completion if configured
+      if (buildParameters.syncRevertAfter && syncStrategy !== 'full') {
+        core.info('[Sync] Reverting overlay changes after job completion');
+        try {
+          await IncrementalSyncService.revertOverlays(workspace, buildParameters.syncStatePath);
+        } catch (revertError) {
+          core.warning(`[Sync] Overlay revert failed: ${(revertError as Error).message}`);
+        }
+      }
     } else {
       await Orchestrator.run(buildParameters, baseImage.toString());
       exitCode = 0;
@@ -182,6 +202,60 @@ async function runColdBuild(
     await Orchestrator.run(buildParameters, baseImage.toString());
 
     return 0;
+  }
+}
+
+/**
+ * Apply the configured sync strategy to the workspace before build.
+ */
+async function applySyncStrategy(buildParameters: BuildParameters, workspace: string): Promise<void> {
+  const strategy = buildParameters.syncStrategy as SyncStrategy;
+  const resolvedStrategy = IncrementalSyncService.resolveStrategy(strategy, workspace, buildParameters.syncStatePath);
+
+  if (resolvedStrategy === 'full') {
+    core.info('[Sync] Resolved to full sync (no incremental state available)');
+
+    return;
+  }
+
+  switch (resolvedStrategy) {
+    case 'git-delta': {
+      const targetReference = buildParameters.gitSha || buildParameters.branch;
+      const changedFiles = await IncrementalSyncService.syncGitDelta(
+        workspace,
+        targetReference,
+        buildParameters.syncStatePath,
+      );
+      core.info(`[Sync] Git delta sync applied: ${changedFiles} file(s) changed`);
+      break;
+    }
+    case 'direct-input': {
+      if (!buildParameters.syncInputRef) {
+        throw new Error('[Sync] direct-input strategy requires syncInputRef to be set');
+      }
+      const overlays = await IncrementalSyncService.applyDirectInput(
+        workspace,
+        buildParameters.syncInputRef,
+        buildParameters.syncStorageRemote || undefined,
+        buildParameters.syncStatePath,
+      );
+      core.info(`[Sync] Direct input applied: ${overlays.length} overlay(s)`);
+      break;
+    }
+    case 'storage-pull': {
+      if (!buildParameters.syncInputRef) {
+        throw new Error('[Sync] storage-pull strategy requires syncInputRef to be set');
+      }
+      const pulledFiles = await IncrementalSyncService.syncStoragePull(workspace, buildParameters.syncInputRef, {
+        rcloneRemote: buildParameters.syncStorageRemote || undefined,
+        syncRevertAfter: buildParameters.syncRevertAfter,
+        statePath: buildParameters.syncStatePath,
+      });
+      core.info(`[Sync] Storage pull complete: ${pulledFiles.length} file(s)`);
+      break;
+    }
+    default:
+      core.warning(`[Sync] Unknown sync strategy: ${resolvedStrategy}`);
   }
 }
 

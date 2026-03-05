@@ -301,6 +301,7 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+<<<<<<< HEAD
   testSuitePath:
     description: 'Path to YAML test suite definition file'
     required: false
@@ -347,6 +348,24 @@ inputs:
     description: '[HotRunner] Fall back to cold build if no hot runner available'
     required: false
     default: 'true'
+  syncStrategy:
+    description: 'Workspace sync strategy: full, git-delta, direct-input, storage-pull'
+    required: false
+    default: 'full'
+  syncInputRef:
+    description: 'URI for direct-input or storage-pull content (storage://remote/path or file path)'
+    required: false
+  syncStorageRemote:
+    description: 'rclone remote name for storage-backed inputs (defaults to rcloneRemote)'
+    required: false
+  syncRevertAfter:
+    description: 'Revert overlaid changes after job completion'
+    required: false
+    default: 'true'
+  syncStatePath:
+    description: 'Path to sync state file for delta tracking'
+    required: false
+    default: '.game-ci/sync-state.json'
 
 outputs:
   volume:

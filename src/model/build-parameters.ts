@@ -127,6 +127,12 @@ class BuildParameters {
   public artifactRetentionDays!: string;
   public artifactCustomTypes!: string;
 
+  public syncStrategy!: string;
+  public syncInputRef!: string;
+  public syncStorageRemote!: string;
+  public syncRevertAfter!: boolean;
+  public syncStatePath!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -280,6 +286,11 @@ class BuildParameters {
       artifactCompression: Input.artifactCompression,
       artifactRetentionDays: Input.artifactRetentionDays,
       artifactCustomTypes: Input.artifactCustomTypes,
+      syncStrategy: Input.syncStrategy,
+      syncInputRef: Input.syncInputRef,
+      syncStorageRemote: Input.syncStorageRemote,
+      syncRevertAfter: Input.syncRevertAfter,
+      syncStatePath: Input.syncStatePath,
     };
   }
 
