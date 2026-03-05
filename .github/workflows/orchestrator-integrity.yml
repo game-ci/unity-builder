@@ -196,6 +196,15 @@ jobs:
           fi
       - run: yarn install --frozen-lockfile
       # ==========================================
+      # FAST UNIT TESTS (no infra required, fast-fail gate)
+      # ==========================================
+      - name: Run orchestrator unit tests (fast, no infra)
+        timeout-minutes: 2
+        run: >-
+          yarn run test
+          --testPathPattern="orchestrator-guid|orchestrator-folders|task-parameter-serializer|follow-log-stream-service|runner-availability-service|provider-url-parser|provider-loader|provider-git-manager|orchestrator-image|orchestrator-hooks|orchestrator-github-checks"
+          --verbose --detectOpenHandles --forceExit --runInBand
+      # ==========================================
       # K8S TESTS SECTION
       # ==========================================
       - name: Clean up disk space before K8s tests
