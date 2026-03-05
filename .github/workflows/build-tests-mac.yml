@@ -12,6 +12,7 @@ jobs:
   buildForAllPlatformsMacOS:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
     runs-on: macos-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:

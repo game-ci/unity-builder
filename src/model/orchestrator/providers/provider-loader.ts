@@ -62,6 +62,8 @@ export default async function loadProvider(
           'local-docker': './docker',
           'local-system': './local',
           local: './local',
+          'gcp-cloud-run': './gcp-cloud-run',
+          'azure-aci': './azure-aci',
         };
 
         modulePath = providerModuleMap[providerSource] || providerSource;
@@ -136,7 +138,7 @@ export class ProviderLoader {
    * @returns string[] - Array of available provider names
    */
   static getAvailableProviders(): string[] {
-    return ['aws', 'k8s', 'test', 'local-docker', 'local-system', 'local'];
+    return ['aws', 'k8s', 'test', 'local-docker', 'local-system', 'local', 'gcp-cloud-run', 'azure-aci'];
   }
 
   /**
