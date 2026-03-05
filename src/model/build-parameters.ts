@@ -113,6 +113,11 @@ class BuildParameters {
   public localCacheRoot!: string;
   public localCacheLibrary!: boolean;
   public localCacheLfs!: boolean;
+  public childWorkspacesEnabled!: boolean;
+  public childWorkspaceName!: string;
+  public childWorkspaceCacheRoot!: string;
+  public childWorkspacePreserveGit!: boolean;
+  public childWorkspaceSeparateLibrary!: boolean;
   public lfsTransferAgent!: string;
   public lfsTransferAgentArgs!: string;
   public lfsStoragePaths!: string;
@@ -263,6 +268,11 @@ class BuildParameters {
       localCacheRoot: Input.localCacheRoot,
       localCacheLibrary: Input.localCacheLibrary,
       localCacheLfs: Input.localCacheLfs,
+      childWorkspacesEnabled: Input.childWorkspacesEnabled,
+      childWorkspaceName: Input.childWorkspaceName,
+      childWorkspaceCacheRoot: Input.childWorkspaceCacheRoot,
+      childWorkspacePreserveGit: Input.childWorkspacePreserveGit,
+      childWorkspaceSeparateLibrary: Input.childWorkspaceSeparateLibrary,
       lfsTransferAgent: Input.lfsTransferAgent,
       lfsTransferAgentArgs: Input.lfsTransferAgentArgs,
       lfsStoragePaths: Input.lfsStoragePaths,

@@ -25,6 +25,33 @@ async function runMain() {
     if (buildParameters.providerStrategy === 'local') {
       core.info('Building locally');
 
+      // Child workspace isolation - restore cached workspace before any other setup
+      let childWorkspaceConfig: any;
+      if (buildParameters.childWorkspacesEnabled && buildParameters.childWorkspaceName) {
+        const { ChildWorkspaceService } = await import('./model/orchestrator/services/cache/child-workspace-service');
+        const cacheRoot =
+          buildParameters.childWorkspaceCacheRoot ||
+          path.join(buildParameters.runnerTempPath || process.env.RUNNER_TEMP || '', 'game-ci-workspaces');
+        childWorkspaceConfig = ChildWorkspaceService.buildConfig({
+          childWorkspacesEnabled: buildParameters.childWorkspacesEnabled,
+          childWorkspaceName: buildParameters.childWorkspaceName,
+          childWorkspaceCacheRoot: cacheRoot,
+          childWorkspacePreserveGit: buildParameters.childWorkspacePreserveGit,
+          childWorkspaceSeparateLibrary: buildParameters.childWorkspaceSeparateLibrary,
+        });
+        const projectFullPath = path.join(workspace, buildParameters.projectPath);
+        const restored = ChildWorkspaceService.initializeWorkspace(projectFullPath, childWorkspaceConfig);
+        core.info(
+          `Child workspace "${buildParameters.childWorkspaceName}": ${
+            restored ? 'restored from cache' : 'starting fresh'
+          }`,
+        );
+
+        // Log workspace size for resource tracking
+        const size = ChildWorkspaceService.getWorkspaceSize(projectFullPath);
+        core.info(`Child workspace size after restore: ${size}`);
+      }
+
       // Submodule profile initialization
       if (buildParameters.submoduleProfilePath) {
         const { SubmoduleProfileService } = await import(
@@ -80,8 +107,8 @@ async function runMain() {
         const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
         await GitHooksService.installHooks(workspace);
         if (buildParameters.gitHooksSkipList) {
-          const env = GitHooksService.configureSkipList(buildParameters.gitHooksSkipList.split(','));
-          Object.assign(process.env, env);
+          const environment = GitHooksService.configureSkipList(buildParameters.gitHooksSkipList.split(','));
+          Object.assign(process.env, environment);
         }
       } else {
         const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
@@ -108,6 +135,17 @@ async function runMain() {
         if (buildParameters.localCacheLfs) {
           await LocalCacheService.saveLfsCache(workspace, cacheRoot, cacheKey);
         }
+      }
+
+      // Child workspace isolation - save workspace for next run
+      if (childWorkspaceConfig && childWorkspaceConfig.enabled) {
+        const { ChildWorkspaceService } = await import('./model/orchestrator/services/cache/child-workspace-service');
+        const projectFullPath = path.join(workspace, buildParameters.projectPath);
+        const preSaveSize = ChildWorkspaceService.getWorkspaceSize(projectFullPath);
+        core.info(`Child workspace size before save: ${preSaveSize}`);
+
+        ChildWorkspaceService.saveWorkspace(projectFullPath, childWorkspaceConfig);
+        core.info(`Child workspace "${buildParameters.childWorkspaceName}" saved to cache`);
       }
     } else {
       await Orchestrator.run(buildParameters, baseImage.toString());

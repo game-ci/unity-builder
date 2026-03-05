@@ -316,14 +316,43 @@ inputs:
     required: false
     default: 'false'
     description: 'Cache Git LFS objects for local builds. Only effective when localCacheEnabled is true.'
+  childWorkspacesEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Enable child workspace isolation for multi-product builds. Uses atomic filesystem moves for O(1) workspace
+      restore instead of tar/download/extract. Ideal for 50GB+ workspaces on self-hosted runners.'
+  childWorkspaceName:
+    required: false
+    default: ''
+    description:
+      'Name for this child workspace (e.g., product name like "TurnOfWar"). Used as the cache key for workspace
+      isolation. Required when childWorkspacesEnabled is true.'
+  childWorkspaceCacheRoot:
+    required: false
+    default: ''
+    description:
+      'Parent directory for cached child workspaces. Should be on the same NTFS volume as the build directory for O(1)
+      atomic restore via filesystem rename. Defaults to $RUNNER_TEMP/game-ci-workspaces.'
+  childWorkspacePreserveGit:
+    required: false
+    default: 'true'
+    description:
+      'Preserve .git directory in cached child workspace. Enables delta operations on restore but increases cache size.
+      Set to false to save disk space at the cost of full re-clone on restore.'
+  childWorkspaceSeparateLibrary:
+    required: false
+    default: 'true'
+    description:
+      'Cache Unity Library folder separately from the child workspace. Allows independent Library restore even when
+      workspace cache is invalidated. Recommended for large projects.'
   lfsTransferAgent:
     required: false
     default: ''
     description:
-      'Custom Git LFS transfer agent. Set to "elastic-git-storage" for built-in support (auto-installs
-      from GitHub releases). Append @version for a specific release (e.g. "elastic-git-storage@v1.0.0").
-      Or provide a path to any custom transfer agent executable. When set, the agent is registered
-      via git config before LFS operations.'
+      'Custom Git LFS transfer agent. Set to "elastic-git-storage" for built-in support (auto-installs from GitHub
+      releases). Append @version for a specific release (e.g. "elastic-git-storage@v1.0.0"). Or provide a path to any
+      custom transfer agent executable. When set, the agent is registered via git config before LFS operations.'
   lfsTransferAgentArgs:
     required: false
     default: ''
@@ -349,10 +378,9 @@ inputs:
     required: false
     default: ''
     description:
-      'Comma-separated list of lefthook hook groups to run before the Unity build. Allows CI to
-      trigger checks that normally only run on git events. Example: pre-commit,pre-push. Requires
-      lefthook. Works with Unity Git Hooks (com.frostebite.unitygithooks) when installed as a UPM
-      package — the init script runs automatically.'
+      'Comma-separated list of lefthook hook groups to run before the Unity build. Allows CI to trigger checks that
+      normally only run on git events. Example: pre-commit,pre-push. Requires lefthook. Works with Unity Git Hooks
+      (com.frostebite.unitygithooks) when installed as a UPM package — the init script runs automatically.'
   providerExecutable:
     required: false
     default: ''

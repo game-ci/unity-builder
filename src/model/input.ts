@@ -310,6 +310,26 @@ class Input {
     return (Input.getInput('localCacheLfs') ?? 'false') === 'true';
   }
 
+  static get childWorkspacesEnabled(): boolean {
+    return (Input.getInput('childWorkspacesEnabled') ?? 'false') === 'true';
+  }
+
+  static get childWorkspaceName(): string {
+    return Input.getInput('childWorkspaceName') ?? '';
+  }
+
+  static get childWorkspaceCacheRoot(): string {
+    return Input.getInput('childWorkspaceCacheRoot') ?? '';
+  }
+
+  static get childWorkspacePreserveGit(): boolean {
+    return (Input.getInput('childWorkspacePreserveGit') ?? 'true') === 'true';
+  }
+
+  static get childWorkspaceSeparateLibrary(): boolean {
+    return (Input.getInput('childWorkspaceSeparateLibrary') ?? 'true') === 'true';
+  }
+
   static get lfsTransferAgent(): string {
     return Input.getInput('lfsTransferAgent') ?? '';
   }
