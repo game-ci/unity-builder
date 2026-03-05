@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as core from '@actions/core';
@@ -310,7 +310,79 @@ export class BuildReliabilityService {
   }
 
   /**
+   * Get available disk space in megabytes for a given directory.
+   * Returns -1 if the check fails (unknown space).
+   *
+   * Cross-platform: uses wmic on Windows, df on Unix.
+   */
+  static getAvailableSpaceMB(directoryPath: string): number {
+    try {
+      if (process.platform === 'win32') {
+        const drive = path.parse(directoryPath).root;
+        const driveLetter = drive.replace(/[:\\\/]/g, '');
+        const output = execFileSync(
+          'wmic',
+          ['logicaldisk', 'where', `DeviceID='${driveLetter}:'`, 'get', 'FreeSpace', '/value'],
+          { encoding: 'utf8', timeout: 10_000 },
+        );
+        const match = output.match(/FreeSpace=(\d+)/);
+
+        return match ? Number.parseInt(match[1], 10) / (1024 * 1024) : -1;
+      } else {
+        const output = execFileSync('df', ['-BM', '--output=avail', directoryPath], {
+          encoding: 'utf8',
+          timeout: 10_000,
+        });
+        const lines = output.trim().split('\n');
+
+        return Number.parseInt(lines[lines.length - 1], 10);
+      }
+    } catch {
+      return -1; // Unknown, caller should proceed with warning
+    }
+  }
+
+  /**
+   * Calculate the total size of a directory in megabytes.
+   * Returns -1 if the calculation fails.
+   */
+  static getDirectorySizeMB(directoryPath: string): number {
+    try {
+      const stat = fs.statSync(directoryPath);
+      if (!stat.isDirectory()) {
+        return stat.size / (1024 * 1024);
+      }
+
+      let totalBytes = 0;
+      const walkDirectory = (dir: string): void => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            walkDirectory(fullPath);
+          } else {
+            try {
+              totalBytes += fs.statSync(fullPath).size;
+            } catch {
+              // Skip inaccessible files
+            }
+          }
+        }
+      };
+
+      walkDirectory(directoryPath);
+
+      return totalBytes / (1024 * 1024);
+    } catch {
+      return -1;
+    }
+  }
+
+  /**
    * Create a tar.gz archive of build output.
+   *
+   * Validates disk space before archiving. Skips archival with a warning
+   * if insufficient space is detected, preventing partial writes on full disks.
    */
   static archiveBuildOutput(sourcePath: string, archivePath: string): void {
     if (!fs.existsSync(sourcePath)) {
@@ -319,6 +391,28 @@ export class BuildReliabilityService {
     }
 
     fs.mkdirSync(archivePath, { recursive: true });
+
+    // Check available disk space before archiving
+    const sourceSizeMB = BuildReliabilityService.getDirectorySizeMB(sourcePath);
+    const availableSpaceMB = BuildReliabilityService.getAvailableSpaceMB(archivePath);
+
+    if (sourceSizeMB >= 0 && availableSpaceMB >= 0) {
+      const neededMB = Math.ceil(sourceSizeMB * 1.1); // 10% safety margin
+      if (availableSpaceMB < neededMB) {
+        core.warning(
+          `[Reliability] Insufficient disk space for archive. ` +
+            `Need ~${neededMB}MB, available: ${Math.floor(availableSpaceMB)}MB. Skipping archive.`,
+        );
+        return;
+      }
+      core.info(
+        `[Reliability] Disk space check passed: need ~${neededMB}MB, available: ${Math.floor(availableSpaceMB)}MB`,
+      );
+    } else if (availableSpaceMB < 0) {
+      core.warning(
+        '[Reliability] Could not determine available disk space. Proceeding with archive cautiously.',
+      );
+    }
 
     const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
     const archiveFile = path.join(archivePath, `build-${timestamp}.tar.gz`);
@@ -332,6 +426,16 @@ export class BuildReliabilityService {
       core.info(`[Reliability] Build output archived to ${archiveFile}`);
     } catch (error: any) {
       core.warning(`[Reliability] Failed to archive build output: ${error.stderr?.toString() ?? error.message}`);
+
+      // Clean up partial archive if it exists to avoid leaving corrupted files
+      try {
+        if (fs.existsSync(archiveFile)) {
+          fs.unlinkSync(archiveFile);
+          core.info(`[Reliability] Cleaned up partial archive: ${archiveFile}`);
+        }
+      } catch {
+        // Best-effort cleanup
+      }
     }
   }
 

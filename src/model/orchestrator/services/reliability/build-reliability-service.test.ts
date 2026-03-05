@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { BuildReliabilityService } from './build-reliability-service';
@@ -12,6 +12,7 @@ jest.mock('@actions/core', () => ({
 }));
 
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
+const mockExecFileSync = execFileSync as jest.MockedFunction<typeof execFileSync>;
 const mockFs = fs as jest.Mocked<typeof fs>;
 
 describe('BuildReliabilityService', () => {
@@ -350,6 +351,101 @@ describe('BuildReliabilityService', () => {
   });
 
   // =========================================================================
+  // getAvailableSpaceMB
+  // =========================================================================
+
+  describe('getAvailableSpaceMB', () => {
+    it('should return -1 when the check fails', () => {
+      mockExecFileSync.mockImplementation(() => {
+        throw new Error('Command failed');
+      });
+
+      const result = BuildReliabilityService.getAvailableSpaceMB('/some/path');
+      expect(result).toBe(-1);
+    });
+
+    it('should parse wmic output on Windows', () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+
+      // 10 GB in bytes
+      mockExecFileSync.mockReturnValue('\r\nFreeSpace=10737418240\r\n' as any);
+
+      const result = BuildReliabilityService.getAvailableSpaceMB('C:\\builds');
+      // 10737418240 / (1024 * 1024) = 10240 MB
+      expect(result).toBeCloseTo(10240, 0);
+
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    });
+
+    it('should parse df output on Unix', () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+
+      mockExecFileSync.mockReturnValue('  Avail\n  5120M\n' as any);
+
+      const result = BuildReliabilityService.getAvailableSpaceMB('/builds');
+      expect(result).toBe(5120);
+
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    });
+  });
+
+  // =========================================================================
+  // getDirectorySizeMB
+  // =========================================================================
+
+  describe('getDirectorySizeMB', () => {
+    it('should return file size for a single file', () => {
+      // 5 MB in bytes
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false, size: 5 * 1024 * 1024 } as any);
+
+      const result = BuildReliabilityService.getDirectorySizeMB('/path/to/file.zip');
+      expect(result).toBeCloseTo(5, 0);
+    });
+
+    it('should return total size for a directory tree', () => {
+      const subDir = path.join('/build', 'sub');
+
+      mockFs.statSync.mockImplementation((p: any) => {
+        const pathStr = typeof p === 'string' ? p : p.toString();
+        if (pathStr === '/build' || pathStr === subDir) {
+          return { isDirectory: () => true, size: 0 } as any;
+        }
+
+        return { isDirectory: () => false, size: 1024 * 1024 } as any; // 1 MB each
+      });
+
+      mockFs.readdirSync.mockImplementation((dirPath: any, _options?: any) => {
+        const dirStr = typeof dirPath === 'string' ? dirPath : dirPath.toString();
+        if (dirStr === '/build') {
+          return [
+            { name: 'file1.bin', isDirectory: () => false },
+            { name: 'sub', isDirectory: () => true },
+          ] as any;
+        }
+        if (dirStr === subDir) {
+          return [{ name: 'file2.bin', isDirectory: () => false }] as any;
+        }
+
+        return [] as any;
+      });
+
+      const result = BuildReliabilityService.getDirectorySizeMB('/build');
+      expect(result).toBeCloseTo(2, 0); // 2 files * 1 MB each
+    });
+
+    it('should return -1 when calculation fails', () => {
+      mockFs.statSync.mockImplementation(() => {
+        throw new Error('Access denied');
+      });
+
+      const result = BuildReliabilityService.getDirectorySizeMB('/inaccessible');
+      expect(result).toBe(-1);
+    });
+  });
+
+  // =========================================================================
   // archiveBuildOutput
   // =========================================================================
 
@@ -364,10 +460,93 @@ describe('BuildReliabilityService', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.mkdirSync.mockReturnValue(undefined as any);
       mockExecSync.mockReturnValue('');
+      // Make disk space check return unknown so we proceed
+      mockExecFileSync.mockImplementation(() => {
+        throw new Error('Command not found');
+      });
+      mockFs.statSync.mockImplementation(() => {
+        throw new Error('Not mocked');
+      });
 
       BuildReliabilityService.archiveBuildOutput('/builds/output', '/archives');
 
       expect(mockFs.mkdirSync).toHaveBeenCalledWith('/archives', { recursive: true });
+      expect(mockExecSync).toHaveBeenCalledWith(expect.stringContaining('tar -czf'), expect.anything());
+    });
+
+    it('should skip archival when insufficient disk space', () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.mkdirSync.mockReturnValue(undefined as any);
+
+      // Source is 1000 MB
+      mockFs.statSync.mockImplementation((p: any) => {
+        const pathStr = typeof p === 'string' ? p : p.toString();
+        if (pathStr.endsWith('big-file.bin')) {
+          return { isDirectory: () => false, size: 1000 * 1024 * 1024 } as any;
+        }
+        return { isDirectory: () => true, size: 0 } as any;
+      });
+      mockFs.readdirSync.mockImplementation(() => {
+        return [{ name: 'big-file.bin', isDirectory: () => false }] as any;
+      });
+
+      // Only 500 MB available
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      mockExecFileSync.mockReturnValue('  Avail\n  500M\n' as any);
+
+      BuildReliabilityService.archiveBuildOutput('/builds/output', '/archives');
+
+      // Should NOT have attempted the tar command
+      expect(mockExecSync).not.toHaveBeenCalledWith(expect.stringContaining('tar'), expect.anything());
+
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    });
+
+    it('should clean up partial archive on tar failure', () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.mkdirSync.mockReturnValue(undefined as any);
+      mockFs.unlinkSync.mockReturnValue(undefined);
+
+      // Make disk space check return unknown so we proceed
+      mockExecFileSync.mockImplementation(() => {
+        throw new Error('Command not found');
+      });
+      mockFs.statSync.mockImplementation(() => {
+        throw new Error('Not mocked');
+      });
+
+      // tar command fails
+      mockExecSync.mockImplementation(() => {
+        const error: any = new Error('tar failed');
+        error.stderr = Buffer.from('No space left on device');
+        throw error;
+      });
+
+      BuildReliabilityService.archiveBuildOutput('/builds/output', '/archives');
+
+      // Should have attempted to clean up the partial archive
+      // (existsSync returns true for the partial file)
+      expect(mockFs.unlinkSync).toHaveBeenCalled();
+    });
+
+    it('should proceed with warning when disk space check fails', () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.mkdirSync.mockReturnValue(undefined as any);
+      mockExecSync.mockReturnValue('');
+
+      // Disk space check fails
+      mockExecFileSync.mockImplementation(() => {
+        throw new Error('Command not found');
+      });
+      // Directory size check also fails
+      mockFs.statSync.mockImplementation(() => {
+        throw new Error('Not mocked');
+      });
+
+      BuildReliabilityService.archiveBuildOutput('/builds/output', '/archives');
+
+      // Should still proceed with tar
       expect(mockExecSync).toHaveBeenCalledWith(expect.stringContaining('tar -czf'), expect.anything());
     });
   });
