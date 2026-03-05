@@ -106,6 +106,12 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public gitIntegrityCheck!: boolean;
+  public gitAutoRecover!: boolean;
+  public cleanReservedFilenames!: boolean;
+  public buildArchiveEnabled!: boolean;
+  public buildArchivePath!: string;
+  public buildArchiveRetention!: number;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -242,6 +248,12 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      gitIntegrityCheck: Input.gitIntegrityCheck,
+      gitAutoRecover: Input.gitAutoRecover,
+      cleanReservedFilenames: Input.cleanReservedFilenames,
+      buildArchiveEnabled: Input.buildArchiveEnabled,
+      buildArchivePath: Input.buildArchivePath,
+      buildArchiveRetention: Input.buildArchiveRetention,
     };
   }
 

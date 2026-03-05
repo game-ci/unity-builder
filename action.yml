@@ -279,6 +279,30 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  gitIntegrityCheck:
+    default: 'false'
+    required: false
+    description: '[Orchestrator] Enable pre-checkout git integrity verification for self-hosted runners'
+  gitAutoRecover:
+    default: 'true'
+    required: false
+    description: '[Orchestrator] Automatically recover from detected git corruption (requires gitIntegrityCheck)'
+  cleanReservedFilenames:
+    default: 'false'
+    required: false
+    description: '[Orchestrator] Remove Windows reserved filenames (nul, con, prn, etc.) from Assets before build'
+  buildArchiveEnabled:
+    default: 'false'
+    required: false
+    description: '[Orchestrator] Enable post-build output archival with retention policy'
+  buildArchivePath:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to archive location for build outputs'
+  buildArchiveRetention:
+    default: '3'
+    required: false
+    description: '[Orchestrator] Number of builds to retain per platform in the archive'
 
 outputs:
   volume:
