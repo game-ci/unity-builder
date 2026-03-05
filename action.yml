@@ -297,6 +297,35 @@ inputs:
     required: false
     default: './test-results'
 
+  hotRunnerEnabled:
+    description: '[HotRunner] Use persistent hot runner for builds (requires pre-registered runners)'
+    required: false
+    default: 'false'
+  hotRunnerTransport:
+    description: '[HotRunner] Transport protocol for hot runner communication: websocket, grpc, named-pipe'
+    required: false
+    default: 'websocket'
+  hotRunnerHost:
+    description: '[HotRunner] Hot runner host address'
+    required: false
+    default: 'localhost'
+  hotRunnerPort:
+    description: '[HotRunner] Hot runner port number'
+    required: false
+    default: '9090'
+  hotRunnerHealthInterval:
+    description: '[HotRunner] Health check interval in seconds'
+    required: false
+    default: '30'
+  hotRunnerMaxIdle:
+    description: '[HotRunner] Maximum idle time in seconds before recycling runner'
+    required: false
+    default: '3600'
+  hotRunnerFallbackToCold:
+    description: '[HotRunner] Fall back to cold build if no hot runner available'
+    required: false
+    default: 'true'
+
 outputs:
   volume:
     description: 'The Persistent Volume (PV) where the build artifacts have been stored by Kubernetes'

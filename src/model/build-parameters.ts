@@ -106,6 +106,13 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public hotRunnerEnabled!: boolean;
+  public hotRunnerTransport!: 'websocket' | 'grpc' | 'named-pipe';
+  public hotRunnerHost!: string;
+  public hotRunnerPort!: number;
+  public hotRunnerHealthInterval!: number;
+  public hotRunnerMaxIdle!: number;
+  public hotRunnerFallbackToCold!: boolean;
 
   public testSuitePath!: string;
   public testSuiteEvent!: string;
@@ -253,6 +260,13 @@ class BuildParameters {
       testTaxonomyPath: Input.testTaxonomyPath,
       testResultFormat: Input.testResultFormat,
       testResultPath: Input.testResultPath,
+      hotRunnerEnabled: Input.hotRunnerEnabled,
+      hotRunnerTransport: Input.hotRunnerTransport,
+      hotRunnerHost: Input.hotRunnerHost,
+      hotRunnerPort: Input.hotRunnerPort,
+      hotRunnerHealthInterval: Input.hotRunnerHealthInterval,
+      hotRunnerMaxIdle: Input.hotRunnerMaxIdle,
+      hotRunnerFallbackToCold: Input.hotRunnerFallbackToCold,
     };
   }
 

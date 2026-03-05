@@ -302,6 +302,38 @@ class Input {
     return Input.getInput('testResultPath') ?? './test-results';
   }
 
+  static get hotRunnerEnabled(): boolean {
+    const input = Input.getInput('hotRunnerEnabled') ?? false;
+
+    return input === 'true';
+  }
+
+  static get hotRunnerTransport(): 'websocket' | 'grpc' | 'named-pipe' {
+    return (Input.getInput('hotRunnerTransport') ?? 'websocket') as 'websocket' | 'grpc' | 'named-pipe';
+  }
+
+  static get hotRunnerHost(): string {
+    return Input.getInput('hotRunnerHost') ?? 'localhost';
+  }
+
+  static get hotRunnerPort(): number {
+    return Number.parseInt(Input.getInput('hotRunnerPort') ?? '9090', 10);
+  }
+
+  static get hotRunnerHealthInterval(): number {
+    return Number.parseInt(Input.getInput('hotRunnerHealthInterval') ?? '30', 10);
+  }
+
+  static get hotRunnerMaxIdle(): number {
+    return Number.parseInt(Input.getInput('hotRunnerMaxIdle') ?? '3600', 10);
+  }
+
+  static get hotRunnerFallbackToCold(): boolean {
+    const input = Input.getInput('hotRunnerFallbackToCold') ?? 'true';
+
+    return input === 'true';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
