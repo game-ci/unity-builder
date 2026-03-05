@@ -18,6 +18,18 @@ interface RunnerCheckResult {
 }
 
 /**
+ * Maximum number of pages to fetch when paginating through GitHub API results.
+ * 100 pages * 100 per page = 10,000 runners maximum.
+ */
+const MAX_PAGINATION_PAGES = 100;
+
+/**
+ * Total timeout in milliseconds for the pagination loop.
+ * Prevents indefinite API calls if GitHub is slow or pagination is unexpectedly deep.
+ */
+const PAGINATION_TIMEOUT_MS = 30_000;
+
+/**
  * Checks GitHub Actions runner availability to support automatic provider fallback.
  *
  * When a user configures `runnerCheckEnabled: true` with a `fallbackProviderStrategy`,
@@ -102,25 +114,77 @@ export class RunnerAvailabilityService {
 
   /**
    * Fetch all runners for a repository, handling pagination.
+   *
+   * Includes defensive limits:
+   * - Maximum page count (MAX_PAGINATION_PAGES) to prevent infinite loops
+   * - Total timeout (PAGINATION_TIMEOUT_MS) to prevent indefinite API calls
+   * - Rate-limit detection (HTTP 403/429 with X-RateLimit-Remaining header)
    */
   private static async fetchRunners(octokit: Octokit, owner: string, repo: string): Promise<GitHubRunner[]> {
     const allRunners: GitHubRunner[] = [];
     let page = 1;
     const perPage = 100;
+    const startTime = Date.now();
 
-    while (true) {
-      const response = await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
-        owner,
-        repo,
-        per_page: perPage,
-        page,
-      });
+    while (page <= MAX_PAGINATION_PAGES) {
+      // Check total timeout
+      if (Date.now() - startTime > PAGINATION_TIMEOUT_MS) {
+        OrchestratorLogger.logWarning(
+          `[RunnerAvailability] Pagination timeout reached after ${page - 1} pages and ${Date.now() - startTime}ms. ` +
+            `Using ${allRunners.length} runners found so far.`,
+        );
+        break;
+      }
+
+      let response: any;
+      try {
+        response = await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
+          owner,
+          repo,
+          per_page: perPage,
+          page,
+        });
+      } catch (requestError: any) {
+        // Octokit throws for non-2xx responses. Check if this is a rate limit error.
+        const status = requestError.status ?? requestError.response?.status;
+        if (status === 403 || status === 429) {
+          const resetTime =
+            requestError.response?.headers?.['x-ratelimit-reset'] ??
+            requestError.headers?.['x-ratelimit-reset'];
+          const resetMessage = resetTime
+            ? ` Resets at ${new Date(Number.parseInt(String(resetTime), 10) * 1000).toISOString()}`
+            : '';
+          OrchestratorLogger.logWarning(
+            `[RunnerAvailability] GitHub API rate limit reached (HTTP ${status}).${resetMessage} ` +
+              `Using ${allRunners.length} runners found so far.`,
+          );
+          break;
+        }
+        // Re-throw non-rate-limit errors to be handled by the outer catch
+        throw requestError;
+      }
 
       const runners = (response.data.runners || []) as GitHubRunner[];
       allRunners.push(...runners);
 
       if (runners.length < perPage) break;
       page++;
+    }
+
+    if (page > MAX_PAGINATION_PAGES) {
+      OrchestratorLogger.logWarning(
+        `[RunnerAvailability] Maximum pagination limit reached (${MAX_PAGINATION_PAGES} pages). ` +
+          `Using ${allRunners.length} runners found so far.`,
+      );
+    }
+
+    if (allRunners.length === 0) {
+      OrchestratorLogger.log(
+        '[RunnerAvailability] No runners found. Possible causes: ' +
+          'wrong token permissions (needs repo or actions scope), ' +
+          'no self-hosted runners registered, ' +
+          'or runners are registered at the organization level instead of the repository.',
+      );
     }
 
     return allRunners;
