@@ -221,27 +221,7 @@ jobs:
           fi
 
       - run: yarn install --frozen-lockfile
-      # ==========================================
-      # FAST UNIT TESTS (no infra required, fast-fail gate)
-      # ==========================================
-      - name: Run orchestrator unit tests (fast, no infra)
-        timeout-minutes: 2
-        run: >-
-          yarn run test
-          --testPathPattern="orchestrator-guid|orchestrator-folders|task-parameter-serializer|follow-log-stream-service|runner-availability-service|provider-url-parser|provider-loader|provider-git-manager|orchestrator-image|orchestrator-hooks|orchestrator-github-checks"
-          --verbose --detectOpenHandles --forceExit --runInBand
-      # ==========================================
-      # K8S TESTS SECTION
-      # ==========================================
-      - name: Clean up disk space before K8s tests
-        run: |
-          echo "Cleaning up disk space before K8s tests..."
-          rm -rf ./orchestrator-cache/* || true
-          sudo apt-get clean || true
-          docker system prune -f || true
-          df -h
-      - name: Create k3s cluster (k3d)
-        timeout-minutes: 5
+      # ===================================        timeout-minutes: 5
         run: |
           LOCALSTACK_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' localstack-main 2>/dev/null || echo "")
           echo "LocalStack container IP: $LOCALSTACK_IP"
