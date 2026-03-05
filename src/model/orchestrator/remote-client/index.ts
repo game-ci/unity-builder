@@ -302,6 +302,7 @@ export class RemoteClient {
 
     RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
     await OrchestratorSystem.Run(`git config --global advice.detachedHead false`);
+    await OrchestratorFolders.configureGitAuth();
     RemoteClientLogger.log(`Cloning the repository being built:`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
@@ -411,12 +412,7 @@ export class RemoteClient {
       const gitPrivateToken = process.env.GIT_PRIVATE_TOKEN;
       if (gitPrivateToken) {
         RemoteClientLogger.log(`Attempting to pull LFS files with GIT_PRIVATE_TOKEN...`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-        await OrchestratorSystem.Run(
-          `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
-        );
+        await RemoteClient.configureTokenAuth(gitPrivateToken);
         await OrchestratorSystem.Run(`git lfs pull`, true);
         await OrchestratorSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
@@ -432,12 +428,7 @@ export class RemoteClient {
       const githubToken = process.env.GITHUB_TOKEN;
       if (githubToken) {
         RemoteClientLogger.log(`Attempting to pull LFS files with GITHUB_TOKEN fallback...`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-        await OrchestratorSystem.Run(
-          `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
-        );
+        await RemoteClient.configureTokenAuth(githubToken);
         await OrchestratorSystem.Run(`git lfs pull`, true);
         await OrchestratorSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN`);
@@ -500,5 +491,26 @@ export class RemoteClient {
     }
 
     return false;
+  }
+
+  /**
+   * Configure git authentication for a token. In header mode (default), uses
+   * http.extraHeader so the token never appears in URLs or git config output.
+   * In url mode (legacy), uses url.insteadOf to embed the token in URLs.
+   */
+  private static async configureTokenAuth(token: string): Promise<void> {
+    if (OrchestratorFolders.useHeaderAuth) {
+      const encoded = Buffer.from(`x-access-token:${token}`).toString('base64');
+      await OrchestratorSystem.Run(
+        `git config --global http.https://github.com/.extraHeader "Authorization: Basic ${encoded}"`,
+      );
+    } else {
+      await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
+      await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
+      await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
+      await OrchestratorSystem.Run(
+        `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`,
+      );
+    }
   }
 }

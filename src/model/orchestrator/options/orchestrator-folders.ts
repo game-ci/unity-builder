@@ -72,12 +72,65 @@ export class OrchestratorFolders {
     return path.join(OrchestratorFolders.cacheFolderForCacheKeyFull, `Library`);
   }
 
+  /**
+   * Whether to use http.extraHeader for git authentication (secure, default)
+   * instead of embedding the token in clone URLs (legacy).
+   */
+  public static get useHeaderAuth(): boolean {
+    return Orchestrator.buildParameters.gitAuthMode !== 'url';
+  }
+
   public static get unityBuilderRepoUrl(): string {
+    if (OrchestratorFolders.useHeaderAuth) {
+      return `https://github.com/${Orchestrator.buildParameters.orchestratorRepoName}.git`;
+    }
+
     return `https://${Orchestrator.buildParameters.gitPrivateToken}@github.com/${Orchestrator.buildParameters.orchestratorRepoName}.git`;
   }
 
   public static get targetBuildRepoUrl(): string {
+    if (OrchestratorFolders.useHeaderAuth) {
+      return `https://github.com/${Orchestrator.buildParameters.githubRepo}.git`;
+    }
+
     return `https://${Orchestrator.buildParameters.gitPrivateToken}@github.com/${Orchestrator.buildParameters.githubRepo}.git`;
+  }
+
+  /**
+   * Shell commands to configure git authentication via http.extraHeader.
+   * Uses GIT_PRIVATE_TOKEN env var so the token never appears in clone URLs or git config output.
+   * This is the same mechanism used by actions/checkout.
+   *
+   * Only emits commands when gitAuthMode is 'header' (default). In 'url' mode,
+   * returns a no-op comment since the token is already in the URL.
+   */
+  public static get gitAuthConfigScript(): string {
+    if (!OrchestratorFolders.useHeaderAuth) {
+      return `# git auth: using token-in-URL mode (legacy)`;
+    }
+
+    return `# git auth: configuring http.extraHeader (secure mode)
+if [ -n "$GIT_PRIVATE_TOKEN" ]; then
+  git config --global http.https://github.com/.extraHeader "Authorization: Basic $(printf '%s' "x-access-token:$GIT_PRIVATE_TOKEN" | base64 -w 0)"
+fi`;
+  }
+
+  /**
+   * Configure git authentication via http.extraHeader in the current Node process.
+   * For use in the remote-client where shell scripts aren't used.
+   * Only configures when gitAuthMode is 'header' (default).
+   */
+  public static async configureGitAuth(): Promise<void> {
+    if (!OrchestratorFolders.useHeaderAuth) return;
+
+    const token = Orchestrator.buildParameters.gitPrivateToken || process.env.GIT_PRIVATE_TOKEN || '';
+    if (!token) return;
+
+    const encoded = Buffer.from(`x-access-token:${token}`).toString('base64');
+    const { OrchestratorSystem } = await import('../services/core/orchestrator-system');
+    await OrchestratorSystem.Run(
+      `git config --global http.https://github.com/.extraHeader "Authorization: Basic ${encoded}"`,
+    );
   }
 
   public static get buildVolumeFolder() {
