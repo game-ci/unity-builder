@@ -1,6 +1,8 @@
 import Input from '../../input';
 import { GenericInputReader } from '../../input-readers/generic-input-reader';
 import OrchestratorOptions from './orchestrator-options';
+import { SecretSourceService } from '../services/secrets/secret-source-service';
+import OrchestratorLogger from '../services/core/orchestrator-logger';
 
 const formatFunction = (value: string, arguments_: any[]) => {
   for (const element of arguments_) {
@@ -12,8 +14,6 @@ const formatFunction = (value: string, arguments_: any[]) => {
 
 class OrchestratorQueryOverride {
   static queryOverrides: { [key: string]: string } | undefined;
-
-  // TODO accept premade secret sources or custom secret source definition yamls
 
   public static query(key: string, alternativeKey: string) {
     if (OrchestratorQueryOverride.queryOverrides && OrchestratorQueryOverride.queryOverrides[key] !== undefined) {
@@ -54,9 +54,50 @@ class OrchestratorQueryOverride {
     );
   }
 
+  /**
+   * Populate query overrides using either:
+   * 1. Premade/custom secret sources (via secretSource input), or
+   * 2. Shell command (via inputPullCommand, legacy approach)
+   *
+   * The secretSource input takes precedence if set. It supports:
+   * - Premade names: 'aws-secrets-manager', 'aws-parameter-store', 'gcp-secret-manager', 'azure-key-vault', 'env'
+   * - Custom commands: any string containing {0} placeholder
+   * - YAML file path: a path ending in .yml or .yaml containing custom source definitions
+   */
   public static async PopulateQueryOverrideInput() {
     const queries = OrchestratorOptions.pullInputList;
     OrchestratorQueryOverride.queryOverrides = {};
+
+    const secretSource = OrchestratorOptions.secretSource;
+
+    // Use SecretSourceService if secretSource is configured
+    if (secretSource) {
+      OrchestratorLogger.log(`Using secret source: ${secretSource}`);
+
+      // YAML file: load definitions and use the first source
+      if (secretSource.endsWith('.yml') || secretSource.endsWith('.yaml')) {
+        const definitions = SecretSourceService.loadFromYaml(secretSource);
+        if (definitions.length > 0) {
+          OrchestratorLogger.log(`Loaded ${definitions.length} secret source(s) from ${secretSource}`);
+          for (const key of queries) {
+            OrchestratorQueryOverride.queryOverrides[key] = await SecretSourceService.fetchSecret(
+              definitions[0],
+              key,
+            );
+          }
+        }
+
+        return;
+      }
+
+      // Premade or custom command source
+      const results = await SecretSourceService.fetchAll(secretSource, queries);
+      Object.assign(OrchestratorQueryOverride.queryOverrides, results);
+
+      return;
+    }
+
+    // Legacy: use inputPullCommand if set
     for (const element of queries) {
       if (OrchestratorQueryOverride.shouldUseOverride(element)) {
         OrchestratorQueryOverride.queryOverrides[element] = await OrchestratorQueryOverride.queryOverride(element);

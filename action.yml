@@ -194,6 +194,14 @@ inputs:
     description:
       '[Orchestrator] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
+  secretSource:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Premade secret source for pulling build secrets. Supported values: aws-secrets-manager,
+      aws-parameter-store, gcp-secret-manager, azure-key-vault, env. Can also be a custom shell command
+      with {0} placeholder for the key, or a path to a YAML file defining custom sources.
+      Takes precedence over inputPullCommand when set.'
   resourceTracking:
     default: 'false'
     required: false
