@@ -15,6 +15,10 @@ import LocalOrchestrator from './providers/local';
 import LocalDockerOrchestrator from './providers/docker';
 import GcpCloudRunProvider from './providers/gcp-cloud-run';
 import AzureAciProvider from './providers/azure-aci';
+import RemotePowershellProvider from './providers/remote-powershell';
+import GitHubActionsProvider from './providers/github-actions';
+import GitLabCIProvider from './providers/gitlab-ci';
+import AnsibleProvider from './providers/ansible';
 import loadProvider from './providers/provider-loader';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
@@ -215,6 +219,17 @@ class Orchestrator {
       case 'azure-aci':
         OrchestratorLogger.log('⚠ EXPERIMENTAL: Azure Container Instances provider');
         Orchestrator.Provider = new AzureAciProvider(Orchestrator.buildParameters);
+      case 'remote-powershell':
+        Orchestrator.Provider = new RemotePowershellProvider(Orchestrator.buildParameters);
+        break;
+      case 'github-actions':
+        Orchestrator.Provider = new GitHubActionsProvider(Orchestrator.buildParameters);
+        break;
+      case 'gitlab-ci':
+        Orchestrator.Provider = new GitLabCIProvider(Orchestrator.buildParameters);
+        break;
+      case 'ansible':
+        Orchestrator.Provider = new AnsibleProvider(Orchestrator.buildParameters);
         break;
       default:
         // Try to load provider using the dynamic loader for unknown providers

@@ -552,6 +552,66 @@ inputs:
     required: false
     default: ''
     description: '[Orchestrator] [Experimental] Azure subnet resource ID for VNet-integrated Container Instances.'
+  remotePowershellHost:
+    default: ''
+    required: false
+    description: '[Orchestrator] Remote PowerShell host (hostname or IP) for the remote-powershell provider'
+  remotePowershellCredential:
+    default: ''
+    required: false
+    description: '[Orchestrator] Remote PowerShell credential (username:password or certificate path)'
+  remotePowershellTransport:
+    default: 'wsman'
+    required: false
+    description: '[Orchestrator] Remote PowerShell transport protocol (wsman or ssh)'
+  githubActionsRepo:
+    default: ''
+    required: false
+    description: '[Orchestrator] Target repository (owner/repo) for the github-actions provider'
+  githubActionsWorkflow:
+    default: ''
+    required: false
+    description: '[Orchestrator] Workflow filename or ID to dispatch for the github-actions provider'
+  githubActionsToken:
+    default: ''
+    required: false
+    description: '[Orchestrator] PAT with actions:write scope for the github-actions provider'
+  githubActionsRef:
+    default: 'main'
+    required: false
+    description: '[Orchestrator] Branch/ref to run the workflow on for the github-actions provider'
+  gitlabProjectId:
+    default: ''
+    required: false
+    description: '[Orchestrator] GitLab project ID or URL-encoded path for the gitlab-ci provider'
+  gitlabTriggerToken:
+    default: ''
+    required: false
+    description: '[Orchestrator] Pipeline trigger token for the gitlab-ci provider'
+  gitlabApiUrl:
+    default: 'https://gitlab.com'
+    required: false
+    description: '[Orchestrator] GitLab API URL (for self-hosted instances) for the gitlab-ci provider'
+  gitlabRef:
+    default: 'main'
+    required: false
+    description: '[Orchestrator] Branch/ref to trigger the pipeline on for the gitlab-ci provider'
+  ansibleInventory:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible inventory file or dynamic inventory script'
+  ansiblePlaybook:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible playbook for Unity builds'
+  ansibleExtraVars:
+    default: ''
+    required: false
+    description: '[Orchestrator] Additional Ansible variables as JSON'
+  ansibleVaultPassword:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible vault password file'
 
 outputs:
   volume:

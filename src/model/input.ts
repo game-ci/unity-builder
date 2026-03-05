@@ -442,6 +442,80 @@ class Input {
 
   static get azureSubnetId(): string {
     return Input.getInput('azureSubnetId') ?? '';
+  // ### ### ###
+  // Remote PowerShell provider
+  // ### ### ###
+
+  static get remotePowershellHost(): string {
+    return Input.getInput('remotePowershellHost') ?? '';
+  }
+
+  static get remotePowershellCredential(): string {
+    return Input.getInput('remotePowershellCredential') ?? '';
+  }
+
+  static get remotePowershellTransport(): string {
+    return Input.getInput('remotePowershellTransport') ?? 'wsman';
+  }
+
+  // ### ### ###
+  // GitHub Actions provider
+  // ### ### ###
+
+  static get githubActionsRepo(): string {
+    return Input.getInput('githubActionsRepo') ?? '';
+  }
+
+  static get githubActionsWorkflow(): string {
+    return Input.getInput('githubActionsWorkflow') ?? '';
+  }
+
+  static get githubActionsToken(): string {
+    return Input.getInput('githubActionsToken') ?? '';
+  }
+
+  static get githubActionsRef(): string {
+    return Input.getInput('githubActionsRef') ?? 'main';
+  }
+
+  // ### ### ###
+  // GitLab CI provider
+  // ### ### ###
+
+  static get gitlabProjectId(): string {
+    return Input.getInput('gitlabProjectId') ?? '';
+  }
+
+  static get gitlabTriggerToken(): string {
+    return Input.getInput('gitlabTriggerToken') ?? '';
+  }
+
+  static get gitlabApiUrl(): string {
+    return Input.getInput('gitlabApiUrl') ?? 'https://gitlab.com';
+  }
+
+  static get gitlabRef(): string {
+    return Input.getInput('gitlabRef') ?? 'main';
+  }
+
+  // ### ### ###
+  // Ansible provider
+  // ### ### ###
+
+  static get ansibleInventory(): string {
+    return Input.getInput('ansibleInventory') ?? '';
+  }
+
+  static get ansiblePlaybook(): string {
+    return Input.getInput('ansiblePlaybook') ?? '';
+  }
+
+  static get ansibleExtraVars(): string {
+    return Input.getInput('ansibleExtraVars') ?? '';
+  }
+
+  static get ansibleVaultPassword(): string {
+    return Input.getInput('ansibleVaultPassword') ?? '';
   }
 
   public static ToEnvVarFormat(input: string) {
