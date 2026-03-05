@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -279,6 +279,23 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  testSuitePath:
+    description: 'Path to YAML test suite definition file'
+    required: false
+  testSuiteEvent:
+    description: 'CI event name for suite selection (pr, push, release)'
+    required: false
+  testTaxonomyPath:
+    description: 'Path to custom taxonomy definition YAML'
+    required: false
+  testResultFormat:
+    description: 'Test result output format: junit, json, or both'
+    required: false
+    default: 'junit'
+  testResultPath:
+    description: 'Directory for structured test result output'
+    required: false
+    default: './test-results'
 
 outputs:
   volume:
