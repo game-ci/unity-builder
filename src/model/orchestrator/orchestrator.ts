@@ -20,6 +20,7 @@ import { FollowLogStreamService } from './services/core/follow-log-stream-servic
 import OrchestratorResult from './services/core/orchestrator-result';
 import OrchestratorOptions from './options/orchestrator-options';
 import ResourceTracking from './services/core/resource-tracking';
+import { RunnerAvailabilityService } from './services/core/runner-availability-service';
 
 class Orchestrator {
   public static Provider: ProviderInterface;
@@ -75,6 +76,42 @@ class Orchestrator {
 
   private static async setupSelectedBuildPlatform() {
     OrchestratorLogger.log(`Orchestrator platform selected ${Orchestrator.buildParameters.providerStrategy}`);
+
+    // Check runner availability and apply fallback if needed
+    if (Orchestrator.buildParameters.runnerCheckEnabled && Orchestrator.buildParameters.fallbackProviderStrategy) {
+      const owner = OrchestratorOptions.githubOwner;
+      const repo = OrchestratorOptions.githubRepoName;
+      const token = Orchestrator.buildParameters.gitPrivateToken || process.env.GITHUB_TOKEN || '';
+
+      OrchestratorLogger.log(
+        `Checking runner availability (labels: [${Orchestrator.buildParameters.runnerCheckLabels.join(', ')}], min: ${
+          Orchestrator.buildParameters.runnerCheckMinAvailable
+        })`,
+      );
+
+      const result = await RunnerAvailabilityService.checkAvailability(
+        owner,
+        repo,
+        token,
+        Orchestrator.buildParameters.runnerCheckLabels,
+        Orchestrator.buildParameters.runnerCheckMinAvailable,
+      );
+
+      OrchestratorLogger.log(
+        `Runner check: ${result.totalRunners} total, ${result.matchingRunners} matching, ${result.idleRunners} idle — ${result.reason}`,
+      );
+
+      if (result.shouldFallback) {
+        const original = Orchestrator.buildParameters.providerStrategy;
+        const fallback = Orchestrator.buildParameters.fallbackProviderStrategy;
+        OrchestratorLogger.log(`Falling back from '${original}' to '${fallback}' — ${result.reason}`);
+        Orchestrator.buildParameters.providerStrategy = fallback;
+        core.setOutput('providerFallbackUsed', 'true');
+        core.setOutput('providerFallbackReason', result.reason);
+      } else {
+        core.setOutput('providerFallbackUsed', 'false');
+      }
+    }
 
     // Detect LocalStack endpoints and handle AWS provider appropriately
     // AWS_FORCE_PROVIDER options:
@@ -193,6 +230,30 @@ class Orchestrator {
     if (baseImage.includes(`undefined`)) {
       throw new Error(`baseImage is undefined`);
     }
+
+    try {
+      return await Orchestrator.runWithProvider(buildParameters, baseImage);
+    } catch (primaryError: any) {
+      // Retry on fallback provider if enabled and a fallback is configured
+      const fallback = buildParameters.fallbackProviderStrategy;
+      const alreadyOnFallback = buildParameters.providerStrategy === fallback;
+      if (buildParameters.retryOnFallback && fallback && !alreadyOnFallback) {
+        OrchestratorLogger.log(
+          `Primary provider '${buildParameters.providerStrategy}' failed: ${primaryError.message}`,
+        );
+        OrchestratorLogger.log(`Retrying build on fallback provider '${fallback}'...`);
+        buildParameters.providerStrategy = fallback;
+        core.setOutput('providerFallbackUsed', 'true');
+        core.setOutput('providerFallbackReason', `Primary provider failed: ${primaryError.message}`);
+
+        return await Orchestrator.runWithProvider(buildParameters, baseImage);
+      }
+
+      throw primaryError;
+    }
+  }
+
+  private static async runWithProvider(buildParameters: BuildParameters, baseImage: string) {
     await Orchestrator.setup(buildParameters);
 
     // When aws-local mode is enabled, validate AWS CloudFormation templates
@@ -200,12 +261,10 @@ class Orchestrator {
     if (Orchestrator.validateAwsTemplates) {
       await Orchestrator.validateAwsCloudFormationTemplates();
     }
-    await Orchestrator.Provider.setupWorkflow(
-      Orchestrator.buildParameters.buildGuid,
-      Orchestrator.buildParameters,
-      Orchestrator.buildParameters.branch,
-      Orchestrator.defaultSecrets,
-    );
+
+    // Setup workflow with optional init timeout
+    await Orchestrator.setupWorkflowWithTimeout();
+
     try {
       if (buildParameters.maxRetainedWorkspaces > 0) {
         Orchestrator.lockedWorkspace = SharedWorkspaceLocking.NewWorkspaceName();
@@ -284,6 +343,39 @@ class Orchestrator {
       await OrchestratorError.handleException(error, Orchestrator.buildParameters, Orchestrator.defaultSecrets);
       throw error;
     }
+  }
+
+  /**
+   * Runs setupWorkflow with an optional timeout. If providerInitTimeout is set and the
+   * provider takes longer than that to initialize, throws an error that triggers
+   * retry-on-fallback (if enabled).
+   */
+  private static async setupWorkflowWithTimeout() {
+    const timeoutSeconds = Orchestrator.buildParameters.providerInitTimeout;
+
+    const setupPromise = Orchestrator.Provider.setupWorkflow(
+      Orchestrator.buildParameters.buildGuid,
+      Orchestrator.buildParameters,
+      Orchestrator.buildParameters.branch,
+      Orchestrator.defaultSecrets,
+    );
+
+    if (timeoutSeconds <= 0) {
+      await setupPromise;
+
+      return;
+    }
+
+    OrchestratorLogger.log(`Provider init timeout: ${timeoutSeconds}s`);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error(`Provider initialization timed out after ${timeoutSeconds}s`)),
+        timeoutSeconds * 1000,
+      );
+    });
+
+    await Promise.race([setupPromise, timeoutPromise]);
   }
 
   private static async updateStatusWithBuildParameters() {

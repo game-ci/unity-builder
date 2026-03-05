@@ -140,6 +140,30 @@ class OrchestratorOptions {
 
   static get gitAuthMode(): string {
     return OrchestratorOptions.getInput('gitAuthMode') || 'header';
+  static get fallbackProviderStrategy(): string {
+    return OrchestratorOptions.getInput('fallbackProviderStrategy') || '';
+  }
+
+  static get runnerCheckEnabled(): boolean {
+    return OrchestratorOptions.getInput('runnerCheckEnabled') === 'true';
+  }
+
+  static get runnerCheckLabels(): string[] {
+    const labels = OrchestratorOptions.getInput('runnerCheckLabels');
+
+    return labels ? labels.split(',').map((l) => l.trim()) : [];
+  }
+
+  static get runnerCheckMinAvailable(): number {
+    return Number(OrchestratorOptions.getInput('runnerCheckMinAvailable')) || 1;
+  }
+
+  static get retryOnFallback(): boolean {
+    return OrchestratorOptions.getInput('retryOnFallback') === 'true';
+  }
+
+  static get providerInitTimeout(): number {
+    return Number(OrchestratorOptions.getInput('providerInitTimeout')) || 0;
   }
 
   static get containerCpu(): string {

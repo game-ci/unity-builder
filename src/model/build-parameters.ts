@@ -55,6 +55,12 @@ class BuildParameters {
   public sshPublicKeysDirectoryPath!: string;
   public providerStrategy!: string;
   public gitAuthMode!: string;
+  public fallbackProviderStrategy!: string;
+  public runnerCheckEnabled!: boolean;
+  public runnerCheckLabels!: string[];
+  public runnerCheckMinAvailable!: number;
+  public retryOnFallback!: boolean;
+  public providerInitTimeout!: number;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public awsEndpoint?: string;
@@ -221,6 +227,12 @@ class BuildParameters {
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
       providerStrategy: OrchestratorOptions.providerStrategy,
       gitAuthMode: OrchestratorOptions.gitAuthMode,
+      fallbackProviderStrategy: OrchestratorOptions.fallbackProviderStrategy,
+      runnerCheckEnabled: OrchestratorOptions.runnerCheckEnabled,
+      runnerCheckLabels: OrchestratorOptions.runnerCheckLabels,
+      runnerCheckMinAvailable: OrchestratorOptions.runnerCheckMinAvailable,
+      retryOnFallback: OrchestratorOptions.retryOnFallback,
+      providerInitTimeout: OrchestratorOptions.providerInitTimeout,
       buildPlatform: OrchestratorOptions.buildPlatform,
       kubeConfig: OrchestratorOptions.kubeConfig,
       containerMemory: OrchestratorOptions.containerMemory,
