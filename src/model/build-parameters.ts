@@ -180,6 +180,12 @@ class BuildParameters {
   public ansiblePlaybook!: string;
   public ansibleExtraVars!: string;
   public ansibleVaultPassword!: string;
+  public gitIntegrityCheck!: boolean;
+  public gitAutoRecover!: boolean;
+  public cleanReservedFilenames!: boolean;
+  public buildArchiveEnabled!: boolean;
+  public buildArchivePath!: string;
+  public buildArchiveRetention!: number;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -386,6 +392,12 @@ class BuildParameters {
       ansiblePlaybook: Input.ansiblePlaybook,
       ansibleExtraVars: Input.ansibleExtraVars,
       ansibleVaultPassword: Input.ansibleVaultPassword,
+      gitIntegrityCheck: Input.gitIntegrityCheck,
+      gitAutoRecover: Input.gitAutoRecover,
+      cleanReservedFilenames: Input.cleanReservedFilenames,
+      buildArchiveEnabled: Input.buildArchiveEnabled,
+      buildArchivePath: Input.buildArchivePath,
+      buildArchiveRetention: Input.buildArchiveRetention,
     };
   }
 

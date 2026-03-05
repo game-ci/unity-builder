@@ -612,6 +612,30 @@ inputs:
     default: ''
     required: false
     description: '[Orchestrator] Path to Ansible vault password file'
+  gitIntegrityCheck:
+    description: 'Run git integrity checks before build (fsck, lock cleanup, submodule validation)'
+    required: false
+    default: 'false'
+  gitAutoRecover:
+    description: 'Attempt automatic recovery if git corruption is detected'
+    required: false
+    default: 'false'
+  cleanReservedFilenames:
+    description: 'Remove Windows reserved filenames that cause Unity import loops'
+    required: false
+    default: 'false'
+  buildArchiveEnabled:
+    description: 'Archive build output after successful build'
+    required: false
+    default: 'false'
+  buildArchivePath:
+    description: 'Path to store build archives'
+    required: false
+    default: './build-archives'
+  buildArchiveRetention:
+    description: 'Days to retain build archives before cleanup'
+    required: false
+    default: '30'
 
 outputs:
   volume:
