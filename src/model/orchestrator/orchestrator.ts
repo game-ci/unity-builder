@@ -13,6 +13,8 @@ import OrchestratorEnvironmentVariable from './options/orchestrator-environment-
 import TestOrchestrator from './providers/test';
 import LocalOrchestrator from './providers/local';
 import LocalDockerOrchestrator from './providers/docker';
+import GcpCloudRunProvider from './providers/gcp-cloud-run';
+import AzureAciProvider from './providers/azure-aci';
 import loadProvider from './providers/provider-loader';
 import GitHub from '../github';
 import SharedWorkspaceLocking from './services/core/shared-workspace-locking';
@@ -168,6 +170,14 @@ class Orchestrator {
         break;
       case 'local':
         Orchestrator.Provider = new LocalOrchestrator();
+        break;
+      case 'gcp-cloud-run':
+        OrchestratorLogger.log('⚠ EXPERIMENTAL: GCP Cloud Run Jobs provider');
+        Orchestrator.Provider = new GcpCloudRunProvider(Orchestrator.buildParameters);
+        break;
+      case 'azure-aci':
+        OrchestratorLogger.log('⚠ EXPERIMENTAL: Azure Container Instances provider');
+        Orchestrator.Provider = new AzureAciProvider(Orchestrator.buildParameters);
         break;
       default:
         // Try to load provider using the dynamic loader for unknown providers
