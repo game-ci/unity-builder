@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import BuildParameters from '../../../build-parameters';
 import { OrchestratorSystem } from '../../services/core/orchestrator-system';
 import OrchestratorEnvironmentVariable from '../../options/orchestrator-environment-variable';
@@ -6,6 +7,8 @@ import { ProviderInterface } from '../provider-interface';
 import OrchestratorSecret from '../../options/orchestrator-secret';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+
+const MAX_POLLING_DURATION_MS = 14_400_000; // 4 hours
 
 /**
  * GitLab CI provider — triggers builds as GitLab CI pipelines
@@ -100,11 +103,21 @@ class GitLabCIProvider implements ProviderInterface {
       throw new Error(`Failed to trigger pipeline: ${error.message || error}`);
     }
 
-    // Poll until completion
+    // Poll until completion (with maximum duration guard)
     let status = 'pending';
     const terminalStatuses = new Set(['success', 'failed', 'canceled', 'skipped']);
+    const pollingStartTime = Date.now();
+    const pipelineUrl = `${this.apiUrl}/${this.projectId}/-/pipelines/${this.pipelineId}`;
 
     while (!terminalStatuses.has(status)) {
+      const elapsedMs = Date.now() - pollingStartTime;
+      if (elapsedMs >= MAX_POLLING_DURATION_MS) {
+        const hours = Math.round(MAX_POLLING_DURATION_MS / 3_600_000);
+        const message = `GitLab CI pipeline did not complete within ${hours} hours. Pipeline URL: ${pipelineUrl}`;
+        core.error(message);
+        throw new Error(message);
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 15_000));
 
       try {

@@ -2,9 +2,17 @@ import AnsibleProvider from '.';
 import BuildParameters from '../../../build-parameters';
 import { OrchestratorSystem } from '../../services/core/orchestrator-system';
 import OrchestratorLogger from '../../services/core/orchestrator-logger';
+import * as core from '@actions/core';
 
 jest.mock('../../services/core/orchestrator-system');
 jest.mock('../../services/core/orchestrator-logger');
+jest.mock('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+  setOutput: jest.fn(),
+  getInput: jest.fn(() => ''),
+}));
 
 const mockRun = OrchestratorSystem.Run as jest.MockedFunction<typeof OrchestratorSystem.Run>;
 const mockLog = OrchestratorLogger.log as jest.MockedFunction<typeof OrchestratorLogger.log>;
@@ -52,16 +60,19 @@ describe('AnsibleProvider', () => {
   });
 
   describe('setupWorkflow', () => {
-    it('verifies ansible binary is available and inventory exists', async () => {
+    it('verifies ansible binary, ansible-playbook binary, and inventory exist', async () => {
       mockRun.mockResolvedValueOnce('ansible [core 2.14.0]'); // ansible --version
+      mockRun.mockResolvedValueOnce('/usr/bin/ansible-playbook'); // ansible-playbook check
       mockRun.mockResolvedValueOnce(''); // test -e inventory
 
       await provider.setupWorkflow('guid-123', createBuildParameters(), 'main', []);
 
-      expect(mockRun).toHaveBeenCalledTimes(2);
+      expect(mockRun).toHaveBeenCalledTimes(3);
       expect(mockRun.mock.calls[0][0]).toContain('ansible --version');
-      expect(mockRun.mock.calls[1][0]).toContain('test -e "/etc/ansible/hosts"');
+      expect(mockRun.mock.calls[1][0]).toContain('ansible-playbook');
+      expect(mockRun.mock.calls[2][0]).toContain('test -e "/etc/ansible/hosts"');
       expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('ansible'));
+      expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('ansible-playbook binary verified'));
     });
 
     it('throws when inventory is not configured', async () => {
@@ -81,8 +92,20 @@ describe('AnsibleProvider', () => {
       );
     });
 
+    it('throws when ansible-playbook binary is not found', async () => {
+      mockRun.mockResolvedValueOnce('ansible [core 2.14.0]'); // ansible version OK
+      mockRun.mockRejectedValueOnce(new Error('command not found')); // ansible-playbook missing
+
+      await expect(provider.setupWorkflow('guid-123', createBuildParameters(), 'main', [])).rejects.toThrow(
+        'ansible-playbook not found on PATH',
+      );
+
+      expect(core.error).toHaveBeenCalledWith('ansible-playbook not found. Install Ansible or ensure it is in PATH.');
+    });
+
     it('throws when inventory file does not exist', async () => {
       mockRun.mockResolvedValueOnce('ansible [core 2.14.0]'); // ansible version OK
+      mockRun.mockResolvedValueOnce('/usr/bin/ansible-playbook'); // ansible-playbook OK
       mockRun.mockRejectedValueOnce(new Error('test -e failed')); // inventory missing
 
       await expect(provider.setupWorkflow('guid-123', createBuildParameters(), 'main', [])).rejects.toThrow(
@@ -125,9 +148,9 @@ describe('AnsibleProvider', () => {
       const params = createBuildParameters({ ansiblePlaybook: '' });
       provider = new AnsibleProvider(params);
 
-      await expect(
-        provider.runTaskInWorkflow('guid-nopb', 'img', 'cmd', '/m', '/w', [], []),
-      ).rejects.toThrow('ansiblePlaybook is required');
+      await expect(provider.runTaskInWorkflow('guid-nopb', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'ansiblePlaybook is required',
+      );
     });
 
     it('passes environment variables as extra-vars in snake_case', async () => {
@@ -170,9 +193,7 @@ describe('AnsibleProvider', () => {
 
       await provider.runTaskInWorkflow('guid-badjson', 'img', 'cmd', '/m', '/w', [], []);
 
-      expect(mockLogWarning).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to parse ansibleExtraVars'),
-      );
+      expect(mockLogWarning).toHaveBeenCalledWith(expect.stringContaining('Failed to parse ansibleExtraVars'));
     });
 
     it('includes vault password file flag when configured', async () => {
@@ -215,9 +236,9 @@ describe('AnsibleProvider', () => {
       const execError = new Error('UNREACHABLE! Host unreachable');
       mockRun.mockRejectedValueOnce(execError);
 
-      await expect(
-        provider.runTaskInWorkflow('guid-hostfail', 'img', 'cmd', '/m', '/w', [], []),
-      ).rejects.toThrow('UNREACHABLE');
+      await expect(provider.runTaskInWorkflow('guid-hostfail', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'UNREACHABLE',
+      );
 
       expect(mockLogWarning).toHaveBeenCalledWith(expect.stringContaining('Playbook failed'));
     });

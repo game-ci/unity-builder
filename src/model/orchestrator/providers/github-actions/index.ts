@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import BuildParameters from '../../../build-parameters';
 import { OrchestratorSystem } from '../../services/core/orchestrator-system';
 import OrchestratorEnvironmentVariable from '../../options/orchestrator-environment-variable';
@@ -6,6 +7,8 @@ import { ProviderInterface } from '../provider-interface';
 import OrchestratorSecret from '../../options/orchestrator-secret';
 import { ProviderResource } from '../provider-resource';
 import { ProviderWorkflow } from '../provider-workflow';
+
+const MAX_POLLING_DURATION_MS = 14_400_000; // 4 hours
 
 /**
  * GitHub Actions provider — triggers builds as workflow_dispatch events
@@ -131,9 +134,20 @@ class GitHubActionsProvider implements ProviderInterface {
       throw new Error(`Workflow run did not start within ${maxAttempts * 10}s`);
     }
 
-    // Poll until completion and stream logs
+    // Poll until completion and stream logs (with maximum duration guard)
     let status = 'in_progress';
+    const pollingStartTime = Date.now();
+    const runUrl = `https://github.com/${this.repo}/actions/runs/${this.runId}`;
+
     while (status === 'in_progress' || status === 'queued') {
+      const elapsedMs = Date.now() - pollingStartTime;
+      if (elapsedMs >= MAX_POLLING_DURATION_MS) {
+        const hours = Math.round(MAX_POLLING_DURATION_MS / 3_600_000);
+        const message = `GitHub Actions workflow did not complete within ${hours} hours. Run URL: ${runUrl}`;
+        core.error(message);
+        throw new Error(message);
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 15_000));
 
       try {
@@ -158,6 +172,9 @@ class GitHubActionsProvider implements ProviderInterface {
         OrchestratorLogger.log(`[GitHubActions] Run ${this.runId} status: ${status}`);
       } catch (error: any) {
         if (error.message && error.message.includes('conclusion')) {
+          throw error;
+        }
+        if (error.message && error.message.includes('did not complete within')) {
           throw error;
         }
         OrchestratorLogger.logWarning(`[GitHubActions] Status check error: ${error.message || error}`);

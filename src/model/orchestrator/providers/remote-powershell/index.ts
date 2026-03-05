@@ -148,11 +148,17 @@ class RemotePowershellProvider implements ProviderInterface {
     }
 
     // WinRM (default)
-    const credentialPart = this.credential
-      ? `-Credential (New-Object PSCredential('${this.credential.split(':')[0]}', (ConvertTo-SecureString '${
-          this.credential.split(':')[1]
-        }' -AsPlainText -Force)))`
-      : '';
+    // Split on the FIRST colon only — passwords may contain colons
+    let credentialPart = '';
+    if (this.credential) {
+      const colonIndex = this.credential.indexOf(':');
+      if (colonIndex === -1) {
+        throw new Error('remotePowershellCredential must be in "username:password" format (no colon found)');
+      }
+      const user = this.credential.substring(0, colonIndex);
+      const pass = this.credential.substring(colonIndex + 1);
+      credentialPart = `-Credential (New-Object PSCredential('${user}', (ConvertTo-SecureString '${pass}' -AsPlainText -Force)))`;
+    }
 
     return `pwsh -NoProfile -NonInteractive -Command "Invoke-Command -ComputerName '${this.host}' ${credentialPart} -ScriptBlock { ${escapedScript} }"`;
   }

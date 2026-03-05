@@ -2,9 +2,17 @@ import GitLabCIProvider from '.';
 import BuildParameters from '../../../build-parameters';
 import { OrchestratorSystem } from '../../services/core/orchestrator-system';
 import OrchestratorLogger from '../../services/core/orchestrator-logger';
+import * as core from '@actions/core';
 
 jest.mock('../../services/core/orchestrator-system');
 jest.mock('../../services/core/orchestrator-logger');
+jest.mock('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+  setOutput: jest.fn(),
+  getInput: jest.fn(() => ''),
+}));
 
 const mockRun = OrchestratorSystem.Run as jest.MockedFunction<typeof OrchestratorSystem.Run>;
 const mockLog = OrchestratorLogger.log as jest.MockedFunction<typeof OrchestratorLogger.log>;
@@ -177,18 +185,18 @@ describe('GitLabCIProvider', () => {
       mockRun.mockResolvedValueOnce(JSON.stringify({ id: 5003, status: 'pending' }));
       mockRun.mockResolvedValueOnce(JSON.stringify({ status: 'failed' }));
 
-      await expect(
-        provider.runTaskInWorkflow('guid-fail', 'img', 'cmd', '/m', '/w', [], []),
-      ).rejects.toThrow('Pipeline 5003 finished with status: failed');
+      await expect(provider.runTaskInWorkflow('guid-fail', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'Pipeline 5003 finished with status: failed',
+      );
     });
 
     it('throws when pipeline is canceled', async () => {
       mockRun.mockResolvedValueOnce(JSON.stringify({ id: 5004, status: 'pending' }));
       mockRun.mockResolvedValueOnce(JSON.stringify({ status: 'canceled' }));
 
-      await expect(
-        provider.runTaskInWorkflow('guid-cancel', 'img', 'cmd', '/m', '/w', [], []),
-      ).rejects.toThrow('Pipeline 5004 finished with status: canceled');
+      await expect(provider.runTaskInWorkflow('guid-cancel', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'Pipeline 5004 finished with status: canceled',
+      );
     });
 
     it('handles job log fetch failures gracefully', async () => {
@@ -228,6 +236,33 @@ describe('GitLabCIProvider', () => {
       await provider.runTaskInWorkflow('guid-retry', 'img', 'cmd', '/m', '/w', [], []);
 
       expect(mockLogWarning).toHaveBeenCalledWith(expect.stringContaining('Status check error'));
+    });
+
+    it('throws timeout error when polling exceeds maximum duration', async () => {
+      const realDateNow = Date.now;
+      let callCount = 0;
+
+      // Trigger pipeline succeeds
+      mockRun.mockResolvedValueOnce(JSON.stringify({ id: 5008, status: 'running' }));
+      // Status always returns running
+      mockRun.mockImplementation(() => Promise.resolve(JSON.stringify({ status: 'running' })));
+
+      // After first call, simulate 5 hours elapsed
+      Date.now = () => {
+        callCount++;
+        if (callCount <= 1) return realDateNow.call(Date);
+        return realDateNow.call(Date) + 14_400_001; // 4 hours + 1ms
+      };
+
+      try {
+        await expect(provider.runTaskInWorkflow('guid-poll-timeout', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+          'did not complete within 4 hours',
+        );
+
+        expect(core.error).toHaveBeenCalledWith(expect.stringContaining('did not complete within 4 hours'));
+      } finally {
+        Date.now = realDateNow;
+      }
     });
   });
 

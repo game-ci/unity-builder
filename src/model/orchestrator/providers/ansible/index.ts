@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import BuildParameters from '../../../build-parameters';
 import { OrchestratorSystem } from '../../services/core/orchestrator-system';
 import OrchestratorEnvironmentVariable from '../../options/orchestrator-environment-variable';
@@ -51,6 +52,15 @@ class AnsibleProvider implements ProviderInterface {
       OrchestratorLogger.log(`[Ansible] ${version.trim()}`);
     } catch (error: any) {
       throw new Error(`Ansible not found on PATH: ${error.message || error}`);
+    }
+
+    // Verify ansible-playbook binary exists (may be separate from ansible)
+    try {
+      await OrchestratorSystem.Run('command -v ansible-playbook || which ansible-playbook || where ansible-playbook');
+      OrchestratorLogger.log(`[Ansible] ansible-playbook binary verified`);
+    } catch (error: any) {
+      core.error('ansible-playbook not found. Install Ansible or ensure it is in PATH.');
+      throw new Error(`ansible-playbook not found on PATH: ${error.message || error}`);
     }
 
     // Verify inventory exists

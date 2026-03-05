@@ -140,9 +140,7 @@ describe('RemotePowershellProvider', () => {
     it('includes secrets in the remote script block', async () => {
       mockRun.mockResolvedValueOnce('output');
 
-      const secrets = [
-        { ParameterKey: 'key1', EnvironmentVariable: 'SECRET_KEY', ParameterValue: 'secret-val-123' },
-      ];
+      const secrets = [{ ParameterKey: 'key1', EnvironmentVariable: 'SECRET_KEY', ParameterValue: 'secret-val-123' }];
 
       await provider.runTaskInWorkflow('guid-sec', 'img', 'build-cmd', '/m', '/w', [], secrets as any);
 
@@ -178,11 +176,36 @@ describe('RemotePowershellProvider', () => {
       const execError = new Error('Remote execution failed: access denied');
       mockRun.mockRejectedValueOnce(execError);
 
-      await expect(
-        provider.runTaskInWorkflow('guid-fail', 'img', 'cmd', '/m', '/w', [], []),
-      ).rejects.toThrow('Remote execution failed');
+      await expect(provider.runTaskInWorkflow('guid-fail', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'Remote execution failed',
+      );
 
       expect(mockLogWarning).toHaveBeenCalledWith(expect.stringContaining('Task failed'));
+    });
+
+    it('preserves passwords containing colons when splitting credentials', async () => {
+      const params = createBuildParameters({
+        remotePowershellCredential: 'admin:P@ss:w0rd:with:colons!',
+      });
+      provider = new RemotePowershellProvider(params);
+      mockRun.mockResolvedValueOnce('output');
+
+      await provider.runTaskInWorkflow('guid-colon', 'img', 'cmd', '/m', '/w', [], []);
+
+      const command = mockRun.mock.calls[0][0];
+      expect(command).toContain("PSCredential('admin'");
+      expect(command).toContain("ConvertTo-SecureString 'P@ss:w0rd:with:colons!'");
+    });
+
+    it('throws when credential has no colon separator', async () => {
+      const params = createBuildParameters({
+        remotePowershellCredential: 'nocolonhere',
+      });
+      provider = new RemotePowershellProvider(params);
+
+      await expect(provider.runTaskInWorkflow('guid-badcred', 'img', 'cmd', '/m', '/w', [], [])).rejects.toThrow(
+        'username:password',
+      );
     });
 
     it('sets working directory in the remote script', async () => {
