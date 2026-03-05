@@ -31,6 +31,20 @@ $integrationBranches = @(
         )
     }
     @{
+        Name = 'release/lts-infrastructure'
+        Branches = @(
+            'feature/orchestrator-enterprise-support'
+            'feature/cloud-run-azure-providers'
+            'feature/provider-load-balancing'
+            'feature/orchestrator-unit-tests'
+            'fix/secure-git-token-usage'
+            'feature/premade-secret-sources'
+            'feature/ci-platform-providers'
+            'feature/build-reliability'
+            'ci/orchestrator-integrity-speedup'
+        )
+    }
+    @{
         Name = 'release/lts-2.0.0'
         Branches = @(
             # Infrastructure
