@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -279,6 +279,30 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  gitIntegrityCheck:
+    description: 'Run git integrity checks before build (fsck, lock cleanup, submodule validation)'
+    required: false
+    default: 'false'
+  gitAutoRecover:
+    description: 'Attempt automatic recovery if git corruption is detected'
+    required: false
+    default: 'false'
+  cleanReservedFilenames:
+    description: 'Remove Windows reserved filenames that cause Unity import loops'
+    required: false
+    default: 'false'
+  buildArchiveEnabled:
+    description: 'Archive build output after successful build'
+    required: false
+    default: 'false'
+  buildArchivePath:
+    description: 'Path to store build archives'
+    required: false
+    default: './build-archives'
+  buildArchiveRetention:
+    description: 'Days to retain build archives before cleanup'
+    required: false
+    default: '30'
 
 outputs:
   volume:

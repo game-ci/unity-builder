@@ -282,6 +282,38 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  static get gitIntegrityCheck(): boolean {
+    const input = Input.getInput('gitIntegrityCheck') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get gitAutoRecover(): boolean {
+    const input = Input.getInput('gitAutoRecover') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get cleanReservedFilenames(): boolean {
+    const input = Input.getInput('cleanReservedFilenames') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get buildArchiveEnabled(): boolean {
+    const input = Input.getInput('buildArchiveEnabled') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get buildArchivePath(): string {
+    return Input.getInput('buildArchivePath') ?? './build-archives';
+  }
+
+  static get buildArchiveRetention(): number {
+    return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
