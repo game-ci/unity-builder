@@ -218,6 +218,10 @@ class OrchestratorOptions {
     return OrchestratorOptions.getInput('pullInputList')?.split(`,`) || [];
   }
 
+  static get secretSource(): string {
+    return OrchestratorOptions.getInput('secretSource') || '';
+  }
+
   static get inputPullCommand(): string {
     const value = OrchestratorOptions.getInput('inputPullCommand');
 
