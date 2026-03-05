@@ -192,6 +192,13 @@ class BuildParameters {
   public testTaxonomyPath!: string;
   public testResultFormat!: string;
   public testResultPath!: string;
+  public hotRunnerEnabled!: boolean;
+  public hotRunnerTransport!: 'websocket' | 'grpc' | 'named-pipe';
+  public hotRunnerHost!: string;
+  public hotRunnerPort!: number;
+  public hotRunnerHealthInterval!: number;
+  public hotRunnerMaxIdle!: number;
+  public hotRunnerFallbackToCold!: boolean;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -409,6 +416,13 @@ class BuildParameters {
       testTaxonomyPath: Input.testTaxonomyPath,
       testResultFormat: Input.testResultFormat,
       testResultPath: Input.testResultPath,
+      hotRunnerEnabled: Input.hotRunnerEnabled,
+      hotRunnerTransport: Input.hotRunnerTransport,
+      hotRunnerHost: Input.hotRunnerHost,
+      hotRunnerPort: Input.hotRunnerPort,
+      hotRunnerHealthInterval: Input.hotRunnerHealthInterval,
+      hotRunnerMaxIdle: Input.hotRunnerMaxIdle,
+      hotRunnerFallbackToCold: Input.hotRunnerFallbackToCold,
     };
   }
 
