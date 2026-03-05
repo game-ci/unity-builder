@@ -282,6 +282,26 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  static get testSuitePath(): string {
+    return Input.getInput('testSuitePath') ?? '';
+  }
+
+  static get testSuiteEvent(): string {
+    return Input.getInput('testSuiteEvent') ?? '';
+  }
+
+  static get testTaxonomyPath(): string {
+    return Input.getInput('testTaxonomyPath') ?? '';
+  }
+
+  static get testResultFormat(): string {
+    return Input.getInput('testResultFormat') ?? 'junit';
+  }
+
+  static get testResultPath(): string {
+    return Input.getInput('testResultPath') ?? './test-results';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
