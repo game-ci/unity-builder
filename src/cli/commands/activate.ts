@@ -10,7 +10,7 @@ interface ActivateArguments extends CliArguments {
 
 const activateCommand: CommandModule<object, ActivateArguments> = {
   command: 'activate',
-  describe: 'Activate a Unity license',
+  describe: 'Verify Unity license configuration',
   builder: (yargs) => {
     return yargs
       .option('unity-version', {

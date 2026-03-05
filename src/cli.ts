@@ -34,6 +34,7 @@ async function main() {
   } catch (error: any) {
     if (error.name !== 'YError') {
       core.error(`Error: ${error.message}`);
+      process.exit(1);
     }
   }
 }

@@ -206,6 +206,43 @@ const buildCommand: CommandModule<object, BuildArguments> = {
         description: 'The Unity licensing server address',
         default: '',
       })
+      .option('container-registry-repository', {
+        alias: 'containerRegistryRepository',
+        type: 'string',
+        description: 'Container registry and repository to pull image from. Only applicable if customImage is not set.',
+        default: 'unityci/editor',
+      })
+      .option('container-registry-image-version', {
+        alias: 'containerRegistryImageVersion',
+        type: 'string',
+        description: 'Container registry image version. Only applicable if customImage is not set.',
+        default: '3',
+      })
+      .option('docker-isolation-mode', {
+        alias: 'dockerIsolationMode',
+        type: 'string',
+        description:
+          'Isolation mode to use for the docker container (process, hyperv, or default). Only applicable on Windows.',
+        default: 'default',
+      })
+      .option('ssh-public-keys-directory-path', {
+        alias: 'sshPublicKeysDirectoryPath',
+        type: 'string',
+        description: 'Path to a directory containing SSH public keys to forward to the container',
+        default: '',
+      })
+      .option('cache-unity-installation-on-mac', {
+        alias: 'cacheUnityInstallationOnMac',
+        type: 'boolean',
+        description: 'Whether to cache the Unity hub and editor installation on MacOS',
+        default: false,
+      })
+      .option('unity-hub-version-on-mac', {
+        alias: 'unityHubVersionOnMac',
+        type: 'string',
+        description: 'The version of Unity Hub to install on MacOS (e.g. 3.4.0). Defaults to latest available on brew.',
+        default: '',
+      })
       .example('game-ci build --target-platform StandaloneLinux64', 'Build for Linux using auto-detected Unity version')
       .example(
         'game-ci build --target-platform Android --unity-version 2022.3.56f1 --build-method MyBuild.Run',

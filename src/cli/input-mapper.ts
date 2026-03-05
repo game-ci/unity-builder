@@ -62,6 +62,12 @@ export interface CliArguments {
   skipActivation?: string;
   cloneDepth?: string;
 
+  readInputFromOverrideList?: string;
+  readInputOverrideCommand?: string;
+  postBuildSteps?: string;
+  preBuildSteps?: string;
+  customJob?: string;
+
   unityLicensingServer?: string;
 
   cacheUnityInstallationOnMac?: boolean;

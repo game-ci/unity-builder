@@ -138,6 +138,45 @@ const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
         description: 'Skip Unity activation/deactivation',
         default: 'false',
       })
+      .option('kube-storage-class', {
+        alias: 'kubeStorageClass',
+        type: 'string',
+        description: 'Kubernetes storage class to use for orchestrator jobs. Leave empty to install rook cluster.',
+        default: '',
+      })
+      .option('read-input-from-override-list', {
+        alias: 'readInputFromOverrideList',
+        type: 'string',
+        description: 'Comma separated list of input value names to read from the input override command',
+        default: '',
+      })
+      .option('read-input-override-command', {
+        alias: 'readInputOverrideCommand',
+        type: 'string',
+        description: 'Command to execute to pull input from an external source (e.g. cloud provider secret managers)',
+        default: '',
+      })
+      .option('post-build-steps', {
+        alias: 'postBuildSteps',
+        type: 'string',
+        description:
+          'Post build job in yaml format with the keys image, secrets (name, value object array), command string',
+        default: '',
+      })
+      .option('pre-build-steps', {
+        alias: 'preBuildSteps',
+        type: 'string',
+        description:
+          'Pre build job after repository setup but before the build job (yaml format with keys image, secrets, command)',
+        default: '',
+      })
+      .option('custom-job', {
+        alias: 'customJob',
+        type: 'string',
+        description:
+          'Custom job instead of the standard build automation (yaml format with keys image, secrets, command)',
+        default: '',
+      })
       .example(
         'game-ci orchestrate --target-platform StandaloneLinux64 --provider-strategy aws',
         'Build on AWS using the orchestrator',
@@ -162,7 +201,11 @@ const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
       const result = await Orchestrator.run(buildParameters, baseImage.toString());
 
       core.info(`\nOrchestrated build completed.`);
-      core.info(`Results: ${result.BuildResults}`);
+      if (result?.BuildResults) {
+        core.info(`Results: ${result.BuildResults}`);
+      } else {
+        core.warning('Build completed but no build results were returned.');
+      }
     } catch (error: any) {
       core.setFailed(`Orchestrated build failed: ${error.message}`);
 
