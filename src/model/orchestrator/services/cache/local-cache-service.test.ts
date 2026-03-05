@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { LocalCacheService } from './local-cache-service';
 
-// Mock dependencies
 jest.mock('node:fs');
 jest.mock('../core/orchestrator-system', () => ({
   OrchestratorSystem: {
@@ -39,6 +38,16 @@ describe('LocalCacheService', () => {
     it('should handle empty branch', () => {
       const key = LocalCacheService.generateCacheKey('StandaloneWindows64', '2021.3.1f1', '');
       expect(key).toBe('StandaloneWindows64-2021_3_1f1-');
+    });
+
+    it('should handle dots in version string', () => {
+      const key = LocalCacheService.generateCacheKey('Android', '6000.0.23f1', 'main');
+      expect(key).toBe('Android-6000_0_23f1-main');
+    });
+
+    it('should preserve hyphens in platform names', () => {
+      const key = LocalCacheService.generateCacheKey('Standalone-Linux64', '2021.3.1f1', 'main');
+      expect(key).toBe('Standalone-Linux64-2021_3_1f1-main');
     });
   });
 
@@ -84,23 +93,57 @@ describe('LocalCacheService', () => {
       const result = await LocalCacheService.restoreLibraryCache('/project', '/cache', 'key1');
       expect(result).toBe(false);
     });
+
+    it('should restore from the latest tar file on cache hit', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['lib-1000.tar', 'lib-2000.tar']);
+      (mockFs.statSync as jest.Mock).mockImplementation((filePath: string) => ({
+        mtimeMs: String(filePath).includes('lib-2000') ? 2000 : 1000,
+      }));
+      (mockFs.mkdirSync as jest.Mock).mockReturnValue(undefined);
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+
+      const result = await LocalCacheService.restoreLibraryCache('/project', '/cache', 'key1');
+
+      expect(result).toBe(true);
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
+        expect.stringContaining('lib-2000.tar'),
+        true,
+      );
+    });
+
+    it('should return false and log warning on error', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockImplementation(() => {
+        throw new Error('Permission denied');
+      });
+
+      const result = await LocalCacheService.restoreLibraryCache('/project', '/cache', 'key1');
+      expect(result).toBe(false);
+    });
   });
 
   describe('saveLibraryCache', () => {
     it('should skip save when Library folder does not exist', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(false);
       await LocalCacheService.saveLibraryCache('/project', '/cache', 'key1');
-      // Should not throw, just log and return
       expect(mockFs.mkdirSync).not.toHaveBeenCalled();
     });
 
-    it('should create cache directory structure', async () => {
+    it('should skip save when Library folder is empty', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue([]);
+      await LocalCacheService.saveLibraryCache('/project', '/cache', 'key1');
+      expect(mockFs.mkdirSync).not.toHaveBeenCalled();
+    });
+
+    it('should create cache directory and save tar', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
       (mockFs.readdirSync as jest.Mock).mockImplementation((dirPath: string) => {
         if (String(dirPath).includes('Library') && !String(dirPath).includes('cache')) {
           return ['file1.asset', 'file2.asset'];
         }
-
         return [];
       });
       (mockFs.statSync as jest.Mock).mockReturnValue({ mtimeMs: Date.now() });
@@ -111,6 +154,58 @@ describe('LocalCacheService', () => {
 
       await LocalCacheService.saveLibraryCache('/project', '/cache', 'key1');
       expect(mockFs.mkdirSync).toHaveBeenCalledWith(path.join('/cache', 'key1', 'Library'), { recursive: true });
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
+        expect.stringContaining('tar -cf'),
+        true,
+      );
+    });
+  });
+
+  describe('restoreLfsCache', () => {
+    it('should return false on cache miss', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(false);
+      const result = await LocalCacheService.restoreLfsCache('/repo', '/cache', 'key1');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when no tar files exist', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['readme.txt']);
+      const result = await LocalCacheService.restoreLfsCache('/repo', '/cache', 'key1');
+      expect(result).toBe(false);
+    });
+
+    it('should restore from latest tar on hit', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['lfs-100.tar', 'lfs-200.tar']);
+      (mockFs.statSync as jest.Mock).mockImplementation((filePath: string) => ({
+        mtimeMs: String(filePath).includes('lfs-200') ? 200 : 100,
+      }));
+      (mockFs.mkdirSync as jest.Mock).mockReturnValue(undefined);
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      const result = await LocalCacheService.restoreLfsCache('/repo', '/cache', 'key1');
+
+      expect(result).toBe(true);
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
+        expect.stringContaining('lfs-200.tar'),
+        true,
+      );
+    });
+  });
+
+  describe('saveLfsCache', () => {
+    it('should skip when .git/lfs does not exist', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(false);
+      await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
+      expect(mockFs.mkdirSync).not.toHaveBeenCalled();
+    });
+
+    it('should skip when .git/lfs is empty', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue([]);
+      await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
+      expect(mockFs.mkdirSync).not.toHaveBeenCalled();
     });
   });
 
@@ -118,7 +213,43 @@ describe('LocalCacheService', () => {
     it('should skip when cache root does not exist', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(false);
       await LocalCacheService.garbageCollect('/nonexistent');
-      // Should not throw
+    });
+
+    it('should remove directories older than maxAgeDays', async () => {
+      const now = Date.now();
+      const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000;
+      const oneDayAgo = now - 1 * 24 * 60 * 60 * 1000;
+
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['old-cache', 'recent-cache']);
+      (mockFs.statSync as jest.Mock).mockImplementation((filePath: string) => ({
+        isDirectory: () => true,
+        mtimeMs: String(filePath).includes('old') ? eightDaysAgo : oneDayAgo,
+      }));
+      (mockFs.rmSync as jest.Mock).mockReturnValue(undefined);
+
+      await LocalCacheService.garbageCollect('/cache', 7);
+
+      expect(mockFs.rmSync).toHaveBeenCalledTimes(1);
+      expect(mockFs.rmSync).toHaveBeenCalledWith(
+        path.join('/cache', 'old-cache'),
+        { recursive: true, force: true },
+      );
+    });
+
+    it('should not remove directories newer than maxAgeDays', async () => {
+      const oneDayAgo = Date.now() - 1 * 24 * 60 * 60 * 1000;
+
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['recent-cache']);
+      (mockFs.statSync as jest.Mock).mockReturnValue({
+        isDirectory: () => true,
+        mtimeMs: oneDayAgo,
+      });
+
+      await LocalCacheService.garbageCollect('/cache', 7);
+
+      expect(mockFs.rmSync).not.toHaveBeenCalled();
     });
   });
 });
