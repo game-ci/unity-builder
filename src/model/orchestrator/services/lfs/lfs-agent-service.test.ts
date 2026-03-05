@@ -80,6 +80,23 @@ describe('LfsAgentService', () => {
     });
   });
 
+  describe('configure with empty storagePaths', () => {
+    it('should not set LFS_STORAGE_PATHS when storagePaths is empty', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+
+      const originalValue = process.env.LFS_STORAGE_PATHS;
+      delete process.env.LFS_STORAGE_PATHS;
+
+      await LfsAgentService.configure('/usr/local/bin/agent', '', [], '/repo');
+
+      expect(process.env.LFS_STORAGE_PATHS).toBeUndefined();
+
+      if (originalValue !== undefined) {
+        process.env.LFS_STORAGE_PATHS = originalValue;
+      }
+    });
+  });
+
   describe('validate', () => {
     it('should return true when agent executable exists', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
@@ -91,6 +108,17 @@ describe('LfsAgentService', () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(false);
       const result = await LfsAgentService.validate('/nonexistent/agent');
       expect(result).toBe(false);
+    });
+
+    it('should log warning when agent does not exist', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(false);
+      const OrchestratorLogger = require('../core/orchestrator-logger').default;
+
+      await LfsAgentService.validate('/nonexistent/agent');
+
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Agent executable not found'),
+      );
     });
   });
 });

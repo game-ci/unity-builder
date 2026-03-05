@@ -106,6 +106,18 @@ describe('GitHooksService', () => {
       expect(OrchestratorSystem.Run).toHaveBeenCalledWith(`cd "/repo" && npx lefthook install`, true);
     });
 
+    it('should run npx husky install when husky is detected', async () => {
+      (mockFs.existsSync as jest.Mock).mockImplementation((filePath: string) => {
+        return String(filePath).endsWith('.husky');
+      });
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+
+      await GitHooksService.installHooks('/repo');
+
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(`cd "/repo" && npx husky install`, true);
+    });
+
     it('should log and return when no framework is detected', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(false);
 
@@ -116,6 +128,46 @@ describe('GitHooksService', () => {
 
       expect(OrchestratorSystem.Run).not.toHaveBeenCalled();
       expect(OrchestratorLogger.log).toHaveBeenCalledWith(expect.stringContaining('No hook framework detected'));
+    });
+
+    it('should log warning on installation failure', async () => {
+      (mockFs.existsSync as jest.Mock).mockImplementation((filePath: string) => {
+        return String(filePath).includes('lefthook.yml') && !String(filePath).startsWith('.');
+      });
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      const OrchestratorLogger = require('../core/orchestrator-logger').default;
+      OrchestratorSystem.Run.mockRejectedValue(new Error('npx not found'));
+
+      await GitHooksService.installHooks('/repo');
+
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Hook installation failed'),
+      );
+    });
+  });
+
+  describe('disableHooks', () => {
+    it('should log warning on failure to disable hooks', async () => {
+      (mockFs.mkdirSync as jest.Mock).mockReturnValue(undefined);
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      const OrchestratorLogger = require('../core/orchestrator-logger').default;
+      OrchestratorSystem.Run.mockRejectedValue(new Error('git config failed'));
+
+      await GitHooksService.disableHooks('/repo');
+
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to disable hooks'),
+      );
+    });
+  });
+
+  describe('configureSkipList edge cases', () => {
+    it('should handle single hook in skip list', () => {
+      const result = GitHooksService.configureSkipList(['commit-msg']);
+      expect(result.LEFTHOOK_EXCLUDE).toBe('commit-msg');
+      expect(result.HUSKY).toBe('0');
     });
   });
 });

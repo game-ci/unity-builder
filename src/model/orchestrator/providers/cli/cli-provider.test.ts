@@ -217,6 +217,208 @@ describe('CliProvider', () => {
     });
   });
 
+  describe('cleanupWorkflow', () => {
+    it('sends cleanup-workflow command and returns result', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.cleanupWorkflow({ editorVersion: '2022.3' } as any, 'main', []);
+
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, result: 'cleaned' }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('cleaned');
+
+      const parsed = JSON.parse(child.stdin.write.mock.calls[0][0]);
+      expect(parsed.command).toBe('cleanup-workflow');
+      expect(parsed.params.branchName).toBe('main');
+    });
+  });
+
+  describe('garbageCollect', () => {
+    it('sends garbage-collect command with correct params', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.garbageCollect('filter*', true, 30, false, true);
+
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, output: '3 items removed' }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('3 items removed');
+
+      const parsed = JSON.parse(child.stdin.write.mock.calls[0][0]);
+      expect(parsed.command).toBe('garbage-collect');
+      expect(parsed.params.filter).toBe('filter*');
+      expect(parsed.params.previewOnly).toBe(true);
+      expect(parsed.params.olderThan).toBe(30);
+      expect(parsed.params.baseDependencies).toBe(true);
+    });
+
+    it('returns empty string when response has no output', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.garbageCollect('', false, 7, false, false);
+
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('');
+    });
+  });
+
+  describe('listWorkflow', () => {
+    it('returns workflow list from response', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.listWorkflow();
+
+      const workflows = [{ Name: 'wf-1' }];
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, result: workflows }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toEqual(workflows);
+    });
+
+    it('returns empty array when result is missing', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.listWorkflow();
+
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('watchWorkflow', () => {
+    it('forwards streaming output and resolves on success', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.watchWorkflow();
+
+      child.stdout.emit('data', Buffer.from('watching...\nstatus: running\n'));
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, output: 'completed' }) + '\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('completed');
+
+      const parsed = JSON.parse(child.stdin.write.mock.calls[0][0]);
+      expect(parsed.command).toBe('watch-workflow');
+    });
+
+    it('rejects on watch-workflow failure', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.watchWorkflow();
+
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: false, error: 'lost connection' }) + '\n'));
+      child.emit('close', 1);
+
+      await expect(promise).rejects.toThrow('lost connection');
+    });
+
+    it('rejects on spawn error', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.watchWorkflow();
+
+      child.emit('error', new Error('ENOENT'));
+
+      await expect(promise).rejects.toThrow('failed to spawn executable');
+    });
+
+    it('resolves with collected output when exit code 0 and no JSON', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.watchWorkflow();
+
+      child.stdout.emit('data', Buffer.from('line A\nline B\n'));
+      child.emit('close', 0);
+
+      const result = await promise;
+      expect(result).toBe('line A\nline B');
+    });
+  });
+
+  describe('stderr forwarding', () => {
+    it('forwards stderr lines to logger during execute', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.listResources();
+
+      child.stderr.emit('data', Buffer.from('warning: something\n'));
+      child.stdout.emit('data', Buffer.from(JSON.stringify({ success: true, result: [] }) + '\n'));
+      child.emit('close', 0);
+
+      await promise;
+      // stderr content included in error message if process fails
+      // Here it succeeds, so we just verify no rejection
+    });
+
+    it('includes stderr in error message when process fails without JSON', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.listResources();
+
+      child.stderr.emit('data', Buffer.from('fatal: segfault\n'));
+      child.emit('close', 1);
+
+      await expect(promise).rejects.toThrow('fatal: segfault');
+    });
+  });
+
+  describe('timeout handling', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('rejects and kills process when command times out', async () => {
+      const child = createMockChildProcess();
+      mockSpawn.mockReturnValue(child);
+
+      const provider = new CliProvider('/path/to/exe', {} as any);
+      const promise = provider.listResources();
+
+      // Advance past the 300s default timeout
+      jest.advanceTimersByTime(301_000);
+
+      await expect(promise).rejects.toThrow('timed out');
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM');
+    });
+  });
+
   describe('available providers list', () => {
     it('includes cli in the available providers', () => {
       const providers = ProviderLoader.getAvailableProviders();

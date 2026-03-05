@@ -207,6 +207,38 @@ describe('LocalCacheService', () => {
       await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
       expect(mockFs.mkdirSync).not.toHaveBeenCalled();
     });
+
+    it('should create cache directory and save tar when lfs has content', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockImplementation((dirPath: string) => {
+        if (String(dirPath).includes('lfs') && !String(dirPath).includes('cache')) {
+          return ['objects', 'tmp'];
+        }
+        return [];
+      });
+      (mockFs.statSync as jest.Mock).mockReturnValue({ mtimeMs: Date.now() });
+      (mockFs.mkdirSync as jest.Mock).mockReturnValue(undefined);
+
+      const { OrchestratorSystem } = require('../core/orchestrator-system');
+      OrchestratorSystem.Run.mockResolvedValue('');
+
+      await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith(path.join('/cache', 'key1', 'lfs'), { recursive: true });
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
+        expect.stringContaining('tar -cf'),
+        true,
+      );
+    });
+
+    it('should handle save errors gracefully', async () => {
+      (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+      (mockFs.readdirSync as jest.Mock).mockImplementation(() => {
+        throw new Error('Disk full');
+      });
+
+      // Should not throw
+      await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
+    });
   });
 
   describe('garbageCollect', () => {
