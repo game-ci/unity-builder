@@ -139,6 +139,31 @@ class BuildParameters {
   public buildArchivePath!: string;
   public buildArchiveRetention!: number;
 
+  // GCP Cloud Run (Experimental)
+  public gcpProject!: string;
+  public gcpRegion!: string;
+  public gcpStorageType!: string;
+  public gcpBucket!: string;
+  public gcpFilestoreIp!: string;
+  public gcpFilestoreShare!: string;
+  public gcpMachineType!: string;
+  public gcpDiskSizeGb!: string;
+  public gcpServiceAccount!: string;
+  public gcpVpcConnector!: string;
+
+  // Azure Container Instances (Experimental)
+  public azureResourceGroup!: string;
+  public azureLocation!: string;
+  public azureStorageType!: string;
+  public azureStorageAccount!: string;
+  public azureBlobContainer!: string;
+  public azureFileShareName!: string;
+  public azureSubscriptionId!: string;
+  public azureCpu!: string;
+  public azureMemoryGb!: string;
+  public azureDiskSizeGb!: string;
+  public azureSubnetId!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -267,6 +292,27 @@ class BuildParameters {
       inputPullCommand: OrchestratorOptions.inputPullCommand,
       pullInputList: OrchestratorOptions.pullInputList,
       kubeStorageClass: OrchestratorOptions.kubeStorageClass,
+      gcpProject: Input.gcpProject,
+      gcpRegion: Input.gcpRegion,
+      gcpStorageType: Input.gcpStorageType,
+      gcpBucket: Input.gcpBucket,
+      gcpFilestoreIp: Input.gcpFilestoreIp,
+      gcpFilestoreShare: Input.gcpFilestoreShare,
+      gcpMachineType: Input.gcpMachineType,
+      gcpDiskSizeGb: Input.gcpDiskSizeGb,
+      gcpServiceAccount: Input.gcpServiceAccount,
+      gcpVpcConnector: Input.gcpVpcConnector,
+      azureResourceGroup: Input.azureResourceGroup,
+      azureLocation: Input.azureLocation,
+      azureStorageType: Input.azureStorageType,
+      azureStorageAccount: Input.azureStorageAccount,
+      azureBlobContainer: Input.azureBlobContainer,
+      azureFileShareName: Input.azureFileShareName,
+      azureSubscriptionId: Input.azureSubscriptionId,
+      azureCpu: Input.azureCpu,
+      azureMemoryGb: Input.azureMemoryGb,
+      azureDiskSizeGb: Input.azureDiskSizeGb,
+      azureSubnetId: Input.azureSubnetId,
       cacheKey: OrchestratorOptions.cacheKey,
       maxRetainedWorkspaces: Number.parseInt(OrchestratorOptions.maxRetainedWorkspaces),
       useLargePackages: OrchestratorOptions.useLargePackages,
