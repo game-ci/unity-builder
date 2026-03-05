@@ -126,6 +126,12 @@ class BuildParameters {
   public gitHooksSkipList!: string;
   public gitHooksRunBeforeBuild!: string;
   public providerExecutable!: string;
+  public gitIntegrityCheck!: boolean;
+  public gitAutoRecover!: boolean;
+  public cleanReservedFilenames!: boolean;
+  public buildArchiveEnabled!: boolean;
+  public buildArchivePath!: string;
+  public buildArchiveRetention!: number;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -282,6 +288,12 @@ class BuildParameters {
       gitHooksSkipList: Input.gitHooksSkipList,
       gitHooksRunBeforeBuild: Input.gitHooksRunBeforeBuild,
       providerExecutable: Input.providerExecutable,
+      gitIntegrityCheck: Input.gitIntegrityCheck,
+      gitAutoRecover: Input.gitAutoRecover,
+      cleanReservedFilenames: Input.cleanReservedFilenames,
+      buildArchiveEnabled: Input.buildArchiveEnabled,
+      buildArchivePath: Input.buildArchivePath,
+      buildArchiveRetention: Input.buildArchiveRetention,
     };
   }
 
