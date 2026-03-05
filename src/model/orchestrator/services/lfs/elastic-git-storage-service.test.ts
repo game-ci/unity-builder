@@ -132,11 +132,7 @@ describe('ElasticGitStorageService', () => {
 
       const result = await ElasticGitStorageService.findInstalled();
       expect(result).toBe('C:\\tools\\elastic-git-storage.exe');
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('where'),
-        false,
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('where'), false, true);
     });
 
     it('should check common install locations when not on PATH', async () => {
@@ -195,12 +191,8 @@ describe('ElasticGitStorageService', () => {
 
       const result = await ElasticGitStorageService.install('latest');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('elastic-git-storage_linux_amd64'),
-      );
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('chmod +x'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('elastic-git-storage_linux_amd64'));
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('chmod +x'));
       expect(result).toContain('elastic-git-storage');
     });
 
@@ -213,12 +205,8 @@ describe('ElasticGitStorageService', () => {
 
       await ElasticGitStorageService.install('v1.2.0');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('elastic-git-storage_darwin_arm64'),
-      );
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('v1.2.0'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('elastic-git-storage_darwin_arm64'));
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('v1.2.0'));
     });
 
     it('should download .exe for windows', async () => {
@@ -234,9 +222,7 @@ describe('ElasticGitStorageService', () => {
         expect.stringContaining('elastic-git-storage_windows_amd64.exe'),
       );
       // Should NOT chmod on windows
-      expect(OrchestratorSystem.Run).not.toHaveBeenCalledWith(
-        expect.stringContaining('chmod'),
-      );
+      expect(OrchestratorSystem.Run).not.toHaveBeenCalledWith(expect.stringContaining('chmod'));
     });
 
     it('should use RUNNER_TOOL_CACHE for install dir when available', async () => {
@@ -269,9 +255,7 @@ describe('ElasticGitStorageService', () => {
 
       await ElasticGitStorageService.install('latest');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('/releases/latest/download/'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('/releases/latest/download/'));
     });
 
     it('should use tagged release URL when version is specified', async () => {
@@ -283,9 +267,7 @@ describe('ElasticGitStorageService', () => {
 
       await ElasticGitStorageService.install('v2.0.0');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('/releases/download/v2.0.0/'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('/releases/download/v2.0.0/'));
     });
 
     it('should return empty string on download failure', async () => {
@@ -321,12 +303,7 @@ describe('ElasticGitStorageService', () => {
       OrchestratorSystem.Run.mockResolvedValue('/usr/local/bin/elastic-git-storage\n');
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
 
-      const result = await ElasticGitStorageService.ensureAndConfigure(
-        'latest',
-        '--verbose',
-        ['/mnt/lfs'],
-        '/repo',
-      );
+      const result = await ElasticGitStorageService.ensureAndConfigure('latest', '--verbose', ['/mnt/lfs'], '/repo');
 
       expect(result).toBe('/usr/local/bin/elastic-git-storage');
       expect(LfsAgentService.configure).toHaveBeenCalledWith(
@@ -346,8 +323,7 @@ describe('ElasticGitStorageService', () => {
       mockOs.tmpdir.mockReturnValue('/tmp');
 
       // findInstalled finds nothing
-      OrchestratorSystem.Run
-        .mockRejectedValueOnce(new Error('not found')) // which
+      OrchestratorSystem.Run.mockRejectedValueOnce(new Error('not found')) // which
         .mockResolvedValueOnce('') // curl download
         .mockResolvedValueOnce(''); // chmod
 
@@ -357,12 +333,7 @@ describe('ElasticGitStorageService', () => {
         .mockReturnValueOnce(false) // ~/.local/bin
         .mockReturnValueOnce(true); // after install
 
-      const result = await ElasticGitStorageService.ensureAndConfigure(
-        'v1.0.0',
-        '',
-        [],
-        '/repo',
-      );
+      const result = await ElasticGitStorageService.ensureAndConfigure('v1.0.0', '', [], '/repo');
 
       expect(result).toContain('elastic-git-storage');
       expect(LfsAgentService.configure).toHaveBeenCalled();
@@ -379,12 +350,7 @@ describe('ElasticGitStorageService', () => {
       OrchestratorSystem.Run.mockRejectedValue(new Error('not found'));
       (mockFs.existsSync as jest.Mock).mockReturnValue(false);
 
-      const result = await ElasticGitStorageService.ensureAndConfigure(
-        'latest',
-        '',
-        [],
-        '/repo',
-      );
+      const result = await ElasticGitStorageService.ensureAndConfigure('latest', '', [], '/repo');
 
       expect(result).toBe('');
     });
@@ -397,8 +363,7 @@ describe('ElasticGitStorageService', () => {
       mockOs.tmpdir.mockReturnValue('/tmp');
 
       // findInstalled finds nothing
-      OrchestratorSystem.Run
-        .mockRejectedValueOnce(new Error('not found'))
+      OrchestratorSystem.Run.mockRejectedValueOnce(new Error('not found'))
         .mockResolvedValueOnce('')
         .mockResolvedValueOnce('');
 
@@ -410,9 +375,7 @@ describe('ElasticGitStorageService', () => {
 
       await ElasticGitStorageService.ensureAndConfigure('', '', [], '/repo');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('/releases/latest/download/'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('/releases/latest/download/'));
     });
   });
 

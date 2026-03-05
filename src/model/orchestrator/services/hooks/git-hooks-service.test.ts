@@ -64,22 +64,26 @@ describe('GitHooksService', () => {
   describe('detectUnityGitHooks', () => {
     it('should return true when package is in manifest.json', () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({
-        dependencies: {
-          'com.frostebite.unitygithooks': 'https://github.com/frostebite/UnityGitHooks.git#1.0.5',
-        },
-      }));
+      (mockFs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify({
+          dependencies: {
+            'com.frostebite.unitygithooks': 'https://github.com/frostebite/UnityGitHooks.git#1.0.5',
+          },
+        }),
+      );
 
       expect(GitHooksService.detectUnityGitHooks('/repo')).toBe(true);
     });
 
     it('should return false when package is not in manifest.json', () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({
-        dependencies: {
-          'com.unity.textmeshpro': '3.0.6',
-        },
-      }));
+      (mockFs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify({
+          dependencies: {
+            'com.unity.textmeshpro': '3.0.6',
+          },
+        }),
+      );
 
       expect(GitHooksService.detectUnityGitHooks('/repo')).toBe(false);
     });
@@ -115,9 +119,7 @@ describe('GitHooksService', () => {
 
     it('should return empty string when package not in cache', () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.unity.textmeshpro@3.0.6',
-      ]);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.unity.textmeshpro@3.0.6']);
 
       const result = GitHooksService.findUnityGitHooksPackagePath('/repo');
       expect(result).toBe('');
@@ -136,16 +138,11 @@ describe('GitHooksService', () => {
       const { OrchestratorSystem } = require('../core/orchestrator-system');
 
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.frostebite.unitygithooks@1.0.5',
-      ]);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.frostebite.unitygithooks@1.0.5']);
 
       await GitHooksService.initUnityGitHooks('/repo');
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('init-unity-lefthook.js'),
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('init-unity-lefthook.js'), true);
     });
 
     it('should skip when package not found in cache', async () => {
@@ -165,15 +162,11 @@ describe('GitHooksService', () => {
         // PackageCache dir exists, but init script doesn't
         return !String(p).includes('init-unity-lefthook');
       });
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.frostebite.unitygithooks@1.0.5',
-      ]);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.frostebite.unitygithooks@1.0.5']);
 
       await GitHooksService.initUnityGitHooks('/repo');
 
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('init script not found'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('init script not found'));
     });
 
     it('should log warning on init failure', async () => {
@@ -181,16 +174,12 @@ describe('GitHooksService', () => {
       const OrchestratorLogger = require('../core/orchestrator-logger').default;
 
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.frostebite.unitygithooks@1.0.5',
-      ]);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.frostebite.unitygithooks@1.0.5']);
       OrchestratorSystem.Run.mockRejectedValue(new Error('node not found'));
 
       await GitHooksService.initUnityGitHooks('/repo');
 
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('init failed'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('init failed'));
     });
   });
 
@@ -228,9 +217,7 @@ describe('GitHooksService', () => {
       (mockFs.readFileSync as jest.Mock).mockReturnValue(
         `{"dependencies":{"com.frostebite.unitygithooks":"https://github.com/frostebite/UnityGitHooks.git"}}`,
       );
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.frostebite.unitygithooks@1.0.5',
-      ]);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.frostebite.unitygithooks@1.0.5']);
 
       OrchestratorSystem.Run.mockImplementation((cmd: string) => {
         if (cmd.includes('init-unity-lefthook')) {
@@ -246,19 +233,13 @@ describe('GitHooksService', () => {
 
       // Init should happen before install
       expect(callOrder).toEqual(['init', 'install']);
-      expect(OrchestratorLogger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Unity Git Hooks (UPM) detected'),
-      );
+      expect(OrchestratorLogger.log).toHaveBeenCalledWith(expect.stringContaining('Unity Git Hooks (UPM) detected'));
     });
 
     it('should set CI env vars when Unity Git Hooks detected', async () => {
       (mockFs.existsSync as jest.Mock).mockReturnValue(true);
-      (mockFs.readFileSync as jest.Mock).mockReturnValue(
-        `{"dependencies":{"com.frostebite.unitygithooks":"1.0.5"}}`,
-      );
-      (mockFs.readdirSync as jest.Mock).mockReturnValue([
-        'com.frostebite.unitygithooks@1.0.5',
-      ]);
+      (mockFs.readFileSync as jest.Mock).mockReturnValue(`{"dependencies":{"com.frostebite.unitygithooks":"1.0.5"}}`);
+      (mockFs.readdirSync as jest.Mock).mockReturnValue(['com.frostebite.unitygithooks@1.0.5']);
 
       await GitHooksService.installHooks('/repo');
 
@@ -300,9 +281,7 @@ describe('GitHooksService', () => {
 
       await GitHooksService.installHooks('/repo');
 
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('Hook installation failed'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('Hook installation failed'));
     });
   });
 
@@ -316,14 +295,8 @@ describe('GitHooksService', () => {
 
       const results = await GitHooksService.runHookGroups('/repo', ['pre-commit', 'pre-push']);
 
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        `cd "/repo" && npx lefthook run pre-commit`,
-        true,
-      );
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        `cd "/repo" && npx lefthook run pre-push`,
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(`cd "/repo" && npx lefthook run pre-commit`, true);
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(`cd "/repo" && npx lefthook run pre-push`, true);
       expect(results['pre-commit']).toBe(true);
       expect(results['pre-push']).toBe(true);
     });
@@ -340,9 +313,7 @@ describe('GitHooksService', () => {
       const results = await GitHooksService.runHookGroups('/repo', ['pre-commit']);
 
       expect(results).toEqual({});
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('requires lefthook'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('requires lefthook'));
     });
 
     it('should mark failed groups as false', async () => {
@@ -351,8 +322,7 @@ describe('GitHooksService', () => {
         return String(filePath).includes('lefthook.yml') && !String(filePath).startsWith('.');
       });
 
-      OrchestratorSystem.Run
-        .mockResolvedValueOnce('') // pre-commit passes
+      OrchestratorSystem.Run.mockResolvedValueOnce('') // pre-commit passes
         .mockRejectedValueOnce(new Error('tests failed')); // pre-push fails
 
       const results = await GitHooksService.runHookGroups('/repo', ['pre-commit', 'pre-push']);
@@ -368,18 +338,12 @@ describe('GitHooksService', () => {
         return String(filePath).includes('lefthook.yml') && !String(filePath).startsWith('.');
       });
 
-      OrchestratorSystem.Run
-        .mockResolvedValueOnce('')
-        .mockRejectedValueOnce(new Error('check failed'));
+      OrchestratorSystem.Run.mockResolvedValueOnce('').mockRejectedValueOnce(new Error('check failed'));
 
       await GitHooksService.runHookGroups('/repo', ['pre-commit', 'commit-msg']);
 
-      expect(OrchestratorLogger.log).toHaveBeenCalledWith(
-        expect.stringContaining("'pre-commit' passed"),
-      );
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining("'commit-msg' failed"),
-      );
+      expect(OrchestratorLogger.log).toHaveBeenCalledWith(expect.stringContaining("'pre-commit' passed"));
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining("'commit-msg' failed"));
     });
   });
 
@@ -429,9 +393,7 @@ describe('GitHooksService', () => {
 
       await GitHooksService.disableHooks('/repo');
 
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to disable hooks'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('Failed to disable hooks'));
     });
   });
 

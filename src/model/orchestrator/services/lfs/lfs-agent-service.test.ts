@@ -116,9 +116,7 @@ describe('LfsAgentService', () => {
 
       await LfsAgentService.validate('/nonexistent/agent');
 
-      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(
-        expect.stringContaining('Agent executable not found'),
-      );
+      expect(OrchestratorLogger.logWarning).toHaveBeenCalledWith(expect.stringContaining('Agent executable not found'));
     });
   });
 });

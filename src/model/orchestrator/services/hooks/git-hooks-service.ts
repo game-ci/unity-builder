@@ -169,9 +169,7 @@ export class GitHooksService {
 
     const framework = GitHooksService.detectHookFramework(repoPath);
     if (framework !== 'lefthook') {
-      OrchestratorLogger.logWarning(
-        `[GitHooks] runHookGroups requires lefthook, but detected: ${framework}`,
-      );
+      OrchestratorLogger.logWarning(`[GitHooks] runHookGroups requires lefthook, but detected: ${framework}`);
 
       return results;
     }

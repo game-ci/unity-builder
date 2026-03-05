@@ -107,10 +107,7 @@ describe('LocalCacheService', () => {
       const result = await LocalCacheService.restoreLibraryCache('/project', '/cache', 'key1');
 
       expect(result).toBe(true);
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('lib-2000.tar'),
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('lib-2000.tar'), true);
     });
 
     it('should return false and log warning on error', async () => {
@@ -154,10 +151,7 @@ describe('LocalCacheService', () => {
 
       await LocalCacheService.saveLibraryCache('/project', '/cache', 'key1');
       expect(mockFs.mkdirSync).toHaveBeenCalledWith(path.join('/cache', 'key1', 'Library'), { recursive: true });
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('tar -cf'),
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('tar -cf'), true);
     });
   });
 
@@ -187,10 +181,7 @@ describe('LocalCacheService', () => {
       const result = await LocalCacheService.restoreLfsCache('/repo', '/cache', 'key1');
 
       expect(result).toBe(true);
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('lfs-200.tar'),
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('lfs-200.tar'), true);
     });
   });
 
@@ -224,10 +215,7 @@ describe('LocalCacheService', () => {
 
       await LocalCacheService.saveLfsCache('/repo', '/cache', 'key1');
       expect(mockFs.mkdirSync).toHaveBeenCalledWith(path.join('/cache', 'key1', 'lfs'), { recursive: true });
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('tar -cf'),
-        true,
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('tar -cf'), true);
     });
 
     it('should handle save errors gracefully', async () => {
@@ -263,10 +251,7 @@ describe('LocalCacheService', () => {
       await LocalCacheService.garbageCollect('/cache', 7);
 
       expect(mockFs.rmSync).toHaveBeenCalledTimes(1);
-      expect(mockFs.rmSync).toHaveBeenCalledWith(
-        path.join('/cache', 'old-cache'),
-        { recursive: true, force: true },
-      );
+      expect(mockFs.rmSync).toHaveBeenCalledWith(path.join('/cache', 'old-cache'), { recursive: true, force: true });
     });
 
     it('should not remove directories newer than maxAgeDays', async () => {
