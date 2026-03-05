@@ -409,9 +409,7 @@ export class BuildReliabilityService {
         `[Reliability] Disk space check passed: need ~${neededMB}MB, available: ${Math.floor(availableSpaceMB)}MB`,
       );
     } else if (availableSpaceMB < 0) {
-      core.warning(
-        '[Reliability] Could not determine available disk space. Proceeding with archive cautiously.',
-      );
+      core.warning('[Reliability] Could not determine available disk space. Proceeding with archive cautiously.');
     }
 
     const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
