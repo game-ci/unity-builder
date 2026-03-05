@@ -194,6 +194,42 @@ inputs:
     description:
       '[Orchestrator] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
+  fallbackProviderStrategy:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Fallback provider when the primary is unavailable. Used with runnerCheckEnabled for automatic
+      failover, or as a catch-all if the primary provider fails to initialize.'
+  runnerCheckEnabled:
+    default: 'false'
+    required: false
+    description:
+      '[Orchestrator] Check GitHub Actions runner availability before starting a build. When no suitable runners are
+      available and fallbackProviderStrategy is set, automatically routes to the fallback provider.'
+  runnerCheckLabels:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Comma-separated runner labels to filter when checking availability (e.g. self-hosted,linux).
+      When empty, checks all runners in the repository.'
+  runnerCheckMinAvailable:
+    default: '1'
+    required: false
+    description:
+      '[Orchestrator] Minimum number of idle runners required for the primary provider. If fewer are available,
+      routes to fallbackProviderStrategy.'
+  retryOnFallback:
+    default: 'false'
+    required: false
+    description:
+      '[Orchestrator] When true and fallbackProviderStrategy is set, automatically retry the build on the fallback
+      provider if the primary provider fails. Useful for long builds where transient cloud failures are common.'
+  providerInitTimeout:
+    default: '0'
+    required: false
+    description:
+      '[Orchestrator] Maximum seconds to wait for the primary provider to initialize (setupWorkflow). If exceeded
+      and fallbackProviderStrategy is set, switches to the fallback. Set to 0 to disable (default).'
   resourceTracking:
     default: 'false'
     required: false
