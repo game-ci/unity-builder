@@ -106,6 +106,12 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public artifactOutputTypes!: string;
+  public artifactUploadTarget!: string;
+  public artifactUploadPath!: string;
+  public artifactCompression!: string;
+  public artifactRetentionDays!: string;
+  public artifactCustomTypes!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -242,6 +248,12 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      artifactOutputTypes: Input.artifactOutputTypes,
+      artifactUploadTarget: Input.artifactUploadTarget,
+      artifactUploadPath: Input.artifactUploadPath,
+      artifactCompression: Input.artifactCompression,
+      artifactRetentionDays: Input.artifactRetentionDays,
+      artifactCustomTypes: Input.artifactCustomTypes,
     };
   }
 
