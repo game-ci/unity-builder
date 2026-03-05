@@ -5,6 +5,7 @@ import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 import { BuildReliabilityService } from './model/orchestrator/services/reliability';
+import { TestWorkflowService } from './model/orchestrator/services/test-workflow';
 
 async function runMain() {
   try {
@@ -22,6 +23,23 @@ async function runMain() {
     const { workspace, actionFolder } = Action;
 
     const buildParameters = await BuildParameters.create();
+
+    // If a test suite path is provided, use the test workflow engine
+    // instead of the standard build execution path
+    if (buildParameters.testSuitePath) {
+      core.info('[TestWorkflow] Test suite path detected, using test workflow engine');
+      const results = await TestWorkflowService.executeTestSuite(buildParameters.testSuitePath, buildParameters);
+
+      const totalFailed = results.reduce((sum, r) => sum + r.failed, 0);
+      if (totalFailed > 0) {
+        core.setFailed(`Test workflow completed with ${totalFailed} failure(s)`);
+      } else {
+        core.info('[TestWorkflow] All test runs passed');
+      }
+
+      return;
+    }
+
     const baseImage = new ImageTag(buildParameters);
 
     // Pre-build reliability checks

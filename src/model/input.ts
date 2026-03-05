@@ -546,6 +546,24 @@ class Input {
 
   static get buildArchiveRetention(): number {
     return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
+  static get testSuitePath(): string {
+    return Input.getInput('testSuitePath') ?? '';
+  }
+
+  static get testSuiteEvent(): string {
+    return Input.getInput('testSuiteEvent') ?? '';
+  }
+
+  static get testTaxonomyPath(): string {
+    return Input.getInput('testTaxonomyPath') ?? '';
+  }
+
+  static get testResultFormat(): string {
+    return Input.getInput('testResultFormat') ?? 'junit';
+  }
+
+  static get testResultPath(): string {
+    return Input.getInput('testResultPath') ?? './test-results';
   }
 
   public static ToEnvVarFormat(input: string) {

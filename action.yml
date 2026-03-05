@@ -636,6 +636,23 @@ inputs:
     description: 'Days to retain build archives before cleanup'
     required: false
     default: '30'
+  testSuitePath:
+    description: 'Path to YAML test suite definition file'
+    required: false
+  testSuiteEvent:
+    description: 'CI event name for suite selection (pr, push, release)'
+    required: false
+  testTaxonomyPath:
+    description: 'Path to custom taxonomy definition YAML'
+    required: false
+  testResultFormat:
+    description: 'Test result output format: junit, json, or both'
+    required: false
+    default: 'junit'
+  testResultPath:
+    description: 'Directory for structured test result output'
+    required: false
+    default: './test-results'
 
 outputs:
   volume:

@@ -187,6 +187,12 @@ class BuildParameters {
   public buildArchivePath!: string;
   public buildArchiveRetention!: number;
 
+  public testSuitePath!: string;
+  public testSuiteEvent!: string;
+  public testTaxonomyPath!: string;
+  public testResultFormat!: string;
+  public testResultPath!: string;
+
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
   }
@@ -398,6 +404,11 @@ class BuildParameters {
       buildArchiveEnabled: Input.buildArchiveEnabled,
       buildArchivePath: Input.buildArchivePath,
       buildArchiveRetention: Input.buildArchiveRetention,
+      testSuitePath: Input.testSuitePath,
+      testSuiteEvent: Input.testSuiteEvent,
+      testTaxonomyPath: Input.testTaxonomyPath,
+      testResultFormat: Input.testResultFormat,
+      testResultPath: Input.testResultPath,
     };
   }
 
