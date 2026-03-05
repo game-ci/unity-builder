@@ -199,9 +199,10 @@ inputs:
     required: false
     description:
       '[Orchestrator] Premade secret source for pulling build secrets. Supported values: aws-secrets-manager,
-      aws-parameter-store, gcp-secret-manager, azure-key-vault, env. Can also be a custom shell command
-      with {0} placeholder for the key, or a path to a YAML file defining custom sources.
-      Takes precedence over inputPullCommand when set.'
+      aws-parameter-store, gcp-secret-manager, azure-key-vault, hashicorp-vault, hashicorp-vault-kv1,
+      vault (alias for hashicorp-vault), env. Can also be a custom shell command with {0} placeholder
+      for the key, or a path to a YAML file defining custom sources. Takes precedence over
+      inputPullCommand when set.'
   resourceTracking:
     default: 'false'
     required: false

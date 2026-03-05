@@ -44,8 +44,20 @@ describe('SecretSourceService', () => {
       expect(SecretSourceService.isPremadeSource('azure-key-vault')).toBe(true);
     });
 
+    it('should return true for hashicorp-vault', () => {
+      expect(SecretSourceService.isPremadeSource('hashicorp-vault')).toBe(true);
+    });
+
+    it('should return true for hashicorp-vault-kv1', () => {
+      expect(SecretSourceService.isPremadeSource('hashicorp-vault-kv1')).toBe(true);
+    });
+
+    it('should return true for vault (short alias)', () => {
+      expect(SecretSourceService.isPremadeSource('vault')).toBe(true);
+    });
+
     it('should return false for unknown source', () => {
-      expect(SecretSourceService.isPremadeSource('hashicorp-vault')).toBe(false);
+      expect(SecretSourceService.isPremadeSource('unknown-source')).toBe(false);
     });
   });
 
@@ -56,7 +68,10 @@ describe('SecretSourceService', () => {
       expect(sources).toContain('aws-parameter-store');
       expect(sources).toContain('gcp-secret-manager');
       expect(sources).toContain('azure-key-vault');
-      expect(sources.length).toBeGreaterThanOrEqual(5);
+      expect(sources).toContain('hashicorp-vault');
+      expect(sources).toContain('hashicorp-vault-kv1');
+      expect(sources).toContain('vault');
+      expect(sources.length).toBeGreaterThanOrEqual(8);
     });
   });
 
@@ -265,6 +280,25 @@ sources:
     it('azure-key-vault uses AZURE_VAULT_NAME env var', () => {
       const source = SecretSourceService.resolveSource('azure-key-vault')!;
       expect(source.command).toContain('$AZURE_VAULT_NAME');
+    });
+
+    it('hashicorp-vault uses vault kv get with VAULT_MOUNT', () => {
+      const source = SecretSourceService.resolveSource('hashicorp-vault')!;
+      expect(source.command).toContain('vault kv get');
+      expect(source.command).toContain('VAULT_MOUNT');
+      expect(source.command).toContain('-field=value');
+    });
+
+    it('hashicorp-vault-kv1 uses vault read for KV v1', () => {
+      const source = SecretSourceService.resolveSource('hashicorp-vault-kv1')!;
+      expect(source.command).toContain('vault read');
+      expect(source.command).toContain('-field=value');
+    });
+
+    it('vault alias resolves to same command as hashicorp-vault', () => {
+      const vault = SecretSourceService.resolveSource('vault')!;
+      const hashicorpVault = SecretSourceService.resolveSource('hashicorp-vault')!;
+      expect(vault.command).toBe(hashicorpVault.command);
     });
   });
 });

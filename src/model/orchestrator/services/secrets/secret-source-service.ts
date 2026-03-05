@@ -20,6 +20,8 @@ export interface SecretSourceDefinition {
  *   - `aws-parameter-store` — AWS Systems Manager Parameter Store
  *   - `gcp-secret-manager` — Google Cloud Secret Manager
  *   - `azure-key-vault` — Azure Key Vault (requires AZURE_VAULT_NAME env var)
+ *   - `hashicorp-vault` — HashiCorp Vault KV v2 (requires VAULT_ADDR, optionally VAULT_MOUNT)
+ *   - `hashicorp-vault-kv1` — HashiCorp Vault KV v1 (requires VAULT_ADDR, optionally VAULT_MOUNT)
  *   - `env` — Read from environment variables (no shell command needed)
  *
  * Custom YAML format:
@@ -57,6 +59,27 @@ export class SecretSourceService {
     'azure-key-vault': {
       name: 'azure-key-vault',
       command: 'az keyvault secret show --vault-name "$AZURE_VAULT_NAME" --name {0} --query value --output tsv',
+      parseOutput: 'raw',
+    },
+    'hashicorp-vault': {
+      // HashiCorp Vault KV v2 (default). Requires VAULT_ADDR env var.
+      // Optionally set VAULT_MOUNT to override the mount path (default: 'secret').
+      // Authentication is handled by VAULT_TOKEN or other Vault auth env vars.
+      name: 'hashicorp-vault',
+      command: 'vault kv get -mount="${VAULT_MOUNT:-secret}" -field=value {0}',
+      parseOutput: 'raw',
+    },
+    'hashicorp-vault-kv1': {
+      // HashiCorp Vault KV v1. Requires VAULT_ADDR env var.
+      // Optionally set VAULT_MOUNT to override the mount path (default: 'secret').
+      name: 'hashicorp-vault-kv1',
+      command: 'vault read -mount="${VAULT_MOUNT:-secret}" -field=value {0}',
+      parseOutput: 'raw',
+    },
+    'vault': {
+      // Short alias for hashicorp-vault (KV v2)
+      name: 'vault',
+      command: 'vault kv get -mount="${VAULT_MOUNT:-secret}" -field=value {0}',
       parseOutput: 'raw',
     },
   };
