@@ -111,12 +111,8 @@ describe('OrchestratorFolders git auth', () => {
 
       // Verify the base64 encoding and extraHeader config are correct
       const expectedEncoded = Buffer.from('x-access-token:ghp_test123').toString('base64');
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining(expectedEncoded),
-      );
-      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(
-        expect.stringContaining('.extraHeader'),
-      );
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining(expectedEncoded));
+      expect(OrchestratorSystem.Run).toHaveBeenCalledWith(expect.stringContaining('.extraHeader'));
     });
 
     it('should not run git config in url mode', async () => {
