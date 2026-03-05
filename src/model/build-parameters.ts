@@ -60,6 +60,7 @@ class BuildParameters {
   public runnerCheckMinAvailable!: number;
   public retryOnFallback!: boolean;
   public providerInitTimeout!: number;
+  public gitAuthMode!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public awsEndpoint?: string;
@@ -250,6 +251,7 @@ class BuildParameters {
       runnerCheckMinAvailable: OrchestratorOptions.runnerCheckMinAvailable,
       retryOnFallback: OrchestratorOptions.retryOnFallback,
       providerInitTimeout: OrchestratorOptions.providerInitTimeout,
+      gitAuthMode: OrchestratorOptions.gitAuthMode,
       buildPlatform: OrchestratorOptions.buildPlatform,
       kubeConfig: OrchestratorOptions.kubeConfig,
       containerMemory: OrchestratorOptions.containerMemory,

@@ -92,6 +92,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const commands = `mkdir -p ${OrchestratorFolders.ToLinuxFolder(
       OrchestratorFolders.builderPathAbsolute,
     )}
+${OrchestratorFolders.gitAuthConfigScript}
 BRANCH="${Orchestrator.buildParameters.orchestratorBranch}"
 REPO="${OrchestratorFolders.unityBuilderRepoUrl}"
 DEST="${OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.builderPathAbsolute)}"

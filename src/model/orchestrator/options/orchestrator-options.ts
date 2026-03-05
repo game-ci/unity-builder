@@ -164,6 +164,10 @@ class OrchestratorOptions {
     return Number(OrchestratorOptions.getInput('providerInitTimeout')) || 0;
   }
 
+  static get gitAuthMode(): string {
+    return OrchestratorOptions.getInput('gitAuthMode') || 'header';
+  }
+
   static get containerCpu(): string {
     return OrchestratorOptions.getInput('containerCpu') || `1024`;
   }
