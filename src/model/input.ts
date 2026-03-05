@@ -291,8 +291,20 @@ class Input {
     return Input.getInput('gcpRegion') ?? '';
   }
 
+  static get gcpStorageType(): string {
+    return Input.getInput('gcpStorageType') ?? 'gcs-fuse';
+  }
+
   static get gcpBucket(): string {
     return Input.getInput('gcpBucket') ?? '';
+  }
+
+  static get gcpFilestoreIp(): string {
+    return Input.getInput('gcpFilestoreIp') ?? '';
+  }
+
+  static get gcpFilestoreShare(): string {
+    return Input.getInput('gcpFilestoreShare') ?? '/share1';
   }
 
   static get gcpMachineType(): string {
@@ -320,8 +332,16 @@ class Input {
     return Input.getInput('azureLocation') ?? '';
   }
 
+  static get azureStorageType(): string {
+    return Input.getInput('azureStorageType') ?? 'azure-files';
+  }
+
   static get azureStorageAccount(): string {
     return Input.getInput('azureStorageAccount') ?? '';
+  }
+
+  static get azureBlobContainer(): string {
+    return Input.getInput('azureBlobContainer') ?? 'unity-builds';
   }
 
   static get azureFileShareName(): string {
