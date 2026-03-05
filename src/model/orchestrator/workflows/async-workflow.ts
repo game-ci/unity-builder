@@ -27,6 +27,7 @@ printenv
 git config --global advice.detachedHead false
 git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
 git config --global filter.lfs.process "git-lfs filter-process --skip"
+${OrchestratorFolders.gitAuthConfigScript}
 BRANCH="${Orchestrator.buildParameters.orchestratorBranch}"
 REPO="${OrchestratorFolders.unityBuilderRepoUrl}"
 if [ -n "$(git ls-remote --heads "$REPO" "$BRANCH" 2>/dev/null)" ]; then

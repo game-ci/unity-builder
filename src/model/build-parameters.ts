@@ -54,6 +54,7 @@ class BuildParameters {
   public sshAgent!: string;
   public sshPublicKeysDirectoryPath!: string;
   public providerStrategy!: string;
+  public gitAuthMode!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public awsEndpoint?: string;
@@ -194,6 +195,7 @@ class BuildParameters {
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
       providerStrategy: OrchestratorOptions.providerStrategy,
+      gitAuthMode: OrchestratorOptions.gitAuthMode,
       buildPlatform: OrchestratorOptions.buildPlatform,
       kubeConfig: OrchestratorOptions.kubeConfig,
       containerMemory: OrchestratorOptions.containerMemory,

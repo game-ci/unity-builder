@@ -105,6 +105,12 @@ inputs:
     required: false
     default: ''
     description: '[Orchestrator] Github private token to pull from github'
+  gitAuthMode:
+    required: false
+    default: 'header'
+    description:
+      '[Orchestrator] How git authentication is configured. "header" (default) uses http.extraHeader so the token
+      never appears in clone URLs or git config. "url" embeds the token in clone URLs (legacy behavior).'
   githubOwner:
     required: false
     default: ''

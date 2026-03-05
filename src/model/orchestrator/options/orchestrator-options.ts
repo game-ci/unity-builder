@@ -138,6 +138,10 @@ class OrchestratorOptions {
     return provider || 'local';
   }
 
+  static get gitAuthMode(): string {
+    return OrchestratorOptions.getInput('gitAuthMode') || 'header';
+  }
+
   static get containerCpu(): string {
     return OrchestratorOptions.getInput('containerCpu') || `1024`;
   }
