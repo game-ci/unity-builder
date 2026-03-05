@@ -330,6 +330,10 @@ class Input {
     return Input.getInput('gitHooksSkipList') ?? '';
   }
 
+  static get gitHooksRunBeforeBuild(): string {
+    return Input.getInput('gitHooksRunBeforeBuild') ?? '';
+  }
+
   static get providerExecutable(): string {
     return Input.getInput('providerExecutable') ?? '';
   }

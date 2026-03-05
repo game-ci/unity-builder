@@ -345,6 +345,14 @@ inputs:
     default: ''
     description:
       'Comma-separated list of hook names to skip even when gitHooksEnabled is true. Example: pre-push,post-merge'
+  gitHooksRunBeforeBuild:
+    required: false
+    default: ''
+    description:
+      'Comma-separated list of lefthook hook groups to run before the Unity build. Allows CI to
+      trigger checks that normally only run on git events. Example: pre-commit,pre-push. Requires
+      lefthook. Works with Unity Git Hooks (com.frostebite.unitygithooks) when installed as a UPM
+      package — the init script runs automatically.'
   providerExecutable:
     required: false
     default: ''

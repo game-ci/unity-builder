@@ -118,6 +118,7 @@ class BuildParameters {
   public lfsStoragePaths!: string;
   public gitHooksEnabled!: boolean;
   public gitHooksSkipList!: string;
+  public gitHooksRunBeforeBuild!: string;
   public providerExecutable!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
@@ -267,6 +268,7 @@ class BuildParameters {
       lfsStoragePaths: Input.lfsStoragePaths,
       gitHooksEnabled: Input.gitHooksEnabled,
       gitHooksSkipList: Input.gitHooksSkipList,
+      gitHooksRunBeforeBuild: Input.gitHooksRunBeforeBuild,
       providerExecutable: Input.providerExecutable,
     };
   }
