@@ -241,6 +241,28 @@ class Input {
     return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
+  static get syncStrategy(): string {
+    return Input.getInput('syncStrategy') ?? 'full';
+  }
+
+  static get syncInputRef(): string {
+    return Input.getInput('syncInputRef') ?? '';
+  }
+
+  static get syncStorageRemote(): string {
+    return Input.getInput('syncStorageRemote') ?? '';
+  }
+
+  static get syncRevertAfter(): boolean {
+    const input = Input.getInput('syncRevertAfter') ?? 'true';
+
+    return input === 'true';
+  }
+
+  static get syncStatePath(): string {
+    return Input.getInput('syncStatePath') ?? '.game-ci/sync-state.json';
+  }
+
   static get dockerCpuLimit(): string {
     return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }

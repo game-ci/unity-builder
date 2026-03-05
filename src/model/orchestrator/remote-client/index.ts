@@ -15,15 +15,24 @@ import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
 import OrchestratorOptions from '../options/orchestrator-options';
 import ResourceTracking from '../services/core/resource-tracking';
+import { IncrementalSyncService } from '../services/sync';
+import { SyncStrategy } from '../services/sync/sync-state';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async setupRemoteClient() {
     OrchestratorLogger.log(`bootstrap game ci orchestrator...`);
     await ResourceTracking.logDiskUsageSnapshot('remote-cli-pre-build (start)');
-    if (!(await RemoteClient.handleRetainedWorkspace())) {
+
+    const syncStrategy = (Orchestrator.buildParameters.syncStrategy || 'full') as SyncStrategy;
+
+    if (syncStrategy !== 'full') {
+      OrchestratorLogger.log(`[Sync] Using incremental sync strategy: ${syncStrategy}`);
+      await RemoteClient.handleIncrementalSync(syncStrategy);
+    } else if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();
     }
+
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
   }
@@ -157,6 +166,20 @@ export class RemoteClient {
 
       await RemoteClient.runCustomHookFiles(`after-build`);
 
+      // Revert sync overlays if configured
+      const syncStrategy = (Orchestrator.buildParameters.syncStrategy || 'full') as SyncStrategy;
+      if (Orchestrator.buildParameters.syncRevertAfter && syncStrategy !== 'full') {
+        try {
+          OrchestratorLogger.log('[Sync] Reverting overlay changes after job completion');
+          await IncrementalSyncService.revertOverlays(
+            OrchestratorFolders.repoPathAbsolute,
+            Orchestrator.buildParameters.syncStatePath,
+          );
+        } catch (revertError: any) {
+          RemoteClientLogger.logWarning(`[Sync] Overlay revert failed: ${revertError.message}`);
+        }
+      }
+
       // WIP - need to give the pod permissions to create config map
       await RemoteClientLogger.handleLogManagementPostJob();
     } catch (error: any) {
@@ -229,6 +252,78 @@ export class RemoteClient {
       RemoteClientLogger.log(JSON.stringify(error, undefined, 4));
     }
   }
+
+  /**
+   * Handle incremental sync strategies (git-delta, direct-input, storage-pull).
+   *
+   * For git-delta: requires an existing workspace with sync state; fetches and applies
+   * only changed files.
+   *
+   * For direct-input and storage-pull: requires an existing workspace; applies overlay
+   * content on top.
+   *
+   * Falls back to full bootstrapRepository() if incremental sync cannot proceed.
+   */
+  private static async handleIncrementalSync(strategy: SyncStrategy): Promise<void> {
+    const buildParameters = Orchestrator.buildParameters;
+    const workspacePath = OrchestratorFolders.repoPathAbsolute;
+    const statePath = buildParameters.syncStatePath;
+
+    // Resolve strategy — may fall back to 'full' if no state exists
+    const resolvedStrategy = IncrementalSyncService.resolveStrategy(strategy, workspacePath, statePath);
+
+    if (resolvedStrategy === 'full') {
+      OrchestratorLogger.log('[Sync] Falling back to full bootstrap');
+      if (!(await RemoteClient.handleRetainedWorkspace())) {
+        await RemoteClient.bootstrapRepository();
+      }
+
+      return;
+    }
+
+    switch (resolvedStrategy) {
+      case 'git-delta': {
+        const targetReference = buildParameters.gitSha || buildParameters.branch;
+        OrchestratorLogger.log(`[Sync] Git delta sync to ${targetReference}`);
+        const changedFiles = await IncrementalSyncService.syncGitDelta(workspacePath, targetReference, statePath);
+        OrchestratorLogger.log(`[Sync] Git delta complete: ${changedFiles} file(s) updated`);
+        break;
+      }
+      case 'direct-input': {
+        const inputReference = buildParameters.syncInputRef;
+        if (!inputReference) {
+          throw new Error('[Sync] direct-input strategy requires syncInputRef');
+        }
+        OrchestratorLogger.log(`[Sync] Applying direct input: ${inputReference}`);
+        await IncrementalSyncService.applyDirectInput(
+          workspacePath,
+          inputReference,
+          buildParameters.syncStorageRemote || undefined,
+          statePath,
+        );
+        break;
+      }
+      case 'storage-pull': {
+        const storageUri = buildParameters.syncInputRef;
+        if (!storageUri) {
+          throw new Error('[Sync] storage-pull strategy requires syncInputRef');
+        }
+        OrchestratorLogger.log(`[Sync] Storage pull from: ${storageUri}`);
+        await IncrementalSyncService.syncStoragePull(workspacePath, storageUri, {
+          rcloneRemote: buildParameters.syncStorageRemote || undefined,
+          syncRevertAfter: buildParameters.syncRevertAfter,
+          statePath,
+        });
+        break;
+      }
+      default:
+        OrchestratorLogger.logWarning(`[Sync] Unknown strategy: ${resolvedStrategy}, falling back to full`);
+        if (!(await RemoteClient.handleRetainedWorkspace())) {
+          await RemoteClient.bootstrapRepository();
+        }
+    }
+  }
+
   public static async bootstrapRepository() {
     await OrchestratorSystem.Run(
       `mkdir -p ${OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.uniqueOrchestratorJobFolderAbsolute)}`,
