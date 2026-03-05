@@ -34,7 +34,9 @@ function createMockConfig(overrides?: Partial<HotRunnerConfig>): HotRunnerConfig
 
 function createMockTransport(overrides?: Partial<HotRunnerTransport>): HotRunnerTransport {
   return {
+    // eslint-disable-next-line unicorn/no-useless-undefined
     connect: jest.fn().mockResolvedValue(undefined),
+    // eslint-disable-next-line unicorn/no-useless-undefined
     disconnect: jest.fn().mockResolvedValue(undefined),
     sendJob: jest.fn().mockResolvedValue({
       jobId: 'test-job',
@@ -140,10 +142,11 @@ describe('HotRunnerRegistry', () => {
 
   it('should filter runners by state', () => {
     const id1 = registry.registerRunner(createMockConfig());
-    const id2 = registry.registerRunner(createMockConfig());
+    registry.registerRunner(createMockConfig());
 
     registry.updateRunner(id1, { state: 'idle' });
-    // id2 remains in 'starting' state
+
+    // second runner remains in 'starting' state
 
     const idle = registry.listRunners({ state: 'idle' });
     expect(idle).toHaveLength(1);
@@ -200,6 +203,7 @@ describe('HotRunnerRegistry', () => {
     const runner = registry.getRunner(id);
     expect(runner!.state).toBe('idle');
     expect(runner!.memoryUsageMB).toBe(2048);
+
     // ID should not be overridden by the update
     expect(runner!.id).toBe(id);
   });
@@ -245,6 +249,131 @@ describe('HotRunnerRegistry', () => {
     const count = persistenceRegistry.loadFromDisk();
     expect(count).toBe(1);
     expect(persistenceRegistry.getRunner('hr-restored')).toBeDefined();
+  });
+
+  it('should discard invalid runner entries when loading from disk', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+    const storedData = {
+      runners: {
+        'hr-valid': {
+          id: 'hr-valid',
+          state: 'idle',
+          unityVersion: '2022.3.0f1',
+          platform: 'StandaloneWindows64',
+          uptime: 100,
+          jobsCompleted: 3,
+          lastHealthCheck: new Date().toISOString(),
+          memoryUsageMB: 512,
+        },
+        'hr-invalid': {
+          // Missing required fields like state, unityVersion
+          id: 'hr-invalid',
+        },
+        'hr-bad-state': {
+          id: 'hr-bad-state',
+          state: 'nonexistent-state',
+          unityVersion: '2022.3.0f1',
+          platform: 'StandaloneWindows64',
+          uptime: 0,
+          jobsCompleted: 0,
+          lastHealthCheck: new Date().toISOString(),
+          memoryUsageMB: 0,
+        },
+      },
+      configs: {
+        'hr-valid': createMockConfig(),
+        'hr-invalid': createMockConfig(),
+        'hr-bad-state': createMockConfig(),
+      },
+    };
+
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(JSON.stringify(storedData));
+
+    const count = persistenceRegistry.loadFromDisk();
+    expect(count).toBe(1);
+    expect(persistenceRegistry.getRunner('hr-valid')).toBeDefined();
+    expect(persistenceRegistry.getRunner('hr-invalid')).toBeUndefined();
+    expect(persistenceRegistry.getRunner('hr-bad-state')).toBeUndefined();
+  });
+
+  it('should handle corrupt JSON persistence file gracefully', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue('{ invalid json !!!');
+
+    const count = persistenceRegistry.loadFromDisk();
+    expect(count).toBe(0);
+    expect(persistenceRegistry.size).toBe(0);
+  });
+
+  it('should handle persistence file with invalid top-level structure', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue('"just a string"');
+
+    const count = persistenceRegistry.loadFromDisk();
+    expect(count).toBe(0);
+  });
+
+  it('should handle persistence file with null runners', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue('{"runners": null, "configs": null}');
+
+    const count = persistenceRegistry.loadFromDisk();
+    expect(count).toBe(0);
+  });
+
+  it('should validate and repair invalid runners', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.writeFileSync.mockImplementation(() => {});
+    mockFs.mkdirSync.mockImplementation(() => '' as any);
+
+    // Register a valid runner first
+    const id = persistenceRegistry.registerRunner(createMockConfig());
+    persistenceRegistry.updateRunner(id, { state: 'idle' });
+
+    // Manually corrupt the runner's state by setting an invalid state
+    // (we access via the public API -- updateRunner with a cast)
+    persistenceRegistry.updateRunner(id, { state: 'invalid-state' as any });
+
+    const repaired = persistenceRegistry.validateAndRepair();
+    expect(repaired).toBe(1);
+
+    const runner = persistenceRegistry.getRunner(id);
+    expect(runner!.state).toBe('unhealthy');
+  });
+
+  it('should not discard configs for valid runners when loading from disk', () => {
+    const persistenceRegistry = new HotRunnerRegistry('/tmp/test');
+    const storedData = {
+      runners: {
+        'hr-valid': {
+          id: 'hr-valid',
+          state: 'idle',
+          unityVersion: '2022.3.0f1',
+          platform: 'StandaloneWindows64',
+          uptime: 100,
+          jobsCompleted: 3,
+          lastHealthCheck: new Date().toISOString(),
+          memoryUsageMB: 512,
+        },
+      },
+      configs: {
+        'hr-valid': createMockConfig(),
+      },
+    };
+
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(JSON.stringify(storedData));
+
+    persistenceRegistry.loadFromDisk();
+    expect(persistenceRegistry.getConfig('hr-valid')).toBeDefined();
   });
 });
 
@@ -335,6 +464,7 @@ describe('HotRunnerHealthMonitor', () => {
 
   it('should recycle idle runner when max idle time exceeded', async () => {
     const id = registry.registerRunner(createMockConfig({ maxIdleTime: 60 }));
+
     // Set lastHealthCheck to 120 seconds ago
     const oldDate = new Date(Date.now() - 120 * 1000).toISOString();
     registry.updateRunner(id, { state: 'idle', lastHealthCheck: oldDate });
@@ -367,6 +497,7 @@ describe('HotRunnerHealthMonitor', () => {
 
   it('should return false when no transport exists for runner', async () => {
     const id = registry.registerRunner(createMockConfig());
+
     // Do not set any transport for this runner
     monitor.startMonitoring(registry, 30, transports);
 
@@ -408,7 +539,7 @@ describe('HotRunnerDispatcher', () => {
     const id = registry.registerRunner(createMockConfig());
     registry.updateRunner(id, { state: 'idle' });
 
-    let statesDuringJob: string[] = [];
+    const statesDuringJob: string[] = [];
     const transport = createMockTransport({
       sendJob: jest.fn().mockImplementation(async () => {
         const runner = registry.getRunner(id);
@@ -428,6 +559,7 @@ describe('HotRunnerDispatcher', () => {
     await dispatcher.dispatchJob(createMockJobRequest(), registry, '2022.3.0f1');
 
     expect(statesDuringJob).toContain('busy');
+
     // After completion, should be idle again
     const runner = registry.getRunner(id);
     expect(runner!.state).toBe('idle');
@@ -456,6 +588,7 @@ describe('HotRunnerDispatcher', () => {
   it('should throw when runner has no transport', async () => {
     const id = registry.registerRunner(createMockConfig());
     registry.updateRunner(id, { state: 'idle' });
+
     // No transport set for this runner
 
     const request = createMockJobRequest();
@@ -497,6 +630,25 @@ describe('HotRunnerDispatcher', () => {
     await expect(dispatcher.dispatchJob(request, registry, '2022.3.0f1')).rejects.toThrow(/timed out/);
   });
 
+  it('should disconnect transport on job timeout', async () => {
+    const id = registry.registerRunner(createMockConfig());
+    registry.updateRunner(id, { state: 'idle' });
+
+    const transport = createMockTransport({
+      sendJob: jest.fn().mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 60000)), // never resolves within timeout
+      ),
+    });
+    transports.set(id, transport);
+
+    const request = createMockJobRequest({ timeout: 50 });
+
+    await expect(dispatcher.dispatchJob(request, registry, '2022.3.0f1')).rejects.toThrow(/timed out/);
+
+    // Transport should have been disconnected to clean up orphaned connection
+    expect(transport.disconnect).toHaveBeenCalled();
+  });
+
   it('should call output callback with job output', async () => {
     const id = registry.registerRunner(createMockConfig());
     registry.updateRunner(id, { state: 'idle' });
@@ -512,6 +664,7 @@ describe('HotRunnerDispatcher', () => {
 
   it('should wait for runner to become available', async () => {
     const id = registry.registerRunner(createMockConfig());
+
     // Runner starts in 'starting' state, not idle
 
     const transport = createMockTransport();

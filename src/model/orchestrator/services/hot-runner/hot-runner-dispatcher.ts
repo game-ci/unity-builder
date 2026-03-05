@@ -4,7 +4,8 @@ import { HotRunnerJobRequest, HotRunnerJobResult, HotRunnerStatus, HotRunnerTran
 
 const POLL_INTERVAL_MS = 1000;
 
-export type OutputCallback = (chunk: string) => void;
+// eslint-disable-next-line no-unused-vars
+export type OutputCallback = (output: string) => void;
 
 export class HotRunnerDispatcher {
   private transports: Map<string, HotRunnerTransport>;
@@ -119,27 +120,37 @@ export class HotRunnerDispatcher {
 
   /**
    * Execute a job on a transport with a timeout guard.
+   * On timeout, disconnects the transport to release the connection
+   * and prevent the orphaned sendJob promise from holding resources.
    */
   private async executeWithTimeout(
     transport: HotRunnerTransport,
     request: HotRunnerJobRequest,
   ): Promise<HotRunnerJobResult> {
-    return new Promise<HotRunnerJobResult>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error(`[HotRunner] Job ${request.jobId} timed out after ${request.timeout}ms`));
-      }, request.timeout);
+    const TIMEOUT_SENTINEL = Symbol('timeout');
 
-      transport
-        .sendJob(request)
-        .then((result) => {
-          clearTimeout(timer);
-          resolve(result);
-        })
-        .catch((error) => {
-          clearTimeout(timer);
-          reject(error);
-        });
+    const timeoutPromise = new Promise<typeof TIMEOUT_SENTINEL>((resolve) => {
+      setTimeout(() => {
+        resolve(TIMEOUT_SENTINEL);
+      }, request.timeout);
     });
+
+    const result = await Promise.race([transport.sendJob(request), timeoutPromise]);
+
+    if (result === TIMEOUT_SENTINEL) {
+      // Disconnect the transport to clean up the orphaned sendJob call
+      try {
+        await transport.disconnect();
+      } catch (disconnectError: any) {
+        OrchestratorLogger.logWarning(
+          `[HotRunner] Error disconnecting transport after timeout for job ${request.jobId}: ${disconnectError.message}`,
+        );
+      }
+
+      throw new Error(`[HotRunner] Job ${request.jobId} timed out after ${request.timeout}ms`);
+    }
+
+    return result;
   }
 
   private sleep(ms: number): Promise<void> {
