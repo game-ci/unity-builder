@@ -282,6 +282,58 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  static get submoduleProfilePath(): string {
+    return Input.getInput('submoduleProfilePath') ?? '';
+  }
+
+  static get submoduleVariantPath(): string {
+    return Input.getInput('submoduleVariantPath') ?? '';
+  }
+
+  static get submoduleToken(): string {
+    return Input.getInput('submoduleToken') ?? '';
+  }
+
+  static get localCacheEnabled(): boolean {
+    return (Input.getInput('localCacheEnabled') ?? 'false') === 'true';
+  }
+
+  static get localCacheRoot(): string {
+    return Input.getInput('localCacheRoot') ?? '';
+  }
+
+  static get localCacheLibrary(): boolean {
+    return (Input.getInput('localCacheLibrary') ?? 'true') === 'true';
+  }
+
+  static get localCacheLfs(): boolean {
+    return (Input.getInput('localCacheLfs') ?? 'false') === 'true';
+  }
+
+  static get lfsTransferAgent(): string {
+    return Input.getInput('lfsTransferAgent') ?? '';
+  }
+
+  static get lfsTransferAgentArgs(): string {
+    return Input.getInput('lfsTransferAgentArgs') ?? '';
+  }
+
+  static get lfsStoragePaths(): string {
+    return Input.getInput('lfsStoragePaths') ?? '';
+  }
+
+  static get gitHooksEnabled(): boolean {
+    return (Input.getInput('gitHooksEnabled') ?? 'false') === 'true';
+  }
+
+  static get gitHooksSkipList(): string {
+    return Input.getInput('gitHooksSkipList') ?? '';
+  }
+
+  static get providerExecutable(): string {
+    return Input.getInput('providerExecutable') ?? '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

@@ -237,6 +237,23 @@ export class RemoteClient {
       `mkdir -p ${OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.cacheFolderForCacheKeyFull)}`,
     );
     await RemoteClient.cloneRepoWithoutLFSFiles();
+
+    // Initialize submodules from profile if configured
+    if (Orchestrator.buildParameters.submoduleProfilePath) {
+      const { SubmoduleProfileService } = await import('../services/submodule/submodule-profile-service');
+      RemoteClientLogger.log('Initializing submodules from profile...');
+      const plan = await SubmoduleProfileService.createInitPlan(
+        Orchestrator.buildParameters.submoduleProfilePath,
+        Orchestrator.buildParameters.submoduleVariantPath,
+        OrchestratorFolders.repoPathAbsolute,
+      );
+      await SubmoduleProfileService.execute(
+        plan,
+        OrchestratorFolders.repoPathAbsolute,
+        Orchestrator.buildParameters.submoduleToken || Orchestrator.buildParameters.gitPrivateToken,
+      );
+    }
+
     await RemoteClient.sizeOfFolder(
       'repo before lfs cache pull',
       OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.repoPathAbsolute),
@@ -251,6 +268,19 @@ export class RemoteClient {
       `${lfsHashes.lfsGuidSum}`,
     );
     await RemoteClient.sizeOfFolder('repo after lfs cache pull', OrchestratorFolders.repoPathAbsolute);
+
+    // Configure custom LFS transfer agent if specified
+    if (Orchestrator.buildParameters.lfsTransferAgent) {
+      const { LfsAgentService } = await import('../services/lfs/lfs-agent-service');
+      RemoteClientLogger.log('Configuring custom LFS transfer agent...');
+      await LfsAgentService.configure(
+        Orchestrator.buildParameters.lfsTransferAgent,
+        Orchestrator.buildParameters.lfsTransferAgentArgs,
+        Orchestrator.buildParameters.lfsStoragePaths ? Orchestrator.buildParameters.lfsStoragePaths.split(';') : [],
+        OrchestratorFolders.repoPathAbsolute,
+      );
+    }
+
     await RemoteClient.pullLatestLFS();
     await RemoteClient.sizeOfFolder('repo before lfs git pull', OrchestratorFolders.repoPathAbsolute);
     await Caching.PushToCache(

@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -279,6 +279,76 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  submoduleProfilePath:
+    required: false
+    default: ''
+    description:
+      'Path to a YAML submodule profile file (relative to repo root). Defines which submodules to initialize (branch:
+      main) or skip (branch: empty). See docs for format.'
+  submoduleVariantPath:
+    required: false
+    default: ''
+    description:
+      'Path to a YAML variant overlay file that modifies the base submodule profile. Used for server or debug build
+      variants.'
+  submoduleToken:
+    required: false
+    default: ''
+    description:
+      'Git token for authenticating submodule clones. Falls back to gitPrivateToken or GITHUB_TOKEN if empty.'
+  localCacheEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Enable filesystem-based caching for local builds. Caches the Unity Library folder and optionally LFS objects
+      between builds without requiring actions/cache.'
+  localCacheRoot:
+    required: false
+    default: ''
+    description:
+      'Root directory for local build cache. Defaults to $RUNNER_TEMP/game-ci-cache or .game-ci/cache if RUNNER_TEMP is
+      not set.'
+  localCacheLibrary:
+    required: false
+    default: 'true'
+    description: 'Cache the Unity Library folder for local builds. Only effective when localCacheEnabled is true.'
+  localCacheLfs:
+    required: false
+    default: 'false'
+    description: 'Cache Git LFS objects for local builds. Only effective when localCacheEnabled is true.'
+  lfsTransferAgent:
+    required: false
+    default: ''
+    description:
+      'Path to a custom Git LFS transfer agent executable (e.g. elastic-git-storage). When set, the agent is registered
+      via git config before LFS operations.'
+  lfsTransferAgentArgs:
+    required: false
+    default: ''
+    description: 'Additional arguments to pass to the custom LFS transfer agent.'
+  lfsStoragePaths:
+    required: false
+    default: ''
+    description:
+      'Semicolon-separated list of storage paths for the custom LFS transfer agent. Interpretation depends on the agent
+      (e.g. local paths, WebDAV URLs, rclone remotes).'
+  gitHooksEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Install and run git hooks (lefthook, husky, or native) during builds. When false (default), hooks are disabled
+      for build performance.'
+  gitHooksSkipList:
+    required: false
+    default: ''
+    description:
+      'Comma-separated list of hook names to skip even when gitHooksEnabled is true. Example: pre-push,post-merge'
+  providerExecutable:
+    required: false
+    default: ''
+    description:
+      'Path to an external CLI executable that implements the provider protocol. Enables providers written in any
+      language (Go, Python, Rust, shell). Uses JSON-over-stdin/stdout communication.'
 
 outputs:
   volume:

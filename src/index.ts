@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import path from 'node:path';
 import { Action, BuildParameters, Cache, Orchestrator, Docker, ImageTag, Output } from './model';
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
@@ -23,6 +24,70 @@ async function runMain() {
 
     if (buildParameters.providerStrategy === 'local') {
       core.info('Building locally');
+
+      // Submodule profile initialization
+      if (buildParameters.submoduleProfilePath) {
+        const { SubmoduleProfileService } = await import(
+          './model/orchestrator/services/submodule/submodule-profile-service'
+        );
+        core.info('Initializing submodules from profile...');
+        const plan = await SubmoduleProfileService.createInitPlan(
+          buildParameters.submoduleProfilePath,
+          buildParameters.submoduleVariantPath,
+          workspace,
+        );
+        await SubmoduleProfileService.execute(
+          plan,
+          workspace,
+          buildParameters.submoduleToken || buildParameters.gitPrivateToken,
+        );
+      }
+
+      // Configure custom LFS transfer agent
+      if (buildParameters.lfsTransferAgent) {
+        const { LfsAgentService } = await import('./model/orchestrator/services/lfs/lfs-agent-service');
+        core.info('Configuring custom LFS transfer agent...');
+        await LfsAgentService.configure(
+          buildParameters.lfsTransferAgent,
+          buildParameters.lfsTransferAgentArgs,
+          buildParameters.lfsStoragePaths ? buildParameters.lfsStoragePaths.split(';') : [],
+          workspace,
+        );
+      }
+
+      // Local build caching - restore
+      let cacheRoot = '';
+      let cacheKey = '';
+      if (buildParameters.localCacheEnabled) {
+        const { LocalCacheService } = await import('./model/orchestrator/services/cache/local-cache-service');
+        cacheRoot = LocalCacheService.resolveCacheRoot(buildParameters);
+        cacheKey = LocalCacheService.generateCacheKey(
+          buildParameters.targetPlatform,
+          buildParameters.editorVersion,
+          buildParameters.branch || '',
+        );
+        if (buildParameters.localCacheLfs) {
+          await LocalCacheService.restoreLfsCache(workspace, cacheRoot, cacheKey);
+        }
+        if (buildParameters.localCacheLibrary) {
+          const projectFullPath = path.join(workspace, buildParameters.projectPath);
+          await LocalCacheService.restoreLibraryCache(projectFullPath, cacheRoot, cacheKey);
+        }
+      }
+
+      // Git hooks
+      if (buildParameters.gitHooksEnabled) {
+        const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
+        await GitHooksService.installHooks(workspace);
+        if (buildParameters.gitHooksSkipList) {
+          const env = GitHooksService.configureSkipList(buildParameters.gitHooksSkipList.split(','));
+          Object.assign(process.env, env);
+        }
+      } else {
+        const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
+        await GitHooksService.disableHooks(workspace);
+      }
+
       await PlatformSetup.setup(buildParameters, actionFolder);
       exitCode =
         process.platform === 'darwin'
@@ -32,6 +97,18 @@ async function runMain() {
               actionFolder,
               ...buildParameters,
             });
+
+      // Local build caching - save
+      if (buildParameters.localCacheEnabled) {
+        const { LocalCacheService } = await import('./model/orchestrator/services/cache/local-cache-service');
+        if (buildParameters.localCacheLibrary) {
+          const projectFullPath = path.join(workspace, buildParameters.projectPath);
+          await LocalCacheService.saveLibraryCache(projectFullPath, cacheRoot, cacheKey);
+        }
+        if (buildParameters.localCacheLfs) {
+          await LocalCacheService.saveLfsCache(workspace, cacheRoot, cacheKey);
+        }
+      }
     } else {
       await Orchestrator.run(buildParameters, baseImage.toString());
       exitCode = 0;

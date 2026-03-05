@@ -58,6 +58,7 @@ export default async function loadProvider(
         const providerModuleMap: Record<string, string> = {
           aws: './aws',
           k8s: './k8s',
+          cli: './cli',
           test: './test',
           'local-docker': './docker',
           'local-system': './local',
@@ -136,7 +137,7 @@ export class ProviderLoader {
    * @returns string[] - Array of available provider names
    */
   static getAvailableProviders(): string[] {
-    return ['aws', 'k8s', 'test', 'local-docker', 'local-system', 'local'];
+    return ['aws', 'k8s', 'cli', 'test', 'local-docker', 'local-system', 'local'];
   }
 
   /**
