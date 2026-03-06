@@ -83,6 +83,7 @@ submodules:
       mockedFs.readFileSync.mockImplementation((filePath: any) => {
         if (filePath === '/base.yml') return baseYaml;
         if (filePath === '/variant.yml') return variantYaml;
+
         return '';
       });
 
@@ -196,6 +197,7 @@ submodules:
       mockedFs.readFileSync.mockImplementation((filePath: any) => {
         if (String(filePath).endsWith('profile.yml')) return profileYaml;
         if (String(filePath).endsWith('.gitmodules')) return gitmodulesContent;
+
         return '';
       });
 
@@ -249,6 +251,7 @@ submodules:
         if (p.endsWith('profile.yml')) return profileYaml;
         if (p.endsWith('variant.yml')) return variantYaml;
         if (p.endsWith('.gitmodules')) return gitmodulesContent;
+
         return '';
       });
 
@@ -307,6 +310,76 @@ submodules:
       await SubmoduleProfileService.execute([], '/repo');
 
       expect(mockedSystem.Run).not.toHaveBeenCalledWith(expect.stringContaining('git config url'));
+    });
+  });
+
+  describe('execute — command construction safety', () => {
+    it('constructs expected git commands for a standard path', async () => {
+      mockedSystem.Run.mockResolvedValue('');
+
+      const plan = [
+        {
+          name: 'Assets/_Game/Submodules/TurnOfWar',
+          path: 'Assets/_Game/Submodules/TurnOfWar',
+          branch: 'main',
+          action: 'init' as const,
+        },
+      ];
+
+      await SubmoduleProfileService.execute(plan, '/repo');
+
+      expect(mockedSystem.Run).toHaveBeenCalledWith('git submodule update --init Assets/_Game/Submodules/TurnOfWar');
+    });
+
+    it('passes path directly into git commands (paths with spaces are not quoted)', async () => {
+      mockedSystem.Run.mockResolvedValue('');
+
+      // This test documents current behavior: paths are passed as-is.
+      // If a path contained shell metacharacters, they would be passed through.
+      // This is acceptable because submodule paths come from .gitmodules (trusted source),
+      // not from user input. Still, this test documents the behavior for awareness.
+      const plan = [
+        { name: 'Module With Spaces', path: 'Assets/Module With Spaces', branch: 'main', action: 'init' as const },
+      ];
+
+      await SubmoduleProfileService.execute(plan, '/repo');
+
+      // The current implementation passes the path directly — no shell quoting
+      expect(mockedSystem.Run).toHaveBeenCalledWith('git submodule update --init Assets/Module With Spaces');
+    });
+
+    it('passes branch name directly into git checkout command', async () => {
+      mockedSystem.Run.mockResolvedValue('');
+
+      // Document that branch names are passed as-is into shell commands.
+      // Branch names come from the trusted profile YAML, not user input.
+      const plan = [{ name: 'ModuleX', path: 'Assets/ModuleX', branch: 'feature/my-branch', action: 'init' as const }];
+
+      await SubmoduleProfileService.execute(plan, '/repo');
+
+      expect(mockedSystem.Run).toHaveBeenCalledWith('git -C Assets/ModuleX checkout feature/my-branch');
+    });
+
+    it('constructs deinit command with error suppression for skip actions', async () => {
+      mockedSystem.Run.mockResolvedValue('');
+
+      const plan = [{ name: 'Unused', path: 'Assets/Unused', branch: 'empty', action: 'skip' as const }];
+
+      await SubmoduleProfileService.execute(plan, '/repo');
+
+      expect(mockedSystem.Run).toHaveBeenCalledWith('git submodule deinit -f Assets/Unused 2>/dev/null || true');
+    });
+
+    it('injects token into git config URL insteadOf pattern', async () => {
+      mockedSystem.Run.mockResolvedValue('');
+
+      // The token is embedded directly into the URL pattern.
+      // This is the standard Git credential approach for CI.
+      await SubmoduleProfileService.execute([], '/repo', 'ghp_abc123xyz');
+
+      const configCall = mockedSystem.Run.mock.calls.find((call: any[]) => String(call[0]).includes('git config url'));
+      expect(configCall).toBeDefined();
+      expect(configCall![0]).toBe('git config url."https://ghp_abc123xyz@github.com/".insteadOf "https://github.com/"');
     });
   });
 });

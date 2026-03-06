@@ -488,6 +488,8 @@ class Input {
 
   static get azureSubnetId(): string {
     return Input.getInput('azureSubnetId') ?? '';
+  }
+
   // ### ### ###
   // Remote PowerShell provider
   // ### ### ###
@@ -562,8 +564,14 @@ class Input {
 
   static get ansibleVaultPassword(): string {
     return Input.getInput('ansibleVaultPassword') ?? '';
+  }
+
   static get gitIntegrityCheck(): boolean {
     const input = Input.getInput('gitIntegrityCheck') ?? 'false';
+
+    return input === 'true';
+  }
+
   static get hotRunnerEnabled(): boolean {
     const input = Input.getInput('hotRunnerEnabled') ?? false;
 
@@ -572,6 +580,10 @@ class Input {
 
   static get gitAutoRecover(): boolean {
     const input = Input.getInput('gitAutoRecover') ?? 'false';
+
+    return input === 'true';
+  }
+
   static get hotRunnerTransport(): 'websocket' | 'grpc' | 'named-pipe' {
     return (Input.getInput('hotRunnerTransport') ?? 'websocket') as 'websocket' | 'grpc' | 'named-pipe';
   }
@@ -616,6 +628,8 @@ class Input {
 
   static get buildArchiveRetention(): number {
     return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
+  }
+
   static get testSuitePath(): string {
     return Input.getInput('testSuitePath') ?? '';
   }

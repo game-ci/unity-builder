@@ -192,7 +192,7 @@ async function runMain() {
         }
       }
 
-      // Git hooks
+      // Git hooks — opt-in only. When disabled (default), do not touch hooks at all.
       if (buildParameters.gitHooksEnabled) {
         const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
         await GitHooksService.installHooks(workspace);
@@ -200,9 +200,6 @@ async function runMain() {
           const environment = GitHooksService.configureSkipList(buildParameters.gitHooksSkipList.split(','));
           Object.assign(process.env, environment);
         }
-      } else {
-        const { GitHooksService } = await import('./model/orchestrator/services/hooks/git-hooks-service');
-        await GitHooksService.disableHooks(workspace);
       }
 
       // Apply incremental sync strategy before build
