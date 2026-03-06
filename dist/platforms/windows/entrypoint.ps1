@@ -31,11 +31,22 @@ if ($env:ENABLE_GPU -eq "true") {
 
 # Activate Unity
 if ($env:SKIP_ACTIVATION -ne "true") {
-  . "c:\steps\activate.ps1"
+  $maxRetries = 3
+  $retryCount = 0
+  do {
+    . "c:\steps\activate.ps1"
+    if ($ACTIVATION_EXIT_CODE -eq 0) {
+      break
+    }
+    $retryCount++
+    Write-Warning "Activation failed with exit code $ACTIVATION_EXIT_CODE. Retrying ($retryCount/$maxRetries)..."
+    Start-Sleep -Seconds 5
+  } while ($retryCount -lt $maxRetries)
 
   # If we didn't activate successfully, exit with the exit code from the activation step.
   if ($ACTIVATION_EXIT_CODE -ne 0) {
-    exit $ACTIVATION_EXIT_CODE
+    Write-Error "Unity activation failed after $maxRetries attempts with exit code $ACTIVATION_EXIT_CODE"
+    exit 1 # exit code 1 is failure on windows
   }
 }
 else {
