@@ -125,6 +125,8 @@ class BuildParameters {
   public gitHooksSkipList!: string;
   public gitHooksRunBeforeBuild!: string;
   public providerExecutable!: string;
+  public middleware!: string;
+  public middlewareFiles!: string[];
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -280,6 +282,8 @@ class BuildParameters {
       gitHooksSkipList: Input.gitHooksSkipList,
       gitHooksRunBeforeBuild: Input.gitHooksRunBeforeBuild,
       providerExecutable: Input.providerExecutable,
+      middleware: OrchestratorOptions.middleware,
+      middlewareFiles: OrchestratorOptions.middlewareFiles,
     };
   }
 

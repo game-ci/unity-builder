@@ -358,6 +358,14 @@ class Input {
     return Input.getInput('providerExecutable') ?? '';
   }
 
+  static get middleware(): string {
+    return Input.getInput('middleware') ?? '';
+  }
+
+  static get middlewareFiles(): string {
+    return Input.getInput('middlewareFiles') ?? '';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

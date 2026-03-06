@@ -387,6 +387,21 @@ inputs:
     description:
       'Path to an external CLI executable that implements the provider protocol. Enables providers written in any
       language (Go, Python, Rust, shell). Uses JSON-over-stdin/stdout communication.'
+  middleware:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] Inline YAML middleware pipeline definitions. Middleware wraps around build phases with
+      before/after semantics, supports trigger conditions (phase, provider, platform, environment expressions), and
+      resolves to either command hooks (inline in build container) or container hooks (separate Docker containers).
+      Middleware executes in priority order — lower priority values run first for before phases and last for after
+      phases (wrapping pattern). See documentation for full YAML format.'
+  middlewareFiles:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] Comma-separated list of middleware file names (without extension) to load from the
+      game-ci/middleware/ directory in your repository. Each file should contain YAML middleware definitions.'
 
 outputs:
   volume:

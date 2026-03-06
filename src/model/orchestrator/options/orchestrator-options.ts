@@ -166,6 +166,14 @@ class OrchestratorOptions {
     return OrchestratorOptions.getInput('commandHookFiles')?.split(`,`) || [];
   }
 
+  static get middleware(): string {
+    return OrchestratorOptions.getInput('middleware') || '';
+  }
+
+  static get middlewareFiles(): string[] {
+    return OrchestratorOptions.getInput('middlewareFiles')?.split(',') || [];
+  }
+
   // ### ### ###
   // Custom commands from yaml parameters
   // ### ### ###
