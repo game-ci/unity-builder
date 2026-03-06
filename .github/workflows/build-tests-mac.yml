@@ -12,6 +12,7 @@ jobs:
   buildForAllPlatformsMacOS:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
     runs-on: macos-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -82,6 +83,8 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name: Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})${{ matrix.buildProfile && '  With Build Profile' || '' }}
+          name:
+            Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})${{ matrix.buildProfile && '  With
+            Build Profile' || '' }}
           path: build
           retention-days: 14

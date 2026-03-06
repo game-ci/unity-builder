@@ -356,6 +356,8 @@ class Input {
 
   static get providerExecutable(): string {
     return Input.getInput('providerExecutable') ?? '';
+  }
+
   static get gitIntegrityCheck(): boolean {
     const input = Input.getInput('gitIntegrityCheck') ?? 'false';
 
@@ -386,6 +388,8 @@ class Input {
 
   static get buildArchiveRetention(): number {
     return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
+  }
+
   // GCP Cloud Run (Experimental)
   static get gcpProject(): string {
     return Input.getInput('gcpProject') ?? '';
@@ -470,6 +474,8 @@ class Input {
 
   static get azureSubnetId(): string {
     return Input.getInput('azureSubnetId') ?? '';
+  }
+
   // ### ### ###
   // Remote PowerShell provider
   // ### ### ###

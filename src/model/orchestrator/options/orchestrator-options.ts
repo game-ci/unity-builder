@@ -140,6 +140,8 @@ class OrchestratorOptions {
 
   static get gitAuthMode(): string {
     return OrchestratorOptions.getInput('gitAuthMode') || 'header';
+  }
+
   static get fallbackProviderStrategy(): string {
     return OrchestratorOptions.getInput('fallbackProviderStrategy') || '';
   }
