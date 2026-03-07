@@ -106,6 +106,27 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public submoduleProfilePath!: string;
+  public submoduleVariantPath!: string;
+  public submoduleToken!: string;
+  public localCacheEnabled!: boolean;
+  public localCacheRoot!: string;
+  public localCacheLibrary!: boolean;
+  public localCacheLfs!: boolean;
+  public childWorkspacesEnabled!: boolean;
+  public childWorkspaceName!: string;
+  public childWorkspaceCacheRoot!: string;
+  public childWorkspacePreserveGit!: boolean;
+  public childWorkspaceSeparateLibrary!: boolean;
+  public lfsTransferAgent!: string;
+  public lfsTransferAgentArgs!: string;
+  public lfsStoragePaths!: string;
+  public gitHooksEnabled!: boolean;
+  public gitHooksSkipList!: string;
+  public gitHooksRunBeforeBuild!: string;
+  public providerExecutable!: string;
+  public middleware!: string;
+  public middlewareFiles!: string[];
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -242,6 +263,27 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      submoduleProfilePath: Input.submoduleProfilePath,
+      submoduleVariantPath: Input.submoduleVariantPath,
+      submoduleToken: Input.submoduleToken,
+      localCacheEnabled: Input.localCacheEnabled,
+      localCacheRoot: Input.localCacheRoot,
+      localCacheLibrary: Input.localCacheLibrary,
+      localCacheLfs: Input.localCacheLfs,
+      childWorkspacesEnabled: Input.childWorkspacesEnabled,
+      childWorkspaceName: Input.childWorkspaceName,
+      childWorkspaceCacheRoot: Input.childWorkspaceCacheRoot,
+      childWorkspacePreserveGit: Input.childWorkspacePreserveGit,
+      childWorkspaceSeparateLibrary: Input.childWorkspaceSeparateLibrary,
+      lfsTransferAgent: Input.lfsTransferAgent,
+      lfsTransferAgentArgs: Input.lfsTransferAgentArgs,
+      lfsStoragePaths: Input.lfsStoragePaths,
+      gitHooksEnabled: Input.gitHooksEnabled,
+      gitHooksSkipList: Input.gitHooksSkipList,
+      gitHooksRunBeforeBuild: Input.gitHooksRunBeforeBuild,
+      providerExecutable: Input.providerExecutable,
+      middleware: OrchestratorOptions.middleware,
+      middlewareFiles: OrchestratorOptions.middlewareFiles,
     };
   }
 

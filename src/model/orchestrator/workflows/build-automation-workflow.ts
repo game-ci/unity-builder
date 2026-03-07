@@ -6,6 +6,8 @@ import { CommandHookService } from '../services/hooks/command-hook-service';
 import path from 'node:path';
 import Orchestrator from '../orchestrator';
 import { ContainerHookService } from '../services/hooks/container-hook-service';
+import { MiddlewareService } from '../services/hooks/middleware-service';
+import { CustomWorkflow } from './custom-workflow';
 
 export class BuildAutomationWorkflow implements WorkflowInterface {
   async run(orchestratorStepState: OrchestratorStepParameters) {
@@ -13,13 +15,41 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
   }
 
   private static async standardBuildAutomation(baseImage: string, orchestratorStepState: OrchestratorStepParameters) {
-    // TODO accept post and pre build steps as yaml files in the repo
     OrchestratorLogger.log(`Orchestrator is running standard build automation`);
 
     let output = '';
 
+    // Load middleware pipeline
+    const middleware = MiddlewareService.getMiddleware(Orchestrator.buildParameters.middleware);
+
+    // --- Pre-build phase ---
+    // Middleware container hooks: pre-build before
+    const preBuildMiddlewareBefore = MiddlewareService.resolveContainerHooks(middleware, 'pre-build', 'before');
+    if (preBuildMiddlewareBefore.length > 0) {
+      output += await CustomWorkflow.runContainerJob(
+        preBuildMiddlewareBefore,
+        orchestratorStepState.environment,
+        orchestratorStepState.secrets,
+      );
+      OrchestratorLogger.logWithTime('Middleware pre-build:before container step(s) time');
+    }
+
+    // Standard pre-build container hooks
     output += await ContainerHookService.RunPreBuildSteps(orchestratorStepState);
     OrchestratorLogger.logWithTime('Configurable pre build step(s) time');
+
+    // Middleware container hooks: pre-build after
+    const preBuildMiddlewareAfter = MiddlewareService.resolveContainerHooks(middleware, 'pre-build', 'after');
+    if (preBuildMiddlewareAfter.length > 0) {
+      output += await CustomWorkflow.runContainerJob(
+        preBuildMiddlewareAfter,
+        orchestratorStepState.environment,
+        orchestratorStepState.secrets,
+      );
+      OrchestratorLogger.logWithTime('Middleware pre-build:after container step(s) time');
+    }
+
+    // --- Build phase ---
     OrchestratorLogger.log(baseImage);
     OrchestratorLogger.logLine(` `);
     OrchestratorLogger.logLine('Starting build automation job');
@@ -35,8 +65,32 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     );
     OrchestratorLogger.logWithTime('Build time');
 
+    // --- Post-build phase ---
+    // Middleware container hooks: post-build before
+    const postBuildMiddlewareBefore = MiddlewareService.resolveContainerHooks(middleware, 'post-build', 'before');
+    if (postBuildMiddlewareBefore.length > 0) {
+      output += await CustomWorkflow.runContainerJob(
+        postBuildMiddlewareBefore,
+        orchestratorStepState.environment,
+        orchestratorStepState.secrets,
+      );
+      OrchestratorLogger.logWithTime('Middleware post-build:before container step(s) time');
+    }
+
+    // Standard post-build container hooks
     output += await ContainerHookService.RunPostBuildSteps(orchestratorStepState);
     OrchestratorLogger.logWithTime('Configurable post build step(s) time');
+
+    // Middleware container hooks: post-build after
+    const postBuildMiddlewareAfter = MiddlewareService.resolveContainerHooks(middleware, 'post-build', 'after');
+    if (postBuildMiddlewareAfter.length > 0) {
+      output += await CustomWorkflow.runContainerJob(
+        postBuildMiddlewareAfter,
+        orchestratorStepState.environment,
+        orchestratorStepState.secrets,
+      );
+      OrchestratorLogger.logWithTime('Middleware post-build:after container step(s) time');
+    }
 
     OrchestratorLogger.log(`Orchestrator finished running standard build automation`);
 
@@ -50,6 +104,13 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
     const buildHooks = CommandHookService.getHooks(Orchestrator.buildParameters.commandHooks).filter((x) =>
       x.step?.includes(`build`),
     );
+
+    // Resolve middleware command hooks for setup and build phases
+    const middleware = MiddlewareService.getMiddleware(Orchestrator.buildParameters.middleware);
+    const middlewareSetupBefore = MiddlewareService.resolveCommandHooks(middleware, 'setup', 'before');
+    const middlewareSetupAfter = MiddlewareService.resolveCommandHooks(middleware, 'setup', 'after');
+    const middlewareBuildBefore = MiddlewareService.resolveCommandHooks(middleware, 'build', 'before');
+    const middlewareBuildAfter = MiddlewareService.resolveCommandHooks(middleware, 'build', 'after');
     const isContainerized =
       Orchestrator.buildParameters.providerStrategy === 'aws' ||
       Orchestrator.buildParameters.providerStrategy === 'k8s' ||
@@ -71,6 +132,7 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
           ? 'apt-get install -y curl tar tree npm git-lfs jq git > /dev/null || true\n      npm --version || true\n      npm i -g n > /dev/null || true\n      npm i -g semver > /dev/null || true\n      npm install --global yarn > /dev/null || true\n      n 20.8.0 || true\n      node --version || true'
           : '# skipping toolchain setup in local-docker or non-container provider'
       }
+      ${middlewareSetupBefore.map((x) => x.commands).join('\n      ') || ' '}
       ${setupHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${
         Orchestrator.buildParameters.providerStrategy === 'local-docker'
@@ -82,9 +144,12 @@ export class BuildAutomationWorkflow implements WorkflowInterface {
       export LOG_FILE=${isContainerized ? '/home/job-log.txt' : '$(pwd)/temp/job-log.txt'}
       ${BuildAutomationWorkflow.setupCommands(builderPath, isContainerized)}
       ${setupHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${middlewareSetupAfter.map((x) => x.commands).join('\n      ') || ' '}
+      ${middlewareBuildBefore.map((x) => x.commands).join('\n      ') || ' '}
       ${buildHooks.filter((x) => x.hook.includes(`before`)).map((x) => x.commands) || ' '}
       ${BuildAutomationWorkflow.BuildCommands(builderPath, isContainerized)}
-      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}`;
+      ${buildHooks.filter((x) => x.hook.includes(`after`)).map((x) => x.commands) || ' '}
+      ${middlewareBuildAfter.map((x) => x.commands).join('\n      ') || ' '}`;
   }
 
   private static setupCommands(builderPath: string, isContainerized: boolean) {
@@ -99,8 +164,7 @@ if [ -n "$(git ls-remote --heads "$REPO" "$BRANCH" 2>/dev/null)" ]; then
   git clone -q -b "$BRANCH" "$REPO" "$DEST"
 else
   echo "Remote branch $BRANCH not found in $REPO; falling back to a known branch"
-  git clone -q -b orchestrator-develop "$REPO" "$DEST" \
-    || git clone -q -b main "$REPO" "$DEST" \
+  git clone -q -b main "$REPO" "$DEST" \
     || git clone -q "$REPO" "$DEST"
 fi
 chmod +x ${builderPath}`;

@@ -129,6 +129,17 @@ class Orchestrator {
     // Store whether we should validate AWS templates (used by aws-local mode)
     Orchestrator.validateAwsTemplates = validateAwsTemplates;
 
+    // Check for CLI provider executable
+    if (Orchestrator.buildParameters.providerExecutable) {
+      const { default: CliProvider } = await import('./providers/cli');
+      Orchestrator.Provider = new CliProvider(
+        Orchestrator.buildParameters.providerExecutable,
+        Orchestrator.buildParameters,
+      );
+      OrchestratorLogger.log(`Using CLI provider executable: ${Orchestrator.buildParameters.providerExecutable}`);
+      return;
+    }
+
     switch (provider) {
       case 'k8s':
         Orchestrator.Provider = new Kubernetes(Orchestrator.buildParameters);
