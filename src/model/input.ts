@@ -241,6 +241,28 @@ class Input {
     return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
+  static get syncStrategy(): string {
+    return Input.getInput('syncStrategy') ?? 'full';
+  }
+
+  static get syncInputRef(): string {
+    return Input.getInput('syncInputRef') ?? '';
+  }
+
+  static get syncStorageRemote(): string {
+    return Input.getInput('syncStorageRemote') ?? '';
+  }
+
+  static get syncRevertAfter(): boolean {
+    const input = Input.getInput('syncRevertAfter') ?? 'true';
+
+    return input === 'true';
+  }
+
+  static get syncStatePath(): string {
+    return Input.getInput('syncStatePath') ?? '.game-ci/sync-state.json';
+  }
+
   static get dockerCpuLimit(): string {
     return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }
@@ -278,8 +300,84 @@ class Input {
     return Input.getInput('containerRegistryImageVersion') ?? '3';
   }
 
+  static get artifactOutputTypes(): string {
+    return Input.getInput('artifactOutputTypes') ?? 'build,logs,test-results';
+  }
+
+  static get artifactUploadTarget(): string {
+    return Input.getInput('artifactUploadTarget') ?? 'github-artifacts';
+  }
+
+  static get artifactUploadPath(): string {
+    return Input.getInput('artifactUploadPath') ?? '';
+  }
+
+  static get artifactCompression(): string {
+    return Input.getInput('artifactCompression') ?? 'gzip';
+  }
+
+  static get artifactRetentionDays(): string {
+    return Input.getInput('artifactRetentionDays') ?? '30';
+  }
+
+  static get artifactCustomTypes(): string {
+    return Input.getInput('artifactCustomTypes') ?? '';
+  }
+
   static get skipActivation(): string {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
+  }
+
+  static get testSuitePath(): string {
+    return Input.getInput('testSuitePath') ?? '';
+  }
+
+  static get testSuiteEvent(): string {
+    return Input.getInput('testSuiteEvent') ?? '';
+  }
+
+  static get testTaxonomyPath(): string {
+    return Input.getInput('testTaxonomyPath') ?? '';
+  }
+
+  static get testResultFormat(): string {
+    return Input.getInput('testResultFormat') ?? 'junit';
+  }
+
+  static get testResultPath(): string {
+    return Input.getInput('testResultPath') ?? './test-results';
+  }
+
+  static get hotRunnerEnabled(): boolean {
+    const input = Input.getInput('hotRunnerEnabled') ?? false;
+
+    return input === 'true';
+  }
+
+  static get hotRunnerTransport(): 'websocket' | 'grpc' | 'named-pipe' {
+    return (Input.getInput('hotRunnerTransport') ?? 'websocket') as 'websocket' | 'grpc' | 'named-pipe';
+  }
+
+  static get hotRunnerHost(): string {
+    return Input.getInput('hotRunnerHost') ?? 'localhost';
+  }
+
+  static get hotRunnerPort(): number {
+    return Number.parseInt(Input.getInput('hotRunnerPort') ?? '9090', 10);
+  }
+
+  static get hotRunnerHealthInterval(): number {
+    return Number.parseInt(Input.getInput('hotRunnerHealthInterval') ?? '30', 10);
+  }
+
+  static get hotRunnerMaxIdle(): number {
+    return Number.parseInt(Input.getInput('hotRunnerMaxIdle') ?? '3600', 10);
+  }
+
+  static get hotRunnerFallbackToCold(): boolean {
+    const input = Input.getInput('hotRunnerFallbackToCold') ?? 'true';
+
+    return input === 'true';
   }
 
   public static ToEnvVarFormat(input: string) {

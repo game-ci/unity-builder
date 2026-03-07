@@ -106,6 +106,32 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public hotRunnerEnabled!: boolean;
+  public hotRunnerTransport!: 'websocket' | 'grpc' | 'named-pipe';
+  public hotRunnerHost!: string;
+  public hotRunnerPort!: number;
+  public hotRunnerHealthInterval!: number;
+  public hotRunnerMaxIdle!: number;
+  public hotRunnerFallbackToCold!: boolean;
+
+  public testSuitePath!: string;
+  public testSuiteEvent!: string;
+  public testTaxonomyPath!: string;
+  public testResultFormat!: string;
+  public testResultPath!: string;
+
+  public artifactOutputTypes!: string;
+  public artifactUploadTarget!: string;
+  public artifactUploadPath!: string;
+  public artifactCompression!: string;
+  public artifactRetentionDays!: string;
+  public artifactCustomTypes!: string;
+
+  public syncStrategy!: string;
+  public syncInputRef!: string;
+  public syncStorageRemote!: string;
+  public syncRevertAfter!: boolean;
+  public syncStatePath!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -242,6 +268,29 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      testSuitePath: Input.testSuitePath,
+      testSuiteEvent: Input.testSuiteEvent,
+      testTaxonomyPath: Input.testTaxonomyPath,
+      testResultFormat: Input.testResultFormat,
+      testResultPath: Input.testResultPath,
+      hotRunnerEnabled: Input.hotRunnerEnabled,
+      hotRunnerTransport: Input.hotRunnerTransport,
+      hotRunnerHost: Input.hotRunnerHost,
+      hotRunnerPort: Input.hotRunnerPort,
+      hotRunnerHealthInterval: Input.hotRunnerHealthInterval,
+      hotRunnerMaxIdle: Input.hotRunnerMaxIdle,
+      hotRunnerFallbackToCold: Input.hotRunnerFallbackToCold,
+      artifactOutputTypes: Input.artifactOutputTypes,
+      artifactUploadTarget: Input.artifactUploadTarget,
+      artifactUploadPath: Input.artifactUploadPath,
+      artifactCompression: Input.artifactCompression,
+      artifactRetentionDays: Input.artifactRetentionDays,
+      artifactCustomTypes: Input.artifactCustomTypes,
+      syncStrategy: Input.syncStrategy,
+      syncInputRef: Input.syncInputRef,
+      syncStorageRemote: Input.syncStorageRemote,
+      syncRevertAfter: Input.syncRevertAfter,
+      syncStatePath: Input.syncStatePath,
     };
   }
 

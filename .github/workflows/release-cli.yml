@@ -1,0 +1,170 @@
+name: Release CLI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build (e.g., v2.0.0). Uses latest release if empty.'
+        required: false
+        type: string
+      publish-npm:
+        description: 'Publish to npm'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-binaries:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            os: ubuntu-latest
+            pkg-target: node20-linux-x64
+            binary-name: game-ci-linux-x64
+          - target: linux-arm64
+            os: ubuntu-latest
+            pkg-target: node20-linux-arm64
+            binary-name: game-ci-linux-arm64
+          - target: macos-x64
+            os: macos-latest
+            pkg-target: node20-macos-x64
+            binary-name: game-ci-macos-x64
+          - target: macos-arm64
+            os: macos-latest
+            pkg-target: node20-macos-arm64
+            binary-name: game-ci-macos-arm64
+          - target: windows-x64
+            os: windows-latest
+            pkg-target: node20-win-x64
+            binary-name: game-ci-windows-x64.exe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build TypeScript
+        run: yarn build
+
+      - name: Verify CLI before packaging
+        run: node lib/cli.js version
+
+      - name: Build standalone binary
+        run: npx pkg lib/cli.js --target ${{ matrix.pkg-target }} --output ${{ matrix.binary-name }} --compress GZip
+
+      - name: Verify standalone binary (non-cross-compiled)
+        if: |
+          (matrix.target == 'linux-x64' && runner.os == 'Linux') ||
+          (matrix.target == 'macos-arm64' && runner.os == 'macOS' && runner.arch == 'ARM64') ||
+          (matrix.target == 'macos-x64' && runner.os == 'macOS' && runner.arch == 'X64') ||
+          (matrix.target == 'windows-x64' && runner.os == 'Windows')
+        run: ./${{ matrix.binary-name }} version
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: ${{ matrix.binary-name }}
+          retention-days: 5
+
+  create-checksums-and-upload:
+    name: Checksums and release upload
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: binaries
+          pattern: binary-*
+          merge-multiple: true
+
+      - name: List binaries
+        run: ls -la binaries/
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd binaries
+          sha256sum game-ci-* > checksums.txt
+          echo "=== checksums.txt ==="
+          cat checksums.txt
+
+      - name: Determine release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ inputs.tag }}" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release tag available. Skipping upload."
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload binaries to release
+        if: steps.tag.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd binaries
+          for f in game-ci-* checksums.txt; do
+            echo "Uploading $f..."
+            gh release upload "${{ steps.tag.outputs.tag }}" "$f" \
+              --repo "${{ github.repository }}" \
+              --clobber
+          done
+
+  publish-npm:
+    name: Publish to npm
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'release') || (github.event_name == 'workflow_dispatch' && inputs.publish-npm)
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Verify CLI
+        run: |
+          node lib/cli.js version
+          node lib/cli.js --help
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

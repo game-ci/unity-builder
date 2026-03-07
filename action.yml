@@ -182,8 +182,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -269,6 +269,28 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  artifactOutputTypes:
+    description: 'Comma-separated list of output types to collect (build, logs, test-results, coverage, images, metrics, data-export, server-build, custom)'
+    required: false
+    default: 'build,logs,test-results'
+  artifactUploadTarget:
+    description: 'Where to upload artifacts: github-artifacts, storage, local, none'
+    required: false
+    default: 'github-artifacts'
+  artifactUploadPath:
+    description: 'Destination path for artifact upload (storage URI or local path)'
+    required: false
+  artifactCompression:
+    description: 'Compression for artifacts: none, gzip, lz4'
+    required: false
+    default: 'gzip'
+  artifactRetentionDays:
+    description: 'Retention period for uploaded artifacts in days'
+    required: false
+    default: '30'
+  artifactCustomTypes:
+    description: 'JSON string defining custom output types [{name, defaultPath, description}]'
+    required: false
   cloneDepth:
     default: '50'
     required: false
@@ -279,6 +301,71 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+<<<<<<< HEAD
+  testSuitePath:
+    description: 'Path to YAML test suite definition file'
+    required: false
+  testSuiteEvent:
+    description: 'CI event name for suite selection (pr, push, release)'
+    required: false
+  testTaxonomyPath:
+    description: 'Path to custom taxonomy definition YAML'
+    required: false
+  testResultFormat:
+    description: 'Test result output format: junit, json, or both'
+    required: false
+    default: 'junit'
+  testResultPath:
+    description: 'Directory for structured test result output'
+    required: false
+    default: './test-results'
+
+  hotRunnerEnabled:
+    description: '[HotRunner] Use persistent hot runner for builds (requires pre-registered runners)'
+    required: false
+    default: 'false'
+  hotRunnerTransport:
+    description: '[HotRunner] Transport protocol for hot runner communication: websocket, grpc, named-pipe'
+    required: false
+    default: 'websocket'
+  hotRunnerHost:
+    description: '[HotRunner] Hot runner host address'
+    required: false
+    default: 'localhost'
+  hotRunnerPort:
+    description: '[HotRunner] Hot runner port number'
+    required: false
+    default: '9090'
+  hotRunnerHealthInterval:
+    description: '[HotRunner] Health check interval in seconds'
+    required: false
+    default: '30'
+  hotRunnerMaxIdle:
+    description: '[HotRunner] Maximum idle time in seconds before recycling runner'
+    required: false
+    default: '3600'
+  hotRunnerFallbackToCold:
+    description: '[HotRunner] Fall back to cold build if no hot runner available'
+    required: false
+    default: 'true'
+  syncStrategy:
+    description: 'Workspace sync strategy: full, git-delta, direct-input, storage-pull'
+    required: false
+    default: 'full'
+  syncInputRef:
+    description: 'URI for direct-input or storage-pull content (storage://remote/path or file path)'
+    required: false
+  syncStorageRemote:
+    description: 'rclone remote name for storage-backed inputs (defaults to rcloneRemote)'
+    required: false
+  syncRevertAfter:
+    description: 'Revert overlaid changes after job completion'
+    required: false
+    default: 'true'
+  syncStatePath:
+    description: 'Path to sync state file for delta tracking'
+    required: false
+    default: '.game-ci/sync-state.json'
 
 outputs:
   volume:
@@ -292,6 +379,8 @@ outputs:
       'Returns the exit code from the build scripts. This code is 0 if the build was successful. If there was an error
       during activation, the code is from the activation step. If activation is successful, the code is from the project
       build step.'
+  artifactManifestPath:
+    description: 'Path to the generated artifact manifest JSON file'
 branding:
   icon: 'box'
   color: 'gray-dark'
