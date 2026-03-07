@@ -27,14 +27,14 @@ printenv
 git config --global advice.detachedHead false
 git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
 git config --global filter.lfs.process "git-lfs filter-process --skip"
+${OrchestratorFolders.gitAuthConfigScript}
 BRANCH="${Orchestrator.buildParameters.orchestratorBranch}"
 REPO="${OrchestratorFolders.unityBuilderRepoUrl}"
 if [ -n "$(git ls-remote --heads "$REPO" "$BRANCH" 2>/dev/null)" ]; then
   git clone -q -b "$BRANCH" "$REPO" /builder
 else
   echo "Remote branch $BRANCH not found in $REPO; falling back to a known branch"
-  git clone -q -b orchestrator-develop "$REPO" /builder \
-    || git clone -q -b main "$REPO" /builder \
+  git clone -q -b main "$REPO" /builder \
     || git clone -q "$REPO" /builder
 fi
 git clone -q -b ${Orchestrator.buildParameters.branch} ${OrchestratorFolders.targetBuildRepoUrl} /repo
