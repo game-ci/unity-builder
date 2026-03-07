@@ -12,6 +12,8 @@ import OrchestratorOptionsReader from '../orchestrator/options/orchestrator-opti
 import GitHub from '../github';
 import { OptionValues } from 'commander';
 import { InputKey } from '../input';
+import { SubmoduleProfileService } from '../orchestrator/services/submodule/submodule-profile-service';
+import { LfsAgentService } from '../orchestrator/services/lfs/lfs-agent-service';
 
 export class Cli {
   public static options: OptionValues | undefined;
@@ -53,6 +55,11 @@ export class Cli {
     program.option('--artifactName <artifactName>', 'caching artifact name');
     program.option('--select <select>', 'select a particular resource');
     program.option('--logFile <logFile>', 'output to log file (log stream only)');
+    program.option('--profilePath <profilePath>', 'path to submodule profile YAML');
+    program.option('--variantPath <variantPath>', 'path to submodule variant YAML');
+    program.option('--agentPath <agentPath>', 'path to custom LFS transfer agent');
+    program.option('--agentArgs <agentArgs>', 'arguments for custom LFS transfer agent');
+    program.option('--storagePaths <storagePaths>', 'semicolon-separated storage paths for LFS agent');
     program.parse(process.argv);
     Cli.options = program.opts();
 
@@ -171,5 +178,27 @@ export class Cli {
     await Orchestrator.setup(buildParameter);
 
     return await Orchestrator.Provider.watchWorkflow();
+  }
+
+  @CliFunction(`submodule-init`, `initializes submodules from a YAML profile`)
+  public static async SubmoduleInit(): Promise<void> {
+    const profilePath = Cli.options!['profilePath'];
+    const variantPath = Cli.options!['variantPath'] || '';
+    if (!profilePath) {
+      throw new Error('--profilePath is required for submodule-init');
+    }
+    const plan = await SubmoduleProfileService.createInitPlan(profilePath, variantPath, process.cwd());
+    await SubmoduleProfileService.execute(plan, process.cwd());
+  }
+
+  @CliFunction(`lfs-agent-configure`, `configures a custom LFS transfer agent`)
+  public static async LfsAgentConfigure(): Promise<void> {
+    const agentPath = Cli.options!['agentPath'];
+    if (!agentPath) {
+      throw new Error('--agentPath is required for lfs-agent-configure');
+    }
+    const agentArgs = Cli.options!['agentArgs'] || '';
+    const storagePaths = (Cli.options!['storagePaths'] || '').split(';').filter(Boolean);
+    await LfsAgentService.configure(agentPath, agentArgs, storagePaths, process.cwd());
   }
 }

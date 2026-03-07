@@ -15,15 +15,24 @@ import BuildParameters from '../../build-parameters';
 import { Cli } from '../../cli/cli';
 import OrchestratorOptions from '../options/orchestrator-options';
 import ResourceTracking from '../services/core/resource-tracking';
+import { IncrementalSyncService } from '../services/sync';
+import { SyncStrategy } from '../services/sync/sync-state';
 
 export class RemoteClient {
   @CliFunction(`remote-cli-pre-build`, `sets up a repository, usually before a game-ci build`)
   static async setupRemoteClient() {
     OrchestratorLogger.log(`bootstrap game ci orchestrator...`);
     await ResourceTracking.logDiskUsageSnapshot('remote-cli-pre-build (start)');
-    if (!(await RemoteClient.handleRetainedWorkspace())) {
+
+    const syncStrategy = (Orchestrator.buildParameters.syncStrategy || 'full') as SyncStrategy;
+
+    if (syncStrategy !== 'full') {
+      OrchestratorLogger.log(`[Sync] Using incremental sync strategy: ${syncStrategy}`);
+      await RemoteClient.handleIncrementalSync(syncStrategy);
+    } else if (!(await RemoteClient.handleRetainedWorkspace())) {
       await RemoteClient.bootstrapRepository();
     }
+
     await RemoteClient.replaceLargePackageReferencesWithSharedReferences();
     await RemoteClient.runCustomHookFiles(`before-build`);
   }
@@ -157,6 +166,20 @@ export class RemoteClient {
 
       await RemoteClient.runCustomHookFiles(`after-build`);
 
+      // Revert sync overlays if configured
+      const syncStrategy = (Orchestrator.buildParameters.syncStrategy || 'full') as SyncStrategy;
+      if (Orchestrator.buildParameters.syncRevertAfter && syncStrategy !== 'full') {
+        try {
+          OrchestratorLogger.log('[Sync] Reverting overlay changes after job completion');
+          await IncrementalSyncService.revertOverlays(
+            OrchestratorFolders.repoPathAbsolute,
+            Orchestrator.buildParameters.syncStatePath,
+          );
+        } catch (revertError: any) {
+          RemoteClientLogger.logWarning(`[Sync] Overlay revert failed: ${revertError.message}`);
+        }
+      }
+
       // WIP - need to give the pod permissions to create config map
       await RemoteClientLogger.handleLogManagementPostJob();
     } catch (error: any) {
@@ -229,6 +252,78 @@ export class RemoteClient {
       RemoteClientLogger.log(JSON.stringify(error, undefined, 4));
     }
   }
+
+  /**
+   * Handle incremental sync strategies (git-delta, direct-input, storage-pull).
+   *
+   * For git-delta: requires an existing workspace with sync state; fetches and applies
+   * only changed files.
+   *
+   * For direct-input and storage-pull: requires an existing workspace; applies overlay
+   * content on top.
+   *
+   * Falls back to full bootstrapRepository() if incremental sync cannot proceed.
+   */
+  private static async handleIncrementalSync(strategy: SyncStrategy): Promise<void> {
+    const buildParameters = Orchestrator.buildParameters;
+    const workspacePath = OrchestratorFolders.repoPathAbsolute;
+    const statePath = buildParameters.syncStatePath;
+
+    // Resolve strategy — may fall back to 'full' if no state exists
+    const resolvedStrategy = IncrementalSyncService.resolveStrategy(strategy, workspacePath, statePath);
+
+    if (resolvedStrategy === 'full') {
+      OrchestratorLogger.log('[Sync] Falling back to full bootstrap');
+      if (!(await RemoteClient.handleRetainedWorkspace())) {
+        await RemoteClient.bootstrapRepository();
+      }
+
+      return;
+    }
+
+    switch (resolvedStrategy) {
+      case 'git-delta': {
+        const targetReference = buildParameters.gitSha || buildParameters.branch;
+        OrchestratorLogger.log(`[Sync] Git delta sync to ${targetReference}`);
+        const changedFiles = await IncrementalSyncService.syncGitDelta(workspacePath, targetReference, statePath);
+        OrchestratorLogger.log(`[Sync] Git delta complete: ${changedFiles} file(s) updated`);
+        break;
+      }
+      case 'direct-input': {
+        const inputReference = buildParameters.syncInputRef;
+        if (!inputReference) {
+          throw new Error('[Sync] direct-input strategy requires syncInputRef');
+        }
+        OrchestratorLogger.log(`[Sync] Applying direct input: ${inputReference}`);
+        await IncrementalSyncService.applyDirectInput(
+          workspacePath,
+          inputReference,
+          buildParameters.syncStorageRemote || undefined,
+          statePath,
+        );
+        break;
+      }
+      case 'storage-pull': {
+        const storageUri = buildParameters.syncInputRef;
+        if (!storageUri) {
+          throw new Error('[Sync] storage-pull strategy requires syncInputRef');
+        }
+        OrchestratorLogger.log(`[Sync] Storage pull from: ${storageUri}`);
+        await IncrementalSyncService.syncStoragePull(workspacePath, storageUri, {
+          rcloneRemote: buildParameters.syncStorageRemote || undefined,
+          syncRevertAfter: buildParameters.syncRevertAfter,
+          statePath,
+        });
+        break;
+      }
+      default:
+        OrchestratorLogger.logWarning(`[Sync] Unknown strategy: ${resolvedStrategy}, falling back to full`);
+        if (!(await RemoteClient.handleRetainedWorkspace())) {
+          await RemoteClient.bootstrapRepository();
+        }
+    }
+  }
+
   public static async bootstrapRepository() {
     await OrchestratorSystem.Run(
       `mkdir -p ${OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.uniqueOrchestratorJobFolderAbsolute)}`,
@@ -237,6 +332,23 @@ export class RemoteClient {
       `mkdir -p ${OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.cacheFolderForCacheKeyFull)}`,
     );
     await RemoteClient.cloneRepoWithoutLFSFiles();
+
+    // Initialize submodules from profile if configured
+    if (Orchestrator.buildParameters.submoduleProfilePath) {
+      const { SubmoduleProfileService } = await import('../services/submodule/submodule-profile-service');
+      RemoteClientLogger.log('Initializing submodules from profile...');
+      const plan = await SubmoduleProfileService.createInitPlan(
+        Orchestrator.buildParameters.submoduleProfilePath,
+        Orchestrator.buildParameters.submoduleVariantPath,
+        OrchestratorFolders.repoPathAbsolute,
+      );
+      await SubmoduleProfileService.execute(
+        plan,
+        OrchestratorFolders.repoPathAbsolute,
+        Orchestrator.buildParameters.submoduleToken || Orchestrator.buildParameters.gitPrivateToken,
+      );
+    }
+
     await RemoteClient.sizeOfFolder(
       'repo before lfs cache pull',
       OrchestratorFolders.ToLinuxFolder(OrchestratorFolders.repoPathAbsolute),
@@ -251,6 +363,19 @@ export class RemoteClient {
       `${lfsHashes.lfsGuidSum}`,
     );
     await RemoteClient.sizeOfFolder('repo after lfs cache pull', OrchestratorFolders.repoPathAbsolute);
+
+    // Configure custom LFS transfer agent if specified
+    if (Orchestrator.buildParameters.lfsTransferAgent) {
+      const { LfsAgentService } = await import('../services/lfs/lfs-agent-service');
+      RemoteClientLogger.log('Configuring custom LFS transfer agent...');
+      await LfsAgentService.configure(
+        Orchestrator.buildParameters.lfsTransferAgent,
+        Orchestrator.buildParameters.lfsTransferAgentArgs,
+        Orchestrator.buildParameters.lfsStoragePaths ? Orchestrator.buildParameters.lfsStoragePaths.split(';') : [],
+        OrchestratorFolders.repoPathAbsolute,
+      );
+    }
+
     await RemoteClient.pullLatestLFS();
     await RemoteClient.sizeOfFolder('repo before lfs git pull', OrchestratorFolders.repoPathAbsolute);
     await Caching.PushToCache(
@@ -302,6 +427,7 @@ export class RemoteClient {
 
     RemoteClientLogger.log(`Initializing source repository for cloning with caching of LFS files`);
     await OrchestratorSystem.Run(`git config --global advice.detachedHead false`);
+    await OrchestratorFolders.configureGitAuth();
     RemoteClientLogger.log(`Cloning the repository being built:`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
@@ -411,12 +537,7 @@ export class RemoteClient {
       const gitPrivateToken = process.env.GIT_PRIVATE_TOKEN;
       if (gitPrivateToken) {
         RemoteClientLogger.log(`Attempting to pull LFS files with GIT_PRIVATE_TOKEN...`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-        await OrchestratorSystem.Run(
-          `git config --global url."https://${gitPrivateToken}@github.com/".insteadOf "https://github.com/"`,
-        );
+        await RemoteClient.configureTokenAuth(gitPrivateToken);
         await OrchestratorSystem.Run(`git lfs pull`, true);
         await OrchestratorSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GIT_PRIVATE_TOKEN`);
@@ -432,12 +553,7 @@ export class RemoteClient {
       const githubToken = process.env.GITHUB_TOKEN;
       if (githubToken) {
         RemoteClientLogger.log(`Attempting to pull LFS files with GITHUB_TOKEN fallback...`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
-        await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
-        await OrchestratorSystem.Run(
-          `git config --global url."https://${githubToken}@github.com/".insteadOf "https://github.com/"`,
-        );
+        await RemoteClient.configureTokenAuth(githubToken);
         await OrchestratorSystem.Run(`git lfs pull`, true);
         await OrchestratorSystem.Run(`git lfs checkout || true`, true);
         RemoteClientLogger.log(`Successfully pulled LFS files with GITHUB_TOKEN`);
@@ -500,5 +616,26 @@ export class RemoteClient {
     }
 
     return false;
+  }
+
+  /**
+   * Configure git authentication for a token. In header mode (default), uses
+   * http.extraHeader so the token never appears in URLs or git config output.
+   * In url mode (legacy), uses url.insteadOf to embed the token in URLs.
+   */
+  private static async configureTokenAuth(token: string): Promise<void> {
+    if (OrchestratorFolders.useHeaderAuth) {
+      const encoded = Buffer.from(`x-access-token:${token}`).toString('base64');
+      await OrchestratorSystem.Run(
+        `git config --global http.https://github.com/.extraHeader "Authorization: Basic ${encoded}"`,
+      );
+    } else {
+      await OrchestratorSystem.Run(`git config --global --unset-all url."https://github.com/".insteadOf || true`);
+      await OrchestratorSystem.Run(`git config --global --unset-all url."ssh://git@github.com/".insteadOf || true`);
+      await OrchestratorSystem.Run(`git config --global --unset-all url."git@github.com".insteadOf || true`);
+      await OrchestratorSystem.Run(
+        `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`,
+      );
+    }
   }
 }

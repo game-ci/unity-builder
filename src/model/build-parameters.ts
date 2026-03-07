@@ -54,6 +54,13 @@ class BuildParameters {
   public sshAgent!: string;
   public sshPublicKeysDirectoryPath!: string;
   public providerStrategy!: string;
+  public fallbackProviderStrategy!: string;
+  public runnerCheckEnabled!: boolean;
+  public runnerCheckLabels!: string[];
+  public runnerCheckMinAvailable!: number;
+  public retryOnFallback!: boolean;
+  public providerInitTimeout!: number;
+  public gitAuthMode!: string;
   public gitPrivateToken!: string;
   public awsStackName!: string;
   public awsEndpoint?: string;
@@ -106,6 +113,103 @@ class BuildParameters {
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
+  public submoduleProfilePath!: string;
+  public submoduleVariantPath!: string;
+  public submoduleToken!: string;
+  public localCacheEnabled!: boolean;
+  public localCacheRoot!: string;
+  public localCacheLibrary!: boolean;
+  public localCacheLfs!: boolean;
+  public childWorkspacesEnabled!: boolean;
+  public childWorkspaceName!: string;
+  public childWorkspaceCacheRoot!: string;
+  public childWorkspacePreserveGit!: boolean;
+  public childWorkspaceSeparateLibrary!: boolean;
+  public lfsTransferAgent!: string;
+  public lfsTransferAgentArgs!: string;
+  public lfsStoragePaths!: string;
+  public gitHooksEnabled!: boolean;
+  public gitHooksSkipList!: string;
+  public gitHooksRunBeforeBuild!: string;
+  public providerExecutable!: string;
+
+  // GCP Cloud Run (Experimental)
+  public gcpProject!: string;
+  public gcpRegion!: string;
+  public gcpStorageType!: string;
+  public gcpBucket!: string;
+  public gcpFilestoreIp!: string;
+  public gcpFilestoreShare!: string;
+  public gcpMachineType!: string;
+  public gcpDiskSizeGb!: string;
+  public gcpServiceAccount!: string;
+  public gcpVpcConnector!: string;
+
+  // Azure Container Instances (Experimental)
+  public azureResourceGroup!: string;
+  public azureLocation!: string;
+  public azureStorageType!: string;
+  public azureStorageAccount!: string;
+  public azureBlobContainer!: string;
+  public azureFileShareName!: string;
+  public azureSubscriptionId!: string;
+  public azureCpu!: string;
+  public azureMemoryGb!: string;
+  public azureDiskSizeGb!: string;
+  public azureSubnetId!: string;
+
+  // Remote PowerShell provider
+  public remotePowershellHost!: string;
+  public remotePowershellCredential!: string;
+  public remotePowershellTransport!: string;
+
+  // GitHub Actions provider
+  public githubActionsRepo!: string;
+  public githubActionsWorkflow!: string;
+  public githubActionsToken!: string;
+  public githubActionsRef!: string;
+
+  // GitLab CI provider
+  public gitlabProjectId!: string;
+  public gitlabTriggerToken!: string;
+  public gitlabApiUrl!: string;
+  public gitlabRef!: string;
+
+  // Ansible provider
+  public ansibleInventory!: string;
+  public ansiblePlaybook!: string;
+  public ansibleExtraVars!: string;
+  public ansibleVaultPassword!: string;
+  public gitIntegrityCheck!: boolean;
+  public gitAutoRecover!: boolean;
+  public cleanReservedFilenames!: boolean;
+  public buildArchiveEnabled!: boolean;
+  public buildArchivePath!: string;
+  public buildArchiveRetention!: number;
+
+  public testSuitePath!: string;
+  public testSuiteEvent!: string;
+  public testTaxonomyPath!: string;
+  public testResultFormat!: string;
+  public testResultPath!: string;
+  public hotRunnerEnabled!: boolean;
+  public hotRunnerTransport!: 'websocket' | 'grpc' | 'named-pipe';
+  public hotRunnerHost!: string;
+  public hotRunnerPort!: number;
+  public hotRunnerHealthInterval!: number;
+  public hotRunnerMaxIdle!: number;
+  public hotRunnerFallbackToCold!: boolean;
+  public artifactOutputTypes!: string;
+  public artifactUploadTarget!: string;
+  public artifactUploadPath!: string;
+  public artifactCompression!: string;
+  public artifactRetentionDays!: string;
+  public artifactCustomTypes!: string;
+  public syncStrategy!: string;
+  public syncInputRef!: string;
+  public syncStorageRemote!: string;
+  public syncRevertAfter!: boolean;
+  public syncStatePath!: string;
 
   public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
     return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
@@ -194,6 +298,13 @@ class BuildParameters {
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
       providerStrategy: OrchestratorOptions.providerStrategy,
+      fallbackProviderStrategy: OrchestratorOptions.fallbackProviderStrategy,
+      runnerCheckEnabled: OrchestratorOptions.runnerCheckEnabled,
+      runnerCheckLabels: OrchestratorOptions.runnerCheckLabels,
+      runnerCheckMinAvailable: OrchestratorOptions.runnerCheckMinAvailable,
+      retryOnFallback: OrchestratorOptions.retryOnFallback,
+      providerInitTimeout: OrchestratorOptions.providerInitTimeout,
+      gitAuthMode: OrchestratorOptions.gitAuthMode,
       buildPlatform: OrchestratorOptions.buildPlatform,
       kubeConfig: OrchestratorOptions.kubeConfig,
       containerMemory: OrchestratorOptions.containerMemory,
@@ -228,6 +339,27 @@ class BuildParameters {
       inputPullCommand: OrchestratorOptions.inputPullCommand,
       pullInputList: OrchestratorOptions.pullInputList,
       kubeStorageClass: OrchestratorOptions.kubeStorageClass,
+      gcpProject: Input.gcpProject,
+      gcpRegion: Input.gcpRegion,
+      gcpStorageType: Input.gcpStorageType,
+      gcpBucket: Input.gcpBucket,
+      gcpFilestoreIp: Input.gcpFilestoreIp,
+      gcpFilestoreShare: Input.gcpFilestoreShare,
+      gcpMachineType: Input.gcpMachineType,
+      gcpDiskSizeGb: Input.gcpDiskSizeGb,
+      gcpServiceAccount: Input.gcpServiceAccount,
+      gcpVpcConnector: Input.gcpVpcConnector,
+      azureResourceGroup: Input.azureResourceGroup,
+      azureLocation: Input.azureLocation,
+      azureStorageType: Input.azureStorageType,
+      azureStorageAccount: Input.azureStorageAccount,
+      azureBlobContainer: Input.azureBlobContainer,
+      azureFileShareName: Input.azureFileShareName,
+      azureSubscriptionId: Input.azureSubscriptionId,
+      azureCpu: Input.azureCpu,
+      azureMemoryGb: Input.azureMemoryGb,
+      azureDiskSizeGb: Input.azureDiskSizeGb,
+      azureSubnetId: Input.azureSubnetId,
       cacheKey: OrchestratorOptions.cacheKey,
       maxRetainedWorkspaces: Number.parseInt(OrchestratorOptions.maxRetainedWorkspaces),
       useLargePackages: OrchestratorOptions.useLargePackages,
@@ -242,6 +374,77 @@ class BuildParameters {
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
+      submoduleProfilePath: Input.submoduleProfilePath,
+      submoduleVariantPath: Input.submoduleVariantPath,
+      submoduleToken: Input.submoduleToken,
+      localCacheEnabled: Input.localCacheEnabled,
+      localCacheRoot: Input.localCacheRoot,
+      localCacheLibrary: Input.localCacheLibrary,
+      localCacheLfs: Input.localCacheLfs,
+      childWorkspacesEnabled: Input.childWorkspacesEnabled,
+      childWorkspaceName: Input.childWorkspaceName,
+      childWorkspaceCacheRoot: Input.childWorkspaceCacheRoot,
+      childWorkspacePreserveGit: Input.childWorkspacePreserveGit,
+      childWorkspaceSeparateLibrary: Input.childWorkspaceSeparateLibrary,
+      lfsTransferAgent: Input.lfsTransferAgent,
+      lfsTransferAgentArgs: Input.lfsTransferAgentArgs,
+      lfsStoragePaths: Input.lfsStoragePaths,
+      gitHooksEnabled: Input.gitHooksEnabled,
+      gitHooksSkipList: Input.gitHooksSkipList,
+      gitHooksRunBeforeBuild: Input.gitHooksRunBeforeBuild,
+      providerExecutable: Input.providerExecutable,
+
+      // Remote PowerShell provider
+      remotePowershellHost: Input.remotePowershellHost,
+      remotePowershellCredential: Input.remotePowershellCredential,
+      remotePowershellTransport: Input.remotePowershellTransport,
+
+      // GitHub Actions provider
+      githubActionsRepo: Input.githubActionsRepo,
+      githubActionsWorkflow: Input.githubActionsWorkflow,
+      githubActionsToken: Input.githubActionsToken,
+      githubActionsRef: Input.githubActionsRef,
+
+      // GitLab CI provider
+      gitlabProjectId: Input.gitlabProjectId,
+      gitlabTriggerToken: Input.gitlabTriggerToken,
+      gitlabApiUrl: Input.gitlabApiUrl,
+      gitlabRef: Input.gitlabRef,
+
+      // Ansible provider
+      ansibleInventory: Input.ansibleInventory,
+      ansiblePlaybook: Input.ansiblePlaybook,
+      ansibleExtraVars: Input.ansibleExtraVars,
+      ansibleVaultPassword: Input.ansibleVaultPassword,
+      gitIntegrityCheck: Input.gitIntegrityCheck,
+      gitAutoRecover: Input.gitAutoRecover,
+      cleanReservedFilenames: Input.cleanReservedFilenames,
+      buildArchiveEnabled: Input.buildArchiveEnabled,
+      buildArchivePath: Input.buildArchivePath,
+      buildArchiveRetention: Input.buildArchiveRetention,
+      testSuitePath: Input.testSuitePath,
+      testSuiteEvent: Input.testSuiteEvent,
+      testTaxonomyPath: Input.testTaxonomyPath,
+      testResultFormat: Input.testResultFormat,
+      testResultPath: Input.testResultPath,
+      hotRunnerEnabled: Input.hotRunnerEnabled,
+      hotRunnerTransport: Input.hotRunnerTransport,
+      hotRunnerHost: Input.hotRunnerHost,
+      hotRunnerPort: Input.hotRunnerPort,
+      hotRunnerHealthInterval: Input.hotRunnerHealthInterval,
+      hotRunnerMaxIdle: Input.hotRunnerMaxIdle,
+      hotRunnerFallbackToCold: Input.hotRunnerFallbackToCold,
+      artifactOutputTypes: Input.artifactOutputTypes,
+      artifactUploadTarget: Input.artifactUploadTarget,
+      artifactUploadPath: Input.artifactUploadPath,
+      artifactCompression: Input.artifactCompression,
+      artifactRetentionDays: Input.artifactRetentionDays,
+      artifactCustomTypes: Input.artifactCustomTypes,
+      syncStrategy: Input.syncStrategy,
+      syncInputRef: Input.syncInputRef,
+      syncStorageRemote: Input.syncStorageRemote,
+      syncRevertAfter: Input.syncRevertAfter,
+      syncStatePath: Input.syncStatePath,
     };
   }
 

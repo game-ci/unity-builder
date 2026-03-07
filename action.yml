@@ -105,6 +105,12 @@ inputs:
     required: false
     default: ''
     description: '[Orchestrator] Github private token to pull from github'
+  gitAuthMode:
+    required: false
+    default: 'header'
+    description:
+      '[Orchestrator] How git authentication is configured. "header" (default) uses http.extraHeader so the token
+      never appears in clone URLs or git config. "url" embeds the token in clone URLs (legacy behavior).'
   githubOwner:
     required: false
     default: ''
@@ -182,8 +188,8 @@ inputs:
     required: false
     default: ''
     description:
-      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with the
-      keys image, secrets (name, value object array), command line string)'
+      '[Orchestrator] Run a custom job instead of the standard build automation for orchestrator (in yaml format with
+      the keys image, secrets (name, value object array), command line string)'
   awsStackName:
     default: 'game-ci'
     required: false
@@ -194,6 +200,51 @@ inputs:
     description:
       '[Orchestrator] Either local, k8s or aws can be used to run builds on a remote cluster. Additional parameters must
       be configured.'
+  fallbackProviderStrategy:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Fallback provider when the primary is unavailable. Used with runnerCheckEnabled for automatic
+      failover, or as a catch-all if the primary provider fails to initialize.'
+  runnerCheckEnabled:
+    default: 'false'
+    required: false
+    description:
+      '[Orchestrator] Check GitHub Actions runner availability before starting a build. When no suitable runners are
+      available and fallbackProviderStrategy is set, automatically routes to the fallback provider.'
+  runnerCheckLabels:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Comma-separated runner labels to filter when checking availability (e.g. self-hosted,linux).
+      When empty, checks all runners in the repository.'
+  runnerCheckMinAvailable:
+    default: '1'
+    required: false
+    description:
+      '[Orchestrator] Minimum number of idle runners required for the primary provider. If fewer are available,
+      routes to fallbackProviderStrategy.'
+  retryOnFallback:
+    default: 'false'
+    required: false
+    description:
+      '[Orchestrator] When true and fallbackProviderStrategy is set, automatically retry the build on the fallback
+      provider if the primary provider fails. Useful for long builds where transient cloud failures are common.'
+  providerInitTimeout:
+    default: '0'
+    required: false
+    description:
+      '[Orchestrator] Maximum seconds to wait for the primary provider to initialize (setupWorkflow). If exceeded
+      and fallbackProviderStrategy is set, switches to the fallback. Set to 0 to disable (default).'
+  secretSource:
+    default: ''
+    required: false
+    description:
+      '[Orchestrator] Premade secret source for pulling build secrets. Supported values: aws-secrets-manager,
+      aws-parameter-store, gcp-secret-manager, azure-key-vault, hashicorp-vault, hashicorp-vault-kv1,
+      vault (alias for hashicorp-vault), env. Can also be a custom shell command with {0} placeholder
+      for the key, or a path to a YAML file defining custom sources. Takes precedence over
+      inputPullCommand when set.'
   resourceTracking:
     default: 'false'
     required: false
@@ -269,6 +320,28 @@ inputs:
     default: 'false'
     required: false
     description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+  artifactOutputTypes:
+    description: 'Comma-separated list of output types to collect (build, logs, test-results, coverage, images, metrics, data-export, server-build, custom)'
+    required: false
+    default: 'build,logs,test-results'
+  artifactUploadTarget:
+    description: 'Where to upload artifacts: github-artifacts, storage, local, none'
+    required: false
+    default: 'github-artifacts'
+  artifactUploadPath:
+    description: 'Destination path for artifact upload (storage URI or local path)'
+    required: false
+  artifactCompression:
+    description: 'Compression for artifacts: none, gzip, lz4'
+    required: false
+    default: 'gzip'
+  artifactRetentionDays:
+    description: 'Retention period for uploaded artifacts in days'
+    required: false
+    default: '30'
+  artifactCustomTypes:
+    description: 'JSON string defining custom output types [{name, defaultPath, description}]'
+    required: false
   cloneDepth:
     default: '50'
     required: false
@@ -279,6 +352,376 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
+  submoduleProfilePath:
+    required: false
+    default: ''
+    description:
+      'Path to a YAML submodule profile file (relative to repo root). Defines which submodules to initialize (branch:
+      main) or skip (branch: empty). See docs for format.'
+  submoduleVariantPath:
+    required: false
+    default: ''
+    description:
+      'Path to a YAML variant overlay file that modifies the base submodule profile. Used for server or debug build
+      variants.'
+  submoduleToken:
+    required: false
+    default: ''
+    description:
+      'Git token for authenticating submodule clones. Falls back to gitPrivateToken or GITHUB_TOKEN if empty.'
+  localCacheEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Enable filesystem-based caching for local builds. Caches the Unity Library folder and optionally LFS objects
+      between builds without requiring actions/cache.'
+  localCacheRoot:
+    required: false
+    default: ''
+    description:
+      'Root directory for local build cache. Defaults to $RUNNER_TEMP/game-ci-cache or .game-ci/cache if RUNNER_TEMP is
+      not set.'
+  localCacheLibrary:
+    required: false
+    default: 'true'
+    description: 'Cache the Unity Library folder for local builds. Only effective when localCacheEnabled is true.'
+  localCacheLfs:
+    required: false
+    default: 'false'
+    description: 'Cache Git LFS objects for local builds. Only effective when localCacheEnabled is true.'
+  childWorkspacesEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Enable child workspace isolation for multi-product builds. Uses atomic filesystem moves for O(1) workspace
+      restore instead of tar/download/extract. Ideal for 50GB+ workspaces on self-hosted runners.'
+  childWorkspaceName:
+    required: false
+    default: ''
+    description:
+      'Name for this child workspace (e.g., product name like "TurnOfWar"). Used as the cache key for workspace
+      isolation. Required when childWorkspacesEnabled is true.'
+  childWorkspaceCacheRoot:
+    required: false
+    default: ''
+    description:
+      'Parent directory for cached child workspaces. Should be on the same NTFS volume as the build directory for O(1)
+      atomic restore via filesystem rename. Defaults to $RUNNER_TEMP/game-ci-workspaces.'
+  childWorkspacePreserveGit:
+    required: false
+    default: 'true'
+    description:
+      'Preserve .git directory in cached child workspace. Enables delta operations on restore but increases cache size.
+      Set to false to save disk space at the cost of full re-clone on restore.'
+  childWorkspaceSeparateLibrary:
+    required: false
+    default: 'true'
+    description:
+      'Cache Unity Library folder separately from the child workspace. Allows independent Library restore even when
+      workspace cache is invalidated. Recommended for large projects.'
+  lfsTransferAgent:
+    required: false
+    default: ''
+    description:
+      'Custom Git LFS transfer agent. Set to "elastic-git-storage" for built-in support (auto-installs from GitHub
+      releases). Append @version for a specific release (e.g. "elastic-git-storage@v1.0.0"). Or provide a path to any
+      custom transfer agent executable. When set, the agent is registered via git config before LFS operations.'
+  lfsTransferAgentArgs:
+    required: false
+    default: ''
+    description: 'Additional arguments to pass to the custom LFS transfer agent.'
+  lfsStoragePaths:
+    required: false
+    default: ''
+    description:
+      'Semicolon-separated list of storage paths for the custom LFS transfer agent. Interpretation depends on the agent
+      (e.g. local paths, WebDAV URLs, rclone remotes).'
+  gitHooksEnabled:
+    required: false
+    default: 'false'
+    description:
+      'Install and run git hooks (lefthook, husky, or native) during builds. When false (default), hooks are disabled
+      for build performance.'
+  gitHooksSkipList:
+    required: false
+    default: ''
+    description:
+      'Comma-separated list of hook names to skip even when gitHooksEnabled is true. Example: pre-push,post-merge'
+  gitHooksRunBeforeBuild:
+    required: false
+    default: ''
+    description:
+      'Comma-separated list of lefthook hook groups to run before the Unity build. Allows CI to trigger checks that
+      normally only run on git events. Example: pre-commit,pre-push. Requires lefthook. Works with Unity Git Hooks
+      (com.frostebite.unitygithooks) when installed as a UPM package — the init script runs automatically.'
+  providerExecutable:
+    required: false
+    default: ''
+    description:
+      'Path to an external CLI executable that implements the provider protocol. Enables providers written in any
+      language (Go, Python, Rust, shell). Uses JSON-over-stdin/stdout communication.'
+  gcpProject:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Google Cloud project ID for Cloud Run Jobs provider. Falls back to
+      GOOGLE_CLOUD_PROJECT env var.'
+  gcpRegion:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Google Cloud region for Cloud Run Jobs (e.g. us-central1). Defaults to the region
+      input if empty.'
+  gcpStorageType:
+    required: false
+    default: 'gcs-fuse'
+    description:
+      '[Orchestrator] [Experimental] Storage type for Cloud Run Jobs. Options: gcs-fuse (mount GCS bucket as filesystem,
+      unlimited size, best for large sequential I/O), gcs-copy (copy artifacts in/out via gsutil, simpler, no FUSE
+      overhead), nfs (Filestore NFS mount, true POSIX, good random I/O, up to 100 TiB), in-memory (tmpfs, fastest but
+      volatile, up to 32 GiB).'
+  gcpBucket:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] GCS bucket name for build artifact storage. Used by gcs-fuse and gcs-copy storage
+      types.'
+  gcpFilestoreIp:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Filestore instance IP address for NFS storage type. Required when gcpStorageType is
+      nfs.'
+  gcpFilestoreShare:
+    required: false
+    default: '/share1'
+    description:
+      '[Orchestrator] [Experimental] Filestore share name for NFS storage type. Defaults to /share1 (the Filestore
+      default).'
+  gcpMachineType:
+    required: false
+    default: 'e2-standard-4'
+    description: '[Orchestrator] [Experimental] Machine type for Cloud Run Jobs (e.g. e2-standard-4, e2-highmem-8).'
+  gcpDiskSizeGb:
+    required: false
+    default: '100'
+    description:
+      '[Orchestrator] [Experimental] Disk size in GB for Cloud Run Jobs in-memory volumes. Only applies to in-memory
+      storage type (max 32).'
+  gcpServiceAccount:
+    required: false
+    default: ''
+    description: '[Orchestrator] [Experimental] Google Cloud service account email for Cloud Run Jobs execution.'
+  gcpVpcConnector:
+    required: false
+    default: ''
+    description: '[Orchestrator] [Experimental] VPC connector name for Cloud Run Jobs private networking.'
+  azureResourceGroup:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Azure resource group for Container Instances provider. Falls back to
+      AZURE_RESOURCE_GROUP env var.'
+  azureLocation:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Azure region for Container Instances (e.g. eastus, westeurope). Defaults to the
+      region input if empty.'
+  azureStorageType:
+    required: false
+    default: 'azure-files'
+    description:
+      '[Orchestrator] [Experimental] Storage type for Azure Container Instances. Options: azure-files (SMB file share
+      mount, up to 100 TiB, premium throughput), blob-copy (copy artifacts in/out via az storage blob, no mount
+      overhead), azure-files-nfs (NFS 4.1 file share mount, true POSIX, no SMB lock overhead), in-memory (emptyDir
+      tmpfs, fastest but volatile, size limited by container memory).'
+  azureStorageAccount:
+    required: false
+    default: ''
+    description:
+      '[Orchestrator] [Experimental] Azure Storage Account name. Used by azure-files, azure-files-nfs, and blob-copy
+      storage types.'
+  azureFileShareName:
+    required: false
+    default: 'unity-builds'
+    description:
+      '[Orchestrator] [Experimental] Azure File Share name within the storage account. Used by azure-files and
+      azure-files-nfs storage types. Supports up to 100 TiB per share.'
+  azureBlobContainer:
+    required: false
+    default: 'unity-builds'
+    description: '[Orchestrator] [Experimental] Azure Blob container name for blob-copy storage type.'
+  azureSubscriptionId:
+    required: false
+    default: ''
+    description: '[Orchestrator] [Experimental] Azure subscription ID. Falls back to AZURE_SUBSCRIPTION_ID env var.'
+  azureCpu:
+    required: false
+    default: '4'
+    description: '[Orchestrator] [Experimental] CPU cores for Azure Container Instances (1-16).'
+  azureMemoryGb:
+    required: false
+    default: '16'
+    description: '[Orchestrator] [Experimental] Memory in GB for Azure Container Instances (1-16).'
+  azureDiskSizeGb:
+    required: false
+    default: '100'
+    description:
+      '[Orchestrator] [Experimental] File share quota in GB for Azure Container Instances. Premium shares support up to
+      102400 GB (100 TiB).'
+  azureSubnetId:
+    required: false
+    default: ''
+    description: '[Orchestrator] [Experimental] Azure subnet resource ID for VNet-integrated Container Instances.'
+  remotePowershellHost:
+    default: ''
+    required: false
+    description: '[Orchestrator] Remote PowerShell host (hostname or IP) for the remote-powershell provider'
+  remotePowershellCredential:
+    default: ''
+    required: false
+    description: '[Orchestrator] Remote PowerShell credential (username:password or certificate path)'
+  remotePowershellTransport:
+    default: 'wsman'
+    required: false
+    description: '[Orchestrator] Remote PowerShell transport protocol (wsman or ssh)'
+  githubActionsRepo:
+    default: ''
+    required: false
+    description: '[Orchestrator] Target repository (owner/repo) for the github-actions provider'
+  githubActionsWorkflow:
+    default: ''
+    required: false
+    description: '[Orchestrator] Workflow filename or ID to dispatch for the github-actions provider'
+  githubActionsToken:
+    default: ''
+    required: false
+    description: '[Orchestrator] PAT with actions:write scope for the github-actions provider'
+  githubActionsRef:
+    default: 'main'
+    required: false
+    description: '[Orchestrator] Branch/ref to run the workflow on for the github-actions provider'
+  gitlabProjectId:
+    default: ''
+    required: false
+    description: '[Orchestrator] GitLab project ID or URL-encoded path for the gitlab-ci provider'
+  gitlabTriggerToken:
+    default: ''
+    required: false
+    description: '[Orchestrator] Pipeline trigger token for the gitlab-ci provider'
+  gitlabApiUrl:
+    default: 'https://gitlab.com'
+    required: false
+    description: '[Orchestrator] GitLab API URL (for self-hosted instances) for the gitlab-ci provider'
+  gitlabRef:
+    default: 'main'
+    required: false
+    description: '[Orchestrator] Branch/ref to trigger the pipeline on for the gitlab-ci provider'
+  ansibleInventory:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible inventory file or dynamic inventory script'
+  ansiblePlaybook:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible playbook for Unity builds'
+  ansibleExtraVars:
+    default: ''
+    required: false
+    description: '[Orchestrator] Additional Ansible variables as JSON'
+  ansibleVaultPassword:
+    default: ''
+    required: false
+    description: '[Orchestrator] Path to Ansible vault password file'
+  gitIntegrityCheck:
+    description: 'Run git integrity checks before build (fsck, lock cleanup, submodule validation)'
+    required: false
+    default: 'false'
+  gitAutoRecover:
+    description: 'Attempt automatic recovery if git corruption is detected'
+    required: false
+    default: 'false'
+  cleanReservedFilenames:
+    description: 'Remove Windows reserved filenames that cause Unity import loops'
+    required: false
+    default: 'false'
+  buildArchiveEnabled:
+    description: 'Archive build output after successful build'
+    required: false
+    default: 'false'
+  buildArchivePath:
+    description: 'Path to store build archives'
+    required: false
+    default: './build-archives'
+  buildArchiveRetention:
+    description: 'Days to retain build archives before cleanup'
+    required: false
+    default: '30'
+  testSuitePath:
+    description: 'Path to YAML test suite definition file'
+    required: false
+  testSuiteEvent:
+    description: 'CI event name for suite selection (pr, push, release)'
+    required: false
+  testTaxonomyPath:
+    description: 'Path to custom taxonomy definition YAML'
+    required: false
+  testResultFormat:
+    description: 'Test result output format: junit, json, or both'
+    required: false
+    default: 'junit'
+  testResultPath:
+    description: 'Directory for structured test result output'
+    required: false
+    default: './test-results'
+
+  hotRunnerEnabled:
+    description: '[HotRunner] Use persistent hot runner for builds (requires pre-registered runners)'
+    required: false
+    default: 'false'
+  hotRunnerTransport:
+    description: '[HotRunner] Transport protocol for hot runner communication: websocket, grpc, named-pipe'
+    required: false
+    default: 'websocket'
+  hotRunnerHost:
+    description: '[HotRunner] Hot runner host address'
+    required: false
+    default: 'localhost'
+  hotRunnerPort:
+    description: '[HotRunner] Hot runner port number'
+    required: false
+    default: '9090'
+  hotRunnerHealthInterval:
+    description: '[HotRunner] Health check interval in seconds'
+    required: false
+    default: '30'
+  hotRunnerMaxIdle:
+    description: '[HotRunner] Maximum idle time in seconds before recycling runner'
+    required: false
+    default: '3600'
+  hotRunnerFallbackToCold:
+    description: '[HotRunner] Fall back to cold build if no hot runner available'
+    required: false
+    default: 'true'
+  syncStrategy:
+    description: 'Workspace sync strategy: full, git-delta, direct-input, storage-pull'
+    required: false
+    default: 'full'
+  syncInputRef:
+    description: 'URI for direct-input or storage-pull content (storage://remote/path or file path)'
+    required: false
+  syncStorageRemote:
+    description: 'rclone remote name for storage-backed inputs (defaults to rcloneRemote)'
+    required: false
+  syncRevertAfter:
+    description: 'Revert overlaid changes after job completion'
+    required: false
+    default: 'true'
+  syncStatePath:
+    description: 'Path to sync state file for delta tracking'
+    required: false
+    default: '.game-ci/sync-state.json'
 
 outputs:
   volume:
@@ -292,6 +735,8 @@ outputs:
       'Returns the exit code from the build scripts. This code is 0 if the build was successful. If there was an error
       during activation, the code is from the activation step. If activation is successful, the code is from the project
       build step.'
+  artifactManifestPath:
+    description: 'Path to the generated artifact manifest JSON file'
 branding:
   icon: 'box'
   color: 'gray-dark'

@@ -1,0 +1,27 @@
+# Community Plugin Validation Registry
+# Packages listed here are automatically tested on a schedule
+# to ensure compatibility with unity-builder.
+#
+# Format:
+#   - name: Human-readable name
+#     package: UPM package name or git URL
+#     source: upm | git | asset-store
+#     unity: Minimum Unity version (optional, defaults to 2021.3)
+#     platforms: List of platforms to test (optional, defaults to [StandaloneLinux64])
+#     timeout: Build timeout in minutes (optional, defaults to 30)
+
+plugins:
+  # Example entries — community members can submit PRs to add their packages
+  - name: UniTask
+    package: https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+    source: git
+    platforms: [StandaloneLinux64, StandaloneWindows64]
+
+  - name: NaughtyAttributes
+    package: https://github.com/dbrizov/NaughtyAttributes.git?path=Assets/NaughtyAttributes
+    source: git
+
+  - name: Unity Atoms
+    package: https://github.com/unity-atoms/unity-atoms.git
+    source: git
+    platforms: [StandaloneLinux64]
