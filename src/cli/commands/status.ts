@@ -6,17 +6,25 @@ import UnityVersioning from '../../model/unity-versioning';
 
 const statusCommand: CommandModule = {
   command: 'status',
-  describe: 'Show build status and workspace info',
+  describe: 'Show project info, environment, and cache status',
   builder: (yargs) => {
-    return yargs.option('project-path', {
-      alias: 'projectPath',
-      type: 'string',
-      description: 'Path to the Unity project',
-      default: '.',
-    });
+    return yargs
+      .option('project-path', {
+        alias: 'projectPath',
+        type: 'string',
+        description: 'Path to the Unity project',
+        default: '.',
+      })
+      .option('cache-dir', {
+        alias: 'cacheDir',
+        type: 'string',
+        description: 'Path to an additional cache directory to inspect',
+        default: '',
+      });
   },
   handler: async (cliArguments) => {
     const projectPath = (cliArguments.projectPath as string) || '.';
+    const cacheDirectory = cliArguments.cacheDir as string;
 
     core.info('game-ci Workspace Status');
     core.info('========================\n');
@@ -36,13 +44,38 @@ const statusCommand: CommandModule = {
         core.info(`Unity Version: Unable to detect`);
       }
 
-      // Library folder status
+      // Library cache status
       const libraryPath = path.join(projectPath, 'Library');
       if (fs.existsSync(libraryPath)) {
         const stats = fs.statSync(libraryPath);
         core.info(`Library Cache: Present (modified ${stats.mtime.toISOString()})`);
+
+        const keyDirectories = ['PackageCache', 'ScriptAssemblies', 'ShaderCache', 'Bee'];
+        for (const directory of keyDirectories) {
+          const directoryPath = path.join(libraryPath, directory);
+          if (fs.existsSync(directoryPath)) {
+            const directoryStats = fs.statSync(directoryPath);
+            core.info(`  ${directory}/: exists (modified ${directoryStats.mtime.toISOString()})`);
+          }
+        }
       } else {
         core.info(`Library Cache: Not present (clean build required)`);
+      }
+
+      // Cache archive detection
+      if (cacheDirectory && fs.existsSync(cacheDirectory)) {
+        core.info(`\nCache Archives (${cacheDirectory}):`);
+        const cacheFiles = fs.readdirSync(cacheDirectory).filter((f) => f.endsWith('.tar') || f.endsWith('.tar.lz4'));
+        if (cacheFiles.length > 0) {
+          for (const file of cacheFiles) {
+            const filePath = path.join(cacheDirectory, file);
+            const fileStats = fs.statSync(filePath);
+            const sizeMegabytes = (fileStats.size / (1024 * 1024)).toFixed(1);
+            core.info(`  - ${file} (${sizeMegabytes} MB, ${fileStats.mtime.toISOString()})`);
+          }
+        } else {
+          core.info('  No cache archives found.');
+        }
       }
 
       // Build output detection

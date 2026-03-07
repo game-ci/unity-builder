@@ -1,7 +1,7 @@
 import buildCommand from '../commands/build';
+import testCommand from '../commands/test';
 import activateCommand from '../commands/activate';
 import orchestrateCommand from '../commands/orchestrate';
-import cacheCommand from '../commands/cache';
 import statusCommand from '../commands/status';
 import versionCommand from '../commands/version';
 import updateCommand from '../commands/update';
@@ -54,7 +54,7 @@ describe('CLI commands', () => {
 
       (buildCommand.builder as Function)(yargs);
 
-      // Core build flags
+      // Core build flags (from shared + build-specific)
       expect(options['target-platform']).toBeDefined();
       expect(options['target-platform'].demandOption).toStrictEqual(true);
       expect(options['unity-version']).toBeDefined();
@@ -88,10 +88,10 @@ describe('CLI commands', () => {
       expect(options['run-as-host-user']).toBeDefined();
       expect(options['chown-files-to']).toBeDefined();
 
-      // Provider flags
-      expect(options['provider-strategy']).toBeDefined();
-      expect(options['skip-activation']).toBeDefined();
-      expect(options['unity-licensing-server']).toBeDefined();
+      // Build should NOT have orchestrator-specific flags
+      expect(options['provider-strategy']).toBeUndefined();
+      expect(options['aws-stack-name']).toBeUndefined();
+      expect(options['kube-config']).toBeUndefined();
     });
 
     it('sets correct default values', () => {
@@ -107,7 +107,6 @@ describe('CLI commands', () => {
       expect(options['enable-gpu'].default).toStrictEqual(false);
       expect(options['android-export-type'].default).toStrictEqual('androidPackage');
       expect(options['android-symbol-type'].default).toStrictEqual('none');
-      expect(options['provider-strategy'].default).toStrictEqual('local');
     });
 
     it('provides camelCase aliases for kebab-case options', () => {
@@ -121,6 +120,62 @@ describe('CLI commands', () => {
       expect(options['build-name'].alias).toStrictEqual('buildName');
       expect(options['builds-path'].alias).toStrictEqual('buildsPath');
       expect(options['build-method'].alias).toStrictEqual('buildMethod');
+    });
+  });
+
+  describe('test command', () => {
+    it('exports command with alias', () => {
+      expect(testCommand.command).toStrictEqual(['test', 't']);
+    });
+
+    it('has a description', () => {
+      expect(testCommand.describe).toBeTruthy();
+    });
+
+    it('has a builder function', () => {
+      expect(typeof testCommand.builder).toStrictEqual('function');
+    });
+
+    it('has a handler function', () => {
+      expect(typeof testCommand.handler).toStrictEqual('function');
+    });
+
+    it('defines test-specific flags', () => {
+      const { yargs, options } = createFakeYargs();
+
+      (testCommand.builder as Function)(yargs);
+
+      expect(options['test-mode']).toBeDefined();
+      expect(options['test-mode'].default).toStrictEqual('All');
+      expect(options['test-mode'].choices).toStrictEqual(['EditMode', 'PlayMode', 'All']);
+      expect(options['test-results-path']).toBeDefined();
+      expect(options['test-category']).toBeDefined();
+      expect(options['test-filter']).toBeDefined();
+      expect(options['enable-code-coverage']).toBeDefined();
+      expect(options['coverage-options']).toBeDefined();
+    });
+
+    it('includes shared project options', () => {
+      const { yargs, options } = createFakeYargs();
+
+      (testCommand.builder as Function)(yargs);
+
+      expect(options['target-platform']).toBeDefined();
+      expect(options['target-platform'].demandOption).toStrictEqual(true);
+      expect(options['unity-version']).toBeDefined();
+      expect(options['project-path']).toBeDefined();
+      expect(options['custom-image']).toBeDefined();
+    });
+
+    it('includes docker options but not orchestrator options', () => {
+      const { yargs, options } = createFakeYargs();
+
+      (testCommand.builder as Function)(yargs);
+
+      expect(options['docker-cpu-limit']).toBeDefined();
+      expect(options['docker-memory-limit']).toBeDefined();
+      expect(options['provider-strategy']).toBeUndefined();
+      expect(options['aws-stack-name']).toBeUndefined();
     });
   });
 
@@ -143,8 +198,8 @@ describe('CLI commands', () => {
   });
 
   describe('orchestrate command', () => {
-    it('exports the correct command name', () => {
-      expect(orchestrateCommand.command).toStrictEqual('orchestrate');
+    it('exports command with alias', () => {
+      expect(orchestrateCommand.command).toStrictEqual(['orchestrate', 'o']);
     });
 
     it('has a description', () => {
@@ -175,23 +230,16 @@ describe('CLI commands', () => {
       expect(options['watch-to-end']).toBeDefined();
       expect(options['clone-depth']).toBeDefined();
     });
-  });
 
-  describe('cache command', () => {
-    it('exports the correct command name', () => {
-      expect(cacheCommand.command).toStrictEqual('cache <action>');
-    });
+    it('does not include build-only options', () => {
+      const { yargs, options } = createFakeYargs();
 
-    it('has a description', () => {
-      expect(cacheCommand.describe).toBeTruthy();
-    });
+      (orchestrateCommand.builder as Function)(yargs);
 
-    it('has a builder function', () => {
-      expect(typeof cacheCommand.builder).toStrictEqual('function');
-    });
-
-    it('has a handler function', () => {
-      expect(typeof cacheCommand.handler).toStrictEqual('function');
+      expect(options['build-profile']).toBeUndefined();
+      expect(options['manual-exit']).toBeUndefined();
+      expect(options['enable-gpu']).toBeUndefined();
+      expect(options['android-version-code']).toBeUndefined();
     });
   });
 
@@ -206,6 +254,15 @@ describe('CLI commands', () => {
 
     it('has a handler function', () => {
       expect(typeof statusCommand.handler).toStrictEqual('function');
+    });
+
+    it('includes cache-dir option', () => {
+      const { yargs, options } = createFakeYargs();
+
+      (statusCommand.builder as Function)(yargs);
+
+      expect(options['cache-dir']).toBeDefined();
+      expect(options['project-path']).toBeDefined();
     });
   });
 

@@ -155,8 +155,8 @@ export class Cli {
     return result.map((x) => x.Name);
   }
 
-  @CliFunction(`list-worfklow`, `lists running workflows`)
-  public static async ListWorfklow(): Promise<string[]> {
+  @CliFunction(`list-workflow`, `lists running workflows`)
+  public static async ListWorkflow(): Promise<string[]> {
     const buildParameter = await BuildParameters.create();
 
     await Orchestrator.setup(buildParameter);

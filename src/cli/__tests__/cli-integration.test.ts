@@ -36,9 +36,9 @@ describe('CLI integration', () => {
     expect(result.code).toStrictEqual(0);
     expect(result.stdout).toContain('game-ci');
     expect(result.stdout).toContain('build');
-    expect(result.stdout).toContain('activate');
+    expect(result.stdout).toContain('test');
     expect(result.stdout).toContain('orchestrate');
-    expect(result.stdout).toContain('cache');
+    expect(result.stdout).toContain('activate');
     expect(result.stdout).toContain('status');
     expect(result.stdout).toContain('version');
     expect(result.stdout).toContain('update');
@@ -62,7 +62,24 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('--builds-path');
     expect(result.stdout).toContain('--build-method');
     expect(result.stdout).toContain('--custom-parameters');
-    expect(result.stdout).toContain('--provider-strategy');
+    expect(result.stdout).toContain('--versioning');
+  });
+
+  it('exits 0 and shows test flags for test --help', async () => {
+    const result = await runCli(['test', '--help']);
+
+    expect(result.code).toStrictEqual(0);
+    expect(result.stdout).toContain('--target-platform');
+    expect(result.stdout).toContain('--test-mode');
+    expect(result.stdout).toContain('--test-results-path');
+    expect(result.stdout).toContain('--enable-code-coverage');
+  });
+
+  it('exits 0 for test alias t --help', async () => {
+    const result = await runCli(['t', '--help']);
+
+    expect(result.code).toStrictEqual(0);
+    expect(result.stdout).toContain('--test-mode');
   });
 
   it('exits non-zero for an unknown command', async () => {
@@ -85,6 +102,13 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('--provider-strategy');
   });
 
+  it('exits 0 for orchestrate alias o --help', async () => {
+    const result = await runCli(['o', '--help']);
+
+    expect(result.code).toStrictEqual(0);
+    expect(result.stdout).toContain('--provider-strategy');
+  });
+
   it('exits 0 for activate --help', async () => {
     const result = await runCli(['activate', '--help']);
 
@@ -92,11 +116,12 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('activate');
   });
 
-  it('exits 0 for cache --help', async () => {
-    const result = await runCli(['cache', '--help']);
+  it('exits 0 for status --help', async () => {
+    const result = await runCli(['status', '--help']);
 
     expect(result.code).toStrictEqual(0);
-    expect(result.stdout).toContain('cache');
+    expect(result.stdout).toContain('status');
+    expect(result.stdout).toContain('--cache-dir');
   });
 
   it('exits 0 for update --help', async () => {

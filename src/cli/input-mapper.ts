@@ -73,6 +73,13 @@ export interface CliArguments {
   cacheUnityInstallationOnMac?: boolean;
   unityHubVersionOnMac?: string;
 
+  testMode?: string;
+  testResultsPath?: string;
+  testCategory?: string;
+  testFilter?: string;
+  coverageOptions?: string;
+  enableCodeCoverage?: boolean;
+
   mode?: string;
 
   [key: string]: unknown;
