@@ -221,7 +221,9 @@ jobs:
           fi
 
       - run: yarn install --frozen-lockfile
-      # ===================================        timeout-minutes: 5
+
+      - name: Create k3d cluster
+        timeout-minutes: 5
         run: |
           LOCALSTACK_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' localstack-main 2>/dev/null || echo "")
           echo "LocalStack container IP: $LOCALSTACK_IP"
