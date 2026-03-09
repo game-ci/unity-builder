@@ -62,8 +62,6 @@ jobs:
       #          Build          #
       ###########################
       - uses: ./
-        id: build
-        continue-on-error: true
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -79,15 +77,10 @@ jobs:
           # We use dirty build because we are replacing the default project settings file above
           allowDirtyBuild: true
 
-      - name: Warn on build failure
-        if: steps.build.outcome == 'failure'
-        run: echo "::warning::Build failed for ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }} (macOS builds are unstable)"
-
       ###########################
       #          Upload         #
       ###########################
       - uses: actions/upload-artifact@v4
-        if: steps.build.outcome == 'success'
         with:
           name: Build ${{ matrix.targetPlatform }} on MacOS (${{ matrix.unityVersion }})${{ matrix.buildProfile && '  With Build Profile' || '' }}
           path: build
