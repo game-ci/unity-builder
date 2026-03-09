@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
 import yargs from 'yargs';
-// eslint-disable-next-line import/no-unresolved
 import { hideBin } from 'yargs/helpers';
 import buildCommand from './cli/commands/build';
 import activateCommand from './cli/commands/activate';
 import orchestrateCommand from './cli/commands/orchestrate';
-import cacheCommand from './cli/commands/cache';
 import statusCommand from './cli/commands/status';
 import versionCommand from './cli/commands/version';
 import updateCommand from './cli/commands/update';
@@ -18,7 +16,6 @@ const cli = yargs(hideBin(process.argv))
   .command(buildCommand)
   .command(activateCommand)
   .command(orchestrateCommand)
-  .command(cacheCommand)
   .command(statusCommand)
   .command(versionCommand)
   .command(updateCommand)

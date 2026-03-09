@@ -1,7 +1,6 @@
 import buildCommand from '../commands/build';
 import activateCommand from '../commands/activate';
 import orchestrateCommand from '../commands/orchestrate';
-import cacheCommand from '../commands/cache';
 import statusCommand from '../commands/status';
 import versionCommand from '../commands/version';
 import updateCommand from '../commands/update';
@@ -13,6 +12,7 @@ function createFakeYargs(): { yargs: any; options: Record<string, any> } {
     positional: jest.fn(),
     example: jest.fn(),
     env: jest.fn(),
+    command: jest.fn(),
   };
 
   yargs.option.mockImplementation((name: string, config: any) => {
@@ -27,6 +27,7 @@ function createFakeYargs(): { yargs: any; options: Record<string, any> } {
   });
   yargs.example.mockReturnValue(yargs);
   yargs.env.mockReturnValue(yargs);
+  yargs.command.mockReturnValue(yargs);
 
   return { yargs, options };
 }
@@ -165,7 +166,6 @@ describe('CLI commands', () => {
       (orchestrateCommand.builder as Function)(yargs);
 
       expect(options['target-platform']).toBeDefined();
-      expect(options['target-platform'].demandOption).toStrictEqual(true);
       expect(options['provider-strategy']).toBeDefined();
       expect(options['provider-strategy'].default).toStrictEqual('aws');
       expect(options['aws-stack-name']).toBeDefined();
@@ -175,23 +175,13 @@ describe('CLI commands', () => {
       expect(options['watch-to-end']).toBeDefined();
       expect(options['clone-depth']).toBeDefined();
     });
-  });
 
-  describe('cache command', () => {
-    it('exports the correct command name', () => {
-      expect(cacheCommand.command).toStrictEqual('cache <action>');
-    });
+    it('registers cache as a subcommand', () => {
+      const { yargs } = createFakeYargs();
 
-    it('has a description', () => {
-      expect(cacheCommand.describe).toBeTruthy();
-    });
+      (orchestrateCommand.builder as Function)(yargs);
 
-    it('has a builder function', () => {
-      expect(typeof cacheCommand.builder).toStrictEqual('function');
-    });
-
-    it('has a handler function', () => {
-      expect(typeof cacheCommand.handler).toStrictEqual('function');
+      expect(yargs.command).toHaveBeenCalled();
     });
   });
 
