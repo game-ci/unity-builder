@@ -54,7 +54,7 @@ jobs:
           # AWS_STACK_NAME: game-ci-github-pipelines
           CHECKS_UPDATE: ${{ github.event.inputs.checksObject }}
         run: |
-          git clone -b orchestrator-develop https://github.com/game-ci/unity-builder
+          git clone -b main https://github.com/game-ci/unity-builder
           cd unity-builder
           yarn
           ls
