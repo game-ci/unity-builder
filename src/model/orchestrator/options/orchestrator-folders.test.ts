@@ -11,6 +11,7 @@ jest.mock('../orchestrator', () => ({
       buildPath: 'Builds',
       maxRetainedWorkspaces: 0,
       gitPrivateToken: 'ghp_test123',
+      gitAuthMode: 'url',
       orchestratorRepoName: 'game-ci/unity-builder',
       githubRepo: 'user/my-game',
     },
