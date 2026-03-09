@@ -301,7 +301,6 @@ inputs:
     description:
       '[Orchestrator] Specifies the repo for the unity builder. Useful if you forked the repo for testing, features, or
       fixes.'
-<<<<<<< HEAD
   testSuitePath:
     description: 'Path to YAML test suite definition file'
     required: false
