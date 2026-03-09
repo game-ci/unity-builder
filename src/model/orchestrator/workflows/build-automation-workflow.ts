@@ -99,8 +99,7 @@ if [ -n "$(git ls-remote --heads "$REPO" "$BRANCH" 2>/dev/null)" ]; then
   git clone -q -b "$BRANCH" "$REPO" "$DEST"
 else
   echo "Remote branch $BRANCH not found in $REPO; falling back to a known branch"
-  git clone -q -b orchestrator-develop "$REPO" "$DEST" \
-    || git clone -q -b main "$REPO" "$DEST" \
+  git clone -q -b main "$REPO" "$DEST" \
     || git clone -q "$REPO" "$DEST"
 fi
 chmod +x ${builderPath}`;
