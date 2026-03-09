@@ -38,7 +38,6 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('build');
     expect(result.stdout).toContain('activate');
     expect(result.stdout).toContain('orchestrate');
-    expect(result.stdout).toContain('cache');
     expect(result.stdout).toContain('status');
     expect(result.stdout).toContain('version');
     expect(result.stdout).toContain('update');
@@ -83,6 +82,7 @@ describe('CLI integration', () => {
     expect(result.code).toStrictEqual(0);
     expect(result.stdout).toContain('--target-platform');
     expect(result.stdout).toContain('--provider-strategy');
+    expect(result.stdout).toContain('cache');
   });
 
   it('exits 0 for activate --help', async () => {
@@ -92,8 +92,8 @@ describe('CLI integration', () => {
     expect(result.stdout).toContain('activate');
   });
 
-  it('exits 0 for cache --help', async () => {
-    const result = await runCli(['cache', '--help']);
+  it('exits 0 for orchestrate cache --help', async () => {
+    const result = await runCli(['orchestrate', 'cache', '--help']);
 
     expect(result.code).toStrictEqual(0);
     expect(result.stdout).toContain('cache');

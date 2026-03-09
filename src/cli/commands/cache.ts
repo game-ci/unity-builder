@@ -24,9 +24,9 @@ const cacheCommand: CommandModule = {
         description: 'Path to the Unity project',
         default: '.',
       })
-      .example('game-ci cache list', 'List all cached workspaces')
-      .example('game-ci cache restore --cache-dir ./my-cache', 'Restore a cached workspace')
-      .example('game-ci cache clear', 'Clear all cached workspaces');
+      .example('game-ci orchestrate cache list', 'List all cached workspaces')
+      .example('game-ci orchestrate cache restore --cache-dir ./my-cache', 'Restore a cached workspace')
+      .example('game-ci orchestrate cache clear', 'Clear all cached workspaces');
   },
   handler: async (cliArguments) => {
     const action = cliArguments.action as string;

@@ -2,6 +2,7 @@ import type { CommandModule } from 'yargs';
 import * as core from '@actions/core';
 import { BuildParameters, ImageTag, Orchestrator } from '../../model';
 import { mapCliArgumentsToInput, CliArguments } from '../input-mapper';
+import cacheCommand from './cache';
 
 interface OrchestrateArguments extends CliArguments {
   targetPlatform: string;
@@ -10,14 +11,14 @@ interface OrchestrateArguments extends CliArguments {
 
 const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
   command: 'orchestrate',
-  describe: 'Run a build via orchestrator providers (AWS, Kubernetes, etc.)',
+  describe: 'Orchestrator — remote builds, cache management, and provider tools',
   builder: (yargs) => {
     return yargs
+      .command(cacheCommand)
       .option('target-platform', {
         alias: 'targetPlatform',
         type: 'string',
         description: 'Platform that the build should target',
-        demandOption: true,
       })
       .option('provider-strategy', {
         alias: 'providerStrategy',
@@ -188,6 +189,10 @@ const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
   },
   handler: async (cliArguments) => {
     try {
+      if (!cliArguments.targetPlatform) {
+        throw new Error('--target-platform is required for orchestrate builds. Run game-ci orchestrate --help.');
+      }
+
       mapCliArgumentsToInput(cliArguments);
 
       const buildParameters = await BuildParameters.create();
