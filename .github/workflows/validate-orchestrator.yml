@@ -222,3 +222,67 @@ jobs:
             }
             console.log('✓ All ' + expectedExports.length + ' declared exports present in orchestrator package');
           "
+
+      - name: Smoke test orchestrator build wiring
+        run: |
+          echo "Verifying orchestrator build wiring end-to-end..."
+          node -e "
+            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
+            const { Orchestrator, BuildParameters } = require('@game-ci/orchestrator');
+
+            (async () => {
+              // Verify Orchestrator has the expected static API
+              const requiredMethods = ['setup', 'run'];
+              for (const m of requiredMethods) {
+                if (typeof Orchestrator[m] !== 'function') {
+                  console.error('ERROR: Orchestrator.' + m + ' should be a function, got ' + typeof Orchestrator[m]);
+                  process.exit(1);
+                }
+              }
+              console.log('✓ Orchestrator has setup() and run() methods');
+
+              // Verify BuildParameters.create() produces a valid config object
+              const params = await BuildParameters.create();
+              const requiredFields = [
+                'targetPlatform', 'projectPath', 'providerStrategy',
+                'editorVersion', 'buildPath', 'buildName',
+              ];
+              for (const f of requiredFields) {
+                if (params[f] === undefined) {
+                  console.error('ERROR: BuildParameters.' + f + ' is undefined');
+                  process.exit(1);
+                }
+              }
+              console.log('✓ BuildParameters.create() produces valid config with ' + requiredFields.length + ' required fields');
+
+              // Verify loadOrchestrator().run is wired to Orchestrator.run
+              const orch = await loadOrchestrator();
+              if (typeof orch.run !== 'function') {
+                console.error('ERROR: loadOrchestrator().run is not a function');
+                process.exit(1);
+              }
+
+              // Call run with a bad baseImage to confirm it reaches Orchestrator.run
+              // (Orchestrator.run throws 'baseImage is undefined' for images containing 'undefined')
+              try {
+                await orch.run(params, 'undefined-image');
+                console.error('ERROR: Expected Orchestrator.run to throw for undefined baseImage');
+                process.exit(1);
+              } catch (e) {
+                if (e.message.includes('baseImage is undefined')) {
+                  console.log('✓ loadOrchestrator().run() correctly wired to Orchestrator.run()');
+                } else {
+                  console.error('ERROR: Unexpected error from Orchestrator.run:', e.message);
+                  process.exit(1);
+                }
+              }
+
+              // Verify plugin services wire through to real service instances
+              const services = await loadPluginServices();
+              if (typeof services.BuildReliabilityService.configureGitEnvironment !== 'function') {
+                console.error('ERROR: BuildReliabilityService.configureGitEnvironment should be a function');
+                process.exit(1);
+              }
+              console.log('✓ Plugin services wire through to real orchestrator implementations');
+            })();
+          "
