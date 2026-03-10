@@ -1,4 +1,4 @@
-name: Orchestrator Integration Tests (Nightly)
+name: Orchestrator Integration Tests
 
 # ==============================================================================
 # Exhaustive integration tests — runs on a daily cron and manual dispatch.
