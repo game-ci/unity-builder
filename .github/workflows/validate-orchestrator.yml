@@ -23,6 +23,7 @@ on:
       - 'src/types/game-ci-orchestrator.d.ts'
       - 'action.yml'
       - 'package.json'
+      - 'yarn.lock'
       - '.github/workflows/validate-orchestrator.yml'
   pull_request:
     branches: [main, 'release/**']
@@ -37,6 +38,7 @@ on:
       - 'src/types/game-ci-orchestrator.d.ts'
       - 'action.yml'
       - 'package.json'
+      - 'yarn.lock'
       - '.github/workflows/validate-orchestrator.yml'
 
 concurrency:
