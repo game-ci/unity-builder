@@ -51,10 +51,10 @@ jobs:
       - name: Install unity-builder dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Verify unity-builder compiles without orchestrator
+      - name: Build unity-builder
         run: |
-          echo "Verifying unity-builder compiles without @game-ci/orchestrator installed..."
-          npx tsc --noEmit
+          echo "Building unity-builder TypeScript..."
+          npx tsc
           echo "✓ unity-builder compiles successfully"
 
       - name: Run unity-builder tests
@@ -62,10 +62,9 @@ jobs:
           echo "Running unity-builder tests..."
           npx jest --no-cache --passWithNoTests 2>&1 | tail -10
 
-      - name: Verify plugin loader gracefully handles missing orchestrator
+      - name: Verify plugin loader returns undefined without orchestrator
         run: |
-          echo "Checking that orchestrator-plugin.ts handles missing package..."
-          # The plugin loader should return undefined when @game-ci/orchestrator is not installed
+          echo "Checking plugin loader handles missing @game-ci/orchestrator..."
           node -e "
             const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
             (async () => {
@@ -83,7 +82,7 @@ jobs:
               }
               console.log('✓ loadEnterpriseServices() returns undefined when package not installed');
             })();
-          " 2>&1 || echo "::warning::Plugin loader test requires compiled JS (run yarn build first)"
+          "
 
       - name: Verify orchestrator type declarations exist
         run: |
@@ -94,16 +93,46 @@ jobs:
             exit 1
           fi
 
-      - name: Run orchestrator standalone tests
+      - name: Build and install orchestrator standalone
         working-directory: orchestrator-standalone
         run: |
           yarn install --frozen-lockfile
+          echo "Building orchestrator standalone..."
+          npx tsc
+          echo "✓ orchestrator standalone compiles successfully"
+          echo "Packing orchestrator as tarball..."
+          npm pack
+
+      - name: Run orchestrator standalone tests
+        working-directory: orchestrator-standalone
+        run: |
           echo "Running orchestrator standalone tests..."
           npx jest --no-cache 2>&1 | tail -10
 
-      - name: Verify orchestrator standalone compiles
-        working-directory: orchestrator-standalone
+      - name: Verify plugin loader returns exports with orchestrator installed
         run: |
-          echo "Verifying orchestrator standalone compiles..."
-          npx tsc --noEmit
-          echo "✓ orchestrator standalone compiles successfully"
+          echo "Installing orchestrator into unity-builder workspace..."
+          npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save
+          echo "Checking plugin loader returns defined exports..."
+          node -e "
+            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
+            (async () => {
+              const orch = await loadOrchestrator();
+              if (orch === undefined) {
+                console.error('ERROR: loadOrchestrator should return defined exports when package is installed');
+                process.exit(1);
+              }
+              if (typeof orch.run !== 'function') {
+                console.error('ERROR: loadOrchestrator().run should be a function');
+                process.exit(1);
+              }
+              console.log('✓ loadOrchestrator() returns defined exports with orchestrator installed');
+
+              const services = await loadEnterpriseServices();
+              if (services === undefined) {
+                console.error('ERROR: loadEnterpriseServices should return defined exports when package is installed');
+                process.exit(1);
+              }
+              console.log('✓ loadEnterpriseServices() returns defined exports with orchestrator installed');
+            })();
+          "
