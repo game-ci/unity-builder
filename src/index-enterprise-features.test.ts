@@ -47,27 +47,77 @@ const mockGitHooksService = {
   configureSkipList: jest.fn().mockReturnValue({ LEFTHOOK_EXCLUDE: 'pre-commit' }),
 };
 
-// Mock the dynamic import() targets — jest.mock with factory functions.
-// The services are imported dynamically via `await import(...)` in index.ts,
-// so we mock the module path and return the mock objects as named exports.
-jest.mock('./model/orchestrator/services/cache/child-workspace-service', () => ({
-  ChildWorkspaceService: mockChildWorkspaceService,
+const mockBuildReliabilityService = {
+  configureGitEnvironment: jest.fn(),
+  checkGitIntegrity: jest.fn().mockReturnValue(true),
+  cleanStaleLockFiles: jest.fn(),
+  validateSubmoduleBackingStores: jest.fn(),
+  cleanReservedFilenames: jest.fn(),
+  recoverCorruptedRepo: jest.fn().mockReturnValue(true),
+  archiveBuildOutput: jest.fn(),
+  enforceRetention: jest.fn(),
+};
+
+const mockTestWorkflowService = {
+  executeTestSuite: jest.fn().mockResolvedValue([]),
+};
+
+const mockHotRunnerService = jest.fn();
+
+const mockIncrementalSyncService = {
+  resolveStrategy: jest.fn().mockReturnValue('full'),
+  syncGitDelta: jest.fn().mockResolvedValue(0),
+  applyDirectInput: jest.fn().mockResolvedValue([]),
+  syncStoragePull: jest.fn().mockResolvedValue([]),
+  revertOverlays: jest.fn().mockImplementation(() => Promise.resolve()),
+};
+
+const mockOutputService = {
+  collectOutputs: jest.fn().mockImplementation(() => Promise.resolve()),
+};
+
+const mockOutputTypeRegistry = {
+  registerType: jest.fn(),
+};
+
+const mockArtifactUploadHandler = {
+  parseConfig: jest.fn().mockImplementation(() => {
+    /* no config */
+  }),
+  uploadArtifacts: jest.fn().mockResolvedValue({ success: true, entries: [] }),
+};
+
+const mockOrchestrator = {
+  run: jest.fn().mockImplementation(() => Promise.resolve()),
+};
+
+// Mock the orchestrator-plugin module to directly return our mock services.
+// This avoids any issues with dynamic imports inside loadEnterpriseServices().
+jest.mock('./model/orchestrator-plugin', () => ({
+  loadOrchestrator: jest.fn().mockResolvedValue({
+    run: mockOrchestrator.run,
+  }),
+  loadEnterpriseServices: jest.fn().mockResolvedValue({
+    BuildReliabilityService: mockBuildReliabilityService,
+    TestWorkflowService: mockTestWorkflowService,
+    HotRunnerService: mockHotRunnerService,
+    OutputService: mockOutputService,
+    OutputTypeRegistry: mockOutputTypeRegistry,
+    ArtifactUploadHandler: mockArtifactUploadHandler,
+    IncrementalSyncService: mockIncrementalSyncService,
+
+    // Lazy-loaded services (matching the plugin loader API)
+    loadChildWorkspaceService: jest.fn().mockResolvedValue(mockChildWorkspaceService),
+    loadLocalCacheService: jest.fn().mockResolvedValue(mockLocalCacheService),
+    loadSubmoduleProfileService: jest.fn().mockResolvedValue(mockSubmoduleProfileService),
+    loadLfsAgentService: jest.fn().mockResolvedValue(mockLfsAgentService),
+    loadGitHooksService: jest.fn().mockResolvedValue(mockGitHooksService),
+  }),
 }));
 
-jest.mock('./model/orchestrator/services/submodule/submodule-profile-service', () => ({
-  SubmoduleProfileService: mockSubmoduleProfileService,
-}));
-
-jest.mock('./model/orchestrator/services/lfs/lfs-agent-service', () => ({
-  LfsAgentService: mockLfsAgentService,
-}));
-
-jest.mock('./model/orchestrator/services/cache/local-cache-service', () => ({
-  LocalCacheService: mockLocalCacheService,
-}));
-
-jest.mock('./model/orchestrator/services/hooks/git-hooks-service', () => ({
-  GitHooksService: mockGitHooksService,
+// Mock the sync-state module for the SyncStrategy type import
+jest.mock('./model/orchestrator/services/sync/sync-state', () => ({
+  SyncStrategy: {},
 }));
 
 // Mock all non-enterprise dependencies to isolate the wiring logic
@@ -83,9 +133,6 @@ jest.mock('./model', () => ({
   },
   Cache: {
     verify: jest.fn(),
-  },
-  Orchestrator: {
-    run: jest.fn().mockResolvedValue(''),
   },
   Docker: {
     run: jest.fn().mockResolvedValue(0),
