@@ -385,6 +385,12 @@ jobs:
 
       - run: yarn install --frozen-lockfile
 
+      - name: Build orchestrator
+        run: |
+          echo "Building orchestrator TypeScript..."
+          yarn build
+          echo "✓ orchestrator build successful"
+
       # --- Fast unit tests (fast-fail gate before heavy infra tests) ---
       - name: Run orchestrator unit tests (fast, no infra)
         timeout-minutes: 2
@@ -678,6 +684,12 @@ jobs:
           fi
 
       - run: yarn install --frozen-lockfile
+
+      - name: Build orchestrator
+        run: |
+          echo "Building orchestrator TypeScript..."
+          yarn build
+          echo "✓ orchestrator build successful"
 
       # --- AWS Test 1: orchestrator-image ---
       - name: Run orchestrator-image test (AWS)
