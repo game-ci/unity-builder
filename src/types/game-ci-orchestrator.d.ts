@@ -1,7 +1,7 @@
 /**
  * Type declarations for @game-ci/orchestrator.
  *
- * This optional dependency provides remote build orchestration and enterprise
+ * This optional dependency provides remote build orchestration and plugin
  * services. When installed, the plugin loader in orchestrator-plugin.ts
  * dynamically imports it.
  */

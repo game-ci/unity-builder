@@ -1,8 +1,8 @@
 /**
- * Integration wiring tests for enterprise features in index.ts
+ * Integration wiring tests for plugin features in index.ts
  *
  * These tests verify the conditional gating logic in runMain():
- * - Each enterprise feature is only invoked when its gate condition is met
+ * - Each plugin feature is only invoked when its gate condition is met
  * - Services are NOT called when their feature is disabled (the default)
  * - The order of operations is correct (restore before build, save after build)
  */
@@ -92,12 +92,12 @@ const mockOrchestrator = {
 };
 
 // Mock the orchestrator-plugin module to directly return our mock services.
-// This avoids any issues with dynamic imports inside loadEnterpriseServices().
+// This avoids any issues with dynamic imports inside loadPluginServices().
 jest.mock('./model/orchestrator-plugin', () => ({
   loadOrchestrator: jest.fn().mockResolvedValue({
     run: mockOrchestrator.run,
   }),
-  loadEnterpriseServices: jest.fn().mockResolvedValue({
+  loadPluginServices: jest.fn().mockResolvedValue({
     BuildReliabilityService: mockBuildReliabilityService,
     TestWorkflowService: mockTestWorkflowService,
     HotRunnerService: mockHotRunnerService,
@@ -115,7 +115,7 @@ jest.mock('./model/orchestrator-plugin', () => ({
   }),
 }));
 
-// Mock all non-enterprise dependencies to isolate the wiring logic
+// Mock all non-plugin dependencies to isolate the wiring logic
 jest.mock('@actions/core');
 jest.mock('./model', () => ({
   Action: {
@@ -164,7 +164,7 @@ jest.mock('./model/platform-setup', () => ({
 
 const mockedBuildParametersCreate = BuildParameters.create as jest.Mock;
 
-interface EnterpriseBuildParametersOverrides {
+interface PluginBuildParametersOverrides {
   providerStrategy?: string;
   childWorkspacesEnabled?: boolean;
   childWorkspaceName?: string;
@@ -187,7 +187,7 @@ interface EnterpriseBuildParametersOverrides {
   gitHooksRunBeforeBuild?: string;
 }
 
-function createMockBuildParameters(overrides: EnterpriseBuildParametersOverrides = {}) {
+function createMockBuildParameters(overrides: PluginBuildParametersOverrides = {}) {
   return {
     // Required base properties
     providerStrategy: 'local',
@@ -199,7 +199,7 @@ function createMockBuildParameters(overrides: EnterpriseBuildParametersOverrides
     branch: 'main',
     runnerTempPath: '/tmp',
 
-    // Enterprise features - all disabled by default
+    // Plugin features - all disabled by default
     childWorkspacesEnabled: false,
     childWorkspaceName: '',
     childWorkspaceCacheRoot: '',
@@ -229,7 +229,7 @@ function createMockBuildParameters(overrides: EnterpriseBuildParametersOverrides
  * Since it calls `runMain()` at module scope, we need to re-import it
  * for each test. jest.isolateModules() handles this.
  */
-async function runIndex(overrides: EnterpriseBuildParametersOverrides = {}): Promise<void> {
+async function runIndex(overrides: PluginBuildParametersOverrides = {}): Promise<void> {
   mockedBuildParametersCreate.mockResolvedValue(createMockBuildParameters(overrides));
 
   return new Promise<void>((resolve) => {
@@ -249,7 +249,7 @@ async function runIndex(overrides: EnterpriseBuildParametersOverrides = {}): Pro
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('index.ts enterprise feature wiring', () => {
+describe('index.ts plugin feature wiring', () => {
   const originalPlatform = process.platform;
   const originalEnvironment = { ...process.env };
 
@@ -625,7 +625,7 @@ describe('index.ts enterprise feature wiring', () => {
   // -----------------------------------------------------------------------
 
   describe('non-local provider strategy', () => {
-    it('should skip all enterprise features when providerStrategy is not local', async () => {
+    it('should skip all plugin features when providerStrategy is not local', async () => {
       await runIndex({
         providerStrategy: 'aws',
         childWorkspacesEnabled: true,
@@ -636,7 +636,7 @@ describe('index.ts enterprise feature wiring', () => {
         gitHooksEnabled: true,
       });
 
-      // None of the enterprise services should be called because
+      // None of the plugin services should be called because
       // they are inside the `if (providerStrategy === 'local')` block
       expect(mockChildWorkspaceService.buildConfig).not.toHaveBeenCalled();
       expect(mockSubmoduleProfileService.createInitPlan).not.toHaveBeenCalled();

@@ -4,13 +4,10 @@ import { Action, BuildParameters, Cache, Docker, ImageTag, Output } from './mode
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
-import { loadOrchestrator, loadEnterpriseServices } from './model/orchestrator-plugin';
+import { loadOrchestrator, loadPluginServices } from './model/orchestrator-plugin';
 type SyncStrategy = 'full' | 'git-delta' | 'direct-input' | 'storage-pull';
 
-type EnterpriseServices = Exclude<
-  ReturnType<typeof loadEnterpriseServices> extends Promise<infer T> ? T : never,
-  undefined
->;
+type PluginServices = Exclude<ReturnType<typeof loadPluginServices> extends Promise<infer T> ? T : never, undefined>;
 
 async function runMain() {
   try {
@@ -22,10 +19,10 @@ async function runMain() {
     Action.checkCompatibility();
     Cache.verify();
 
-    const enterprise = await loadEnterpriseServices();
+    const plugin = await loadPluginServices();
 
     // Always configure git environment for CI reliability
-    enterprise?.BuildReliabilityService.configureGitEnvironment();
+    plugin?.BuildReliabilityService.configureGitEnvironment();
 
     const { workspace, actionFolder } = Action;
 
@@ -35,7 +32,7 @@ async function runMain() {
     // instead of the standard build execution path
     if (buildParameters.testSuitePath) {
       core.info('[TestWorkflow] Test suite path detected, using test workflow engine');
-      const results = await enterprise?.TestWorkflowService.executeTestSuite(
+      const results = await plugin?.TestWorkflowService.executeTestSuite(
         buildParameters.testSuitePath,
         buildParameters,
       );
@@ -60,24 +57,24 @@ async function runMain() {
     if (buildParameters.gitIntegrityCheck) {
       core.info('Running git integrity checks...');
 
-      const isHealthy = enterprise?.BuildReliabilityService.checkGitIntegrity(workspace);
-      enterprise?.BuildReliabilityService.cleanStaleLockFiles(workspace);
-      enterprise?.BuildReliabilityService.validateSubmoduleBackingStores(workspace);
+      const isHealthy = plugin?.BuildReliabilityService.checkGitIntegrity(workspace);
+      plugin?.BuildReliabilityService.cleanStaleLockFiles(workspace);
+      plugin?.BuildReliabilityService.validateSubmoduleBackingStores(workspace);
 
       if (buildParameters.cleanReservedFilenames) {
-        enterprise?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
+        plugin?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
       }
 
       if (!isHealthy && buildParameters.gitAutoRecover) {
         core.info('Git corruption detected, attempting automatic recovery...');
-        const recovered = enterprise?.BuildReliabilityService.recoverCorruptedRepo(workspace);
+        const recovered = plugin?.BuildReliabilityService.recoverCorruptedRepo(workspace);
         if (!recovered) {
           core.warning('Automatic recovery failed. Build may encounter issues.');
         }
       }
     } else if (buildParameters.cleanReservedFilenames) {
       // cleanReservedFilenames can run independently of gitIntegrityCheck
-      enterprise?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
+      plugin?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
     }
 
     let exitCode = -1;
@@ -96,11 +93,11 @@ async function runMain() {
         maxJobsBeforeRecycle: 0, // no automatic recycle by job count
       };
 
-      if (!enterprise?.HotRunnerService) {
-        throw new Error('[HotRunner] Enterprise services required for hot runner mode');
+      if (!plugin?.HotRunnerService) {
+        throw new Error('[HotRunner] Orchestrator plugin required for hot runner mode');
       }
 
-      const hotRunnerService = new enterprise.HotRunnerService();
+      const hotRunnerService = new plugin.HotRunnerService();
 
       try {
         await hotRunnerService.initialize(hotRunnerConfig);
@@ -129,7 +126,7 @@ async function runMain() {
       // Child workspace isolation - restore cached workspace before any other setup
       let childWorkspaceConfig: any;
       if (buildParameters.childWorkspacesEnabled && buildParameters.childWorkspaceName) {
-        const ChildWorkspaceService = await enterprise?.loadChildWorkspaceService();
+        const ChildWorkspaceService = await plugin?.loadChildWorkspaceService();
         const cacheRoot =
           buildParameters.childWorkspaceCacheRoot ||
           path.join(buildParameters.runnerTempPath || process.env.RUNNER_TEMP || '', 'game-ci-workspaces');
@@ -156,7 +153,7 @@ async function runMain() {
       // Submodule profile initialization
       if (buildParameters.submoduleProfilePath) {
         core.info('Initializing submodules from profile...');
-        const SubmoduleProfileService = await enterprise?.loadSubmoduleProfileService();
+        const SubmoduleProfileService = await plugin?.loadSubmoduleProfileService();
         const plan = await SubmoduleProfileService?.createInitPlan(
           buildParameters.submoduleProfilePath,
           buildParameters.submoduleVariantPath,
@@ -175,7 +172,7 @@ async function runMain() {
       // Configure custom LFS transfer agent
       if (buildParameters.lfsTransferAgent) {
         core.info('Configuring custom LFS transfer agent...');
-        const LfsAgentService = await enterprise?.loadLfsAgentService();
+        const LfsAgentService = await plugin?.loadLfsAgentService();
         await LfsAgentService?.configure(
           buildParameters.lfsTransferAgent,
           buildParameters.lfsTransferAgentArgs,
@@ -188,9 +185,9 @@ async function runMain() {
       let cacheRoot = '';
       let cacheKey = '';
       // eslint-disable-next-line no-undef
-      let LocalCacheService: Awaited<ReturnType<NonNullable<typeof enterprise>['loadLocalCacheService']>> | undefined;
+      let LocalCacheService: Awaited<ReturnType<NonNullable<typeof plugin>['loadLocalCacheService']>> | undefined;
       if (buildParameters.localCacheEnabled) {
-        LocalCacheService = await enterprise?.loadLocalCacheService();
+        LocalCacheService = await plugin?.loadLocalCacheService();
         cacheRoot = LocalCacheService?.resolveCacheRoot(buildParameters) || '';
         cacheKey =
           LocalCacheService?.generateCacheKey(
@@ -209,7 +206,7 @@ async function runMain() {
 
       // Git hooks — opt-in only. When disabled (default), do not touch hooks at all.
       if (buildParameters.gitHooksEnabled) {
-        const GitHooksService = await enterprise?.loadGitHooksService();
+        const GitHooksService = await plugin?.loadGitHooksService();
         await GitHooksService?.installHooks(workspace);
         if (buildParameters.gitHooksSkipList) {
           const environment = GitHooksService?.configureSkipList(buildParameters.gitHooksSkipList.split(','));
@@ -223,7 +220,7 @@ async function runMain() {
       const syncStrategy = buildParameters.syncStrategy as SyncStrategy;
       if (syncStrategy !== 'full') {
         core.info(`[Sync] Applying sync strategy: ${syncStrategy}`);
-        await applySyncStrategy(buildParameters, workspace, enterprise);
+        await applySyncStrategy(buildParameters, workspace, plugin);
       }
 
       await PlatformSetup.setup(buildParameters, actionFolder);
@@ -249,7 +246,7 @@ async function runMain() {
 
       // Child workspace isolation - save workspace for next run
       if (childWorkspaceConfig && childWorkspaceConfig.enabled) {
-        const ChildWorkspaceService = await enterprise?.loadChildWorkspaceService();
+        const ChildWorkspaceService = await plugin?.loadChildWorkspaceService();
         const projectFullPath = path.join(workspace, buildParameters.projectPath);
         const preSaveSize = ChildWorkspaceService?.getWorkspaceSize(projectFullPath);
         core.info(`Child workspace size before save: ${preSaveSize}`);
@@ -262,7 +259,7 @@ async function runMain() {
       if (buildParameters.syncRevertAfter && syncStrategy !== 'full') {
         core.info('[Sync] Reverting overlay changes after job completion');
         try {
-          await enterprise?.IncrementalSyncService.revertOverlays(workspace, buildParameters.syncStatePath);
+          await plugin?.IncrementalSyncService.revertOverlays(workspace, buildParameters.syncStatePath);
         } catch (revertError) {
           core.warning(`[Sync] Overlay revert failed: ${(revertError as Error).message}`);
         }
@@ -281,11 +278,8 @@ async function runMain() {
     // Post-build: archive and enforce retention
     if (buildParameters.buildArchiveEnabled && exitCode === 0) {
       core.info('Archiving build output...');
-      enterprise?.BuildReliabilityService.archiveBuildOutput(
-        buildParameters.buildPath,
-        buildParameters.buildArchivePath,
-      );
-      enterprise?.BuildReliabilityService.enforceRetention(
+      plugin?.BuildReliabilityService.archiveBuildOutput(buildParameters.buildPath, buildParameters.buildArchivePath);
+      plugin?.BuildReliabilityService.enforceRetention(
         buildParameters.buildArchivePath,
         buildParameters.buildArchiveRetention,
       );
@@ -304,7 +298,7 @@ async function runMain() {
           const customTypes = JSON.parse(buildParameters.artifactCustomTypes);
           if (Array.isArray(customTypes)) {
             for (const ct of customTypes) {
-              enterprise?.OutputTypeRegistry.registerType({
+              plugin?.OutputTypeRegistry.registerType({
                 name: ct.name,
                 defaultPath: ct.defaultPath || ct.pattern || `./${ct.name}/`,
                 description: ct.description || `Custom output type: ${ct.name}`,
@@ -319,7 +313,7 @@ async function runMain() {
 
       // Collect outputs and generate manifest
       const manifestPath = path.join(buildParameters.projectPath, 'output-manifest.json');
-      const manifest = await enterprise?.OutputService.collectOutputs(
+      const manifest = await plugin?.OutputService.collectOutputs(
         buildParameters.projectPath,
         buildParameters.buildGuid,
         buildParameters.artifactOutputTypes,
@@ -330,7 +324,7 @@ async function runMain() {
 
       if (manifest) {
         // Upload artifacts
-        const uploadConfig = enterprise?.ArtifactUploadHandler.parseConfig(
+        const uploadConfig = plugin?.ArtifactUploadHandler.parseConfig(
           buildParameters.artifactUploadTarget,
           buildParameters.artifactUploadPath || undefined,
           buildParameters.artifactCompression,
@@ -338,7 +332,7 @@ async function runMain() {
         );
 
         if (uploadConfig) {
-          const uploadResult = await enterprise?.ArtifactUploadHandler.uploadArtifacts(
+          const uploadResult = await plugin?.ArtifactUploadHandler.uploadArtifacts(
             manifest,
             uploadConfig,
             buildParameters.projectPath,
@@ -402,15 +396,15 @@ async function runColdBuild(
 async function applySyncStrategy(
   buildParameters: BuildParameters,
   workspace: string,
-  enterprise?: EnterpriseServices | undefined,
+  plugin?: PluginServices | undefined,
 ): Promise<void> {
-  if (!enterprise?.IncrementalSyncService) {
-    core.warning('[Sync] Enterprise services not available, skipping sync strategy');
+  if (!plugin?.IncrementalSyncService) {
+    core.warning('[Sync] Orchestrator plugin not available, skipping sync strategy');
 
     return;
   }
 
-  const { IncrementalSyncService } = enterprise;
+  const { IncrementalSyncService } = plugin;
   const strategy = buildParameters.syncStrategy as SyncStrategy;
   const resolvedStrategy = IncrementalSyncService.resolveStrategy(strategy, workspace, buildParameters.syncStatePath);
 

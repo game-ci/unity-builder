@@ -36,11 +36,11 @@ export async function loadOrchestrator(): Promise<
 }
 
 /**
- * Load enterprise services for local builds.
+ * Load orchestrator plugin services for local builds.
  * These services are part of the orchestrator but also used in local builds
  * (child workspaces, local cache, git hooks, LFS agents, etc.).
  */
-export async function loadEnterpriseServices() {
+export async function loadPluginServices() {
   try {
     // eslint-disable-next-line import/no-unresolved
     const orchestrator = await import('@game-ci/orchestrator');
@@ -76,6 +76,6 @@ export async function loadEnterpriseServices() {
       },
     };
   } catch (error) {
-    core.warning(`Enterprise services not available: ${(error as Error).message}`);
+    core.warning(`Orchestrator plugin not available: ${(error as Error).message}`);
   }
 }

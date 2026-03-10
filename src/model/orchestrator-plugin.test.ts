@@ -5,7 +5,7 @@
  * optional dependency.  Two scenarios exist:
  *
  * 1. Package NOT installed (the natural state in unity-builder) -- both
- *    loadOrchestrator() and loadEnterpriseServices() must degrade gracefully.
+ *    loadOrchestrator() and loadPluginServices() must degrade gracefully.
  *
  * 2. Package IS installed (mocked) -- the returned wrappers must faithfully
  *    forward calls and map results.
@@ -41,14 +41,14 @@ describe('orchestrator-plugin (package not installed)', () => {
     expect(result).toBeUndefined();
   });
 
-  it('loadEnterpriseServices() returns undefined and logs a warning', async () => {
-    const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+  it('loadPluginServices() returns undefined and logs a warning', async () => {
+    const { loadPluginServices } = await import('./orchestrator-plugin');
 
-    const result = await loadEnterpriseServices();
+    const result = await loadPluginServices();
 
     expect(result).toBeUndefined();
     expect(mockWarning).toHaveBeenCalledTimes(1);
-    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('Enterprise services not available'));
+    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('Orchestrator plugin not available'));
   });
 });
 
@@ -75,7 +75,7 @@ describe('orchestrator-plugin (package installed)', () => {
 
   /**
    * Install the mock BEFORE importing orchestrator-plugin so that the dynamic
-   * import('@game-ci/orchestrator') inside loadOrchestrator / loadEnterpriseServices
+   * import('@game-ci/orchestrator') inside loadOrchestrator / loadPluginServices
    * resolves to our fake module.
    *
    * The { virtual: true } flag is required because @game-ci/orchestrator is
@@ -164,15 +164,15 @@ describe('orchestrator-plugin (package installed)', () => {
   });
 
   // -----------------------------------------------------------------------
-  // loadEnterpriseServices()
+  // loadPluginServices()
   // -----------------------------------------------------------------------
 
-  describe('loadEnterpriseServices()', () => {
+  describe('loadPluginServices()', () => {
     it('returns all 7 eager services', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
 
       expect(services).toBeDefined();
       expect(services!.BuildReliabilityService).toBe(fakeBuildReliabilityService);
@@ -186,9 +186,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('returns all 5 lazy loader functions', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
 
       expect(services).toBeDefined();
       expect(typeof services!.loadChildWorkspaceService).toBe('function');
@@ -200,9 +200,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('loadChildWorkspaceService() returns the correct service', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
       const service = await services!.loadChildWorkspaceService();
 
       expect(service).toBe(fakeChildWorkspaceService);
@@ -210,9 +210,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('loadLocalCacheService() returns the correct service', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
       const service = await services!.loadLocalCacheService();
 
       expect(service).toBe(fakeLocalCacheService);
@@ -220,9 +220,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('loadSubmoduleProfileService() returns the correct service', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
       const service = await services!.loadSubmoduleProfileService();
 
       expect(service).toBe(fakeSubmoduleProfileService);
@@ -230,9 +230,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('loadLfsAgentService() returns the correct service', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
       const service = await services!.loadLfsAgentService();
 
       expect(service).toBe(fakeLfsAgentService);
@@ -240,9 +240,9 @@ describe('orchestrator-plugin (package installed)', () => {
 
     it('loadGitHooksService() returns the correct service', async () => {
       installOrchestratorMock();
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
       const service = await services!.loadGitHooksService();
 
       expect(service).toBe(fakeGitHooksService);
@@ -270,9 +270,9 @@ describe('orchestrator-plugin (package installed)', () => {
         BuildReliabilityService: undefined,
         ChildWorkspaceService: undefined,
       });
-      const { loadEnterpriseServices } = await import('./orchestrator-plugin');
+      const { loadPluginServices } = await import('./orchestrator-plugin');
 
-      const services = await loadEnterpriseServices();
+      const services = await loadPluginServices();
 
       expect(services).toBeDefined();
       expect(services!.BuildReliabilityService).toBeUndefined();
