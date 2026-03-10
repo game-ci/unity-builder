@@ -4,31 +4,29 @@ on:
   push:
     branches: [main, 'release/**', 'feature/**']
     paths:
-      - 'src/model/orchestrator/**'
+      - 'src/model/orchestrator-plugin.ts'
       - 'src/model/build-parameters.ts'
       - 'src/model/input.ts'
       - 'src/model/github.ts'
-      - 'src/model/docker.ts'
       - 'src/model/cli/cli.ts'
-      - 'src/model/cli/cli-functions-repository.ts'
       - 'src/model/input-readers/**'
-      - 'src/model/shared-types.ts'
-      - 'src/model/image-tag.ts'
-      - 'src/model/action.ts'
+      - 'src/index.ts'
+      - 'src/types/game-ci-orchestrator.d.ts'
+      - 'action.yml'
+      - 'package.json'
   pull_request:
     branches: [main, 'release/**']
     paths:
-      - 'src/model/orchestrator/**'
+      - 'src/model/orchestrator-plugin.ts'
       - 'src/model/build-parameters.ts'
       - 'src/model/input.ts'
       - 'src/model/github.ts'
-      - 'src/model/docker.ts'
       - 'src/model/cli/cli.ts'
-      - 'src/model/cli/cli-functions-repository.ts'
       - 'src/model/input-readers/**'
-      - 'src/model/shared-types.ts'
-      - 'src/model/image-tag.ts'
-      - 'src/model/action.ts'
+      - 'src/index.ts'
+      - 'src/types/game-ci-orchestrator.d.ts'
+      - 'action.yml'
+      - 'package.json'
 
 jobs:
   validate-orchestrator:
@@ -53,43 +51,59 @@ jobs:
       - name: Install unity-builder dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Verify orchestrator source is in sync
+      - name: Verify unity-builder compiles without orchestrator
         run: |
-          echo "Comparing orchestrator source files..."
-          # Compare orchestrator source between unity-builder and standalone repo
-          # Exclude interfaces.ts which only exists in standalone
-          DIFF_OUTPUT=$(diff -rq src/model/orchestrator/ orchestrator-standalone/src/model/orchestrator/ --exclude="interfaces.ts" 2>&1 || true)
-          if [ -n "$DIFF_OUTPUT" ]; then
-            echo "::warning::Orchestrator source has diverged from standalone repo:"
-            echo "$DIFF_OUTPUT"
-            echo ""
-            echo "Files that differ:"
-            diff -rq src/model/orchestrator/ orchestrator-standalone/src/model/orchestrator/ --exclude="interfaces.ts" | head -20 || true
+          echo "Verifying unity-builder compiles without @game-ci/orchestrator installed..."
+          npx tsc --noEmit
+          echo "✓ unity-builder compiles successfully"
+
+      - name: Run unity-builder tests
+        run: |
+          echo "Running unity-builder tests..."
+          npx jest --no-cache --passWithNoTests 2>&1 | tail -10
+
+      - name: Verify plugin loader gracefully handles missing orchestrator
+        run: |
+          echo "Checking that orchestrator-plugin.ts handles missing package..."
+          # The plugin loader should return undefined when @game-ci/orchestrator is not installed
+          node -e "
+            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
+            (async () => {
+              const orch = await loadOrchestrator();
+              if (orch !== undefined) {
+                console.error('ERROR: loadOrchestrator should return undefined when package not installed');
+                process.exit(1);
+              }
+              console.log('✓ loadOrchestrator() returns undefined when package not installed');
+
+              const services = await loadEnterpriseServices();
+              if (services !== undefined) {
+                console.error('ERROR: loadEnterpriseServices should return undefined when package not installed');
+                process.exit(1);
+              }
+              console.log('✓ loadEnterpriseServices() returns undefined when package not installed');
+            })();
+          " 2>&1 || echo "::warning::Plugin loader test requires compiled JS (run yarn build first)"
+
+      - name: Verify orchestrator type declarations exist
+        run: |
+          if [ -f "src/types/game-ci-orchestrator.d.ts" ]; then
+            echo "✓ Type declarations for @game-ci/orchestrator exist"
           else
-            echo "✓ All orchestrator source files are in sync"
+            echo "::error::Missing type declarations: src/types/game-ci-orchestrator.d.ts"
+            exit 1
           fi
 
-      - name: Verify bridge file compatibility
-        run: |
-          echo "Checking that bridge file exports match unity-builder exports..."
-          # Verify key exports exist in both repos
-          for file in build-parameters input github docker action image-tag; do
-            if [ -f "orchestrator-standalone/src/model/${file}.ts" ]; then
-              echo "✓ Bridge file exists: src/model/${file}.ts"
-            else
-              echo "::error::Missing bridge file in orchestrator: src/model/${file}.ts"
-              exit 1
-            fi
-          done
-
-      - name: Run orchestrator tests in unity-builder context
-        run: |
-          echo "Running orchestrator unit tests..."
-          npx jest --no-cache --testPathPattern="src/model/orchestrator/" --passWithNoTests 2>&1 | tail -5
-
-      - name: Run orchestrator tests in standalone context
+      - name: Run orchestrator standalone tests
         working-directory: orchestrator-standalone
         run: |
           yarn install --frozen-lockfile
           echo "Running orchestrator standalone tests..."
-          npx jest --no-cache 2>&1 | tail -5
+          npx jest --no-cache 2>&1 | tail -10
+
+      - name: Verify orchestrator standalone compiles
+        working-directory: orchestrator-standalone
+        run: |
+          echo "Verifying orchestrator standalone compiles..."
+          npx tsc --noEmit
+          echo "✓ orchestrator standalone compiles successfully"

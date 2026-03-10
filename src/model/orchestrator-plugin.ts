@@ -1,15 +1,3 @@
-/**
- * Orchestrator plugin loader.
- *
- * After extraction, the orchestrator lives in @game-ci/orchestrator.
- * This module provides a thin loader that dynamically imports it,
- * falling back gracefully if the package is not installed.
- *
- * During the extraction transition period, this imports from the local
- * source. Once extraction is complete, the import path changes to the
- * npm package.
- */
-
 import * as core from '@actions/core';
 
 export interface OrchestratorPluginResult {
@@ -29,9 +17,8 @@ export async function loadOrchestrator(): Promise<
   | undefined
 > {
   try {
-    // During extraction transition: import from local source
-    // After extraction: import from '@game-ci/orchestrator'
-    const { default: Orchestrator } = await import('./orchestrator/orchestrator');
+    // eslint-disable-next-line import/no-unresolved
+    const { Orchestrator } = await import('@game-ci/orchestrator');
 
     return {
       run: async (buildParameters: any, baseImage: string): Promise<OrchestratorPluginResult> => {
@@ -55,62 +42,37 @@ export async function loadOrchestrator(): Promise<
  */
 export async function loadEnterpriseServices() {
   try {
-    const [
-      { BuildReliabilityService },
-      { TestWorkflowService },
-      { HotRunnerService },
-      { OutputService },
-      { OutputTypeRegistry },
-      { ArtifactUploadHandler },
-      { IncrementalSyncService },
-    ] = await Promise.all([
-      import('./orchestrator/services/reliability'),
-      import('./orchestrator/services/test-workflow'),
-      import('./orchestrator/services/hot-runner'),
-      import('./orchestrator/services/output/output-service'),
-      import('./orchestrator/services/output/output-type-registry'),
-      import('./orchestrator/services/output/artifact-upload-handler'),
-      import('./orchestrator/services/sync'),
-    ]);
+    // eslint-disable-next-line import/no-unresolved
+    const orchestrator = await import('@game-ci/orchestrator');
 
     return {
-      BuildReliabilityService,
-      TestWorkflowService,
-      HotRunnerService,
-      OutputService,
-      OutputTypeRegistry,
-      ArtifactUploadHandler,
-      IncrementalSyncService,
+      BuildReliabilityService: orchestrator.BuildReliabilityService,
+      TestWorkflowService: orchestrator.TestWorkflowService,
+      HotRunnerService: orchestrator.HotRunnerService,
+      OutputService: orchestrator.OutputService,
+      OutputTypeRegistry: orchestrator.OutputTypeRegistry,
+      ArtifactUploadHandler: orchestrator.ArtifactUploadHandler,
+      IncrementalSyncService: orchestrator.IncrementalSyncService,
 
       // Lazy-loaded services (only imported when needed)
       async loadChildWorkspaceService() {
-        const m = await import('./orchestrator/services/cache/child-workspace-service');
-
-        return m.ChildWorkspaceService;
+        return orchestrator.ChildWorkspaceService;
       },
 
       async loadLocalCacheService() {
-        const m = await import('./orchestrator/services/cache/local-cache-service');
-
-        return m.LocalCacheService;
+        return orchestrator.LocalCacheService;
       },
 
       async loadSubmoduleProfileService() {
-        const m = await import('./orchestrator/services/submodule/submodule-profile-service');
-
-        return m.SubmoduleProfileService;
+        return orchestrator.SubmoduleProfileService;
       },
 
       async loadLfsAgentService() {
-        const m = await import('./orchestrator/services/lfs/lfs-agent-service');
-
-        return m.LfsAgentService;
+        return orchestrator.LfsAgentService;
       },
 
       async loadGitHooksService() {
-        const m = await import('./orchestrator/services/hooks/git-hooks-service');
-
-        return m.GitHooksService;
+        return orchestrator.GitHooksService;
       },
     };
   } catch (error) {

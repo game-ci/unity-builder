@@ -5,7 +5,7 @@ import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 import { loadOrchestrator, loadEnterpriseServices } from './model/orchestrator-plugin';
-import { SyncStrategy } from './model/orchestrator/services/sync/sync-state';
+type SyncStrategy = 'full' | 'git-delta' | 'direct-input' | 'storage-pull';
 
 type EnterpriseServices = Exclude<
   ReturnType<typeof loadEnterpriseServices> extends Promise<infer T> ? T : never,
@@ -104,7 +104,7 @@ async function runMain() {
 
       try {
         await hotRunnerService.initialize(hotRunnerConfig);
-        const result = await hotRunnerService.submitBuild(buildParameters, (output) => {
+        const result = await hotRunnerService.submitBuild(buildParameters, (output: string) => {
           core.info(output);
         });
 
@@ -347,8 +347,8 @@ async function runMain() {
           if (uploadResult && !uploadResult.success) {
             core.warning(
               `Artifact upload completed with errors: ${uploadResult.entries
-                .filter((entry) => !entry.success)
-                .map((entry) => `${entry.type}: ${entry.error}`)
+                .filter((entry: any) => !entry.success)
+                .map((entry: any) => `${entry.type}: ${entry.error}`)
                 .join('; ')}`,
             );
           }

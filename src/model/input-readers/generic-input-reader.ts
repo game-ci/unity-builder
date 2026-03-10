@@ -1,12 +1,21 @@
-import { OrchestratorSystem } from '../orchestrator/services/core/orchestrator-system';
-import OrchestratorOptions from '../orchestrator/options/orchestrator-options';
+import { exec } from 'node:child_process';
+import Input from '../input';
 
 export class GenericInputReader {
   public static async Run(command: string) {
-    if (OrchestratorOptions.providerStrategy === 'local') {
+    if ((Input.getInput('providerStrategy') || 'local') === 'local') {
       return '';
     }
 
-    return await OrchestratorSystem.Run(command, false, true);
+    return new Promise<string>((resolve, reject) => {
+      exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout) => {
+        if (error) {
+          reject(error);
+
+          return;
+        }
+        resolve(stdout.toString());
+      });
+    });
   }
 }

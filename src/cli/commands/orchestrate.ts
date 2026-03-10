@@ -1,7 +1,8 @@
 import type { CommandModule } from 'yargs';
 import * as core from '@actions/core';
-import { BuildParameters, ImageTag, Orchestrator } from '../../model';
+import { BuildParameters, ImageTag } from '../../model';
 import { mapCliArgumentsToInput, CliArguments } from '../input-mapper';
+import { loadOrchestrator } from '../../model/orchestrator-plugin';
 import cacheCommand from './cache';
 
 interface OrchestrateArguments extends CliArguments {
@@ -195,6 +196,13 @@ const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
 
       mapCliArgumentsToInput(cliArguments);
 
+      const orchestrator = await loadOrchestrator();
+      if (!orchestrator) {
+        throw new Error(
+          'Orchestrator package not available. Install @game-ci/orchestrator to use orchestrate commands.',
+        );
+      }
+
       const buildParameters = await BuildParameters.create();
       const baseImage = new ImageTag(buildParameters);
 
@@ -203,13 +211,13 @@ const orchestrateCommand: CommandModule<object, OrchestrateArguments> = {
       core.info(`Unity version: ${buildParameters.editorVersion}`);
       core.info(`Build GUID: ${buildParameters.buildGuid}`);
 
-      const result = await Orchestrator.run(buildParameters, baseImage.toString());
+      const result = await orchestrator.run(buildParameters, baseImage.toString());
 
       core.info(`\nOrchestrated build completed.`);
-      if (result?.BuildResults) {
-        core.info(`Results: ${result.BuildResults}`);
+      if (result?.BuildSucceeded) {
+        core.info(`Build succeeded.`);
       } else {
-        core.warning('Build completed but no build results were returned.');
+        core.warning('Build completed but did not succeed.');
       }
     } catch (error: any) {
       core.setFailed(`Orchestrated build failed: ${error.message}`);

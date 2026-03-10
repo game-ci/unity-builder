@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Cli } from './cli/cli';
-import OrchestratorQueryOverride from './orchestrator/options/orchestrator-query-override';
 import Platform from './platform';
 import GitHub from './github';
 import os from 'node:os';
@@ -30,10 +29,6 @@ class Input {
     // Query input sources
     if (Cli.query(query, alternativeQuery)) {
       return Cli.query(query, alternativeQuery);
-    }
-
-    if (OrchestratorQueryOverride.query(query, alternativeQuery)) {
-      return OrchestratorQueryOverride.query(query, alternativeQuery);
     }
 
     if (process.env[query] !== undefined) {

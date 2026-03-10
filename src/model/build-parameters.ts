@@ -1,7 +1,5 @@
 import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
-import OrchestratorConstants from './orchestrator/options/orchestrator-constants';
-import OrchestratorBuildGuid from './orchestrator/options/orchestrator-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
@@ -10,8 +8,6 @@ import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
 import { Cli } from './cli/cli';
 import GitHub from './github';
-import OrchestratorOptions from './orchestrator/options/orchestrator-options';
-import Orchestrator from './orchestrator/orchestrator';
 import * as core from '@actions/core';
 
 class BuildParameters {
@@ -211,10 +207,6 @@ class BuildParameters {
   public syncRevertAfter!: boolean;
   public syncStatePath!: string;
 
-  public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
-  }
-
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
@@ -297,48 +289,60 @@ class BuildParameters {
       dockerIsolationMode: Input.dockerIsolationMode,
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
-      providerStrategy: OrchestratorOptions.providerStrategy,
-      fallbackProviderStrategy: OrchestratorOptions.fallbackProviderStrategy,
-      runnerCheckEnabled: OrchestratorOptions.runnerCheckEnabled,
-      runnerCheckLabels: OrchestratorOptions.runnerCheckLabels,
-      runnerCheckMinAvailable: OrchestratorOptions.runnerCheckMinAvailable,
-      retryOnFallback: OrchestratorOptions.retryOnFallback,
-      providerInitTimeout: OrchestratorOptions.providerInitTimeout,
-      gitAuthMode: OrchestratorOptions.gitAuthMode,
-      buildPlatform: OrchestratorOptions.buildPlatform,
-      kubeConfig: OrchestratorOptions.kubeConfig,
-      containerMemory: OrchestratorOptions.containerMemory,
-      containerCpu: OrchestratorOptions.containerCpu,
-      containerNamespace: OrchestratorOptions.containerNamespace,
-      kubeVolumeSize: OrchestratorOptions.kubeVolumeSize,
-      kubeVolume: OrchestratorOptions.kubeVolume,
-      postBuildContainerHooks: OrchestratorOptions.postBuildContainerHooks,
-      preBuildContainerHooks: OrchestratorOptions.preBuildContainerHooks,
-      customJob: OrchestratorOptions.customJob,
+      providerStrategy: Input.getInput('providerStrategy') || (Cli.isCliMode ? 'aws' : 'local'),
+      fallbackProviderStrategy: Input.getInput('fallbackProviderStrategy') || '',
+      runnerCheckEnabled: Input.getInput('runnerCheckEnabled') === 'true',
+      runnerCheckLabels: (Input.getInput('runnerCheckLabels') || '')
+        .split(',')
+        .map((l: string) => l.trim())
+        .filter(Boolean),
+      runnerCheckMinAvailable: Number(Input.getInput('runnerCheckMinAvailable')) || 1,
+      retryOnFallback: Input.getInput('retryOnFallback') === 'true',
+      providerInitTimeout: Number(Input.getInput('providerInitTimeout')) || 0,
+      gitAuthMode: Input.getInput('gitAuthMode') || 'header',
+      buildPlatform:
+        Input.getInput('buildPlatform') ||
+        ((Input.getInput('providerStrategy') || 'local') !== 'local' ? 'linux' : process.platform),
+      kubeConfig: Input.getInput('kubeConfig') || '',
+      containerMemory: Input.getInput('containerMemory') || '3072',
+      containerCpu: Input.getInput('containerCpu') || '1024',
+      containerNamespace: Input.getInput('containerNamespace') || 'default',
+      kubeVolumeSize: Input.getInput('kubeVolumeSize') || '25Gi',
+      kubeVolume: Input.getInput('kubeVolume') || '',
+      postBuildContainerHooks: Input.getInput('postBuildContainerHooks') || '',
+      preBuildContainerHooks: Input.getInput('preBuildContainerHooks') || '',
+      customJob: Input.getInput('customJob') || '',
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      orchestratorBranch: OrchestratorOptions.orchestratorBranch.split('/').reverse()[0],
-      orchestratorDebug: OrchestratorOptions.orchestratorDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || OrchestratorOptions.orchestratorRepoName,
-      orchestratorRepoName: OrchestratorOptions.orchestratorRepoName,
-      cloneDepth: Number.parseInt(OrchestratorOptions.cloneDepth),
+      orchestratorBranch: (Input.getInput('orchestratorBranch') || 'main').split('/').reverse()[0],
+      orchestratorDebug:
+        Input.getInput('orchestratorDebug') === 'true' || Input.getInput('orchestratorTests') === 'true',
+      githubRepo:
+        (Input.githubRepo ?? (await GitRepoReader.GetRemote())) ||
+        Input.getInput('orchestratorRepoName') ||
+        'game-ci/unity-builder',
+      orchestratorRepoName: Input.getInput('orchestratorRepoName') || 'game-ci/unity-builder',
+      cloneDepth: Number.parseInt(Input.getInput('cloneDepth') || '50'),
       isCliMode: Cli.isCliMode,
-      awsStackName: OrchestratorOptions.awsStackName,
-      awsEndpoint: OrchestratorOptions.awsEndpoint,
-      awsCloudFormationEndpoint: OrchestratorOptions.awsCloudFormationEndpoint,
-      awsEcsEndpoint: OrchestratorOptions.awsEcsEndpoint,
-      awsKinesisEndpoint: OrchestratorOptions.awsKinesisEndpoint,
-      awsCloudWatchLogsEndpoint: OrchestratorOptions.awsCloudWatchLogsEndpoint,
-      awsS3Endpoint: OrchestratorOptions.awsS3Endpoint,
-      storageProvider: OrchestratorOptions.storageProvider,
-      rcloneRemote: OrchestratorOptions.rcloneRemote,
+      awsStackName: Input.getInput('awsStackName') || 'game-ci',
+      awsEndpoint: Input.getInput('awsEndpoint'),
+      awsCloudFormationEndpoint: Input.getInput('awsCloudFormationEndpoint') || Input.getInput('awsEndpoint'),
+      awsEcsEndpoint: Input.getInput('awsEcsEndpoint') || Input.getInput('awsEndpoint'),
+      awsKinesisEndpoint: Input.getInput('awsKinesisEndpoint') || Input.getInput('awsEndpoint'),
+      awsCloudWatchLogsEndpoint: Input.getInput('awsCloudWatchLogsEndpoint') || Input.getInput('awsEndpoint'),
+      awsS3Endpoint: Input.getInput('awsS3Endpoint') || Input.getInput('awsEndpoint'),
+      storageProvider: Input.getInput('storageProvider') || 's3',
+      rcloneRemote: Input.getInput('rcloneRemote') || '',
       gitSha: Input.gitSha,
-      logId: customAlphabet(OrchestratorConstants.alphabet, 9)(),
-      buildGuid: OrchestratorBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      commandHooks: OrchestratorOptions.commandHooks,
-      inputPullCommand: OrchestratorOptions.inputPullCommand,
-      pullInputList: OrchestratorOptions.pullInputList,
-      kubeStorageClass: OrchestratorOptions.kubeStorageClass,
+      logId: customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 9)(),
+      buildGuid: `${Input.runNumber}-${Input.targetPlatform.toLowerCase().replace('standalone', '')}-${customAlphabet(
+        '0123456789abcdefghijklmnopqrstuvwxyz',
+        4,
+      )()}`,
+      commandHooks: Input.getInput('commandHooks') || '',
+      inputPullCommand: Input.getInput('inputPullCommand') || '',
+      pullInputList: (Input.getInput('pullInputList') || '').split(',').filter(Boolean),
+      kubeStorageClass: Input.getInput('kubeStorageClass') || '',
       gcpProject: Input.gcpProject,
       gcpRegion: Input.gcpRegion,
       gcpStorageType: Input.gcpStorageType,
@@ -360,17 +364,17 @@ class BuildParameters {
       azureMemoryGb: Input.azureMemoryGb,
       azureDiskSizeGb: Input.azureDiskSizeGb,
       azureSubnetId: Input.azureSubnetId,
-      cacheKey: OrchestratorOptions.cacheKey,
-      maxRetainedWorkspaces: Number.parseInt(OrchestratorOptions.maxRetainedWorkspaces),
-      useLargePackages: OrchestratorOptions.useLargePackages,
-      useCompressionStrategy: OrchestratorOptions.useCompressionStrategy,
-      garbageMaxAge: OrchestratorOptions.garbageMaxAge,
-      githubChecks: OrchestratorOptions.githubChecks,
-      asyncWorkflow: OrchestratorOptions.asyncOrchestrator,
-      githubCheckId: OrchestratorOptions.githubCheckId,
-      finalHooks: OrchestratorOptions.finalHooks,
-      skipLfs: OrchestratorOptions.skipLfs,
-      skipCache: OrchestratorOptions.skipCache,
+      cacheKey: Input.getInput('cacheKey') || Input.branch,
+      maxRetainedWorkspaces: Number.parseInt(Input.getInput('maxRetainedWorkspaces') || '0'),
+      useLargePackages: Input.getInput('useLargePackages') === 'true',
+      useCompressionStrategy: Input.getInput('useCompressionStrategy') === 'true',
+      garbageMaxAge: Number(Input.getInput('garbageMaxAge')) || 24,
+      githubChecks: Input.getInput('githubChecks') === 'true',
+      asyncWorkflow: Input.getInput('asyncOrchestrator') === 'true',
+      githubCheckId: Input.getInput('githubCheckId') || '',
+      finalHooks: (Input.getInput('finalHooks') || '').split(',').filter(Boolean),
+      skipLfs: Input.getInput('skipLfs') === 'true',
+      skipCache: Input.getInput('skipCache') === 'true',
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,

@@ -115,11 +115,6 @@ jest.mock('./model/orchestrator-plugin', () => ({
   }),
 }));
 
-// Mock the sync-state module for the SyncStrategy type import
-jest.mock('./model/orchestrator/services/sync/sync-state', () => ({
-  SyncStrategy: {},
-}));
-
 // Mock all non-enterprise dependencies to isolate the wiring logic
 jest.mock('@actions/core');
 jest.mock('./model', () => ({

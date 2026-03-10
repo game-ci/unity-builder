@@ -1,7 +1,8 @@
 import type { CommandModule } from 'yargs';
 import * as core from '@actions/core';
-import { BuildParameters, ImageTag, Orchestrator } from '../../model';
+import { BuildParameters, ImageTag } from '../../model';
 import { mapCliArgumentsToInput, CliArguments } from '../input-mapper';
+import { loadOrchestrator } from '../../model/orchestrator-plugin';
 import MacBuilder from '../../model/mac-builder';
 import Docker from '../../model/docker';
 import Action from '../../model/action';
@@ -276,8 +277,14 @@ const buildCommand: CommandModule<object, BuildArguments> = {
               });
       } else {
         core.info(`Building via orchestrator (${buildParameters.providerStrategy})...`);
-        await Orchestrator.run(buildParameters, baseImage.toString());
-        exitCode = 0;
+        const orchestrator = await loadOrchestrator();
+        if (!orchestrator) {
+          throw new Error(
+            'Orchestrator package not available. Install @game-ci/orchestrator or use --provider-strategy local.',
+          );
+        }
+        const result = await orchestrator.run(buildParameters, baseImage.toString());
+        exitCode = result.exitCode;
       }
 
       // Output results
