@@ -90,7 +90,7 @@ jobs:
       - name: Verify all services and lazy loaders
         run: |
           node -e "
-            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
             (async () => {
               const orch = await loadOrchestrator();
               if (!orch || typeof orch.run !== 'function') {
@@ -99,8 +99,8 @@ jobs:
               }
               console.log('✓ loadOrchestrator().run is a function');
 
-              const services = await loadEnterpriseServices();
-              if (!services) { console.error('ERROR: loadEnterpriseServices failed'); process.exit(1); }
+              const services = await loadPluginServices();
+              if (!services) { console.error('ERROR: loadPluginServices failed'); process.exit(1); }
 
               const eager = ['BuildReliabilityService','TestWorkflowService','HotRunnerService','OutputService','OutputTypeRegistry','ArtifactUploadHandler','IncrementalSyncService'];
               for (const s of eager) { if (!services[s]) { console.error('Missing: ' + s); process.exit(1); } }

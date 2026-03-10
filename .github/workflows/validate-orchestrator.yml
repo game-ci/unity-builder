@@ -99,7 +99,7 @@ jobs:
         run: |
           echo "Checking plugin loader handles missing @game-ci/orchestrator..."
           node -e "
-            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
             (async () => {
               const orch = await loadOrchestrator();
               if (orch !== undefined) {
@@ -108,12 +108,12 @@ jobs:
               }
               console.log('✓ loadOrchestrator() returns undefined when package not installed');
 
-              const services = await loadEnterpriseServices();
+              const services = await loadPluginServices();
               if (services !== undefined) {
-                console.error('ERROR: loadEnterpriseServices should return undefined when package not installed');
+                console.error('ERROR: loadPluginServices should return undefined when package not installed');
                 process.exit(1);
               }
-              console.log('✓ loadEnterpriseServices() returns undefined when package not installed');
+              console.log('✓ loadPluginServices() returns undefined when package not installed');
             })();
           "
 
@@ -153,7 +153,7 @@ jobs:
         run: |
           echo "Checking plugin loader returns defined exports..."
           node -e "
-            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
             (async () => {
               const orch = await loadOrchestrator();
               if (orch === undefined) {
@@ -166,9 +166,9 @@ jobs:
               }
               console.log('✓ loadOrchestrator() returns defined exports with orchestrator installed');
 
-              const services = await loadEnterpriseServices();
+              const services = await loadPluginServices();
               if (services === undefined) {
-                console.error('ERROR: loadEnterpriseServices should return defined exports when package is installed');
+                console.error('ERROR: loadPluginServices should return defined exports when package is installed');
                 process.exit(1);
               }
               const expectedServices = [
@@ -182,7 +182,7 @@ jobs:
                   process.exit(1);
                 }
               }
-              console.log('✓ loadEnterpriseServices() returns all ' + expectedServices.length + ' services');
+              console.log('✓ loadPluginServices() returns all ' + expectedServices.length + ' services');
 
               const lazyLoaders = [
                 'loadChildWorkspaceService', 'loadLocalCacheService',
