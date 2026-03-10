@@ -112,7 +112,7 @@ jobs:
       - name: Verify plugin loader returns exports with orchestrator installed
         run: |
           echo "Installing orchestrator into unity-builder workspace..."
-          npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save
+          npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save --legacy-peer-deps
           echo "Checking plugin loader returns defined exports..."
           node -e "
             const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
