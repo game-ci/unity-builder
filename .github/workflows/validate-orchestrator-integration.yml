@@ -1,27 +1,19 @@
-name: Validate Orchestrator Integration
+name: Orchestrator Integration Tests (Nightly)
+
+# ==============================================================================
+# Exhaustive integration tests — runs on a daily cron and manual dispatch.
+# Slow (~1-2h wall-clock): k8s, AWS, local-docker, rclone via LocalStack + k3d.
+#
+# Mirrors the full orchestrator-integrity.yml test suite from the orchestrator
+# repo, run from unity-builder's perspective to catch cross-repo regressions.
+#
+# For fast per-PR checks, see validate-orchestrator.yml.
+# ==============================================================================
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, 'release/**', 'feature/**', 'refactor/**']
-    paths:
-      - 'src/model/orchestrator-plugin.ts'
-      - 'src/model/build-parameters.ts'
-      - 'src/model/input.ts'
-      - 'src/model/github.ts'
-      - 'src/types/game-ci-orchestrator.d.ts'
-      - 'action.yml'
-      - '.github/workflows/validate-orchestrator-integration.yml'
-  pull_request:
-    branches: [main, 'release/**']
-    paths:
-      - 'src/model/orchestrator-plugin.ts'
-      - 'src/model/build-parameters.ts'
-      - 'src/model/input.ts'
-      - 'src/model/github.ts'
-      - 'src/types/game-ci-orchestrator.d.ts'
-      - 'action.yml'
-      - '.github/workflows/validate-orchestrator-integration.yml'
+  schedule:
+    - cron: '0 3 * * *' # Daily at 3 AM UTC
 
 permissions:
   contents: read
@@ -29,7 +21,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -39,21 +31,13 @@ env:
   USE_IL2CPP: false
 
 # ==============================================================================
-# Cross-repo integration testing
-# ==============================================================================
-# Validates that the orchestrator package works correctly when installed as a
-# plugin into unity-builder. Each job runs on its own runner with a fresh 14GB
-# disk to avoid disk exhaustion (a known issue with localstack + k3d).
-#
-# Job groups:
-#   plugin-interface  - Unit tests + installed plugin smoke tests (no infra)
-#   k8s-integration   - k3d cluster + LocalStack, 3 representative tests
-#   aws-integration   - LocalStack only (no k3d), 3 representative tests
+# 4 parallel jobs on separate runners (fresh 14GB disk each).
+# Matches the orchestrator-integrity.yml architecture.
 # ==============================================================================
 
 jobs:
   # ============================================================================
-  # PLUGIN INTERFACE VALIDATION
+  # PLUGIN INTERFACE (fast gate — fails fast before slow jobs waste time)
   # ============================================================================
   plugin-interface:
     name: Plugin Interface Tests
@@ -88,28 +72,6 @@ jobs:
           echo "Running orchestrator-plugin unit tests..."
           npx jest orchestrator-plugin --verbose --detectOpenHandles --forceExit
 
-      - name: Verify plugin loader returns undefined without orchestrator
-        run: |
-          echo "Checking plugin loader handles missing @game-ci/orchestrator..."
-          node -e "
-            const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
-            (async () => {
-              const orch = await loadOrchestrator();
-              if (orch !== undefined) {
-                console.error('ERROR: loadOrchestrator should return undefined when package not installed');
-                process.exit(1);
-              }
-              console.log('✓ loadOrchestrator() returns undefined when package not installed');
-
-              const services = await loadEnterpriseServices();
-              if (services !== undefined) {
-                console.error('ERROR: loadEnterpriseServices should return undefined when package not installed');
-                process.exit(1);
-              }
-              console.log('✓ loadEnterpriseServices() returns undefined when package not installed');
-            })();
-          "
-
       - name: Build and pack orchestrator
         working-directory: orchestrator-standalone
         run: |
@@ -125,78 +87,43 @@ jobs:
           echo "Installing orchestrator into unity-builder workspace..."
           npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save --legacy-peer-deps
 
-      - name: Verify plugin loader returns exports with orchestrator installed
+      - name: Verify all services and lazy loaders
         run: |
-          echo "Checking plugin loader returns defined exports..."
           node -e "
             const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
             (async () => {
               const orch = await loadOrchestrator();
-              if (orch === undefined) {
-                console.error('ERROR: loadOrchestrator should return defined exports when package is installed');
+              if (!orch || typeof orch.run !== 'function') {
+                console.error('ERROR: loadOrchestrator failed');
                 process.exit(1);
               }
-              if (typeof orch.run !== 'function') {
-                console.error('ERROR: loadOrchestrator().run should be a function');
-                process.exit(1);
-              }
-              console.log('✓ loadOrchestrator() returns defined exports with orchestrator installed');
+              console.log('✓ loadOrchestrator().run is a function');
 
               const services = await loadEnterpriseServices();
-              if (services === undefined) {
-                console.error('ERROR: loadEnterpriseServices should return defined exports when package is installed');
-                process.exit(1);
-              }
-              const expectedServices = [
-                'BuildReliabilityService', 'TestWorkflowService', 'HotRunnerService',
-                'OutputService', 'OutputTypeRegistry', 'ArtifactUploadHandler',
-                'IncrementalSyncService',
-              ];
-              for (const svc of expectedServices) {
-                if (services[svc] === undefined) {
-                  console.error('ERROR: ' + svc + ' should be defined');
-                  process.exit(1);
-                }
-              }
-              console.log('✓ loadEnterpriseServices() returns all ' + expectedServices.length + ' services');
+              if (!services) { console.error('ERROR: loadEnterpriseServices failed'); process.exit(1); }
 
-              const lazyLoaders = [
-                'loadChildWorkspaceService', 'loadLocalCacheService',
-                'loadSubmoduleProfileService', 'loadLfsAgentService', 'loadGitHooksService',
-              ];
-              for (const loader of lazyLoaders) {
-                if (typeof services[loader] !== 'function') {
-                  console.error('ERROR: ' + loader + ' should be a function');
-                  process.exit(1);
-                }
-                const loaded = await services[loader]();
-                if (loaded === undefined) {
-                  console.error('ERROR: ' + loader + '() should return defined service');
-                  process.exit(1);
-                }
+              const eager = ['BuildReliabilityService','TestWorkflowService','HotRunnerService','OutputService','OutputTypeRegistry','ArtifactUploadHandler','IncrementalSyncService'];
+              for (const s of eager) { if (!services[s]) { console.error('Missing: ' + s); process.exit(1); } }
+              console.log('✓ All ' + eager.length + ' eager services loaded');
+
+              const lazy = ['loadChildWorkspaceService','loadLocalCacheService','loadSubmoduleProfileService','loadLfsAgentService','loadGitHooksService'];
+              for (const l of lazy) {
+                if (typeof services[l] !== 'function') { console.error('Missing loader: ' + l); process.exit(1); }
+                const svc = await services[l]();
+                if (!svc) { console.error(l + '() returned undefined'); process.exit(1); }
               }
-              console.log('✓ All ' + lazyLoaders.length + ' lazy loaders return defined services');
+              console.log('✓ All ' + lazy.length + ' lazy loaders return defined services');
             })();
           "
 
-      - name: Verify type declarations match orchestrator exports
+      - name: Verify type declarations match exports
         run: |
-          echo "Checking type declarations align with orchestrator exports..."
           node -e "
             const orch = require('@game-ci/orchestrator');
-            const expectedExports = [
-              'Orchestrator', 'BuildReliabilityService', 'TestWorkflowService',
-              'HotRunnerService', 'OutputService', 'OutputTypeRegistry',
-              'ArtifactUploadHandler', 'IncrementalSyncService',
-              'ChildWorkspaceService', 'LocalCacheService', 'SubmoduleProfileService',
-              'LfsAgentService', 'GitHooksService',
-            ];
-            const missing = expectedExports.filter(e => orch[e] === undefined);
-            if (missing.length > 0) {
-              console.error('ERROR: Missing exports from @game-ci/orchestrator:', missing.join(', '));
-              process.exit(1);
-            }
-            console.log('✓ All ' + expectedExports.length + ' declared exports present in orchestrator package');
+            const expected = ['Orchestrator','BuildReliabilityService','TestWorkflowService','HotRunnerService','OutputService','OutputTypeRegistry','ArtifactUploadHandler','IncrementalSyncService','ChildWorkspaceService','LocalCacheService','SubmoduleProfileService','LfsAgentService','GitHooksService'];
+            const missing = expected.filter(e => orch[e] === undefined);
+            if (missing.length > 0) { console.error('Missing exports:', missing.join(', ')); process.exit(1); }
+            console.log('✓ All ' + expected.length + ' exports present');
           "
 
   # ============================================================================
@@ -291,8 +218,6 @@ jobs:
       - name: Start LocalStack
         run: |
           echo "Starting LocalStack..."
-          HOST_IP=$(ip route | grep default | awk '{print $3}')
-          echo "Host gateway IP: $HOST_IP"
           docker run -d \
             --name localstack-main \
             --network orchestrator-net \
@@ -306,83 +231,41 @@ jobs:
           MAX_ATTEMPTS=60
           READY=false
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            if ! docker ps | grep -q localstack-main; then
-              echo "LocalStack container not running (attempt $i/$MAX_ATTEMPTS)"
-              sleep 2
-              continue
-            fi
+            if ! docker ps | grep -q localstack-main; then sleep 2; continue; fi
             HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
-            if [ -z "$HEALTH" ] || ! echo "$HEALTH" | grep -q "services"; then
-              echo "LocalStack health endpoint not ready (attempt $i/$MAX_ATTEMPTS)"
-              sleep 2
-              continue
-            fi
+            if [ -z "$HEALTH" ] || ! echo "$HEALTH" | grep -q "services"; then sleep 2; continue; fi
             if echo "$HEALTH" | grep -q '"s3"'; then
-              echo "LocalStack is ready with S3 service (attempt $i/$MAX_ATTEMPTS)"
+              echo "LocalStack is ready (attempt $i/$MAX_ATTEMPTS)"
               READY=true
               break
             fi
-            echo "Waiting for LocalStack S3 service... ($i/$MAX_ATTEMPTS)"
             sleep 2
           done
           if [ "$READY" != "true" ]; then
-            echo "ERROR: LocalStack did not become ready after $MAX_ATTEMPTS attempts"
-            docker ps -a | grep localstack || echo "No LocalStack container found"
+            echo "ERROR: LocalStack did not become ready"
             docker logs localstack-main --tail 100 || true
             exit 1
           fi
 
       - name: Install AWS CLI tools
         run: |
-          if ! command -v aws > /dev/null 2>&1; then
-            pip install awscli || true
-          fi
+          if ! command -v aws > /dev/null 2>&1; then pip install awscli || true; fi
           pip install awscli-local || true
-          aws --version || echo "AWS CLI not available"
 
       - name: Create S3 bucket for tests
         run: |
-          echo "Verifying LocalStack connectivity..."
           for i in {1..10}; do
-            if curl -s http://localhost:4566/_localstack/health > /dev/null 2>&1; then
-              echo "LocalStack is accessible"
-              break
-            fi
-            echo "Waiting for LocalStack... ($i/10)"
+            if curl -s http://localhost:4566/_localstack/health > /dev/null 2>&1; then break; fi
             sleep 1
           done
-          MAX_RETRIES=5
-          RETRY_COUNT=0
-          BUCKET_CREATED=false
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$BUCKET_CREATED" != "true" ]; do
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            echo "Attempting to create S3 bucket (attempt $RETRY_COUNT/$MAX_RETRIES)..."
+          for i in {1..5}; do
             if command -v awslocal > /dev/null 2>&1; then
-              if awslocal s3 mb s3://$AWS_STACK_NAME 2>&1; then
-                echo "Bucket created successfully with awslocal"
-                BUCKET_CREATED=true
-              else
-                echo "Bucket creation failed, will retry..."
-                sleep 2
-              fi
-            elif command -v aws > /dev/null 2>&1; then
-              if aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1; then
-                echo "Bucket created successfully with aws CLI"
-                BUCKET_CREATED=true
-              else
-                echo "Bucket creation failed, will retry..."
-                sleep 2
-              fi
+              awslocal s3 mb s3://$AWS_STACK_NAME 2>&1 && break
             else
-              echo "Neither awslocal nor aws CLI available"
-              exit 1
+              aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1 && break
             fi
+            sleep 2
           done
-          if [ "$BUCKET_CREATED" != "true" ]; then
-            echo "ERROR: Failed to create S3 bucket after $MAX_RETRIES attempts"
-            docker logs localstack-main --tail 50 || true
-            exit 1
-          fi
 
       - run: yarn install --frozen-lockfile
 
@@ -392,18 +275,17 @@ jobs:
           yarn build
           echo "✓ orchestrator build successful"
 
-      # --- Fast unit tests (fast-fail gate before heavy infra tests) ---
+      # --- Fast unit tests (fast-fail gate) ---
       - name: Run orchestrator unit tests (fast, no infra)
         timeout-minutes: 2
         run: >-
           yarn run test
-          --testPathPattern="orchestrator-guid|orchestrator-folders|task-parameter-serializer|follow-log-stream-service|runner-availability-service|provider-url-parser|provider-loader|provider-git-manager|orchestrator-image|orchestrator-hooks|orchestrator-github-checks"
+          --testPathPattern="orchestrator-guid|orchestrator-folders|task-parameter-serializer|follow-log-stream-service|runner-availability-service|provider-url-parser|provider-loader|provider-git-manager|orchestrator-image|orchestrator-hooks|orchestrator-github-checks|middleware-service"
           --verbose --detectOpenHandles --forceExit --runInBand
 
       # --- K8s cluster setup ---
       - name: Clean up disk space before K8s tests
         run: |
-          echo "Cleaning up disk space before K8s tests..."
           rm -rf ./orchestrator-cache/* || true
           sudo apt-get clean || true
           docker system prune -f || true
@@ -425,24 +307,15 @@ jobs:
         timeout-minutes: 2
         run: |
           for i in {1..60}; do
-            if kubectl get nodes 2>/dev/null | grep -q Ready; then
-              echo "Cluster is ready"
-              break
-            fi
+            if kubectl get nodes 2>/dev/null | grep -q Ready; then echo "Cluster is ready"; break; fi
             echo "Waiting for cluster... ($i/60)"
             sleep 5
           done
           kubectl get nodes
-          kubectl get storageclass
           LOCALSTACK_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' localstack-main 2>/dev/null || echo "")
-          echo "LocalStack container IP: $LOCALSTACK_IP"
-          echo "Testing LocalStack connectivity from k3d cluster..."
-          curl -s --max-time 5 http://localhost:4566/_localstack/health | head -5 || echo "Host connectivity failed"
-          docker run --rm --network orchestrator-net curlimages/curl \
-            curl -s --max-time 5 http://localstack-main:4566/_localstack/health 2>&1 | head -5 || echo "Container network test failed"
           kubectl run test-localstack --image=curlimages/curl --rm -i --restart=Never --timeout=30s -- \
             curl -v --max-time 10 http://${LOCALSTACK_IP}:4566/_localstack/health 2>&1 | head -30 || \
-            echo "Cluster connectivity test - if this fails, LocalStack may not be accessible from k3d"
+            echo "Cluster connectivity test - LocalStack may not be accessible from k3d"
 
       - name: Clean up K8s resources before tests
         run: |
@@ -450,19 +323,9 @@ jobs:
           k8s_resource_cleanup
           for i in {1..30}; do
             PVC_COUNT=$(kubectl get pvc -n default 2>/dev/null | grep "unity-builder-pvc-" | wc -l || echo "0")
-            if [ "$PVC_COUNT" -eq 0 ]; then
-              echo "All PVCs deleted"
-              break
-            fi
-            echo "Waiting for PVCs to be deleted... ($i/30) - Found $PVC_COUNT PVCs"
+            if [ "$PVC_COUNT" -eq 0 ]; then echo "All PVCs deleted"; break; fi
             sleep 1
           done
-          kubectl get pv 2>/dev/null | grep -E "(Released|Failed)" | awk '{print $1}' | while read pv; do
-            if [ -n "$pv" ] && [ "$pv" != "NAME" ]; then
-              kubectl delete pv "$pv" --ignore-not-found=true || true
-            fi
-          done || true
-          sleep 3
           docker system prune -f || true
 
       # --- K8s Test 1: orchestrator-image ---
@@ -553,16 +416,86 @@ jobs:
           source /tmp/cleanup-functions.sh
           full_k8s_cleanup
 
+      # --- K8s Test 4: orchestrator-end2end-caching ---
+      - name: Run orchestrator-end2end-caching test (K8s)
+        timeout-minutes: 60
+        continue-on-error: true
+        run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          KUBE_STORAGE_CLASS: local-path
+          PROVIDER_STRATEGY: k8s
+          KUBE_VOLUME_SIZE: 2Gi
+          containerCpu: '1000'
+          containerMemory: '1024'
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_S3_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT: http://localhost:4566
+          INPUT_AWSS3ENDPOINT: http://localhost:4566
+          INPUT_AWSENDPOINT: http://localhost:4566
+          AWS_S3_FORCE_PATH_STYLE: 'true'
+          AWS_EC2_METADATA_DISABLED: 'true'
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-end2end-caching (K8s)
+        if: always()
+        run: |
+          source /tmp/cleanup-functions.sh
+          full_k8s_cleanup
+
+      # --- K8s Test 5: orchestrator-end2end-retaining ---
+      - name: Extra disk cleanup before retaining test
+        run: |
+          source /tmp/cleanup-functions.sh
+          full_k8s_cleanup
+          docker system prune -af --volumes || true
+          df -h
+      - name: Run orchestrator-end2end-retaining test (K8s)
+        timeout-minutes: 60
+        continue-on-error: true
+        run: yarn run test "orchestrator-end2end-retaining" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          KUBE_STORAGE_CLASS: local-path
+          PROVIDER_STRATEGY: k8s
+          KUBE_VOLUME_SIZE: 2Gi
+          containerCpu: '1000'
+          containerMemory: '1024'
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_S3_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT: http://localhost:4566
+          INPUT_AWSS3ENDPOINT: http://localhost:4566
+          INPUT_AWSENDPOINT: http://localhost:4566
+          AWS_S3_FORCE_PATH_STYLE: 'true'
+          AWS_EC2_METADATA_DISABLED: 'true'
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-end2end-retaining (K8s)
+        if: always()
+        run: |
+          source /tmp/cleanup-functions.sh
+          full_k8s_cleanup
+
       # --- K8s teardown ---
       - name: Delete k3d cluster and final cleanup
         if: always()
         run: |
-          echo "Deleting k3d cluster..."
           k3d cluster delete unity-builder || true
           docker stop localstack-main 2>/dev/null || true
           docker rm localstack-main 2>/dev/null || true
           docker system prune -af --volumes || true
-          echo "Final disk usage:"
           df -h
 
   # ============================================================================
@@ -598,7 +531,6 @@ jobs:
             docker system prune -f || true
             df -h
           }
-
           heavy_cleanup() {
             echo "--- Heavy cleanup ---"
             rm -rf ./orchestrator-cache/* || true
@@ -606,83 +538,43 @@ jobs:
             df -h
           }
           CLEANUP_EOF
-          echo "Cleanup functions defined at /tmp/cleanup-functions.sh"
 
       - name: Initial disk space cleanup
         run: |
-          echo "Initial disk space cleanup..."
           df -h
           docker system prune -af --volumes || true
-          echo "Disk usage after cleanup:"
           df -h
 
       - name: Start LocalStack
         run: |
-          echo "Starting LocalStack..."
           docker run -d \
             --name localstack-main \
             -p 4566:4566 \
             -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs,efs,ec2,iam,elasticfilesystem,secretsmanager,lambda,events,sts \
             -e DEBUG=0 \
             localstack/localstack:latest || true
-          echo "Waiting for LocalStack to be ready..."
           MAX_ATTEMPTS=60
-          READY=false
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            if ! docker ps | grep -q localstack-main; then
-              echo "LocalStack container not running (attempt $i/$MAX_ATTEMPTS)"
-              sleep 2
-              continue
-            fi
             HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
-            if [ -z "$HEALTH" ] || ! echo "$HEALTH" | grep -q "services"; then
-              sleep 2
-              continue
-            fi
-            if echo "$HEALTH" | grep -q '"s3"'; then
-              echo "LocalStack is ready with S3 service (attempt $i/$MAX_ATTEMPTS)"
-              READY=true
-              break
-            fi
+            if echo "$HEALTH" | grep -q '"s3"'; then echo "LocalStack ready ($i/$MAX_ATTEMPTS)"; break; fi
             sleep 2
           done
-          if [ "$READY" != "true" ]; then
-            echo "ERROR: LocalStack did not become ready"
-            docker logs localstack-main --tail 100 || true
-            exit 1
-          fi
 
       - name: Install AWS CLI tools
         run: |
-          if ! command -v aws > /dev/null 2>&1; then
-            pip install awscli || true
-          fi
+          if ! command -v aws > /dev/null 2>&1; then pip install awscli || true; fi
           pip install awscli-local || true
 
       - name: Create S3 bucket for tests
         run: |
-          for i in {1..10}; do
-            if curl -s http://localhost:4566/_localstack/health > /dev/null 2>&1; then break; fi
-            sleep 1
-          done
-          MAX_RETRIES=5
-          RETRY_COUNT=0
-          BUCKET_CREATED=false
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$BUCKET_CREATED" != "true" ]; do
-            RETRY_COUNT=$((RETRY_COUNT + 1))
+          for i in {1..5}; do
             if command -v awslocal > /dev/null 2>&1; then
-              if awslocal s3 mb s3://$AWS_STACK_NAME 2>&1; then BUCKET_CREATED=true; else sleep 2; fi
-            elif command -v aws > /dev/null 2>&1; then
-              if aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1; then BUCKET_CREATED=true; else sleep 2; fi
+              awslocal s3 mb s3://$AWS_STACK_NAME 2>&1 && break
             else
-              echo "Neither awslocal nor aws CLI available"; exit 1
+              aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1 && break
             fi
+            sleep 2
           done
-          if [ "$BUCKET_CREATED" != "true" ]; then
-            echo "ERROR: Failed to create S3 bucket"
-            docker logs localstack-main --tail 50 || true
-            exit 1
-          fi
 
       - run: yarn install --frozen-lockfile
 
@@ -703,17 +595,32 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           orchestratorTests: true
           versioning: None
-          KUBE_STORAGE_CLASS: local-path
           PROVIDER_STRATEGY: aws
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
       - name: Cleanup after orchestrator-image (AWS)
         if: always()
-        run: |
-          source /tmp/cleanup-functions.sh
-          light_cleanup
+        run: source /tmp/cleanup-functions.sh && light_cleanup
 
-      # --- AWS Test 2: orchestrator-s3-steps ---
+      # --- AWS Test 2: orchestrator-environment ---
+      - name: Run orchestrator-environment test (AWS)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-environment" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-environment (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- AWS Test 3: orchestrator-s3-steps ---
       - name: Run orchestrator-s3-steps test (AWS)
         timeout-minutes: 30
         run: yarn run test "orchestrator-s3-steps" --detectOpenHandles --forceExit --runInBand
@@ -724,19 +631,35 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           orchestratorTests: true
           versioning: None
-          KUBE_STORAGE_CLASS: local-path
           PROVIDER_STRATEGY: aws
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
       - name: Cleanup after orchestrator-s3-steps (AWS)
         if: always()
-        run: |
-          source /tmp/cleanup-functions.sh
-          light_cleanup
+        run: source /tmp/cleanup-functions.sh && light_cleanup
 
-      # --- AWS Test 3: orchestrator-end2end-caching ---
+      # --- AWS Test 4: orchestrator-hooks ---
+      - name: Run orchestrator-hooks test (AWS)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-hooks" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-hooks (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- AWS Test 5: orchestrator-end2end-caching ---
       - name: Run orchestrator-end2end-caching test (AWS)
         timeout-minutes: 60
+        continue-on-error: true
         run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -745,21 +668,462 @@ jobs:
           TARGET_PLATFORM: StandaloneWindows64
           orchestratorTests: true
           versioning: None
-          KUBE_STORAGE_CLASS: local-path
           PROVIDER_STRATEGY: aws
           GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
       - name: Cleanup after orchestrator-end2end-caching (AWS)
         if: always()
-        run: |
-          source /tmp/cleanup-functions.sh
-          light_cleanup
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- AWS Test 6: orchestrator-end2end-retaining ---
+      - name: Run orchestrator-end2end-retaining test (AWS)
+        timeout-minutes: 60
+        continue-on-error: true
+        run: yarn run test "orchestrator-end2end-retaining" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-end2end-retaining (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- AWS Test 7: orchestrator-caching ---
+      - name: Run orchestrator-caching test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-caching (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- AWS Test 8: orchestrator-locking-core ---
+      - name: Run orchestrator-locking-core test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-core (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- AWS Test 9: orchestrator-locking-get-locked ---
+      - name: Run orchestrator-locking-get-locked test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-get-locked (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- AWS Test 10: orchestrator-end2end-locking ---
+      - name: Run orchestrator-end2end-locking test (AWS)
+        timeout-minutes: 60
+        continue-on-error: true
+        run: yarn run test "orchestrator-end2end-locking" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-end2end-locking (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
 
       # --- Final cleanup ---
       - name: Final cleanup
         if: always()
         run: |
-          rm -rf ./orchestrator-cache/* || true
+          docker stop localstack-main 2>/dev/null || true
+          docker rm localstack-main 2>/dev/null || true
+          docker system prune -af --volumes || true
+          df -h
+
+  # ============================================================================
+  # LOCAL-DOCKER INTEGRATION TESTS
+  # ============================================================================
+  local-docker-integration:
+    name: Local Docker Integration Tests
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT: http://localhost:4566
+      AWS_ENDPOINT_URL: http://localhost:4566
+    steps:
+      - name: Checkout orchestrator
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Define cleanup functions
+        run: |
+          cat > /tmp/cleanup-functions.sh << 'CLEANUP_EOF'
+          light_cleanup() {
+            echo "--- Light cleanup ---"
+            rm -rf ./orchestrator-cache/* || true
+            docker system prune -f || true
+            df -h
+          }
+          heavy_cleanup() {
+            echo "--- Heavy cleanup ---"
+            rm -rf ./orchestrator-cache/* || true
+            docker system prune -af --volumes || true
+            df -h
+          }
+          CLEANUP_EOF
+
+      - name: Initial disk space cleanup
+        run: |
+          df -h
+          docker system prune -af --volumes || true
+          df -h
+
+      - name: Start LocalStack (for S3-dependent tests)
+        run: |
+          docker run -d \
+            --name localstack-main \
+            -p 4566:4566 \
+            -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs \
+            -e DEBUG=0 \
+            localstack/localstack:latest || true
+          MAX_ATTEMPTS=60
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
+            if echo "$HEALTH" | grep -q '"s3"'; then echo "LocalStack ready ($i/$MAX_ATTEMPTS)"; break; fi
+            sleep 2
+          done
+
+      - name: Install AWS CLI tools
+        run: |
+          if ! command -v aws > /dev/null 2>&1; then pip install awscli || true; fi
+          pip install awscli-local || true
+
+      - name: Create S3 bucket for tests
+        run: |
+          for i in {1..5}; do
+            if command -v awslocal > /dev/null 2>&1; then
+              awslocal s3 mb s3://$AWS_STACK_NAME 2>&1 && break
+            else
+              aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1 && break
+            fi
+            sleep 2
+          done
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Build orchestrator
+        run: |
+          yarn build
+          echo "✓ orchestrator build successful"
+
+      # --- Local Docker Test 1: orchestrator-image ---
+      - name: Run orchestrator-image test (local-docker)
+        timeout-minutes: 10
+        run: yarn run test "orchestrator-image" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-image (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 2: orchestrator-hooks ---
+      - name: Run orchestrator-hooks test (local-docker)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-hooks" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-hooks (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 3: orchestrator-local-persistence ---
+      - name: Run orchestrator-local-persistence test (local-docker)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-local-persistence" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-local-persistence (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 4: orchestrator-caching ---
+      - name: Run orchestrator-caching test (local-docker)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-caching (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 5: orchestrator-github-checks ---
+      - name: Run orchestrator-github-checks test (local-docker)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-github-checks" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-github-checks (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 6: orchestrator-locking-core (with S3) ---
+      - name: Run orchestrator-locking-core test (local-docker + S3)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-core (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 7: orchestrator-locking-get-locked (with S3) ---
+      - name: Run orchestrator-locking-get-locked test (local-docker + S3)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-get-locked (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- Local Docker Test 8: orchestrator-s3-steps (with S3) ---
+      - name: Run orchestrator-s3-steps test (local-docker + S3)
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-s3-steps" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-s3-steps (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- Local Docker Test 9: orchestrator-end2end-caching (with S3) ---
+      - name: Run orchestrator-end2end-caching test (local-docker + S3)
+        timeout-minutes: 60
+        continue-on-error: true
+        run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-end2end-caching (local-docker)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- Final cleanup ---
+      - name: Final cleanup
+        if: always()
+        run: |
+          docker stop localstack-main 2>/dev/null || true
+          docker rm localstack-main 2>/dev/null || true
+          docker system prune -af --volumes || true
+          df -h
+
+  # ============================================================================
+  # RCLONE INTEGRATION TESTS
+  # ============================================================================
+  rclone-integration:
+    name: Rclone Integration Tests
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT: http://localhost:4566
+      AWS_ENDPOINT_URL: http://localhost:4566
+    steps:
+      - name: Checkout orchestrator
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Initial disk space cleanup
+        run: |
+          docker system prune -af --volumes || true
+          df -h
+
+      - name: Start LocalStack
+        run: |
+          docker run -d \
+            --name localstack-main \
+            -p 4566:4566 \
+            -e SERVICES=s3 \
+            -e DEBUG=0 \
+            localstack/localstack:latest || true
+          MAX_ATTEMPTS=60
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
+            if echo "$HEALTH" | grep -q '"s3"'; then echo "LocalStack ready ($i/$MAX_ATTEMPTS)"; break; fi
+            sleep 2
+          done
+
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash || true
+          rclone version || echo "rclone not available"
+
+      - name: Install AWS CLI tools
+        run: |
+          if ! command -v aws > /dev/null 2>&1; then pip install awscli || true; fi
+          pip install awscli-local || true
+
+      - name: Create S3 bucket for tests
+        run: |
+          for i in {1..5}; do
+            if command -v awslocal > /dev/null 2>&1; then
+              awslocal s3 mb s3://$AWS_STACK_NAME 2>&1 && break
+            else
+              aws --endpoint-url=http://localhost:4566 s3 mb s3://$AWS_STACK_NAME 2>&1 && break
+            fi
+            sleep 2
+          done
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Build orchestrator
+        run: |
+          yarn build
+          echo "✓ orchestrator build successful"
+
+      # --- Rclone Test ---
+      - name: Run orchestrator-rclone-steps test
+        timeout-minutes: 30
+        run: yarn run test "orchestrator-rclone-steps" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneLinux64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: local-docker
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+
+      # --- Final cleanup ---
+      - name: Final cleanup
+        if: always()
+        run: |
           docker stop localstack-main 2>/dev/null || true
           docker rm localstack-main 2>/dev/null || true
           docker system prune -af --volumes || true

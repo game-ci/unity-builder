@@ -1,5 +1,13 @@
 name: Validate Orchestrator Compatibility
 
+# ==============================================================================
+# Essential plugin health checks — runs on every PR and push.
+# Fast (~5 min): compilation, unit tests, plugin interface, type declarations.
+#
+# For exhaustive integration tests (k8s, AWS, local-docker, rclone) see
+# validate-orchestrator-integration.yml which runs on a daily cron.
+# ==============================================================================
+
 on:
   workflow_dispatch:
   push:
@@ -15,6 +23,7 @@ on:
       - 'src/types/game-ci-orchestrator.d.ts'
       - 'action.yml'
       - 'package.json'
+      - '.github/workflows/validate-orchestrator.yml'
   pull_request:
     branches: [main, 'release/**']
     paths:
@@ -28,16 +37,31 @@ on:
       - 'src/types/game-ci-orchestrator.d.ts'
       - 'action.yml'
       - 'package.json'
+      - '.github/workflows/validate-orchestrator.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate-orchestrator:
-    name: Orchestrator Compatibility Check
+  # ============================================================================
+  # PLUGIN ARCHITECTURE HEALTH CHECK
+  # ============================================================================
+  # Validates that:
+  #   1. unity-builder compiles and its unit tests pass
+  #   2. Plugin loader degrades gracefully without orchestrator
+  #   3. Orchestrator compiles and its unit tests pass
+  #   4. Plugin loader loads all services when orchestrator is installed
+  #   5. Type declarations match actual exports
+  # ============================================================================
+  plugin-health:
+    name: Plugin Architecture Health
     runs-on: ubuntu-latest
     steps:
       - name: Checkout unity-builder
         uses: actions/checkout@v4
 
-      - name: Checkout orchestrator repo
+      - name: Checkout orchestrator
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
@@ -49,6 +73,7 @@ jobs:
           node-version: 20
           cache: yarn
 
+      # --- unity-builder compilation and tests ---
       - name: Install unity-builder dependencies
         run: yarn install --frozen-lockfile
 
@@ -58,11 +83,12 @@ jobs:
           npx tsc
           echo "✓ unity-builder compiles successfully"
 
-      - name: Run unity-builder tests
+      - name: Run orchestrator-plugin unit tests
         run: |
-          echo "Running unity-builder tests..."
-          npx jest --no-cache --passWithNoTests 2>&1 | tail -10
+          echo "Running orchestrator-plugin unit tests..."
+          npx jest orchestrator-plugin --verbose --detectOpenHandles --forceExit
 
+      # --- Plugin loader without orchestrator ---
       - name: Verify plugin loader returns undefined without orchestrator
         run: |
           echo "Checking plugin loader handles missing @game-ci/orchestrator..."
@@ -94,26 +120,31 @@ jobs:
             exit 1
           fi
 
-      - name: Build and install orchestrator standalone
+      # --- Orchestrator compilation and tests ---
+      - name: Build and pack orchestrator
         working-directory: orchestrator-standalone
         run: |
           yarn install --frozen-lockfile
-          echo "Building orchestrator standalone..."
+          echo "Building orchestrator..."
           npx tsc
-          echo "✓ orchestrator standalone compiles successfully"
+          echo "✓ orchestrator compiles successfully"
           echo "Packing orchestrator as tarball..."
           npm pack
 
-      - name: Run orchestrator standalone tests
+      - name: Run orchestrator unit tests
         working-directory: orchestrator-standalone
         run: |
-          echo "Running orchestrator standalone tests..."
-          npx jest --no-cache 2>&1 | tail -10
+          echo "Running orchestrator unit tests..."
+          npx jest --no-cache 2>&1 | tail -20
 
-      - name: Verify plugin loader returns exports with orchestrator installed
+      # --- Plugin loader with orchestrator installed ---
+      - name: Install orchestrator into unity-builder
         run: |
           echo "Installing orchestrator into unity-builder workspace..."
           npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save --legacy-peer-deps
+
+      - name: Verify plugin loader returns exports with orchestrator installed
+        run: |
           echo "Checking plugin loader returns defined exports..."
           node -e "
             const { loadOrchestrator, loadEnterpriseServices } = require('./lib/model/orchestrator-plugin');
@@ -134,6 +165,54 @@ jobs:
                 console.error('ERROR: loadEnterpriseServices should return defined exports when package is installed');
                 process.exit(1);
               }
-              console.log('✓ loadEnterpriseServices() returns defined exports with orchestrator installed');
+              const expectedServices = [
+                'BuildReliabilityService', 'TestWorkflowService', 'HotRunnerService',
+                'OutputService', 'OutputTypeRegistry', 'ArtifactUploadHandler',
+                'IncrementalSyncService',
+              ];
+              for (const svc of expectedServices) {
+                if (services[svc] === undefined) {
+                  console.error('ERROR: ' + svc + ' should be defined');
+                  process.exit(1);
+                }
+              }
+              console.log('✓ loadEnterpriseServices() returns all ' + expectedServices.length + ' services');
+
+              const lazyLoaders = [
+                'loadChildWorkspaceService', 'loadLocalCacheService',
+                'loadSubmoduleProfileService', 'loadLfsAgentService', 'loadGitHooksService',
+              ];
+              for (const loader of lazyLoaders) {
+                if (typeof services[loader] !== 'function') {
+                  console.error('ERROR: ' + loader + ' should be a function');
+                  process.exit(1);
+                }
+                const loaded = await services[loader]();
+                if (loaded === undefined) {
+                  console.error('ERROR: ' + loader + '() should return defined service');
+                  process.exit(1);
+                }
+              }
+              console.log('✓ All ' + lazyLoaders.length + ' lazy loaders return defined services');
             })();
+          "
+
+      - name: Verify type declarations match orchestrator exports
+        run: |
+          echo "Checking type declarations align with orchestrator exports..."
+          node -e "
+            const orch = require('@game-ci/orchestrator');
+            const expectedExports = [
+              'Orchestrator', 'BuildReliabilityService', 'TestWorkflowService',
+              'HotRunnerService', 'OutputService', 'OutputTypeRegistry',
+              'ArtifactUploadHandler', 'IncrementalSyncService',
+              'ChildWorkspaceService', 'LocalCacheService', 'SubmoduleProfileService',
+              'LfsAgentService', 'GitHooksService',
+            ];
+            const missing = expectedExports.filter(e => orch[e] === undefined);
+            if (missing.length > 0) {
+              console.error('ERROR: Missing exports from @game-ci/orchestrator:', missing.join(', '));
+              process.exit(1);
+            }
+            console.log('✓ All ' + expectedExports.length + ' declared exports present in orchestrator package');
           "
