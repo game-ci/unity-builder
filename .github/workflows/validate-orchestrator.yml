@@ -1,8 +1,9 @@
 name: Validate Orchestrator Compatibility
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main, 'release/**', 'feature/**']
+    branches: [main, 'release/**', 'feature/**', 'refactor/**']
     paths:
       - 'src/model/orchestrator-plugin.ts'
       - 'src/model/build-parameters.ts'
