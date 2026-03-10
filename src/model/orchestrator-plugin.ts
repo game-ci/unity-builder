@@ -30,8 +30,10 @@ export async function loadOrchestrator(): Promise<
         };
       },
     };
-  } catch {
-    // Orchestrator package not installed
+  } catch (error) {
+    if (!isModuleNotFoundError(error)) {
+      throw error;
+    }
   }
 }
 
@@ -76,6 +78,20 @@ export async function loadPluginServices() {
       },
     };
   } catch (error) {
+    if (!isModuleNotFoundError(error)) {
+      throw error;
+    }
     core.warning(`Orchestrator plugin not available: ${(error as Error).message}`);
   }
+}
+
+function isModuleNotFoundError(error: unknown): boolean {
+  if (error && typeof error === 'object' && 'code' in error) {
+    const code = (error as { code: string }).code;
+    if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
+      return true;
+    }
+  }
+
+  return typeof (error as Error)?.message === 'string' && /cannot find module/i.test((error as Error).message);
 }
