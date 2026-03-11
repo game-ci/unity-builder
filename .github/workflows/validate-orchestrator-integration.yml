@@ -227,7 +227,7 @@ jobs:
             -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs,efs,ec2,iam,elasticfilesystem,secretsmanager,lambda,events,sts \
             -e DEBUG=0 \
             -e HOSTNAME_EXTERNAL=localstack-main \
-            localstack/localstack:latest || true
+            localstack/localstack:3.8.1 || true
           echo "Waiting for LocalStack to be ready..."
           MAX_ATTEMPTS=60
           READY=false
@@ -553,7 +553,7 @@ jobs:
             -p 4566:4566 \
             -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs,efs,ec2,iam,elasticfilesystem,secretsmanager,lambda,events,sts \
             -e DEBUG=0 \
-            localstack/localstack:latest || true
+            localstack/localstack:3.8.1 || true
           MAX_ATTEMPTS=60
           for i in $(seq 1 $MAX_ATTEMPTS); do
             HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
@@ -831,7 +831,7 @@ jobs:
             -p 4566:4566 \
             -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs \
             -e DEBUG=0 \
-            localstack/localstack:latest || true
+            localstack/localstack:3.8.1 || true
           MAX_ATTEMPTS=60
           for i in $(seq 1 $MAX_ATTEMPTS); do
             HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
@@ -1070,7 +1070,7 @@ jobs:
             -p 4566:4566 \
             -e SERVICES=s3 \
             -e DEBUG=0 \
-            localstack/localstack:latest || true
+            localstack/localstack:3.8.1 || true
           MAX_ATTEMPTS=60
           for i in $(seq 1 $MAX_ATTEMPTS); do
             HEALTH=$(curl -s http://localhost:4566/_localstack/health 2>/dev/null || echo "")
