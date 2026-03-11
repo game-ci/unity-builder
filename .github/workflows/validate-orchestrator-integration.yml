@@ -12,6 +12,7 @@ name: Orchestrator Integration Tests
 
 on:
   workflow_dispatch:
+  workflow_call: # Allow integrity-check.yml and other workflows to invoke these tests
   schedule:
     - cron: '0 3 * * *' # Daily at 3 AM UTC
 
