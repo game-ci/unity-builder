@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Cli } from './cli/cli';
-import OrchestratorQueryOverride from './orchestrator/options/orchestrator-query-override';
 import Platform from './platform';
 import GitHub from './github';
 import os from 'node:os';
@@ -30,10 +29,6 @@ class Input {
     // Query input sources
     if (Cli.query(query, alternativeQuery)) {
       return Cli.query(query, alternativeQuery);
-    }
-
-    if (OrchestratorQueryOverride.query(query, alternativeQuery)) {
-      return OrchestratorQueryOverride.query(query, alternativeQuery);
     }
 
     if (process.env[query] !== undefined) {
@@ -241,6 +236,28 @@ class Input {
     return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
+  static get syncStrategy(): string {
+    return Input.getInput('syncStrategy') ?? 'full';
+  }
+
+  static get syncInputRef(): string {
+    return Input.getInput('syncInputRef') ?? '';
+  }
+
+  static get syncStorageRemote(): string {
+    return Input.getInput('syncStorageRemote') ?? '';
+  }
+
+  static get syncRevertAfter(): boolean {
+    const input = Input.getInput('syncRevertAfter') ?? 'true';
+
+    return input === 'true';
+  }
+
+  static get syncStatePath(): string {
+    return Input.getInput('syncStatePath') ?? '.game-ci/sync-state.json';
+  }
+
   static get dockerCpuLimit(): string {
     return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }
@@ -278,8 +295,354 @@ class Input {
     return Input.getInput('containerRegistryImageVersion') ?? '3';
   }
 
+  static get artifactOutputTypes(): string {
+    return Input.getInput('artifactOutputTypes') ?? 'build,logs,test-results';
+  }
+
+  static get artifactUploadTarget(): string {
+    return Input.getInput('artifactUploadTarget') ?? 'github-artifacts';
+  }
+
+  static get artifactUploadPath(): string {
+    return Input.getInput('artifactUploadPath') ?? '';
+  }
+
+  static get artifactCompression(): string {
+    return Input.getInput('artifactCompression') ?? 'gzip';
+  }
+
+  static get artifactRetentionDays(): string {
+    return Input.getInput('artifactRetentionDays') ?? '30';
+  }
+
+  static get artifactCustomTypes(): string {
+    return Input.getInput('artifactCustomTypes') ?? '';
+  }
+
   static get skipActivation(): string {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
+  }
+
+  static get submoduleProfilePath(): string {
+    return Input.getInput('submoduleProfilePath') ?? '';
+  }
+
+  static get submoduleVariantPath(): string {
+    return Input.getInput('submoduleVariantPath') ?? '';
+  }
+
+  static get submoduleToken(): string {
+    return Input.getInput('submoduleToken') ?? '';
+  }
+
+  static get localCacheEnabled(): boolean {
+    return (Input.getInput('localCacheEnabled') ?? 'false') === 'true';
+  }
+
+  static get localCacheRoot(): string {
+    return Input.getInput('localCacheRoot') ?? '';
+  }
+
+  static get localCacheLibrary(): boolean {
+    return (Input.getInput('localCacheLibrary') ?? 'true') === 'true';
+  }
+
+  static get localCacheLfs(): boolean {
+    return (Input.getInput('localCacheLfs') ?? 'false') === 'true';
+  }
+
+  static get childWorkspacesEnabled(): boolean {
+    return (Input.getInput('childWorkspacesEnabled') ?? 'false') === 'true';
+  }
+
+  static get childWorkspaceName(): string {
+    return Input.getInput('childWorkspaceName') ?? '';
+  }
+
+  static get childWorkspaceCacheRoot(): string {
+    return Input.getInput('childWorkspaceCacheRoot') ?? '';
+  }
+
+  static get childWorkspacePreserveGit(): boolean {
+    return (Input.getInput('childWorkspacePreserveGit') ?? 'true') === 'true';
+  }
+
+  static get childWorkspaceSeparateLibrary(): boolean {
+    return (Input.getInput('childWorkspaceSeparateLibrary') ?? 'true') === 'true';
+  }
+
+  static get lfsTransferAgent(): string {
+    return Input.getInput('lfsTransferAgent') ?? '';
+  }
+
+  static get lfsTransferAgentArgs(): string {
+    return Input.getInput('lfsTransferAgentArgs') ?? '';
+  }
+
+  static get lfsStoragePaths(): string {
+    return Input.getInput('lfsStoragePaths') ?? '';
+  }
+
+  static get gitHooksEnabled(): boolean {
+    return (Input.getInput('gitHooksEnabled') ?? 'false') === 'true';
+  }
+
+  static get gitHooksSkipList(): string {
+    return Input.getInput('gitHooksSkipList') ?? '';
+  }
+
+  static get gitHooksRunBeforeBuild(): string {
+    return Input.getInput('gitHooksRunBeforeBuild') ?? '';
+  }
+
+  static get providerExecutable(): string {
+    return Input.getInput('providerExecutable') ?? '';
+  }
+
+  // GCP Cloud Run (Experimental)
+  static get gcpProject(): string {
+    return Input.getInput('gcpProject') ?? '';
+  }
+
+  static get gcpRegion(): string {
+    return Input.getInput('gcpRegion') ?? '';
+  }
+
+  static get gcpStorageType(): string {
+    return Input.getInput('gcpStorageType') ?? 'gcs-fuse';
+  }
+
+  static get gcpBucket(): string {
+    return Input.getInput('gcpBucket') ?? '';
+  }
+
+  static get gcpFilestoreIp(): string {
+    return Input.getInput('gcpFilestoreIp') ?? '';
+  }
+
+  static get gcpFilestoreShare(): string {
+    return Input.getInput('gcpFilestoreShare') ?? '/share1';
+  }
+
+  static get gcpMachineType(): string {
+    return Input.getInput('gcpMachineType') ?? 'e2-standard-4';
+  }
+
+  static get gcpDiskSizeGb(): string {
+    return Input.getInput('gcpDiskSizeGb') ?? '100';
+  }
+
+  static get gcpServiceAccount(): string {
+    return Input.getInput('gcpServiceAccount') ?? '';
+  }
+
+  static get gcpVpcConnector(): string {
+    return Input.getInput('gcpVpcConnector') ?? '';
+  }
+
+  // Azure Container Instances (Experimental)
+  static get azureResourceGroup(): string {
+    return Input.getInput('azureResourceGroup') ?? '';
+  }
+
+  static get azureLocation(): string {
+    return Input.getInput('azureLocation') ?? '';
+  }
+
+  static get azureStorageType(): string {
+    return Input.getInput('azureStorageType') ?? 'azure-files';
+  }
+
+  static get azureStorageAccount(): string {
+    return Input.getInput('azureStorageAccount') ?? '';
+  }
+
+  static get azureBlobContainer(): string {
+    return Input.getInput('azureBlobContainer') ?? 'unity-builds';
+  }
+
+  static get azureFileShareName(): string {
+    return Input.getInput('azureFileShareName') ?? 'unity-builds';
+  }
+
+  static get azureSubscriptionId(): string {
+    return Input.getInput('azureSubscriptionId') ?? '';
+  }
+
+  static get azureCpu(): string {
+    return Input.getInput('azureCpu') ?? '4';
+  }
+
+  static get azureMemoryGb(): string {
+    return Input.getInput('azureMemoryGb') ?? '16';
+  }
+
+  static get azureDiskSizeGb(): string {
+    return Input.getInput('azureDiskSizeGb') ?? '100';
+  }
+
+  static get azureSubnetId(): string {
+    return Input.getInput('azureSubnetId') ?? '';
+  }
+
+  // ### ### ###
+  // Remote PowerShell provider
+  // ### ### ###
+
+  static get remotePowershellHost(): string {
+    return Input.getInput('remotePowershellHost') ?? '';
+  }
+
+  static get remotePowershellCredential(): string {
+    return Input.getInput('remotePowershellCredential') ?? '';
+  }
+
+  static get remotePowershellTransport(): string {
+    return Input.getInput('remotePowershellTransport') ?? 'wsman';
+  }
+
+  // ### ### ###
+  // GitHub Actions provider
+  // ### ### ###
+
+  static get githubActionsRepo(): string {
+    return Input.getInput('githubActionsRepo') ?? '';
+  }
+
+  static get githubActionsWorkflow(): string {
+    return Input.getInput('githubActionsWorkflow') ?? '';
+  }
+
+  static get githubActionsToken(): string {
+    return Input.getInput('githubActionsToken') ?? '';
+  }
+
+  static get githubActionsRef(): string {
+    return Input.getInput('githubActionsRef') ?? 'main';
+  }
+
+  // ### ### ###
+  // GitLab CI provider
+  // ### ### ###
+
+  static get gitlabProjectId(): string {
+    return Input.getInput('gitlabProjectId') ?? '';
+  }
+
+  static get gitlabTriggerToken(): string {
+    return Input.getInput('gitlabTriggerToken') ?? '';
+  }
+
+  static get gitlabApiUrl(): string {
+    return Input.getInput('gitlabApiUrl') ?? 'https://gitlab.com';
+  }
+
+  static get gitlabRef(): string {
+    return Input.getInput('gitlabRef') ?? 'main';
+  }
+
+  // ### ### ###
+  // Ansible provider
+  // ### ### ###
+
+  static get ansibleInventory(): string {
+    return Input.getInput('ansibleInventory') ?? '';
+  }
+
+  static get ansiblePlaybook(): string {
+    return Input.getInput('ansiblePlaybook') ?? '';
+  }
+
+  static get ansibleExtraVars(): string {
+    return Input.getInput('ansibleExtraVars') ?? '';
+  }
+
+  static get ansibleVaultPassword(): string {
+    return Input.getInput('ansibleVaultPassword') ?? '';
+  }
+
+  static get gitIntegrityCheck(): boolean {
+    const input = Input.getInput('gitIntegrityCheck') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get hotRunnerEnabled(): boolean {
+    const input = Input.getInput('hotRunnerEnabled') ?? false;
+
+    return input === 'true';
+  }
+
+  static get gitAutoRecover(): boolean {
+    const input = Input.getInput('gitAutoRecover') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get hotRunnerTransport(): 'websocket' | 'grpc' | 'named-pipe' {
+    return (Input.getInput('hotRunnerTransport') ?? 'websocket') as 'websocket' | 'grpc' | 'named-pipe';
+  }
+
+  static get hotRunnerHost(): string {
+    return Input.getInput('hotRunnerHost') ?? 'localhost';
+  }
+
+  static get hotRunnerPort(): number {
+    return Number.parseInt(Input.getInput('hotRunnerPort') ?? '9090', 10);
+  }
+
+  static get hotRunnerHealthInterval(): number {
+    return Number.parseInt(Input.getInput('hotRunnerHealthInterval') ?? '30', 10);
+  }
+
+  static get hotRunnerMaxIdle(): number {
+    return Number.parseInt(Input.getInput('hotRunnerMaxIdle') ?? '3600', 10);
+  }
+
+  static get hotRunnerFallbackToCold(): boolean {
+    const input = Input.getInput('hotRunnerFallbackToCold') ?? 'true';
+
+    return input === 'true';
+  }
+
+  static get cleanReservedFilenames(): boolean {
+    const input = Input.getInput('cleanReservedFilenames') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get buildArchiveEnabled(): boolean {
+    const input = Input.getInput('buildArchiveEnabled') ?? 'false';
+
+    return input === 'true';
+  }
+
+  static get buildArchivePath(): string {
+    return Input.getInput('buildArchivePath') ?? './build-archives';
+  }
+
+  static get buildArchiveRetention(): number {
+    return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
+  }
+
+  static get testSuitePath(): string {
+    return Input.getInput('testSuitePath') ?? '';
+  }
+
+  static get testSuiteEvent(): string {
+    return Input.getInput('testSuiteEvent') ?? '';
+  }
+
+  static get testTaxonomyPath(): string {
+    return Input.getInput('testTaxonomyPath') ?? '';
+  }
+
+  static get testResultFormat(): string {
+    return Input.getInput('testResultFormat') ?? 'junit';
+  }
+
+  static get testResultPath(): string {
+    return Input.getInput('testResultPath') ?? './test-results';
   }
 
   public static ToEnvVarFormat(input: string) {
