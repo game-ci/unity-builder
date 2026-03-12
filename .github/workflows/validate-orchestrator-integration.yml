@@ -657,7 +657,66 @@ jobs:
         if: always()
         run: source /tmp/cleanup-functions.sh && light_cleanup
 
-      # --- AWS Test 5: orchestrator-end2end-caching ---
+      # --- AWS Test 5: orchestrator-caching ---
+      - name: Run orchestrator-caching test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-caching (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && heavy_cleanup
+
+      # --- AWS Test 6: orchestrator-locking-core ---
+      - name: Run orchestrator-locking-core test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-core (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # --- AWS Test 7: orchestrator-locking-get-locked ---
+      - name: Run orchestrator-locking-get-locked test (AWS)
+        timeout-minutes: 60
+        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          TARGET_PLATFORM: StandaloneWindows64
+          orchestratorTests: true
+          versioning: None
+          PROVIDER_STRATEGY: aws
+          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
+      - name: Cleanup after orchestrator-locking-get-locked (AWS)
+        if: always()
+        run: source /tmp/cleanup-functions.sh && light_cleanup
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # End-to-end tests (continue-on-error) — run LAST to prevent
+      # workspace corruption from affecting mandatory tests above.
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      # --- AWS Test 8: orchestrator-end2end-caching ---
       - name: Run orchestrator-end2end-caching test (AWS)
         timeout-minutes: 60
         continue-on-error: true
@@ -676,7 +735,7 @@ jobs:
         if: always()
         run: source /tmp/cleanup-functions.sh && heavy_cleanup
 
-      # --- AWS Test 6: orchestrator-end2end-retaining ---
+      # --- AWS Test 9: orchestrator-end2end-retaining ---
       - name: Run orchestrator-end2end-retaining test (AWS)
         timeout-minutes: 60
         continue-on-error: true
@@ -694,60 +753,6 @@ jobs:
       - name: Cleanup after orchestrator-end2end-retaining (AWS)
         if: always()
         run: source /tmp/cleanup-functions.sh && heavy_cleanup
-
-      # --- AWS Test 7: orchestrator-caching ---
-      - name: Run orchestrator-caching test (AWS)
-        timeout-minutes: 60
-        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          TARGET_PLATFORM: StandaloneWindows64
-          orchestratorTests: true
-          versioning: None
-          PROVIDER_STRATEGY: aws
-          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-      - name: Cleanup after orchestrator-caching (AWS)
-        if: always()
-        run: source /tmp/cleanup-functions.sh && heavy_cleanup
-
-      # --- AWS Test 8: orchestrator-locking-core ---
-      - name: Run orchestrator-locking-core test (AWS)
-        timeout-minutes: 60
-        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          TARGET_PLATFORM: StandaloneWindows64
-          orchestratorTests: true
-          versioning: None
-          PROVIDER_STRATEGY: aws
-          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-      - name: Cleanup after orchestrator-locking-core (AWS)
-        if: always()
-        run: source /tmp/cleanup-functions.sh && light_cleanup
-
-      # --- AWS Test 9: orchestrator-locking-get-locked ---
-      - name: Run orchestrator-locking-get-locked test (AWS)
-        timeout-minutes: 60
-        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          TARGET_PLATFORM: StandaloneWindows64
-          orchestratorTests: true
-          versioning: None
-          PROVIDER_STRATEGY: aws
-          GIT_PRIVATE_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GIT_PRIVATE_TOKEN }}
-      - name: Cleanup after orchestrator-locking-get-locked (AWS)
-        if: always()
-        run: source /tmp/cleanup-functions.sh && light_cleanup
 
       # --- AWS Test 10: orchestrator-end2end-locking ---
       - name: Run orchestrator-end2end-locking test (AWS)
