@@ -112,7 +112,12 @@ class BuildParameters {
   }
 
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
+    const buildFile = this.parseBuildFile(
+      Input.buildName,
+      Input.targetPlatform,
+      Input.androidExportType,
+      Input.linux64RemoveExecutableExtension,
+    );
     const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
     const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
     const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
@@ -245,7 +250,12 @@ class BuildParameters {
     };
   }
 
-  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
+  static parseBuildFile(
+    filename: string,
+    platform: string,
+    androidExportType: string,
+    linux64RemoveExecutableExtension: boolean,
+  ): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
@@ -263,6 +273,10 @@ class BuildParameters {
             `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
           );
       }
+    }
+
+    if (platform === Platform.types.StandaloneLinux64 && !linux64RemoveExecutableExtension) {
+      return `${filename}.x86_64`;
     }
 
     return filename;
