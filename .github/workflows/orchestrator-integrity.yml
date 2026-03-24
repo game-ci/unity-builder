@@ -91,7 +91,7 @@ jobs:
             -e SERVICES=s3,cloudformation,ecs,kinesis,cloudwatch,logs,efs,ec2,iam,elasticfilesystem,secretsmanager,lambda,events,sts \
             -e DEBUG=0 \
             -e HOSTNAME_EXTERNAL=localstack-main \
-            localstack/localstack:latest || true
+            localstack/localstack:4.4.0 || true
           # Wait for LocalStack to be ready - check both health endpoint and S3 service
           echo "Waiting for LocalStack to be ready..."
           MAX_ATTEMPTS=60
