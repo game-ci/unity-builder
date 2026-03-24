@@ -1,6 +1,7 @@
 import { DescribeTasksCommand, RunTaskCommand, waitUntilTasksRunning } from '@aws-sdk/client-ecs';
 import { DescribeStreamCommand, GetRecordsCommand, GetShardIteratorCommand } from '@aws-sdk/client-kinesis';
 import OrchestratorEnvironmentVariable from '../../options/orchestrator-environment-variable';
+import OrchestratorSecret from '../../options/orchestrator-secret';
 import * as core from '@actions/core';
 import OrchestratorAWSTaskDef from './orchestrator-aws-task-def';
 import * as zlib from 'node:zlib';
@@ -56,6 +57,7 @@ class AWSTaskRunner {
   static async runTask(
     taskDef: OrchestratorAWSTaskDef,
     environment: OrchestratorEnvironmentVariable[],
+    secrets: OrchestratorSecret[],
     commands: string,
   ): Promise<{ output: string; shouldCleanup: boolean }> {
     const cluster = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
@@ -73,6 +75,12 @@ class AWSTaskRunner {
     // Transform localhost endpoints for container environment
     const transformedEnvironment = AWSTaskRunner.transformEndpointsForContainer(environment);
 
+    // Merge secrets into environment as plain env vars, matching docker and k8s provider behavior.
+    // This ensures UNITY_EMAIL, UNITY_PASSWORD, UNITY_SERIAL reach the container reliably
+    // without depending on CloudFormation Secrets Manager resolution.
+    const secretsAsEnvironment = secrets.map((s) => ({ name: s.EnvironmentVariable, value: s.ParameterValue }));
+    const mergedEnvironment = [...transformedEnvironment, ...secretsAsEnvironment];
+
     const runParameters = {
       cluster,
       taskDefinition,
@@ -81,7 +89,7 @@ class AWSTaskRunner {
         containerOverrides: [
           {
             name: taskDef.taskDefStackName,
-            environment: transformedEnvironment,
+            environment: mergedEnvironment,
             command: ['-c', CommandHookService.ApplyHooksToCommands(commands, Orchestrator.buildParameters)],
           },
         ],
