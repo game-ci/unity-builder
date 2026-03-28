@@ -3,6 +3,10 @@
   "version": "3.0.0",
   "description": "Build Unity projects for different platforms.",
   "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./cli-plugin": "./src/cli-plugin/index.ts"
+  },
   "repository": "git@github.com:game-ci/unity-builder.git",
   "author": "Webber <webber@takken.io>",
   "license": "MIT",
