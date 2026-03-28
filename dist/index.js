@@ -3398,7 +3398,7 @@ class AWSTaskRunner {
             return { name: x.name, value };
         });
     }
-    static async runTask(taskDef, environment, commands) {
+    static async runTask(taskDef, environment, secrets, commands) {
         const cluster = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'ECSCluster')?.PhysicalResourceId || '';
         const taskDefinition = taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'TaskDefinition')?.PhysicalResourceId || '';
         const SubnetOne = taskDef.baseResources?.find((x) => x.LogicalResourceId === 'PublicSubnetOne')?.PhysicalResourceId || '';
@@ -3407,6 +3407,11 @@ class AWSTaskRunner {
         const streamName = taskDef.taskDefResources?.find((x) => x.LogicalResourceId === 'KinesisStream')?.PhysicalResourceId || '';
         // Transform localhost endpoints for container environment
         const transformedEnvironment = AWSTaskRunner.transformEndpointsForContainer(environment);
+        // Merge secrets into environment as plain env vars, matching docker and k8s provider behavior.
+        // This ensures UNITY_EMAIL, UNITY_PASSWORD, UNITY_SERIAL reach the container reliably
+        // without depending on CloudFormation Secrets Manager resolution.
+        const secretsAsEnvironment = secrets.map((s) => ({ name: s.EnvironmentVariable, value: s.ParameterValue }));
+        const mergedEnvironment = [...transformedEnvironment, ...secretsAsEnvironment];
         const runParameters = {
             cluster,
             taskDefinition,
@@ -3415,7 +3420,7 @@ class AWSTaskRunner {
                 containerOverrides: [
                     {
                         name: taskDef.taskDefStackName,
-                        environment: transformedEnvironment,
+                        environment: mergedEnvironment,
                         command: ['-c', command_hook_service_1.CommandHookService.ApplyHooksToCommands(commands, orchestrator_1.default.buildParameters)],
                     },
                 ],
@@ -4449,7 +4454,7 @@ class AWSBuildEnvironment {
         try {
             const postSetupStacksTimeMs = Date.now();
             orchestrator_logger_1.default.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-            const { output, shouldCleanup } = await aws_task_runner_1.default.runTask(taskDef, environment, commands);
+            const { output, shouldCleanup } = await aws_task_runner_1.default.runTask(taskDef, environment, secrets, commands);
             postRunTaskTimeMs = Date.now();
             orchestrator_logger_1.default.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
             if (shouldCleanup) {

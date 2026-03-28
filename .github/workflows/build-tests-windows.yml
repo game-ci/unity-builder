@@ -70,6 +70,7 @@ jobs:
       #    Docker Readiness     #
       ###########################
       - name: Ensure Docker daemon is ready
+        timeout-minutes: 2
         shell: powershell
         run: |
           $maxRetries = 10

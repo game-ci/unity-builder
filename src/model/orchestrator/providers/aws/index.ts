@@ -125,7 +125,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     try {
       const postSetupStacksTimeMs = Date.now();
       OrchestratorLogger.log(`Setup job time: ${Math.floor((postSetupStacksTimeMs - startTimeMs) / 1000)}s`);
-      const { output, shouldCleanup } = await AwsTaskRunner.runTask(taskDef, environment, commands);
+      const { output, shouldCleanup } = await AwsTaskRunner.runTask(taskDef, environment, secrets, commands);
       postRunTaskTimeMs = Date.now();
       OrchestratorLogger.log(`Run job time: ${Math.floor((postRunTaskTimeMs - postSetupStacksTimeMs) / 1000)}s`);
       if (shouldCleanup) {
