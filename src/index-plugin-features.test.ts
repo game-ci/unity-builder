@@ -1,121 +1,35 @@
 /**
- * Integration wiring tests for plugin features in index.ts
+ * Integration wiring tests for the plugin lifecycle in index.ts
  *
- * These tests verify the conditional gating logic in runMain():
- * - Each plugin feature is only invoked when its gate condition is met
- * - Services are NOT called when their feature is disabled (the default)
- * - The order of operations is correct (restore before build, save after build)
+ * These tests verify that:
+ * - The plugin lifecycle hooks are called in the correct order
+ * - Plugin canHandleBuild() controls the execution path
+ * - fallbackToLocal is handled correctly
+ * - When no plugin is installed, local builds still work
+ * - When providerStrategy is non-local without a plugin, an error is thrown
  */
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 import { BuildParameters } from './model';
 
 // ---------------------------------------------------------------------------
-// Service mocks — must be declared before importing index.ts (jest hoists them)
+// Mock plugin
 // ---------------------------------------------------------------------------
 
-const mockChildWorkspaceService = {
-  buildConfig: jest.fn().mockReturnValue({ enabled: true, workspaceName: 'Test' }),
-  initializeWorkspace: jest.fn().mockReturnValue(false),
-  getWorkspaceSize: jest.fn().mockReturnValue('0 B'),
-  saveWorkspace: jest.fn(),
+const mockPlugin = {
+  initialize: jest.fn().mockResolvedValue(undefined),
+  canHandleBuild: jest.fn().mockReturnValue(false),
+  handleBuild: jest.fn().mockResolvedValue({ exitCode: 0 }),
+  beforeLocalBuild: jest.fn().mockResolvedValue(undefined),
+  afterLocalBuild: jest.fn().mockResolvedValue(undefined),
+  handlePostBuild: jest.fn().mockResolvedValue(undefined),
 };
 
-const mockSubmoduleProfileService = {
-  createInitPlan: jest.fn().mockResolvedValue([]),
-  execute: jest.fn().mockResolvedValue(''),
-};
+const mockLoadOrchestratorPlugin = jest.fn().mockResolvedValue(mockPlugin);
 
-const mockLfsAgentService = {
-  configure: jest.fn().mockResolvedValue(''),
-};
-
-const mockLocalCacheService = {
-  resolveCacheRoot: jest.fn().mockReturnValue('/cache'),
-  generateCacheKey: jest.fn().mockReturnValue('key-1'),
-  restoreLfsCache: jest.fn().mockResolvedValue(true),
-  restoreLibraryCache: jest.fn().mockResolvedValue(true),
-  saveLibraryCache: jest.fn().mockResolvedValue(''),
-  saveLfsCache: jest.fn().mockResolvedValue(''),
-};
-
-const mockGitHooksService = {
-  installHooks: jest.fn().mockResolvedValue(''),
-  configureSkipList: jest.fn().mockReturnValue({ LEFTHOOK_EXCLUDE: 'pre-commit' }),
-};
-
-const mockBuildReliabilityService = {
-  configureGitEnvironment: jest.fn(),
-  checkGitIntegrity: jest.fn().mockReturnValue(true),
-  cleanStaleLockFiles: jest.fn(),
-  validateSubmoduleBackingStores: jest.fn(),
-  cleanReservedFilenames: jest.fn(),
-  recoverCorruptedRepo: jest.fn().mockReturnValue(true),
-  archiveBuildOutput: jest.fn(),
-  enforceRetention: jest.fn(),
-};
-
-const mockTestWorkflowService = {
-  executeTestSuite: jest.fn().mockResolvedValue([]),
-};
-
-const mockHotRunnerService = jest.fn();
-
-const mockIncrementalSyncService = {
-  resolveStrategy: jest.fn().mockReturnValue('full'),
-  syncGitDelta: jest.fn().mockResolvedValue(0),
-  applyDirectInput: jest.fn().mockResolvedValue([]),
-  syncStoragePull: jest.fn().mockResolvedValue([]),
-  revertOverlays: jest.fn().mockImplementation(() => Promise.resolve()),
-};
-
-const mockOutputService = {
-  collectOutputs: jest.fn().mockImplementation(() => Promise.resolve()),
-};
-
-const mockOutputTypeRegistry = {
-  registerType: jest.fn(),
-};
-
-const mockArtifactUploadHandler = {
-  parseConfig: jest.fn().mockImplementation(() => {
-    /* no config */
-  }),
-  uploadArtifacts: jest.fn().mockResolvedValue({ success: true, entries: [] }),
-};
-
-const mockOrchestrator = {
-  run: jest.fn().mockImplementation(() => Promise.resolve()),
-};
-
-// Mock the orchestrator-plugin module to directly return our mock services.
-// This avoids any issues with dynamic imports inside loadPluginServices().
 jest.mock('./model/orchestrator-plugin', () => ({
-  loadOrchestrator: jest.fn().mockResolvedValue({
-    run: mockOrchestrator.run,
-  }),
-  loadPluginServices: jest.fn().mockResolvedValue({
-    BuildReliabilityService: mockBuildReliabilityService,
-    TestWorkflowService: mockTestWorkflowService,
-    HotRunnerService: mockHotRunnerService,
-    OutputService: mockOutputService,
-    OutputTypeRegistry: mockOutputTypeRegistry,
-    ArtifactUploadHandler: mockArtifactUploadHandler,
-    IncrementalSyncService: mockIncrementalSyncService,
-
-    // Lazy-loaded services (matching the plugin loader API)
-    loadChildWorkspaceService: jest.fn().mockResolvedValue(mockChildWorkspaceService),
-    loadLocalCacheService: jest.fn().mockResolvedValue(mockLocalCacheService),
-    loadSubmoduleProfileService: jest.fn().mockResolvedValue(mockSubmoduleProfileService),
-    loadLfsAgentService: jest.fn().mockResolvedValue(mockLfsAgentService),
-    loadGitHooksService: jest.fn().mockResolvedValue(mockGitHooksService),
-  }),
+  loadOrchestratorPlugin: mockLoadOrchestratorPlugin,
 }));
 
-// Mock all non-plugin dependencies to isolate the wiring logic
 jest.mock('@actions/core');
 jest.mock('./model', () => ({
   Action: {
@@ -164,32 +78,8 @@ jest.mock('./model/platform-setup', () => ({
 
 const mockedBuildParametersCreate = BuildParameters.create as jest.Mock;
 
-interface PluginBuildParametersOverrides {
-  providerStrategy?: string;
-  childWorkspacesEnabled?: boolean;
-  childWorkspaceName?: string;
-  childWorkspaceCacheRoot?: string;
-  childWorkspacePreserveGit?: boolean;
-  childWorkspaceSeparateLibrary?: boolean;
-  submoduleProfilePath?: string;
-  submoduleVariantPath?: string;
-  submoduleToken?: string;
-  gitPrivateToken?: string;
-  lfsTransferAgent?: string;
-  lfsTransferAgentArgs?: string;
-  lfsStoragePaths?: string;
-  localCacheEnabled?: boolean;
-  localCacheRoot?: string;
-  localCacheLibrary?: boolean;
-  localCacheLfs?: boolean;
-  gitHooksEnabled?: boolean;
-  gitHooksSkipList?: string;
-  gitHooksRunBeforeBuild?: string;
-}
-
-function createMockBuildParameters(overrides: PluginBuildParametersOverrides = {}) {
+function createMockBuildParameters(overrides: Record<string, any> = {}) {
   return {
-    // Required base properties
     providerStrategy: 'local',
     targetPlatform: 'StandaloneLinux64',
     editorVersion: '2021.3.1f1',
@@ -198,49 +88,17 @@ function createMockBuildParameters(overrides: PluginBuildParametersOverrides = {
     projectPath: '.',
     branch: 'main',
     runnerTempPath: '/tmp',
-
-    // Plugin features - all disabled by default
-    childWorkspacesEnabled: false,
-    childWorkspaceName: '',
-    childWorkspaceCacheRoot: '',
-    childWorkspacePreserveGit: true,
-    childWorkspaceSeparateLibrary: true,
-    submoduleProfilePath: '',
-    submoduleVariantPath: '',
-    submoduleToken: '',
-    gitPrivateToken: '',
-    lfsTransferAgent: '',
-    lfsTransferAgentArgs: '',
-    lfsStoragePaths: '',
-    localCacheEnabled: false,
-    localCacheRoot: '',
-    localCacheLibrary: true,
-    localCacheLfs: false,
-    gitHooksEnabled: false,
-    gitHooksSkipList: '',
-    gitHooksRunBeforeBuild: '',
-
     ...overrides,
   };
 }
 
-/**
- * The entry point (runMain) is invoked by importing index.ts.
- * Since it calls `runMain()` at module scope, we need to re-import it
- * for each test. jest.isolateModules() handles this.
- */
-async function runIndex(overrides: PluginBuildParametersOverrides = {}): Promise<void> {
+async function runIndex(overrides: Record<string, any> = {}): Promise<void> {
   mockedBuildParametersCreate.mockResolvedValue(createMockBuildParameters(overrides));
 
   return new Promise<void>((resolve) => {
     jest.isolateModules(() => {
       require('./index');
-
-      // runMain() is async; give it a tick to complete
-      // We use setImmediate to ensure all microtasks from the dynamic imports resolve
     });
-
-    // Allow all promises and microtasks to settle
     setTimeout(resolve, 100);
   });
 }
@@ -249,16 +107,19 @@ async function runIndex(overrides: PluginBuildParametersOverrides = {}): Promise
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('index.ts plugin feature wiring', () => {
+describe('index.ts plugin lifecycle wiring', () => {
   const originalPlatform = process.platform;
   const originalEnvironment = { ...process.env };
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.GITHUB_WORKSPACE = '/workspace';
-
-    // Force linux platform so Docker.run is used (not MacBuilder)
     Object.defineProperty(process, 'platform', { value: 'linux' });
+
+    // Reset plugin to default behavior
+    mockPlugin.canHandleBuild.mockReturnValue(false);
+    mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
+    mockLoadOrchestratorPlugin.mockResolvedValue(mockPlugin);
   });
 
   afterEach(() => {
@@ -267,382 +128,135 @@ describe('index.ts plugin feature wiring', () => {
   });
 
   // -----------------------------------------------------------------------
-  // GitHooksService gating
+  // Local build with plugin
   // -----------------------------------------------------------------------
 
-  describe('GitHooksService gating', () => {
-    it('should NOT call GitHooksService when gitHooksEnabled is false (default)', async () => {
-      await runIndex({ gitHooksEnabled: false });
-
-      expect(mockGitHooksService.installHooks).not.toHaveBeenCalled();
-      expect(mockGitHooksService.configureSkipList).not.toHaveBeenCalled();
-    });
-
-    it('should call installHooks when gitHooksEnabled is true', async () => {
-      await runIndex({ gitHooksEnabled: true });
-
-      expect(mockGitHooksService.installHooks).toHaveBeenCalledWith('/workspace');
-    });
-
-    it('should call configureSkipList when gitHooksEnabled and gitHooksSkipList is set', async () => {
-      await runIndex({
-        gitHooksEnabled: true,
-        gitHooksSkipList: 'pre-commit,pre-push',
-      });
-
-      expect(mockGitHooksService.configureSkipList).toHaveBeenCalledWith(['pre-commit', 'pre-push']);
-    });
-
-    it('should NOT call configureSkipList when gitHooksSkipList is empty', async () => {
-      await runIndex({
-        gitHooksEnabled: true,
-        gitHooksSkipList: '',
-      });
-
-      expect(mockGitHooksService.installHooks).toHaveBeenCalled();
-      expect(mockGitHooksService.configureSkipList).not.toHaveBeenCalled();
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // LocalCacheService gating
-  // -----------------------------------------------------------------------
-
-  describe('LocalCacheService gating', () => {
-    it('should NOT call LocalCacheService when localCacheEnabled is false (default)', async () => {
-      await runIndex({ localCacheEnabled: false });
-
-      expect(mockLocalCacheService.resolveCacheRoot).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.generateCacheKey).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLibraryCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLfsCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLibraryCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLfsCache).not.toHaveBeenCalled();
-    });
-
-    it('should call restore and save operations when localCacheEnabled is true', async () => {
-      await runIndex({
-        localCacheEnabled: true,
-        localCacheLibrary: true,
-        localCacheLfs: true,
-      });
-
-      expect(mockLocalCacheService.resolveCacheRoot).toHaveBeenCalled();
-      expect(mockLocalCacheService.generateCacheKey).toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLibraryCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLfsCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLibraryCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLfsCache).toHaveBeenCalled();
-    });
-
-    it('should only cache Library when localCacheLibrary is true and localCacheLfs is false', async () => {
-      await runIndex({
-        localCacheEnabled: true,
-        localCacheLibrary: true,
-        localCacheLfs: false,
-      });
-
-      expect(mockLocalCacheService.restoreLibraryCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLfsCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLibraryCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLfsCache).not.toHaveBeenCalled();
-    });
-
-    it('should only cache LFS when localCacheLfs is true and localCacheLibrary is false', async () => {
-      await runIndex({
-        localCacheEnabled: true,
-        localCacheLibrary: false,
-        localCacheLfs: true,
-      });
-
-      expect(mockLocalCacheService.restoreLibraryCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.restoreLfsCache).toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLibraryCache).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.saveLfsCache).toHaveBeenCalled();
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // ChildWorkspaceService gating
-  // -----------------------------------------------------------------------
-
-  describe('ChildWorkspaceService gating', () => {
-    it('should NOT call ChildWorkspaceService when childWorkspacesEnabled is false (default)', async () => {
-      await runIndex({ childWorkspacesEnabled: false });
-
-      expect(mockChildWorkspaceService.buildConfig).not.toHaveBeenCalled();
-      expect(mockChildWorkspaceService.initializeWorkspace).not.toHaveBeenCalled();
-      expect(mockChildWorkspaceService.saveWorkspace).not.toHaveBeenCalled();
-    });
-
-    it('should NOT call ChildWorkspaceService when childWorkspacesEnabled is true but childWorkspaceName is empty', async () => {
-      await runIndex({
-        childWorkspacesEnabled: true,
-        childWorkspaceName: '',
-      });
-
-      expect(mockChildWorkspaceService.buildConfig).not.toHaveBeenCalled();
-    });
-
-    it('should call buildConfig, initializeWorkspace, and saveWorkspace when enabled with a name', async () => {
-      mockChildWorkspaceService.buildConfig.mockReturnValue({ enabled: true, workspaceName: 'TurnOfWar' });
-
-      await runIndex({
-        childWorkspacesEnabled: true,
-        childWorkspaceName: 'TurnOfWar',
-        childWorkspaceCacheRoot: '/cache/workspaces',
-      });
-
-      expect(mockChildWorkspaceService.buildConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          childWorkspacesEnabled: true,
-          childWorkspaceName: 'TurnOfWar',
-        }),
-      );
-      expect(mockChildWorkspaceService.initializeWorkspace).toHaveBeenCalled();
-      expect(mockChildWorkspaceService.getWorkspaceSize).toHaveBeenCalled();
-      expect(mockChildWorkspaceService.saveWorkspace).toHaveBeenCalled();
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // SubmoduleProfileService gating
-  // -----------------------------------------------------------------------
-
-  describe('SubmoduleProfileService gating', () => {
-    it('should NOT call SubmoduleProfileService when submoduleProfilePath is empty (default)', async () => {
-      await runIndex({ submoduleProfilePath: '' });
-
-      expect(mockSubmoduleProfileService.createInitPlan).not.toHaveBeenCalled();
-      expect(mockSubmoduleProfileService.execute).not.toHaveBeenCalled();
-    });
-
-    it('should call createInitPlan and execute when submoduleProfilePath is set', async () => {
-      await runIndex({
-        submoduleProfilePath: '/path/to/profile.yml',
-        submoduleVariantPath: '',
-        submoduleToken: 'my-token',
-      });
-
-      expect(mockSubmoduleProfileService.createInitPlan).toHaveBeenCalledWith('/path/to/profile.yml', '', '/workspace');
-      expect(mockSubmoduleProfileService.execute).toHaveBeenCalled();
-    });
-
-    it('should pass variant path when provided', async () => {
-      await runIndex({
-        submoduleProfilePath: '/path/to/profile.yml',
-        submoduleVariantPath: '/path/to/variant.yml',
-      });
-
-      expect(mockSubmoduleProfileService.createInitPlan).toHaveBeenCalledWith(
-        '/path/to/profile.yml',
-        '/path/to/variant.yml',
-        '/workspace',
-      );
-    });
-
-    it('should use submoduleToken for auth, falling back to gitPrivateToken', async () => {
-      await runIndex({
-        submoduleProfilePath: '/path/to/profile.yml',
-        submoduleToken: '',
-        gitPrivateToken: 'fallback-token',
-      });
-
-      expect(mockSubmoduleProfileService.execute).toHaveBeenCalledWith(
-        expect.anything(),
-        '/workspace',
-        'fallback-token',
-      );
-    });
-
-    it('should prefer submoduleToken over gitPrivateToken', async () => {
-      await runIndex({
-        submoduleProfilePath: '/path/to/profile.yml',
-        submoduleToken: 'specific-token',
-        gitPrivateToken: 'fallback-token',
-      });
-
-      expect(mockSubmoduleProfileService.execute).toHaveBeenCalledWith(
-        expect.anything(),
-        '/workspace',
-        'specific-token',
-      );
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // LfsAgentService gating
-  // -----------------------------------------------------------------------
-
-  describe('LfsAgentService gating', () => {
-    it('should NOT call LfsAgentService when lfsTransferAgent is empty (default)', async () => {
-      await runIndex({ lfsTransferAgent: '' });
-
-      expect(mockLfsAgentService.configure).not.toHaveBeenCalled();
-    });
-
-    it('should call configure when lfsTransferAgent is set', async () => {
-      await runIndex({
-        lfsTransferAgent: '/tools/elastic-git-storage',
-        lfsTransferAgentArgs: '--verbose',
-        lfsStoragePaths: '/path/a;/path/b',
-      });
-
-      expect(mockLfsAgentService.configure).toHaveBeenCalledWith(
-        '/tools/elastic-git-storage',
-        '--verbose',
-        ['/path/a', '/path/b'],
-        '/workspace',
-      );
-    });
-
-    it('should pass empty array when lfsStoragePaths is empty', async () => {
-      await runIndex({
-        lfsTransferAgent: '/tools/agent',
-        lfsStoragePaths: '',
-      });
-
-      expect(mockLfsAgentService.configure).toHaveBeenCalledWith('/tools/agent', '', [], '/workspace');
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // Order of operations (restore before build, save after build)
-  // -----------------------------------------------------------------------
-
-  describe('order of operations', () => {
-    it('should execute restore operations before build and save operations after build', async () => {
+  describe('local build with plugin installed', () => {
+    it('should call lifecycle hooks in order: initialize → beforeLocalBuild → [build] → afterLocalBuild → handlePostBuild', async () => {
       const callOrder: string[] = [];
+      mockPlugin.initialize.mockImplementation(async () => callOrder.push('initialize'));
+      mockPlugin.beforeLocalBuild.mockImplementation(async () => callOrder.push('beforeLocalBuild'));
+      mockPlugin.afterLocalBuild.mockImplementation(async () => callOrder.push('afterLocalBuild'));
+      mockPlugin.handlePostBuild.mockImplementation(async () => callOrder.push('handlePostBuild'));
 
-      // Track call order for each relevant operation
-      mockChildWorkspaceService.buildConfig.mockReturnValue({ enabled: true, workspaceName: 'Test' });
-      mockChildWorkspaceService.initializeWorkspace.mockImplementation(() => {
-        callOrder.push('child-workspace-restore');
+      await runIndex();
 
-        return false;
-      });
-      mockChildWorkspaceService.getWorkspaceSize.mockImplementation(() => {
-        callOrder.push('child-workspace-size');
+      expect(callOrder).toEqual(['initialize', 'beforeLocalBuild', 'afterLocalBuild', 'handlePostBuild']);
+    });
 
-        return '0 B';
-      });
-      mockSubmoduleProfileService.createInitPlan.mockImplementation(async () => {
-        callOrder.push('submodule-profile-plan');
+    it('should pass buildParameters and workspace to initialize', async () => {
+      await runIndex({ targetPlatform: 'WebGL' });
 
-        return [];
-      });
-      mockSubmoduleProfileService.execute.mockImplementation(async () => {
-        callOrder.push('submodule-profile-execute');
-      });
-      mockLfsAgentService.configure.mockImplementation(async () => {
-        callOrder.push('lfs-agent-configure');
-      });
-      mockLocalCacheService.resolveCacheRoot.mockImplementation(() => {
-        callOrder.push('local-cache-resolve');
+      expect(mockPlugin.initialize).toHaveBeenCalledWith(
+        expect.objectContaining({ targetPlatform: 'WebGL' }),
+        '/workspace',
+      );
+    });
 
-        return '/cache';
-      });
-      mockLocalCacheService.generateCacheKey.mockImplementation(() => {
-        callOrder.push('local-cache-keygen');
+    it('should pass workspace to beforeLocalBuild', async () => {
+      await runIndex();
 
-        return 'key-1';
-      });
-      mockLocalCacheService.restoreLfsCache.mockImplementation(async () => {
-        callOrder.push('local-cache-restore-lfs');
+      expect(mockPlugin.beforeLocalBuild).toHaveBeenCalledWith('/workspace');
+    });
 
-        return true;
-      });
-      mockLocalCacheService.restoreLibraryCache.mockImplementation(async () => {
-        callOrder.push('local-cache-restore-library');
+    it('should pass workspace and exit code to afterLocalBuild', async () => {
+      await runIndex();
 
-        return true;
-      });
-      mockGitHooksService.installHooks.mockImplementation(async () => {
-        callOrder.push('git-hooks-install');
-      });
-      mockLocalCacheService.saveLibraryCache.mockImplementation(async () => {
-        callOrder.push('local-cache-save-library');
-      });
-      mockLocalCacheService.saveLfsCache.mockImplementation(async () => {
-        callOrder.push('local-cache-save-lfs');
-      });
-      mockChildWorkspaceService.saveWorkspace.mockImplementation(() => {
-        callOrder.push('child-workspace-save');
-      });
+      expect(mockPlugin.afterLocalBuild).toHaveBeenCalledWith('/workspace', 0);
+    });
 
-      await runIndex({
-        childWorkspacesEnabled: true,
-        childWorkspaceName: 'TurnOfWar',
-        submoduleProfilePath: '/profile.yml',
-        lfsTransferAgent: '/tools/agent',
-        localCacheEnabled: true,
-        localCacheLfs: true,
-        localCacheLibrary: true,
-        gitHooksEnabled: true,
-      });
+    it('should pass exit code to handlePostBuild', async () => {
+      await runIndex();
 
-      // Verify restore operations happen before save operations.
-      // The expected order from index.ts is:
-      // 1. Child workspace restore
-      // 2. Submodule profile init
-      // 3. LFS agent configure
-      // 4. Local cache restore (LFS then Library)
-      // 5. Git hooks install
-      // 6. [BUILD happens here - Docker.run or MacBuilder.run]
-      // 7. Local cache save (Library then LFS)
-      // 8. Child workspace save
-
-      const restoreOps = [
-        'child-workspace-restore',
-        'submodule-profile-plan',
-        'submodule-profile-execute',
-        'lfs-agent-configure',
-        'local-cache-restore-lfs',
-        'local-cache-restore-library',
-        'git-hooks-install',
-      ];
-
-      const saveOps = ['local-cache-save-library', 'local-cache-save-lfs', 'child-workspace-save'];
-
-      // All restore ops should appear before all save ops
-      for (const restoreOp of restoreOps) {
-        if (!callOrder.includes(restoreOp)) continue; // Skip if the operation wasn't called
-        for (const saveOp of saveOps) {
-          if (!callOrder.includes(saveOp)) continue;
-          expect(callOrder.indexOf(restoreOp)).toBeLessThan(callOrder.indexOf(saveOp));
-        }
-      }
-
-      // Child workspace save should be last
-      if (callOrder.includes('child-workspace-save') && callOrder.includes('local-cache-save-lfs')) {
-        expect(callOrder.indexOf('local-cache-save-lfs')).toBeLessThan(callOrder.indexOf('child-workspace-save'));
-      }
+      expect(mockPlugin.handlePostBuild).toHaveBeenCalledWith(0);
     });
   });
 
   // -----------------------------------------------------------------------
-  // Non-local provider strategy
+  // Plugin handles build entirely
   // -----------------------------------------------------------------------
 
-  describe('non-local provider strategy', () => {
-    it('should skip all plugin features when providerStrategy is not local', async () => {
-      await runIndex({
-        providerStrategy: 'aws',
-        childWorkspacesEnabled: true,
-        childWorkspaceName: 'Test',
-        submoduleProfilePath: '/profile.yml',
-        lfsTransferAgent: '/tools/agent',
-        localCacheEnabled: true,
-        gitHooksEnabled: true,
-      });
+  describe('plugin handles build (canHandleBuild = true)', () => {
+    it('should call handleBuild instead of Docker.run', async () => {
+      const { Docker } = require('./model');
+      mockPlugin.canHandleBuild.mockReturnValue(true);
+      mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
 
-      // None of the plugin services should be called because
-      // they are inside the `if (providerStrategy === 'local')` block
-      expect(mockChildWorkspaceService.buildConfig).not.toHaveBeenCalled();
-      expect(mockSubmoduleProfileService.createInitPlan).not.toHaveBeenCalled();
-      expect(mockLfsAgentService.configure).not.toHaveBeenCalled();
-      expect(mockLocalCacheService.resolveCacheRoot).not.toHaveBeenCalled();
-      expect(mockGitHooksService.installHooks).not.toHaveBeenCalled();
+      await runIndex();
+
+      expect(mockPlugin.handleBuild).toHaveBeenCalledWith('mock-image:latest');
+      expect(Docker.run).not.toHaveBeenCalled();
+      expect(mockPlugin.beforeLocalBuild).not.toHaveBeenCalled();
+      expect(mockPlugin.afterLocalBuild).not.toHaveBeenCalled();
+    });
+
+    it('should still call handlePostBuild after handleBuild', async () => {
+      mockPlugin.canHandleBuild.mockReturnValue(true);
+      mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
+
+      await runIndex();
+
+      expect(mockPlugin.handlePostBuild).toHaveBeenCalledWith(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Fallback to local
+  // -----------------------------------------------------------------------
+
+  describe('fallback to local build', () => {
+    it('should do a local build when handleBuild returns fallbackToLocal', async () => {
+      const { Docker } = require('./model');
+      mockPlugin.canHandleBuild.mockReturnValue(true);
+      mockPlugin.handleBuild.mockResolvedValue({ exitCode: -1, fallbackToLocal: true });
+
+      await runIndex();
+
+      expect(mockPlugin.handleBuild).toHaveBeenCalled();
+      expect(mockPlugin.beforeLocalBuild).toHaveBeenCalled();
+      expect(Docker.run).toHaveBeenCalled();
+      expect(mockPlugin.afterLocalBuild).toHaveBeenCalled();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // No plugin installed
+  // -----------------------------------------------------------------------
+
+  describe('no plugin installed', () => {
+    it('should build locally without errors when providerStrategy is local', async () => {
+      const { Docker } = require('./model');
+      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+
+      await runIndex({ providerStrategy: 'local' });
+
+      expect(Docker.run).toHaveBeenCalled();
+    });
+
+    it('should error when providerStrategy is non-local and no plugin', async () => {
+      const core = require('@actions/core');
+      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+
+      await runIndex({ providerStrategy: 'aws' });
+
+      expect(core.setFailed).toHaveBeenCalledWith(expect.stringContaining('requires @game-ci/orchestrator'));
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // canHandleBuild = false with non-local provider
+  // -----------------------------------------------------------------------
+
+  describe('plugin installed but canHandleBuild returns false with non-local provider', () => {
+    it('should error when providerStrategy is non-local', async () => {
+      const core = require('@actions/core');
+      mockPlugin.canHandleBuild.mockReturnValue(false);
+
+      await runIndex({ providerStrategy: 'aws' });
+
+      // The plugin is initialized but says it can't handle the build,
+      // and providerStrategy is not local, so it falls to the error case
+      expect(core.setFailed).toHaveBeenCalledWith(expect.stringContaining('requires @game-ci/orchestrator'));
     });
   });
 });

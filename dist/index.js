@@ -34,7 +34,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(42186));
-const node_path_1 = __importDefault(__nccwpck_require__(49411));
 const model_1 = __nccwpck_require__(41359);
 const cli_1 = __nccwpck_require__(55651);
 const mac_builder_1 = __importDefault(__nccwpck_require__(39364));
@@ -48,258 +47,33 @@ async function runMain() {
         }
         model_1.Action.checkCompatibility();
         model_1.Cache.verify();
-        const plugin = await (0, orchestrator_plugin_1.loadPluginServices)();
-        // Always configure git environment for CI reliability
-        plugin?.BuildReliabilityService.configureGitEnvironment();
         const { workspace, actionFolder } = model_1.Action;
         const buildParameters = await model_1.BuildParameters.create();
-        // If a test suite path is provided, use the test workflow engine
-        // instead of the standard build execution path
-        if (buildParameters.testSuitePath) {
-            core.info('[TestWorkflow] Test suite path detected, using test workflow engine');
-            const results = await plugin?.TestWorkflowService.executeTestSuite(buildParameters.testSuitePath, buildParameters);
-            let totalFailed = 0;
-            for (const result of results || []) {
-                totalFailed += result.failed;
-            }
-            if (totalFailed > 0) {
-                core.setFailed(`Test workflow completed with ${totalFailed} failure(s)`);
-            }
-            else {
-                core.info('[TestWorkflow] All test runs passed');
-            }
-            return;
-        }
         const baseImage = new model_1.ImageTag(buildParameters);
-        // Pre-build reliability checks
-        if (buildParameters.gitIntegrityCheck) {
-            core.info('Running git integrity checks...');
-            const isHealthy = plugin?.BuildReliabilityService.checkGitIntegrity(workspace);
-            plugin?.BuildReliabilityService.cleanStaleLockFiles(workspace);
-            plugin?.BuildReliabilityService.validateSubmoduleBackingStores(workspace);
-            if (buildParameters.cleanReservedFilenames) {
-                plugin?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
-            }
-            if (!isHealthy && buildParameters.gitAutoRecover) {
-                core.info('Git corruption detected, attempting automatic recovery...');
-                const recovered = plugin?.BuildReliabilityService.recoverCorruptedRepo(workspace);
-                if (!recovered) {
-                    core.warning('Automatic recovery failed. Build may encounter issues.');
-                }
-            }
-        }
-        else if (buildParameters.cleanReservedFilenames) {
-            // cleanReservedFilenames can run independently of gitIntegrityCheck
-            plugin?.BuildReliabilityService.cleanReservedFilenames(buildParameters.projectPath);
-        }
+        // Load orchestrator plugin (optional — only needed for remote builds and plugin features)
+        const plugin = await (0, orchestrator_plugin_1.loadOrchestratorPlugin)();
+        await plugin?.initialize(buildParameters, workspace);
         let exitCode = -1;
-        // Hot runner path: attempt to use a persistent Unity editor instance
-        if (buildParameters.hotRunnerEnabled) {
-            core.info('[HotRunner] Hot runner mode enabled, attempting hot build...');
-            const hotRunnerConfig = {
-                enabled: true,
-                transport: buildParameters.hotRunnerTransport,
-                host: buildParameters.hotRunnerHost,
-                port: buildParameters.hotRunnerPort,
-                healthCheckInterval: buildParameters.hotRunnerHealthInterval,
-                maxIdleTime: buildParameters.hotRunnerMaxIdle,
-                maxJobsBeforeRecycle: 0, // no automatic recycle by job count
-            };
-            if (!plugin?.HotRunnerService) {
-                throw new Error('[HotRunner] Orchestrator plugin required for hot runner mode');
-            }
-            const hotRunnerService = new plugin.HotRunnerService();
-            try {
-                await hotRunnerService.initialize(hotRunnerConfig);
-                const result = await hotRunnerService.submitBuild(buildParameters, (output) => {
-                    core.info(output);
-                });
-                exitCode = result.exitCode;
-                core.info(`[HotRunner] Build completed with exit code ${exitCode}`);
-                await hotRunnerService.shutdown();
-            }
-            catch (hotRunnerError) {
-                await hotRunnerService.shutdown();
-                if (buildParameters.hotRunnerFallbackToCold) {
-                    core.warning(`[HotRunner] Hot runner failed: ${hotRunnerError.message}. Falling back to cold build.`);
-                    exitCode = await runColdBuild(buildParameters, baseImage, workspace, actionFolder);
-                }
-                else {
-                    throw hotRunnerError;
-                }
-            }
+        if (plugin?.canHandleBuild()) {
+            // Plugin handles the build entirely (remote providers, hot runner, test workflows)
+            const result = await plugin.handleBuild(baseImage.toString());
+            exitCode = result.fallbackToLocal
+                ? await runLocalBuild(buildParameters, baseImage, workspace, actionFolder, plugin)
+                : result.exitCode;
         }
         else if (buildParameters.providerStrategy === 'local') {
-            core.info('Building locally');
-            // Child workspace isolation - restore cached workspace before any other setup
-            let childWorkspaceConfig;
-            if (buildParameters.childWorkspacesEnabled && buildParameters.childWorkspaceName) {
-                const ChildWorkspaceService = await plugin?.loadChildWorkspaceService();
-                const cacheRoot = buildParameters.childWorkspaceCacheRoot ||
-                    node_path_1.default.join(buildParameters.runnerTempPath || process.env.RUNNER_TEMP || '', 'game-ci-workspaces');
-                childWorkspaceConfig = ChildWorkspaceService?.buildConfig({
-                    childWorkspacesEnabled: buildParameters.childWorkspacesEnabled,
-                    childWorkspaceName: buildParameters.childWorkspaceName,
-                    childWorkspaceCacheRoot: cacheRoot,
-                    childWorkspacePreserveGit: buildParameters.childWorkspacePreserveGit,
-                    childWorkspaceSeparateLibrary: buildParameters.childWorkspaceSeparateLibrary,
-                });
-                const projectFullPath = node_path_1.default.join(workspace, buildParameters.projectPath);
-                const restored = ChildWorkspaceService?.initializeWorkspace(projectFullPath, childWorkspaceConfig);
-                core.info(`Child workspace "${buildParameters.childWorkspaceName}": ${restored ? 'restored from cache' : 'starting fresh'}`);
-                // Log workspace size for resource tracking
-                const size = ChildWorkspaceService?.getWorkspaceSize(projectFullPath);
-                core.info(`Child workspace size after restore: ${size}`);
-            }
-            // Submodule profile initialization
-            if (buildParameters.submoduleProfilePath) {
-                core.info('Initializing submodules from profile...');
-                const SubmoduleProfileService = await plugin?.loadSubmoduleProfileService();
-                const plan = await SubmoduleProfileService?.createInitPlan(buildParameters.submoduleProfilePath, buildParameters.submoduleVariantPath, workspace);
-                if (plan) {
-                    await SubmoduleProfileService?.execute(plan, workspace, buildParameters.submoduleToken || buildParameters.gitPrivateToken);
-                }
-            }
-            // Configure custom LFS transfer agent
-            if (buildParameters.lfsTransferAgent) {
-                core.info('Configuring custom LFS transfer agent...');
-                const LfsAgentService = await plugin?.loadLfsAgentService();
-                await LfsAgentService?.configure(buildParameters.lfsTransferAgent, buildParameters.lfsTransferAgentArgs, buildParameters.lfsStoragePaths ? buildParameters.lfsStoragePaths.split(';') : [], workspace);
-            }
-            // Local build caching - restore
-            let cacheRoot = '';
-            let cacheKey = '';
-            // eslint-disable-next-line no-undef
-            let LocalCacheService;
-            if (buildParameters.localCacheEnabled) {
-                LocalCacheService = await plugin?.loadLocalCacheService();
-                cacheRoot = LocalCacheService?.resolveCacheRoot(buildParameters) || '';
-                cacheKey =
-                    LocalCacheService?.generateCacheKey(buildParameters.targetPlatform, buildParameters.editorVersion, buildParameters.branch || '') || '';
-                if (buildParameters.localCacheLfs) {
-                    await LocalCacheService?.restoreLfsCache(workspace, cacheRoot, cacheKey);
-                }
-                if (buildParameters.localCacheLibrary) {
-                    const projectFullPath = node_path_1.default.join(workspace, buildParameters.projectPath);
-                    await LocalCacheService?.restoreLibraryCache(projectFullPath, cacheRoot, cacheKey);
-                }
-            }
-            // Git hooks — opt-in only. When disabled (default), do not touch hooks at all.
-            if (buildParameters.gitHooksEnabled) {
-                const GitHooksService = await plugin?.loadGitHooksService();
-                await GitHooksService?.installHooks(workspace);
-                if (buildParameters.gitHooksSkipList) {
-                    const environment = GitHooksService?.configureSkipList(buildParameters.gitHooksSkipList.split(','));
-                    if (environment) {
-                        Object.assign(process.env, environment);
-                    }
-                }
-            }
-            // Apply incremental sync strategy before build
-            const syncStrategy = buildParameters.syncStrategy;
-            if (syncStrategy !== 'full') {
-                core.info(`[Sync] Applying sync strategy: ${syncStrategy}`);
-                await applySyncStrategy(buildParameters, workspace, plugin);
-            }
-            await platform_setup_1.default.setup(buildParameters, actionFolder);
-            exitCode =
-                process.platform === 'darwin'
-                    ? await mac_builder_1.default.run(actionFolder)
-                    : await model_1.Docker.run(baseImage.toString(), {
-                        workspace,
-                        actionFolder,
-                        ...buildParameters,
-                    });
-            // Local build caching - save
-            if (buildParameters.localCacheEnabled && LocalCacheService) {
-                if (buildParameters.localCacheLibrary) {
-                    const projectFullPath = node_path_1.default.join(workspace, buildParameters.projectPath);
-                    await LocalCacheService.saveLibraryCache(projectFullPath, cacheRoot, cacheKey);
-                }
-                if (buildParameters.localCacheLfs) {
-                    await LocalCacheService.saveLfsCache(workspace, cacheRoot, cacheKey);
-                }
-            }
-            // Child workspace isolation - save workspace for next run
-            if (childWorkspaceConfig && childWorkspaceConfig.enabled) {
-                const ChildWorkspaceService = await plugin?.loadChildWorkspaceService();
-                const projectFullPath = node_path_1.default.join(workspace, buildParameters.projectPath);
-                const preSaveSize = ChildWorkspaceService?.getWorkspaceSize(projectFullPath);
-                core.info(`Child workspace size before save: ${preSaveSize}`);
-                ChildWorkspaceService?.saveWorkspace(projectFullPath, childWorkspaceConfig);
-                core.info(`Child workspace "${buildParameters.childWorkspaceName}" saved to cache`);
-            }
-            // Revert overlays after job completion if configured
-            if (buildParameters.syncRevertAfter && syncStrategy !== 'full') {
-                core.info('[Sync] Reverting overlay changes after job completion');
-                try {
-                    await plugin?.IncrementalSyncService.revertOverlays(workspace, buildParameters.syncStatePath);
-                }
-                catch (revertError) {
-                    core.warning(`[Sync] Overlay revert failed: ${revertError.message}`);
-                }
-            }
+            exitCode = await runLocalBuild(buildParameters, baseImage, workspace, actionFolder, plugin);
         }
         else {
-            const orchestrator = await (0, orchestrator_plugin_1.loadOrchestrator)();
-            if (!orchestrator) {
-                throw new Error('Orchestrator package not available. Install @game-ci/orchestrator or use providerStrategy=local.');
-            }
-            await orchestrator.run(buildParameters, baseImage.toString());
-            exitCode = 0;
+            throw new Error(`Provider strategy "${buildParameters.providerStrategy}" requires @game-ci/orchestrator. ` +
+                'Install it via the game-ci/orchestrator action, or use providerStrategy=local.');
         }
-        // Post-build: archive and enforce retention
-        if (buildParameters.buildArchiveEnabled && exitCode === 0) {
-            core.info('Archiving build output...');
-            plugin?.BuildReliabilityService.archiveBuildOutput(buildParameters.buildPath, buildParameters.buildArchivePath);
-            plugin?.BuildReliabilityService.enforceRetention(buildParameters.buildArchivePath, buildParameters.buildArchiveRetention);
-        }
-        // Set output
+        // Set core outputs
         await model_1.Output.setBuildVersion(buildParameters.buildVersion);
         await model_1.Output.setAndroidVersionCode(buildParameters.androidVersionCode);
         await model_1.Output.setEngineExitCode(exitCode);
-        // Artifact collection and upload (runs on both success and failure)
-        try {
-            // Register custom output types if provided
-            if (buildParameters.artifactCustomTypes) {
-                try {
-                    const customTypes = JSON.parse(buildParameters.artifactCustomTypes);
-                    if (Array.isArray(customTypes)) {
-                        for (const ct of customTypes) {
-                            plugin?.OutputTypeRegistry.registerType({
-                                name: ct.name,
-                                defaultPath: ct.defaultPath || ct.pattern || `./${ct.name}/`,
-                                description: ct.description || `Custom output type: ${ct.name}`,
-                                builtIn: false,
-                            });
-                        }
-                    }
-                }
-                catch (parseError) {
-                    core.warning(`Failed to parse artifactCustomTypes: ${parseError.message}`);
-                }
-            }
-            // Collect outputs and generate manifest
-            const manifestPath = node_path_1.default.join(buildParameters.projectPath, 'output-manifest.json');
-            const manifest = await plugin?.OutputService.collectOutputs(buildParameters.projectPath, buildParameters.buildGuid, buildParameters.artifactOutputTypes, manifestPath);
-            core.setOutput('artifactManifestPath', manifestPath);
-            if (manifest) {
-                // Upload artifacts
-                const uploadConfig = plugin?.ArtifactUploadHandler.parseConfig(buildParameters.artifactUploadTarget, buildParameters.artifactUploadPath || undefined, buildParameters.artifactCompression, buildParameters.artifactRetentionDays);
-                if (uploadConfig) {
-                    const uploadResult = await plugin?.ArtifactUploadHandler.uploadArtifacts(manifest, uploadConfig, buildParameters.projectPath);
-                    if (uploadResult && !uploadResult.success) {
-                        core.warning(`Artifact upload completed with errors: ${uploadResult.entries
-                            .filter((entry) => !entry.success)
-                            .map((entry) => `${entry.type}: ${entry.error}`)
-                            .join('; ')}`);
-                    }
-                }
-            }
-        }
-        catch (artifactError) {
-            core.warning(`Artifact collection/upload failed: ${artifactError.message}`);
-        }
+        // Plugin handles post-build (artifacts, archiving, retention)
+        await plugin?.handlePostBuild(exitCode);
         if (exitCode !== 0) {
             core.setFailed(`Build failed with exit code ${exitCode}`);
         }
@@ -308,72 +82,18 @@ async function runMain() {
         core.setFailed(error.message);
     }
 }
-async function runColdBuild(buildParameters, baseImage, workspace, actionFolder) {
-    if (buildParameters.providerStrategy === 'local') {
-        core.info('Building locally');
-        await platform_setup_1.default.setup(buildParameters, actionFolder);
-        return process.platform === 'darwin'
-            ? await mac_builder_1.default.run(actionFolder)
-            : await model_1.Docker.run(baseImage.toString(), {
-                workspace,
-                actionFolder,
-                ...buildParameters,
-            });
-    }
-    else {
-        const orchestrator = await (0, orchestrator_plugin_1.loadOrchestrator)();
-        if (!orchestrator) {
-            throw new Error('Orchestrator package not available. Install @game-ci/orchestrator or use providerStrategy=local.');
-        }
-        await orchestrator.run(buildParameters, baseImage.toString());
-        return 0;
-    }
-}
-/**
- * Apply the configured sync strategy to the workspace before build.
- */
-async function applySyncStrategy(buildParameters, workspace, plugin) {
-    if (!plugin?.IncrementalSyncService) {
-        core.warning('[Sync] Orchestrator plugin not available, skipping sync strategy');
-        return;
-    }
-    const { IncrementalSyncService } = plugin;
-    const strategy = buildParameters.syncStrategy;
-    const resolvedStrategy = IncrementalSyncService.resolveStrategy(strategy, workspace, buildParameters.syncStatePath);
-    if (resolvedStrategy === 'full') {
-        core.info('[Sync] Resolved to full sync (no incremental state available)');
-        return;
-    }
-    switch (resolvedStrategy) {
-        case 'git-delta': {
-            const targetReference = buildParameters.gitSha || buildParameters.branch;
-            const changedFiles = await IncrementalSyncService.syncGitDelta(workspace, targetReference, buildParameters.syncStatePath);
-            core.info(`[Sync] Git delta sync applied: ${changedFiles} file(s) changed`);
-            break;
-        }
-        case 'direct-input': {
-            if (!buildParameters.syncInputRef) {
-                throw new Error('[Sync] direct-input strategy requires syncInputRef to be set');
-            }
-            const overlays = await IncrementalSyncService.applyDirectInput(workspace, buildParameters.syncInputRef, buildParameters.syncStorageRemote || undefined, buildParameters.syncStatePath);
-            core.info(`[Sync] Direct input applied: ${overlays.length} overlay(s)`);
-            break;
-        }
-        case 'storage-pull': {
-            if (!buildParameters.syncInputRef) {
-                throw new Error('[Sync] storage-pull strategy requires syncInputRef to be set');
-            }
-            const pulledFiles = await IncrementalSyncService.syncStoragePull(workspace, buildParameters.syncInputRef, {
-                rcloneRemote: buildParameters.syncStorageRemote || undefined,
-                syncRevertAfter: buildParameters.syncRevertAfter,
-                statePath: buildParameters.syncStatePath,
-            });
-            core.info(`[Sync] Storage pull complete: ${pulledFiles.length} file(s)`);
-            break;
-        }
-        default:
-            core.warning(`[Sync] Unknown sync strategy: ${resolvedStrategy}`);
-    }
+async function runLocalBuild(buildParameters, baseImage, workspace, actionFolder, plugin) {
+    await plugin?.beforeLocalBuild(workspace);
+    await platform_setup_1.default.setup(buildParameters, actionFolder);
+    const exitCode = process.platform === 'darwin'
+        ? await mac_builder_1.default.run(actionFolder)
+        : await model_1.Docker.run(baseImage.toString(), {
+            workspace,
+            actionFolder,
+            ...buildParameters,
+        });
+    await plugin?.afterLocalBuild(workspace, exitCode);
+    return exitCode;
 }
 runMain();
 
@@ -578,6 +298,7 @@ class BuildParameters {
             core.setSecret(unitySerial);
             core.setSecret(`${unitySerial.slice(0, -4)}XXXX`);
         }
+        const providerStrategy = input_1.default.getInput('providerStrategy') || (cli_1.Cli.isCliMode ? 'aws' : 'local');
         return {
             editorVersion,
             customImage: input_1.default.customImage,
@@ -616,156 +337,18 @@ class BuildParameters {
             dockerIsolationMode: input_1.default.dockerIsolationMode,
             containerRegistryRepository: input_1.default.containerRegistryRepository,
             containerRegistryImageVersion: input_1.default.containerRegistryImageVersion,
-            providerStrategy: input_1.default.getInput('providerStrategy') || (cli_1.Cli.isCliMode ? 'aws' : 'local'),
-            fallbackProviderStrategy: input_1.default.getInput('fallbackProviderStrategy') || '',
-            runnerCheckEnabled: input_1.default.getInput('runnerCheckEnabled') === 'true',
-            runnerCheckLabels: (input_1.default.getInput('runnerCheckLabels') || '')
-                .split(',')
-                .map((l) => l.trim())
-                .filter(Boolean),
-            runnerCheckMinAvailable: Number(input_1.default.getInput('runnerCheckMinAvailable')) || 1,
-            retryOnFallback: input_1.default.getInput('retryOnFallback') === 'true',
-            providerInitTimeout: Number(input_1.default.getInput('providerInitTimeout')) || 0,
-            gitAuthMode: input_1.default.getInput('gitAuthMode') || 'header',
-            buildPlatform: input_1.default.getInput('buildPlatform') ||
-                ((input_1.default.getInput('providerStrategy') || 'local') !== 'local' ? 'linux' : process.platform),
-            kubeConfig: input_1.default.getInput('kubeConfig') || '',
-            containerMemory: input_1.default.getInput('containerMemory') || '3072',
-            containerCpu: input_1.default.getInput('containerCpu') || '1024',
-            containerNamespace: input_1.default.getInput('containerNamespace') || 'default',
-            kubeVolumeSize: input_1.default.getInput('kubeVolumeSize') || '25Gi',
-            kubeVolume: input_1.default.getInput('kubeVolume') || '',
-            postBuildContainerHooks: input_1.default.getInput('postBuildContainerHooks') || '',
-            preBuildContainerHooks: input_1.default.getInput('preBuildContainerHooks') || '',
-            customJob: input_1.default.getInput('customJob') || '',
+            providerStrategy,
+            buildPlatform: providerStrategy !== 'local' ? 'linux' : process.platform,
             runNumber: input_1.default.runNumber,
             branch: input_1.default.branch.replace('/head', '') || (await git_repo_1.GitRepoReader.GetBranch()),
-            orchestratorBranch: (input_1.default.getInput('orchestratorBranch') || 'main').split('/').reverse()[0],
-            orchestratorDebug: input_1.default.getInput('orchestratorDebug') === 'true' || input_1.default.getInput('orchestratorTests') === 'true',
-            githubRepo: (input_1.default.githubRepo ?? (await git_repo_1.GitRepoReader.GetRemote())) ||
-                input_1.default.getInput('orchestratorRepoName') ||
-                'game-ci/unity-builder',
-            orchestratorRepoName: input_1.default.getInput('orchestratorRepoName') || 'game-ci/unity-builder',
-            cloneDepth: Number.parseInt(input_1.default.getInput('cloneDepth') || '50'),
-            isCliMode: cli_1.Cli.isCliMode,
-            awsStackName: input_1.default.getInput('awsStackName') || 'game-ci',
-            awsEndpoint: input_1.default.getInput('awsEndpoint'),
-            awsCloudFormationEndpoint: input_1.default.getInput('awsCloudFormationEndpoint') || input_1.default.getInput('awsEndpoint'),
-            awsEcsEndpoint: input_1.default.getInput('awsEcsEndpoint') || input_1.default.getInput('awsEndpoint'),
-            awsKinesisEndpoint: input_1.default.getInput('awsKinesisEndpoint') || input_1.default.getInput('awsEndpoint'),
-            awsCloudWatchLogsEndpoint: input_1.default.getInput('awsCloudWatchLogsEndpoint') || input_1.default.getInput('awsEndpoint'),
-            awsS3Endpoint: input_1.default.getInput('awsS3Endpoint') || input_1.default.getInput('awsEndpoint'),
-            storageProvider: input_1.default.getInput('storageProvider') || 's3',
-            rcloneRemote: input_1.default.getInput('rcloneRemote') || '',
+            githubRepo: (input_1.default.githubRepo ?? (await git_repo_1.GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
             gitSha: input_1.default.gitSha,
             logId: (0, nanoid_1.customAlphabet)('0123456789abcdefghijklmnopqrstuvwxyz', 9)(),
             buildGuid: `${input_1.default.runNumber}-${input_1.default.targetPlatform.toLowerCase().replace('standalone', '')}-${(0, nanoid_1.customAlphabet)('0123456789abcdefghijklmnopqrstuvwxyz', 4)()}`,
-            commandHooks: input_1.default.getInput('commandHooks') || '',
-            inputPullCommand: input_1.default.getInput('inputPullCommand') || '',
-            pullInputList: (input_1.default.getInput('pullInputList') || '').split(',').filter(Boolean),
-            kubeStorageClass: input_1.default.getInput('kubeStorageClass') || '',
-            gcpProject: input_1.default.gcpProject,
-            gcpRegion: input_1.default.gcpRegion,
-            gcpStorageType: input_1.default.gcpStorageType,
-            gcpBucket: input_1.default.gcpBucket,
-            gcpFilestoreIp: input_1.default.gcpFilestoreIp,
-            gcpFilestoreShare: input_1.default.gcpFilestoreShare,
-            gcpMachineType: input_1.default.gcpMachineType,
-            gcpDiskSizeGb: input_1.default.gcpDiskSizeGb,
-            gcpServiceAccount: input_1.default.gcpServiceAccount,
-            gcpVpcConnector: input_1.default.gcpVpcConnector,
-            azureResourceGroup: input_1.default.azureResourceGroup,
-            azureLocation: input_1.default.azureLocation,
-            azureStorageType: input_1.default.azureStorageType,
-            azureStorageAccount: input_1.default.azureStorageAccount,
-            azureBlobContainer: input_1.default.azureBlobContainer,
-            azureFileShareName: input_1.default.azureFileShareName,
-            azureSubscriptionId: input_1.default.azureSubscriptionId,
-            azureCpu: input_1.default.azureCpu,
-            azureMemoryGb: input_1.default.azureMemoryGb,
-            azureDiskSizeGb: input_1.default.azureDiskSizeGb,
-            azureSubnetId: input_1.default.azureSubnetId,
-            cacheKey: input_1.default.getInput('cacheKey') || input_1.default.branch,
-            maxRetainedWorkspaces: Number.parseInt(input_1.default.getInput('maxRetainedWorkspaces') || '0'),
-            useLargePackages: input_1.default.getInput('useLargePackages') === 'true',
-            useCompressionStrategy: input_1.default.getInput('useCompressionStrategy') === 'true',
-            garbageMaxAge: Number(input_1.default.getInput('garbageMaxAge')) || 24,
-            githubChecks: input_1.default.getInput('githubChecks') === 'true',
-            asyncWorkflow: input_1.default.getInput('asyncOrchestrator') === 'true',
-            githubCheckId: input_1.default.getInput('githubCheckId') || '',
-            finalHooks: (input_1.default.getInput('finalHooks') || '').split(',').filter(Boolean),
-            skipLfs: input_1.default.getInput('skipLfs') === 'true',
-            skipCache: input_1.default.getInput('skipCache') === 'true',
+            isCliMode: cli_1.Cli.isCliMode,
             cacheUnityInstallationOnMac: input_1.default.cacheUnityInstallationOnMac,
             unityHubVersionOnMac: input_1.default.unityHubVersionOnMac,
             dockerWorkspacePath: input_1.default.dockerWorkspacePath,
-            submoduleProfilePath: input_1.default.submoduleProfilePath,
-            submoduleVariantPath: input_1.default.submoduleVariantPath,
-            submoduleToken: input_1.default.submoduleToken,
-            localCacheEnabled: input_1.default.localCacheEnabled,
-            localCacheRoot: input_1.default.localCacheRoot,
-            localCacheLibrary: input_1.default.localCacheLibrary,
-            localCacheLfs: input_1.default.localCacheLfs,
-            childWorkspacesEnabled: input_1.default.childWorkspacesEnabled,
-            childWorkspaceName: input_1.default.childWorkspaceName,
-            childWorkspaceCacheRoot: input_1.default.childWorkspaceCacheRoot,
-            childWorkspacePreserveGit: input_1.default.childWorkspacePreserveGit,
-            childWorkspaceSeparateLibrary: input_1.default.childWorkspaceSeparateLibrary,
-            lfsTransferAgent: input_1.default.lfsTransferAgent,
-            lfsTransferAgentArgs: input_1.default.lfsTransferAgentArgs,
-            lfsStoragePaths: input_1.default.lfsStoragePaths,
-            gitHooksEnabled: input_1.default.gitHooksEnabled,
-            gitHooksSkipList: input_1.default.gitHooksSkipList,
-            gitHooksRunBeforeBuild: input_1.default.gitHooksRunBeforeBuild,
-            providerExecutable: input_1.default.providerExecutable,
-            // Remote PowerShell provider
-            remotePowershellHost: input_1.default.remotePowershellHost,
-            remotePowershellCredential: input_1.default.remotePowershellCredential,
-            remotePowershellTransport: input_1.default.remotePowershellTransport,
-            // GitHub Actions provider
-            githubActionsRepo: input_1.default.githubActionsRepo,
-            githubActionsWorkflow: input_1.default.githubActionsWorkflow,
-            githubActionsToken: input_1.default.githubActionsToken,
-            githubActionsRef: input_1.default.githubActionsRef,
-            // GitLab CI provider
-            gitlabProjectId: input_1.default.gitlabProjectId,
-            gitlabTriggerToken: input_1.default.gitlabTriggerToken,
-            gitlabApiUrl: input_1.default.gitlabApiUrl,
-            gitlabRef: input_1.default.gitlabRef,
-            // Ansible provider
-            ansibleInventory: input_1.default.ansibleInventory,
-            ansiblePlaybook: input_1.default.ansiblePlaybook,
-            ansibleExtraVars: input_1.default.ansibleExtraVars,
-            ansibleVaultPassword: input_1.default.ansibleVaultPassword,
-            gitIntegrityCheck: input_1.default.gitIntegrityCheck,
-            gitAutoRecover: input_1.default.gitAutoRecover,
-            cleanReservedFilenames: input_1.default.cleanReservedFilenames,
-            buildArchiveEnabled: input_1.default.buildArchiveEnabled,
-            buildArchivePath: input_1.default.buildArchivePath,
-            buildArchiveRetention: input_1.default.buildArchiveRetention,
-            testSuitePath: input_1.default.testSuitePath,
-            testSuiteEvent: input_1.default.testSuiteEvent,
-            testTaxonomyPath: input_1.default.testTaxonomyPath,
-            testResultFormat: input_1.default.testResultFormat,
-            testResultPath: input_1.default.testResultPath,
-            hotRunnerEnabled: input_1.default.hotRunnerEnabled,
-            hotRunnerTransport: input_1.default.hotRunnerTransport,
-            hotRunnerHost: input_1.default.hotRunnerHost,
-            hotRunnerPort: input_1.default.hotRunnerPort,
-            hotRunnerHealthInterval: input_1.default.hotRunnerHealthInterval,
-            hotRunnerMaxIdle: input_1.default.hotRunnerMaxIdle,
-            hotRunnerFallbackToCold: input_1.default.hotRunnerFallbackToCold,
-            artifactOutputTypes: input_1.default.artifactOutputTypes,
-            artifactUploadTarget: input_1.default.artifactUploadTarget,
-            artifactUploadPath: input_1.default.artifactUploadPath,
-            artifactCompression: input_1.default.artifactCompression,
-            artifactRetentionDays: input_1.default.artifactRetentionDays,
-            artifactCustomTypes: input_1.default.artifactCustomTypes,
-            syncStrategy: input_1.default.syncStrategy,
-            syncInputRef: input_1.default.syncInputRef,
-            syncStorageRemote: input_1.default.syncStorageRemote,
-            syncRevertAfter: input_1.default.syncRevertAfter,
-            syncStatePath: input_1.default.syncStatePath,
         };
     }
     static parseBuildFile(filename, platform, androidExportType) {
@@ -1697,7 +1280,8 @@ const core = __importStar(__nccwpck_require__(42186));
  *
  * Note that input is always passed as a string, even booleans.
  *
- * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
+ * Only core build inputs belong here. Orchestrator/plugin inputs are read
+ * directly by the @game-ci/orchestrator plugin via core.getInput() / env vars.
  */
 class Input {
     static getInput(query) {
@@ -1718,9 +1302,6 @@ class Input {
         if (alternativeQuery !== query && process.env[alternativeQuery] !== undefined) {
             return process.env[alternativeQuery];
         }
-    }
-    static get region() {
-        return Input.getInput('region') ?? 'eu-west-2';
     }
     static get githubRepo() {
         return Input.getInput('GITHUB_REPOSITORY') ?? Input.getInput('GITHUB_REPO') ?? undefined;
@@ -1870,22 +1451,6 @@ class Input {
     static get dockerWorkspacePath() {
         return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
     }
-    static get syncStrategy() {
-        return Input.getInput('syncStrategy') ?? 'full';
-    }
-    static get syncInputRef() {
-        return Input.getInput('syncInputRef') ?? '';
-    }
-    static get syncStorageRemote() {
-        return Input.getInput('syncStorageRemote') ?? '';
-    }
-    static get syncRevertAfter() {
-        const input = Input.getInput('syncRevertAfter') ?? 'true';
-        return input === 'true';
-    }
-    static get syncStatePath() {
-        return Input.getInput('syncStatePath') ?? '.game-ci/sync-state.json';
-    }
     static get dockerCpuLimit() {
         return Input.getInput('dockerCpuLimit') ?? node_os_1.default.cpus().length.toString();
     }
@@ -1914,265 +1479,8 @@ class Input {
     static get containerRegistryImageVersion() {
         return Input.getInput('containerRegistryImageVersion') ?? '3';
     }
-    static get artifactOutputTypes() {
-        return Input.getInput('artifactOutputTypes') ?? 'build,logs,test-results';
-    }
-    static get artifactUploadTarget() {
-        return Input.getInput('artifactUploadTarget') ?? 'github-artifacts';
-    }
-    static get artifactUploadPath() {
-        return Input.getInput('artifactUploadPath') ?? '';
-    }
-    static get artifactCompression() {
-        return Input.getInput('artifactCompression') ?? 'gzip';
-    }
-    static get artifactRetentionDays() {
-        return Input.getInput('artifactRetentionDays') ?? '30';
-    }
-    static get artifactCustomTypes() {
-        return Input.getInput('artifactCustomTypes') ?? '';
-    }
     static get skipActivation() {
         return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
-    }
-    static get submoduleProfilePath() {
-        return Input.getInput('submoduleProfilePath') ?? '';
-    }
-    static get submoduleVariantPath() {
-        return Input.getInput('submoduleVariantPath') ?? '';
-    }
-    static get submoduleToken() {
-        return Input.getInput('submoduleToken') ?? '';
-    }
-    static get localCacheEnabled() {
-        return (Input.getInput('localCacheEnabled') ?? 'false') === 'true';
-    }
-    static get localCacheRoot() {
-        return Input.getInput('localCacheRoot') ?? '';
-    }
-    static get localCacheLibrary() {
-        return (Input.getInput('localCacheLibrary') ?? 'true') === 'true';
-    }
-    static get localCacheLfs() {
-        return (Input.getInput('localCacheLfs') ?? 'false') === 'true';
-    }
-    static get childWorkspacesEnabled() {
-        return (Input.getInput('childWorkspacesEnabled') ?? 'false') === 'true';
-    }
-    static get childWorkspaceName() {
-        return Input.getInput('childWorkspaceName') ?? '';
-    }
-    static get childWorkspaceCacheRoot() {
-        return Input.getInput('childWorkspaceCacheRoot') ?? '';
-    }
-    static get childWorkspacePreserveGit() {
-        return (Input.getInput('childWorkspacePreserveGit') ?? 'true') === 'true';
-    }
-    static get childWorkspaceSeparateLibrary() {
-        return (Input.getInput('childWorkspaceSeparateLibrary') ?? 'true') === 'true';
-    }
-    static get lfsTransferAgent() {
-        return Input.getInput('lfsTransferAgent') ?? '';
-    }
-    static get lfsTransferAgentArgs() {
-        return Input.getInput('lfsTransferAgentArgs') ?? '';
-    }
-    static get lfsStoragePaths() {
-        return Input.getInput('lfsStoragePaths') ?? '';
-    }
-    static get gitHooksEnabled() {
-        return (Input.getInput('gitHooksEnabled') ?? 'false') === 'true';
-    }
-    static get gitHooksSkipList() {
-        return Input.getInput('gitHooksSkipList') ?? '';
-    }
-    static get gitHooksRunBeforeBuild() {
-        return Input.getInput('gitHooksRunBeforeBuild') ?? '';
-    }
-    static get providerExecutable() {
-        return Input.getInput('providerExecutable') ?? '';
-    }
-    // GCP Cloud Run (Experimental)
-    static get gcpProject() {
-        return Input.getInput('gcpProject') ?? '';
-    }
-    static get gcpRegion() {
-        return Input.getInput('gcpRegion') ?? '';
-    }
-    static get gcpStorageType() {
-        return Input.getInput('gcpStorageType') ?? 'gcs-fuse';
-    }
-    static get gcpBucket() {
-        return Input.getInput('gcpBucket') ?? '';
-    }
-    static get gcpFilestoreIp() {
-        return Input.getInput('gcpFilestoreIp') ?? '';
-    }
-    static get gcpFilestoreShare() {
-        return Input.getInput('gcpFilestoreShare') ?? '/share1';
-    }
-    static get gcpMachineType() {
-        return Input.getInput('gcpMachineType') ?? 'e2-standard-4';
-    }
-    static get gcpDiskSizeGb() {
-        return Input.getInput('gcpDiskSizeGb') ?? '100';
-    }
-    static get gcpServiceAccount() {
-        return Input.getInput('gcpServiceAccount') ?? '';
-    }
-    static get gcpVpcConnector() {
-        return Input.getInput('gcpVpcConnector') ?? '';
-    }
-    // Azure Container Instances (Experimental)
-    static get azureResourceGroup() {
-        return Input.getInput('azureResourceGroup') ?? '';
-    }
-    static get azureLocation() {
-        return Input.getInput('azureLocation') ?? '';
-    }
-    static get azureStorageType() {
-        return Input.getInput('azureStorageType') ?? 'azure-files';
-    }
-    static get azureStorageAccount() {
-        return Input.getInput('azureStorageAccount') ?? '';
-    }
-    static get azureBlobContainer() {
-        return Input.getInput('azureBlobContainer') ?? 'unity-builds';
-    }
-    static get azureFileShareName() {
-        return Input.getInput('azureFileShareName') ?? 'unity-builds';
-    }
-    static get azureSubscriptionId() {
-        return Input.getInput('azureSubscriptionId') ?? '';
-    }
-    static get azureCpu() {
-        return Input.getInput('azureCpu') ?? '4';
-    }
-    static get azureMemoryGb() {
-        return Input.getInput('azureMemoryGb') ?? '16';
-    }
-    static get azureDiskSizeGb() {
-        return Input.getInput('azureDiskSizeGb') ?? '100';
-    }
-    static get azureSubnetId() {
-        return Input.getInput('azureSubnetId') ?? '';
-    }
-    // ### ### ###
-    // Remote PowerShell provider
-    // ### ### ###
-    static get remotePowershellHost() {
-        return Input.getInput('remotePowershellHost') ?? '';
-    }
-    static get remotePowershellCredential() {
-        return Input.getInput('remotePowershellCredential') ?? '';
-    }
-    static get remotePowershellTransport() {
-        return Input.getInput('remotePowershellTransport') ?? 'wsman';
-    }
-    // ### ### ###
-    // GitHub Actions provider
-    // ### ### ###
-    static get githubActionsRepo() {
-        return Input.getInput('githubActionsRepo') ?? '';
-    }
-    static get githubActionsWorkflow() {
-        return Input.getInput('githubActionsWorkflow') ?? '';
-    }
-    static get githubActionsToken() {
-        return Input.getInput('githubActionsToken') ?? '';
-    }
-    static get githubActionsRef() {
-        return Input.getInput('githubActionsRef') ?? 'main';
-    }
-    // ### ### ###
-    // GitLab CI provider
-    // ### ### ###
-    static get gitlabProjectId() {
-        return Input.getInput('gitlabProjectId') ?? '';
-    }
-    static get gitlabTriggerToken() {
-        return Input.getInput('gitlabTriggerToken') ?? '';
-    }
-    static get gitlabApiUrl() {
-        return Input.getInput('gitlabApiUrl') ?? 'https://gitlab.com';
-    }
-    static get gitlabRef() {
-        return Input.getInput('gitlabRef') ?? 'main';
-    }
-    // ### ### ###
-    // Ansible provider
-    // ### ### ###
-    static get ansibleInventory() {
-        return Input.getInput('ansibleInventory') ?? '';
-    }
-    static get ansiblePlaybook() {
-        return Input.getInput('ansiblePlaybook') ?? '';
-    }
-    static get ansibleExtraVars() {
-        return Input.getInput('ansibleExtraVars') ?? '';
-    }
-    static get ansibleVaultPassword() {
-        return Input.getInput('ansibleVaultPassword') ?? '';
-    }
-    static get gitIntegrityCheck() {
-        const input = Input.getInput('gitIntegrityCheck') ?? 'false';
-        return input === 'true';
-    }
-    static get hotRunnerEnabled() {
-        const input = Input.getInput('hotRunnerEnabled') ?? false;
-        return input === 'true';
-    }
-    static get gitAutoRecover() {
-        const input = Input.getInput('gitAutoRecover') ?? 'false';
-        return input === 'true';
-    }
-    static get hotRunnerTransport() {
-        return (Input.getInput('hotRunnerTransport') ?? 'websocket');
-    }
-    static get hotRunnerHost() {
-        return Input.getInput('hotRunnerHost') ?? 'localhost';
-    }
-    static get hotRunnerPort() {
-        return Number.parseInt(Input.getInput('hotRunnerPort') ?? '9090', 10);
-    }
-    static get hotRunnerHealthInterval() {
-        return Number.parseInt(Input.getInput('hotRunnerHealthInterval') ?? '30', 10);
-    }
-    static get hotRunnerMaxIdle() {
-        return Number.parseInt(Input.getInput('hotRunnerMaxIdle') ?? '3600', 10);
-    }
-    static get hotRunnerFallbackToCold() {
-        const input = Input.getInput('hotRunnerFallbackToCold') ?? 'true';
-        return input === 'true';
-    }
-    static get cleanReservedFilenames() {
-        const input = Input.getInput('cleanReservedFilenames') ?? 'false';
-        return input === 'true';
-    }
-    static get buildArchiveEnabled() {
-        const input = Input.getInput('buildArchiveEnabled') ?? 'false';
-        return input === 'true';
-    }
-    static get buildArchivePath() {
-        return Input.getInput('buildArchivePath') ?? './build-archives';
-    }
-    static get buildArchiveRetention() {
-        return Number.parseInt(Input.getInput('buildArchiveRetention') ?? '30', 10);
-    }
-    static get testSuitePath() {
-        return Input.getInput('testSuitePath') ?? '';
-    }
-    static get testSuiteEvent() {
-        return Input.getInput('testSuiteEvent') ?? '';
-    }
-    static get testTaxonomyPath() {
-        return Input.getInput('testTaxonomyPath') ?? '';
-    }
-    static get testResultFormat() {
-        return Input.getInput('testResultFormat') ?? 'junit';
-    }
-    static get testResultPath() {
-        return Input.getInput('testResultPath') ?? './test-results';
     }
     static ToEnvVarFormat(input) {
         if (input.toUpperCase() === input) {
@@ -2239,25 +1547,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.loadPluginServices = exports.loadOrchestrator = void 0;
+exports.loadOrchestratorPlugin = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 /**
- * Load the orchestrator for remote builds.
- * Returns undefined if orchestrator is not available.
+ * Attempt to load the orchestrator plugin.
+ * Returns undefined if @game-ci/orchestrator is not installed.
  */
-async function loadOrchestrator() {
+async function loadOrchestratorPlugin() {
     try {
         // eslint-disable-next-line import/no-unresolved
-        const { Orchestrator } = await Promise.resolve().then(() => __importStar(__nccwpck_require__(70776)));
-        return {
-            run: async (buildParameters, baseImage) => {
-                const result = await Orchestrator.run(buildParameters, baseImage);
-                return {
-                    exitCode: result.BuildSucceeded ? 0 : 1,
-                    BuildSucceeded: result.BuildSucceeded,
-                };
-            },
-        };
+        const orchestratorModule = await Promise.resolve().then(() => __importStar(__nccwpck_require__(70776)));
+        if (typeof orchestratorModule.createPlugin !== 'function') {
+            core.warning('Orchestrator package found but does not export createPlugin(). ' +
+                'Update @game-ci/orchestrator to the latest version.');
+            return;
+        }
+        return orchestratorModule.createPlugin();
     }
     catch (error) {
         if (!isModuleNotFoundError(error)) {
@@ -2265,50 +1570,7 @@ async function loadOrchestrator() {
         }
     }
 }
-exports.loadOrchestrator = loadOrchestrator;
-/**
- * Load orchestrator plugin services for local builds.
- * These services are part of the orchestrator but also used in local builds
- * (child workspaces, local cache, git hooks, LFS agents, etc.).
- */
-async function loadPluginServices() {
-    try {
-        // eslint-disable-next-line import/no-unresolved
-        const orchestrator = await Promise.resolve().then(() => __importStar(__nccwpck_require__(70776)));
-        return {
-            BuildReliabilityService: orchestrator.BuildReliabilityService,
-            TestWorkflowService: orchestrator.TestWorkflowService,
-            HotRunnerService: orchestrator.HotRunnerService,
-            OutputService: orchestrator.OutputService,
-            OutputTypeRegistry: orchestrator.OutputTypeRegistry,
-            ArtifactUploadHandler: orchestrator.ArtifactUploadHandler,
-            IncrementalSyncService: orchestrator.IncrementalSyncService,
-            // Lazy-loaded services (only imported when needed)
-            async loadChildWorkspaceService() {
-                return orchestrator.ChildWorkspaceService;
-            },
-            async loadLocalCacheService() {
-                return orchestrator.LocalCacheService;
-            },
-            async loadSubmoduleProfileService() {
-                return orchestrator.SubmoduleProfileService;
-            },
-            async loadLfsAgentService() {
-                return orchestrator.LfsAgentService;
-            },
-            async loadGitHooksService() {
-                return orchestrator.GitHooksService;
-            },
-        };
-    }
-    catch (error) {
-        if (!isModuleNotFoundError(error)) {
-            throw error;
-        }
-        core.warning(`Orchestrator plugin not available: ${error.message}`);
-    }
-}
-exports.loadPluginServices = loadPluginServices;
+exports.loadOrchestratorPlugin = loadOrchestratorPlugin;
 function isModuleNotFoundError(error) {
     if (error && typeof error === 'object' && 'code' in error) {
         const code = error.code;

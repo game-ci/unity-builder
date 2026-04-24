@@ -1,87 +1,63 @@
 import * as core from '@actions/core';
 
-export interface OrchestratorPluginResult {
-  exitCode: number;
-  BuildSucceeded: boolean;
+/**
+ * Lifecycle interface for the orchestrator plugin.
+ *
+ * The orchestrator reads its own configuration from environment variables
+ * and GitHub Actions inputs. Unity-builder only calls these lifecycle hooks
+ * at the appropriate times — it never needs to know individual plugin params.
+ */
+export interface OrchestratorPlugin {
+  // eslint-disable-next-line no-unused-vars
+  initialize(coreParameters: Record<string, any>, workspace: string): Promise<void>;
+
+  /** Whether the plugin wants to handle the entire build (remote, hot runner, test workflow). */
+  canHandleBuild(): boolean;
+
+  /**
+   * Execute the build when canHandleBuild() returns true.
+   * If the plugin needs to fall back to a local build (e.g. hot runner failure),
+   * it returns { exitCode: -1, fallbackToLocal: true }.
+   */
+  // eslint-disable-next-line no-unused-vars
+  handleBuild(baseImage: string): Promise<{ exitCode: number; fallbackToLocal?: boolean }>;
+
+  /** Pre-build hook for local builds (cache restore, git hooks, sync, etc.). */
+  // eslint-disable-next-line no-unused-vars
+  beforeLocalBuild(workspace: string): Promise<void>;
+
+  /** Post-build hook for local builds (cache save, workspace save, etc.). */
+  // eslint-disable-next-line no-unused-vars
+  afterLocalBuild(workspace: string, exitCode: number): Promise<void>;
+
+  /** Post-build hook for all build types (archiving, artifacts, etc.). */
+  // eslint-disable-next-line no-unused-vars
+  handlePostBuild(exitCode: number): Promise<void>;
 }
 
 /**
- * Load the orchestrator for remote builds.
- * Returns undefined if orchestrator is not available.
+ * Attempt to load the orchestrator plugin.
+ * Returns undefined if @game-ci/orchestrator is not installed.
  */
-export async function loadOrchestrator(): Promise<
-  | {
-      // eslint-disable-next-line no-unused-vars
-      run: (buildParameters: any, baseImage: string) => Promise<OrchestratorPluginResult>;
-    }
-  | undefined
-> {
+export async function loadOrchestratorPlugin(): Promise<OrchestratorPlugin | undefined> {
   try {
     // eslint-disable-next-line import/no-unresolved
-    const { Orchestrator } = await import('@game-ci/orchestrator');
+    const orchestratorModule = await import('@game-ci/orchestrator');
 
-    return {
-      run: async (buildParameters: any, baseImage: string): Promise<OrchestratorPluginResult> => {
-        const result = await Orchestrator.run(buildParameters, baseImage);
+    if (typeof orchestratorModule.createPlugin !== 'function') {
+      core.warning(
+        'Orchestrator package found but does not export createPlugin(). ' +
+          'Update @game-ci/orchestrator to the latest version.',
+      );
 
-        return {
-          exitCode: result.BuildSucceeded ? 0 : 1,
-          BuildSucceeded: result.BuildSucceeded,
-        };
-      },
-    };
+      return;
+    }
+
+    return orchestratorModule.createPlugin();
   } catch (error) {
     if (!isModuleNotFoundError(error)) {
       throw error;
     }
-  }
-}
-
-/**
- * Load orchestrator plugin services for local builds.
- * These services are part of the orchestrator but also used in local builds
- * (child workspaces, local cache, git hooks, LFS agents, etc.).
- */
-export async function loadPluginServices() {
-  try {
-    // eslint-disable-next-line import/no-unresolved
-    const orchestrator = await import('@game-ci/orchestrator');
-
-    return {
-      BuildReliabilityService: orchestrator.BuildReliabilityService,
-      TestWorkflowService: orchestrator.TestWorkflowService,
-      HotRunnerService: orchestrator.HotRunnerService,
-      OutputService: orchestrator.OutputService,
-      OutputTypeRegistry: orchestrator.OutputTypeRegistry,
-      ArtifactUploadHandler: orchestrator.ArtifactUploadHandler,
-      IncrementalSyncService: orchestrator.IncrementalSyncService,
-
-      // Lazy-loaded services (only imported when needed)
-      async loadChildWorkspaceService() {
-        return orchestrator.ChildWorkspaceService;
-      },
-
-      async loadLocalCacheService() {
-        return orchestrator.LocalCacheService;
-      },
-
-      async loadSubmoduleProfileService() {
-        return orchestrator.SubmoduleProfileService;
-      },
-
-      async loadLfsAgentService() {
-        return orchestrator.LfsAgentService;
-      },
-
-      async loadGitHooksService() {
-        return orchestrator.GitHooksService;
-      },
-    };
-  } catch (error) {
-    if (!isModuleNotFoundError(error)) {
-      throw error;
-    }
-    core.warning(`Orchestrator plugin not available: ${(error as Error).message}`);
   }
 }
 
