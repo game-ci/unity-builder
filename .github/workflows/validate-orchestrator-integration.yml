@@ -88,32 +88,27 @@ jobs:
           echo "Installing orchestrator into unity-builder workspace..."
           npm install ./orchestrator-standalone/game-ci-orchestrator-*.tgz --no-save --legacy-peer-deps
 
-      - name: Verify all services and lazy loaders
+      - name: Verify plugin loader returns exports with orchestrator installed
         run: |
           node -e "
-            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
             (async () => {
-              const orch = await loadOrchestrator();
-              if (!orch || typeof orch.run !== 'function') {
-                console.error('ERROR: loadOrchestrator failed');
+              const plugin = await loadOrchestratorPlugin();
+              if (plugin === undefined) {
+                console.error('ERROR: loadOrchestratorPlugin should return defined plugin when package is installed');
                 process.exit(1);
               }
-              console.log('✓ loadOrchestrator().run is a function');
-
-              const services = await loadPluginServices();
-              if (!services) { console.error('ERROR: loadPluginServices failed'); process.exit(1); }
-
-              const eager = ['BuildReliabilityService','TestWorkflowService','HotRunnerService','OutputService','OutputTypeRegistry','ArtifactUploadHandler','IncrementalSyncService'];
-              for (const s of eager) { if (!services[s]) { console.error('Missing: ' + s); process.exit(1); } }
-              console.log('✓ All ' + eager.length + ' eager services loaded');
-
-              const lazy = ['loadChildWorkspaceService','loadLocalCacheService','loadSubmoduleProfileService','loadLfsAgentService','loadGitHooksService'];
-              for (const l of lazy) {
-                if (typeof services[l] !== 'function') { console.error('Missing loader: ' + l); process.exit(1); }
-                const svc = await services[l]();
-                if (!svc) { console.error(l + '() returned undefined'); process.exit(1); }
+              const lifecycleMethods = [
+                'initialize', 'canHandleBuild', 'handleBuild',
+                'beforeLocalBuild', 'afterLocalBuild', 'handlePostBuild',
+              ];
+              for (const method of lifecycleMethods) {
+                if (typeof plugin[method] !== 'function') {
+                  console.error('ERROR: plugin.' + method + ' should be a function, got ' + typeof plugin[method]);
+                  process.exit(1);
+                }
               }
-              console.log('✓ All ' + lazy.length + ' lazy loaders return defined services');
+              console.log('✓ loadOrchestratorPlugin() returns plugin with all ' + lifecycleMethods.length + ' lifecycle methods');
             })();
           "
 

@@ -99,21 +99,14 @@ jobs:
         run: |
           echo "Checking plugin loader handles missing @game-ci/orchestrator..."
           node -e "
-            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
             (async () => {
-              const orch = await loadOrchestrator();
-              if (orch !== undefined) {
-                console.error('ERROR: loadOrchestrator should return undefined when package not installed');
+              const plugin = await loadOrchestratorPlugin();
+              if (plugin !== undefined) {
+                console.error('ERROR: loadOrchestratorPlugin should return undefined when package not installed');
                 process.exit(1);
               }
-              console.log('✓ loadOrchestrator() returns undefined when package not installed');
-
-              const services = await loadPluginServices();
-              if (services !== undefined) {
-                console.error('ERROR: loadPluginServices should return undefined when package not installed');
-                process.exit(1);
-              }
-              console.log('✓ loadPluginServices() returns undefined when package not installed');
+              console.log('✓ loadOrchestratorPlugin() returns undefined when package not installed');
             })();
           "
 
@@ -153,53 +146,24 @@ jobs:
         run: |
           echo "Checking plugin loader returns defined exports..."
           node -e "
-            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
             (async () => {
-              const orch = await loadOrchestrator();
-              if (orch === undefined) {
-                console.error('ERROR: loadOrchestrator should return defined exports when package is installed');
+              const plugin = await loadOrchestratorPlugin();
+              if (plugin === undefined) {
+                console.error('ERROR: loadOrchestratorPlugin should return defined plugin when package is installed');
                 process.exit(1);
               }
-              if (typeof orch.run !== 'function') {
-                console.error('ERROR: loadOrchestrator().run should be a function');
-                process.exit(1);
-              }
-              console.log('✓ loadOrchestrator() returns defined exports with orchestrator installed');
-
-              const services = await loadPluginServices();
-              if (services === undefined) {
-                console.error('ERROR: loadPluginServices should return defined exports when package is installed');
-                process.exit(1);
-              }
-              const expectedServices = [
-                'BuildReliabilityService', 'TestWorkflowService', 'HotRunnerService',
-                'OutputService', 'OutputTypeRegistry', 'ArtifactUploadHandler',
-                'IncrementalSyncService',
+              const lifecycleMethods = [
+                'initialize', 'canHandleBuild', 'handleBuild',
+                'beforeLocalBuild', 'afterLocalBuild', 'handlePostBuild',
               ];
-              for (const svc of expectedServices) {
-                if (services[svc] === undefined) {
-                  console.error('ERROR: ' + svc + ' should be defined');
+              for (const method of lifecycleMethods) {
+                if (typeof plugin[method] !== 'function') {
+                  console.error('ERROR: plugin.' + method + ' should be a function, got ' + typeof plugin[method]);
                   process.exit(1);
                 }
               }
-              console.log('✓ loadPluginServices() returns all ' + expectedServices.length + ' services');
-
-              const lazyLoaders = [
-                'loadChildWorkspaceService', 'loadLocalCacheService',
-                'loadSubmoduleProfileService', 'loadLfsAgentService', 'loadGitHooksService',
-              ];
-              for (const loader of lazyLoaders) {
-                if (typeof services[loader] !== 'function') {
-                  console.error('ERROR: ' + loader + ' should be a function');
-                  process.exit(1);
-                }
-                const loaded = await services[loader]();
-                if (loaded === undefined) {
-                  console.error('ERROR: ' + loader + '() should return defined service');
-                  process.exit(1);
-                }
-              }
-              console.log('✓ All ' + lazyLoaders.length + ' lazy loaders return defined services');
+              console.log('✓ loadOrchestratorPlugin() returns plugin with all ' + lifecycleMethods.length + ' lifecycle methods');
             })();
           "
 
@@ -227,62 +191,37 @@ jobs:
         run: |
           echo "Verifying orchestrator build wiring end-to-end..."
           node -e "
-            const { loadOrchestrator, loadPluginServices } = require('./lib/model/orchestrator-plugin');
-            const { Orchestrator, BuildParameters } = require('@game-ci/orchestrator');
+            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
 
             (async () => {
-              // Verify Orchestrator has the expected static API
-              const requiredMethods = ['setup', 'run'];
-              for (const m of requiredMethods) {
-                if (typeof Orchestrator[m] !== 'function') {
-                  console.error('ERROR: Orchestrator.' + m + ' should be a function, got ' + typeof Orchestrator[m]);
-                  process.exit(1);
-                }
+              // Verify plugin loads successfully with orchestrator installed
+              const plugin = await loadOrchestratorPlugin();
+              if (plugin === undefined) {
+                console.error('ERROR: plugin should be defined when orchestrator is installed');
+                process.exit(1);
               }
-              console.log('✓ Orchestrator has setup() and run() methods');
 
-              // Verify BuildParameters.create() produces a valid config object
-              const params = await BuildParameters.create();
-              const requiredFields = [
-                'targetPlatform', 'projectPath', 'providerStrategy',
-                'editorVersion', 'buildPath', 'buildName',
+              // Verify all lifecycle methods are callable
+              const lifecycleMethods = [
+                'initialize', 'canHandleBuild', 'handleBuild',
+                'beforeLocalBuild', 'afterLocalBuild', 'handlePostBuild',
               ];
-              for (const f of requiredFields) {
-                if (params[f] === undefined) {
-                  console.error('ERROR: BuildParameters.' + f + ' is undefined');
+              for (const m of lifecycleMethods) {
+                if (typeof plugin[m] !== 'function') {
+                  console.error('ERROR: plugin.' + m + ' should be a function, got ' + typeof plugin[m]);
                   process.exit(1);
                 }
               }
-              console.log('✓ BuildParameters.create() produces valid config with ' + requiredFields.length + ' required fields');
+              console.log('✓ Plugin has all ' + lifecycleMethods.length + ' lifecycle methods');
 
-              // Verify loadOrchestrator().run is wired to Orchestrator.run
-              const orch = await loadOrchestrator();
-              if (typeof orch.run !== 'function') {
-                console.error('ERROR: loadOrchestrator().run is not a function');
+              // Verify canHandleBuild returns a boolean
+              const canHandle = plugin.canHandleBuild();
+              if (typeof canHandle !== 'boolean') {
+                console.error('ERROR: canHandleBuild() should return a boolean, got ' + typeof canHandle);
                 process.exit(1);
               }
+              console.log('✓ canHandleBuild() returns boolean');
 
-              // Call run with a bad baseImage to confirm it reaches Orchestrator.run
-              // (Orchestrator.run throws 'baseImage is undefined' for images containing 'undefined')
-              try {
-                await orch.run(params, 'undefined-image');
-                console.error('ERROR: Expected Orchestrator.run to throw for undefined baseImage');
-                process.exit(1);
-              } catch (e) {
-                if (e.message.includes('baseImage is undefined')) {
-                  console.log('✓ loadOrchestrator().run() correctly wired to Orchestrator.run()');
-                } else {
-                  console.error('ERROR: Unexpected error from Orchestrator.run:', e.message);
-                  process.exit(1);
-                }
-              }
-
-              // Verify plugin services wire through to real service instances
-              const services = await loadPluginServices();
-              if (typeof services.BuildReliabilityService.configureGitEnvironment !== 'function') {
-                console.error('ERROR: BuildReliabilityService.configureGitEnvironment should be a function');
-                process.exit(1);
-              }
-              console.log('✓ Plugin services wire through to real orchestrator implementations');
+              console.log('✓ Plugin architecture wiring verified');
             })();
           "
