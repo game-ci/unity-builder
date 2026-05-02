@@ -47,7 +47,17 @@ jobs:
       - name: Checkout unity-builder
         uses: actions/checkout@v4
 
-      - name: Checkout orchestrator
+      - name: Checkout orchestrator (matching branch)
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          ref: ${{ github.head_ref || github.ref_name }}
+          path: orchestrator-standalone
+        continue-on-error: true
+        id: orchestrator-branch
+
+      - name: Fallback to orchestrator main branch
+        if: steps.orchestrator-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
@@ -134,7 +144,17 @@ jobs:
       RESOURCE_TRACKING: 'true'
       K8S_LOCALSTACK_HOST: localstack-main
     steps:
-      - name: Checkout orchestrator
+      - name: Checkout orchestrator (matching branch)
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          ref: ${{ github.head_ref || github.ref_name }}
+          lfs: false
+        continue-on-error: true
+        id: orch-branch
+
+      - name: Fallback to orchestrator main branch
+        if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
@@ -506,7 +526,17 @@ jobs:
       AWS_ENDPOINT: http://localhost:4566
       AWS_ENDPOINT_URL: http://localhost:4566
     steps:
-      - name: Checkout orchestrator
+      - name: Checkout orchestrator (matching branch)
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          ref: ${{ github.head_ref || github.ref_name }}
+          lfs: false
+        continue-on-error: true
+        id: orch-branch
+
+      - name: Fallback to orchestrator main branch
+        if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
@@ -789,7 +819,17 @@ jobs:
       AWS_ENDPOINT: http://localhost:4566
       AWS_ENDPOINT_URL: http://localhost:4566
     steps:
-      - name: Checkout orchestrator
+      - name: Checkout orchestrator (matching branch)
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          ref: ${{ github.head_ref || github.ref_name }}
+          lfs: false
+        continue-on-error: true
+        id: orch-branch
+
+      - name: Fallback to orchestrator main branch
+        if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
@@ -1046,7 +1086,17 @@ jobs:
       AWS_ENDPOINT: http://localhost:4566
       AWS_ENDPOINT_URL: http://localhost:4566
     steps:
-      - name: Checkout orchestrator
+      - name: Checkout orchestrator (matching branch)
+        uses: actions/checkout@v4
+        with:
+          repository: game-ci/orchestrator
+          ref: ${{ github.head_ref || github.ref_name }}
+          lfs: false
+        continue-on-error: true
+        id: orch-branch
+
+      - name: Fallback to orchestrator main branch
+        if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
