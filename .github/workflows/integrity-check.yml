@@ -2,7 +2,8 @@ name: Integrity
 
 on:
   push: { branches: [main] }
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
@@ -34,6 +35,8 @@ jobs:
 
   orchestrator-integration:
     name: Orchestrator Integration
-    if: github.event_name == 'push'
+    if: >-
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.labels.*.name, 'run-integration')
     uses: ./.github/workflows/validate-orchestrator-integration.yml
     secrets: inherit
