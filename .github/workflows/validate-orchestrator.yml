@@ -83,15 +83,34 @@ jobs:
           repository: game-ci/orchestrator
           path: orchestrator-standalone
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install package manager (from package.json)
+        run: |
+          corepack enable
+          corepack install
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+      - name: Resolve yarn cache folder
+        id: yarn-config
+        run: echo "cacheFolder=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+      - name: Restore yarn install cache (node_modules + cacheFolder + install-state)
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ steps.yarn-config.outputs.cacheFolder }}
+            .yarn/install-state.gz
+          key: yarn-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-node-20-
 
       # --- unity-builder compilation and tests ---
       - name: Install unity-builder dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          YARN_ENABLE_HARDENED_MODE: 'false'
+        run: |
+          case "$(yarn --version)" in 1.*) echo 'expected up-to-date yarn version'; exit 1 ;; esac
+          yarn install --immutable
 
       - name: Build unity-builder
         run: |
@@ -133,7 +152,7 @@ jobs:
       - name: Build and pack orchestrator
         working-directory: orchestrator-standalone
         run: |
-          yarn install --frozen-lockfile
+          yarn install --immutable
           echo "Building orchestrator..."
           npx tsc
           echo "✓ orchestrator compiles successfully"
