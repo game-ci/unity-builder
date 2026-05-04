@@ -78,6 +78,9 @@
     // Allow Array.from(set) mitigate TS2569 which would require '--downlevelIteration'
     "unicorn/prefer-spread": "off",
     // Temp disable to prevent mixing changes with other PRs
+    // Disabled: @types/jest 27 typings require .mockResolvedValue(undefined),
+    // contradicting this rule
+    "unicorn/no-useless-undefined": "off",
     "i18n-text/no-en": "off"
   },
   "overrides": [
