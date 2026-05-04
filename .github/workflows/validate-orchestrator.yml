@@ -100,9 +100,9 @@ jobs:
             node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
-          key: yarn-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
+          key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            yarn-${{ runner.os }}-node-20-
+            yarn-v2-${{ runner.os }}-node-20-
 
       # --- unity-builder compilation and tests ---
       - name: Install unity-builder dependencies

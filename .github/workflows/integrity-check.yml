@@ -40,9 +40,9 @@ jobs:
             node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
-          key: yarn-${{ runner.os }}-node-18-${{ hashFiles('yarn.lock') }}
+          key: yarn-v2-${{ runner.os }}-node-18-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            yarn-${{ runner.os }}-node-18-
+            yarn-v2-${{ runner.os }}-node-18-
       - name: Install deps
         env:
           YARN_ENABLE_HARDENED_MODE: 'false'
