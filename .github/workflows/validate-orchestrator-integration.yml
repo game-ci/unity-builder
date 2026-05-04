@@ -77,7 +77,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
           key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
@@ -189,7 +188,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
           key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
@@ -583,7 +581,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
           key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
@@ -889,7 +886,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
           key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
@@ -1169,7 +1165,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
           key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
