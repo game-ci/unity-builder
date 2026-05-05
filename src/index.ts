@@ -3,7 +3,7 @@ import { Action, BuildParameters, Cache, Docker, ImageTag, Output } from './mode
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
-import { loadOrchestratorPlugin, OrchestratorPlugin } from './model/orchestrator-plugin';
+import { BuildPlugin, loadBuildPlugin } from './model/build-plugin';
 
 async function runMain() {
   try {
@@ -19,8 +19,8 @@ async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    // Load orchestrator plugin (optional — only needed for remote builds and plugin features)
-    const plugin = await loadOrchestratorPlugin();
+    // Load optional build plugin. The default implementation is @game-ci/orchestrator.
+    const plugin = await loadBuildPlugin();
     await plugin?.initialize(buildParameters, workspace);
 
     let exitCode = -1;
@@ -62,7 +62,7 @@ async function runLocalBuild(
   baseImage: ImageTag,
   workspace: string,
   actionFolder: string,
-  plugin?: OrchestratorPlugin,
+  plugin?: BuildPlugin,
 ): Promise<number> {
   await plugin?.beforeLocalBuild(workspace);
 

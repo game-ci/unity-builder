@@ -24,10 +24,10 @@ const mockPlugin = {
   handlePostBuild: jest.fn().mockResolvedValue(undefined),
 };
 
-const mockLoadOrchestratorPlugin = jest.fn().mockResolvedValue(mockPlugin);
+const mockLoadBuildPlugin = jest.fn().mockResolvedValue(mockPlugin);
 
-jest.mock('./model/orchestrator-plugin', () => ({
-  loadOrchestratorPlugin: mockLoadOrchestratorPlugin,
+jest.mock('./model/build-plugin', () => ({
+  loadBuildPlugin: mockLoadBuildPlugin,
 }));
 
 jest.mock('@actions/core');
@@ -119,7 +119,7 @@ describe('index.ts plugin lifecycle wiring', () => {
     // Reset plugin to default behavior
     mockPlugin.canHandleBuild.mockReturnValue(false);
     mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
-    mockLoadOrchestratorPlugin.mockResolvedValue(mockPlugin);
+    mockLoadBuildPlugin.mockResolvedValue(mockPlugin);
   });
 
   afterEach(() => {
@@ -226,7 +226,7 @@ describe('index.ts plugin lifecycle wiring', () => {
   describe('no plugin installed', () => {
     it('should build locally without errors when providerStrategy is local', async () => {
       const { Docker } = require('./model');
-      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+      mockLoadBuildPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'local' });
 
@@ -235,7 +235,7 @@ describe('index.ts plugin lifecycle wiring', () => {
 
     it('should error when providerStrategy is non-local and no plugin', async () => {
       const core = require('@actions/core');
-      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+      mockLoadBuildPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'aws' });
 

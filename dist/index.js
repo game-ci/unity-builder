@@ -38,7 +38,7 @@ const model_1 = __nccwpck_require__(41359);
 const cli_1 = __nccwpck_require__(55651);
 const mac_builder_1 = __importDefault(__nccwpck_require__(39364));
 const platform_setup_1 = __importDefault(__nccwpck_require__(64423));
-const orchestrator_plugin_1 = __nccwpck_require__(2075);
+const build_plugin_1 = __nccwpck_require__(76162);
 async function runMain() {
     try {
         if (cli_1.Cli.InitCliMode()) {
@@ -50,8 +50,8 @@ async function runMain() {
         const { workspace, actionFolder } = model_1.Action;
         const buildParameters = await model_1.BuildParameters.create();
         const baseImage = new model_1.ImageTag(buildParameters);
-        // Load orchestrator plugin (optional — only needed for remote builds and plugin features)
-        const plugin = await (0, orchestrator_plugin_1.loadOrchestratorPlugin)();
+        // Load optional build plugin. The default implementation is @game-ci/orchestrator.
+        const plugin = await (0, build_plugin_1.loadBuildPlugin)();
         await plugin?.initialize(buildParameters, workspace);
         let exitCode = -1;
         if (plugin?.canHandleBuild()) {
@@ -383,6 +383,76 @@ class BuildParameters {
     }
 }
 exports["default"] = BuildParameters;
+
+
+/***/ }),
+
+/***/ 76162:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.loadBuildPlugin = void 0;
+const core = __importStar(__nccwpck_require__(42186));
+const DEFAULT_BUILD_PLUGIN_MODULE = '@game-ci/orchestrator';
+/**
+ * Attempt to load the default optional build plugin.
+ *
+ * Today the default implementation is @game-ci/orchestrator. The loader is
+ * intentionally named after the generic plugin contract so additional plugin
+ * implementations can be added without making orchestrator part of the core
+ * abstraction.
+ */
+async function loadBuildPlugin(moduleName = DEFAULT_BUILD_PLUGIN_MODULE) {
+    try {
+        const pluginModule = await Promise.resolve().then(() => __importStar(require(/* webpackIgnore: true */ moduleName)));
+        if (typeof pluginModule.createPlugin !== 'function') {
+            core.warning(`Build plugin package "${moduleName}" found but does not export createPlugin(). ` +
+                'Update the plugin package to the latest version.');
+            return;
+        }
+        return pluginModule.createPlugin();
+    }
+    catch (error) {
+        if (!isModuleNotFoundError(error)) {
+            throw error;
+        }
+    }
+}
+exports.loadBuildPlugin = loadBuildPlugin;
+function isModuleNotFoundError(error) {
+    if (error && typeof error === 'object' && 'code' in error) {
+        const code = error.code;
+        if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
+            return true;
+        }
+    }
+    return typeof error?.message === 'string' && /cannot find module/i.test(error.message);
+}
 
 
 /***/ }),
@@ -1520,72 +1590,6 @@ class MacBuilder {
     }
 }
 exports["default"] = MacBuilder;
-
-
-/***/ }),
-
-/***/ 2075:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.loadOrchestratorPlugin = void 0;
-const core = __importStar(__nccwpck_require__(42186));
-/**
- * Attempt to load the orchestrator plugin.
- * Returns undefined if @game-ci/orchestrator is not installed.
- */
-async function loadOrchestratorPlugin() {
-    try {
-        // eslint-disable-next-line import/no-unresolved
-        const orchestratorModule = await Promise.resolve().then(() => __importStar(__nccwpck_require__(70776)));
-        if (typeof orchestratorModule.createPlugin !== 'function') {
-            core.warning('Orchestrator package found but does not export createPlugin(). ' +
-                'Update @game-ci/orchestrator to the latest version.');
-            return;
-        }
-        return orchestratorModule.createPlugin();
-    }
-    catch (error) {
-        if (!isModuleNotFoundError(error)) {
-            throw error;
-        }
-    }
-}
-exports.loadOrchestratorPlugin = loadOrchestratorPlugin;
-function isModuleNotFoundError(error) {
-    if (error && typeof error === 'object' && 'code' in error) {
-        const code = error.code;
-        if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
-            return true;
-        }
-    }
-    return typeof error?.message === 'string' && /cannot find module/i.test(error.message);
-}
 
 
 /***/ }),
@@ -76009,14 +76013,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 70776:
-/***/ ((module) => {
-
-module.exports = eval("require")("@game-ci/orchestrator");
-
-
-/***/ }),
-
 /***/ 22877:
 /***/ ((module) => {
 
@@ -91074,6 +91070,24 @@ exports.StorageContextClient = StorageContextClient;
 
 /***/ }),
 
+/***/ 39241:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.KnownEncryptionAlgorithmType = void 0;
+/** Known values of {@link EncryptionAlgorithmType} that the service accepts. */
+var KnownEncryptionAlgorithmType;
+(function (KnownEncryptionAlgorithmType) {
+    KnownEncryptionAlgorithmType["AES256"] = "AES256";
+})(KnownEncryptionAlgorithmType || (exports.KnownEncryptionAlgorithmType = KnownEncryptionAlgorithmType = {}));
+//# sourceMappingURL=generatedModels.js.map
+
+/***/ }),
+
 /***/ 57955:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -101400,6 +101414,132 @@ exports.listType = {
 
 /***/ }),
 
+/***/ 24763:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=appendBlob.js.map
+
+/***/ }),
+
+/***/ 57427:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=blob.js.map
+
+/***/ }),
+
+/***/ 56945:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=blockBlob.js.map
+
+/***/ }),
+
+/***/ 43634:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=container.js.map
+
+/***/ }),
+
+/***/ 68529:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __nccwpck_require__(4351);
+tslib_1.__exportStar(__nccwpck_require__(75650), exports);
+tslib_1.__exportStar(__nccwpck_require__(43634), exports);
+tslib_1.__exportStar(__nccwpck_require__(57427), exports);
+tslib_1.__exportStar(__nccwpck_require__(76425), exports);
+tslib_1.__exportStar(__nccwpck_require__(24763), exports);
+tslib_1.__exportStar(__nccwpck_require__(56945), exports);
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 76425:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=pageBlob.js.map
+
+/***/ }),
+
+/***/ 75650:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ *
+ * Code generated by Microsoft (R) AutoRest Code Generator.
+ * Changes may cause incorrect behavior and will be lost if the code is regenerated.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=service.js.map
+
+/***/ }),
+
 /***/ 80313:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -104615,132 +104755,6 @@ const filterBlobsOperationSpec = {
 
 /***/ }),
 
-/***/ 24763:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=appendBlob.js.map
-
-/***/ }),
-
-/***/ 57427:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=blob.js.map
-
-/***/ }),
-
-/***/ 56945:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=blockBlob.js.map
-
-/***/ }),
-
-/***/ 43634:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=container.js.map
-
-/***/ }),
-
-/***/ 68529:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __nccwpck_require__(4351);
-tslib_1.__exportStar(__nccwpck_require__(75650), exports);
-tslib_1.__exportStar(__nccwpck_require__(43634), exports);
-tslib_1.__exportStar(__nccwpck_require__(57427), exports);
-tslib_1.__exportStar(__nccwpck_require__(76425), exports);
-tslib_1.__exportStar(__nccwpck_require__(24763), exports);
-tslib_1.__exportStar(__nccwpck_require__(56945), exports);
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ 76425:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=pageBlob.js.map
-
-/***/ }),
-
-/***/ 75650:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-/*
- * Copyright (c) Microsoft Corporation.
- * Licensed under the MIT License.
- *
- * Code generated by Microsoft (R) AutoRest Code Generator.
- * Changes may cause incorrect behavior and will be lost if the code is regenerated.
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//# sourceMappingURL=service.js.map
-
-/***/ }),
-
 /***/ 50166:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -104811,24 +104825,6 @@ class StorageClient extends coreHttpCompat.ExtendedServiceClient {
 }
 exports.StorageClient = StorageClient;
 //# sourceMappingURL=storageClient.js.map
-
-/***/ }),
-
-/***/ 39241:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.KnownEncryptionAlgorithmType = void 0;
-/** Known values of {@link EncryptionAlgorithmType} that the service accepts. */
-var KnownEncryptionAlgorithmType;
-(function (KnownEncryptionAlgorithmType) {
-    KnownEncryptionAlgorithmType["AES256"] = "AES256";
-})(KnownEncryptionAlgorithmType || (exports.KnownEncryptionAlgorithmType = KnownEncryptionAlgorithmType = {}));
-//# sourceMappingURL=generatedModels.js.map
 
 /***/ }),
 
