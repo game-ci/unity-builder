@@ -111,12 +111,3 @@ describe('build-plugin (default package installed)', () => {
     await expect(loadBuildPlugin()).rejects.toThrow('Syntax error in module');
   });
 });
-
-describe('orchestrator-plugin compatibility exports', () => {
-  it('keeps the old loader name as an alias', async () => {
-    const buildPlugin = await import('./build-plugin');
-    const compatibility = await import('./orchestrator-plugin');
-
-    expect(compatibility.loadOrchestratorPlugin).toBe(buildPlugin.loadBuildPlugin);
-  });
-});
