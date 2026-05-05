@@ -71,7 +71,9 @@ export default class Versioning {
   static async determineBuildVersion(strategy: string, inputVersion: string): Promise<string> {
     // Validate input
     if (!Object.hasOwnProperty.call(this.strategies, strategy)) {
-      throw new ValidationError(`Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`);
+      throw new ValidationError(
+        `Versioning strategy should be one of ${Object.values(this.strategies).join(', ')}.`,
+      );
     }
 
     switch (strategy) {
@@ -122,7 +124,9 @@ export default class Versioning {
 
       // Ensure 3 digits (commits should always be patch level)
       const [major, minor, patch] = `${tag}.${commits}`.split('.');
-      const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
+      const threeDigitVersion = /^\d+$/.test(patch)
+        ? `${major}.${minor}.${patch}`
+        : `${major}.0.${minor}`;
 
       core.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
 
@@ -168,7 +172,9 @@ export default class Versioning {
       }
     }
 
-    core.warning(`Failed to parse git describe output or version can not be determined through: "${description}".`);
+    core.warning(
+      `Failed to parse git describe output or version can not be determined through: "${description}".`,
+    );
 
     return false;
   }
@@ -207,7 +213,9 @@ export default class Versioning {
    * identifies the current commit.
    */
   static async getVersionDescription() {
-    const versionTags = (await this.git(['tag', '--list', '--merged', 'HEAD', '--sort=-creatordate']))
+    const versionTags = (
+      await this.git(['tag', '--list', '--merged', 'HEAD', '--sort=-creatordate'])
+    )
       .split('\n')
       .filter((tag) => new RegExp(this.grepCompatibleInputVersionRegex).test(tag));
 
@@ -218,7 +226,9 @@ export default class Versioning {
     }
 
     const latestVersionTag = versionTags[0];
-    const commitsCount = (await this.git(['rev-list', `${latestVersionTag}..HEAD`, '--count'])).trim();
+    const commitsCount = (
+      await this.git(['rev-list', `${latestVersionTag}..HEAD`, '--count'])
+    ).trim();
     const commitHash = (await this.git(['rev-parse', '--short', 'HEAD'])).trim();
 
     return `${latestVersionTag}-${commitsCount}-g${commitHash}`;
@@ -253,7 +263,9 @@ export default class Versioning {
    */
   static async hasAnyVersionTags() {
     const numberOfTagsAsString = await System.run('sh', undefined, {
-      input: Buffer.from(`git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`),
+      input: Buffer.from(
+        `git tag --list --merged HEAD | grep -E '${this.grepCompatibleInputVersionRegex}' | wc -l`,
+      ),
       cwd: Input.projectPath,
       silent: false,
     });

@@ -42,7 +42,8 @@ class SetupMac {
       }
     }
 
-    const commandSuffix = buildParameters.unityHubVersionOnMac !== '' ? `@${buildParameters.unityHubVersionOnMac}` : '';
+    const commandSuffix =
+      buildParameters.unityHubVersionOnMac !== '' ? `@${buildParameters.unityHubVersionOnMac}` : '';
     const command = `brew install unity-hub${commandSuffix}`;
 
     // Ignoring return code because the log seems to overflow the internal buffer which triggers
@@ -52,7 +53,9 @@ class SetupMac {
       ignoreReturnCode: true,
     });
     if (errorCode) {
-      throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+      throw new Error(
+        `There was an error installing the Unity Editor. See logs above for details.`,
+      );
     }
 
     if (buildParameters.cacheUnityInstallationOnMac) {
@@ -135,7 +138,9 @@ class SetupMac {
     }
 
     const unityChangeset = await getUnityChangeset(buildParameters.editorVersion);
-    const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(buildParameters.targetPlatform);
+    const moduleArguments = SetupMac.getModuleParametersForTargetPlatform(
+      buildParameters.targetPlatform,
+    );
     const architectureArguments = SetupMac.getArchitectureParameters();
 
     const execArguments: string[] = [
@@ -156,7 +161,9 @@ class SetupMac {
       ignoreReturnCode: true,
     });
     if (errorCode) {
-      throw new Error(`There was an error installing the Unity Editor. See logs above for details.`);
+      throw new Error(
+        `There was an error installing the Unity Editor. See logs above for details.`,
+      );
     }
 
     if (buildParameters.cacheUnityInstallationOnMac) {
@@ -164,7 +171,10 @@ class SetupMac {
     }
   }
 
-  private static async setEnvironmentVariables(buildParameters: BuildParameters, actionFolder: string) {
+  private static async setEnvironmentVariables(
+    buildParameters: BuildParameters,
+    actionFolder: string,
+  ) {
     // Need to set environment variables from here because we execute
     // the scripts on the host for mac
     process.env.ACTION_FOLDER = actionFolder;

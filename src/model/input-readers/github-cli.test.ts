@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import { GithubCliReader } from './github-cli';
 import * as core from '@actions/core';
 

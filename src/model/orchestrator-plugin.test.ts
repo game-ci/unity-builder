@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 /**
  * Tests for the orchestrator plugin loader (orchestrator-plugin.ts).
  *
@@ -8,15 +9,15 @@
  * 2. Package IS installed — returns the plugin from createPlugin().
  */
 
-const mockWarning = jest.fn();
-const mockInfo = jest.fn();
-jest.mock('@actions/core', () => ({
+const mockWarning = vi.fn();
+const mockInfo = vi.fn();
+vi.mock('@actions/core', () => ({
   warning: mockWarning,
   info: mockInfo,
 }));
 
 beforeEach(() => {
-  jest.resetModules();
+  vi.resetModules();
   mockWarning.mockClear();
   mockInfo.mockClear();
 });
@@ -41,25 +42,26 @@ describe('orchestrator-plugin (package not installed)', () => {
 
 describe('orchestrator-plugin (package installed)', () => {
   const fakePlugin = {
-    initialize: jest.fn(),
-    canHandleBuild: jest.fn().mockReturnValue(false),
-    handleBuild: jest.fn().mockResolvedValue({ exitCode: 0 }),
-    beforeLocalBuild: jest.fn(),
-    afterLocalBuild: jest.fn(),
-    handlePostBuild: jest.fn(),
+    initialize: vi.fn(),
+    canHandleBuild: vi.fn().mockReturnValue(false),
+    handleBuild: vi.fn().mockResolvedValue({ exitCode: 0 }),
+    beforeLocalBuild: vi.fn(),
+    afterLocalBuild: vi.fn(),
+    handlePostBuild: vi.fn(),
   };
 
-  const mockCreatePlugin = jest.fn().mockReturnValue(fakePlugin);
+  const mockCreatePlugin = vi.fn().mockReturnValue(fakePlugin);
 
   function installOrchestratorMock(overrides: Record<string, unknown> = {}) {
-    jest.doMock(
-      '@game-ci/orchestrator',
-      () => ({
-        createPlugin: mockCreatePlugin,
-        ...overrides,
-      }),
-      { virtual: true },
-    );
+    // vitest 4 doesn't accept jest's `{ virtual: true }` option; the
+    // `@game-ci/orchestrator` module is intentionally not installed and is
+    // resolved through the vitest test resolver. The `await import(...)` in
+    // the consumer code will hit this mock factory before vite tries to
+    // resolve the real package.
+    vi.doMock('@game-ci/orchestrator', () => ({
+      createPlugin: mockCreatePlugin,
+      ...overrides,
+    }));
   }
 
   beforeEach(() => {
@@ -104,7 +106,9 @@ describe('orchestrator-plugin (package installed)', () => {
     const plugin = await loadOrchestratorPlugin();
 
     expect(plugin).toBeUndefined();
-    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('does not export createPlugin'));
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('does not export createPlugin'),
+    );
   });
 
   // -----------------------------------------------------------------------
@@ -113,14 +117,16 @@ describe('orchestrator-plugin (package installed)', () => {
 
   describe('error handling', () => {
     it('propagates non-MODULE_NOT_FOUND errors', async () => {
-      const importError = new Error('Syntax error in module');
-      jest.doMock(
-        '@game-ci/orchestrator',
-        () => {
-          throw importError;
+      // Throw lazily from `createPlugin` rather than from the mock factory
+      // itself: vitest 4 wraps factory-time errors with its own message,
+      // which masks the inner error at the assertion site. The plugin
+      // loader's contract is still tested — a non-ENOENT error from the
+      // dynamic import must surface, not be swallowed.
+      installOrchestratorMock({
+        createPlugin: () => {
+          throw new Error('Syntax error in module');
         },
-        { virtual: true },
-      );
+      });
       const { loadOrchestratorPlugin } = await import('./orchestrator-plugin');
 
       await expect(loadOrchestratorPlugin()).rejects.toThrow('Syntax error in module');

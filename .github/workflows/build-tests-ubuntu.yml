@@ -9,8 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  UNITY_LICENSE:
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>\n    <License
+  UNITY_LICENSE: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>\n    <License
     id=\"Terms\">\n        <MachineBindings>\n            <Binding Key=\"1\"
     Value=\"576562626572264761624c65526f7578\"/>\n            <Binding Key=\"2\"
     Value=\"576562626572264761624c65526f7578\"/>\n        </MachineBindings>\n        <MachineID
@@ -36,8 +35,7 @@ env:
 
 jobs:
   buildForAllPlatformsUbuntu:
-    name:
-      "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
+    name: "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -200,7 +198,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name:
-            "Build ${{ matrix.targetPlatform }}${{ startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp }}_params_${{ matrix.additionalParameters }})"
+          name: "Build ${{ matrix.targetPlatform }}${{ startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp }}_params_${{ matrix.additionalParameters }})"
           path: build
           retention-days: 14

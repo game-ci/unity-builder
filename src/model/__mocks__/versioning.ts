@@ -1,22 +1,23 @@
+import { vi } from 'vitest';
 /* eslint unicorn/prevent-abbreviations: "off" */
 
 // Import these named export into your test file:
-export const mockProjectPath = jest.fn().mockResolvedValue('mockProjectPath');
-export const mockIsDirtyAllowed = jest.fn().mockResolvedValue(false);
-export const mockBranch = jest.fn().mockResolvedValue('mockBranch');
-export const mockHeadRef = jest.fn().mockResolvedValue('mockHeadRef');
-export const mockRef = jest.fn().mockResolvedValue('mockRef');
-export const mockDetermineVersion = jest.fn().mockResolvedValue('1.2.3');
-export const mockGenerateSemanticVersion = jest.fn().mockResolvedValue('2.3.4');
-export const mockGenerateTagVersion = jest.fn().mockResolvedValue('1.0');
-export const mockParseSemanticVersion = jest.fn().mockResolvedValue({});
-export const mockFetch = jest.fn().mockImplementation(() => {});
-export const mockGetVersionDescription = jest.fn().mockResolvedValue('1.2-3-g12345678-dirty');
-export const mockIsDirty = jest.fn().mockResolvedValue(false);
-export const mockGetTag = jest.fn().mockResolvedValue('v1.0');
-export const mockHasAnyVersionTags = jest.fn().mockResolvedValue(true);
-export const mockGetTotalNumberOfCommits = jest.fn().mockResolvedValue(3);
-export const mockGit = jest.fn().mockImplementation(() => {});
+export const mockProjectPath = vi.fn().mockResolvedValue('mockProjectPath');
+export const mockIsDirtyAllowed = vi.fn().mockResolvedValue(false);
+export const mockBranch = vi.fn().mockResolvedValue('mockBranch');
+export const mockHeadRef = vi.fn().mockResolvedValue('mockHeadRef');
+export const mockRef = vi.fn().mockResolvedValue('mockRef');
+export const mockDetermineVersion = vi.fn().mockResolvedValue('1.2.3');
+export const mockGenerateSemanticVersion = vi.fn().mockResolvedValue('2.3.4');
+export const mockGenerateTagVersion = vi.fn().mockResolvedValue('1.0');
+export const mockParseSemanticVersion = vi.fn().mockResolvedValue({});
+export const mockFetch = vi.fn().mockImplementation(() => {});
+export const mockGetVersionDescription = vi.fn().mockResolvedValue('1.2-3-g12345678-dirty');
+export const mockIsDirty = vi.fn().mockResolvedValue(false);
+export const mockGetTag = vi.fn().mockResolvedValue('v1.0');
+export const mockHasAnyVersionTags = vi.fn().mockResolvedValue(true);
+export const mockGetTotalNumberOfCommits = vi.fn().mockResolvedValue(3);
+export const mockGit = vi.fn().mockImplementation(() => {});
 
 export default {
   projectPath: mockProjectPath,

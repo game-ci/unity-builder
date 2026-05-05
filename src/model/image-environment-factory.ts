@@ -1,8 +1,14 @@
 import { DockerParameters, StringKeyValuePair } from './shared-types';
 
 class ImageEnvironmentFactory {
-  public static getEnvVarString(parameters: DockerParameters, additionalVariables: StringKeyValuePair[] = []) {
-    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
+  public static getEnvVarString(
+    parameters: DockerParameters,
+    additionalVariables: StringKeyValuePair[] = [],
+  ) {
+    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(
+      parameters,
+      additionalVariables,
+    );
     let string = '';
     for (const p of environmentVariables) {
       if (p.value === '' || p.value === undefined || p.value === null) {
@@ -21,7 +27,10 @@ class ImageEnvironmentFactory {
     return string;
   }
 
-  public static getEnvironmentVariables(parameters: DockerParameters, additionalVariables: StringKeyValuePair[] = []) {
+  public static getEnvironmentVariables(
+    parameters: DockerParameters,
+    additionalVariables: StringKeyValuePair[] = [],
+  ) {
     let environmentVariables: StringKeyValuePair[] = [
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
       { name: 'UNITY_PASSWORD', value: process.env.UNITY_PASSWORD },

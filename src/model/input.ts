@@ -47,7 +47,10 @@ class Input {
 
   static get branch(): string {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return Input.getInput(`GITHUB_REF`)!
+        .replace('refs/', '')
+        .replace(`head/`, '')
+        .replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch')!;
     } else {
@@ -260,7 +263,8 @@ class Input {
     }
 
     return (
-      Input.getInput('dockerMemoryLimit') ?? `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+      Input.getInput('dockerMemoryLimit') ??
+      `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
     );
   }
 

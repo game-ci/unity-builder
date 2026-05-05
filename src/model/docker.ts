@@ -17,7 +17,13 @@ class Docker {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables, entrypointBash);
+        runCommand = this.getLinuxCommand(
+          image,
+          parameters,
+          overrideCommands,
+          additionalVariables,
+          entrypointBash,
+        );
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);

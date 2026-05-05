@@ -9,8 +9,7 @@ inputs:
   unityVersion:
     required: false
     default: 'auto'
-    description:
-      'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
+    description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
   customImage:
     required: false
     default: ''
@@ -124,8 +123,7 @@ inputs:
   chownFilesTo:
     required: false
     default: ''
-    description:
-      'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
+    description: 'User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts'
   dockerCpuLimit:
     required: false
     default: ''

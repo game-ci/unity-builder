@@ -69,5 +69,8 @@ function isModuleNotFoundError(error: unknown): boolean {
     }
   }
 
-  return typeof (error as Error)?.message === 'string' && /cannot find module/i.test((error as Error).message);
+  return (
+    typeof (error as Error)?.message === 'string' &&
+    /cannot find module/i.test((error as Error).message)
+  );
 }

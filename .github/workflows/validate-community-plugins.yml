@@ -98,12 +98,12 @@ jobs:
 
             # Add git package via manifest
             cd test-project
-            cat Packages/manifest.json | python3 -c "
+            python3 -c "
           import sys, json
           manifest = json.load(sys.stdin)
           manifest['dependencies']['${{ matrix.name }}'] = '${{ matrix.package }}'
           json.dump(manifest, sys.stdout, indent=2)
-          " > Packages/manifest.tmp && mv Packages/manifest.tmp Packages/manifest.json
+          " < Packages/manifest.json > Packages/manifest.tmp && mv Packages/manifest.tmp Packages/manifest.json
             cd ..
           fi
 
@@ -125,18 +125,20 @@ jobs:
         if: always()
         run: |
           STATUS="${{ steps.build.outcome }}"
-          echo "## ${{ matrix.name }} — ${{ matrix.platform }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "$STATUS" = "success" ]; then
-            echo "✅ **PASSED** — Compiled and built successfully" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **FAILED** — Build or compilation failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Unity: ${{ matrix.unity }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Platform: ${{ matrix.platform }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Source: ${{ matrix.source }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Package: \`${{ matrix.package }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## ${{ matrix.name }} — ${{ matrix.platform }}"
+            echo ""
+            if [ "$STATUS" = "success" ]; then
+              echo "✅ **PASSED** — Compiled and built successfully"
+            else
+              echo "❌ **FAILED** — Build or compilation failed"
+            fi
+            echo ""
+            echo "- Unity: ${{ matrix.unity }}"
+            echo "- Platform: ${{ matrix.platform }}"
+            echo "- Source: ${{ matrix.source }}"
+            echo "- Package: \`${{ matrix.package }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   report:
     name: Validation Report

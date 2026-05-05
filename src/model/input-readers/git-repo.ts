@@ -23,7 +23,9 @@ export class GitRepoReader {
       return '';
     }
     assert(fs.existsSync(`.git`));
-    const value = (await GitRepoReader.runCommand(`cd ${Input.projectPath} && git remote -v`)).replace(/ /g, ``);
+    const value = (
+      await GitRepoReader.runCommand(`cd ${Input.projectPath} && git remote -v`)
+    ).replace(/ /g, ``);
     core.info(`value ${value}`);
     assert(value.includes('github.com'));
 

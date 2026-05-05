@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import UnityVersioning from './unity-versioning';
 
 describe('Unity Versioning', () => {

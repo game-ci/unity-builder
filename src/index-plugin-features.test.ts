@@ -1,3 +1,14 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+  vi,
+  type Mock,
+} from 'vitest';
 /**
  * Integration wiring tests for the plugin lifecycle in index.ts
  *
@@ -9,74 +20,83 @@
  * - When providerStrategy is non-local without a plugin, an error is thrown
  */
 
-import { BuildParameters } from './model';
+import { BuildParameters, Docker } from './model';
+import * as core from '@actions/core';
 
 // ---------------------------------------------------------------------------
 // Mock plugin
 // ---------------------------------------------------------------------------
 
-const mockPlugin = {
-  initialize: jest.fn().mockResolvedValue(undefined),
-  canHandleBuild: jest.fn().mockReturnValue(false),
-  handleBuild: jest.fn().mockResolvedValue({ exitCode: 0 }),
-  beforeLocalBuild: jest.fn().mockResolvedValue(undefined),
-  afterLocalBuild: jest.fn().mockResolvedValue(undefined),
-  handlePostBuild: jest.fn().mockResolvedValue(undefined),
-};
+// `vi.mock` hoists to the top of the module, so any factory references must
+// be hoisted with `vi.hoisted` to be defined at mock-evaluation time.
+const { mockPlugin, mockLoadOrchestratorPlugin } = vi.hoisted(() => {
+  const plugin = {
+    initialize: vi.fn().mockResolvedValue(undefined),
+    canHandleBuild: vi.fn().mockReturnValue(false),
+    handleBuild: vi.fn().mockResolvedValue({ exitCode: 0 }),
+    beforeLocalBuild: vi.fn().mockResolvedValue(undefined),
+    afterLocalBuild: vi.fn().mockResolvedValue(undefined),
+    handlePostBuild: vi.fn().mockResolvedValue(undefined),
+  };
+  return {
+    mockPlugin: plugin,
+    mockLoadOrchestratorPlugin: vi.fn().mockResolvedValue(plugin),
+  };
+});
 
-const mockLoadOrchestratorPlugin = jest.fn().mockResolvedValue(mockPlugin);
-
-jest.mock('./model/orchestrator-plugin', () => ({
+vi.mock('./model/orchestrator-plugin', () => ({
   loadOrchestratorPlugin: mockLoadOrchestratorPlugin,
 }));
 
-jest.mock('@actions/core');
-jest.mock('./model', () => ({
+vi.mock('@actions/core');
+vi.mock('./model', () => ({
   Action: {
-    checkCompatibility: jest.fn(),
+    checkCompatibility: vi.fn(),
     workspace: '/workspace',
     actionFolder: '/action',
   },
   BuildParameters: {
-    create: jest.fn(),
+    create: vi.fn(),
   },
   Cache: {
-    verify: jest.fn(),
+    verify: vi.fn(),
   },
   Docker: {
-    run: jest.fn().mockResolvedValue(0),
+    run: vi.fn().mockResolvedValue(0),
   },
-  ImageTag: jest.fn().mockImplementation(() => ({
-    toString: () => 'mock-image:latest',
-  })),
+  // vitest 4 requires constructor mocks to use regular `function` (or
+  // `class`); arrow fns aren't valid constructors.
+  ImageTag: vi.fn(function () {
+    return { toString: () => 'mock-image:latest' };
+  }),
   Output: {
-    setBuildVersion: jest.fn().mockResolvedValue(''),
-    setAndroidVersionCode: jest.fn().mockResolvedValue(''),
-    setEngineExitCode: jest.fn().mockResolvedValue(''),
+    setBuildVersion: vi.fn().mockResolvedValue(''),
+    setAndroidVersionCode: vi.fn().mockResolvedValue(''),
+    setEngineExitCode: vi.fn().mockResolvedValue(''),
   },
 }));
 
-jest.mock('./model/cli/cli', () => ({
+vi.mock('./model/cli/cli', () => ({
   Cli: {
-    InitCliMode: jest.fn().mockReturnValue(false),
+    InitCliMode: vi.fn().mockReturnValue(false),
   },
 }));
 
-jest.mock('./model/mac-builder', () => ({
+vi.mock('./model/mac-builder', () => ({
   __esModule: true,
   default: {
-    run: jest.fn().mockResolvedValue(0),
+    run: vi.fn().mockResolvedValue(0),
   },
 }));
 
-jest.mock('./model/platform-setup', () => ({
+vi.mock('./model/platform-setup', () => ({
   __esModule: true,
   default: {
-    setup: jest.fn().mockResolvedValue(''),
+    setup: vi.fn().mockResolvedValue(''),
   },
 }));
 
-const mockedBuildParametersCreate = BuildParameters.create as jest.Mock;
+const mockedBuildParametersCreate = BuildParameters.create as Mock;
 
 function createMockBuildParameters(overrides: Record<string, any> = {}) {
   return {
@@ -95,12 +115,12 @@ function createMockBuildParameters(overrides: Record<string, any> = {}) {
 async function runIndex(overrides: Record<string, any> = {}): Promise<void> {
   mockedBuildParametersCreate.mockResolvedValue(createMockBuildParameters(overrides));
 
-  return new Promise<void>((resolve) => {
-    jest.isolateModules(() => {
-      require('./index');
-    });
-    setTimeout(resolve, 100);
-  });
+  // index.ts exports `runMain` for testability (the file used to rely on
+  // top-level execution + jest's `vi.isolateModules`, but vitest 4 dropped
+  // that API). Calling the exported function directly is cleaner than
+  // round-tripping through dynamic imports.
+  const { runMain } = await import('./index');
+  await runMain();
 }
 
 // ---------------------------------------------------------------------------
@@ -112,7 +132,7 @@ describe('index.ts plugin lifecycle wiring', () => {
   const originalEnvironment = { ...process.env };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env.GITHUB_WORKSPACE = '/workspace';
     Object.defineProperty(process, 'platform', { value: 'linux' });
 
@@ -135,13 +155,20 @@ describe('index.ts plugin lifecycle wiring', () => {
     it('should call lifecycle hooks in order: initialize → beforeLocalBuild → [build] → afterLocalBuild → handlePostBuild', async () => {
       const callOrder: string[] = [];
       mockPlugin.initialize.mockImplementation(async () => callOrder.push('initialize'));
-      mockPlugin.beforeLocalBuild.mockImplementation(async () => callOrder.push('beforeLocalBuild'));
+      mockPlugin.beforeLocalBuild.mockImplementation(async () =>
+        callOrder.push('beforeLocalBuild'),
+      );
       mockPlugin.afterLocalBuild.mockImplementation(async () => callOrder.push('afterLocalBuild'));
       mockPlugin.handlePostBuild.mockImplementation(async () => callOrder.push('handlePostBuild'));
 
       await runIndex();
 
-      expect(callOrder).toEqual(['initialize', 'beforeLocalBuild', 'afterLocalBuild', 'handlePostBuild']);
+      expect(callOrder).toEqual([
+        'initialize',
+        'beforeLocalBuild',
+        'afterLocalBuild',
+        'handlePostBuild',
+      ]);
     });
 
     it('should pass buildParameters and workspace to initialize', async () => {
@@ -178,7 +205,6 @@ describe('index.ts plugin lifecycle wiring', () => {
 
   describe('plugin handles build (canHandleBuild = true)', () => {
     it('should call handleBuild instead of Docker.run', async () => {
-      const { Docker } = require('./model');
       mockPlugin.canHandleBuild.mockReturnValue(true);
       mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
 
@@ -206,7 +232,6 @@ describe('index.ts plugin lifecycle wiring', () => {
 
   describe('fallback to local build', () => {
     it('should do a local build when handleBuild returns fallbackToLocal', async () => {
-      const { Docker } = require('./model');
       mockPlugin.canHandleBuild.mockReturnValue(true);
       mockPlugin.handleBuild.mockResolvedValue({ exitCode: -1, fallbackToLocal: true });
 
@@ -225,7 +250,6 @@ describe('index.ts plugin lifecycle wiring', () => {
 
   describe('no plugin installed', () => {
     it('should build locally without errors when providerStrategy is local', async () => {
-      const { Docker } = require('./model');
       mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'local' });
@@ -234,12 +258,13 @@ describe('index.ts plugin lifecycle wiring', () => {
     });
 
     it('should error when providerStrategy is non-local and no plugin', async () => {
-      const core = require('@actions/core');
       mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'aws' });
 
-      expect(core.setFailed).toHaveBeenCalledWith(expect.stringContaining('requires @game-ci/orchestrator'));
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining('requires @game-ci/orchestrator'),
+      );
     });
   });
 
@@ -249,14 +274,15 @@ describe('index.ts plugin lifecycle wiring', () => {
 
   describe('plugin installed but canHandleBuild returns false with non-local provider', () => {
     it('should error when providerStrategy is non-local', async () => {
-      const core = require('@actions/core');
       mockPlugin.canHandleBuild.mockReturnValue(false);
 
       await runIndex({ providerStrategy: 'aws' });
 
       // The plugin is initialized but says it can't handle the build,
       // and providerStrategy is not local, so it falls to the error case
-      expect(core.setFailed).toHaveBeenCalledWith(expect.stringContaining('requires @game-ci/orchestrator'));
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining('requires @game-ci/orchestrator'),
+      );
     });
   });
 });

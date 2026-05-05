@@ -39,7 +39,10 @@ export class Cli {
         .map((x) => `${x.key} (${x.description})`)
         .join(` | `),
     );
-    program.option('--populateOverride <populateOverride>', 'should use override query to pull input false by default');
+    program.option(
+      '--populateOverride <populateOverride>',
+      'should use override query to pull input false by default',
+    );
     program.option('--cachePushFrom <cachePushFrom>', 'cache push from source folder');
     program.option('--cachePushTo <cachePushTo>', 'cache push to caching folder');
     program.option('--artifactName <artifactName>', 'caching artifact name');
@@ -49,7 +52,10 @@ export class Cli {
     program.option('--variantPath <variantPath>', 'path to submodule variant YAML');
     program.option('--agentPath <agentPath>', 'path to custom LFS transfer agent');
     program.option('--agentArgs <agentArgs>', 'arguments for custom LFS transfer agent');
-    program.option('--storagePaths <storagePaths>', 'semicolon-separated storage paths for LFS agent');
+    program.option(
+      '--storagePaths <storagePaths>',
+      'semicolon-separated storage paths for LFS agent',
+    );
     program.parse(process.argv);
     Cli.options = program.opts();
 

@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import path from 'node:path';
 import fs from 'node:fs';
 import Action from './action';

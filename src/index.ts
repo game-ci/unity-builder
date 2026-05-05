@@ -5,7 +5,9 @@ import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 import { loadOrchestratorPlugin, OrchestratorPlugin } from './model/orchestrator-plugin';
 
-async function runMain() {
+// Exported so tests can drive the lifecycle directly without depending on
+// vitest's module re-loading (which changed in vitest 4).
+export async function runMain() {
   try {
     if (Cli.InitCliMode()) {
       await Cli.RunCli();
@@ -81,4 +83,9 @@ async function runLocalBuild(
   return exitCode;
 }
 
-runMain();
+// Auto-run when this module is the entry point. Tests import the file via
+// `await import('./index')` purely to register the mock factories and then
+// call `runMain()` directly.
+if (process.env.NODE_ENV !== 'test') {
+  runMain();
+}

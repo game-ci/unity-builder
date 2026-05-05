@@ -7,7 +7,14 @@ export function ReadLicense(): string {
   if ((Input.getInput('providerStrategy') || 'local') === 'local') {
     return '';
   }
-  const pipelineFile = path.join(__dirname, `.github`, `workflows`, `orchestrator-k8s-pipeline.yml`);
+  const pipelineFile = path.join(
+    __dirname,
+    `.github`,
+    `workflows`,
+    `orchestrator-k8s-pipeline.yml`,
+  );
 
-  return fs.existsSync(pipelineFile) ? YAML.parse(fs.readFileSync(pipelineFile, 'utf8')).env.UNITY_LICENSE : '';
+  return fs.existsSync(pipelineFile)
+    ? YAML.parse(fs.readFileSync(pipelineFile, 'utf8')).env.UNITY_LICENSE
+    : '';
 }
