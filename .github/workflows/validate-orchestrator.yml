@@ -120,7 +120,7 @@ jobs:
       - name: Run orchestrator-plugin unit tests
         run: |
           echo "Running orchestrator-plugin unit tests..."
-          npx jest orchestrator-plugin --verbose --detectOpenHandles --forceExit
+          yarn vitest run orchestrator-plugin
 
       # --- Plugin loader without orchestrator ---
       - name: Verify plugin loader returns undefined without orchestrator
@@ -162,7 +162,7 @@ jobs:
         working-directory: orchestrator-standalone
         run: |
           echo "Running orchestrator unit tests..."
-          npx jest --no-cache 2>&1 | tail -20
+          yarn vitest run 2>&1 | tail -30
 
       # --- Plugin loader with orchestrator installed ---
       - name: Install orchestrator into unity-builder
