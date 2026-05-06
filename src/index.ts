@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { Action, BuildParameters, Cache, Docker, ImageTag, Output } from './model';
-import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
 import { Plugin, loadPlugin } from './model/plugin';
@@ -9,11 +8,6 @@ import { Plugin, loadPlugin } from './model/plugin';
 // vitest's module re-loading (which changed in vitest 4).
 export async function runMain() {
   try {
-    if (Cli.InitCliMode()) {
-      await Cli.RunCli();
-
-      return;
-    }
     Action.checkCompatibility();
     Cache.verify();
 

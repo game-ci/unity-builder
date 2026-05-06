@@ -66,12 +66,6 @@ vi.mock('./model', () => ({
   },
 }));
 
-vi.mock('./model/cli/cli', () => ({
-  Cli: {
-    InitCliMode: vi.fn().mockReturnValue(false),
-  },
-}));
-
 vi.mock('./model/mac-builder', () => ({
   __esModule: true,
   default: {
