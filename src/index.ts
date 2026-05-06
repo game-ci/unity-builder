@@ -3,7 +3,7 @@ import { Action, BuildParameters, Cache, Docker, ImageTag, Output } from './mode
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
-import { loadOrchestratorPlugin, OrchestratorPlugin } from './model/orchestrator-plugin';
+import { Plugin, loadPlugin } from './model/plugin';
 
 // Exported so tests can drive the lifecycle directly without depending on
 // vitest's module re-loading (which changed in vitest 4).
@@ -21,8 +21,8 @@ export async function runMain() {
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
-    // Load orchestrator plugin (optional — only needed for remote builds and plugin features)
-    const plugin = await loadOrchestratorPlugin();
+    // Load optional plugin. The default implementation is @game-ci/orchestrator.
+    const plugin = await loadPlugin();
     await plugin?.initialize(buildParameters, workspace);
 
     let exitCode = -1;
@@ -64,7 +64,7 @@ async function runLocalBuild(
   baseImage: ImageTag,
   workspace: string,
   actionFolder: string,
-  plugin?: OrchestratorPlugin,
+  plugin?: Plugin,
 ): Promise<number> {
   await plugin?.beforeLocalBuild(workspace);
 

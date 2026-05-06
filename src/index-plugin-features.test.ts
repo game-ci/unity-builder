@@ -1,14 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-  vi,
-  type Mock,
-} from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 /**
  * Integration wiring tests for the plugin lifecycle in index.ts
  *
@@ -29,7 +19,7 @@ import * as core from '@actions/core';
 
 // `vi.mock` hoists to the top of the module, so any factory references must
 // be hoisted with `vi.hoisted` to be defined at mock-evaluation time.
-const { mockPlugin, mockLoadOrchestratorPlugin } = vi.hoisted(() => {
+const { mockPlugin, mockLoadPlugin } = vi.hoisted(() => {
   const plugin = {
     initialize: vi.fn().mockResolvedValue(undefined),
     canHandleBuild: vi.fn().mockReturnValue(false),
@@ -40,12 +30,12 @@ const { mockPlugin, mockLoadOrchestratorPlugin } = vi.hoisted(() => {
   };
   return {
     mockPlugin: plugin,
-    mockLoadOrchestratorPlugin: vi.fn().mockResolvedValue(plugin),
+    mockLoadPlugin: vi.fn().mockResolvedValue(plugin),
   };
 });
 
-vi.mock('./model/orchestrator-plugin', () => ({
-  loadOrchestratorPlugin: mockLoadOrchestratorPlugin,
+vi.mock('./model/plugin', () => ({
+  loadPlugin: mockLoadPlugin,
 }));
 
 vi.mock('@actions/core');
@@ -139,7 +129,7 @@ describe('index.ts plugin lifecycle wiring', () => {
     // Reset plugin to default behavior
     mockPlugin.canHandleBuild.mockReturnValue(false);
     mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
-    mockLoadOrchestratorPlugin.mockResolvedValue(mockPlugin);
+    mockLoadPlugin.mockResolvedValue(mockPlugin);
   });
 
   afterEach(() => {
@@ -152,7 +142,7 @@ describe('index.ts plugin lifecycle wiring', () => {
   // -----------------------------------------------------------------------
 
   describe('local build with plugin installed', () => {
-    it('should call lifecycle hooks in order: initialize → beforeLocalBuild → [build] → afterLocalBuild → handlePostBuild', async () => {
+    it('should call lifecycle hooks in order: initialize -> beforeLocalBuild -> [build] -> afterLocalBuild -> handlePostBuild', async () => {
       const callOrder: string[] = [];
       mockPlugin.initialize.mockImplementation(async () => callOrder.push('initialize'));
       mockPlugin.beforeLocalBuild.mockImplementation(async () =>
@@ -250,7 +240,7 @@ describe('index.ts plugin lifecycle wiring', () => {
 
   describe('no plugin installed', () => {
     it('should build locally without errors when providerStrategy is local', async () => {
-      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+      mockLoadPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'local' });
 
@@ -258,7 +248,7 @@ describe('index.ts plugin lifecycle wiring', () => {
     });
 
     it('should error when providerStrategy is non-local and no plugin', async () => {
-      mockLoadOrchestratorPlugin.mockResolvedValue(undefined);
+      mockLoadPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'aws' });
 
