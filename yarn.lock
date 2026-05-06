@@ -5,7 +5,7 @@ __metadata:
   version: 9
   cacheKey: 10
 
-"@actions/cache@npm:^4.0.0":
+"@actions/cache@npm:^4.1.0":
   version: 4.1.0
   resolution: "@actions/cache@npm:4.1.0"
   dependencies:
@@ -42,7 +42,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/github@npm:^6.0.0":
+"@actions/github@npm:^6.0.1":
   version: 6.0.1
   resolution: "@actions/github@npm:6.0.1"
   dependencies:
@@ -2341,7 +2341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^9.0.0":
+"commander@npm:^9.5.0":
   version: 9.5.0
   resolution: "commander@npm:9.5.0"
   checksum: 10/41c49b3d0f94a1fbeb0463c85b13f15aa15a9e0b4d5e10a49c0a1d58d4489b549d62262b052ae0aa6cfda53299bee487bfe337825df15e342114dde543f82906
@@ -3800,7 +3800,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.1, nanoid@npm:^3.3.11":
+"nanoid@npm:^3.3.11, nanoid@npm:^3.3.12":
   version: 3.3.12
   resolution: "nanoid@npm:3.3.12"
   bin:
@@ -4214,10 +4214,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.1.13":
-  version: 0.1.14
-  resolution: "reflect-metadata@npm:0.1.14"
-  checksum: 10/fcab9c17ec3b9fea0e2f748c2129aceb57c24af6d8d13842b8a77c8c79dde727d7456ce293e76e8d7b267d1dbf93eea4c5b3c9101299a789a075824f2e40f1ee
+"reflect-metadata@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "reflect-metadata@npm:0.2.2"
+  checksum: 10/1c93f9ac790fea1c852fde80c91b2760420069f4862f28e6fae0c00c6937a56508716b0ed2419ab02869dd488d123c4ab92d062ae84e8739ea7417fae10c4745
   languageName: node
   linkType: hard
 
@@ -4807,16 +4807,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "unity-builder@workspace:."
   dependencies:
-    "@actions/cache": "npm:^4.0.0"
+    "@actions/cache": "npm:^4.1.0"
     "@actions/core": "npm:^1.11.1"
     "@actions/exec": "npm:^1.1.1"
-    "@actions/github": "npm:^6.0.0"
+    "@actions/github": "npm:^6.0.1"
     "@types/node": "npm:^17.0.23"
     "@types/semver": "npm:^7.3.9"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260505.1"
     "@vercel/ncc": "npm:^0.36.1"
     "@vitest/coverage-istanbul": "npm:^4.1.5"
-    commander: "npm:^9.0.0"
+    commander: "npm:^9.5.0"
     commander-ts: "npm:^0.2.0"
     cross-env: "npm:^7.0.3"
     eslint: "npm:^10.3.0"
@@ -4825,19 +4825,19 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     lint-staged: "npm:^16.4.0"
     md5: "npm:^2.3.0"
-    nanoid: "npm:^3.3.1"
+    nanoid: "npm:^3.3.12"
     node-fetch: "npm:2"
     oxfmt: "npm:^0.48.0"
     oxlint: "npm:^1.63.0"
-    reflect-metadata: "npm:^0.1.13"
-    semver: "npm:^7.5.2"
+    reflect-metadata: "npm:^0.2.2"
+    semver: "npm:^7.7.4"
     ts-md5: "npm:^1.3.1"
     ts-node: "npm:10.8.1"
     typescript: "npm:4.7.4"
     unity-changeset: "npm:^3.1.0"
     vite: "npm:^7"
     vitest: "npm:^4"
-    yaml: "npm:^2.2.2"
+    yaml: "npm:^2.8.4"
     yarn-audit-fix: "npm:^9.3.8"
   dependenciesMeta:
     lefthook:
@@ -5209,7 +5209,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.2.2, yaml@npm:^2.8.2":
+"yaml@npm:^2.8.2, yaml@npm:^2.8.4":
   version: 2.8.4
   resolution: "yaml@npm:2.8.4"
   bin:
