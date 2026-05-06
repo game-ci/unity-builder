@@ -6,7 +6,7 @@ import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
-import { Cli } from './cli/cli';
+import { PluginOptions } from './plugin-options';
 import GitHub from './github';
 import * as core from '@actions/core';
 
@@ -129,7 +129,7 @@ class BuildParameters {
     }
 
     const providerStrategy =
-      Input.getInput('providerStrategy') || (Cli.isCliMode ? 'aws' : 'local');
+      Input.getInput('providerStrategy') || (PluginOptions.isPluginMode ? 'aws' : 'local');
 
     return {
       editorVersion,
@@ -182,7 +182,7 @@ class BuildParameters {
         '0123456789abcdefghijklmnopqrstuvwxyz',
         4,
       )()}`,
-      isCliMode: Cli.isCliMode,
+      isCliMode: PluginOptions.isPluginMode,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,

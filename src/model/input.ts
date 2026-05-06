@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Cli } from './cli/cli';
+import { PluginOptions } from './plugin-options';
 import Platform from './platform';
 import GitHub from './github';
 import os from 'node:os';
@@ -28,8 +28,8 @@ class Input {
     const alternativeQuery = Input.ToEnvVarFormat(query);
 
     // Query input sources
-    if (Cli.query(query, alternativeQuery)) {
-      return Cli.query(query, alternativeQuery);
+    if (PluginOptions.query(query, alternativeQuery)) {
+      return PluginOptions.query(query, alternativeQuery);
     }
 
     if (process.env[query] !== undefined) {
