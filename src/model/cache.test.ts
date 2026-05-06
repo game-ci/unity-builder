@@ -1,6 +1,7 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import Cache from './cache';
 
-jest.mock('./input');
+vi.mock('./input');
 
 describe('Cache', () => {
   describe('Verification', () => {

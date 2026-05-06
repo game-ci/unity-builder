@@ -1,6 +1,0 @@
-class OrchestratorSecret {
-  public ParameterKey!: string;
-  public EnvironmentVariable!: string;
-  public ParameterValue!: string;
-}
-export default OrchestratorSecret;

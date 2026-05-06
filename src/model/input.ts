@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Cli } from './cli/cli';
-import OrchestratorQueryOverride from './orchestrator/options/orchestrator-query-override';
 import Platform from './platform';
 import GitHub from './github';
 import os from 'node:os';
@@ -15,7 +14,8 @@ export type InputKey = keyof typeof Input;
  *
  * Note that input is always passed as a string, even booleans.
  *
- * Todo: rename to UserInput and remove anything that is not direct input from the user / ci workflow
+ * Only core build inputs belong here. Orchestrator/plugin inputs are read
+ * directly by the @game-ci/orchestrator plugin via core.getInput() / env vars.
  */
 class Input {
   public static getInput(query: string): string | undefined {
@@ -32,10 +32,6 @@ class Input {
       return Cli.query(query, alternativeQuery);
     }
 
-    if (OrchestratorQueryOverride.query(query, alternativeQuery)) {
-      return OrchestratorQueryOverride.query(query, alternativeQuery);
-    }
-
     if (process.env[query] !== undefined) {
       return process.env[query]!;
     }
@@ -45,17 +41,16 @@ class Input {
     }
   }
 
-  static get region(): string {
-    return Input.getInput('region') ?? 'eu-west-2';
-  }
-
   static get githubRepo(): string | undefined {
     return Input.getInput('GITHUB_REPOSITORY') ?? Input.getInput('GITHUB_REPO') ?? undefined;
   }
 
   static get branch(): string {
     if (Input.getInput(`GITHUB_REF`)) {
-      return Input.getInput(`GITHUB_REF`)!.replace('refs/', '').replace(`head/`, '').replace(`heads/`, '');
+      return Input.getInput(`GITHUB_REF`)!
+        .replace('refs/', '')
+        .replace(`head/`, '')
+        .replace(`heads/`, '');
     } else if (Input.getInput('branch')) {
       return Input.getInput('branch')!;
     } else {
@@ -145,6 +140,12 @@ class Input {
 
   static get customParameters(): string {
     return Input.getInput('customParameters') ?? '';
+  }
+
+  static get useHostNetwork(): boolean {
+    const input = Input.getInput('useHostNetwork') ?? false;
+
+    return input === 'true';
   }
 
   static get versioningStrategy(): string {
@@ -262,7 +263,8 @@ class Input {
     }
 
     return (
-      Input.getInput('dockerMemoryLimit') ?? `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
+      Input.getInput('dockerMemoryLimit') ??
+      `${Math.floor((os.totalmem() / bytesInMegabyte) * memoryMultiplier)}m`
     );
   }
 

@@ -1,7 +1,8 @@
+import { vi } from 'vitest';
 // Import this named export into your test file:
 import Platform from '../platform';
 
-export const mockGetFromUser = jest.fn().mockResolvedValue({
+export const mockGetFromUser = vi.fn().mockResolvedValue({
   editorVersion: '',
   targetPlatform: Platform.types.Test,
   projectPath: '.',

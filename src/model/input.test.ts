@@ -1,10 +1,11 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from 'vitest';
 import * as core from '@actions/core';
 
 import Input from './input';
 import Platform from './platform';
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('Input', () => {
@@ -15,7 +16,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = '2020.4.99f9';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.unityVersion).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -27,7 +28,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = '2020.4.99f9';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.customImage).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -40,7 +41,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'Android';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.targetPlatform).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -53,7 +54,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'customProjectPath';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.projectPath).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -66,7 +67,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'path/to/build_profile.asset';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.buildProfile).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -79,14 +80,14 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'Build';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.buildName).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('takes special characters as input', () => {
       const mockValue = '1ßúëld2';
-      jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.buildName).toStrictEqual(mockValue);
     });
   });
@@ -98,7 +99,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'customBuildsPath';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.buildsPath).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -111,7 +112,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'Namespace.ClassName.Method';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.buildMethod).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -123,13 +124,13 @@ describe('Input', () => {
     });
 
     it('returns true when string true is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('true');
       expect(Input.manualExit).toStrictEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('returns false when string false is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('false');
       expect(Input.manualExit).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -141,13 +142,13 @@ describe('Input', () => {
     });
 
     it('returns true when string true is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('true');
       expect(Input.enableGpu).toStrictEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('returns false when string false is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('false');
       expect(Input.enableGpu).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -160,7 +161,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'Anything';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.versioningStrategy).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -173,7 +174,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = '1.33.7';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.specifiedVersion).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -186,7 +187,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = '42';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidVersionCode).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -203,7 +204,7 @@ describe('Input', () => {
       ${'androidAppBundle'}     | ${'androidAppBundle'}
       ${'androidStudioProject'} | ${'androidStudioProject'}
     `('returns $expected when $input is passed', ({ input, expected }) => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(input);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(input);
       expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -220,7 +221,7 @@ describe('Input', () => {
       ${'public'}    | ${'public'}
       ${'debugging'} | ${'debugging'}
     `('returns $expected when $input is passed', ({ input, expected }) => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(input);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(input);
       expect(Input.androidExportType).toStrictEqual(expected);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -233,7 +234,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'keystore.keystore';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidKeystoreName).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -246,7 +247,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'secret';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidKeystoreBase64).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -259,7 +260,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'secret';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidKeystorePass).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -272,7 +273,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'secret';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidKeyaliasName).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -285,7 +286,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'secret';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidKeyaliasPass).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -298,7 +299,7 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = 'secret';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.androidTargetSdkVersion).toStrictEqual(mockValue);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -310,13 +311,13 @@ describe('Input', () => {
     });
 
     it('returns true when string true is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('true');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('true');
       expect(Input.allowDirtyBuild).toStrictEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('returns false when string false is passed', () => {
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue('false');
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('false');
       expect(Input.allowDirtyBuild).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -329,8 +330,26 @@ describe('Input', () => {
 
     it('takes input from the users workflow', () => {
       const mockValue = '-imAFlag';
-      const spy = jest.spyOn(core, 'getInput').mockReturnValue(mockValue);
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue(mockValue);
       expect(Input.customParameters).toStrictEqual(mockValue);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('useHostNetwork', () => {
+    it('returns the default value', () => {
+      expect(Input.useHostNetwork).toStrictEqual(false);
+    });
+
+    it('returns true when string true is passed', () => {
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('true');
+      expect(Input.useHostNetwork).toStrictEqual(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when string false is passed', () => {
+      const spy = vi.spyOn(core, 'getInput').mockReturnValue('false');
+      expect(Input.useHostNetwork).toStrictEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });

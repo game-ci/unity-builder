@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import ValidationError from './validation-error';
 
 describe('ValidationError', () => {

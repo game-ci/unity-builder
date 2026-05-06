@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+yarn lint-staged
+yarn typecheck
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --no-banner --redact
+fi

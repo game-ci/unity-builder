@@ -1,6 +1,7 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import Project from './project';
 
-jest.mock('./input');
+vi.mock('./input');
 
 describe('Platform', () => {
   describe('relativePath', () => {

@@ -42,7 +42,9 @@ class ValidateWindows {
 
   private static checkForVisualStudio() {
     // Note: When upgrading to Server 2022, we will need to move to just "program files" since VS will be 64-bit
-    const visualStudioInstallPathExists = fs.existsSync('C:/Program Files (x86)/Microsoft Visual Studio');
+    const visualStudioInstallPathExists = fs.existsSync(
+      'C:/Program Files (x86)/Microsoft Visual Studio',
+    );
     const visualStudioDataPathExists = fs.existsSync('C:/ProgramData/Microsoft/VisualStudio');
 
     if (!visualStudioInstallPathExists || !visualStudioDataPathExists) {

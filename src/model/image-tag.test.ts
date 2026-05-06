@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import ImageTag from './image-tag';
 
 describe('ImageTag', () => {
@@ -27,15 +28,18 @@ describe('ImageTag', () => {
       expect(image.builderPlatform).toStrictEqual(testImageParameters.builderPlatform);
     });
 
-    test.each(['2000.0.0f0', '2011.1.11f1', '6000.0.0f1'])('accepts %p version format', (version) => {
-      expect(
-        () =>
-          new ImageTag({
-            editorVersion: version,
-            targetPlatform: testImageParameters.targetPlatform,
-          }),
-      ).not.toThrow();
-    });
+    test.each(['2000.0.0f0', '2011.1.11f1', '6000.0.0f1'])(
+      'accepts %p version format',
+      (version) => {
+        expect(
+          () =>
+            new ImageTag({
+              editorVersion: version,
+              targetPlatform: testImageParameters.targetPlatform,
+            }),
+        ).not.toThrow();
+      },
+    );
 
     test.each(['some version', ''])('throws for incorrect version %p', (editorVersion) => {
       const { targetPlatform } = testImageParameters;

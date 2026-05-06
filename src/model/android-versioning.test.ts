@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import AndroidVersioning from './android-versioning';
 
 describe('Android Versioning', () => {
@@ -35,7 +36,9 @@ describe('Android Versioning', () => {
     });
 
     it('uses the specified api level', () => {
-      expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevel30')).toBe('platforms;android-30');
+      expect(AndroidVersioning.determineSdkManagerParameters('AndroidApiLevel30')).toBe(
+        'platforms;android-30',
+      );
     });
   });
 });

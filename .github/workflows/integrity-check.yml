@@ -2,7 +2,8 @@ name: Integrity
 
 on:
   push: { branches: [main] }
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
@@ -22,17 +23,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install package manager (from package.json)
+        run: |
+          corepack enable
+          corepack install
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: yarn
+      - name: Resolve yarn cache folder
+        id: yarn-config
+        run: echo "cacheFolder=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+      - name: Restore yarn install cache (node_modules + cacheFolder + install-state)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.yarn-config.outputs.cacheFolder }}
+            .yarn/install-state.gz
+          key: yarn-v2-${{ runner.os }}-node-18-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-v2-${{ runner.os }}-node-18-
+      - name: Install deps
+        env:
+          YARN_ENABLE_HARDENED_MODE: 'false'
+        run: |
+          case "$(yarn --version)" in 1.*) echo 'expected up-to-date yarn version'; exit 1 ;; esac
+          yarn install --immutable
       - run: yarn lint
       - run: yarn test:ci --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
   #      - run: yarn build --quiet && git diff --quiet dist || { echo "dist should be auto generated" ; git diff dist ; exit 62; }
 
-  orchestrator:
-    name: Orchestrator Integrity
-    uses: ./.github/workflows/orchestrator-integrity.yml
+  orchestrator-integration:
+    name: Orchestrator Integration
+    if: >-
+      github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'run-integration')
+    uses: ./.github/workflows/validate-orchestrator-integration.yml
     secrets: inherit

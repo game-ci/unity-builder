@@ -1,3 +1,3 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Versioning determineBuildVersion throws for invalid strategy somethingRandom 1`] = `"Versioning strategy should be one of None, Semantic, Tag, Custom."`;
+exports[`Versioning > determineBuildVersion > throws for invalid strategy somethingRandom 1`] = `[ValidationError: Versioning strategy should be one of None, Semantic, Tag, Custom.]`;

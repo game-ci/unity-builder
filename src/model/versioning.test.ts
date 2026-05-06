@@ -1,3 +1,4 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from 'vitest';
 import * as core from '@actions/core';
 import NotImplementedException from './error/not-implemented-exception';
 import System from './system';
@@ -5,7 +6,7 @@ import Versioning from './versioning';
 import { validVersionTagInputs, invalidVersionTagInputs } from './__data__/versions';
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('Versioning', () => {
@@ -39,7 +40,9 @@ describe('Versioning', () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const matchInputUsingGrep = async (input: string) => {
       const output = await System.run('sh', undefined, {
-        input: Buffer.from(`echo '${input}' | grep -E '${Versioning.grepCompatibleInputVersionRegex}'`),
+        input: Buffer.from(
+          `echo '${input}' | grep -E '${Versioning.grepCompatibleInputVersionRegex}'`,
+        ),
         silent: true,
       });
 
@@ -50,30 +53,39 @@ describe('Versioning', () => {
       expect(await matchInputUsingGrep(input)).toStrictEqual(input);
     });
 
-    it.concurrent.each(invalidVersionTagInputs)(`rejects non-version tag input '%s'`, async (input) => {
-      await expect(async () => matchInputUsingGrep(input)).rejects.toThrowError(/^Failed to run/);
-    });
+    it.concurrent.each(invalidVersionTagInputs)(
+      `rejects non-version tag input '%s'`,
+      async (input) => {
+        await expect(async () => matchInputUsingGrep(input)).rejects.toThrowError(/^Failed to run/);
+      },
+    );
   });
 
   describe('branch', () => {
     it('returns headRef when set', () => {
-      const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockReturnValue('feature-branch-1');
+      const headReference = vi
+        .spyOn(Versioning, 'headRef', 'get')
+        .mockReturnValue('feature-branch-1');
 
       expect(Versioning.branch).toStrictEqual('feature-branch-1');
       expect(headReference).toHaveBeenCalledTimes(1);
     });
 
     it('returns part of Ref when set', () => {
-      jest.spyOn(Versioning, 'headRef', 'get').mockImplementation();
-      const reference = jest.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-branch-2');
+      vi.spyOn(Versioning, 'headRef', 'get').mockImplementation(() => undefined);
+      const reference = vi
+        .spyOn(Versioning, 'ref', 'get')
+        .mockReturnValue('refs/heads/feature-branch-2');
 
       expect(Versioning.branch).toStrictEqual('feature-branch-2');
       expect(reference).toHaveBeenCalledTimes(1);
     });
 
     it('prefers headRef over ref when set', () => {
-      const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockReturnValue('feature-branch-1');
-      const reference = jest.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-2');
+      const headReference = vi
+        .spyOn(Versioning, 'headRef', 'get')
+        .mockReturnValue('feature-branch-1');
+      const reference = vi.spyOn(Versioning, 'ref', 'get').mockReturnValue('refs/heads/feature-2');
 
       expect(Versioning.branch).toStrictEqual('feature-branch-1');
       expect(headReference).toHaveBeenCalledTimes(1);
@@ -81,8 +93,10 @@ describe('Versioning', () => {
     });
 
     it('returns undefined when headRef and ref are not set', () => {
-      const headReference = jest.spyOn(Versioning, 'headRef', 'get').mockImplementation();
-      const reference = jest.spyOn(Versioning, 'ref', 'get').mockImplementation();
+      const headReference = vi
+        .spyOn(Versioning, 'headRef', 'get')
+        .mockImplementation(() => undefined);
+      const reference = vi.spyOn(Versioning, 'ref', 'get').mockImplementation(() => undefined);
 
       expect(Versioning.branch).not.toBeDefined();
 
@@ -106,16 +120,19 @@ describe('Versioning', () => {
   describe('logging git diff', () => {
     it('calls git diff', async () => {
       // allowDirtyBuild: true
-      jest.spyOn(core, 'getInput').mockReturnValue('true');
-      jest.spyOn(Versioning, 'isShallow').mockResolvedValue(true);
-      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
-      jest.spyOn(Versioning, 'fetch').mockImplementation();
-      jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
-      jest
-        .spyOn(Versioning, 'parseSemanticVersion')
-        .mockResolvedValue({ match: '', tag: 'mocktag', commits: 'abcdef', hash: '75822BCAF' });
-      const logDiffSpy = jest.spyOn(Versioning, 'logDiff');
-      const gitSpy = jest.spyOn(System, 'run').mockImplementation();
+      vi.spyOn(core, 'getInput').mockReturnValue('true');
+      vi.spyOn(Versioning, 'isShallow').mockResolvedValue(true);
+      vi.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
+      vi.spyOn(Versioning, 'fetch').mockResolvedValue();
+      vi.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
+      vi.spyOn(Versioning, 'parseSemanticVersion').mockResolvedValue({
+        match: '',
+        tag: 'mocktag',
+        commits: 'abcdef',
+        hash: '75822BCAF',
+      });
+      const logDiffSpy = vi.spyOn(Versioning, 'logDiff');
+      const gitSpy = vi.spyOn(System, 'run').mockResolvedValue('');
 
       await Versioning.generateSemanticVersion();
 
@@ -157,12 +174,16 @@ describe('Versioning', () => {
 
   describe('determineBuildVersion', () => {
     test.each(['somethingRandom'])('throws for invalid strategy %s', async (strategy) => {
-      await expect(Versioning.determineBuildVersion(strategy, '')).rejects.toThrowErrorMatchingSnapshot();
+      await expect(
+        Versioning.determineBuildVersion(strategy, ''),
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     describe('opt out strategy', () => {
       it("returns 'none'", async () => {
-        await expect(Versioning.determineBuildVersion('None', 'v1.0')).resolves.toMatchInlineSnapshot(`"none"`);
+        await expect(
+          Versioning.determineBuildVersion('None', 'v1.0'),
+        ).resolves.toMatchInlineSnapshot(`"none"`);
       });
     });
 
@@ -170,23 +191,31 @@ describe('Versioning', () => {
       test.each(['v0.1', '1', 'CamelCase', 'dashed-version'])(
         'returns the inputVersion for %s',
         async (inputVersion) => {
-          await expect(Versioning.determineBuildVersion('Custom', inputVersion)).resolves.toStrictEqual(inputVersion);
+          await expect(
+            Versioning.determineBuildVersion('Custom', inputVersion),
+          ).resolves.toStrictEqual(inputVersion);
         },
       );
     });
 
     describe('semantic strategy', () => {
       it('refers to generateSemanticVersion', async () => {
-        const generateSemanticVersion = jest.spyOn(Versioning, 'generateSemanticVersion').mockResolvedValue('1.3.37');
+        const generateSemanticVersion = vi
+          .spyOn(Versioning, 'generateSemanticVersion')
+          .mockResolvedValue('1.3.37');
 
-        await expect(Versioning.determineBuildVersion('Semantic', '')).resolves.toStrictEqual('1.3.37');
+        await expect(Versioning.determineBuildVersion('Semantic', '')).resolves.toStrictEqual(
+          '1.3.37',
+        );
         expect(generateSemanticVersion).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('tag strategy', () => {
       it('refers to generateTagVersion', async () => {
-        const generateTagVersion = jest.spyOn(Versioning, 'generateTagVersion').mockResolvedValue('0.1');
+        const generateTagVersion = vi
+          .spyOn(Versioning, 'generateTagVersion')
+          .mockResolvedValue('0.1');
 
         await expect(Versioning.determineBuildVersion('Tag', '')).resolves.toStrictEqual('0.1');
         expect(generateTagVersion).toHaveBeenCalledTimes(1);
@@ -197,22 +226,24 @@ describe('Versioning', () => {
       it('throws a not implemented exception', async () => {
         const strategy = 'Test';
         // @ts-ignore
-        jest.spyOn(Versioning, 'strategies', 'get').mockReturnValue({ [strategy]: strategy });
-        await expect(Versioning.determineBuildVersion(strategy, '')).rejects.toThrowError(NotImplementedException);
+        vi.spyOn(Versioning, 'strategies', 'get').mockReturnValue({ [strategy]: strategy });
+        await expect(Versioning.determineBuildVersion(strategy, '')).rejects.toThrowError(
+          NotImplementedException,
+        );
       });
     });
   });
 
   describe('generateTagVersion', () => {
     it('removes the v', async () => {
-      jest.spyOn(Versioning, 'getTag').mockResolvedValue('v1.3.37');
+      vi.spyOn(Versioning, 'getTag').mockResolvedValue('v1.3.37');
       await expect(Versioning.generateTagVersion()).resolves.toStrictEqual('1.3.37');
     });
   });
 
   describe('parseSemanticVersion', () => {
     it('returns the named parts', async () => {
-      jest.spyOn(Versioning, 'getVersionDescription').mockResolvedValue('v0.1-2-g12345678');
+      vi.spyOn(Versioning, 'getVersionDescription').mockResolvedValue('v0.1-2-g12345678');
 
       await expect(Versioning.parseSemanticVersion()).resolves.toMatchObject({
         tag: '0.1',
@@ -222,7 +253,7 @@ describe('Versioning', () => {
     });
 
     it('throws when no match could be made', async () => {
-      jest.spyOn(Versioning, 'getVersionDescription').mockResolvedValue('no-match-can-be-made');
+      vi.spyOn(Versioning, 'getVersionDescription').mockResolvedValue('no-match-can-be-made');
 
       await expect(Versioning.parseSemanticVersion()).toMatchObject({});
     });
@@ -231,7 +262,7 @@ describe('Versioning', () => {
   describe('getVersionDescription', () => {
     it('returns the commands output', async () => {
       const runOutput = 'someValue';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.getVersionDescription()).resolves.toStrictEqual(runOutput);
     });
   });
@@ -239,27 +270,27 @@ describe('Versioning', () => {
   describe('isShallow', () => {
     it('returns true when the repo is shallow', async () => {
       const runOutput = 'true\n';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isShallow()).resolves.toStrictEqual(true);
     });
 
     it('returns false when the repo is not shallow', async () => {
       const runOutput = 'false\n';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isShallow()).resolves.toStrictEqual(false);
     });
   });
 
   describe('fetch', () => {
     it('awaits the command', async () => {
-      jest.spyOn(core, 'warning').mockImplementation(() => {});
-      jest.spyOn(System, 'run').mockImplementation();
+      vi.spyOn(core, 'warning').mockImplementation(() => {});
+      vi.spyOn(System, 'run').mockResolvedValue('');
       await expect(Versioning.fetch()).resolves.not.toThrow();
     });
 
     it('falls back to the second strategy when the first fails', async () => {
-      jest.spyOn(core, 'warning').mockImplementation(() => {});
-      const gitFetch = jest.spyOn(System, 'run').mockImplementation();
+      vi.spyOn(core, 'warning').mockImplementation(() => {});
+      const gitFetch = vi.spyOn(System, 'run').mockResolvedValue('');
 
       await expect(Versioning.fetch()).resolves.not.toThrow();
       expect(gitFetch).toHaveBeenCalledTimes(1);
@@ -268,12 +299,12 @@ describe('Versioning', () => {
 
   describe('generateSemanticVersion', () => {
     it('returns a proper version from description', async () => {
-      jest.spyOn(System, 'run').mockImplementation();
-      jest.spyOn(core, 'info').mockImplementation(() => {});
-      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
-      jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
-      jest.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(2);
-      jest.spyOn(Versioning, 'parseSemanticVersion').mockResolvedValue({
+      vi.spyOn(System, 'run').mockResolvedValue('');
+      vi.spyOn(core, 'info').mockImplementation(() => {});
+      vi.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
+      vi.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(true);
+      vi.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(2);
+      vi.spyOn(Versioning, 'parseSemanticVersion').mockResolvedValue({
         match: '0.1-2-g1b345678',
         tag: '0.1',
         commits: '2',
@@ -284,19 +315,19 @@ describe('Versioning', () => {
     });
 
     it('throws when dirty', async () => {
-      jest.spyOn(System, 'run').mockImplementation();
-      jest.spyOn(core, 'info').mockImplementation(() => {});
-      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(true);
+      vi.spyOn(System, 'run').mockResolvedValue('');
+      vi.spyOn(core, 'info').mockImplementation(() => {});
+      vi.spyOn(Versioning, 'isDirty').mockResolvedValue(true);
       await expect(Versioning.generateSemanticVersion()).rejects.toThrowError();
     });
 
     it('falls back to commits only, when no tags are present', async () => {
       const commits = Math.round(Math.random() * 10);
-      jest.spyOn(System, 'run').mockImplementation();
-      jest.spyOn(core, 'info').mockImplementation(() => {});
-      jest.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
-      jest.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(false);
-      jest.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(commits);
+      vi.spyOn(System, 'run').mockResolvedValue('');
+      vi.spyOn(core, 'info').mockImplementation(() => {});
+      vi.spyOn(Versioning, 'isDirty').mockResolvedValue(false);
+      vi.spyOn(Versioning, 'hasAnyVersionTags').mockResolvedValue(false);
+      vi.spyOn(Versioning, 'getTotalNumberOfCommits').mockResolvedValue(commits);
 
       await expect(Versioning.generateSemanticVersion()).resolves.toStrictEqual(`0.0.${commits}`);
     });
@@ -305,13 +336,13 @@ describe('Versioning', () => {
   describe('isDirty', () => {
     it('returns true when there are files listed', async () => {
       const runOutput = 'file.ext\nfile2.ext';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isDirty()).resolves.toStrictEqual(true);
     });
 
     it('returns false when there is no output', async () => {
       const runOutput = '';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.isDirty()).resolves.toStrictEqual(false);
     });
   });
@@ -319,7 +350,7 @@ describe('Versioning', () => {
   describe('getTag', () => {
     it('returns the commands output', async () => {
       const runOutput = 'v1.0';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.getTag()).resolves.toStrictEqual(runOutput);
     });
   });
@@ -327,20 +358,20 @@ describe('Versioning', () => {
   describe('hasAnyVersionTags', () => {
     it('returns false when the command returns 0', async () => {
       const runOutput = '0';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.hasAnyVersionTags()).resolves.toStrictEqual(false);
     });
 
     it('returns true when the command returns >= 0', async () => {
       const runOutput = '9';
-      jest.spyOn(System, 'run').mockResolvedValue(runOutput);
+      vi.spyOn(System, 'run').mockResolvedValue(runOutput);
       await expect(Versioning.hasAnyVersionTags()).resolves.toStrictEqual(true);
     });
   });
 
   describe('getTotalNumberOfCommits', () => {
     it('returns a number from the command', async () => {
-      jest.spyOn(System, 'run').mockResolvedValue('9');
+      vi.spyOn(System, 'run').mockResolvedValue('9');
       await expect(Versioning.getTotalNumberOfCommits()).resolves.toStrictEqual(9);
     });
   });
