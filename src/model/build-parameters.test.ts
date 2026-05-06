@@ -117,18 +117,21 @@ describe('BuildParameters', () => {
     });
 
     test.each`
-      targetPlatform                        | expectedExtension | androidExportType
-      ${Platform.types.Android}             | ${'.apk'}         | ${'androidPackage'}
-      ${Platform.types.Android}             | ${'.aab'}         | ${'androidAppBundle'}
-      ${Platform.types.Android}             | ${''}             | ${'androidStudioProject'}
-      ${Platform.types.StandaloneWindows}   | ${'.exe'}         | ${'n/a'}
-      ${Platform.types.StandaloneWindows64} | ${'.exe'}         | ${'n/a'}
+      targetPlatform                        | expectedExtension | androidExportType         | linux64RemoveExecutableExtension
+      ${Platform.types.Android}             | ${'.apk'}         | ${'androidPackage'}       | ${false}
+      ${Platform.types.Android}             | ${'.aab'}         | ${'androidAppBundle'}     | ${true}
+      ${Platform.types.Android}             | ${''}             | ${'androidStudioProject'} | ${false}
+      ${Platform.types.StandaloneWindows}   | ${'.exe'}         | ${'n/a'}                  | ${true}
+      ${Platform.types.StandaloneWindows64} | ${'.exe'}         | ${'n/a'}                  | ${false}
+      ${Platform.types.StandaloneLinux64}   | ${'.x86_64'}      | ${'n/a'}                  | ${false}
+      ${Platform.types.StandaloneLinux64}   | ${''}             | ${'n/a'}                  | ${true}
     `(
-      'appends $expectedExtension for $targetPlatform with androidExportType $androidExportType',
-      async ({ targetPlatform, expectedExtension, androidExportType }) => {
+      'appends $expectedExtension for $targetPlatform with linux64RemoveExecutableExtension=$linux64RemoveExecutableExtension',
+      async ({ targetPlatform, expectedExtension, androidExportType, linux64RemoveExecutableExtension }) => {
         vi.spyOn(Input, 'targetPlatform', 'get').mockReturnValue(targetPlatform);
         vi.spyOn(Input, 'buildName', 'get').mockReturnValue(targetPlatform);
         vi.spyOn(Input, 'androidExportType', 'get').mockReturnValue(androidExportType);
+        vi.spyOn(Input, 'linux64RemoveExecutableExtension', 'get').mockReturnValue(linux64RemoveExecutableExtension);
         await expect(BuildParameters.create()).resolves.toEqual(
           expect.objectContaining({ buildFile: `${targetPlatform}${expectedExtension}` }),
         );

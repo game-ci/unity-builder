@@ -284,6 +284,12 @@ class Input {
     return Input.getInput('skipActivation')?.toLowerCase() ?? 'false';
   }
 
+  static get linux64RemoveExecutableExtension(): boolean {
+    const input = Input.getInput('linux64RemoveExecutableExtension') ?? 'false';
+
+    return input === 'true';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;
