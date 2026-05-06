@@ -24,10 +24,10 @@ const mockPlugin = {
   handlePostBuild: jest.fn().mockResolvedValue(undefined),
 };
 
-const mockLoadBuildPlugin = jest.fn().mockResolvedValue(mockPlugin);
+const mockLoadPlugin = jest.fn().mockResolvedValue(mockPlugin);
 
-jest.mock('./model/build-plugin', () => ({
-  loadBuildPlugin: mockLoadBuildPlugin,
+jest.mock('./model/plugin', () => ({
+  loadPlugin: mockLoadPlugin,
 }));
 
 jest.mock('@actions/core');
@@ -119,7 +119,7 @@ describe('index.ts plugin lifecycle wiring', () => {
     // Reset plugin to default behavior
     mockPlugin.canHandleBuild.mockReturnValue(false);
     mockPlugin.handleBuild.mockResolvedValue({ exitCode: 0 });
-    mockLoadBuildPlugin.mockResolvedValue(mockPlugin);
+    mockLoadPlugin.mockResolvedValue(mockPlugin);
   });
 
   afterEach(() => {
@@ -226,7 +226,7 @@ describe('index.ts plugin lifecycle wiring', () => {
   describe('no plugin installed', () => {
     it('should build locally without errors when providerStrategy is local', async () => {
       const { Docker } = require('./model');
-      mockLoadBuildPlugin.mockResolvedValue(undefined);
+      mockLoadPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'local' });
 
@@ -235,7 +235,7 @@ describe('index.ts plugin lifecycle wiring', () => {
 
     it('should error when providerStrategy is non-local and no plugin', async () => {
       const core = require('@actions/core');
-      mockLoadBuildPlugin.mockResolvedValue(undefined);
+      mockLoadPlugin.mockResolvedValue(undefined);
 
       await runIndex({ providerStrategy: 'aws' });
 

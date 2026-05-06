@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-const DEFAULT_BUILD_PLUGIN_MODULE = '@game-ci/orchestrator';
+const DEFAULT_PLUGIN_MODULE = '@game-ci/orchestrator';
 
 /**
  * Generic lifecycle contract for optional unity-builder plugins.
@@ -9,7 +9,7 @@ const DEFAULT_BUILD_PLUGIN_MODULE = '@game-ci/orchestrator';
  * Actions inputs. Unity-builder only calls lifecycle hooks at the points where
  * an external implementation can extend or replace the local build flow.
  */
-export interface BuildPlugin {
+export interface Plugin {
   // eslint-disable-next-line no-unused-vars
   initialize(coreParameters: Record<string, any>, workspace: string): Promise<void>;
 
@@ -38,20 +38,20 @@ export interface BuildPlugin {
 }
 
 /**
- * Attempt to load the default optional build plugin.
+ * Attempt to load the default optional plugin.
  *
  * Today the default implementation is @game-ci/orchestrator. The loader is
  * intentionally named after the generic plugin contract so additional plugin
  * implementations can be added without making orchestrator part of the core
  * abstraction.
  */
-export async function loadBuildPlugin(moduleName = DEFAULT_BUILD_PLUGIN_MODULE): Promise<BuildPlugin | undefined> {
+export async function loadPlugin(moduleName = DEFAULT_PLUGIN_MODULE): Promise<Plugin | undefined> {
   try {
     const pluginModule = await import(/* webpackIgnore: true */ moduleName);
 
     if (typeof pluginModule.createPlugin !== 'function') {
       core.warning(
-        `Build plugin package "${moduleName}" found but does not export createPlugin(). ` +
+        `Plugin package "${moduleName}" found but does not export createPlugin(). ` +
           'Update the plugin package to the latest version.',
       );
 

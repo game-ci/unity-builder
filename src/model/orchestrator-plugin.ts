@@ -1,2 +1,2 @@
-export { loadBuildPlugin as loadOrchestratorPlugin } from './build-plugin';
-export type { BuildPlugin as OrchestratorPlugin } from './build-plugin';
+export { loadPlugin as loadOrchestratorPlugin } from './plugin';
+export type { Plugin as OrchestratorPlugin } from './plugin';

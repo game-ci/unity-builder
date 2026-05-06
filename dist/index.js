@@ -38,7 +38,7 @@ const model_1 = __nccwpck_require__(41359);
 const cli_1 = __nccwpck_require__(55651);
 const mac_builder_1 = __importDefault(__nccwpck_require__(39364));
 const platform_setup_1 = __importDefault(__nccwpck_require__(64423));
-const build_plugin_1 = __nccwpck_require__(76162);
+const plugin_1 = __nccwpck_require__(67270);
 async function runMain() {
     try {
         if (cli_1.Cli.InitCliMode()) {
@@ -50,8 +50,8 @@ async function runMain() {
         const { workspace, actionFolder } = model_1.Action;
         const buildParameters = await model_1.BuildParameters.create();
         const baseImage = new model_1.ImageTag(buildParameters);
-        // Load optional build plugin. The default implementation is @game-ci/orchestrator.
-        const plugin = await (0, build_plugin_1.loadBuildPlugin)();
+        // Load optional plugin. The default implementation is @game-ci/orchestrator.
+        const plugin = await (0, plugin_1.loadPlugin)();
         await plugin?.initialize(buildParameters, workspace);
         let exitCode = -1;
         if (plugin?.canHandleBuild()) {
@@ -383,76 +383,6 @@ class BuildParameters {
     }
 }
 exports["default"] = BuildParameters;
-
-
-/***/ }),
-
-/***/ 76162:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.loadBuildPlugin = void 0;
-const core = __importStar(__nccwpck_require__(42186));
-const DEFAULT_BUILD_PLUGIN_MODULE = '@game-ci/orchestrator';
-/**
- * Attempt to load the default optional build plugin.
- *
- * Today the default implementation is @game-ci/orchestrator. The loader is
- * intentionally named after the generic plugin contract so additional plugin
- * implementations can be added without making orchestrator part of the core
- * abstraction.
- */
-async function loadBuildPlugin(moduleName = DEFAULT_BUILD_PLUGIN_MODULE) {
-    try {
-        const pluginModule = await Promise.resolve().then(() => __importStar(require(/* webpackIgnore: true */ moduleName)));
-        if (typeof pluginModule.createPlugin !== 'function') {
-            core.warning(`Build plugin package "${moduleName}" found but does not export createPlugin(). ` +
-                'Update the plugin package to the latest version.');
-            return;
-        }
-        return pluginModule.createPlugin();
-    }
-    catch (error) {
-        if (!isModuleNotFoundError(error)) {
-            throw error;
-        }
-    }
-}
-exports.loadBuildPlugin = loadBuildPlugin;
-function isModuleNotFoundError(error) {
-    if (error && typeof error === 'object' && 'code' in error) {
-        const code = error.code;
-        if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
-            return true;
-        }
-    }
-    return typeof error?.message === 'string' && /cannot find module/i.test(error.message);
-}
 
 
 /***/ }),
@@ -2094,6 +2024,76 @@ class Platform {
     }
 }
 exports["default"] = Platform;
+
+
+/***/ }),
+
+/***/ 67270:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.loadPlugin = void 0;
+const core = __importStar(__nccwpck_require__(42186));
+const DEFAULT_PLUGIN_MODULE = '@game-ci/orchestrator';
+/**
+ * Attempt to load the default optional plugin.
+ *
+ * Today the default implementation is @game-ci/orchestrator. The loader is
+ * intentionally named after the generic plugin contract so additional plugin
+ * implementations can be added without making orchestrator part of the core
+ * abstraction.
+ */
+async function loadPlugin(moduleName = DEFAULT_PLUGIN_MODULE) {
+    try {
+        const pluginModule = await Promise.resolve().then(() => __importStar(require(/* webpackIgnore: true */ moduleName)));
+        if (typeof pluginModule.createPlugin !== 'function') {
+            core.warning(`Plugin package "${moduleName}" found but does not export createPlugin(). ` +
+                'Update the plugin package to the latest version.');
+            return;
+        }
+        return pluginModule.createPlugin();
+    }
+    catch (error) {
+        if (!isModuleNotFoundError(error)) {
+            throw error;
+        }
+    }
+}
+exports.loadPlugin = loadPlugin;
+function isModuleNotFoundError(error) {
+    if (error && typeof error === 'object' && 'code' in error) {
+        const code = error.code;
+        if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
+            return true;
+        }
+    }
+    return typeof error?.message === 'string' && /cannot find module/i.test(error.message);
+}
 
 
 /***/ }),

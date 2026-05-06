@@ -2,11 +2,11 @@
  * Type declarations for @game-ci/orchestrator.
  *
  * This optional dependency is one implementation of unity-builder's generic
- * build plugin lifecycle. When installed, the plugin loader in build-plugin.ts
+ * plugin lifecycle. When installed, the plugin loader in plugin.ts
  * dynamically imports it.
  */
 declare module '@game-ci/orchestrator' {
-  interface UnityBuilderPlugin {
+  interface Plugin {
     initialize(coreParams: Record<string, any>, workspace: string): Promise<void>;
     canHandleBuild(): boolean;
     handleBuild(baseImage: string): Promise<{ exitCode: number; fallbackToLocal?: boolean }>;
@@ -20,7 +20,7 @@ declare module '@game-ci/orchestrator' {
    * The plugin reads its own configuration from environment variables and
    * GitHub Actions inputs; unity-builder does not need to proxy them.
    */
-  export function createPlugin(): UnityBuilderPlugin;
+  export function createPlugin(): Plugin;
 
   // Legacy export — kept for backward compatibility with CLI and direct consumers
   export const Orchestrator: {

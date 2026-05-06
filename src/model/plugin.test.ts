@@ -1,8 +1,8 @@
 /**
- * Tests for the generic build plugin loader (build-plugin.ts).
+ * Tests for the generic plugin loader (plugin.ts).
  *
  * The default plugin implementation is currently @game-ci/orchestrator, but
- * unity-builder depends on the generic BuildPlugin lifecycle rather than an
+ * unity-builder depends on the generic Plugin lifecycle rather than an
  * orchestrator-specific type.
  */
 
@@ -19,17 +19,17 @@ beforeEach(() => {
   mockInfo.mockClear();
 });
 
-describe('build-plugin (default package not installed)', () => {
-  it('loadBuildPlugin() returns undefined', async () => {
-    const { loadBuildPlugin } = await import('./build-plugin');
+describe('plugin (default package not installed)', () => {
+  it('loadPlugin() returns undefined', async () => {
+    const { loadPlugin } = await import('./plugin');
 
-    const result = await loadBuildPlugin();
+    const result = await loadPlugin();
 
     expect(result).toBeUndefined();
   });
 });
 
-describe('build-plugin (default package installed)', () => {
+describe('plugin (default package installed)', () => {
   const fakePlugin = {
     initialize: jest.fn(),
     canHandleBuild: jest.fn().mockReturnValue(false),
@@ -64,9 +64,9 @@ describe('build-plugin (default package installed)', () => {
 
   it('returns the plugin from createPlugin()', async () => {
     installDefaultPluginMock();
-    const { loadBuildPlugin } = await import('./build-plugin');
+    const { loadPlugin } = await import('./plugin');
 
-    const plugin = await loadBuildPlugin();
+    const plugin = await loadPlugin();
 
     expect(plugin).toBeDefined();
     expect(mockCreatePlugin).toHaveBeenCalledTimes(1);
@@ -75,9 +75,9 @@ describe('build-plugin (default package installed)', () => {
 
   it('returns a plugin with all lifecycle methods', async () => {
     installDefaultPluginMock();
-    const { loadBuildPlugin } = await import('./build-plugin');
+    const { loadPlugin } = await import('./plugin');
 
-    const plugin = await loadBuildPlugin();
+    const plugin = await loadPlugin();
 
     expect(typeof plugin!.initialize).toBe('function');
     expect(typeof plugin!.canHandleBuild).toBe('function');
@@ -89,9 +89,9 @@ describe('build-plugin (default package installed)', () => {
 
   it('returns undefined and warns when createPlugin is not a function', async () => {
     installDefaultPluginMock({ createPlugin: undefined });
-    const { loadBuildPlugin } = await import('./build-plugin');
+    const { loadPlugin } = await import('./plugin');
 
-    const plugin = await loadBuildPlugin();
+    const plugin = await loadPlugin();
 
     expect(plugin).toBeUndefined();
     expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('does not export createPlugin'));
@@ -106,8 +106,8 @@ describe('build-plugin (default package installed)', () => {
       },
       { virtual: true },
     );
-    const { loadBuildPlugin } = await import('./build-plugin');
+    const { loadPlugin } = await import('./plugin');
 
-    await expect(loadBuildPlugin()).rejects.toThrow('Syntax error in module');
+    await expect(loadPlugin()).rejects.toThrow('Syntax error in module');
   });
 });
