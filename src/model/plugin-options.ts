@@ -9,11 +9,7 @@ export class PluginOptions {
   public static options: Record<string, any> | undefined;
 
   static get isPluginMode() {
-    return (
-      PluginOptions.options !== undefined &&
-      PluginOptions.options.mode !== undefined &&
-      PluginOptions.options.mode !== ''
-    );
+    return Boolean(PluginOptions.options?.mode);
   }
 
   public static query(key: string, alternativeKey: string) {
