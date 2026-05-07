@@ -95,7 +95,7 @@ jobs:
       - name: Run plugin interface unit tests
         run: |
           echo "Running orchestrator-plugin unit tests..."
-          npx jest orchestrator-plugin --verbose --detectOpenHandles --forceExit
+          npx vitest run orchestrator-plugin --reporter=verbose
 
       - name: Build and pack orchestrator
         working-directory: orchestrator-standalone
@@ -173,6 +173,7 @@ jobs:
         with:
           repository: game-ci/orchestrator
           lfs: false
+          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -566,6 +567,7 @@ jobs:
         with:
           repository: game-ci/orchestrator
           lfs: false
+          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -871,6 +873,7 @@ jobs:
         with:
           repository: game-ci/orchestrator
           lfs: false
+          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -1150,6 +1153,7 @@ jobs:
         with:
           repository: game-ci/orchestrator
           lfs: false
+          clean: true
 
       - name: Install package manager (from package.json)
         run: |
