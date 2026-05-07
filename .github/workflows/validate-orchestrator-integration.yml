@@ -167,13 +167,16 @@ jobs:
         continue-on-error: true
         id: orch-branch
 
+      - name: Clean corrupted checkout
+        if: steps.orch-branch.outcome == 'failure'
+        run: rm -rf .git || true
+
       - name: Fallback to orchestrator main branch
         if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
           lfs: false
-          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -321,9 +324,20 @@ jobs:
       - name: Run orchestrator unit tests (fast, no infra)
         timeout-minutes: 2
         run: >-
-          yarn run test
-          --testPathPattern="orchestrator-guid|orchestrator-folders|task-parameter-serializer|follow-log-stream-service|runner-availability-service|provider-url-parser|provider-loader|provider-git-manager|orchestrator-image|orchestrator-hooks|orchestrator-github-checks|middleware-service"
-          --verbose --detectOpenHandles --forceExit --runInBand
+          yarn vitest run
+          "orchestrator-guid"
+          "orchestrator-folders"
+          "task-parameter-serializer"
+          "follow-log-stream-service"
+          "runner-availability-service"
+          "provider-url-parser"
+          "provider-loader"
+          "provider-git-manager"
+          "orchestrator-image"
+          "orchestrator-hooks"
+          "orchestrator-github-checks"
+          "middleware-service"
+          --reporter=verbose --no-file-parallelism
 
       # --- K8s cluster setup ---
       - name: Clean up disk space before K8s tests
@@ -373,7 +387,7 @@ jobs:
       # --- K8s Test 1: orchestrator-image ---
       - name: Run orchestrator-image test (K8s)
         timeout-minutes: 10
-        run: yarn run test "orchestrator-image" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-image" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -397,7 +411,7 @@ jobs:
       # --- K8s Test 2: orchestrator-kubernetes ---
       - name: Run orchestrator-kubernetes test
         timeout-minutes: 30
-        run: yarn run test "orchestrator-kubernetes" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-kubernetes" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -429,7 +443,7 @@ jobs:
       # --- K8s Test 3: orchestrator-s3-steps ---
       - name: Run orchestrator-s3-steps test (K8s)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-s3-steps" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-s3-steps" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -462,7 +476,7 @@ jobs:
       - name: Run orchestrator-end2end-caching test (K8s)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-caching" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -501,7 +515,7 @@ jobs:
       - name: Run orchestrator-end2end-retaining test (K8s)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-retaining" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-retaining" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -561,13 +575,16 @@ jobs:
         continue-on-error: true
         id: orch-branch
 
+      - name: Clean corrupted checkout
+        if: steps.orch-branch.outcome == 'failure'
+        run: rm -rf .git || true
+
       - name: Fallback to orchestrator main branch
         if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
           lfs: false
-          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -652,7 +669,7 @@ jobs:
       # --- AWS Test 1: orchestrator-image ---
       - name: Run orchestrator-image test (AWS)
         timeout-minutes: 10
-        run: yarn run test "orchestrator-image" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-image" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -670,7 +687,7 @@ jobs:
       # --- AWS Test 2: orchestrator-environment ---
       - name: Run orchestrator-environment test (AWS)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-environment" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-environment" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -688,7 +705,7 @@ jobs:
       # --- AWS Test 3: orchestrator-s3-steps ---
       - name: Run orchestrator-s3-steps test (AWS)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-s3-steps" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-s3-steps" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -706,7 +723,7 @@ jobs:
       # --- AWS Test 4: orchestrator-hooks ---
       - name: Run orchestrator-hooks test (AWS)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-hooks" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-hooks" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -724,7 +741,7 @@ jobs:
       # --- AWS Test 5: orchestrator-caching ---
       - name: Run orchestrator-caching test (AWS)
         timeout-minutes: 60
-        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-caching" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -742,7 +759,7 @@ jobs:
       # --- AWS Test 6: orchestrator-locking-core ---
       - name: Run orchestrator-locking-core test (AWS)
         timeout-minutes: 60
-        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-locking-core" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -760,7 +777,7 @@ jobs:
       # --- AWS Test 7: orchestrator-locking-get-locked ---
       - name: Run orchestrator-locking-get-locked test (AWS)
         timeout-minutes: 60
-        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-locking-get-locked" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -784,7 +801,7 @@ jobs:
       - name: Run orchestrator-end2end-caching test (AWS)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-caching" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -803,7 +820,7 @@ jobs:
       - name: Run orchestrator-end2end-retaining test (AWS)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-retaining" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-retaining" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -822,7 +839,7 @@ jobs:
       - name: Run orchestrator-end2end-locking test (AWS)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-locking" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-locking" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -867,13 +884,16 @@ jobs:
         continue-on-error: true
         id: orch-branch
 
+      - name: Clean corrupted checkout
+        if: steps.orch-branch.outcome == 'failure'
+        run: rm -rf .git || true
+
       - name: Fallback to orchestrator main branch
         if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
           lfs: false
-          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -957,7 +977,7 @@ jobs:
       # --- Local Docker Test 1: orchestrator-image ---
       - name: Run orchestrator-image test (local-docker)
         timeout-minutes: 10
-        run: yarn run test "orchestrator-image" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-image" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -975,7 +995,7 @@ jobs:
       # --- Local Docker Test 2: orchestrator-hooks ---
       - name: Run orchestrator-hooks test (local-docker)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-hooks" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-hooks" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -993,7 +1013,7 @@ jobs:
       # --- Local Docker Test 3: orchestrator-local-persistence ---
       - name: Run orchestrator-local-persistence test (local-docker)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-local-persistence" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-local-persistence" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1011,7 +1031,7 @@ jobs:
       # --- Local Docker Test 4: orchestrator-caching ---
       - name: Run orchestrator-caching test (local-docker)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-caching" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-caching" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1029,7 +1049,7 @@ jobs:
       # --- Local Docker Test 5: orchestrator-github-checks ---
       - name: Run orchestrator-github-checks test (local-docker)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-github-checks" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-github-checks" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1047,7 +1067,7 @@ jobs:
       # --- Local Docker Test 6: orchestrator-locking-core (with S3) ---
       - name: Run orchestrator-locking-core test (local-docker + S3)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-locking-core" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-locking-core" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1065,7 +1085,7 @@ jobs:
       # --- Local Docker Test 7: orchestrator-locking-get-locked (with S3) ---
       - name: Run orchestrator-locking-get-locked test (local-docker + S3)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-locking-get-locked" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-locking-get-locked" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1083,7 +1103,7 @@ jobs:
       # --- Local Docker Test 8: orchestrator-s3-steps (with S3) ---
       - name: Run orchestrator-s3-steps test (local-docker + S3)
         timeout-minutes: 30
-        run: yarn run test "orchestrator-s3-steps" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-s3-steps" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1102,7 +1122,7 @@ jobs:
       - name: Run orchestrator-end2end-caching test (local-docker + S3)
         timeout-minutes: 60
         continue-on-error: true
-        run: yarn run test "orchestrator-end2end-caching" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-end2end-caching" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -1147,13 +1167,16 @@ jobs:
         continue-on-error: true
         id: orch-branch
 
+      - name: Clean corrupted checkout
+        if: steps.orch-branch.outcome == 'failure'
+        run: rm -rf .git || true
+
       - name: Fallback to orchestrator main branch
         if: steps.orch-branch.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: game-ci/orchestrator
           lfs: false
-          clean: true
 
       - name: Install package manager (from package.json)
         run: |
@@ -1224,7 +1247,7 @@ jobs:
       # --- Rclone Test ---
       - name: Run orchestrator-rclone-steps test
         timeout-minutes: 30
-        run: yarn run test "orchestrator-rclone-steps" --detectOpenHandles --forceExit --runInBand
+        run: yarn run test "orchestrator-rclone-steps" --no-file-parallelism
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
