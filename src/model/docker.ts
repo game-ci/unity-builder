@@ -68,6 +68,7 @@ class Docker {
     const commandPrefix = isAlpineBasedImage ? `/bin/sh` : `/bin/bash`;
 
     return `docker run \
+            --shm-size=1025m \
             --workdir ${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters, additionalVariables)} \
@@ -115,6 +116,7 @@ class Docker {
     if (!existsSync(githubHome)) mkdirSync(githubHome);
 
     return `docker run \
+            --shm-size=1025m \
             --workdir c:${dockerWorkspacePath} \
             --rm \
             ${ImageEnvironmentFactory.getEnvVarString(parameters)} \
