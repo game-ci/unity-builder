@@ -35,7 +35,16 @@ elif [[ -n "$UNITY_LICENSING_SERVER" ]]; then
   mkdir -p "$UNITY_LICENSE_PATH/config/"
   cp "$ACTION_FOLDER/unity-config/services-config.json" "$UNITY_LICENSE_PATH/config/services-config.json"
 
-  /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/Frameworks/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client \
+  UNITY_EDITOR_DIR="/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app"
+  UNITY_LICENSING_CLIENT_SUBDIR="Frameworks"
+
+  # Unity 6000.3+ moved UnityLicensingClient from Contents/Frameworks to Contents/Helpers.
+  # See: https://docs.unity.com/en-us/licensing-server/client-config
+  if [[ "$UNITY_VERSION" =~ ^6000\.([3-9]|[1-9][0-9]) ]]; then
+    UNITY_LICENSING_CLIENT_SUBDIR="Helpers"
+  fi
+
+  "$UNITY_EDITOR_DIR/Contents/$UNITY_LICENSING_CLIENT_SUBDIR/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client" \
     --acquire-floating > license.txt
 
   # Store the exit code from the verify command
