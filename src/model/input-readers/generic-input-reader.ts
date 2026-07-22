@@ -1,12 +1,21 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
-import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
+import { exec } from 'node:child_process';
+import Input from '../input';
 
 export class GenericInputReader {
   public static async Run(command: string) {
-    if (CloudRunnerOptions.providerStrategy === 'local') {
+    if ((Input.getInput('providerStrategy') || 'local') === 'local') {
       return '';
     }
 
-    return await CloudRunnerSystem.Run(command, false, true);
+    return new Promise<string>((resolve, reject) => {
+      exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout) => {
+        if (error) {
+          reject(error);
+
+          return;
+        }
+        resolve(stdout.toString());
+      });
+    });
   }
 }

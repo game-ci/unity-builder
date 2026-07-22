@@ -9,7 +9,6 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
-import CloudRunner from './cloud-runner/cloud-runner';
 
 export {
   Action,
@@ -23,5 +22,4 @@ export {
   Project,
   Unity,
   Versioning,
-  CloudRunner as CloudRunner,
 };

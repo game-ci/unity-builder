@@ -1,19 +1,32 @@
-import { CloudRunnerSystem } from '../cloud-runner/services/core/cloud-runner-system';
+import { exec } from 'node:child_process';
 import * as core from '@actions/core';
-import CloudRunnerOptions from '../cloud-runner/options/cloud-runner-options';
+import Input from '../input';
 
 export class GithubCliReader {
+  private static async runCommand(command: string, suppressError = false): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout, stderr) => {
+        if (error && !suppressError) {
+          reject(error);
+
+          return;
+        }
+        resolve((stdout || '').toString() + (stderr || '').toString());
+      });
+    });
+  }
+
   static async GetGitHubAuthToken() {
-    if (CloudRunnerOptions.providerStrategy === 'local') {
+    if ((Input.getInput('providerStrategy') || 'local') === 'local') {
       return '';
     }
     try {
-      const authStatus = await CloudRunnerSystem.Run(`gh auth status`, true, true);
+      const authStatus = await GithubCliReader.runCommand(`gh auth status`, true);
       if (authStatus.includes('You are not logged') || authStatus === '') {
         return '';
       }
 
-      return (await CloudRunnerSystem.Run(`gh auth status -t`, false, true))
+      return (await GithubCliReader.runCommand(`gh auth status -t`))
         .split(`Token: `)[1]
         .replace(/ /g, '')
         .replace(/\n/g, '');

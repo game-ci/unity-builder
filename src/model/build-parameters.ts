@@ -1,17 +1,13 @@
 import { customAlphabet } from 'nanoid';
 import AndroidVersioning from './android-versioning';
-import CloudRunnerConstants from './cloud-runner/options/cloud-runner-constants';
-import CloudRunnerBuildGuid from './cloud-runner/options/cloud-runner-guid';
 import Input from './input';
 import Platform from './platform';
 import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
-import { Cli } from './cli/cli';
+import { PluginOptions } from './plugin-options';
 import GitHub from './github';
-import CloudRunnerOptions from './cloud-runner/options/cloud-runner-options';
-import CloudRunner from './cloud-runner/cloud-runner';
 import * as core from '@actions/core';
 
 class BuildParameters {
@@ -51,62 +47,49 @@ class BuildParameters {
   public containerRegistryImageVersion!: string;
 
   public customParameters!: string;
+  public useHostNetwork!: boolean;
   public sshAgent!: string;
   public sshPublicKeysDirectoryPath!: string;
   public providerStrategy!: string;
   public gitPrivateToken!: string;
-  public awsStackName!: string;
-  public kubeConfig!: string;
-  public containerMemory!: string;
-  public containerCpu!: string;
-  public containerNamespace!: string;
-  public kubeVolumeSize!: string;
-  public kubeVolume!: string;
-  public kubeStorageClass!: string;
   public runAsHostUser!: string;
   public chownFilesTo!: string;
-  public commandHooks!: string;
-  public pullInputList!: string[];
-  public inputPullCommand!: string;
-  public cacheKey!: string;
 
-  public postBuildContainerHooks!: string;
-  public preBuildContainerHooks!: string;
-  public customJob!: string;
   public runNumber!: string;
   public branch!: string;
   public githubRepo!: string;
   public gitSha!: string;
   public logId!: string;
   public buildGuid!: string;
-  public cloudRunnerBranch!: string;
-  public cloudRunnerDebug!: boolean | undefined;
   public buildPlatform!: string | undefined;
   public isCliMode!: boolean;
-  public maxRetainedWorkspaces!: number;
-  public useLargePackages!: boolean;
-  public useCompressionStrategy!: boolean;
-  public garbageMaxAge!: number;
-  public githubChecks!: boolean;
-  public asyncWorkflow!: boolean;
-  public githubCheckId!: string;
-  public finalHooks!: string[];
-  public skipLfs!: boolean;
-  public skipCache!: boolean;
+
   public cacheUnityInstallationOnMac!: boolean;
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
 
-  public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.maxRetainedWorkspaces > 0 && CloudRunner.lockedWorkspace !== ``;
-  }
-
   static async create(): Promise<BuildParameters> {
-    const buildFile = this.parseBuildFile(Input.buildName, Input.targetPlatform, Input.androidExportType);
-    const editorVersion = UnityVersioning.determineUnityVersion(Input.projectPath, Input.unityVersion);
-    const buildVersion = await Versioning.determineBuildVersion(Input.versioningStrategy, Input.specifiedVersion);
-    const androidVersionCode = AndroidVersioning.determineVersionCode(buildVersion, Input.androidVersionCode);
-    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(Input.androidTargetSdkVersion);
+    const buildFile = this.parseBuildFile(
+      Input.buildName,
+      Input.targetPlatform,
+      Input.androidExportType,
+      Input.linux64RemoveExecutableExtension,
+    );
+    const editorVersion = UnityVersioning.determineUnityVersion(
+      Input.projectPath,
+      Input.unityVersion,
+    );
+    const buildVersion = await Versioning.determineBuildVersion(
+      Input.versioningStrategy,
+      Input.specifiedVersion,
+    );
+    const androidVersionCode = AndroidVersioning.determineVersionCode(
+      buildVersion,
+      Input.androidVersionCode,
+    );
+    const androidSdkManagerParameters = AndroidVersioning.determineSdkManagerParameters(
+      Input.androidTargetSdkVersion,
+    );
 
     const androidSymbolExportType = Input.androidSymbolType;
     if (Platform.isAndroid(Input.targetPlatform)) {
@@ -145,6 +128,9 @@ class BuildParameters {
       core.setSecret(`${unitySerial.slice(0, -4)}XXXX`);
     }
 
+    const providerStrategy =
+      Input.getInput('providerStrategy') || (PluginOptions.isPluginMode ? 'aws' : 'local');
+
     return {
       editorVersion,
       customImage: Input.customImage,
@@ -173,6 +159,7 @@ class BuildParameters {
       androidExportType: Input.androidExportType,
       androidSymbolType: androidSymbolExportType,
       customParameters: Input.customParameters,
+      useHostNetwork: Input.useHostNetwork,
       sshAgent: Input.sshAgent,
       sshPublicKeysDirectoryPath: Input.sshPublicKeysDirectoryPath,
       gitPrivateToken: Input.gitPrivateToken ?? (await GithubCliReader.GetGitHubAuthToken()),
@@ -183,49 +170,31 @@ class BuildParameters {
       dockerIsolationMode: Input.dockerIsolationMode,
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
-      providerStrategy: CloudRunnerOptions.providerStrategy,
-      buildPlatform: CloudRunnerOptions.buildPlatform,
-      kubeConfig: CloudRunnerOptions.kubeConfig,
-      containerMemory: CloudRunnerOptions.containerMemory,
-      containerCpu: CloudRunnerOptions.containerCpu,
-      containerNamespace: CloudRunnerOptions.containerNamespace,
-      kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
-      kubeVolume: CloudRunnerOptions.kubeVolume,
-      postBuildContainerHooks: CloudRunnerOptions.postBuildContainerHooks,
-      preBuildContainerHooks: CloudRunnerOptions.preBuildContainerHooks,
-      customJob: CloudRunnerOptions.customJob,
+      providerStrategy,
+      buildPlatform: providerStrategy !== 'local' ? 'linux' : process.platform,
       runNumber: Input.runNumber,
       branch: Input.branch.replace('/head', '') || (await GitRepoReader.GetBranch()),
-      cloudRunnerBranch: CloudRunnerOptions.cloudRunnerBranch.split('/').reverse()[0],
-      cloudRunnerDebug: CloudRunnerOptions.cloudRunnerDebug,
-      githubRepo: (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
-      isCliMode: Cli.isCliMode,
-      awsStackName: CloudRunnerOptions.awsStackName,
+      githubRepo:
+        (Input.githubRepo ?? (await GitRepoReader.GetRemote())) || 'game-ci/unity-builder',
       gitSha: Input.gitSha,
-      logId: customAlphabet(CloudRunnerConstants.alphabet, 9)(),
-      buildGuid: CloudRunnerBuildGuid.generateGuid(Input.runNumber, Input.targetPlatform),
-      commandHooks: CloudRunnerOptions.commandHooks,
-      inputPullCommand: CloudRunnerOptions.inputPullCommand,
-      pullInputList: CloudRunnerOptions.pullInputList,
-      kubeStorageClass: CloudRunnerOptions.kubeStorageClass,
-      cacheKey: CloudRunnerOptions.cacheKey,
-      maxRetainedWorkspaces: Number.parseInt(CloudRunnerOptions.maxRetainedWorkspaces),
-      useLargePackages: CloudRunnerOptions.useLargePackages,
-      useCompressionStrategy: CloudRunnerOptions.useCompressionStrategy,
-      garbageMaxAge: CloudRunnerOptions.garbageMaxAge,
-      githubChecks: CloudRunnerOptions.githubChecks,
-      asyncWorkflow: CloudRunnerOptions.asyncCloudRunner,
-      githubCheckId: CloudRunnerOptions.githubCheckId,
-      finalHooks: CloudRunnerOptions.finalHooks,
-      skipLfs: CloudRunnerOptions.skipLfs,
-      skipCache: CloudRunnerOptions.skipCache,
+      logId: customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 9)(),
+      buildGuid: `${Input.runNumber}-${Input.targetPlatform.toLowerCase().replace('standalone', '')}-${customAlphabet(
+        '0123456789abcdefghijklmnopqrstuvwxyz',
+        4,
+      )()}`,
+      isCliMode: PluginOptions.isPluginMode,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
     };
   }
 
-  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
+  static parseBuildFile(
+    filename: string,
+    platform: string,
+    androidExportType: string,
+    linux64RemoveExecutableExtension: boolean,
+  ): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
@@ -243,6 +212,10 @@ class BuildParameters {
             `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
           );
       }
+    }
+
+    if (platform === Platform.types.StandaloneLinux64 && !linux64RemoveExecutableExtension) {
+      return `${filename}.x86_64`;
     }
 
     return filename;

@@ -9,8 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  UNITY_LICENSE:
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>\n    <License
+  UNITY_LICENSE: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>\n    <License
     id=\"Terms\">\n        <MachineBindings>\n            <Binding Key=\"1\"
     Value=\"576562626572264761624c65526f7578\"/>\n            <Binding Key=\"2\"
     Value=\"576562626572264761624c65526f7578\"/>\n        </MachineBindings>\n        <MachineID
@@ -36,8 +35,7 @@ env:
 
 jobs:
   buildForAllPlatformsUbuntu:
-    name:
-      "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
+    name: "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -48,9 +46,9 @@ jobs:
         projectPath:
           - test-project
         unityVersion:
-          - 2021.3.32f1
-          - 2022.3.13f1
-          - 2023.2.2f1
+          - 2021.3.45f2
+          - 2022.3.62f3
+          - 2023.2.22f1
         targetPlatform:
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit) with mono backend.
           - StandaloneWindows64 # Build a Windows 64-bit standalone with mono backend.
@@ -200,7 +198,6 @@ jobs:
       ###########################
       - uses: actions/upload-artifact@v4
         with:
-          name:
-            "Build ${{ matrix.targetPlatform }}${{ startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp }}_params_${{ matrix.additionalParameters }})"
+          name: "Build ${{ matrix.targetPlatform }}${{ startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }} on Ubuntu (${{ matrix.unityVersion }}_il2cpp_${{ matrix.buildWithIl2cpp }}_params_${{ matrix.additionalParameters }})"
           path: build
           retention-days: 14

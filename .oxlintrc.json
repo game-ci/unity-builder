@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "vitest", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "rules": {
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/valid-title": "off",
+    "vitest/valid-describe-callback": "off",
+    "vitest/expect-expect": "off",
+    "vitest/no-conditional-tests": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/require-to-throw-message": "off",
+    "vitest/no-disabled-tests": "warn",
+    "unicorn/prefer-array-flat-map": "warn",
+    "typescript/no-explicit-any": "warn",
+    "typescript/ban-ts-comment": "off",
+    "typescript/no-namespace": "off",
+    "typescript/no-extraneous-class": "off",
+    "no-bitwise": "off",
+    "no-shadow": "off",
+    "no-await-in-loop": "off",
+    "no-underscore-dangle": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/prefer-set-has": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-useless-spread": "warn",
+    "eslint/preserve-caught-error": "warn",
+    "oxc/no-map-spread": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "no-unused-vars": "off"
+      }
+    }
+  ],
+  "env": {
+    "browser": false,
+    "node": true,
+    "es2024": true,
+    "vitest/globals": true
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.yarn/**",
+    "default-build-script/**",
+    "test-runner/**",
+    "platforms/**"
+  ]
+}

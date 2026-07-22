@@ -1,12 +1,13 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import * as core from '@actions/core';
 import System from './system';
 
-jest.spyOn(core, 'debug').mockImplementation(() => {});
-jest.spyOn(core, 'info').mockImplementation(() => {});
-jest.spyOn(core, 'warning').mockImplementation(() => {});
-jest.spyOn(core, 'error').mockImplementation(() => {});
+vi.spyOn(core, 'debug').mockImplementation(() => {});
+vi.spyOn(core, 'info').mockImplementation(() => {});
+vi.spyOn(core, 'warning').mockImplementation(() => {});
+vi.spyOn(core, 'error').mockImplementation(() => {});
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('System', () => {
   describe('run', () => {

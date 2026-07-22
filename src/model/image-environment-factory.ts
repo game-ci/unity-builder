@@ -1,26 +1,36 @@
 import { DockerParameters, StringKeyValuePair } from './shared-types';
 
 class ImageEnvironmentFactory {
-  public static getEnvVarString(parameters: DockerParameters, additionalVariables: StringKeyValuePair[] = []) {
-    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(parameters, additionalVariables);
+  public static getEnvVarString(
+    parameters: DockerParameters,
+    additionalVariables: StringKeyValuePair[] = [],
+  ) {
+    const environmentVariables = ImageEnvironmentFactory.getEnvironmentVariables(
+      parameters,
+      additionalVariables,
+    );
     let string = '';
     for (const p of environmentVariables) {
-      if (p.value === '' || p.value === undefined) {
+      if (p.value === '' || p.value === undefined || p.value === null) {
         continue;
       }
-      if (p.name !== 'ANDROID_KEYSTORE_BASE64' && p.value.toString().includes(`\n`)) {
+      const valueAsString = typeof p.value === 'string' ? p.value : String(p.value);
+      if (p.name !== 'ANDROID_KEYSTORE_BASE64' && valueAsString.includes(`\n`)) {
         string += `--env ${p.name} `;
-        process.env[p.name] = p.value.toString();
+        process.env[p.name] = valueAsString;
         continue;
       }
 
-      string += `--env ${p.name}="${p.value}" `;
+      string += `--env ${p.name}="${valueAsString}" `;
     }
 
     return string;
   }
 
-  public static getEnvironmentVariables(parameters: DockerParameters, additionalVariables: StringKeyValuePair[] = []) {
+  public static getEnvironmentVariables(
+    parameters: DockerParameters,
+    additionalVariables: StringKeyValuePair[] = [],
+  ) {
     let environmentVariables: StringKeyValuePair[] = [
       { name: 'UNITY_EMAIL', value: process.env.UNITY_EMAIL },
       { name: 'UNITY_PASSWORD', value: process.env.UNITY_PASSWORD },
@@ -82,17 +92,12 @@ class ImageEnvironmentFactory {
       { name: 'RUNNER_TEMP', value: process.env.RUNNER_TEMP },
       { name: 'RUNNER_WORKSPACE', value: process.env.RUNNER_WORKSPACE },
     ];
-    if (parameters.providerStrategy === 'local-docker') {
-      for (const element of additionalVariables) {
-        if (!environmentVariables.some((x) => element?.name === x?.name)) {
-          environmentVariables.push(element);
-        }
-      }
-      for (const variable of environmentVariables) {
-        if (!environmentVariables.some((x) => variable?.name === x?.name)) {
-          environmentVariables = environmentVariables.filter((x) => x !== variable);
-        }
-      }
+
+    // Always merge additional variables (e.g., secrets/env from Orchestrator) uniquely by name
+    for (const element of additionalVariables) {
+      if (!element || !element.name) continue;
+      environmentVariables = environmentVariables.filter((x) => x?.name !== element.name);
+      environmentVariables.push(element);
     }
     if (parameters.sshAgent) {
       environmentVariables.push({ name: 'SSH_AUTH_SOCK', value: '/ssh-agent' });

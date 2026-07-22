@@ -5,3 +5,14 @@ lib/
 .vsconfig
 yarn-error.log
 .orig
+$LOG_FILE
+temp/
+
+# yarn 4 (berry)
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

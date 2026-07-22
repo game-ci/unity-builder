@@ -1,21 +1,26 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import System from './system';
 
-jest.spyOn(core, 'debug').mockImplementation(() => {});
-const info = jest.spyOn(core, 'info').mockImplementation(() => {});
-jest.spyOn(core, 'warning').mockImplementation(() => {});
-jest.spyOn(core, 'error').mockImplementation(() => {});
-const execSpy = jest.spyOn(exec, 'exec').mockImplementation(async () => 0);
+vi.spyOn(core, 'debug').mockImplementation(() => {});
+const info = vi.spyOn(core, 'info').mockImplementation(() => {});
+vi.spyOn(core, 'warning').mockImplementation(() => {});
+vi.spyOn(core, 'error').mockImplementation(() => {});
+const execSpy = vi.spyOn(exec, 'exec').mockImplementation(async () => 0);
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('System', () => {
   describe('run', () => {
     describe('units', () => {
       it('passes the command to command line', async () => {
         await expect(System.run('echo test')).resolves.not.toBeNull();
-        await expect(execSpy).toHaveBeenLastCalledWith('echo test', expect.anything(), expect.anything());
+        await expect(execSpy).toHaveBeenLastCalledWith(
+          'echo test',
+          expect.anything(),
+          expect.anything(),
+        );
       });
 
       it('throws on when error code is not 0', async () => {
