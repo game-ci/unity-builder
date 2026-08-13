@@ -127,7 +127,7 @@ jobs:
         run: |
           echo "Checking plugin loader handles missing @game-ci/orchestrator..."
           node -e "
-            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./node_modules/@game-ci/unity-engine-core/dist/unity-builder/model/orchestrator-plugin');
             (async () => {
               const plugin = await loadOrchestratorPlugin();
               if (plugin !== undefined) {
@@ -174,7 +174,7 @@ jobs:
         run: |
           echo "Checking plugin loader returns defined exports..."
           node -e "
-            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./node_modules/@game-ci/unity-engine-core/dist/unity-builder/model/orchestrator-plugin');
             (async () => {
               const plugin = await loadOrchestratorPlugin();
               if (plugin === undefined) {
@@ -219,7 +219,7 @@ jobs:
         run: |
           echo "Verifying orchestrator build wiring end-to-end..."
           node -e "
-            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./node_modules/@game-ci/unity-engine-core/dist/unity-builder/model/orchestrator-plugin');
 
             (async () => {
               // Verify plugin loads successfully with orchestrator installed

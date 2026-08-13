@@ -115,7 +115,7 @@ jobs:
       - name: Verify plugin loader returns exports with orchestrator installed
         run: |
           node -e "
-            const { loadOrchestratorPlugin } = require('./lib/model/orchestrator-plugin');
+            const { loadOrchestratorPlugin } = require('./node_modules/@game-ci/unity-engine-core/dist/unity-builder/model/orchestrator-plugin');
             (async () => {
               const plugin = await loadOrchestratorPlugin();
               if (plugin === undefined) {
