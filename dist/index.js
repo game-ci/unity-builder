@@ -139,7 +139,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadCli = exports.assetNameFor = void 0;
+exports.downloadCli = exports.binaryNameFor = exports.assetNameFor = void 0;
 const fs = __importStar(__nccwpck_require__(3977));
 const os = __importStar(__nccwpck_require__(612));
 const path = __importStar(__nccwpck_require__(9411));
@@ -156,12 +156,26 @@ function assetNameFor(platform, arch) {
     const target = targets[platform]?.[arch];
     if (!target)
         throw new Error(`Unsupported platform/arch for the game-ci CLI: ${platform}/${arch}`);
-    return platform === 'win32' ? `game-ci-${target}.exe` : `game-ci-${target}`;
+    const extension = platform === 'win32' ? 'zip' : 'tar.gz';
+    return `game-ci-${target}.${extension}`;
 }
 exports.assetNameFor = assetNameFor;
+/** The binary's name once extracted - matches release-cli.yml's per-platform `binary` matrix value. */
+function binaryNameFor(platform) {
+    return platform === 'win32' ? 'game-ci.exe' : 'game-ci';
+}
+exports.binaryNameFor = binaryNameFor;
 /**
- * Downloads (or reuses a cached copy of) the game-ci CLI binary matching the
- * current runner, and returns its path.
+ * Downloads (or reuses a cached copy of) the game-ci CLI release archive
+ * matching the current runner, extracts it, and returns the path to the
+ * binary inside.
+ *
+ * The archive - not a bare binary - is what's published: cli.ts resolves
+ * its own static assets (default-build-script/, platforms/*,
+ * unity-config/services-config.json.template, all needed for Docker
+ * volume mounts) relative to its own directory on disk, and those assets
+ * aren't embedded in the compiled binary itself. dist/ ships as the
+ * binary's sibling inside the archive - see game-ci/cli#73.
  *
  * Pinned versions are cached via @actions/cache (GitHub's cache service),
  * so repeat jobs on ephemeral, GitHub-hosted runners skip the download
@@ -175,9 +189,10 @@ exports.assetNameFor = assetNameFor;
  */
 async function downloadCli(version) {
     const asset = assetNameFor(process.platform, process.arch);
+    const binaryName = binaryNameFor(process.platform);
     const isPinned = version !== 'latest';
     if (isPinned) {
-        const cached = await restoreFromCache(version, asset);
+        const cached = await restoreFromCache(version, binaryName);
         if (cached)
             return cached;
     }
@@ -185,49 +200,52 @@ async function downloadCli(version) {
         ? `https://github.com/${CLI_REPO}/releases/download/${version}/${asset}`
         : `https://github.com/${CLI_REPO}/releases/latest/download/${asset}`;
     core.info(`Downloading game-ci CLI (${version}) from ${url}`);
-    const downloadedPath = await tc.downloadTool(url);
+    const archivePath = await tc.downloadTool(url);
+    const extractedDir = process.platform === 'win32' ? await tc.extractZip(archivePath) : await tc.extractTar(archivePath);
+    const binaryPath = path.join(extractedDir, binaryName);
     if (process.platform !== 'win32') {
-        await fs.chmod(downloadedPath, 0o755);
+        await fs.chmod(binaryPath, 0o755);
     }
     if (isPinned) {
-        await saveToCache(version, asset, downloadedPath);
+        await saveToCache(version, binaryName, extractedDir);
     }
-    return downloadedPath;
+    return binaryPath;
 }
 exports.downloadCli = downloadCli;
-function cachePathFor(version, asset) {
-    return path.join(os.tmpdir(), 'game-ci-cli-cache', version, asset);
+function cacheDirFor(version) {
+    return path.join(os.tmpdir(), 'game-ci-cli-cache', version);
 }
-function cacheKeyFor(version, asset) {
-    return `game-ci-cli-${version}-${asset}`;
+function cacheKeyFor(version, binaryName) {
+    return `game-ci-cli-${version}-${binaryName}`;
 }
-async function restoreFromCache(version, asset) {
+async function restoreFromCache(version, binaryName) {
     if (!cache.isFeatureAvailable())
         return null;
-    const cachePath = cachePathFor(version, asset);
+    const cacheDir = cacheDirFor(version);
     try {
-        const hitKey = await cache.restoreCache([cachePath], cacheKeyFor(version, asset));
+        const hitKey = await cache.restoreCache([cacheDir], cacheKeyFor(version, binaryName));
         if (!hitKey)
             return null;
+        const binaryPath = path.join(cacheDir, binaryName);
         // Cache restore doesn't guarantee the executable bit survives.
         if (process.platform !== 'win32')
-            await fs.chmod(cachePath, 0o755);
+            await fs.chmod(binaryPath, 0o755);
         core.info(`Restored game-ci CLI ${version} from cache`);
-        return cachePath;
+        return binaryPath;
     }
     catch (error) {
         core.warning(`Failed to restore game-ci CLI from cache: ${error.message}`);
         return null;
     }
 }
-async function saveToCache(version, asset, downloadedPath) {
+async function saveToCache(version, binaryName, extractedDir) {
     if (!cache.isFeatureAvailable())
         return;
-    const cachePath = cachePathFor(version, asset);
+    const cacheDir = cacheDirFor(version);
     try {
-        await fs.mkdir(path.dirname(cachePath), { recursive: true });
-        await fs.copyFile(downloadedPath, cachePath);
-        await cache.saveCache([cachePath], cacheKeyFor(version, asset));
+        await fs.mkdir(path.dirname(cacheDir), { recursive: true });
+        await fs.cp(extractedDir, cacheDir, { recursive: true });
+        await cache.saveCache([cacheDir], cacheKeyFor(version, binaryName));
     }
     catch (error) {
         // A cache miss on save (e.g. another concurrent job already saved this
@@ -336,7 +354,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.resolveProjectPath = void 0;
-function resolveProjectPath({ input, existsSync, joinPath }) {
+function resolveProjectPath({ input, existsSync, joinPath, }) {
     if (input)
         return input.replace(/\/$/, '');
     const hasTestProject = existsSync(joinPath('test-project', 'ProjectSettings', 'ProjectVersion.txt'));
