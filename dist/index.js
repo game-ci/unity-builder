@@ -279,10 +279,13 @@ exports.run = void 0;
 // UNITY_LICENSE, UNITY_LICENSING_SERVER) are read by the CLI itself from
 // its own process environment - never passed as CLI arguments, since argv
 // can leak through process listings and command-logging.
+const fs = __importStar(__nccwpck_require__(7561));
+const path = __importStar(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const build_args_1 = __nccwpck_require__(89);
 const download_cli_1 = __nccwpck_require__(3431);
+const resolve_project_path_1 = __nccwpck_require__(2833);
 async function run() {
     try {
         const unityVersion = core.getInput('unityVersion') || 'auto';
@@ -293,7 +296,14 @@ async function run() {
         }
         const cliVersion = core.getInput('cliVersion') || 'latest';
         const cliPath = await (0, download_cli_1.downloadCli)(cliVersion);
-        const args = (0, build_args_1.buildCliArgs)({ getInput: (name) => core.getInput(name) });
+        const projectPath = (0, resolve_project_path_1.resolveProjectPath)({
+            input: core.getInput('projectPath'),
+            existsSync: fs.existsSync,
+            joinPath: path.join,
+        });
+        const args = (0, build_args_1.buildCliArgs)({
+            getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
+        });
         const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
         // Matches the original action's engineExitCode output: 0 on success,
         // otherwise the exit code of whichever step (activation or build)
@@ -315,6 +325,27 @@ exports.run = run;
 if (process.env.NODE_ENV !== 'test') {
     run();
 }
+
+
+/***/ }),
+
+/***/ 2833:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.resolveProjectPath = void 0;
+function resolveProjectPath({ input, existsSync, joinPath }) {
+    if (input)
+        return input.replace(/\/$/, '');
+    const hasTestProject = existsSync(joinPath('test-project', 'ProjectSettings', 'ProjectVersion.txt'));
+    const hasRootProject = existsSync(joinPath('ProjectSettings', 'ProjectVersion.txt'));
+    if (hasTestProject && !hasRootProject)
+        return 'test-project';
+    return '';
+}
+exports.resolveProjectPath = resolveProjectPath;
 
 
 /***/ }),

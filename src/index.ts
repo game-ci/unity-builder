@@ -8,10 +8,13 @@
 // UNITY_LICENSE, UNITY_LICENSING_SERVER) are read by the CLI itself from
 // its own process environment - never passed as CLI arguments, since argv
 // can leak through process listings and command-logging.
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { buildCliArgs } from './build-args';
 import { downloadCli } from './download-cli';
+import { resolveProjectPath } from './resolve-project-path';
 
 export async function run() {
   try {
@@ -27,7 +30,15 @@ export async function run() {
     const cliVersion = core.getInput('cliVersion') || 'latest';
     const cliPath = await downloadCli(cliVersion);
 
-    const args = buildCliArgs({ getInput: (name) => core.getInput(name) });
+    const projectPath = resolveProjectPath({
+      input: core.getInput('projectPath'),
+      existsSync: fs.existsSync,
+      joinPath: path.join,
+    });
+
+    const args = buildCliArgs({
+      getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
+    });
 
     const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
 
