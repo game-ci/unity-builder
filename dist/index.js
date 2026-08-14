@@ -80,7 +80,7 @@ function buildCliArgs({ getInput }) {
     if (!targetPlatform) {
         throw new Error('targetPlatform is required.');
     }
-    args.push('--targetPlatform', targetPlatform);
+    args.push(`--targetPlatform=${targetPlatform}`);
     const providerStrategy = getInput('providerStrategy') || 'local';
     if (providerStrategy !== 'local') {
         throw new Error(`Provider strategy "${providerStrategy}" is not supported by this thin wrapper. ` +
@@ -89,8 +89,14 @@ function buildCliArgs({ getInput }) {
     }
     for (const [input, flag] of STRING_FLAGS) {
         const value = getInput(input);
+        // "--flag value" as two argv tokens is ambiguous when value itself
+        // starts with "-" (e.g. customParameters="-profile Foo -someBoolean"):
+        // yargs sees the next token starting with "-" and assumes the flag
+        // takes no value, leaving the value string to be mis-parsed as its own
+        // (partly alias-colliding) short-flag cluster. "--flag=value" glues
+        // them into one token, which is unambiguous.
         if (value)
-            args.push(`--${flag}`, value);
+            args.push(`--${flag}=${value}`);
     }
     for (const [input, flag] of BOOLEAN_FLAGS) {
         const value = getInput(input);
