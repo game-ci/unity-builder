@@ -32,7 +32,10 @@
     "node": ">=18.x"
   },
   "dependencies": {
-    "@game-ci/unity-engine-core": "game-ci/unity-engine-core#main"
+    "@actions/cache": "^3.2.4",
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",

@@ -9,7 +9,16 @@ inputs:
   unityVersion:
     required: false
     default: 'auto'
-    description: 'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt'
+    description:
+      'Version of unity to use for building the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt.
+      A value other than "auto" is currently ignored - the underlying game-ci CLI always detects the version from the
+      checked-out project and has no override flag yet.'
+  cliVersion:
+    required: false
+    default: 'latest'
+    description:
+      'Release tag of the game-ci/cli binary to install and run (e.g. "v0.1.0"). Defaults to the latest release; pin
+      this for reproducible builds.'
   customImage:
     required: false
     default: ''
@@ -181,8 +190,7 @@ inputs:
   linux64RemoveExecutableExtension:
     default: 'false'
     required: false
-    description:
-      'When building for StandaloneLinux64, remove the default file extension of `.x86_64`. Set to true to restore the extensionless behavior from v4.'
+    description: 'When building for StandaloneLinux64, remove the default file extension of `.x86_64`. Set to true to restore the extensionless behavior from v4.'
 
 outputs:
   volume:
