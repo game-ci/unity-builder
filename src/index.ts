@@ -43,8 +43,11 @@ export async function run() {
     const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
 
     // Matches the original action's engineExitCode output: 0 on success,
-    // otherwise the exit code of whichever step (activation or build)
-    // failed - which is exactly what the CLI subprocess itself exits with.
+    // otherwise the exit code of whichever step (activation or build) - or,
+    // for providerStrategy=local-system, whichever stage of the
+    // orchestrator's setup/build/cleanup workflow - failed. Either way it's
+    // exactly what the CLI subprocess itself exits with, so no special
+    // handling is needed here for the orchestrate path.
     core.setOutput('engineExitCode', exitCode);
 
     if (exitCode !== 0) {

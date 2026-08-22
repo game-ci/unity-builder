@@ -121,8 +121,11 @@ inputs:
     default: 'local'
     required: false
     description:
-      'Build execution strategy. Use "local" for local Docker/Mac builds. For remote builds (aws, k8s, etc.), install
-      @game-ci/orchestrator and use the game-ci/orchestrator action which declares its own inputs.'
+      'Build execution strategy. Use "local" (the default) for Docker/Mac builds driven by this action itself, or
+      "local-system" to build natively on the host with no Docker at all (game-ci/orchestrator''s own local-system
+      provider, invoked via `game-ci orchestrate`) - useful for self-hosted runners that already have Unity installed.
+      For remote builds (aws, k8s, etc.), install @game-ci/orchestrator and use the game-ci/orchestrator action which
+      declares its own inputs.'
   runAsHostUser:
     required: false
     default: 'false'
@@ -186,11 +189,51 @@ inputs:
   skipActivation:
     default: 'false'
     required: false
-    description: 'Skip the activation/deactivation of Unity. This assumes Unity is already activated.'
+    description:
+      'Skip the activation/deactivation of Unity. This assumes Unity is already activated. Also honoured by
+      providerStrategy=local-system, for self-hosted runners with an already-licensed, long-lived Unity Hub session.'
   linux64RemoveExecutableExtension:
     default: 'false'
     required: false
     description: 'When building for StandaloneLinux64, remove the default file extension of `.x86_64`. Set to true to restore the extensionless behavior from v4.'
+  engineLaunchWrapper:
+    default: ''
+    required: false
+    description:
+      "Only applicable to providerStrategy=local-system. Command to prefix the Unity engine process invocation with
+      (e.g. a self-hosted runner's own launch-serialization lock). Applied precisely around the engine launch itself,
+      not the surrounding build step. Empty by default."
+  enableBuildRetry:
+    default: 'false'
+    required: false
+    description:
+      'Only applicable to providerStrategy=local-system. Enable automatic classify/decide/retry recovery for failed
+      Unity builds (budget-gated). Default off: a single failed attempt still throws exactly as before - retry can
+      back up or wipe the Library folder as a recovery action, which is a meaningful behavior change to opt into.'
+  localCacheEnabled:
+    default: 'false'
+    required: false
+    description:
+      'Only applicable to providerStrategy=local-system. Enable local filesystem caching of the Unity Library folder
+      and/or .git/lfs between builds on the same self-hosted runner. Off by default.'
+  localCacheLibrary:
+    default: 'true'
+    required: false
+    description:
+      'Only applicable to providerStrategy=local-system, and only takes effect when localCacheEnabled=true. Cache the
+      engine Library folder locally.'
+  localCacheLfs:
+    default: 'false'
+    required: false
+    description:
+      'Only applicable to providerStrategy=local-system, and only takes effect when localCacheEnabled=true. Cache
+      .git/lfs locally.'
+  localCacheMode:
+    default: 'tar'
+    required: false
+    description:
+      'Only applicable to providerStrategy=local-system, and only takes effect when localCacheEnabled=true. Local
+      cache save/restore mode: "tar", "move-directory", or "copy-directory".'
 
 outputs:
   volume:
