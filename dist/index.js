@@ -272,7 +272,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadCli = exports.binaryNameFor = exports.assetNameFor = void 0;
+exports.downloadCli = exports.resolveLatestTag = exports.binaryNameFor = exports.assetNameFor = void 0;
 const fs = __importStar(__nccwpck_require__(3977));
 const os = __importStar(__nccwpck_require__(612));
 const path = __importStar(__nccwpck_require__(9411));
@@ -299,6 +299,31 @@ function binaryNameFor(platform) {
 }
 exports.binaryNameFor = binaryNameFor;
 /**
+ * Resolves the "latest" alias to the actual release tag it currently
+ * points to, via a small GitHub API call - not the release-asset
+ * redirect, which never reveals the concrete tag it landed on. This is
+ * what makes caching "latest" possible at all: caching under the literal
+ * string "latest" would silently pin every job to whatever version
+ * happened to be current on the first cache write, but caching under the
+ * *resolved* tag self-invalidates the moment a new release ships (a new
+ * tag is a cache miss by construction), while still hitting cache on
+ * every run in between.
+ */
+async function resolveLatestTag(fetchFn = fetch) {
+    const response = await fetchFn(`https://api.github.com/repos/${CLI_REPO}/releases/latest`, {
+        headers: { Accept: 'application/vnd.github+json' },
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to resolve the latest game-ci CLI release: GitHub API returned ${response.status}.`);
+    }
+    const body = (await response.json());
+    if (!body.tag_name) {
+        throw new Error('Failed to resolve the latest game-ci CLI release: response had no tag_name.');
+    }
+    return body.tag_name;
+}
+exports.resolveLatestTag = resolveLatestTag;
+/**
  * Downloads (or reuses a cached copy of) the game-ci CLI release archive
  * matching the current runner, extracts it, and returns the path to the
  * binary inside.
@@ -310,29 +335,26 @@ exports.binaryNameFor = binaryNameFor;
  * aren't embedded in the compiled binary itself. dist/ ships as the
  * binary's sibling inside the archive - see game-ci/cli#73.
  *
- * Pinned versions are cached via @actions/cache (GitHub's cache service),
- * so repeat jobs on ephemeral, GitHub-hosted runners skip the download
- * entirely - @actions/tool-cache alone only survives for the life of one
- * runner's disk, which GitHub-hosted runners don't persist between jobs.
- * "latest" is intentionally never persisted this way: caching a moving
- * target under a fixed key would silently pin every job to whatever
- * version happened to be "latest" on the first cache write.
+ * Every version - including "latest" - is cached via @actions/cache
+ * (GitHub's cache service), so repeat jobs on ephemeral, GitHub-hosted
+ * runners skip the archive download entirely - @actions/tool-cache alone
+ * only survives for the life of one runner's disk, which GitHub-hosted
+ * runners don't persist between jobs. "latest" is resolved to its
+ * concrete tag first (see resolveLatestTag) and cached under *that*, not
+ * under the literal string "latest" - a real new release is a fresh tag,
+ * so it's a cache miss by construction, never a stale hit.
  *
  * @param version A release tag (e.g. "v0.1.0"), or "latest".
  */
 async function downloadCli(version) {
     const asset = assetNameFor(process.platform, process.arch);
     const binaryName = binaryNameFor(process.platform);
-    const isPinned = version !== 'latest';
-    if (isPinned) {
-        const cached = await restoreFromCache(version, binaryName);
-        if (cached)
-            return cached;
-    }
-    const url = isPinned
-        ? `https://github.com/${CLI_REPO}/releases/download/${version}/${asset}`
-        : `https://github.com/${CLI_REPO}/releases/latest/download/${asset}`;
-    core.info(`Downloading game-ci CLI (${version}) from ${url}`);
+    const resolvedVersion = version === 'latest' ? await resolveLatestTag() : version;
+    const cached = await restoreFromCache(resolvedVersion, binaryName);
+    if (cached)
+        return cached;
+    const url = `https://github.com/${CLI_REPO}/releases/download/${resolvedVersion}/${asset}`;
+    core.info(`Downloading game-ci CLI ${resolvedVersion} from ${url}`);
     const archivePath = await tc.downloadTool(url);
     const extractedDir = process.platform === 'win32'
         ? await tc.extractZip(archivePath)
@@ -341,9 +363,7 @@ async function downloadCli(version) {
     if (process.platform !== 'win32') {
         await fs.chmod(binaryPath, 0o755);
     }
-    if (isPinned) {
-        await saveToCache(version, binaryName, extractedDir);
-    }
+    await saveToCache(resolvedVersion, binaryName, extractedDir);
     return binaryPath;
 }
 exports.downloadCli = downloadCli;
