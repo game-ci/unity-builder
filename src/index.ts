@@ -40,6 +40,15 @@ export async function run() {
       getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
     });
 
+    // codeql[js/command-line-injection] - args is an array of discrete argv
+    // entries, not a concatenated shell string, and @actions/exec's
+    // toolrunner.js passes it straight to child_process.spawn(fileName, args,
+    // options) (verified by reading node_modules/@actions/exec/lib/toolrunner.js)
+    // - no shell is ever invoked to (mis)parse it, so classic shell/command
+    // injection via metacharacters isn't reachable here. CodeQL's static
+    // analysis can't see through @actions/exec's internals to confirm that,
+    // which is why it still flags this generic "user input reaches an
+    // exec-family call" pattern.
     const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
 
     // Matches the original action's engineExitCode output: 0 on success,
