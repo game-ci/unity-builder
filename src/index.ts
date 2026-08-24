@@ -40,15 +40,17 @@ export async function run() {
       getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
     });
 
-    // codeql[js/command-line-injection] - args is an array of discrete argv
-    // entries, not a concatenated shell string, and @actions/exec's
-    // toolrunner.js passes it straight to child_process.spawn(fileName, args,
-    // options) (verified by reading node_modules/@actions/exec/lib/toolrunner.js)
-    // - no shell is ever invoked to (mis)parse it, so classic shell/command
-    // injection via metacharacters isn't reachable here. CodeQL's static
-    // analysis can't see through @actions/exec's internals to confirm that,
-    // which is why it still flags this generic "user input reaches an
-    // exec-family call" pattern.
+    // CodeQL flags this line (js/command-line-injection) since args
+    // ultimately derives from Action inputs. Verified false positive: args
+    // is an array of discrete argv entries, not a concatenated shell
+    // string, and @actions/exec's toolrunner.js passes it straight to
+    // child_process.spawn(fileName, args, options) - verified by reading
+    // node_modules/@actions/exec/lib/toolrunner.js - never a shell string,
+    // never shell-parsed. CodeQL's static analysis can't see through
+    // @actions/exec's internals to confirm that. This comment does not
+    // suppress the alert (GitHub Code Scanning's default setup has no
+    // inline-suppression-comment mechanism - that was legacy LGTM.com
+    // behavior); the alert needs dismissing via the Security tab/API.
     const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
 
     // Matches the original action's engineExitCode output: 0 on success,
