@@ -44,12 +44,9 @@
     "@vercel/ncc": "^0.36.1",
     "@vitest/coverage-istanbul": "^4.1.5",
     "cross-env": "^7.0.3",
-    "eslint": "^10.3.0",
-    "eslint-plugin-unicorn": "^64.0.0",
     "husky": "9",
     "js-yaml": "^4.1.0",
     "lint-staged": "^16.4.0",
-    "node-fetch": "2",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
     "ts-node": "10.8.1",
@@ -58,10 +55,5 @@
     "vitest": "^4",
     "yarn-audit-fix": "^9.3.8"
   },
-  "packageManager": "yarn@4.14.1",
-  "dependenciesMeta": {
-    "lefthook": {
-      "built": true
-    }
-  }
+  "packageManager": "yarn@4.14.1"
 }

@@ -10,19 +10,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Jest Test",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": [
-        "--collectCoverage=false",
-        "--colors",
-        "--config",
-        "${workspaceRoot}/jest.config.js",
-        "--runInBand",
-        "--runTestsByPath",
-        "${relativeFile}",
-        "--testPathPattern=${fileDirname}",
-        "--testTimeout=10000000"
-      ],
+      "name": "Debug Vitest Test",
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${relativeFile}"],
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart",
       "envFile": "${workspaceRoot}/.env",
