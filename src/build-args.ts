@@ -2,17 +2,19 @@
  * Translates unity-builder's action inputs into `game-ci build` (or, for
  * providerStrategy=local-system, `game-ci orchestrate`) CLI flags.
  *
- * Two deliberate omissions for the `build` path, both because there is
- * nothing to translate to:
- *  - `unityVersion` (except "auto"): the CLI always detects the Unity
- *    version from the checked-out project's ProjectSettings/ProjectVersion.txt
- *    and has no flag to override that today (game-ci/cli's engine-detection
- *    middleware unconditionally overwrites any passed value). Pinning a
- *    version other than "auto" is a known, real gap versus the original
- *    action - see the PR this shipped in.
+ * One deliberate omission for the `build` path, because there is nothing
+ * to translate to:
  *  - `providerStrategy` values other than "local"/"local-system": the base
  *    action (without the separately-installed @game-ci/orchestrator plugin)
  *    already throws for these today, so throwing here isn't a regression.
+ *
+ * `unityVersion` (except "auto", which means "let the CLI auto-detect from
+ * ProjectSettings/ProjectVersion.txt", so it's never passed through as a
+ * literal flag value): mapped to `--engineVersion`, which game-ci/cli's
+ * engine-detection middleware now respects instead of unconditionally
+ * overwriting (game-ci/cli#154). Not carried into ORCHESTRATE_STRING_FLAGS -
+ * unverified whether `orchestrate`'s local-system path reads engineVersion
+ * the same way; scope this out until confirmed.
  *
  * Boolean inputs use GitHub Actions' own truthy/falsy string convention
  * ('true'/'false', case-insensitive) - see actions/toolkit's getBooleanInput.
@@ -235,6 +237,11 @@ export function buildCliArgs({ getInput }: BuildArgsOptions): string[] {
     throw new Error('targetPlatform is required.');
   }
   args.push(`--targetPlatform=${targetPlatform}`);
+
+  const unityVersion = getInput('unityVersion');
+  if (unityVersion && unityVersion !== 'auto') {
+    args.push(`--engineVersion=${unityVersion}`);
+  }
 
   pushStringFlags(args, getInput, STRING_FLAGS);
   pushBooleanFlags(args, getInput, BOOLEAN_FLAGS);
