@@ -18,15 +18,6 @@ import { resolveProjectPath } from './resolve-project-path';
 
 export async function run() {
   try {
-    const unityVersion = core.getInput('unityVersion') || 'auto';
-    if (unityVersion !== 'auto') {
-      core.warning(
-        `unityVersion="${unityVersion}" is ignored: the underlying game-ci CLI always detects the Unity ` +
-          "version from the checked-out project's ProjectSettings/ProjectVersion.txt and has no flag to " +
-          'override it yet.',
-      );
-    }
-
     const cliVersion = core.getInput('cliVersion') || 'latest';
     const cliPath = await downloadCli(cliVersion);
 

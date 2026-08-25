@@ -23,6 +23,24 @@ describe('buildCliArgs', () => {
     ).toStrictEqual(['build', 'game', '--targetPlatform=StandaloneLinux64']);
   });
 
+  it('omits --engineVersion when unityVersion is unset or "auto"', () => {
+    const noneSet = buildCliArgs(inputsOf({ targetPlatform: 'StandaloneLinux64' }));
+    const explicitAuto = buildCliArgs(
+      inputsOf({ targetPlatform: 'StandaloneLinux64', unityVersion: 'auto' }),
+    );
+
+    expect(noneSet.some((arg) => arg.startsWith('--engineVersion'))).toBe(false);
+    expect(explicitAuto.some((arg) => arg.startsWith('--engineVersion'))).toBe(false);
+  });
+
+  it('maps an explicit unityVersion to --engineVersion, overriding auto-detection', () => {
+    const args = buildCliArgs(
+      inputsOf({ targetPlatform: 'WebGL', unityVersion: '6000.0.36f1' }),
+    );
+
+    expect(args).toContain('--engineVersion=6000.0.36f1');
+  });
+
   it('throws for a non-local providerStrategy, matching the base action without @game-ci/orchestrator', () => {
     expect(() =>
       buildCliArgs(inputsOf({ targetPlatform: 'StandaloneLinux64', providerStrategy: 'aws' })),
