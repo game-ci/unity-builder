@@ -63,6 +63,55 @@ describe('resolveLatestTag', () => {
     );
   });
 
+  it('sends no Authorization header when GITHUB_TOKEN/GH_TOKEN are unset', async () => {
+    const originalGithub = process.env.GITHUB_TOKEN;
+    const originalGh = process.env.GH_TOKEN;
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GH_TOKEN;
+
+    const fetchFn = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.15' }),
+    })) as unknown as typeof fetch;
+
+    try {
+      await resolveLatestTag(fetchFn);
+      const [, init] = vi.mocked(fetchFn).mock.calls[0] as [
+        string,
+        RequestInit & { headers: Record<string, string> },
+      ];
+      expect(init.headers.Authorization).toBeUndefined();
+    } finally {
+      if (originalGithub !== undefined) process.env.GITHUB_TOKEN = originalGithub;
+      if (originalGh !== undefined) process.env.GH_TOKEN = originalGh;
+    }
+  });
+
+  it('sends an Authorization header from GITHUB_TOKEN when set, to avoid the unauthenticated rate limit', async () => {
+    const original = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = 'test-token-123';
+
+    const fetchFn = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.15' }),
+    })) as unknown as typeof fetch;
+
+    try {
+      await resolveLatestTag(fetchFn);
+      expect(fetchFn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: 'Bearer test-token-123' }),
+        }),
+      );
+    } finally {
+      if (original === undefined) delete process.env.GITHUB_TOKEN;
+      else process.env.GITHUB_TOKEN = original;
+    }
+  });
+
   it('throws with a clear message on a non-ok response', async () => {
     const fetchFn = vi.fn(async () => ({
       ok: false,

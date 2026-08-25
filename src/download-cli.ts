@@ -40,8 +40,17 @@ export function binaryNameFor(platform: NodeJS.Platform): string {
  * every run in between.
  */
 export async function resolveLatestTag(fetchFn: typeof fetch = fetch): Promise<string> {
+  const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
+  // Actions runners share IPs across many concurrent jobs from unrelated
+  // repos/orgs, so the unauthenticated rate limit (60 req/hour per IP) gets
+  // exhausted by traffic this job never generated. The default GITHUB_TOKEN
+  // reads public repo data (game-ci/cli's releases) fine regardless of which
+  // repo the workflow runs in, and lifts the limit to 5000 req/hour.
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const response = await fetchFn(`https://api.github.com/repos/${CLI_REPO}/releases/latest`, {
-    headers: { Accept: 'application/vnd.github+json' },
+    headers,
   });
 
   if (!response.ok) {
