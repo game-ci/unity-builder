@@ -1,32 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { assetNameFor, binaryNameFor, resolveLatestTag } from './download-cli';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as cache from '@actions/cache';
+import * as exec from '@actions/exec';
+import { binaryNameFor, downloadCli, resolveLatestTag } from './download-cli';
 
-describe('assetNameFor', () => {
-  it('maps linux x64 to a .tar.gz archive', () => {
-    expect(assetNameFor('linux', 'x64')).toBe('game-ci-linux-x64.tar.gz');
-  });
-
-  it('maps linux arm64 to a .tar.gz archive', () => {
-    expect(assetNameFor('linux', 'arm64')).toBe('game-ci-linux-arm64.tar.gz');
-  });
-
-  it('maps darwin x64 to a .tar.gz archive', () => {
-    expect(assetNameFor('darwin', 'x64')).toBe('game-ci-macos-x64.tar.gz');
-  });
-
-  it('maps darwin arm64 to a .tar.gz archive', () => {
-    expect(assetNameFor('darwin', 'arm64')).toBe('game-ci-macos-arm64.tar.gz');
-  });
-
-  it('maps win32 x64 to a .zip archive', () => {
-    expect(assetNameFor('win32', 'x64')).toBe('game-ci-windows-x64.zip');
-  });
-
-  it('throws for an unsupported platform/arch combination', () => {
-    expect(() => assetNameFor('win32', 'arm64')).toThrow(/unsupported/i);
-    expect(() => assetNameFor('freebsd', 'x64')).toThrow(/unsupported/i);
-  });
-});
+vi.mock('@actions/exec');
+vi.mock('@actions/cache');
 
 describe('binaryNameFor', () => {
   it('is game-ci.exe on win32', () => {
@@ -130,5 +108,84 @@ describe('resolveLatestTag', () => {
     })) as unknown as typeof fetch;
 
     await expect(resolveLatestTag(fetchFn)).rejects.toThrow(/no tag_name/);
+  });
+});
+
+describe('downloadCli', () => {
+  beforeEach(() => {
+    vi.mocked(cache.isFeatureAvailable).mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  // The actual install mechanics (platform detection, archive format,
+  // extraction) live in game-ci/cli's own scripts/install.sh now, fetched
+  // and run at the resolved version's tag - see game-ci/cli#187. This
+  // wrapper's own job is just: build that command correctly, and take
+  // install.sh's stdout as the binary path.
+  it('fetches and runs install.sh for the given version, returning its stdout as the binary path', async () => {
+    vi.mocked(exec.exec).mockImplementation(async (_cmd, _args, options) => {
+      options?.listeners?.stdout?.(Buffer.from('/tmp/game-ci-cli-cache/v0.1.32/game-ci\n'));
+      return 0;
+    });
+
+    const binaryPath = await downloadCli('v0.1.32');
+
+    expect(binaryPath).toBe('/tmp/game-ci-cli-cache/v0.1.32/game-ci');
+    expect(exec.exec).toHaveBeenCalledWith(
+      'bash',
+      expect.arrayContaining([
+        'https://raw.githubusercontent.com/game-ci/cli/v0.1.32/scripts/install.sh',
+        'v0.1.32',
+      ]),
+      expect.anything(),
+    );
+  });
+
+  it('resolves "latest" to a concrete tag before fetching install.sh', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.33' }),
+    })) as unknown as typeof fetch;
+
+    vi.mocked(exec.exec).mockImplementation(async (_cmd, _args, options) => {
+      options?.listeners?.stdout?.(Buffer.from('/tmp/game-ci\n'));
+      return 0;
+    });
+
+    try {
+      await downloadCli('latest');
+
+      expect(exec.exec).toHaveBeenCalledWith(
+        'bash',
+        expect.arrayContaining([
+          'https://raw.githubusercontent.com/game-ci/cli/v0.1.33/scripts/install.sh',
+          'v0.1.33',
+        ]),
+        expect.anything(),
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it('throws a clear error when install.sh produces no output', async () => {
+    vi.mocked(exec.exec).mockImplementation(async () => 0);
+
+    await expect(downloadCli('v0.1.32')).rejects.toThrow(/produced no output/);
+  });
+
+  it('restores from cache instead of running install.sh on a cache hit', async () => {
+    vi.mocked(cache.isFeatureAvailable).mockReturnValue(true);
+    vi.mocked(cache.restoreCache).mockResolvedValue('game-ci-cli-v0.1.32-key');
+
+    const binaryPath = await downloadCli('v0.1.32');
+
+    expect(binaryPath).toContain(binaryNameFor(process.platform));
+    expect(exec.exec).not.toHaveBeenCalled();
   });
 });

@@ -3,25 +3,9 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import * as tc from '@actions/tool-cache';
+import * as exec from '@actions/exec';
 
 const CLI_REPO = 'game-ci/cli';
-
-export function assetNameFor(platform: NodeJS.Platform, arch: string): string {
-  const targets: Partial<Record<NodeJS.Platform, Partial<Record<string, string>>>> = {
-    linux: { x64: 'linux-x64', arm64: 'linux-arm64' },
-    darwin: { x64: 'macos-x64', arm64: 'macos-arm64' },
-    win32: { x64: 'windows-x64' },
-  };
-
-  const target = targets[platform]?.[arch];
-  if (!target)
-    throw new Error(`Unsupported platform/arch for the game-ci CLI: ${platform}/${arch}`);
-
-  const extension = platform === 'win32' ? 'zip' : 'tar.gz';
-
-  return `game-ci-${target}.${extension}`;
-}
 
 /** The binary's name once extracted - matches release-cli.yml's per-platform `binary` matrix value. */
 export function binaryNameFor(platform: NodeJS.Platform): string {
@@ -37,7 +21,10 @@ export function binaryNameFor(platform: NodeJS.Platform): string {
  * happened to be current on the first cache write, but caching under the
  * *resolved* tag self-invalidates the moment a new release ships (a new
  * tag is a cache miss by construction), while still hitting cache on
- * every run in between.
+ * every run in between. It's also what pins install.sh (below) to a
+ * specific, immutable version rather than "latest" - install.sh doesn't
+ * know how to resolve "latest" itself, by design, since which tag it's
+ * fetched at IS the version it installs.
  */
 export async function resolveLatestTag(fetchFn: typeof fetch = fetch): Promise<string> {
   const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
@@ -67,73 +54,30 @@ export async function resolveLatestTag(fetchFn: typeof fetch = fetch): Promise<s
   return body.tag_name;
 }
 
-/**
- * Downloads (or reuses a cached copy of) the game-ci CLI release archive
- * matching the current runner, extracts it, and returns the path to the
- * binary inside.
- *
- * The archive - not a bare binary - is what's published: cli.ts resolves
- * its own static assets (default-build-script/, platforms/*,
- * unity-config/services-config.json.template, all needed for Docker
- * volume mounts) relative to its own directory on disk, and those assets
- * aren't embedded in the compiled binary itself. dist/ ships as the
- * binary's sibling inside the archive - see game-ci/cli#73.
- *
- * Every version - including "latest" - is cached via @actions/cache
- * (GitHub's cache service), so repeat jobs on ephemeral, GitHub-hosted
- * runners skip the archive download entirely - @actions/tool-cache alone
- * only survives for the life of one runner's disk, which GitHub-hosted
- * runners don't persist between jobs. "latest" is resolved to its
- * concrete tag first (see resolveLatestTag) and cached under *that*, not
- * under the literal string "latest" - a real new release is a fresh tag,
- * so it's a cache miss by construction, never a stale hit.
- *
- * @param version A release tag (e.g. "v0.1.0"), or "latest".
- */
-export async function downloadCli(version: string): Promise<string> {
-  const asset = assetNameFor(process.platform, process.arch);
-  const binaryName = binaryNameFor(process.platform);
-  const resolvedVersion = version === 'latest' ? await resolveLatestTag() : version;
-
-  const cached = await restoreFromCache(resolvedVersion, binaryName);
-  if (cached) return cached;
-
-  const url = `https://github.com/${CLI_REPO}/releases/download/${resolvedVersion}/${asset}`;
-
-  core.info(`Downloading game-ci CLI ${resolvedVersion} from ${url}`);
-  const archivePath = await tc.downloadTool(url);
-  const extractedDir =
-    process.platform === 'win32'
-      ? await tc.extractZip(archivePath)
-      : await tc.extractTar(archivePath);
-
-  const binaryPath = path.join(extractedDir, binaryName);
-  if (process.platform !== 'win32') {
-    await fs.chmod(binaryPath, 0o755);
-  }
-
-  await saveToCache(resolvedVersion, binaryName, extractedDir);
-
-  return binaryPath;
-}
-
 function cacheDirFor(version: string): string {
   return path.join(os.tmpdir(), 'game-ci-cli-cache', version);
 }
 
-function cacheKeyFor(version: string, binaryName: string): string {
-  return `game-ci-cli-${version}-${binaryName}`;
+/**
+ * Includes platform+arch, not just version: darwin-x64 and darwin-arm64
+ * (or any two architectures on the same OS) both extract to a binary
+ * named plain "game-ci", so a key built from version+binaryName alone
+ * (this cache's previous scheme) can't tell them apart and would let one
+ * architecture's binary get restored onto the other's runner.
+ */
+function cacheKeyFor(version: string): string {
+  return `game-ci-cli-${version}-${process.platform}-${process.arch}`;
 }
 
-async function restoreFromCache(version: string, binaryName: string): Promise<string | null> {
+async function restoreFromCache(version: string): Promise<string | null> {
   if (!cache.isFeatureAvailable()) return null;
 
   const cacheDir = cacheDirFor(version);
   try {
-    const hitKey = await cache.restoreCache([cacheDir], cacheKeyFor(version, binaryName));
+    const hitKey = await cache.restoreCache([cacheDir], cacheKeyFor(version));
     if (!hitKey) return null;
 
-    const binaryPath = path.join(cacheDir, binaryName);
+    const binaryPath = path.join(cacheDir, binaryNameFor(process.platform));
     // Cache restore doesn't guarantee the executable bit survives.
     if (process.platform !== 'win32') await fs.chmod(binaryPath, 0o755);
 
@@ -145,21 +89,93 @@ async function restoreFromCache(version: string, binaryName: string): Promise<st
   }
 }
 
-async function saveToCache(
-  version: string,
-  binaryName: string,
-  extractedDir: string,
-): Promise<void> {
+async function saveToCache(version: string): Promise<void> {
   if (!cache.isFeatureAvailable()) return;
 
-  const cacheDir = cacheDirFor(version);
   try {
-    await fs.mkdir(path.dirname(cacheDir), { recursive: true });
-    await fs.cp(extractedDir, cacheDir, { recursive: true });
-    await cache.saveCache([cacheDir], cacheKeyFor(version, binaryName));
+    await cache.saveCache([cacheDirFor(version)], cacheKeyFor(version));
   } catch (error: any) {
     // A cache miss on save (e.g. another concurrent job already saved this
-    // key) isn't fatal - the download itself already succeeded.
+    // key) isn't fatal - the install itself already succeeded.
     core.warning(`Failed to save game-ci CLI to cache: ${error.message}`);
   }
+}
+
+/**
+ * Downloads (or reuses a cached copy of) the game-ci CLI release archive
+ * matching the current runner, extracts it, and returns the path to the
+ * binary inside.
+ *
+ * The actual install mechanics - platform/arch detection, archive format,
+ * download, extraction - live in exactly one place: game-ci/cli's own
+ * scripts/install.sh, fetched and run at the resolved version's tag. That
+ * script is what every engine wrapper (this one today, others later)
+ * delegates to, so a bugfix or a new supported platform ships once, there,
+ * and every wrapper picks it up on its next run with no code change of its
+ * own - see game-ci/cli#187. GitHub Actions caching stays here, in the
+ * wrapper: it's an Actions-only service with no shell-callable API, so
+ * install.sh has no way to drive it itself.
+ *
+ * Every version - including "latest" - is cached via @actions/cache
+ * (GitHub's cache service), so repeat jobs on ephemeral, GitHub-hosted
+ * runners skip the archive download entirely. "latest" is resolved to its
+ * concrete tag first (see resolveLatestTag) and cached under *that*, not
+ * under the literal string "latest" - a real new release is a fresh tag,
+ * so it's a cache miss by construction, never a stale hit.
+ *
+ * @param version A release tag (e.g. "v0.1.0"), or "latest".
+ */
+export async function downloadCli(version: string): Promise<string> {
+  const resolvedVersion = version === 'latest' ? await resolveLatestTag() : version;
+
+  const cached = await restoreFromCache(resolvedVersion);
+  if (cached) return cached;
+
+  const destDir = cacheDirFor(resolvedVersion);
+  await fs.mkdir(destDir, { recursive: true });
+
+  const installScriptUrl = `https://raw.githubusercontent.com/${CLI_REPO}/${resolvedVersion}/scripts/install.sh`;
+  core.info(`Installing game-ci CLI ${resolvedVersion} via ${installScriptUrl}`);
+
+  let stdout = '';
+  await exec.exec(
+    'bash',
+    [
+      '-c',
+      // `set -o pipefail` matters here: without it, a failed curl (e.g. a
+      // typo'd/deleted tag giving a 404) still exits 0 because it's not the
+      // pipeline's last command, and the inner `bash -s` would silently run
+      // on an empty script instead of failing loudly.
+      'set -o pipefail; curl -fsSL "$0" | bash -s -- "$1" "$2"',
+      installScriptUrl,
+      resolvedVersion,
+      destDir,
+    ],
+    {
+      listeners: {
+        stdout: (data: Buffer) => {
+          stdout += data.toString();
+        },
+      },
+    },
+  );
+
+  // install.sh writes progress to stderr and only the final binary path to
+  // stdout, but take the last non-empty line regardless - defensive against
+  // any stray stdout noise from a future version of the script.
+  const binaryPath = stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .toReversed()
+    .find(Boolean);
+
+  if (!binaryPath) {
+    throw new Error(
+      `Failed to install the game-ci CLI ${resolvedVersion}: install.sh produced no output.`,
+    );
+  }
+
+  await saveToCache(resolvedVersion);
+
+  return binaryPath;
 }
