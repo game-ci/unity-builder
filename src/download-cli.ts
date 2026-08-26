@@ -162,12 +162,19 @@ export async function downloadCli(version: string): Promise<string> {
 
   // install.sh writes progress to stderr and only the final binary path to
   // stdout, but take the last non-empty line regardless - defensive against
-  // any stray stdout noise from a future version of the script.
-  const binaryPath = stdout
-    .split('\n')
-    .map((line) => line.trim())
-    .toReversed()
-    .find(Boolean);
+  // any stray stdout noise from a future version of the script. Walked
+  // backwards by index rather than toReversed()/reverse() - toReversed()
+  // isn't available on this project's target Node version, and reverse()
+  // mutates in place, which unicorn/no-array-reverse flags even when the
+  // array being mutated is a fresh one from map().
+  const lines = stdout.split('\n').map((line) => line.trim());
+  let binaryPath: string | undefined;
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    if (lines[i]) {
+      binaryPath = lines[i];
+      break;
+    }
+  }
 
   if (!binaryPath) {
     throw new Error(
