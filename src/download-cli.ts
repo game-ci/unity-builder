@@ -137,28 +137,32 @@ export async function downloadCli(version: string): Promise<string> {
   const installScriptUrl = `https://raw.githubusercontent.com/${CLI_REPO}/${resolvedVersion}/scripts/install.sh`;
   core.info(`Installing game-ci CLI ${resolvedVersion} via ${installScriptUrl}`);
 
+  // Fetched and written to a file, then run as `bash <path> <args...>`,
+  // rather than piped straight into a `bash -c '... "$0" ...'` wrapper: a
+  // curl-into-bash one-liner needs resolvedVersion/destDir interpolated
+  // into the -c script text (even safely, as quoted positional params),
+  // which is exactly the shape CodeQL's uncontrolled-command-line query
+  // flags. Passing a real file path plus a plain string[] of args - the
+  // same pattern this file's own callers already use for the CLI binary
+  // itself - has no such shell-text construction step to flag at all.
+  const scriptResponse = await fetch(installScriptUrl);
+  if (!scriptResponse.ok) {
+    throw new Error(
+      `Failed to fetch install.sh for game-ci CLI ${resolvedVersion}: ` +
+        `GitHub returned ${scriptResponse.status} for ${installScriptUrl}.`,
+    );
+  }
+  const scriptPath = path.join(os.tmpdir(), `game-ci-install-${resolvedVersion.replace(/[^\w.-]/g, '_')}.sh`);
+  await fs.writeFile(scriptPath, await scriptResponse.text(), { mode: 0o755 });
+
   let stdout = '';
-  await exec.exec(
-    'bash',
-    [
-      '-c',
-      // `set -o pipefail` matters here: without it, a failed curl (e.g. a
-      // typo'd/deleted tag giving a 404) still exits 0 because it's not the
-      // pipeline's last command, and the inner `bash -s` would silently run
-      // on an empty script instead of failing loudly.
-      'set -o pipefail; curl -fsSL "$0" | bash -s -- "$1" "$2"',
-      installScriptUrl,
-      resolvedVersion,
-      destDir,
-    ],
-    {
-      listeners: {
-        stdout: (data: Buffer) => {
-          stdout += data.toString();
-        },
+  await exec.exec('bash', [scriptPath, resolvedVersion, destDir], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        stdout += data.toString();
       },
     },
-  );
+  });
 
   // install.sh writes progress to stderr and only the final binary path to
   // stdout, but take the last non-empty line regardless - defensive against

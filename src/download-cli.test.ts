@@ -1,10 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as fs from 'node:fs/promises';
 import * as cache from '@actions/cache';
 import * as exec from '@actions/exec';
 import { binaryNameFor, downloadCli, resolveLatestTag } from './download-cli';
 
 vi.mock('@actions/exec');
 vi.mock('@actions/cache');
+vi.mock('node:fs/promises');
+
+function mockInstallScriptFetch(): void {
+  globalThis.fetch = vi.fn(async () => ({
+    ok: true,
+    status: 200,
+    text: async () => '#!/usr/bin/env bash\necho mock install.sh',
+  })) as unknown as typeof fetch;
+}
 
 describe('binaryNameFor', () => {
   it('is game-ci.exe on win32', () => {
@@ -112,20 +122,37 @@ describe('resolveLatestTag', () => {
 });
 
 describe('downloadCli', () => {
+  const originalFetch = globalThis.fetch;
+
   beforeEach(() => {
     vi.mocked(cache.isFeatureAvailable).mockReturnValue(false);
+    // Real chmod/mkdir/writeFile aren't under test here (that's install.sh's
+    // job, and it isn't actually run - see mockInstallScriptFetch) and the
+    // paths involved don't exist on disk in this test environment. Without
+    // these, restoreFromCache's real fs.chmod call throws ENOENT on any
+    // platform where that branch actually runs (linux/darwin - the
+    // `process.platform !== 'win32'` guard means it's silently skipped, and
+    // the bug masked, on a Windows dev machine) - restoreFromCache's own
+    // try/catch then swallows that and returns null, so a cache-hit test
+    // silently falls through to the real install path instead of catching
+    // what it's meant to catch.
+    vi.mocked(fs.chmod).mockResolvedValue(undefined);
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+    vi.mocked(fs.writeFile).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
     vi.resetAllMocks();
+    globalThis.fetch = originalFetch;
   });
 
   // The actual install mechanics (platform detection, archive format,
   // extraction) live in game-ci/cli's own scripts/install.sh now, fetched
   // and run at the resolved version's tag - see game-ci/cli#187. This
-  // wrapper's own job is just: build that command correctly, and take
-  // install.sh's stdout as the binary path.
+  // wrapper's own job is just: fetch that script, run it correctly, and
+  // take its stdout as the binary path.
   it('fetches and runs install.sh for the given version, returning its stdout as the binary path', async () => {
+    mockInstallScriptFetch();
     vi.mocked(exec.exec).mockImplementation(async (_cmd, _args, options) => {
       options?.listeners?.stdout?.(Buffer.from('/tmp/game-ci-cli-cache/v0.1.32/game-ci\n'));
       return 0;
@@ -134,52 +161,59 @@ describe('downloadCli', () => {
     const binaryPath = await downloadCli('v0.1.32');
 
     expect(binaryPath).toBe('/tmp/game-ci-cli-cache/v0.1.32/game-ci');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://raw.githubusercontent.com/game-ci/cli/v0.1.32/scripts/install.sh',
+    );
     expect(exec.exec).toHaveBeenCalledWith(
       'bash',
-      expect.arrayContaining([
-        'https://raw.githubusercontent.com/game-ci/cli/v0.1.32/scripts/install.sh',
-        'v0.1.32',
-      ]),
+      expect.arrayContaining(['v0.1.32']),
       expect.anything(),
     );
   });
 
   it('resolves "latest" to a concrete tag before fetching install.sh', async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async () => ({
-      ok: true,
-      status: 200,
-      json: async () => ({ tag_name: 'v0.1.33' }),
-    })) as unknown as typeof fetch;
+    globalThis.fetch = vi.fn(async (url: string) => {
+      if (url.includes('/releases/latest')) {
+        return { ok: true, status: 200, json: async () => ({ tag_name: 'v0.1.33' }) };
+      }
+      return { ok: true, status: 200, text: async () => 'echo mock install.sh' };
+    }) as unknown as typeof fetch;
 
     vi.mocked(exec.exec).mockImplementation(async (_cmd, _args, options) => {
       options?.listeners?.stdout?.(Buffer.from('/tmp/game-ci\n'));
       return 0;
     });
 
-    try {
-      await downloadCli('latest');
+    await downloadCli('latest');
 
-      expect(exec.exec).toHaveBeenCalledWith(
-        'bash',
-        expect.arrayContaining([
-          'https://raw.githubusercontent.com/game-ci/cli/v0.1.33/scripts/install.sh',
-          'v0.1.33',
-        ]),
-        expect.anything(),
-      );
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://raw.githubusercontent.com/game-ci/cli/v0.1.33/scripts/install.sh',
+    );
+    expect(exec.exec).toHaveBeenCalledWith(
+      'bash',
+      expect.arrayContaining(['v0.1.33']),
+      expect.anything(),
+    );
+  });
+
+  it('throws a clear error when the install.sh fetch fails', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      ok: false,
+      status: 404,
+    })) as unknown as typeof fetch;
+
+    await expect(downloadCli('v0.1.32')).rejects.toThrow(/404/);
+    expect(exec.exec).not.toHaveBeenCalled();
   });
 
   it('throws a clear error when install.sh produces no output', async () => {
+    mockInstallScriptFetch();
     vi.mocked(exec.exec).mockImplementation(async () => 0);
 
     await expect(downloadCli('v0.1.32')).rejects.toThrow(/produced no output/);
   });
 
-  it('restores from cache instead of running install.sh on a cache hit', async () => {
+  it('restores from cache instead of fetching install.sh on a cache hit', async () => {
     vi.mocked(cache.isFeatureAvailable).mockReturnValue(true);
     vi.mocked(cache.restoreCache).mockResolvedValue('game-ci-cli-v0.1.32-key');
 
