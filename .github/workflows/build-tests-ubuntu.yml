@@ -37,6 +37,10 @@ jobs:
   buildForAllPlatformsUbuntu:
     name: "${{ matrix.targetPlatform }} on ${{ matrix.unityVersion}}${{startsWith(matrix.buildProfile, 'Assets') && ' (via Build Profile)' || '' }}"
     runs-on: ubuntu-latest
+    # See build-tests-mac.yml's matching comment - a per-step timeout doesn't
+    # bound an action's own implicit post-run cleanup step, only a job-level
+    # timeout does.
+    timeout-minutes: 60
     # Known, disclosed gap (see #844's description and src/build-args.ts's own
     # header comment): the CLI always detects the Unity version from the
     # checked-out project's ProjectSettings/ProjectVersion.txt and has no flag

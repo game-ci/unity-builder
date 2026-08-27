@@ -12,6 +12,14 @@ jobs:
   buildForAllPlatformsMacOS:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
     runs-on: macos-latest
+    # A per-step timeout doesn't bound an action's own implicit post-run
+    # cleanup step (e.g. actions/cache@v4's cache-save), which is exactly
+    # what's been observed hanging here - real builds finish in well under
+    # 40m, but a hung "Post Run actions/cache@v4" step has left jobs stuck
+    # "in_progress" for 1.5h+. A job-level timeout is the only thing that
+    # bounds that too, converting a silent multi-hour hang into a clear,
+    # fast failure.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

@@ -12,6 +12,10 @@ jobs:
   buildForAllPlatformsWindows:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
     runs-on: windows-2022
+    # See build-tests-mac.yml's matching comment - a per-step timeout doesn't
+    # bound an action's own implicit post-run cleanup step, only a job-level
+    # timeout does.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
