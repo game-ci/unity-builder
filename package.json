@@ -21,18 +21,19 @@
     "setup:hooks": "node scripts/ensure-husky.mjs"
   },
   "lint-staged": {
-    "*.@(ts|tsx|mts|js|jsx|mjs|cjs)": [
-      "oxlint --fix --quiet",
+    "!(dist)/**/*.@(ts|tsx|mts|js|jsx|mjs|cjs)": [
+      "oxlint --fix --quiet --no-error-on-unmatched-pattern",
       "oxfmt --write"
     ],
-    "*.@(json|jsonc|json5|md|mdx|yaml|yml|css|scss|sass|html|toml)": "oxfmt --write",
+    "!(dist)/**/*.@(json|jsonc|json5|md|mdx|yaml|yml|css|scss|sass|html|toml)": "oxfmt --write",
+    "package.json": "oxfmt --write",
     ".github/workflows/*.@(yml|yaml)": "actionlint"
   },
   "engines": {
     "node": ">=18.x"
   },
   "dependencies": {
-    "@actions/cache": "^3.2.4",
+    "@actions/cache": "^4.0.0",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/tool-cache": "^2.0.1"

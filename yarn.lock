@@ -5,9 +5,9 @@ __metadata:
   version: 9
   cacheKey: 10
 
-"@actions/cache@npm:^3.2.4":
-  version: 3.3.0
-  resolution: "@actions/cache@npm:3.3.0"
+"@actions/cache@npm:^4.0.0":
+  version: 4.1.0
+  resolution: "@actions/cache@npm:4.1.0"
   dependencies:
     "@actions/core": "npm:^1.11.1"
     "@actions/exec": "npm:^1.0.1"
@@ -17,8 +17,9 @@ __metadata:
     "@azure/abort-controller": "npm:^1.1.0"
     "@azure/ms-rest-js": "npm:^2.6.0"
     "@azure/storage-blob": "npm:^12.13.0"
+    "@protobuf-ts/runtime-rpc": "npm:^2.11.1"
     semver: "npm:^6.3.1"
-  checksum: 10/b3e31b9204ee690187b4cfbcf98e85b12ed0f769f2dc824d0122c0ff1f37f7bb847a07f9437db3496d459bde99d26d5383789b76236ca10a11e39cc4e7f23f2d
+  checksum: 10/ee0bb0db93b0e1ffefec86400236589cc8c2ee3fc87a876acf136a49162e17d60fd42a643163ccb3653a0ee3b1ec10ba48b638142944ea2a4a88b845201fbf6d
   languageName: node
   linkType: hard
 
@@ -1022,6 +1023,22 @@ __metadata:
   version: 1.78.0
   resolution: "@oxlint/binding-win32-x64-msvc@npm:1.78.0"
   conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@protobuf-ts/runtime-rpc@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "@protobuf-ts/runtime-rpc@npm:2.11.1"
+  dependencies:
+    "@protobuf-ts/runtime": "npm:^2.11.1"
+  checksum: 10/32c9220a4898b8abca1628806075066292a3f2774965b7d1f39e9389c43a178d7b5023d9e67a0e024d0010790b0b7b6a4e73080e59a0e1701e2d5cee9572e6e2
+  languageName: node
+  linkType: hard
+
+"@protobuf-ts/runtime@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "@protobuf-ts/runtime@npm:2.11.1"
+  checksum: 10/888b963a0b2b26c0b5f77d411b99bfc80068faa89e287efeede2e7686f1b0fea09fc5f0cf7e6be148728f2acf9c05ec7b5814f6633da6cdc810895677b2e68f5
   languageName: node
   linkType: hard
 
@@ -3869,7 +3886,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "unity-builder@workspace:."
   dependencies:
-    "@actions/cache": "npm:^3.2.4"
+    "@actions/cache": "npm:^4.0.0"
     "@actions/core": "npm:^1.11.1"
     "@actions/exec": "npm:^1.1.1"
     "@actions/tool-cache": "npm:^2.0.1"
