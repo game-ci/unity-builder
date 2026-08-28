@@ -53,9 +53,17 @@ jobs:
           lfs: true
 
       ###########################
-      #          Cache          #
+      #     Cache (restore)     #
       ###########################
-      - uses: actions/cache@v4
+      # Split from the save side (below) rather than the combined
+      # actions/cache@v4: that action's implicit post-run save has been
+      # observed hanging indefinitely on GitHub-hosted runners, unrelated to
+      # the cache key itself. A per-step timeout doesn't bound an implicit
+      # post-run cleanup step, only an explicit step does - and caching is a
+      # pure optimization, so losing one save is far cheaper than a job
+      # stuck "in_progress" for well over an hour.
+      - uses: actions/cache/restore@v4
+        id: cache-restore
         with:
           path: ${{ matrix.projectPath }}/Library
           key: Library-${{ matrix.projectPath }}-windows-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-${{ matrix.buildProfile }}
@@ -186,3 +194,19 @@ jobs:
             GPU' || '' }}${{ matrix.buildProfile && '  With Build Profile' || '' }}
           path: build
           retention-days: 14
+
+      ###########################
+      #      Cache (save)       #
+      ###########################
+      # A bounded, non-fatal step (unlike the combined action's implicit
+      # post-run save): a hang here is killed after 5m instead of stalling
+      # the whole job, and continue-on-error means a failed/timed-out save
+      # never fails the build - only a real cache miss on the next run,
+      # which is a much cheaper failure mode.
+      - if: steps.cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        timeout-minutes: 5
+        continue-on-error: true
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
