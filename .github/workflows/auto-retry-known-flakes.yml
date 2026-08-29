@@ -1,0 +1,92 @@
+name: Auto-retry known-transient CI flakes
+
+# Careful, narrow auto-healing for this repo's OWN test CI - not a blanket
+# "retry until green" mechanism. game-ci/cli's Unity build/activate steps
+# already retry a specific, documented set of transient licensing errors
+# in-process (up to --licenseRetryMaxAttempts, default 4, exponential
+# backoff - see dist/platforms/{mac,ubuntu}/steps/{activate,build}.sh). That
+# retries on the SAME runner instance, so it can't help when the underlying
+# issue is runner-specific (e.g. a stuck Gatekeeper/codesign cache) rather
+# than a genuinely transient network blip - all 4 in-process attempts then
+# fail identically, and only a fresh job (potentially a different runner)
+# has a chance.
+#
+# This workflow closes exactly that gap: if a build-tests-* run finishes
+# with failed jobs, and EVERY failed job's log matches the exact same
+# known-transient pattern the in-process retry already uses (nothing
+# broader - a real compile error, a genuine license misconfiguration, or
+# any other failure never matches and is never auto-retried), rerun the
+# failed jobs once. If any failed job doesn't match, or this is already a
+# retry (workflow_run.run_attempt > 1), do nothing - a human or agent needs
+# to look at it.
+on:
+  workflow_run:
+    workflows: ['Builds - MacOS', 'Builds - Ubuntu', 'Builds - Windows']
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  retry-if-known-flake:
+    name: Retry if known-transient flake
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1
+    steps:
+      - name: Check failed jobs against the known-transient pattern, rerun if all match
+        uses: actions/github-script@v7
+        env:
+          # Kept in sync with dist/platforms/{mac,ubuntu}/steps/{activate,build}.sh's
+          # own UNITY_*_TRANSIENT_LICENSE_ERROR_PATTERN - update both together.
+          TRANSIENT_PATTERN: 'TimeoutPolicy did not complete|Access token is unavailable|entitlement groups and 0 free entitlements|License activation has failed|No valid Unity Editor license found|License is not active'
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const pattern = new RegExp(process.env.TRANSIENT_PATTERN);
+
+            const { data: { jobs } } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+              per_page: 100,
+            });
+
+            const failedJobs = jobs.filter((job) => job.conclusion === 'failure');
+            if (failedJobs.length === 0) {
+              core.info('No failed jobs found (a cancelled/skipped-only run) - nothing to do.');
+              return;
+            }
+
+            let allMatch = true;
+            for (const job of failedJobs) {
+              let log = '';
+              try {
+                const response = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: job.id,
+                });
+                log = response.data.toString();
+              } catch (error) {
+                core.warning(`Could not fetch logs for job ${job.name} (${job.id}): ${error.message}`);
+                allMatch = false;
+                break;
+              }
+
+              if (!pattern.test(log)) {
+                core.info(`Job "${job.name}" failed without the known-transient pattern - not auto-retrying this run.`);
+                allMatch = false;
+                break;
+              }
+              core.info(`Job "${job.name}" failed with the known-transient pattern.`);
+            }
+
+            if (!allMatch) return;
+
+            core.info(`All ${failedJobs.length} failed job(s) matched the known-transient pattern - rerunning failed jobs.`);
+            await github.rest.actions.reRunWorkflowFailedJobs({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
