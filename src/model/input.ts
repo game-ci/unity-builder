@@ -242,6 +242,17 @@ class Input {
     return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
   }
 
+  /**
+   * Unity 6.6+ editors request 1GiB of shared memory and hard-fail with
+   * "Insufficient shared memory available" against Docker's 64m default
+   * (game-ci/unity-builder#840). unity-test-runner has always passed 1025m,
+   * so match it here rather than leaving builds broken by default. '0' or
+   * 'none' omits the flag and uses Docker's own default.
+   */
+  static get dockerShmSize(): string {
+    return Input.getInput('dockerShmSize') ?? '1025m';
+  }
+
   static get dockerCpuLimit(): string {
     return Input.getInput('dockerCpuLimit') ?? os.cpus().length.toString();
   }

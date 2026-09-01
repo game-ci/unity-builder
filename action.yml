@@ -128,6 +128,13 @@ inputs:
     required: false
     default: ''
     description: 'Number of CPU cores to assign the docker container. Defaults to all available cores on all platforms.'
+  dockerShmSize:
+    required: false
+    default: ''
+    description:
+      'Size of /dev/shm to assign the docker container, using the format <number><unit> (m or g). Unity 6.6+ editors
+      request 1GiB of shared memory and fail with "Insufficient shared memory available" against Docker''s 64m
+      default. Defaults to 1025m; set to "0" or "none" to use Docker''s own default.'
   dockerMemoryLimit:
     required: false
     default: ''

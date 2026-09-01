@@ -4,6 +4,20 @@ import path from 'node:path';
 import { ExecOptions, exec } from '@actions/exec';
 import { DockerParameters, StringKeyValuePair } from './shared-types';
 
+/**
+ * Unity 6.6+ editors request 1GiB of shared memory and hard-fail with
+ * "Insufficient shared memory available" against Docker's 64m default
+ * (game-ci/unity-builder#840). BuildParameters defaults this to 1025m, the
+ * value unity-test-runner has always passed. '0'/'none' omits the flag so
+ * Docker's own default applies.
+ */
+function shmSizeFlag(dockerShmSize?: string): string {
+  const value = String(dockerShmSize ?? '').trim();
+  if (value === '' || value === '0' || value.toLowerCase() === 'none') return '';
+
+  return `--shm-size=${value}`;
+}
+
 class Docker {
   static async run(
     image: string,
@@ -56,6 +70,7 @@ class Docker {
       dockerWorkspacePath,
       dockerCpuLimit,
       dockerMemoryLimit,
+      dockerShmSize,
     } = parameters;
 
     const githubHome = path.join(runnerTempPath, '_github_home');
@@ -85,6 +100,7 @@ class Docker {
             --volume "${actionFolder}/BlankProject":"/BlankProject:z" \
             --cpus=${dockerCpuLimit} \
             --memory=${dockerMemoryLimit} \
+            ${shmSizeFlag(dockerShmSize)} \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${
               sshAgent && !sshPublicKeysDirectoryPath
@@ -108,6 +124,7 @@ class Docker {
       dockerWorkspacePath,
       dockerCpuLimit,
       dockerMemoryLimit,
+      dockerShmSize,
       dockerIsolationMode,
     } = parameters;
 
@@ -134,6 +151,7 @@ class Docker {
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
             --cpus=${dockerCpuLimit} \
             --memory=${dockerMemoryLimit} \
+            ${shmSizeFlag(dockerShmSize)} \
             --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;

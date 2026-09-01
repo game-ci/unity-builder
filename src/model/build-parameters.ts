@@ -42,6 +42,7 @@ class BuildParameters {
   public androidSymbolType!: string;
   public dockerCpuLimit!: string;
   public dockerMemoryLimit!: string;
+  public dockerShmSize!: string;
   public dockerIsolationMode!: string;
   public containerRegistryRepository!: string;
   public containerRegistryImageVersion!: string;
@@ -167,6 +168,7 @@ class BuildParameters {
       chownFilesTo: Input.chownFilesTo,
       dockerCpuLimit: Input.dockerCpuLimit,
       dockerMemoryLimit: Input.dockerMemoryLimit,
+      dockerShmSize: Input.dockerShmSize,
       dockerIsolationMode: Input.dockerIsolationMode,
       containerRegistryRepository: Input.containerRegistryRepository,
       containerRegistryImageVersion: Input.containerRegistryImageVersion,
