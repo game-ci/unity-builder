@@ -323,6 +323,7 @@ class BuildParameters {
             chownFilesTo: input_1.default.chownFilesTo,
             dockerCpuLimit: input_1.default.dockerCpuLimit,
             dockerMemoryLimit: input_1.default.dockerMemoryLimit,
+            dockerShmSize: input_1.default.dockerShmSize,
             dockerIsolationMode: input_1.default.dockerIsolationMode,
             containerRegistryRepository: input_1.default.containerRegistryRepository,
             containerRegistryImageVersion: input_1.default.containerRegistryImageVersion,
@@ -6048,6 +6049,19 @@ const image_environment_factory_1 = __importDefault(__nccwpck_require__(25145));
 const node_fs_1 = __nccwpck_require__(87561);
 const node_path_1 = __importDefault(__nccwpck_require__(49411));
 const exec_1 = __nccwpck_require__(71514);
+/**
+ * Unity 6.6+ editors request 1GiB of shared memory and hard-fail with
+ * "Insufficient shared memory available" against Docker's 64m default
+ * (game-ci/unity-builder#840). BuildParameters defaults this to 1025m, the
+ * value unity-test-runner has always passed. '0'/'none' omits the flag so
+ * Docker's own default applies.
+ */
+function shmSizeFlag(dockerShmSize) {
+    const value = String(dockerShmSize ?? '').trim();
+    if (value === '' || value === '0' || value.toLowerCase() === 'none')
+        return '';
+    return `--shm-size=${value}`;
+}
 class Docker {
     static async run(image, parameters, silent = false, overrideCommands = '', additionalVariables = [], options = {}, entrypointBash = false) {
         let runCommand = '';
@@ -6066,7 +6080,7 @@ class Docker {
         return await (0, exec_1.exec)(runCommand, undefined, options);
     }
     static getLinuxCommand(image, parameters, overrideCommands = '', additionalVariables = [], entrypointBash = false) {
-        const { workspace, actionFolder, runnerTempPath, sshAgent, sshPublicKeysDirectoryPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, } = parameters;
+        const { workspace, actionFolder, runnerTempPath, sshAgent, sshPublicKeysDirectoryPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, dockerShmSize, } = parameters;
         const githubHome = node_path_1.default.join(runnerTempPath, '_github_home');
         if (!(0, node_fs_1.existsSync)(githubHome))
             (0, node_fs_1.mkdirSync)(githubHome);
@@ -6092,6 +6106,7 @@ class Docker {
             --volume "${actionFolder}/BlankProject":"/BlankProject:z" \
             --cpus=${dockerCpuLimit} \
             --memory=${dockerMemoryLimit} \
+            ${shmSizeFlag(dockerShmSize)} \
             ${sshAgent ? `--volume ${sshAgent}:/ssh-agent` : ''} \
             ${sshAgent && !sshPublicKeysDirectoryPath
             ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro'
@@ -6103,7 +6118,7 @@ class Docker {
             "${overrideCommands !== '' ? overrideCommands : `/entrypoint.sh`}"`;
     }
     static getWindowsCommand(image, parameters) {
-        const { workspace, actionFolder, runnerTempPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, dockerIsolationMode, } = parameters;
+        const { workspace, actionFolder, runnerTempPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, dockerShmSize, dockerIsolationMode, } = parameters;
         const githubHome = node_path_1.default.join(runnerTempPath, '_github_home');
         if (!(0, node_fs_1.existsSync)(githubHome))
             (0, node_fs_1.mkdirSync)(githubHome);
@@ -6127,6 +6142,7 @@ class Docker {
             --volume "${actionFolder}/BlankProject":"c:/BlankProject" \
             --cpus=${dockerCpuLimit} \
             --memory=${dockerMemoryLimit} \
+            ${shmSizeFlag(dockerShmSize)} \
             --isolation=${dockerIsolationMode} \
             ${image} \
             powershell c:/steps/entrypoint.ps1`;
@@ -7087,6 +7103,16 @@ class Input {
     }
     static get dockerWorkspacePath() {
         return Input.getInput('dockerWorkspacePath') ?? '/github/workspace';
+    }
+    /**
+     * Unity 6.6+ editors request 1GiB of shared memory and hard-fail with
+     * "Insufficient shared memory available" against Docker's 64m default
+     * (game-ci/unity-builder#840). unity-test-runner has always passed 1025m,
+     * so match it here rather than leaving builds broken by default. '0' or
+     * 'none' omits the flag and uses Docker's own default.
+     */
+    static get dockerShmSize() {
+        return Input.getInput('dockerShmSize') ?? '1025m';
     }
     static get dockerCpuLimit() {
         return Input.getInput('dockerCpuLimit') ?? node_os_1.default.cpus().length.toString();
