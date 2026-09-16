@@ -19,7 +19,11 @@ import { resolveProjectPath } from './resolve-project-path';
 export async function run() {
   try {
     const cliVersion = core.getInput('cliVersion') || 'latest';
-    const cliPath = await downloadCli(cliVersion);
+    // Defaults to ${{ github.token }}, always populated by Actions - see
+    // download-cli.ts's resolveLatestTag for why this has to be threaded
+    // through rather than left to a GITHUB_TOKEN env var.
+    const githubToken = core.getInput('githubToken') || '';
+    const cliPath = await downloadCli(cliVersion, githubToken);
 
     const projectPath = resolveProjectPath({
       input: core.getInput('projectPath'),

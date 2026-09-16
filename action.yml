@@ -19,6 +19,13 @@ inputs:
     description:
       'Release tag of the game-ci/cli binary to install and run (e.g. "v0.1.0"). Defaults to the latest release; pin
       this for reproducible builds.'
+  githubToken:
+    required: false
+    default: '${{ github.token }}'
+    description:
+      'Token used to authenticate the GitHub API call that resolves cliVersion: latest to a concrete release tag.
+      Defaults to the token GitHub Actions provides for every run automatically - no need to set this unless you
+      have a reason to override it.'
   customImage:
     required: false
     default: ''

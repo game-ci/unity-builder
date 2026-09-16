@@ -76,6 +76,31 @@ describe('resolveLatestTag', () => {
     }
   });
 
+  // The githubToken parameter is the action's own `githubToken` input,
+  // which defaults to `${{ github.token }}` - populated by GitHub Actions on
+  // every run with no consumer action needed. process.env.GITHUB_TOKEN, by
+  // contrast, is NOT auto-injected into a JS action's environment - a
+  // calling workflow has to set it explicitly, which essentially none did.
+  // Confirmed live via game-ci/unity-test-runner#328: a consumer's six-
+  // version matrix failed simultaneously with "GitHub API returned 403"
+  // despite every job having a real, usable token the whole time.
+  it('sends an Authorization header from the githubToken parameter even when no env var is set', async () => {
+    const fetchFn = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.15' }),
+    })) as unknown as typeof fetch;
+
+    await resolveLatestTag(fetchFn, 'gha-token-from-input');
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: 'Bearer gha-token-from-input' }),
+      }),
+    );
+  });
+
   it('sends an Authorization header from GITHUB_TOKEN when set, to avoid the unauthenticated rate limit', async () => {
     const original = process.env.GITHUB_TOKEN;
     process.env.GITHUB_TOKEN = 'test-token-123';
@@ -168,6 +193,33 @@ describe('downloadCli', () => {
       'bash',
       expect.arrayContaining(['v0.1.32']),
       expect.anything(),
+    );
+  });
+
+  // downloadCli is the only caller of resolveLatestTag in production code,
+  // so this is what actually exercises the wiring index.ts depends on - the
+  // resolveLatestTag-level test above only proves the function accepts the
+  // parameter, not that anything passes it one.
+  it('forwards its githubToken parameter to resolveLatestTag when resolving "latest"', async () => {
+    globalThis.fetch = vi.fn(async (url: string) => {
+      if (url.includes('/releases/latest')) {
+        return { ok: true, status: 200, json: async () => ({ tag_name: 'v0.1.33' }) };
+      }
+      return { ok: true, status: 200, text: async () => 'echo mock install.sh' };
+    }) as unknown as typeof fetch;
+
+    vi.mocked(exec.exec).mockImplementation(async (_cmd, _args, options) => {
+      options?.listeners?.stdout?.(Buffer.from('/tmp/game-ci\n'));
+      return 0;
+    });
+
+    await downloadCli('latest', 'gha-token-from-input');
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://api.github.com/repos/game-ci/cli/releases/latest',
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: 'Bearer gha-token-from-input' }),
+      }),
     );
   });
 
