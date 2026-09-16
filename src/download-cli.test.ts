@@ -152,6 +152,34 @@ describe('resolveLatestTag', () => {
     }
   });
 
+  it('prefers the explicit githubToken parameter over GITHUB_TOKEN/GH_TOKEN when both are present', async () => {
+    const originalGithub = process.env.GITHUB_TOKEN;
+    const originalGh = process.env.GH_TOKEN;
+    process.env.GITHUB_TOKEN = 'env-github-token';
+    process.env.GH_TOKEN = 'env-gh-token';
+
+    const fetchFn = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.15' }),
+    })) as unknown as typeof fetch;
+
+    try {
+      await resolveLatestTag(fetchFn, 'explicit-input-token');
+      expect(fetchFn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: 'Bearer explicit-input-token' }),
+        }),
+      );
+    } finally {
+      if (originalGithub === undefined) delete process.env.GITHUB_TOKEN;
+      else process.env.GITHUB_TOKEN = originalGithub;
+      if (originalGh === undefined) delete process.env.GH_TOKEN;
+      else process.env.GH_TOKEN = originalGh;
+    }
+  });
+
   it('throws with a clear message on a non-ok response', async () => {
     const fetchFn = vi.fn(async () => ({
       ok: false,
