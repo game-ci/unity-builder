@@ -305,14 +305,28 @@ exports.binaryNameFor = binaryNameFor;
  * know how to resolve "latest" itself, by design, since which tag it's
  * fetched at IS the version it installs.
  */
-async function resolveLatestTag(fetchFn = fetch) {
+async function resolveLatestTag(fetchFn = fetch, githubToken) {
     const headers = { Accept: 'application/vnd.github+json' };
     // Actions runners share IPs across many concurrent jobs from unrelated
     // repos/orgs, so the unauthenticated rate limit (60 req/hour per IP) gets
-    // exhausted by traffic this job never generated. The default GITHUB_TOKEN
-    // reads public repo data (game-ci/cli's releases) fine regardless of which
-    // repo the workflow runs in, and lifts the limit to 5000 req/hour.
-    const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+    // exhausted by traffic this job never generated - hit live via
+    // game-ci/unity-test-runner#328's consumer, whose six-version matrix failed
+    // simultaneously with "GitHub API returned 403".
+    //
+    // process.env.GITHUB_TOKEN/GH_TOKEN alone does not fix this: GitHub Actions
+    // does not inject GITHUB_TOKEN into a JS action's process environment
+    // automatically - a calling workflow has to set it explicitly via env:,
+    // which essentially no consumer had reason to do before this action started
+    // making its own API calls. So the env-var-only version of this check was
+    // unauthenticated for effectively every consumer, not just ones under
+    // unusual load.
+    //
+    // The githubToken *input* (added alongside this) defaults to `${{
+    // github.token }}`, which GitHub Actions populates on every run with no
+    // consumer action needed - so it is the primary path, ahead of the env
+    // vars, which stay as a fallback for the CLI/install.sh path that has no
+    // Action input to read from.
+    const token = githubToken || process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
     if (token)
         headers.Authorization = `Bearer ${token}`;
     const response = await fetchFn(`https://api.github.com/repos/${CLI_REPO}/releases/latest`, {
@@ -397,8 +411,8 @@ async function saveToCache(version) {
  *
  * @param version A release tag (e.g. "v0.1.0"), or "latest".
  */
-async function downloadCli(version) {
-    const resolvedVersion = version === 'latest' ? await resolveLatestTag() : version;
+async function downloadCli(version, githubToken) {
+    const resolvedVersion = version === 'latest' ? await resolveLatestTag(fetch, githubToken) : version;
     const cached = await restoreFromCache(resolvedVersion);
     if (cached)
         return cached;
@@ -505,7 +519,11 @@ const resolve_project_path_1 = __nccwpck_require__(2833);
 async function run() {
     try {
         const cliVersion = core.getInput('cliVersion') || 'latest';
-        const cliPath = await (0, download_cli_1.downloadCli)(cliVersion);
+        // Defaults to ${{ github.token }}, always populated by Actions - see
+        // download-cli.ts's resolveLatestTag for why this has to be threaded
+        // through rather than left to a GITHUB_TOKEN env var.
+        const githubToken = core.getInput('githubToken') || '';
+        const cliPath = await (0, download_cli_1.downloadCli)(cliVersion, githubToken);
         const projectPath = (0, resolve_project_path_1.resolveProjectPath)({
             input: core.getInput('projectPath'),
             existsSync: fs.existsSync,
