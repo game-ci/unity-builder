@@ -143,7 +143,8 @@ async function saveToCache(version: string): Promise<void> {
  * @param version A release tag (e.g. "v0.1.0"), or "latest".
  */
 export async function downloadCli(version: string, githubToken?: string): Promise<string> {
-  const resolvedVersion = version === 'latest' ? await resolveLatestTag(fetch, githubToken) : version;
+  const resolvedVersion =
+    version === 'latest' ? await resolveLatestTag(fetch, githubToken) : version;
 
   const cached = await restoreFromCache(resolvedVersion);
   if (cached) return cached;
@@ -169,7 +170,10 @@ export async function downloadCli(version: string, githubToken?: string): Promis
         `GitHub returned ${scriptResponse.status} for ${installScriptUrl}.`,
     );
   }
-  const scriptPath = path.join(os.tmpdir(), `game-ci-install-${resolvedVersion.replace(/[^\w.-]/g, '_')}.sh`);
+  const scriptPath = path.join(
+    os.tmpdir(),
+    `game-ci-install-${resolvedVersion.replace(/[^\w.-]/g, '_')}.sh`,
+  );
   await fs.writeFile(scriptPath, await scriptResponse.text(), { mode: 0o755 });
 
   let stdout = '';
