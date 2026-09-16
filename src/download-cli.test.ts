@@ -125,6 +125,33 @@ describe('resolveLatestTag', () => {
     }
   });
 
+  it('falls back to GH_TOKEN when GITHUB_TOKEN is unset', async () => {
+    const originalGithub = process.env.GITHUB_TOKEN;
+    const originalGh = process.env.GH_TOKEN;
+    delete process.env.GITHUB_TOKEN;
+    process.env.GH_TOKEN = 'gh-token-456';
+
+    const fetchFn = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: 'v0.1.15' }),
+    })) as unknown as typeof fetch;
+
+    try {
+      await resolveLatestTag(fetchFn);
+      expect(fetchFn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: 'Bearer gh-token-456' }),
+        }),
+      );
+    } finally {
+      if (originalGithub !== undefined) process.env.GITHUB_TOKEN = originalGithub;
+      if (originalGh === undefined) delete process.env.GH_TOKEN;
+      else process.env.GH_TOKEN = originalGh;
+    }
+  });
+
   it('throws with a clear message on a non-ok response', async () => {
     const fetchFn = vi.fn(async () => ({
       ok: false,
