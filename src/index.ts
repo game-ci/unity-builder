@@ -15,6 +15,7 @@ import * as exec from '@actions/exec';
 import { buildCliArgs } from './build-args';
 import { downloadCli } from './download-cli';
 import { resolveProjectPath } from './resolve-project-path';
+import { collectCliOutputs } from './cli-outputs';
 
 export async function run() {
   try {
@@ -35,6 +36,8 @@ export async function run() {
       getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
     });
 
+    const versionOutputs = collectCliOutputs();
+
     // CodeQL flags this line (js/command-line-injection) since args
     // ultimately derives from Action inputs. Verified false positive: args
     // is an array of discrete argv entries, not a concatenated shell
@@ -46,7 +49,10 @@ export async function run() {
     // suppress the alert (GitHub Code Scanning's default setup has no
     // inline-suppression-comment mechanism - that was legacy LGTM.com
     // behavior); the alert needs dismissing via the Security tab/API.
-    const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
+    const exitCode = await exec.exec(cliPath, args, {
+      ignoreReturnCode: true,
+      listeners: { stdout: versionOutputs.stdout },
+    });
 
     // Matches the original action's engineExitCode output: 0 on success,
     // otherwise the exit code of whichever step (activation or build) - or,
@@ -58,12 +64,14 @@ export async function run() {
 
     if (exitCode !== 0) {
       core.setFailed(`Build failed with exit code ${exitCode}`);
+      return;
     }
 
-    // buildVersion/androidVersionCode are set by the CLI subprocess itself
-    // via @actions/core, which writes directly to the file at
-    // $GITHUB_OUTPUT - inherited by the child process, so no extra
-    // plumbing is needed here to forward them.
+    // Newer CLIs can write GITHUB_OUTPUT directly. Only forward legacy
+    // records that were actually reported, leaving native outputs intact.
+    for (const [name, value] of versionOutputs.finish()) {
+      core.setOutput(name, value);
+    }
   } catch (error: any) {
     core.setFailed(error.message);
   }

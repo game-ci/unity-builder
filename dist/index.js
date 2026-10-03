@@ -249,6 +249,46 @@ function buildOrchestrateArgs(getInput) {
 
 /***/ }),
 
+/***/ 3753:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.collectCliOutputs = void 0;
+const node_string_decoder_1 = __nccwpck_require__(76915);
+// CLI releases such as v0.1.71 log version outputs through a mock
+// @actions/core adapter instead of writing them to GITHUB_OUTPUT.
+function collectCliOutputs() {
+    const outputs = new Map();
+    const decoder = new node_string_decoder_1.StringDecoder('utf8');
+    let pending = '';
+    function recordLine(line) {
+        const match = /^\(mock\) Output "(buildVersion|androidVersionCode)" is set to "([^"\r\n]+)"\r?$/.exec(line);
+        if (match)
+            outputs.set(match[1], match[2]);
+    }
+    return {
+        // Listen to bytes rather than @actions/exec's stdline callback, which
+        // only splits on the host OS's EOL and can miss LF-only CLI output on
+        // Windows. Retain only the unfinished line, not the whole Unity log.
+        stdout(data) {
+            const lines = (pending + decoder.write(data)).split('\n');
+            pending = lines.pop();
+            for (const line of lines)
+                recordLine(line);
+        },
+        finish() {
+            recordLine(pending + decoder.end());
+            return outputs;
+        },
+    };
+}
+exports.collectCliOutputs = collectCliOutputs;
+
+
+/***/ }),
+
 /***/ 83431:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -516,6 +556,7 @@ const exec = __importStar(__nccwpck_require__(71514));
 const build_args_1 = __nccwpck_require__(10089);
 const download_cli_1 = __nccwpck_require__(83431);
 const resolve_project_path_1 = __nccwpck_require__(2833);
+const cli_outputs_1 = __nccwpck_require__(3753);
 async function run() {
     try {
         const cliVersion = core.getInput('cliVersion') || 'latest';
@@ -532,6 +573,7 @@ async function run() {
         const args = (0, build_args_1.buildCliArgs)({
             getInput: (name) => (name === 'projectPath' ? projectPath : core.getInput(name)),
         });
+        const versionOutputs = (0, cli_outputs_1.collectCliOutputs)();
         // CodeQL flags this line (js/command-line-injection) since args
         // ultimately derives from Action inputs. Verified false positive: args
         // is an array of discrete argv entries, not a concatenated shell
@@ -543,7 +585,10 @@ async function run() {
         // suppress the alert (GitHub Code Scanning's default setup has no
         // inline-suppression-comment mechanism - that was legacy LGTM.com
         // behavior); the alert needs dismissing via the Security tab/API.
-        const exitCode = await exec.exec(cliPath, args, { ignoreReturnCode: true });
+        const exitCode = await exec.exec(cliPath, args, {
+            ignoreReturnCode: true,
+            listeners: { stdout: versionOutputs.stdout },
+        });
         // Matches the original action's engineExitCode output: 0 on success,
         // otherwise the exit code of whichever step (activation or build) - or,
         // for providerStrategy=local-system, whichever stage of the
@@ -553,11 +598,13 @@ async function run() {
         core.setOutput('engineExitCode', exitCode);
         if (exitCode !== 0) {
             core.setFailed(`Build failed with exit code ${exitCode}`);
+            return;
         }
-        // buildVersion/androidVersionCode are set by the CLI subprocess itself
-        // via @actions/core, which writes directly to the file at
-        // $GITHUB_OUTPUT - inherited by the child process, so no extra
-        // plumbing is needed here to forward them.
+        // Newer CLIs can write GITHUB_OUTPUT directly. Only forward legacy
+        // records that were actually reported, leaving native outputs intact.
+        for (const [name, value] of versionOutputs.finish()) {
+            core.setOutput(name, value);
+        }
     }
     catch (error) {
         core.setFailed(error.message);
@@ -41349,6 +41396,14 @@ module.exports = require("node:process");
 
 "use strict";
 module.exports = require("node:stream");
+
+/***/ }),
+
+/***/ 76915:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:string_decoder");
 
 /***/ }),
 
