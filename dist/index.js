@@ -257,27 +257,32 @@ function buildOrchestrateArgs(getInput) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.collectCliOutputs = void 0;
 const node_string_decoder_1 = __nccwpck_require__(76915);
-// CLI releases such as v0.1.71 log version outputs through a mock
-// @actions/core adapter instead of writing them to GITHUB_OUTPUT.
+/**
+ * Collect version records printed by legacy CLIs such as v0.1.71, whose
+ * mock @actions/core adapter does not write to GITHUB_OUTPUT.
+ */
 function collectCliOutputs() {
     const outputs = new Map();
     const decoder = new node_string_decoder_1.StringDecoder('utf8');
     let pending = '';
+    /** Save only complete legacy records for the two supported version outputs. */
     function recordLine(line) {
         const match = /^\(mock\) Output "(buildVersion|androidVersionCode)" is set to "([^"\r\n]+)"\r?$/.exec(line);
         if (match)
             outputs.set(match[1], match[2]);
     }
     return {
-        // Listen to bytes rather than @actions/exec's stdline callback, which
-        // only splits on the host OS's EOL and can miss LF-only CLI output on
-        // Windows. Retain only the unfinished line, not the whole Unity log.
+        /**
+         * Decode stdout incrementally, retaining only the unfinished line.
+         * Unlike @actions/exec's stdline callback, accept LF on Windows too.
+         */
         stdout(data) {
             const lines = (pending + decoder.write(data)).split('\n');
             pending = lines.pop();
             for (const line of lines)
                 recordLine(line);
         },
+        /** Flush an unterminated final record and return the collected output values. */
         finish() {
             recordLine(pending + decoder.end());
             return outputs;
@@ -557,6 +562,7 @@ const build_args_1 = __nccwpck_require__(10089);
 const download_cli_1 = __nccwpck_require__(83431);
 const resolve_project_path_1 = __nccwpck_require__(2833);
 const cli_outputs_1 = __nccwpck_require__(3753);
+/** Run the CLI build and publish its exit status and successful version outputs. */
 async function run() {
     try {
         const cliVersion = core.getInput('cliVersion') || 'latest';

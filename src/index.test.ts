@@ -27,6 +27,7 @@ describe('CLI build outputs', () => {
     vi.unstubAllEnvs();
   });
 
+  /** Simulate CLI stdout records and the subprocess exit code. */
   function cliReports(lines: string[], exitCode = 0) {
     vi.mocked(exec.exec).mockImplementation(async (_command, _args, options) => {
       for (const line of lines) options?.listeners?.stdout?.(Buffer.from(`${line}\n`));

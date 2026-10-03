@@ -17,6 +17,7 @@ import { downloadCli } from './download-cli';
 import { resolveProjectPath } from './resolve-project-path';
 import { collectCliOutputs } from './cli-outputs';
 
+/** Run the CLI build and publish its exit status and successful version outputs. */
 export async function run() {
   try {
     const cliVersion = core.getInput('cliVersion') || 'latest';
