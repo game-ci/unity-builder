@@ -30,7 +30,7 @@
     ".github/workflows/*.@(yml|yaml)": "actionlint"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=24"
   },
   "dependencies": {
     "@actions/cache": "^4.0.0",
@@ -39,7 +39,7 @@
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.23",
+    "@types/node": "^24.19.2",
     "@types/semver": "^7.3.9",
     "@typescript/native-preview": "^7.0.0-dev.20260505.1",
     "@vercel/ncc": "^0.36.1",
@@ -51,7 +51,7 @@
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
     "ts-node": "10.8.1",
-    "typescript": "4.7.4",
+    "typescript": "6.0.3",
     "vite": "^7",
     "vitest": "^4",
     "yarn-audit-fix": "^9.3.8"
