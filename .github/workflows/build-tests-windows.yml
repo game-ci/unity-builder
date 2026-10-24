@@ -66,10 +66,11 @@ jobs:
         id: cache-restore
         with:
           path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-windows-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-${{ matrix.buildProfile }}
-          restore-keys: |
-            Library-${{ matrix.projectPath }}-windows-
-            Library-
+          # One cache per build configuration and no prefix fallback: a Library
+          # remembers the settings of the build that produced it (such as the
+          # standalone subtarget), so restoring another configuration's Library
+          # changes what gets built. Bump the version to discard every Library cache.
+          key: Library-v2-${{ matrix.projectPath }}-windows-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-il2cpp-true-subtarget-player-${{ matrix.buildProfile }}
 
       ###########################
       #  Set Scripting Backend  #
