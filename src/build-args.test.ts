@@ -34,9 +34,7 @@ describe('buildCliArgs', () => {
   });
 
   it('maps an explicit unityVersion to --engineVersion, overriding auto-detection', () => {
-    const args = buildCliArgs(
-      inputsOf({ targetPlatform: 'WebGL', unityVersion: '6000.0.36f1' }),
-    );
+    const args = buildCliArgs(inputsOf({ targetPlatform: 'WebGL', unityVersion: '6000.0.36f1' }));
 
     expect(args).toContain('--engineVersion=6000.0.36f1');
   });
