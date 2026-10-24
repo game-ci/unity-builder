@@ -48,6 +48,7 @@ jobs:
           case "$(yarn --version)" in 1.*) echo 'expected up-to-date yarn version'; exit 1 ;; esac
           yarn install --immutable
       - run: yarn lint
+      - run: yarn format:check
       - run: yarn test:ci --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
