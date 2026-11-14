@@ -11,6 +11,10 @@ concurrency:
 jobs:
   buildForAllPlatformsMacOS:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
+    # Dependabot-triggered runs receive no Actions secrets, so the Unity
+    # licence these builds need is absent. Ubuntu builds (embedded licence)
+    # and the Tests job still cover dependency bumps.
+    if: github.actor != 'dependabot[bot]'
     runs-on: macos-latest
     # Kept as a backstop even after splitting the cache save below into its
     # own bounded step: real builds finish in well under 40m, so this only
