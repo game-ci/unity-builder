@@ -11,6 +11,10 @@ concurrency:
 jobs:
   buildForAllPlatformsWindows:
     name: ${{ matrix.targetPlatform }} on ${{ matrix.unityVersion }}
+    # Dependabot-triggered runs receive no Actions secrets, so the Unity
+    # licence these builds need is absent. Ubuntu builds (embedded licence)
+    # and the Tests job still cover dependency bumps.
+    if: github.actor != 'dependabot[bot]'
     runs-on: windows-2022
     # See build-tests-mac.yml's matching comment - a per-step timeout doesn't
     # bound an action's own implicit post-run cleanup step, only a job-level
