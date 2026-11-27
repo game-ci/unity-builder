@@ -139,13 +139,6 @@ inputs:
     description:
       'Whether to run as a user that matches the host system or the default root container user. Only applicable to
       Linux hosts and containers. This is useful for fixing permission errors on Self-Hosted runners.'
-  runAsHostUserReuseExisting:
-    required: false
-    default: 'false'
-    description:
-      "With runAsHostUser, reuse a group or user the image already has at the host GID/UID instead of failing to
-      create it - e.g. the ubuntu user/group at 1000 in Ubuntu 24.04 based images (unityci/editor v4), which is the
-      usual UID/GID of a self-hosted runner's account. Requires a game-ci/cli release that supports it."
   chownFilesTo:
     required: false
     default: ''

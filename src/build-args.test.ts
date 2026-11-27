@@ -167,7 +167,6 @@ describe('buildCliArgs', () => {
         enableGpu: 'true',
         useHostNetwork: 'true',
         runAsHostUser: 'true',
-        runAsHostUserReuseExisting: 'true',
         allowDirtyBuild: 'true',
         cacheUnityInstallationOnMac: 'true',
         skipActivation: 'true',
@@ -211,7 +210,6 @@ describe('buildCliArgs', () => {
         '--enableGpu',
         '--useHostNetwork',
         '--runAsHostUser',
-        '--runAsHostUserReuseExisting',
         '--allowDirtyBuild',
         '--cacheUnityInstallationOnMac',
         '--skipActivation',
@@ -335,7 +333,6 @@ describe('buildCliArgs', () => {
         enableGpu: 'true',
         useHostNetwork: 'true',
         runAsHostUser: 'true',
-        runAsHostUserReuseExisting: 'true',
         cacheUnityInstallationOnMac: 'true',
         linux64RemoveExecutableExtension: 'true',
       };
@@ -367,7 +364,6 @@ describe('buildCliArgs', () => {
         'enableGpu',
         'useHostNetwork',
         'runAsHostUser',
-        'runAsHostUserReuseExisting',
         'cacheUnityInstallationOnMac',
         'linux64RemoveExecutableExtension',
       ];
