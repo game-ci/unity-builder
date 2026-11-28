@@ -59,7 +59,6 @@ const BOOLEAN_FLAGS: Array<[input: string, flag: string]> = [
   ['enableGpu', 'enableGpu'],
   ['useHostNetwork', 'useHostNetwork'],
   ['runAsHostUser', 'runAsHostUser'],
-  ['runAsHostUserReuseExisting', 'runAsHostUserReuseExisting'],
   ['allowDirtyBuild', 'allowDirtyBuild'],
   ['cacheUnityInstallationOnMac', 'cacheUnityInstallationOnMac'],
   ['skipActivation', 'skipActivation'],
@@ -145,10 +144,10 @@ const ORCHESTRATE_BOOLEAN_FLAGS: Array<[input: string, flag: string]> = [
   // enableGpu: not assigned anywhere in build-parameters-adapter.ts or the
   //   orchestrator model - a real, currently-unfilled gap versus `build`'s
   //   GPU passthrough, not something to silently pretend to support.
-  // useHostNetwork/runAsHostUser/runAsHostUserReuseExisting: Docker
-  //   networking/uid-mapping concepts; not assigned by the adapter, and
-  //   runAsHostUser is meaningless by construction on a bare host process
-  //   that already runs as that host user.
+  // useHostNetwork/runAsHostUser: Docker networking/uid-mapping concepts;
+  //   not assigned by the adapter, and runAsHostUser is meaningless by
+  //   construction on a bare host process that already runs as that host
+  //   user.
   // cacheUnityInstallationOnMac: build-parameters-adapter.ts DOES assign
   //   bp.cacheUnityInstallationOnMac, but nothing downstream (no provider,
   //   no workflow) ever reads it back - it's a currently-dead field for
